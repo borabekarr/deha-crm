@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Claude artifacts
+evaluate/
+.claude/tmp/
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/settings.json
