@@ -15,6 +15,15 @@ dist-ssr/
 evaluate/
 .claude/tmp/
 
+# Claude Code system — keep tooling and project artifact dirs out of git
+.claude/
+.claude-ext/
+plans/
+debt/
+handouts/
+memory/
+.archive/
+
 # Logs
 logs
 *.log
