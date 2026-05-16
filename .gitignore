@@ -4,6 +4,7 @@ node_modules/
 # Build
 dist/
 dist-ssr/
+.tanstack/
 
 # Environment
 .env
@@ -23,6 +24,7 @@ debt/
 handouts/
 memory/
 .archive/
+skills-lock.json
 
 # Logs
 logs
