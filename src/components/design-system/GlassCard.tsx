@@ -26,30 +26,26 @@ const radiusMap: Record<NonNullable<GlassCardProps['radius']>, string> = {
  * Composes: white/70 fill · 40px backdrop blur · hairline white border ·
  * layered box-shadow (glass shadow + inner highlight).
  */
-export const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
-  ({ className, padding = 'md', radius = 'lg', children, ...rest }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          // Fill + blur
-          'bg-white/70 backdrop-blur-[40px]',
-          // Border
-          'border border-white/60',
-          // Shadow: outer glass shadow + inner top highlight
-          '[box-shadow:0_4px_6px_-1px_rgba(0,0,0,0.10),0_2px_4px_-1px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.4)]',
-          // Overflow clip so children respect radius
-          'overflow-hidden',
-          radiusMap[radius],
-          paddingMap[padding],
-          className,
-        )}
-        {...rest}
-      >
-        {children}
-      </div>
-    )
-  },
-)
-
-GlassCard.displayName = 'GlassCard'
+export function GlassCard({ className, padding = 'md', radius = 'lg', children, ref, ...rest }: GlassCardProps & { ref?: React.Ref<HTMLDivElement> }) {
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        // Fill + blur
+        'bg-white/70 backdrop-blur-[40px]',
+        // Border
+        'border border-white/60',
+        // Shadow: outer glass shadow + inner top highlight
+        '[box-shadow:0_4px_6px_-1px_rgba(0,0,0,0.10),0_2px_4px_-1px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.4)]',
+        // Overflow clip so children respect radius
+        'overflow-hidden',
+        radiusMap[radius],
+        paddingMap[padding],
+        className,
+      )}
+      {...rest}
+    >
+      {children}
+    </div>
+  )
+}

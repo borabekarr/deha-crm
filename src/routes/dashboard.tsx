@@ -49,14 +49,14 @@ function DashboardHeader() {
       className="sticky top-0 z-20 flex items-center justify-between px-4 py-3"
       style={{
         background: 'rgba(255,255,255,0.75)',
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
         borderBottom: '1px solid rgba(255,255,255,0.6)',
       }}
     >
       {/* Wordmark */}
       <span
-        className="text-xl font-black tracking-tight text-slate-900"
+        className="text-xl font-black tracking-tight text-foreground"
         style={{ fontFamily: 'Montserrat, sans-serif', letterSpacing: '-0.02em' }}
       >
         deha
@@ -69,7 +69,7 @@ function DashboardHeader() {
         <button
           type="button"
           aria-label="Bildirimler"
-          className="relative flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-slate-600 shadow-sm border border-white/60"
+          className="relative flex size-9 items-center justify-center rounded-full bg-white/70 text-muted-foreground shadow-sm border border-white/60"
         >
           <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
             notifications
@@ -77,13 +77,13 @@ function DashboardHeader() {
           {/* Red dot */}
           <span
             aria-hidden="true"
-            className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500"
+            className="absolute right-2 top-2 size-2 rounded-full bg-red-500"
           />
         </button>
 
         {/* Avatar placeholder */}
         <div
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500 text-white text-sm font-black shadow-sm"
+          className="flex size-9 items-center justify-center rounded-full bg-emerald-500 text-white text-sm font-black shadow-sm"
           style={{ fontFamily: 'Montserrat, sans-serif' }}
         >
           B
@@ -107,7 +107,7 @@ function HeroSection({ period, onPeriodChange }: HeroSectionProps) {
       <div className="mb-4 flex items-start justify-between">
         <div>
           <h2
-            className="text-2xl font-black text-white leading-tight"
+            className="text-2xl font-semibold text-white leading-tight"
             style={{ fontFamily: 'Montserrat, sans-serif', letterSpacing: '-0.02em' }}
           >
             Hoş geldin Bora!
@@ -196,7 +196,7 @@ function PersonalGoalTracker() {
     <GlassCard padding="md">
       <div className="mb-3 flex items-center justify-between">
         <h3
-          className="text-base font-black text-slate-900"
+          className="text-base font-semibold text-foreground"
           style={{ fontFamily: 'Montserrat, sans-serif' }}
         >
           Personal Goal Tracker
@@ -204,7 +204,7 @@ function PersonalGoalTracker() {
         <span className="text-sm font-black text-emerald-500">{progress}%</span>
       </div>
 
-      <p className="mb-4 text-xs font-medium text-slate-500">
+      <p className="mb-4 text-xs font-medium text-muted-foreground">
         Aylık hedefinize ulaşmak için {100 - progress} puan daha!
       </p>
 
@@ -226,7 +226,7 @@ function PersonalGoalTracker() {
         />
       </div>
 
-      <div className="mt-2 flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+      <div className="mt-2 flex justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
         <span>0</span>
         <span>Hedef: 100 puan</span>
       </div>
@@ -241,7 +241,7 @@ function TasksTeaser() {
     <GlassCard padding="md">
       <div className="mb-3 flex items-center justify-between">
         <h3
-          className="text-base font-black text-slate-900"
+          className="text-base font-semibold text-foreground"
           style={{ fontFamily: 'Montserrat, sans-serif' }}
         >
           Görevler

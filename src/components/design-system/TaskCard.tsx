@@ -58,7 +58,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ title, priority, eta }) => {
       {/* Top row: title + ETA chip */}
       <div className="flex items-start justify-between gap-3">
         {/* Title */}
-        <h4 className="flex-1 text-[15px] font-black leading-snug text-slate-900">
+        <h4 className="flex-1 text-[15px] font-semibold leading-snug text-foreground">
           {title}
         </h4>
 
@@ -73,7 +73,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ title, priority, eta }) => {
             {/* schedule icon via Unicode clock */}
             <svg
               aria-hidden="true"
-              className="h-3 w-3 shrink-0"
+              className="size-3 shrink-0"
               viewBox="0 0 24 24"
               fill="currentColor"
             >

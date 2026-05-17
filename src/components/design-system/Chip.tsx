@@ -59,25 +59,21 @@ export interface ChipProps
  *
  * Extends native `<button>` — pass any HTMLButtonElement attribute.
  */
-export const Chip = React.forwardRef<HTMLButtonElement, ChipProps>(
-  ({ className, variant, children, ...rest }, ref) => {
-    return (
-      <button
-        ref={ref}
-        type="button"
-        className={cn(chipVariants({ variant }), className)}
-        {...rest}
-      >
-        {hasDot(variant) && (
-          <span
-            aria-hidden="true"
-            className={cn('inline-block h-[6px] w-[6px] shrink-0 rounded-full', dotColorMap[variant])}
-          />
-        )}
-        {children}
-      </button>
-    )
-  },
-)
-
-Chip.displayName = 'Chip'
+export function Chip({ className, variant, children, ref, ...rest }: ChipProps & { ref?: React.Ref<HTMLButtonElement> }) {
+  return (
+    <button
+      ref={ref}
+      type="button"
+      className={cn(chipVariants({ variant }), className)}
+      {...rest}
+    >
+      {hasDot(variant) && (
+        <span
+          aria-hidden="true"
+          className={cn('inline-block h-[6px] w-[6px] shrink-0 rounded-full', dotColorMap[variant])}
+        />
+      )}
+      {children}
+    </button>
+  )
+}

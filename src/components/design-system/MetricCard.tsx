@@ -24,8 +24,7 @@ export interface MetricCardProps
  * Composes GlassCard. Trend chip uses Material Symbols Outlined icons.
  * Sparkline rendered via Recharts AreaChart with emerald gradient.
  */
-export const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
-  ({ label, value, trend, sparkline, className, ...rest }, ref) => {
+export function MetricCard({ label, value, trend, sparkline, className, ref, ...rest }: MetricCardProps & { ref?: React.Ref<HTMLDivElement> }) {
     const sparkData = sparkline?.map((v) => ({ v })) ?? []
 
     const gradientId = React.useId()
@@ -39,14 +38,14 @@ export const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
         {...rest}
       >
         {/* Label */}
-        <span className="text-xs font-medium text-gray-500 tracking-wide uppercase">
+        <span className="text-xs font-medium text-muted-foreground tracking-wide uppercase">
           {label}
         </span>
 
         {/* Value + trend row */}
         <div className="flex items-end justify-between gap-2">
           <span
-            className="font-black text-gray-900 leading-none"
+            className="font-black text-foreground leading-none"
             style={{ fontSize: '38px', fontFamily: "'Montserrat', sans-serif" }}
           >
             {value}
@@ -99,7 +98,4 @@ export const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
         )}
       </GlassCard>
     )
-  },
-)
-
-MetricCard.displayName = 'MetricCard'
+}
