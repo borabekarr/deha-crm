@@ -48,7 +48,7 @@ const AvatarBadge: React.FC<AvatarBadgeProps> = ({ rank, name, avatar }) => {
       <img
         src={avatar}
         alt={name}
-        className="h-8 w-8 shrink-0 rounded-full object-cover"
+        className="size-8 shrink-0 rounded-full object-cover"
       />
     )
   }
@@ -56,7 +56,7 @@ const AvatarBadge: React.FC<AvatarBadgeProps> = ({ rank, name, avatar }) => {
     <div
       aria-label={`Rank ${rank}`}
       className={cn(
-        'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-black',
+        'flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-black',
         rankClass(rank),
       )}
     >
@@ -166,7 +166,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ title, entries }) => {
       {/* Header */}
       <div className="mb-4 flex items-center gap-2">
         <span aria-hidden="true" className="text-xl text-emerald-500">🏆</span>
-        <h3 className="text-base font-black text-slate-900">{title}</h3>
+        <h3 className="text-base font-semibold text-foreground">{title}</h3>
       </div>
 
       {/* Column labels */}

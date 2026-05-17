@@ -1,6 +1,8 @@
 import { createRootRoute, Outlet, useLocation } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 
+const CURRENT_YEAR = new Date().getFullYear()
+
 export const Route = createRootRoute({
   component: RootLayout,
 })
@@ -27,7 +29,7 @@ function RootLayout() {
         <Outlet />
       </main>
       <footer className="border-t px-6 py-3 text-sm text-muted-foreground">
-        &copy; {new Date().getFullYear()} Deha Automation
+        &copy; {CURRENT_YEAR} Deha Automation
       </footer>
       {import.meta.env.DEV && <TanStackRouterDevtools />}
     </>
