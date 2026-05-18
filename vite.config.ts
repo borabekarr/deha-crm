@@ -5,6 +5,10 @@ import tailwindcss from '@tailwindcss/vite'
 import path from 'node:path'
 
 export default defineConfig({
+  server: {
+    host: '0.0.0.0',
+    allowedHosts: ['.share.zrok.io', '.zrok.io', 'localhost'],
+  },
   build: {
     // Emit brand SVGs as separate hashed files rather than inlining as data URIs.
     // Default limit is 4096 bytes; all brand SVGs are under that threshold.
