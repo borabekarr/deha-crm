@@ -38,16 +38,16 @@ test.describe('Step 17 — Tooltip smooth opacity+transform transition', () => {
     const sampleCount = 4;
     const sampleIntervalMs = 30;
 
-    // Wait for the delay to pass, then immediately start sampling
+    // Wait for the delay to pass, then sample at fixed offsets in parallel
     await page.waitForTimeout(210); // just past the 200ms transition-delay
 
-    for (let i = 0; i < sampleCount; i++) {
-      const op = await tooltip.evaluate((el) => parseFloat(getComputedStyle(el).opacity));
-      samples.push(op);
-      if (i < sampleCount - 1) {
-        await page.waitForTimeout(sampleIntervalMs);
-      }
-    }
+    const parallelSamples = await Promise.all(
+      Array.from({ length: sampleCount }, async (_, step) => {
+        await page.waitForTimeout(step * sampleIntervalMs);
+        return tooltip.evaluate((el) => parseFloat(getComputedStyle(el).opacity));
+      }),
+    );
+    samples.push(...parallelSamples);
 
     // At least 2 samples should be strictly between 0 and 1 (intermediate values)
     const intermediates = samples.filter((v) => v > 0 && v < 1);

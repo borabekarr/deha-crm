@@ -26,9 +26,11 @@ test.describe('feedback-pass-3 — behavioral changes', () => {
     await page.waitForTimeout(50);
 
     const menu = page.locator('#ctx-menu');
-    const menuLeft = await menu.evaluate((el) => parseFloat((el as HTMLElement).style.left));
-    const menuTop  = await menu.evaluate((el) => parseFloat((el as HTMLElement).style.top));
-    const menuWidth = await menu.evaluate((el) => el.getBoundingClientRect().width);
+    const [menuLeft, menuTop, menuWidth] = await Promise.all([
+      menu.evaluate((el) => parseFloat((el as HTMLElement).style.left)),
+      menu.evaluate((el) => parseFloat((el as HTMLElement).style.top)),
+      menu.evaluate((el) => el.getBoundingClientRect().width),
+    ]);
 
     // Top must always be tRect.top + scrollY (within 2px)
     expect(Math.abs(menuTop - (tRect.top + scrollY))).toBeLessThanOrEqual(2);
@@ -66,9 +68,11 @@ test.describe('feedback-pass-3 — behavioral changes', () => {
     await page.waitForTimeout(100);
 
     const menu = page.locator('#ctx-menu');
-    const menuLeft  = await menu.evaluate((el) => parseFloat((el as HTMLElement).style.left));
-    const menuTop   = await menu.evaluate((el) => parseFloat((el as HTMLElement).style.top));
-    const menuWidth = await menu.evaluate((el) => el.getBoundingClientRect().width);
+    const [menuLeft, menuTop, menuWidth] = await Promise.all([
+      menu.evaluate((el) => parseFloat((el as HTMLElement).style.left)),
+      menu.evaluate((el) => parseFloat((el as HTMLElement).style.top)),
+      menu.evaluate((el) => el.getBoundingClientRect().width),
+    ]);
 
     // Top anchor is always tRect.top + scrollY regardless of mirroring
     expect(Math.abs(menuTop - (tRect.top + scrollY))).toBeLessThanOrEqual(2);

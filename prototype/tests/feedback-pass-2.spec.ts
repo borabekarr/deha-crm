@@ -52,8 +52,10 @@ test.describe('feedback-pass-2 — behavioral bugs', () => {
     await page.waitForTimeout(200);
 
     const panel = page.locator('#popover-panel');
-    const bg = await panel.evaluate((el) => getComputedStyle(el).backgroundColor);
-    const z = await panel.evaluate((el) => getComputedStyle(el).zIndex);
+    const [bg, z] = await Promise.all([
+      panel.evaluate((el) => getComputedStyle(el).backgroundColor),
+      panel.evaluate((el) => getComputedStyle(el).zIndex),
+    ]);
 
     expect(bg).toBe('rgb(255, 255, 255)');
     expect(z).toBe('100');
@@ -83,8 +85,7 @@ test.describe('feedback-pass-2 — behavioral bugs', () => {
 
     const sheet = page.locator('#sht-1');
     const saveBtn = page.locator('#sht-1 .sheet-actions .btn-primary');
-    const sBox = await sheet.boundingBox();
-    const bBox = await saveBtn.boundingBox();
+    const [sBox, bBox] = await Promise.all([sheet.boundingBox(), saveBtn.boundingBox()]);
     if (!sBox || !bBox) throw new Error('sheet or button not measurable');
 
     const sheetCenter = sBox.x + sBox.width / 2;

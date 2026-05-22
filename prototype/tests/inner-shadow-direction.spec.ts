@@ -45,7 +45,7 @@ test.describe('inset box-shadow direction', () => {
         const parts = shadow.split(/(?<=\))\s*,\s*/);
 
         for (const part of parts) {
-          if (!part.includes('inset')) continue;
+          if (!/inset/.test(part)) continue;
 
           // Parse the y-offset from an inset shadow.
           // Format: inset <x>px <y>px [blur] [spread] [color]
