@@ -18,11 +18,11 @@ test.describe('gallery smoke', () => {
     const anchors = await page.locator('aside.nav-rail a[href^="#"]').evaluateAll(
       (els) => els.map((el) => (el as HTMLAnchorElement).getAttribute('href')),
     );
-    for (const href of anchors) {
-      if (!href) continue;
-      const id = href.slice(1);
-      await expect(page.locator(`#${id}`)).toHaveCount(1);
-    }
+    await Promise.all(
+      anchors
+        .filter((href): href is string => Boolean(href))
+        .map((href) => expect(page.locator(`#${href.slice(1)}`)).toHaveCount(1)),
+    );
   });
 
   test('agentation comment exists (React-only, not rendered in prototype)', async ({ page }) => {

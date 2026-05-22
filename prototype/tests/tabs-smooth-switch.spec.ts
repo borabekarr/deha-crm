@@ -20,7 +20,7 @@ test.describe('tabs sliding pill indicator', () => {
               const style = rule.style;
               const hasBottom0 = style.bottom === '0' || style.bottom === '0px';
               const bg = style.background || style.backgroundColor;
-              const hasGreen = bg.includes('emerald') || bg.includes('16 185 129') || bg.includes('10b981');
+              const hasGreen = /emerald|16 185 129|10b981/.test(bg);
               if (hasBottom0 && hasGreen) return true;
             }
           }
@@ -60,16 +60,16 @@ test.describe('tabs sliding pill indicator', () => {
     const lastTab = triggers.nth(count - 1);
     await lastTab.click();
 
-    // Sample transform at intervals to catch intermediate animation frames
-    const transforms: string[] = [];
-    for (let i = 0; i < 4; i++) {
-      const transform = await page.evaluate(() => {
-        const indicator = document.querySelector('.tabs-list .tabs-indicator') as HTMLElement | null;
-        return indicator ? indicator.style.transform : '';
-      });
-      transforms.push(transform);
-      await page.waitForTimeout(50);
-    }
+    // Sample at fixed offsets 0..150ms in parallel — order preserved by Promise.all.
+    const transforms = await Promise.all(
+      Array.from({ length: 4 }, async (_, step) => {
+        await page.waitForTimeout(step * 50);
+        return page.evaluate(() => {
+          const indicator = document.querySelector('.tabs-list .tabs-indicator') as HTMLElement | null;
+          return indicator ? indicator.style.transform : '';
+        });
+      }),
+    );
 
     // At least one frame should have a translateX value set
     const hasTranslate = transforms.some(t => t.includes('translateX'));

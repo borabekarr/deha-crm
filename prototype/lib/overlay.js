@@ -16,8 +16,10 @@ let scrollLockCount = 0;
 export function lockScroll() {
   if (scrollLockCount === 0) {
     const sbw = window.innerWidth - document.documentElement.clientWidth;
-    document.body.style.overflow = 'hidden';
-    if (sbw > 0) document.body.style.paddingRight = `${sbw}px`;
+    Object.assign(document.body.style, {
+      overflow: 'hidden',
+      paddingRight: sbw > 0 ? `${sbw}px` : '',
+    });
   }
   scrollLockCount++;
 }
@@ -25,8 +27,7 @@ export function lockScroll() {
 export function unlockScroll() {
   scrollLockCount = Math.max(0, scrollLockCount - 1);
   if (scrollLockCount === 0) {
-    document.body.style.overflow = '';
-    document.body.style.paddingRight = '';
+    Object.assign(document.body.style, { overflow: '', paddingRight: '' });
   }
 }
 

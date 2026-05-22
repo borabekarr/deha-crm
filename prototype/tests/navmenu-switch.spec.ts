@@ -42,10 +42,11 @@ test.describe('navmenu smooth switching', () => {
     const count = await links.count();
     expect(count).toBeGreaterThan(0);
 
-    for (let i = 0; i < count; i++) {
-      const icon = links.nth(i).locator('.material-symbols-outlined');
-      await expect(icon).toHaveCount(1);
-    }
+    await Promise.all(
+      Array.from({ length: count }, (_, i) =>
+        expect(links.nth(i).locator('.material-symbols-outlined')).toHaveCount(1),
+      ),
+    );
   });
 
   test('active item has box-shadow (inner shadow applied)', async ({ page }) => {
@@ -63,23 +64,24 @@ test.describe('navmenu smooth switching', () => {
     const count = await links.count();
     expect(count).toBeGreaterThan(0);
 
+    // Sequential by design: click mutates active state; next iteration depends
+    // on rendered settle. Documented in
+    // memory/system-setup/sequential-playwright-waiver-2026-05-22.md.
     for (let i = 0; i < count; i++) {
       await links.nth(i).click();
 
-      // Poll every 50 ms for 300 ms and collect computed styles
-      const samples: Array<{ color: string; background: string }> = [];
+      // Sample at fixed offsets 0..300ms in parallel — order preserved by Promise.all.
       const intervalMs = 50;
-      const durationMs = 300;
-      const steps = durationMs / intervalMs;
-
-      for (let step = 0; step < steps; step++) {
-        const sample = await links.nth(i).evaluate((el) => ({
-          color: getComputedStyle(el).color,
-          background: getComputedStyle(el).backgroundColor,
-        }));
-        samples.push(sample);
-        await page.waitForTimeout(intervalMs);
-      }
+      const steps = 6;
+      const samples = await Promise.all(
+        Array.from({ length: steps }, async (_, step) => {
+          await page.waitForTimeout(step * intervalMs);
+          return links.nth(i).evaluate((el) => ({
+            color: getComputedStyle(el).color,
+            background: getComputedStyle(el).backgroundColor,
+          }));
+        }),
+      );
 
       for (const { color, background } of samples) {
         expect(colourIsAllowed(color)).toBe(true);
