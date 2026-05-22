@@ -1,5 +1,26 @@
 # React + TypeScript + Vite
 
+> See [MIGRATION.md](./MIGRATION.md) for the monorepo restructure rationale and layout.
+
+## Workspaces
+
+| Package | Stack | Port |
+|---|---|---|
+| `apps/web` | Vite + React 19 + Tailwind v4 + TanStack Router | 5173 |
+| `apps/mobile` | Expo SDK 56 + React Native | 8081 |
+| `packages/core` | Pure TS types and schemas | — |
+| `packages/api` | Supabase client factory | — |
+| `packages/motion-tokens` | Duration + easing tokens (shared with both apps) | — |
+| `packages/ui-contracts` | Cross-platform component prop interfaces | — |
+
+### Dev commands
+
+- `pnpm dev` — boots web + mobile in parallel via Turborepo
+- `pnpm dev:web` — Vite only (port 5173)
+- `pnpm dev:mobile` — Metro only (port 8081)
+
+> **Vite-under-Turborepo gotcha** ([vercel/turborepo#11784](https://github.com/vercel/turborepo/issues/11784)): If `pnpm dev` causes Vite to exit early, use `pnpm dev:web` directly.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:

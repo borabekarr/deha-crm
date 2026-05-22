@@ -57,3 +57,11 @@ prototype/test-results/
 *.njsproj
 *.sln
 *.sw?
+
+# Turborepo
+.turbo/
+.output/
+
+# Workspace node_modules
+apps/*/node_modules
+packages/*/node_modules
