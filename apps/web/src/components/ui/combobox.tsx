@@ -109,11 +109,11 @@ const Combobox = ({
             'flex h-10 w-full items-center justify-between',
             'rounded-[14px] px-3.5 py-2',
             // surface — white bg, inner shadow matching prototype combo trigger
-            'bg-white border border-slate-200',
+            'bg-white border border-neutral-200',
             'shadow-[inset_0_1px_3px_rgb(15_23_42_/_0.06)]',
             // text
             'text-sm font-medium text-left',
-            currentValue ? 'text-slate-900' : 'text-slate-400',
+            currentValue ? 'text-neutral-900' : 'text-neutral-400',
             // focus ring — emerald
             'outline-none focus-visible:border-emerald-500',
             'focus-visible:ring-[3px] focus-visible:ring-emerald-500/15',
@@ -129,7 +129,7 @@ const Combobox = ({
           </span>
           <ChevronsUpDownIcon
             className={cn(
-              'ml-2 size-4 shrink-0 text-slate-500',
+              'ml-2 size-4 shrink-0 text-neutral-500',
               'transition-transform duration-[var(--duration-fast,120ms)]',
               isOpen && 'rotate-180',
             )}
@@ -148,7 +148,7 @@ const Combobox = ({
             // shape
             'z-50 rounded-[12px] p-0',
             // surface — prototype .combo-list
-            'bg-white border border-slate-200',
+            'bg-white border border-neutral-200',
             'shadow-[0_8px_32px_-4px_rgb(15_23_42_/_0.18),0_2px_8px_-2px_rgb(15_23_42_/_0.08)]',
             // animation
             'data-[state=open]:animate-in data-[state=closed]:animate-out',
@@ -163,7 +163,7 @@ const Combobox = ({
             className="flex flex-col overflow-hidden rounded-[12px]"
           >
             {/* Search input */}
-            <div className="flex items-center border-b border-slate-100 px-3">
+            <div className="flex items-center border-b border-neutral-100 px-3">
               <CommandInput
                 value={query}
                 onValueChange={handleQueryChange}
@@ -171,7 +171,7 @@ const Combobox = ({
                 className={cn(
                   // reset cmdk default styles
                   'h-10 flex-1 bg-transparent py-3',
-                  'text-sm font-medium text-slate-900 placeholder:text-slate-400',
+                  'text-sm font-medium text-neutral-900 placeholder:text-neutral-400',
                   'outline-none border-0 focus:ring-0',
                 )}
               />
@@ -179,7 +179,7 @@ const Combobox = ({
 
             {/* List */}
             <CommandList id={listboxId} className="max-h-56 overflow-y-auto p-1">
-              <CommandEmpty className="py-3 text-center text-sm text-slate-400">
+              <CommandEmpty className="py-3 text-center text-sm text-neutral-400">
                 {emptyText}
               </CommandEmpty>
 
@@ -194,10 +194,10 @@ const Combobox = ({
                       'relative flex w-full cursor-pointer select-none items-center',
                       'rounded-[8px] py-2 pl-3 pr-8',
                       // text
-                      'text-sm font-medium text-slate-700',
+                      'text-sm font-medium text-neutral-700',
                       // hover / focus — cmdk uses data-[selected] for keyboard highlight
-                      'data-[selected=true]:bg-slate-100 data-[selected=true]:text-slate-900',
-                      'hover:bg-slate-50 hover:text-slate-900',
+                      'data-[selected=true]:bg-neutral-100 data-[selected=true]:text-neutral-900',
+                      'hover:bg-neutral-50 hover:text-neutral-900',
                       'focus:outline-none',
                       // selected (chosen) state — emerald
                       currentValue === option.value && 'text-emerald-600 font-semibold',

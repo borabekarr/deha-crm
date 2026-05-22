@@ -9,42 +9,43 @@ const SheetContext = React.createContext<{ side: 'top' | 'right' | 'bottom' | 'l
 // ---------------------------------------------------------------------------
 // Root — wraps vaul Drawer with snapPoints for Apple Maps style peek/full
 // ---------------------------------------------------------------------------
-const Sheet = ({
+function Sheet({
   reducedMotion: _reducedMotion, // eslint-disable-line @typescript-eslint/no-unused-vars
   side = 'right',
   children,
   ...props
-}: SheetProps & React.ComponentPropsWithoutRef<typeof Drawer.Root>) => (
-  <SheetContext.Provider value={{ side }}>
-    <Drawer.Root snapPoints={[0.4, 0.85]} direction={side} {...props}>
-      {children}
-    </Drawer.Root>
-  </SheetContext.Provider>
-)
+}: SheetProps & React.ComponentPropsWithoutRef<typeof Drawer.Root>) {
+  const ctxValue = React.useMemo(() => ({ side }), [side])
+  return (
+    <SheetContext.Provider value={ctxValue}>
+      <Drawer.Root snapPoints={[0.4, 0.85]} direction={side} {...props}>
+        {children}
+      </Drawer.Root>
+    </SheetContext.Provider>
+  )
+}
 Sheet.displayName = 'Sheet'
 
 // ---------------------------------------------------------------------------
 // Trigger
 // ---------------------------------------------------------------------------
-const SheetTrigger = React.forwardRef<
-  React.ComponentRef<typeof Drawer.Trigger>,
-  React.ComponentPropsWithoutRef<typeof Drawer.Trigger>
->((props, ref) => <Drawer.Trigger ref={ref} {...props} />)
+function SheetTrigger({ ref, ...props }: React.ComponentProps<typeof Drawer.Trigger>) {
+  return <Drawer.Trigger ref={ref} {...props} />
+}
 SheetTrigger.displayName = 'SheetTrigger'
 
 // ---------------------------------------------------------------------------
 // Overlay — scrim behind the drawer
 // ---------------------------------------------------------------------------
-const SheetOverlay = React.forwardRef<
-  React.ComponentRef<typeof Drawer.Overlay>,
-  React.ComponentPropsWithoutRef<typeof Drawer.Overlay>
->(({ className, ...props }, ref) => (
-  <Drawer.Overlay
-    ref={ref}
-    className={cn('fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm', className)}
-    {...props}
-  />
-))
+function SheetOverlay({ ref, className, ...props }: React.ComponentProps<typeof Drawer.Overlay>) {
+  return (
+    <Drawer.Overlay
+      ref={ref}
+      className={cn('fixed inset-0 z-50 bg-neutral-900/40 backdrop-blur-sm', className)}
+      {...props}
+    />
+  )
+}
 SheetOverlay.displayName = 'SheetOverlay'
 
 const sidePositionClasses: Record<'top' | 'right' | 'bottom' | 'left', string> = {
@@ -57,11 +58,8 @@ const sidePositionClasses: Record<'top' | 'right' | 'bottom' | 'left', string> =
 // ---------------------------------------------------------------------------
 // Content — slide-over panel, positioned based on parent Sheet's `side` prop
 // ---------------------------------------------------------------------------
-const SheetContent = React.forwardRef<
-  React.ComponentRef<typeof Drawer.Content>,
-  React.ComponentPropsWithoutRef<typeof Drawer.Content>
->(({ className, children, ...props }, ref) => {
-  const { side } = React.useContext(SheetContext)
+function SheetContent({ ref, className, children, ...props }: React.ComponentProps<typeof Drawer.Content>) {
+  const { side } = React.use(SheetContext)
   return (
     <Drawer.Portal>
       <SheetOverlay />
@@ -85,7 +83,7 @@ const SheetContent = React.forwardRef<
       </Drawer.Content>
     </Drawer.Portal>
   )
-})
+}
 SheetContent.displayName = 'SheetContent'
 
 // ---------------------------------------------------------------------------
@@ -99,31 +97,29 @@ SheetHeader.displayName = 'SheetHeader'
 // ---------------------------------------------------------------------------
 // Title
 // ---------------------------------------------------------------------------
-const SheetTitle = React.forwardRef<
-  React.ComponentRef<typeof Drawer.Title>,
-  React.ComponentPropsWithoutRef<typeof Drawer.Title>
->(({ className, ...props }, ref) => (
-  <Drawer.Title
-    ref={ref}
-    className={cn('text-[length:var(--text-20)] font-semibold text-[var(--foreground)]', className)}
-    {...props}
-  />
-))
+function SheetTitle({ ref, className, ...props }: React.ComponentProps<typeof Drawer.Title>) {
+  return (
+    <Drawer.Title
+      ref={ref}
+      className={cn('text-[length:var(--text-20)] font-semibold text-[var(--foreground)]', className)}
+      {...props}
+    />
+  )
+}
 SheetTitle.displayName = 'SheetTitle'
 
 // ---------------------------------------------------------------------------
 // Description
 // ---------------------------------------------------------------------------
-const SheetDescription = React.forwardRef<
-  React.ComponentRef<typeof Drawer.Description>,
-  React.ComponentPropsWithoutRef<typeof Drawer.Description>
->(({ className, ...props }, ref) => (
-  <Drawer.Description
-    ref={ref}
-    className={cn('mt-1 text-[length:var(--text-14)] text-[var(--muted-foreground)]', className)}
-    {...props}
-  />
-))
+function SheetDescription({ ref, className, ...props }: React.ComponentProps<typeof Drawer.Description>) {
+  return (
+    <Drawer.Description
+      ref={ref}
+      className={cn('mt-1 text-[length:var(--text-14)] text-[var(--muted-foreground)]', className)}
+      {...props}
+    />
+  )
+}
 SheetDescription.displayName = 'SheetDescription'
 
 // ---------------------------------------------------------------------------
@@ -140,10 +136,9 @@ SheetFooter.displayName = 'SheetFooter'
 // ---------------------------------------------------------------------------
 // Close
 // ---------------------------------------------------------------------------
-const SheetClose = React.forwardRef<
-  React.ComponentRef<typeof Drawer.Close>,
-  React.ComponentPropsWithoutRef<typeof Drawer.Close>
->((props, ref) => <Drawer.Close ref={ref} {...props} />)
+function SheetClose({ ref, ...props }: React.ComponentProps<typeof Drawer.Close>) {
+  return <Drawer.Close ref={ref} {...props} />
+}
 SheetClose.displayName = 'SheetClose'
 
 export {

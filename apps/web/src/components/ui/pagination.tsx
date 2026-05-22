@@ -78,106 +78,98 @@ function ChevronRight({ className }: { className?: string }) {
 // ---------------------------------------------------------------------------
 // Pagination
 // ---------------------------------------------------------------------------
-const Pagination = React.forwardRef<
-  HTMLElement,
-  PaginationProps & React.HTMLAttributes<HTMLElement>
->(
-  (
-    {
-      page,
-      totalPages,
-      onPageChange,
-      siblingCount = 1,
-      disabled = false,
-      reducedMotion: _reducedMotion, // eslint-disable-line @typescript-eslint/no-unused-vars
-      className,
-      ...props
-    },
-    ref,
-  ) => {
-    const pages = buildPageRange(page, totalPages, siblingCount)
+function Pagination({
+  ref,
+  page,
+  totalPages,
+  onPageChange,
+  siblingCount = 1,
+  disabled = false,
+  reducedMotion: _reducedMotion, // eslint-disable-line @typescript-eslint/no-unused-vars
+  className,
+  ...props
+}: PaginationProps & React.HTMLAttributes<HTMLElement> & { ref?: React.Ref<HTMLElement> }) {
+  const pages = buildPageRange(page, totalPages, siblingCount)
 
-    const buttonBase = cn(
-      // prototype: .pager button — min-width:2.5rem; height:2.5rem; padding:0 .5rem
-      // border:1px solid var(--slate-200); background:rgb(255 255 255 / .7);
-      // backdrop-filter:blur(20px); border-radius:12px; font-size:var(--text-13);
-      // font-weight:600; color:var(--slate-700); cursor:pointer
-      'inline-flex min-w-10 h-10 items-center justify-center gap-1 rounded-xl',
-      'border border-slate-200 bg-white/70 px-2 backdrop-blur-[20px]',
-      'text-[13px] font-semibold text-slate-700',
-      'transition-colors duration-150 ease-out',
-      'hover:bg-white/95',
-      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1',
-      'disabled:pointer-events-none disabled:opacity-40',
-    )
+  const buttonBase = cn(
+    // prototype: .pager button — min-width:2.5rem; height:2.5rem; padding:0 .5rem
+    // border:1px solid var(--neutral-200); background:rgb(255 255 255 / .7);
+    // backdrop-filter:blur(20px); border-radius:12px; font-size:var(--text-13);
+    // font-weight:600; color:var(--neutral-700); cursor:pointer
+    'inline-flex min-w-10 h-10 items-center justify-center gap-1 rounded-xl',
+    'border border-neutral-200 bg-white/70 px-2 backdrop-blur-[20px]',
+    'text-[13px] font-semibold text-neutral-700',
+    'transition-colors duration-150 ease-out',
+    'hover:bg-white/95',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1',
+    'disabled:pointer-events-none disabled:opacity-40',
+  )
 
-    const activeButton = cn(
-      // prototype: .pager button[aria-current="page"] — bg:slate-900; color:#fff
-      'bg-slate-900 text-white border-slate-900 font-bold',
-      'hover:bg-slate-900',
-    )
+  const activeButton = cn(
+    // prototype: .pager button[aria-current="page"] — bg:neutral-900; color:#fff
+    'bg-neutral-900 text-white border-neutral-900 font-bold',
+    'hover:bg-neutral-900',
+  )
 
-    return (
-      <nav
-        ref={ref}
-        role="navigation"
-        aria-label="Pagination"
-        className={cn('inline-flex gap-1', className)}
-        {...props}
+  return (
+    <nav
+      ref={ref}
+      aria-label="Pagination"
+      className={cn('inline-flex gap-1', className)}
+      {...props}
+    >
+      {/* Prev */}
+      <button
+        type="button"
+        aria-label="Go to previous page"
+        disabled={disabled || page <= 1}
+        onClick={() => onPageChange?.(page - 1)}
+        className={buttonBase}
       >
-        {/* Prev */}
-        <button
-          type="button"
-          aria-label="Go to previous page"
-          disabled={disabled || page <= 1}
-          onClick={() => onPageChange?.(page - 1)}
-          className={buttonBase}
-        >
-          <ChevronLeft />
-        </button>
+        <ChevronLeft />
+      </button>
 
-        {/* Page numbers */}
-        {pages.map((p, idx) =>
-          p === '...' ? (
-            <span
-              key={`ellipsis-${idx}`}
-              className={cn(
-                buttonBase,
-                'cursor-default border-transparent bg-transparent hover:bg-transparent',
-              )}
-              aria-hidden
-            >
-              &hellip;
-            </span>
-          ) : (
-            <button
-              key={p}
-              type="button"
-              aria-label={`Go to page ${p}`}
-              aria-current={p === page ? 'page' : undefined}
-              disabled={disabled}
-              onClick={() => onPageChange?.(p as number)}
-              className={cn(buttonBase, p === page && activeButton)}
-            >
-              {p}
-            </button>
-          ),
-        )}
+      {/* Page numbers */}
+      {pages.map((p, idx) =>
+        p === '...' ? (
+          <span
+            key={`ellipsis-${idx}`}
+            className={cn(
+              buttonBase,
+              'cursor-default border-transparent bg-transparent hover:bg-transparent',
+            )}
+            aria-hidden
+          >
+            &hellip;
+          </span>
+        ) : (
+          <button
+            key={p}
+            type="button"
+            aria-label={`Go to page ${p}`}
+            aria-current={p === page ? 'page' : undefined}
+            disabled={disabled}
+            onClick={() => onPageChange?.(p as number)}
+            className={cn(buttonBase, p === page && activeButton)}
+          >
+            {p}
+          </button>
+        ),
+      )}
 
-        {/* Next */}
-        <button
-          type="button"
-          aria-label="Go to next page"
-          disabled={disabled || page >= totalPages}
-          onClick={() => onPageChange?.(page + 1)}
-          className={buttonBase}
-        >
-          <ChevronRight />
-        </button>
-      </nav>
-    )
-  },
-)
+      {/* Next */}
+      <button
+        type="button"
+        aria-label="Go to next page"
+        disabled={disabled || page >= totalPages}
+        onClick={() => onPageChange?.(page + 1)}
+        className={buttonBase}
+      >
+        <ChevronRight />
+      </button>
+    </nav>
+  )
+}
 Pagination.displayName = 'Pagination'
 
 export { Pagination }

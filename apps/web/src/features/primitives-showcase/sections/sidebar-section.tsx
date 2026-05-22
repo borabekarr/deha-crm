@@ -10,19 +10,19 @@ export function SidebarSection() {
   return (
     <section id="sidebar" className="space-y-4">
       <div>
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Sidebar</h2>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+        <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">Sidebar</h2>
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
           Persistent left-edge navigation that collapses to icons on narrow screens.
         </p>
       </div>
 
       {/* Variant 1: Expanded sidebar mockup */}
-      <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
-        <p className="mb-4 text-xs font-medium text-slate-400 uppercase tracking-wider">Expanded (desktop)</p>
-        <div className="h-72 flex overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
+      <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4">
+        <p className="mb-4 text-xs font-medium text-neutral-400 uppercase tracking-wider">Expanded (desktop)</p>
+        <div className="h-72 flex overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
           <Sidebar defaultCollapsed={false}>
             <SidebarHeader>
-              <span className="text-sm font-black text-slate-900 dark:text-slate-100">deha<span className="text-emerald-500">.</span></span>
+              <span className="text-sm font-black text-neutral-900 dark:text-neutral-100">deha<span className="text-emerald-500">.</span></span>
             </SidebarHeader>
             <SidebarContent>
               <SidebarItem
@@ -62,16 +62,16 @@ export function SidebarSection() {
           </Sidebar>
 
           {/* Main area placeholder */}
-          <div className="flex-1 bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
-            <p className="text-xs text-slate-400">Main content area</p>
+          <div className="flex-1 bg-neutral-50 dark:bg-neutral-900 flex items-center justify-center">
+            <p className="text-xs text-neutral-400">Main content area</p>
           </div>
         </div>
       </div>
 
       {/* Variant 2: Collapsed sidebar */}
-      <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
-        <p className="mb-4 text-xs font-medium text-slate-400 uppercase tracking-wider">Collapsed (icon-only)</p>
-        <div className="h-72 flex overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
+      <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4">
+        <p className="mb-4 text-xs font-medium text-neutral-400 uppercase tracking-wider">Collapsed (icon-only)</p>
+        <div className="h-72 flex overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
           <Sidebar defaultCollapsed={true}>
             <SidebarHeader>
               <span className="text-sm font-black text-emerald-500">d</span>
@@ -82,8 +82,8 @@ export function SidebarSection() {
               <SidebarItem href="#sidebar" icon={<span className="material-symbols-outlined" style={{ fontSize: 20 }}>task_alt</span>} />
             </SidebarContent>
           </Sidebar>
-          <div className="flex-1 bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
-            <p className="text-xs text-slate-400">Main content area</p>
+          <div className="flex-1 bg-neutral-50 dark:bg-neutral-900 flex items-center justify-center">
+            <p className="text-xs text-neutral-400">Main content area</p>
           </div>
         </div>
       </div>

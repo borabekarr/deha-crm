@@ -10,20 +10,20 @@ export function TooltipSection() {
   return (
     <section id="tooltip" className="space-y-4">
       <div>
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Tooltip</h2>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+        <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">Tooltip</h2>
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
           Hover or focus reveals a short label anchored near the trigger element.
         </p>
       </div>
 
       {/* Contract-level API: <Tooltip content="..."><trigger /></Tooltip> */}
-      <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 space-y-4">
-        <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Button tooltips (contract API)</p>
+      <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4 space-y-4">
+        <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Button tooltips (contract API)</p>
         <div className="flex flex-wrap items-center gap-4">
           <Tooltip content="Default tooltip">
             <button
               type="button"
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
+              className="rounded-xl border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200"
             >
               Hover me
             </button>
@@ -52,8 +52,8 @@ export function TooltipSection() {
 
       {/* Manual composition API: TooltipProvider + TooltipRoot + TooltipTrigger + TooltipContent */}
       <TooltipProvider>
-        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 space-y-4">
-          <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Icon tooltips (compound API)</p>
+        <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4 space-y-4">
+          <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Icon tooltips (compound API)</p>
           <div className="flex items-center gap-6">
             {[
               { icon: 'dashboard', tip: 'Dashboard' },
@@ -67,7 +67,7 @@ export function TooltipSection() {
                   <button
                     type="button"
                     aria-label={tip}
-                    className="flex size-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-700"
+                    className="flex size-9 items-center justify-center rounded-lg text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-700"
                   >
                     <span className="material-symbols-outlined" style={{ fontSize: 22 }}>{icon}</span>
                   </button>

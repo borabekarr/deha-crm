@@ -4,19 +4,19 @@ export function SheetSection() {
   return (
     <section id="sheet" className="space-y-4">
       <div>
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Sheet</h2>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+        <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">Sheet</h2>
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
           Bottom or side drawer built on Vaul with snap points for peek and full states.
         </p>
       </div>
 
-      <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 space-y-4">
-        <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Side sheet</p>
+      <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4 space-y-4">
+        <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Side sheet</p>
         <Sheet>
           <SheetTrigger asChild>
             <button
               type="button"
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
+              className="rounded-xl border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200"
             >
               Open Lead Details
             </button>
@@ -24,7 +24,7 @@ export function SheetSection() {
           <SheetContent>
             <SheetHeader>
               <SheetTitle>Lead Details</SheetTitle>
-              <SheetDescription>Ahmet Yilmaz — Enterprise prospect</SheetDescription>
+              <SheetDescription>Ahmet Yilmaz, Enterprise prospect</SheetDescription>
             </SheetHeader>
             <div className="mt-4 space-y-3">
               {[
@@ -34,8 +34,8 @@ export function SheetSection() {
                 { label: 'Owner', value: 'Bora Bekar' },
               ].map(({ label, value }) => (
                 <div key={label} className="flex justify-between text-sm">
-                  <span className="text-slate-500">{label}</span>
-                  <span className="font-medium text-slate-900">{value}</span>
+                  <span className="text-neutral-500">{label}</span>
+                  <span className="font-medium text-neutral-900">{value}</span>
                 </div>
               ))}
             </div>
@@ -43,8 +43,8 @@ export function SheetSection() {
         </Sheet>
       </div>
 
-      <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 space-y-4">
-        <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Action sheet</p>
+      <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4 space-y-4">
+        <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Action sheet</p>
         <Sheet>
           <SheetTrigger asChild>
             <button
@@ -64,7 +64,7 @@ export function SheetSection() {
                 <button
                   key={action}
                   type="button"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 text-left text-sm font-medium text-neutral-700 hover:bg-neutral-50"
                 >
                   {action}
                 </button>

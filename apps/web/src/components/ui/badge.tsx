@@ -24,7 +24,7 @@ const badgeVariants = cva(
         ],
         // default — neutral light pill matching .badge.tag
         default: [
-          'bg-slate-100 text-slate-600 border border-slate-200',
+          'bg-neutral-100 text-neutral-600 border border-neutral-200',
           'shadow-[inset_0_-2px_5px_rgba(0,0,0,0.07),inset_0_-1px_0_rgba(255,255,255,0.8)]',
           'px-3 py-[6px]',
         ],
@@ -41,7 +41,7 @@ const badgeVariants = cva(
         ],
         // neutral — matches .badge.tag exactly
         neutral: [
-          'bg-slate-100 text-slate-500 border border-slate-300 px-3 py-[6px]',
+          'bg-neutral-100 text-neutral-500 border border-neutral-300 px-3 py-[6px]',
           'shadow-[inset_0_-2px_5px_rgba(0,0,0,0.07),inset_0_-1px_0_rgba(255,255,255,0.8)]',
         ],
       },
@@ -60,8 +60,8 @@ export type BadgeProps = Omit<BadgeContractProps, 'variant' | 'children'> &
   VariantProps<typeof badgeVariants> &
   React.HTMLAttributes<HTMLSpanElement>
 
-const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
-  ({ className, variant, reducedMotion: _reducedMotion, children, ...props }, ref) => ( // eslint-disable-line @typescript-eslint/no-unused-vars
+function Badge({ ref, className, variant, reducedMotion: _reducedMotion, children, ...props }: BadgeProps & { ref?: React.Ref<HTMLSpanElement> }) { // eslint-disable-line @typescript-eslint/no-unused-vars
+  return (
     <span
       ref={ref}
       className={cn(badgeVariants({ variant }), className)}
@@ -69,8 +69,8 @@ const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
     >
       {children}
     </span>
-  ),
-)
+  )
+}
 Badge.displayName = 'Badge'
 
 // eslint-disable-next-line react-refresh/only-export-components

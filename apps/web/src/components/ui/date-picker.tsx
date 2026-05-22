@@ -60,13 +60,13 @@ const DatePicker = ({
           className={cn(
             // Input-like appearance
             'flex h-10 w-full items-center justify-between',
-            'rounded-xl border border-slate-200 bg-white px-3 py-2',
+            'rounded-xl border border-neutral-200 bg-white px-3 py-2',
             'text-sm text-left',
             'shadow-sm',
             // Placeholder vs value colour
-            currentDate ? 'text-slate-800' : 'text-slate-400',
+            currentDate ? 'text-neutral-800' : 'text-neutral-400',
             // States
-            'hover:border-slate-300 hover:bg-slate-50',
+            'hover:border-neutral-300 hover:bg-neutral-50',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500',
             'disabled:cursor-not-allowed disabled:opacity-50',
             'transition-colors duration-150',
@@ -75,7 +75,7 @@ const DatePicker = ({
           <span className="truncate">
             {currentDate ? format(currentDate, 'PP') : placeholder}
           </span>
-          <CalendarIcon className="ml-2 h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
+          <CalendarIcon className="ml-2 h-4 w-4 shrink-0 text-neutral-400" aria-hidden="true" />
         </button>
       </PopoverTrigger>
 

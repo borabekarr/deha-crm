@@ -4,19 +4,19 @@ export function ToastSection() {
   return (
     <section id="toast" className="space-y-4">
       <div>
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Toast</h2>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+        <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">Toast</h2>
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
           Transient notification banners that auto-dismiss after a configurable duration.
         </p>
       </div>
 
-      <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 space-y-4">
-        <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Trigger by variant</p>
+      <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4 space-y-4">
+        <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Trigger by variant</p>
         <div className="flex flex-wrap gap-3">
           <button
             type="button"
             onClick={() => toast({ title: 'Lead saved', description: 'Ahmet Yilmaz has been updated.', variant: 'default' })}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
+            className="rounded-xl border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200"
           >
             Default
           </button>
@@ -44,13 +44,13 @@ export function ToastSection() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 space-y-4">
-        <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Title only</p>
+      <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4 space-y-4">
+        <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Title only</p>
         <div className="flex flex-wrap gap-3">
           <button
             type="button"
             onClick={() => toast({ title: 'Copied to clipboard', variant: 'default' })}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
+            className="rounded-xl border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200"
           >
             Toast (title only)
           </button>

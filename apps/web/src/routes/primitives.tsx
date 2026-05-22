@@ -48,25 +48,25 @@ function PrimitivesLayout() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
+    <div className="flex h-screen overflow-hidden bg-neutral-50 dark:bg-neutral-950">
       {/* ── Left rail ──────────────────────────────────────────────────────── */}
-      <aside className="hidden md:flex w-56 shrink-0 flex-col bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
+      <aside className="hidden md:flex w-56 shrink-0 flex-col bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800">
         {/* Header */}
-        <div className="flex h-14 shrink-0 items-center px-5 border-b border-slate-200 dark:border-slate-800">
-          <span className="text-sm font-black tracking-tight text-slate-900 dark:text-slate-100">
+        <div className="flex h-14 shrink-0 items-center px-5 border-b border-neutral-200 dark:border-neutral-800">
+          <span className="text-sm font-black tracking-tight text-neutral-900 dark:text-neutral-100">
             deha<span className="text-emerald-500">.</span>
-            <span className="ml-1.5 text-xs font-medium text-slate-400">primitives</span>
+            <span className="ml-1.5 text-xs font-medium text-neutral-400">primitives</span>
           </span>
         </div>
 
         {/* Nav links */}
         <ScrollArea className="flex-1">
-          <nav className="py-3 px-3 space-y-0.5" aria-label="Primitive sections">
+          <nav className="p-3 space-y-0.5" aria-label="Primitive sections">
             {NAV_ITEMS.map(({ id, label }) => (
               <a
                 key={id}
                 href={`#${id}`}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] font-medium text-slate-600 dark:text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] font-medium text-neutral-600 dark:text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-900 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
               >
                 {label}
               </a>
@@ -78,8 +78,8 @@ function PrimitivesLayout() {
       {/* ── Main column ────────────────────────────────────────────────────── */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6">
-          <h1 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+        <header className="flex h-14 shrink-0 items-center justify-between border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-6">
+          <h1 className="text-sm font-semibold text-neutral-700 dark:text-neutral-200">
             UI Primitives Showcase
           </h1>
           {/* Dark mode toggle */}
@@ -87,7 +87,7 @@ function PrimitivesLayout() {
             type="button"
             aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
             onClick={toggleDark}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
           >
             {dark ? (
               /* Sun icon */

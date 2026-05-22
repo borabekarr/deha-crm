@@ -33,16 +33,15 @@ NavigationMenu.displayName = 'NavigationMenu'
 // ---------------------------------------------------------------------------
 // List — horizontal row of nav items
 // ---------------------------------------------------------------------------
-const NavigationMenuList = React.forwardRef<
-  React.ComponentRef<typeof NavigationMenuPrimitive.List>,
-  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.List>
->(({ className, ...props }, ref) => (
-  <NavigationMenuPrimitive.List
-    ref={ref}
-    className={cn('flex flex-row items-center gap-1', className)}
-    {...props}
-  />
-))
+function NavigationMenuList({ ref, className, ...props }: React.ComponentProps<typeof NavigationMenuPrimitive.List>) {
+  return (
+    <NavigationMenuPrimitive.List
+      ref={ref}
+      className={cn('flex flex-row items-center gap-1', className)}
+      {...props}
+    />
+  )
+}
 NavigationMenuList.displayName = 'NavigationMenuList'
 
 // ---------------------------------------------------------------------------
@@ -54,143 +53,138 @@ NavigationMenuItem.displayName = 'NavigationMenuItem'
 // ---------------------------------------------------------------------------
 // Trigger — hover-open button inside an item
 // Prototype .navmenu a: padding .5rem 1rem, font-size 13px, weight 600,
-//   color slate-500, pill radius. Active: slate-900 bg, white text.
+//   color neutral-500, pill radius. Active: neutral-900 bg, white text.
 // ---------------------------------------------------------------------------
-const NavigationMenuTrigger = React.forwardRef<
-  React.ComponentRef<typeof NavigationMenuPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
-  <NavigationMenuPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      'inline-flex items-center gap-1.5 rounded-full px-4 py-2',
-      'text-[13px] font-semibold text-slate-500',
-      'transition-colors duration-150 ease-out',
-      'hover:text-slate-900',
-      'data-[state=open]:bg-slate-900 data-[state=open]:text-white',
-      'data-[state=open]:shadow-[inset_0_1px_2px_rgb(0_0_0_/_0.2)]',
-      'outline-none select-none',
-      className,
-    )}
-    {...props}
-  >
-    {children}
-    <svg
-      className="relative top-px h-3 w-3 flex-shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
-      viewBox="0 0 12 12"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
+function NavigationMenuTrigger({ ref, className, children, ...props }: React.ComponentProps<typeof NavigationMenuPrimitive.Trigger>) {
+  return (
+    <NavigationMenuPrimitive.Trigger
+      ref={ref}
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full px-4 py-2',
+        'text-[13px] font-semibold text-neutral-500',
+        'transition-colors duration-150 ease-out',
+        'hover:text-neutral-900',
+        'data-[state=open]:bg-neutral-900 data-[state=open]:text-white',
+        'data-[state=open]:shadow-[inset_0_1px_2px_rgb(0_0_0_/_0.2)]',
+        'outline-none select-none',
+        className,
+      )}
+      {...props}
     >
-      <path d="M2 4l4 4 4-4" />
-    </svg>
-  </NavigationMenuPrimitive.Trigger>
-))
+      {children}
+      <svg
+        className="relative top-px h-3 w-3 flex-shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
+        viewBox="0 0 12 12"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M2 4l4 4 4-4" />
+      </svg>
+    </NavigationMenuPrimitive.Trigger>
+  )
+}
 NavigationMenuTrigger.displayName = 'NavigationMenuTrigger'
 
 // ---------------------------------------------------------------------------
 // Content — floating dropdown panel
 // Prototype .menu: white/85 frosted, border white/60, shadow, rounded-2xl.
 // ---------------------------------------------------------------------------
-const NavigationMenuContent = React.forwardRef<
-  React.ComponentRef<typeof NavigationMenuPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Content>
->(({ className, ...props }, ref) => (
-  <NavigationMenuPrimitive.Content
-    ref={ref}
-    className={cn(
-      'absolute left-0 top-0 w-auto',
-      'data-[state=open]:animate-in data-[state=closed]:animate-out',
-      'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-      'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
-      'data-[motion=from-end]:slide-in-from-right-52 data-[motion=from-start]:slide-in-from-left-52',
-      'data-[motion=to-end]:slide-out-to-right-52 data-[motion=to-start]:slide-out-to-left-52',
-      className,
-    )}
-    {...props}
-  />
-))
+function NavigationMenuContent({ ref, className, ...props }: React.ComponentProps<typeof NavigationMenuPrimitive.Content>) {
+  return (
+    <NavigationMenuPrimitive.Content
+      ref={ref}
+      className={cn(
+        'absolute left-0 top-0 w-auto',
+        'data-[state=open]:animate-in data-[state=closed]:animate-out',
+        'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+        'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
+        'data-[motion=from-end]:slide-in-from-right-52 data-[motion=from-start]:slide-in-from-left-52',
+        'data-[motion=to-end]:slide-out-to-right-52 data-[motion=to-start]:slide-out-to-left-52',
+        className,
+      )}
+      {...props}
+    />
+  )
+}
 NavigationMenuContent.displayName = 'NavigationMenuContent'
 
 // ---------------------------------------------------------------------------
 // Link — plain nav link (no dropdown)
-// Prototype .navmenu a active state: slate-900 bg, white text, inner shadow.
+// Prototype .navmenu a active state: neutral-900 bg, white text, inner shadow.
 // ---------------------------------------------------------------------------
-const NavigationMenuLink = React.forwardRef<
-  React.ComponentRef<typeof NavigationMenuPrimitive.Link>,
-  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Link>
->(({ className, ...props }, ref) => (
-  <NavigationMenuPrimitive.Link
-    ref={ref}
-    className={cn(
-      'inline-flex items-center gap-1.5 rounded-full px-4 py-2',
-      'text-[13px] font-semibold text-slate-500 no-underline',
-      'transition-colors duration-150 ease-out',
-      'hover:text-slate-900',
-      'data-[active]:bg-slate-900 data-[active]:text-white',
-      'data-[active]:shadow-[inset_0_1px_2px_rgb(0_0_0_/_0.2)]',
-      'outline-none',
-      className,
-    )}
-    {...props}
-  />
-))
+function NavigationMenuLink({ ref, className, ...props }: React.ComponentProps<typeof NavigationMenuPrimitive.Link>) {
+  return (
+    <NavigationMenuPrimitive.Link
+      ref={ref}
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full px-4 py-2',
+        'text-[13px] font-semibold text-neutral-500 no-underline',
+        'transition-colors duration-150 ease-out',
+        'hover:text-neutral-900',
+        'data-[active]:bg-neutral-900 data-[active]:text-white',
+        'data-[active]:shadow-[inset_0_1px_2px_rgb(0_0_0_/_0.2)]',
+        'outline-none',
+        className,
+      )}
+      {...props}
+    />
+  )
+}
 NavigationMenuLink.displayName = 'NavigationMenuLink'
 
 // ---------------------------------------------------------------------------
 // Indicator — sliding underline indicator (optional)
 // ---------------------------------------------------------------------------
-const NavigationMenuIndicator = React.forwardRef<
-  React.ComponentRef<typeof NavigationMenuPrimitive.Indicator>,
-  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Indicator>
->(({ className, ...props }, ref) => (
-  <NavigationMenuPrimitive.Indicator
-    ref={ref}
-    className={cn(
-      'top-full z-[1] flex h-1.5 items-end justify-center overflow-hidden',
-      'data-[state=visible]:animate-in data-[state=hidden]:animate-out',
-      'data-[state=hidden]:fade-out data-[state=visible]:fade-in',
-      className,
-    )}
-    {...props}
-  >
-    <div className="relative top-[60%] h-2 w-2 rotate-45 rounded-tl-sm bg-slate-200 shadow-md" />
-  </NavigationMenuPrimitive.Indicator>
-))
+function NavigationMenuIndicator({ ref, className, ...props }: React.ComponentProps<typeof NavigationMenuPrimitive.Indicator>) {
+  return (
+    <NavigationMenuPrimitive.Indicator
+      ref={ref}
+      className={cn(
+        'top-full z-[1] flex h-1.5 items-end justify-center overflow-hidden',
+        'data-[state=visible]:animate-in data-[state=hidden]:animate-out',
+        'data-[state=hidden]:fade-out data-[state=visible]:fade-in',
+        className,
+      )}
+      {...props}
+    >
+      <div className="relative top-[60%] h-2 w-2 rotate-45 rounded-tl-sm bg-neutral-200 shadow-md" />
+    </NavigationMenuPrimitive.Indicator>
+  )
+}
 NavigationMenuIndicator.displayName = 'NavigationMenuIndicator'
 
 // ---------------------------------------------------------------------------
 // Viewport — where dropdown Contents render
 // Frosted glass panel; same menu visual treatment.
 // ---------------------------------------------------------------------------
-const NavigationMenuViewport = React.forwardRef<
-  React.ComponentRef<typeof NavigationMenuPrimitive.Viewport>,
-  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Viewport>
->(({ className, ...props }, ref) => (
-  <div className={cn('absolute left-0 top-full flex justify-center')}>
-    <NavigationMenuPrimitive.Viewport
-      ref={ref}
-      className={cn(
-        'relative mt-1.5 h-[var(--radix-navigation-menu-viewport-height)]',
-        'w-full overflow-hidden rounded-2xl',
-        'bg-white/85 backdrop-blur-[40px]',
-        'border border-white/60',
-        'shadow-[0_12px_32px_-8px_rgb(15_23_42_/_0.20),inset_0_1px_0_rgb(255_255_255_/_0.5)]',
-        'p-1.5',
-        'origin-[top_center]',
-        'data-[state=open]:animate-in data-[state=closed]:animate-out',
-        'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-        'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
-        'min-w-[13rem]',
-        className,
-      )}
-      {...props}
-    />
-  </div>
-))
+function NavigationMenuViewport({ ref, className, ...props }: React.ComponentProps<typeof NavigationMenuPrimitive.Viewport>) {
+  return (
+    <div className={cn('absolute left-0 top-full flex justify-center')}>
+      <NavigationMenuPrimitive.Viewport
+        ref={ref}
+        className={cn(
+          'relative mt-1.5 h-[var(--radix-navigation-menu-viewport-height)]',
+          'w-full overflow-hidden rounded-2xl',
+          'bg-white/85 backdrop-blur-[40px]',
+          'border border-white/60',
+          'shadow-[0_12px_32px_-8px_rgb(15_23_42_/_0.20),inset_0_1px_0_rgb(255_255_255_/_0.5)]',
+          'p-1.5',
+          'origin-[top_center]',
+          'data-[state=open]:animate-in data-[state=closed]:animate-out',
+          'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+          'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
+          'min-w-[13rem]',
+          className,
+        )}
+        {...props}
+      />
+    </div>
+  )
+}
 NavigationMenuViewport.displayName = 'NavigationMenuViewport'
 
 export {

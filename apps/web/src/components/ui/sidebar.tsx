@@ -29,7 +29,7 @@ const Sidebar = ({
   children,
 }: SidebarProps) => {
   // Uncontrolled fallback — no useEffect, plain useState initial value
-  const [internalCollapsed, setInternalCollapsed] = React.useState(defaultCollapsed)
+  const [internalCollapsed, setInternalCollapsed] = React.useState(() => defaultCollapsed ?? false)
   const isCollapsed = collapsed ?? internalCollapsed
 
   const setCollapsed = React.useCallback(
@@ -60,7 +60,7 @@ const Sidebar = ({
       {/* ── Mobile: Vaul Drawer ── */}
       <Drawer.Root open={!isCollapsed} onOpenChange={(open) => setCollapsed(!open)} direction="left">
         <Drawer.Portal>
-          <Drawer.Overlay className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm md:hidden" />
+          <Drawer.Overlay className="fixed inset-0 z-50 bg-neutral-900/40 backdrop-blur-sm md:hidden" />
           <Drawer.Content
             aria-label="Sidebar navigation"
             className={cn(
@@ -119,8 +119,8 @@ interface SidebarItemProps extends React.AnchorHTMLAttributes<HTMLAnchorElement>
   icon?: React.ReactNode
 }
 
-const SidebarItem = React.forwardRef<HTMLAnchorElement, SidebarItemProps>(
-  ({ className, active, icon, children, ...props }, ref) => (
+function SidebarItem({ ref, className, active, icon, children, ...props }: SidebarItemProps & { ref?: React.Ref<HTMLAnchorElement> }) {
+  return (
     <a
       ref={ref}
       className={cn(
@@ -128,7 +128,7 @@ const SidebarItem = React.forwardRef<HTMLAnchorElement, SidebarItemProps>(
         'text-[length:var(--text-14)] font-medium transition-colors duration-150',
         active
           ? 'bg-[var(--emerald-50,oklch(0.979_0.021_166.113))] text-[var(--emerald-700)]'
-          : 'text-[var(--slate-600)] hover:bg-[var(--accent)] hover:text-[var(--foreground)]',
+          : 'text-[var(--neutral-600)] hover:bg-[var(--accent)] hover:text-[var(--foreground)]',
         className,
       )}
       aria-current={active ? 'page' : undefined}
@@ -139,8 +139,8 @@ const SidebarItem = React.forwardRef<HTMLAnchorElement, SidebarItemProps>(
       )}
       <span className="truncate">{children}</span>
     </a>
-  ),
-)
+  )
+}
 SidebarItem.displayName = 'SidebarItem'
 
 export { Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarItem }
