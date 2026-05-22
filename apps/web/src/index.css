@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "./styles/tokens.css";
+@import "./styles/keyframes.css";
 
 /* =========================================================================
    Deha CRM — Design Token Registry
@@ -71,6 +73,38 @@
   --color-destructive:       oklch(0.577 0.245 27.325);
   --color-accent:            oklch(0.970 0.010 255.508);
   --color-ring:              oklch(0.596 0.145 163.225);
+
+  /* -----------------------------------------------------------------------
+     Surface / text / border semantic families (used by dark mode overrides)
+  ----------------------------------------------------------------------- */
+  /* Surface tokens — glass backgrounds */
+  --color-surface-base:      oklch(1.000 0.010 106.423);   /* #fff-ish */
+  --color-surface-raised:    oklch(0.984 0.003 247.858);   /* slate-50 */
+  --color-surface-overlay:   oklch(0.967 0.006 247.917);   /* slate-100 */
+  --color-surface-glass:     oklch(1.000 0.010 106.423 / 0.7); /* glass bg */
+
+  /* Text tokens */
+  --color-text-primary:      oklch(0.208 0.042 265.755);   /* slate-900 */
+  --color-text-secondary:    oklch(0.372 0.044 257.287);   /* slate-700 */
+  --color-text-muted:        oklch(0.554 0.046 264.364);   /* slate-500 */
+  --color-text-disabled:     oklch(0.704 0.033 256.788);   /* slate-400 */
+
+  /* Border tokens */
+  --color-border-default:    oklch(0.929 0.013 255.508);   /* slate-200 */
+  --color-border-subtle:     oklch(0.967 0.006 247.917);   /* slate-100 */
+  --color-border-strong:     oklch(0.868 0.020 258.338);   /* slate-300 */
+
+  /* -----------------------------------------------------------------------
+     Status / red tokens (from prototype/tokens.css)
+  ----------------------------------------------------------------------- */
+  --color-red-100:    oklch(0.936 0.032 17.717);
+  --color-red-500:    oklch(0.637 0.237 25.331);
+  --color-red-600:    oklch(0.577 0.245 27.325);
+
+  /* Yellow tokens */
+  --color-yellow-100: oklch(0.973 0.071 103.193);
+  --color-yellow-400: oklch(0.852 0.199 91.936);
+  --color-yellow-600: oklch(0.681 0.162 75.834);
 
   /* -----------------------------------------------------------------------
      Font families
@@ -160,4 +194,57 @@
     );
     min-height: 100dvh;
   }
+}
+
+/* =========================================================================
+   Dark mode overrides
+   Applied via .dark class on <html> (class-based, not prefers-color-scheme,
+   so the app can control the toggle). Surface, text, and border families
+   are overridden to maintain WCAG AA contrast (4.5:1 for normal text,
+   3:1 for large text / UI components).
+
+   Contrast notes:
+     --color-text-primary  (slate-50  oklch 0.984) on
+     --color-surface-base  (slate-900 oklch 0.208) ≈ 16:1   WCAG AAA
+     --color-text-secondary (slate-200 oklch 0.929) on same  ≈ 11:1  AAA
+     --color-text-muted     (slate-400 oklch 0.704) on same  ≈ 5.3:1 AA
+     Primary emerald-300 on dark surface ≈ 4.8:1              AA
+   ========================================================================= */
+.dark {
+  /* Surface tokens — dark glass backgrounds */
+  --color-surface-base:    oklch(0.208 0.042 265.755);   /* slate-900 */
+  --color-surface-raised:  oklch(0.279 0.041 260.031);   /* slate-800 */
+  --color-surface-overlay: oklch(0.372 0.044 257.287);   /* slate-700 */
+  --color-surface-glass:   oklch(0.279 0.041 260.031 / 0.7);
+
+  /* Text tokens */
+  --color-text-primary:    oklch(0.984 0.003 247.858);   /* slate-50  */
+  --color-text-secondary:  oklch(0.929 0.013 255.508);   /* slate-200 */
+  --color-text-muted:      oklch(0.704 0.033 256.788);   /* slate-400 */
+  --color-text-disabled:   oklch(0.554 0.046 264.364);   /* slate-500 */
+
+  /* Border tokens */
+  --color-border-default:  oklch(0.372 0.044 257.287);   /* slate-700 */
+  --color-border-subtle:   oklch(0.279 0.041 260.031);   /* slate-800 */
+  --color-border-strong:   oklch(0.446 0.043 257.281);   /* slate-600 */
+
+  /* Shadcn semantic overrides */
+  --color-background:      oklch(0.208 0.042 265.755);   /* slate-900 */
+  --color-foreground:      oklch(0.984 0.003 247.858);   /* slate-50  */
+  --color-card:            oklch(0.279 0.041 260.031);   /* slate-800 */
+  --color-card-foreground: oklch(0.984 0.003 247.858);   /* slate-50  */
+  --color-muted:           oklch(0.372 0.044 257.287);   /* slate-700 */
+  --color-muted-foreground: oklch(0.868 0.020 258.338);  /* slate-300 */
+  --color-border:          oklch(0.372 0.044 257.287);   /* slate-700 */
+  --color-accent:          oklch(0.372 0.044 257.287);   /* slate-700 */
+  --color-primary:         oklch(0.845 0.143 164.978);   /* emerald-300 — AA on dark */
+  --color-primary-foreground: oklch(0.208 0.042 265.755); /* slate-900 */
+
+  /* Dark body background — deep emerald-tinted gradient */
+  background: radial-gradient(
+    ellipse at top right,
+    oklch(0.358 0.084 164.128) 0%,  /* emerald-900 */
+    oklch(0.279 0.041 260.031) 40%,  /* slate-800 */
+    oklch(0.208 0.042 265.755) 100%  /* slate-900 */
+  );
 }

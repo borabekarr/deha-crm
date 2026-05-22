@@ -2,8 +2,13 @@ packages:
   - "apps/*"
   - "packages/*"
 nodeLinker: hoisted
+overrides:
+  form-data: ">=4.0.4"
+  axios: ">=1.7.9"
 allowBuilds:
   core-js: true
+  esbuild: true
   msgpackr-extract: true
   msw: false
+  odiff-bin: true
   protobufjs: true

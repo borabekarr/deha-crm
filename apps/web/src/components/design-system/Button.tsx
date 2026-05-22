@@ -67,10 +67,11 @@ export interface ButtonProps
  *
  * Extends native `<button>` — pass any HTMLButtonElement attribute.
  */
-export function Button({ className, variant, size, ref, ...rest }: ButtonProps & { ref?: React.Ref<HTMLButtonElement> }) {
+export function Button({ className, variant, size, ref, type, ...rest }: ButtonProps & { ref?: React.Ref<HTMLButtonElement> }) {
   return (
     <button
       ref={ref}
+      type={type ?? 'button'}
       className={cn(buttonVariants({ variant, size }), className)}
       {...rest}
     />

@@ -21,15 +21,15 @@ export interface SegmentedPillsProps extends Omit<React.HTMLAttributes<HTMLDivEl
  */
 export function SegmentedPills({ options, value, onChange, className, ref, ...rest }: SegmentedPillsProps & { ref?: React.Ref<HTMLDivElement> }) {
   return (
-    <div
-      ref={ref}
-      role="group"
+    <fieldset
+      ref={ref as unknown as React.Ref<HTMLFieldSetElement>}
       className={cn(
-        'inline-flex items-center rounded-full bg-slate-100 p-[3px]',
+        'm-0 min-w-0 border-0 p-[3px]',
+        'inline-flex items-center rounded-full bg-slate-100',
         '[box-shadow:var(--shadow-recessed,inset_0_2px_4px_rgba(0,0,0,0.06))]',
         className,
       )}
-      {...rest}
+      {...(rest as unknown as React.FieldsetHTMLAttributes<HTMLFieldSetElement>)}
     >
       {options.map((opt) => {
         const active = opt === value
@@ -52,6 +52,6 @@ export function SegmentedPills({ options, value, onChange, className, ref, ...re
           </button>
         )
       })}
-    </div>
+    </fieldset>
   )
 }

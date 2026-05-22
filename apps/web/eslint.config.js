@@ -19,6 +19,22 @@ export default defineConfig([
       globals: globals.browser,
     },
     rules: {
+      'react-refresh/only-export-components': [
+        'warn',
+        {
+          allowConstantExport: true,
+          allowExportNames: [
+            'Route',
+            'loader',
+            'action',
+            'meta',
+            'links',
+            'shouldRevalidate',
+            'ErrorBoundary',
+            'useFormField',
+          ],
+        },
+      ],
       'no-eval': 'error',
       'no-implied-eval': 'error',
       'no-new-func': 'error',

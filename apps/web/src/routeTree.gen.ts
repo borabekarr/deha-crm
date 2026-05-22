@@ -9,9 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PrimitivesRouteImport } from './routes/primitives'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PrimitivesIndexRouteImport } from './routes/primitives.index'
 
+const PrimitivesRoute = PrimitivesRouteImport.update({
+  id: '/primitives',
+  path: '/primitives',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -22,35 +29,53 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrimitivesIndexRoute = PrimitivesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PrimitivesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/primitives': typeof PrimitivesRouteWithChildren
+  '/primitives/': typeof PrimitivesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/primitives': typeof PrimitivesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/primitives': typeof PrimitivesRouteWithChildren
+  '/primitives/': typeof PrimitivesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard'
+  fullPaths: '/' | '/dashboard' | '/primitives' | '/primitives/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard'
-  id: '__root__' | '/' | '/dashboard'
+  to: '/' | '/dashboard' | '/primitives'
+  id: '__root__' | '/' | '/dashboard' | '/primitives' | '/primitives/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
+  PrimitivesRoute: typeof PrimitivesRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/primitives': {
+      id: '/primitives'
+      path: '/primitives'
+      fullPath: '/primitives'
+      preLoaderRoute: typeof PrimitivesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -65,12 +90,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/primitives/': {
+      id: '/primitives/'
+      path: '/'
+      fullPath: '/primitives/'
+      preLoaderRoute: typeof PrimitivesIndexRouteImport
+      parentRoute: typeof PrimitivesRoute
+    }
   }
 }
+
+interface PrimitivesRouteChildren {
+  PrimitivesIndexRoute: typeof PrimitivesIndexRoute
+}
+
+const PrimitivesRouteChildren: PrimitivesRouteChildren = {
+  PrimitivesIndexRoute: PrimitivesIndexRoute,
+}
+
+const PrimitivesRouteWithChildren = PrimitivesRoute._addFileChildren(
+  PrimitivesRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
+  PrimitivesRoute: PrimitivesRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
