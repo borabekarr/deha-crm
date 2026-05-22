@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { DayPicker } from 'react-day-picker'
+import type { Matcher } from 'react-day-picker'
 import 'react-day-picker/style.css'
 import type { CalendarProps } from '@deha/ui-contracts'
 import { cn } from '@/lib/utils'
@@ -33,12 +34,17 @@ const Calendar = ({
   const fromDate = minDate ? new Date(minDate) : undefined
   const toDate = maxDate ? new Date(maxDate) : undefined
 
+  const disabledMatchers: Matcher[] = []
+  if (disabled === true) disabledMatchers.push({ before: new Date(8640000000000000) })
+  if (minDate) disabledMatchers.push({ before: new Date(minDate + 'T00:00:00') })
+  if (maxDate) disabledMatchers.push({ after: new Date(maxDate + 'T00:00:00') })
+
   return (
     <DayPicker
       mode="single"
       selected={selected}
       onSelect={onSelect}
-      disabled={disabled === true ? { before: new Date(8640000000000000) } : undefined}
+      disabled={disabledMatchers.length > 0 ? disabledMatchers : undefined}
       startMonth={fromDate}
       endMonth={toDate}
       showOutsideDays

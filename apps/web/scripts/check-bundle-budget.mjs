@@ -15,6 +15,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const BUDGET_BYTES = 8192
 const STATS_PATH = path.resolve(__dirname, '../dist/bundle-stats.json')
 
+// Primitives not yet imported anywhere in the app graph — expected to show 0 bytes.
+// Remove an entry when the primitive becomes consumed; if it still shows 0 then,
+// the budget gate will FAIL and surface the regression.
+const EXPECTED_UNBUNDLED = new Set(['form', 'label'])
+
 let stats
 try {
   stats = JSON.parse(readFileSync(STATS_PATH, 'utf8'))
@@ -60,7 +65,11 @@ for (const primitive of uiFiles) {
 
   let status
   if (total === 0) {
-    status = 'not bundled'
+    if (EXPECTED_UNBUNDLED.has(primitive)) {
+      status = 'not bundled'
+    } else {
+      status = 'MISSING (0 B — visualizer or chunk-split broken?)'
+    }
   } else if (total > BUDGET_BYTES) {
     status = `OVER BUDGET (${total} > ${BUDGET_BYTES})`
   } else {
@@ -93,12 +102,24 @@ for (const { primitive, gzipBytes, status } of results) {
 }
 console.log('')
 
-const failures = results.filter((r) => r.gzipBytes > BUDGET_BYTES)
-if (failures.length > 0) {
-  console.error(
-    `[budget] FAIL: ${failures.length} primitive(s) exceed 8 KB gzip budget:\n` +
-      failures.map((f) => `  - ${f.primitive}: ${f.gzipBytes} B`).join('\n'),
-  )
+const overBudget = results.filter((r) => r.gzipBytes > BUDGET_BYTES)
+const missing = results.filter(
+  (r) => r.gzipBytes === 0 && !EXPECTED_UNBUNDLED.has(r.primitive),
+)
+
+if (overBudget.length > 0 || missing.length > 0) {
+  if (overBudget.length > 0) {
+    console.error(
+      `[budget] FAIL — over budget: ${overBudget.length} primitive(s) exceed 8 KB gzip budget:\n` +
+        overBudget.map((f) => `  - ${f.primitive}: ${f.gzipBytes} B`).join('\n'),
+    )
+  }
+  if (missing.length > 0) {
+    console.error(
+      `[budget] FAIL — missing: ${missing.length} primitive(s) reported 0 bytes (not in allowlist):\n` +
+        missing.map((f) => `  - ${f.primitive}`).join('\n'),
+    )
+  }
   process.exit(1)
 }
 

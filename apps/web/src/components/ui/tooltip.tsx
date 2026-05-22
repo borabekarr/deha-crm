@@ -3,6 +3,8 @@ import * as TooltipPrimitive from '@radix-ui/react-tooltip'
 import type { TooltipProps } from '@deha/ui-contracts'
 import { cn } from '@/lib/utils'
 
+// Default Tooltip export = contract-level (Tooltip content="..."); named exports (TooltipProvider, TooltipRoot, TooltipTrigger, TooltipContent) = manual composition.
+
 // ---------------------------------------------------------------------------
 // Provider — wrap once near the app root; exported for consumer convenience
 // ---------------------------------------------------------------------------
@@ -10,18 +12,38 @@ const TooltipProvider = TooltipPrimitive.Provider
 TooltipProvider.displayName = 'TooltipProvider'
 
 // ---------------------------------------------------------------------------
-// Root — strips reducedMotion + TooltipProps before forwarding to Radix Root
+// Root — contract-level entry point: wraps Provider + Root + Trigger + Content
+// Usage: <Tooltip content="Label"><Button /></Tooltip>
 // Default delayDuration 300 ms per spec
 // ---------------------------------------------------------------------------
 const Tooltip = ({
   reducedMotion: _reducedMotion, // eslint-disable-line @typescript-eslint/no-unused-vars
-  content: _content,             // eslint-disable-line @typescript-eslint/no-unused-vars
+  content,
+  open,
+  defaultOpen,
+  onOpenChange,
   delayDuration = 300,
-  ...props
-}: TooltipProps & Omit<React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Root>, 'children'> & { children: React.ReactNode }) => (
-  <TooltipPrimitive.Root delayDuration={delayDuration} {...props} />
+  children,
+}: TooltipProps & { children: React.ReactNode }) => (
+  <TooltipPrimitive.Provider>
+    <TooltipPrimitive.Root
+      open={open}
+      defaultOpen={defaultOpen}
+      onOpenChange={onOpenChange}
+      delayDuration={delayDuration}
+    >
+      <TooltipPrimitive.Trigger asChild>{children}</TooltipPrimitive.Trigger>
+      <TooltipContent>{content}</TooltipContent>
+    </TooltipPrimitive.Root>
+  </TooltipPrimitive.Provider>
 )
 Tooltip.displayName = 'Tooltip'
+
+// ---------------------------------------------------------------------------
+// TooltipRoot — manual-composition entry point (no Provider/Trigger/Content)
+// ---------------------------------------------------------------------------
+const TooltipRoot = TooltipPrimitive.Root
+TooltipRoot.displayName = 'TooltipRoot'
 
 // ---------------------------------------------------------------------------
 // Trigger — wraps the element that receives hover / focus
@@ -92,6 +114,7 @@ TooltipArrow.displayName = 'TooltipArrow'
 export {
   TooltipProvider,
   Tooltip,
+  TooltipRoot,
   TooltipTrigger,
   TooltipPortal,
   TooltipContent,

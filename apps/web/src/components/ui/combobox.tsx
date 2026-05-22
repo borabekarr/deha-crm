@@ -20,16 +20,12 @@ interface ComboboxOption {
   label: string
 }
 
-interface ComboboxPropsExtended
-  extends Omit<ComboboxProps, 'children' | 'onInputChange' | 'open' | 'onOpenChange'> {
+interface ComboboxPropsExtended extends Omit<ComboboxProps, 'children'> {
   options: ComboboxOption[]
-  value?: string
-  onValueChange?: (v: string) => void
   placeholder?: string
   emptyText?: string
   creatable?: boolean
   onCreate?: (query: string) => void
-  reducedMotion?: 'auto' | 'reduce' | 'no-preference'
   className?: string
 }
 
@@ -43,8 +39,12 @@ interface ComboboxPropsExtended
 // ---------------------------------------------------------------------------
 const Combobox = ({
   options,
-  value: controlledValue,
+  value,
+  defaultValue,
   onValueChange,
+  onInputChange,
+  open,
+  onOpenChange,
   placeholder = 'Select…',
   emptyText = 'No results.',
   creatable = false,
@@ -52,24 +52,40 @@ const Combobox = ({
   reducedMotion: _reducedMotion, // eslint-disable-line @typescript-eslint/no-unused-vars
   className,
 }: ComboboxPropsExtended) => {
-  const [open, setOpen] = React.useState(false)
-  const [query, setQuery] = React.useState('')
-  const [internalValue, setInternalValue] = React.useState(controlledValue ?? '')
+  const listboxId = React.useId()
 
-  // Resolve whether controlled or uncontrolled
-  const selected = controlledValue !== undefined ? controlledValue : internalValue
-
-  const handleSelect = (val: string) => {
-    const next = val === selected ? '' : val
-    if (controlledValue === undefined) {
-      setInternalValue(next)
-    }
-    onValueChange?.(next)
-    setOpen(false)
-    setQuery('')
+  // Controlled / uncontrolled open state
+  const [internalOpen, setInternalOpen] = React.useState(false)
+  const isOpen = open ?? internalOpen
+  const setOpen = (next: boolean) => {
+    if (open === undefined) setInternalOpen(next)
+    onOpenChange?.(next)
   }
 
-  const selectedLabel = options.find((o) => o.value === selected)?.label
+  // Controlled / uncontrolled value state
+  const [internalValue, setInternalValue] = React.useState(defaultValue ?? '')
+  const currentValue = value ?? internalValue
+  const setValue = (next: string) => {
+    if (value === undefined) setInternalValue(next)
+    onValueChange?.(next)
+  }
+
+  const [query, setQuery] = React.useState('')
+
+  const handleQueryChange = (q: string) => {
+    setQuery(q)
+    onInputChange?.(q)
+  }
+
+  const handleSelect = (val: string) => {
+    const next = val === currentValue ? '' : val
+    setValue(next)
+    setOpen(false)
+    setQuery('')
+    onInputChange?.('')
+  }
+
+  const selectedLabel = options.find((o) => o.value === currentValue)?.label
 
   // Determine if the current query matches any option exactly
   const hasExactMatch = options.some(
@@ -79,14 +95,15 @@ const Combobox = ({
   const showCreateOption = creatable && query.length > 0 && !hasExactMatch
 
   return (
-    <PopoverPrimitive.Root open={open} onOpenChange={setOpen}>
+    <PopoverPrimitive.Root open={isOpen} onOpenChange={setOpen}>
       {/* Trigger */}
       <PopoverPrimitive.Trigger asChild>
         <button
           type="button"
           role="combobox"
-          aria-expanded={open}
+          aria-expanded={isOpen}
           aria-haspopup="listbox"
+          aria-controls={listboxId}
           className={cn(
             // layout
             'flex h-10 w-full items-center justify-between',
@@ -96,12 +113,12 @@ const Combobox = ({
             'shadow-[inset_0_1px_3px_rgb(15_23_42_/_0.06)]',
             // text
             'text-sm font-medium text-left',
-            selected ? 'text-slate-900' : 'text-slate-400',
+            currentValue ? 'text-slate-900' : 'text-slate-400',
             // focus ring — emerald
             'outline-none focus-visible:border-emerald-500',
             'focus-visible:ring-[3px] focus-visible:ring-emerald-500/15',
             // open state — emerald border
-            open && 'border-emerald-500 ring-[3px] ring-emerald-500/15',
+            isOpen && 'border-emerald-500 ring-[3px] ring-emerald-500/15',
             // transition
             'transition-[border-color,box-shadow] duration-[var(--duration-fast,120ms)]',
             className,
@@ -114,7 +131,7 @@ const Combobox = ({
             className={cn(
               'ml-2 size-4 shrink-0 text-slate-500',
               'transition-transform duration-[var(--duration-fast,120ms)]',
-              open && 'rotate-180',
+              isOpen && 'rotate-180',
             )}
           />
         </button>
@@ -149,7 +166,7 @@ const Combobox = ({
             <div className="flex items-center border-b border-slate-100 px-3">
               <CommandInput
                 value={query}
-                onValueChange={setQuery}
+                onValueChange={handleQueryChange}
                 placeholder={placeholder}
                 className={cn(
                   // reset cmdk default styles
@@ -161,7 +178,7 @@ const Combobox = ({
             </div>
 
             {/* List */}
-            <CommandList className="max-h-56 overflow-y-auto p-1">
+            <CommandList id={listboxId} className="max-h-56 overflow-y-auto p-1">
               <CommandEmpty className="py-3 text-center text-sm text-slate-400">
                 {emptyText}
               </CommandEmpty>
@@ -183,13 +200,13 @@ const Combobox = ({
                       'hover:bg-slate-50 hover:text-slate-900',
                       'focus:outline-none',
                       // selected (chosen) state — emerald
-                      selected === option.value && 'text-emerald-600 font-semibold',
+                      currentValue === option.value && 'text-emerald-600 font-semibold',
                       // transition
                       'transition-colors duration-[var(--duration-fast,120ms)]',
                     )}
                   >
                     {option.label}
-                    {selected === option.value && (
+                    {currentValue === option.value && (
                       <span className="absolute right-2.5 flex items-center">
                         <CheckIcon className="size-4 text-emerald-500" strokeWidth={2.5} />
                       </span>
@@ -207,6 +224,7 @@ const Combobox = ({
                       onCreate?.(query)
                       setOpen(false)
                       setQuery('')
+                      onInputChange?.('')
                     }}
                     className={cn(
                       'relative flex w-full cursor-pointer select-none items-center gap-2',

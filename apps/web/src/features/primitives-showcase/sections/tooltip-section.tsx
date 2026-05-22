@@ -1,5 +1,6 @@
 import {
   Tooltip,
+  TooltipRoot,
   TooltipTrigger,
   TooltipContent,
   TooltipProvider,
@@ -15,51 +16,44 @@ export function TooltipSection() {
         </p>
       </div>
 
+      {/* Contract-level API: <Tooltip content="..."><trigger /></Tooltip> */}
+      <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 space-y-4">
+        <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Button tooltips (contract API)</p>
+        <div className="flex flex-wrap items-center gap-4">
+          <Tooltip content="Default tooltip">
+            <button
+              type="button"
+              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
+            >
+              Hover me
+            </button>
+          </Tooltip>
+
+          <Tooltip content="Add new lead">
+            <button
+              type="button"
+              className="flex size-9 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm hover:bg-emerald-600"
+              aria-label="Add lead"
+            >
+              +
+            </button>
+          </Tooltip>
+
+          <Tooltip content="This action cannot be undone">
+            <button
+              type="button"
+              className="rounded-xl bg-red-50 border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-100"
+            >
+              Delete
+            </button>
+          </Tooltip>
+        </div>
+      </div>
+
+      {/* Manual composition API: TooltipProvider + TooltipRoot + TooltipTrigger + TooltipContent */}
       <TooltipProvider>
         <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 space-y-4">
-          <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Button tooltips</p>
-          <div className="flex flex-wrap items-center gap-4">
-            <Tooltip content="Default tooltip">
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
-                >
-                  Hover me
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>Default tooltip</TooltipContent>
-            </Tooltip>
-
-            <Tooltip content="Add new lead">
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  className="flex size-9 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm hover:bg-emerald-600"
-                  aria-label="Add lead"
-                >
-                  +
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>Add new lead</TooltipContent>
-            </Tooltip>
-
-            <Tooltip content="This action cannot be undone">
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  className="rounded-xl bg-red-50 border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-100"
-                >
-                  Delete
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>This action cannot be undone</TooltipContent>
-            </Tooltip>
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 space-y-4">
-          <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Icon tooltips</p>
+          <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Icon tooltips (compound API)</p>
           <div className="flex items-center gap-6">
             {[
               { icon: 'dashboard', tip: 'Dashboard' },
@@ -68,7 +62,7 @@ export function TooltipSection() {
               { icon: 'bar_chart', tip: 'Reports' },
               { icon: 'settings', tip: 'Settings' },
             ].map(({ icon, tip }) => (
-              <Tooltip key={icon} content={tip}>
+              <TooltipRoot key={icon}>
                 <TooltipTrigger asChild>
                   <button
                     type="button"
@@ -79,7 +73,7 @@ export function TooltipSection() {
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>{tip}</TooltipContent>
-              </Tooltip>
+              </TooltipRoot>
             ))}
           </div>
         </div>

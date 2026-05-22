@@ -20,7 +20,7 @@ export function SidebarSection() {
       <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
         <p className="mb-4 text-xs font-medium text-slate-400 uppercase tracking-wider">Expanded (desktop)</p>
         <div className="h-72 flex overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
-          <Sidebar defaultOpen={true}>
+          <Sidebar defaultCollapsed={false}>
             <SidebarHeader>
               <span className="text-sm font-black text-slate-900 dark:text-slate-100">deha<span className="text-emerald-500">.</span></span>
             </SidebarHeader>
@@ -72,7 +72,7 @@ export function SidebarSection() {
       <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
         <p className="mb-4 text-xs font-medium text-slate-400 uppercase tracking-wider">Collapsed (icon-only)</p>
         <div className="h-72 flex overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
-          <Sidebar defaultOpen={false}>
+          <Sidebar defaultCollapsed={true}>
             <SidebarHeader>
               <span className="text-sm font-black text-emerald-500">d</span>
             </SidebarHeader>

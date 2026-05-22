@@ -8,42 +8,45 @@ import { Calendar } from './calendar'
 
 // ---------------------------------------------------------------------------
 // DatePicker — composes Popover + Calendar.
-// Trigger is an input-like button; selecting a date closes the popover.
+// Controlled via `value` (ISO YYYY-MM-DD string) or uncontrolled via
+// `defaultValue`. Fires `onValueChange(isoString)` on selection.
 // No useEffect anywhere.
 // ---------------------------------------------------------------------------
 
-export interface DatePickerComponentProps extends DatePickerProps {
-  /** Controlled selected date as Date object. If omitted, parses `value`. */
-  selected?: Date
-  /** Called with the new Date on selection. */
-  onChange?: (date: Date | undefined) => void
+const formatISO = (d: Date): string => d.toISOString().slice(0, 10)
+
+const parseISO = (s: string): Date | undefined => {
+  const d = new Date(s + 'T00:00:00')
+  return isNaN(d.getTime()) ? undefined : d
 }
 
 const DatePicker = ({
   value,
-  selected: selectedProp,
-  onChange,
+  defaultValue,
+  onValueChange,
   placeholder = 'Pick a date',
   disabled = false,
   reducedMotion,
   minDate,
   maxDate,
-}: DatePickerComponentProps) => {
+}: DatePickerProps) => {
   const [open, setOpen] = React.useState(false)
+  const [internal, setInternal] = React.useState<Date | undefined>(
+    defaultValue ? parseISO(defaultValue) : undefined,
+  )
 
-  // Derive selected Date: prefer explicit `selected` prop; fall back to `value` string.
-  const selectedDate: Date | undefined = React.useMemo(() => {
-    if (selectedProp instanceof Date) return selectedProp
-    if (value) {
-      const parsed = new Date(value)
-      return isNaN(parsed.getTime()) ? undefined : parsed
-    }
-    return undefined
-  }, [selectedProp, value])
+  // Controlled takes precedence; uncontrolled falls back to internal state.
+  const currentDate: Date | undefined =
+    value !== undefined ? (value ? parseISO(value) : undefined) : internal
 
-  const handleSelect = (date: Date | undefined) => {
+  const setDate = (d: Date | undefined) => {
+    if (value === undefined) setInternal(d)
+    onValueChange?.(d ? formatISO(d) : '')
+  }
+
+  const handleSelect = (d: Date | undefined) => {
     setOpen(false)
-    onChange?.(date)
+    setDate(d)
   }
 
   return (
@@ -61,7 +64,7 @@ const DatePicker = ({
             'text-sm text-left',
             'shadow-sm',
             // Placeholder vs value colour
-            selectedDate ? 'text-slate-800' : 'text-slate-400',
+            currentDate ? 'text-slate-800' : 'text-slate-400',
             // States
             'hover:border-slate-300 hover:bg-slate-50',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500',
@@ -70,7 +73,7 @@ const DatePicker = ({
           )}
         >
           <span className="truncate">
-            {selectedDate ? format(selectedDate, 'PP') : placeholder}
+            {currentDate ? format(currentDate, 'PP') : placeholder}
           </span>
           <CalendarIcon className="ml-2 h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
         </button>
@@ -82,7 +85,7 @@ const DatePicker = ({
         sideOffset={8}
       >
         <Calendar
-          selected={selectedDate}
+          selected={currentDate}
           onSelect={handleSelect}
           disabled={disabled}
           minDate={minDate}

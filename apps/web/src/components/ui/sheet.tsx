@@ -3,17 +3,23 @@ import { Drawer } from 'vaul'
 import type { SheetProps } from '@deha/ui-contracts'
 import { cn } from '@/lib/utils'
 
+// Side context lets SheetContent inherit positioning from the root Sheet without re-prop-drilling.
+const SheetContext = React.createContext<{ side: 'top' | 'right' | 'bottom' | 'left' }>({ side: 'right' })
+
 // ---------------------------------------------------------------------------
 // Root — wraps vaul Drawer with snapPoints for Apple Maps style peek/full
 // ---------------------------------------------------------------------------
 const Sheet = ({
   reducedMotion: _reducedMotion, // eslint-disable-line @typescript-eslint/no-unused-vars
+  side = 'right',
   children,
   ...props
 }: SheetProps & React.ComponentPropsWithoutRef<typeof Drawer.Root>) => (
-  <Drawer.Root snapPoints={[0.4, 0.85]} {...props}>
-    {children}
-  </Drawer.Root>
+  <SheetContext.Provider value={{ side }}>
+    <Drawer.Root snapPoints={[0.4, 0.85]} direction={side} {...props}>
+      {children}
+    </Drawer.Root>
+  </SheetContext.Provider>
 )
 Sheet.displayName = 'Sheet'
 
@@ -41,34 +47,45 @@ const SheetOverlay = React.forwardRef<
 ))
 SheetOverlay.displayName = 'SheetOverlay'
 
+const sidePositionClasses: Record<'top' | 'right' | 'bottom' | 'left', string> = {
+  right: 'right-0 top-0 h-full max-w-[440px] w-full border-l',
+  left:  'left-0 top-0 h-full max-w-[440px] w-full border-r',
+  top:   'top-0 left-0 w-full max-h-[80vh] border-b',
+  bottom:'bottom-0 left-0 w-full max-h-[80vh] border-t',
+}
+
 // ---------------------------------------------------------------------------
-// Content — right-edge slide-over panel matching prototype `.sheet`
+// Content — slide-over panel, positioned based on parent Sheet's `side` prop
 // ---------------------------------------------------------------------------
 const SheetContent = React.forwardRef<
   React.ComponentRef<typeof Drawer.Content>,
   React.ComponentPropsWithoutRef<typeof Drawer.Content>
->(({ className, children, ...props }, ref) => (
-  <Drawer.Portal>
-    <SheetOverlay />
-    <Drawer.Content
-      ref={ref}
-      className={cn(
-        'fixed bottom-0 right-0 z-50 flex h-full w-full flex-col',
-        'max-w-sm rounded-tl-2xl rounded-bl-2xl bg-white',
-        'shadow-[var(--shadow-overlay-strong)]',
-        'outline-none',
-        className,
-      )}
-      {...props}
-    >
-      {/* Drag handle indicator */}
-      <div className="mx-auto mt-3 mb-1 h-1.5 w-10 shrink-0 rounded-full bg-[var(--border)]" />
-      <div className="flex flex-1 flex-col overflow-auto p-6">
-        {children}
-      </div>
-    </Drawer.Content>
-  </Drawer.Portal>
-))
+>(({ className, children, ...props }, ref) => {
+  const { side } = React.useContext(SheetContext)
+  return (
+    <Drawer.Portal>
+      <SheetOverlay />
+      <Drawer.Content
+        ref={ref}
+        className={cn(
+          'fixed z-50 flex flex-col',
+          sidePositionClasses[side],
+          'bg-white',
+          'shadow-[var(--shadow-overlay-strong)]',
+          'outline-none',
+          className,
+        )}
+        {...props}
+      >
+        {/* Drag handle indicator */}
+        <div className="mx-auto mt-3 mb-1 h-1.5 w-10 shrink-0 rounded-full bg-[var(--border)]" />
+        <div className="flex flex-1 flex-col overflow-auto p-6">
+          {children}
+        </div>
+      </Drawer.Content>
+    </Drawer.Portal>
+  )
+})
 SheetContent.displayName = 'SheetContent'
 
 // ---------------------------------------------------------------------------

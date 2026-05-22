@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { DatePicker } from '@/components/ui/date-picker'
 
 export function DatePickerSection() {
-  const [date1, setDate1] = useState<Date | undefined>()
-  const [date2, setDate2] = useState<Date | undefined>(new Date())
+  const [date1, setDate1] = useState<string>('')
+  const [date2, setDate2] = useState<string>('2026-05-22')
 
   return (
     <section id="date-picker" className="space-y-4">
@@ -18,12 +18,12 @@ export function DatePickerSection() {
         <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Empty (no selection)</p>
         <DatePicker
           placeholder="Pick a start date"
-          selected={date1}
-          onChange={setDate1}
+          value={date1}
+          onValueChange={setDate1}
         />
         {date1 && (
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Selected: <span className="font-semibold text-emerald-600">{date1.toLocaleDateString()}</span>
+            Selected: <span className="font-semibold text-emerald-600">{date1}</span>
           </p>
         )}
       </div>
@@ -32,8 +32,17 @@ export function DatePickerSection() {
         <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Pre-selected date</p>
         <DatePicker
           placeholder="Pick a date"
-          selected={date2}
-          onChange={setDate2}
+          value={date2}
+          onValueChange={setDate2}
+        />
+      </div>
+
+      <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 space-y-4">
+        <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Uncontrolled with defaultValue</p>
+        <DatePicker
+          placeholder="Pick a date"
+          defaultValue="2026-01-15"
+          onValueChange={(v) => console.log('uncontrolled picked:', v)}
         />
       </div>
 

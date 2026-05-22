@@ -4,18 +4,16 @@ import type { SidebarProps } from '@deha/ui-contracts'
 import { cn } from '@/lib/utils'
 
 // ---------------------------------------------------------------------------
-// Context — shared open/collapsed state for compound children
+// Context — shared collapsed state for compound children
 // ---------------------------------------------------------------------------
 interface SidebarContextValue {
-  open: boolean
-  setOpen: (open: boolean) => void
-  collapsible: boolean
+  isCollapsed: boolean
+  setCollapsed: (collapsed: boolean) => void
 }
 
 const SidebarContext = React.createContext<SidebarContextValue>({
-  open: true,
-  setOpen: () => void 0,
-  collapsible: false,
+  isCollapsed: false,
+  setCollapsed: () => void 0,
 })
 
 // ---------------------------------------------------------------------------
@@ -24,33 +22,25 @@ const SidebarContext = React.createContext<SidebarContextValue>({
 // No useEffect.
 // ---------------------------------------------------------------------------
 const Sidebar = ({
-  open: controlledOpen,
-  defaultOpen = true,
-  onOpenChange,
-  collapsible = false,
+  collapsed,
+  defaultCollapsed = false,
+  onCollapsedChange,
   reducedMotion: _reducedMotion, // eslint-disable-line @typescript-eslint/no-unused-vars
   children,
-}: SidebarProps & {
-  open?: boolean
-  defaultOpen?: boolean
-  onOpenChange?: (open: boolean) => void
-  collapsible?: boolean
-  children: React.ReactNode
-}) => {
+}: SidebarProps) => {
   // Uncontrolled fallback — no useEffect, plain useState initial value
-  const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen)
-  const isControlled = controlledOpen !== undefined
-  const open = isControlled ? (controlledOpen as boolean) : uncontrolledOpen
+  const [internalCollapsed, setInternalCollapsed] = React.useState(defaultCollapsed)
+  const isCollapsed = collapsed ?? internalCollapsed
 
-  const setOpen = React.useCallback(
+  const setCollapsed = React.useCallback(
     (next: boolean) => {
-      if (!isControlled) setUncontrolledOpen(next)
-      onOpenChange?.(next)
+      if (collapsed === undefined) setInternalCollapsed(next)
+      onCollapsedChange?.(next)
     },
-    [isControlled, onOpenChange],
+    [collapsed, onCollapsedChange],
   )
 
-  const ctx = React.useMemo(() => ({ open, setOpen, collapsible }), [open, setOpen, collapsible])
+  const ctx = React.useMemo(() => ({ isCollapsed, setCollapsed }), [isCollapsed, setCollapsed])
 
   return (
     <SidebarContext.Provider value={ctx}>
@@ -60,7 +50,7 @@ const Sidebar = ({
           'hidden md:flex flex-col h-full shrink-0',
           'bg-white border-r border-[var(--border)]',
           'transition-[width] duration-200',
-          open ? 'w-56' : 'w-14',
+          isCollapsed ? 'w-14' : 'w-56',
         )}
         aria-label="Sidebar navigation"
       >
@@ -68,7 +58,7 @@ const Sidebar = ({
       </aside>
 
       {/* ── Mobile: Vaul Drawer ── */}
-      <Drawer.Root open={open} onOpenChange={setOpen} direction="left">
+      <Drawer.Root open={!isCollapsed} onOpenChange={(open) => setCollapsed(!open)} direction="left">
         <Drawer.Portal>
           <Drawer.Overlay className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm md:hidden" />
           <Drawer.Content
