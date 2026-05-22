@@ -6,6 +6,8 @@ import path from 'node:path'
 
 export default defineConfig({
   server: {
+    // host '0.0.0.0' + wildcard *.zrok.io hosts intentional for /host-public
+    // tunnel sharing. Dev-only; firewall must restrict 5173 on shared networks.
     host: '0.0.0.0',
     allowedHosts: ['.share.zrok.io', '.zrok.io', 'localhost'],
   },
