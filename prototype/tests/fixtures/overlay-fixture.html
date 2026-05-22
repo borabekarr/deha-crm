@@ -1,0 +1,29 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>overlay fixture</title>
+<link rel="stylesheet" href="../../tokens.css"></head>
+<body>
+<button id="opener" data-opens="#dlg">Open</button>
+<div id="dlg" role="dialog" tabindex="-1" style="display:none;padding:1rem">
+  <input id="a" />
+  <button id="b">B</button>
+  <button id="c">C</button>
+  <button id="close">Close</button>
+</div>
+<script type="module">
+  import { registerOpen, registerClose, lockScroll, unlockScroll } from '../../lib/overlay.js';
+  const dlg = document.getElementById('dlg');
+  // Wire `open` attribute → show/register.
+  new MutationObserver(() => {
+    if (dlg.hasAttribute('open')) {
+      dlg.style.display = 'block';
+      lockScroll();
+      registerOpen(dlg, { opener: dlg.__opener, onClose: () => dlg.removeAttribute('open') });
+    } else {
+      dlg.style.display = 'none';
+      unlockScroll();
+      registerClose(dlg);
+    }
+  }).observe(dlg, { attributes: true, attributeFilter: ['open'] });
+  document.getElementById('close').addEventListener('click', () => dlg.removeAttribute('open'));
+</script>
+</body></html>

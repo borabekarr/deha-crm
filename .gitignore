@@ -16,6 +16,9 @@ dist-ssr/
 evaluate/
 .claude/tmp/
 
+# local agent scratch
+.agents/
+
 # Claude Code system — keep tooling and project artifact dirs out of git
 .claude/
 .claude-ext/
@@ -37,6 +40,13 @@ lerna-debug.log*
 
 # OS
 .DS_Store
+
+# Design source snapshots (fetched from borabekarr/deha-stitch-bundle, not committed)
+prototype/_design-source/
+
+# Playwright generated artifacts inside prototype/
+prototype/playwright-report/
+prototype/test-results/
 
 # IDE
 .vscode/*
