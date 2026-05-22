@@ -75,7 +75,7 @@ const DatePicker = ({
           <span className="truncate">
             {currentDate ? format(currentDate, 'PP') : placeholder}
           </span>
-          <CalendarIcon className="ml-2 h-4 w-4 shrink-0 text-neutral-400" aria-hidden="true" />
+          <CalendarIcon className="ml-2 size-4 shrink-0 text-neutral-400" aria-hidden="true" />
         </button>
       </PopoverTrigger>
 

@@ -87,7 +87,7 @@ function PrimitivesLayout() {
             type="button"
             aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
             onClick={toggleDark}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
+            className="flex size-8 items-center justify-center rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
           >
             {dark ? (
               /* Sun icon */

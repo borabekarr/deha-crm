@@ -73,7 +73,7 @@ function NavigationMenuTrigger({ ref, className, children, ...props }: React.Com
     >
       {children}
       <svg
-        className="relative top-px h-3 w-3 flex-shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
+        className="relative top-px size-3 flex-shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
         viewBox="0 0 12 12"
         fill="none"
         stroke="currentColor"
@@ -151,7 +151,7 @@ function NavigationMenuIndicator({ ref, className, ...props }: React.ComponentPr
       )}
       {...props}
     >
-      <div className="relative top-[60%] h-2 w-2 rotate-45 rounded-tl-sm bg-neutral-200 shadow-md" />
+      <div className="relative top-[60%] size-2 rotate-45 rounded-tl-sm bg-neutral-200 shadow-md" />
     </NavigationMenuPrimitive.Indicator>
   )
 }

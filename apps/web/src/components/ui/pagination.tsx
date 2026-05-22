@@ -133,7 +133,7 @@ function Pagination({
       {pages.map((p, idx) =>
         p === '...' ? (
           <span
-            key={`ellipsis-${idx}`}
+            key={`ellipsis-after-${pages[idx - 1] ?? 'start'}`}
             className={cn(
               buttonBase,
               'cursor-default border-transparent bg-transparent hover:bg-transparent',

@@ -133,10 +133,10 @@ function DropdownMenuCheckboxItem({ ref, className, children, checked, ...props 
       )}
       {...props}
     >
-      <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+      <span className="absolute left-2 flex size-3.5 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
           <svg
-            className="h-3.5 w-3.5 text-emerald-600"
+            className="size-3.5 text-emerald-600"
             viewBox="0 0 16 16"
             fill="none"
             stroke="currentColor"
@@ -175,10 +175,10 @@ function DropdownMenuRadioItem({ ref, className, children, ...props }: React.Com
       )}
       {...props}
     >
-      <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+      <span className="absolute left-2 flex size-3.5 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
           <svg
-            className="h-2 w-2 fill-emerald-600"
+            className="size-2 fill-emerald-600"
             viewBox="0 0 8 8"
             aria-hidden="true"
           >

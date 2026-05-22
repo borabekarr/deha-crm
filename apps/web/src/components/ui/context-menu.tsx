@@ -149,10 +149,10 @@ function ContextMenuCheckboxItem({ ref, className, children, checked, ...props }
       )}
       {...props}
     >
-      <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+      <span className="absolute left-2 flex size-3.5 items-center justify-center">
         <ContextMenuPrimitive.ItemIndicator>
           <svg
-            className="h-3.5 w-3.5 text-emerald-600"
+            className="size-3.5 text-emerald-600"
             viewBox="0 0 16 16"
             fill="none"
             stroke="currentColor"
@@ -188,10 +188,10 @@ function ContextMenuRadioItem({ ref, className, children, ...props }: React.Comp
       )}
       {...props}
     >
-      <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+      <span className="absolute left-2 flex size-3.5 items-center justify-center">
         <ContextMenuPrimitive.ItemIndicator>
           <svg
-            className="h-2 w-2 fill-emerald-600"
+            className="size-2 fill-emerald-600"
             viewBox="0 0 8 8"
             aria-hidden="true"
           >
@@ -231,7 +231,7 @@ function ContextMenuSubTrigger({ ref, className, inset, children, ...props }: Re
     >
       {children}
       <svg
-        className="ml-auto h-3.5 w-3.5 text-neutral-400"
+        className="ml-auto size-3.5 text-neutral-400"
         viewBox="0 0 12 12"
         fill="none"
         stroke="currentColor"
