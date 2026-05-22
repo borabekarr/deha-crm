@@ -1,0 +1,88 @@
+/* Deha CRM — keyframe animations
+   Source: prototype/tokens.css
+   These are imported by index.css via @import "./styles/keyframes.css"
+   ================================================================== */
+
+/* ---------- Slide panel (tabs, pagination, sidebar) ---------- */
+/* slide-in-right: content arrives from the right (+x) — next/forward direction */
+@keyframes slide-in-right {
+  from { transform: translateX(24px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+/* slide-in-left: content arrives from the left (-x) — previous/back direction */
+@keyframes slide-in-left {
+  from { transform: translateX(-24px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+
+/* fade-in-only: reduced-motion fallback — no translate, plain opacity */
+@keyframes fade-in-only {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ---------- Slide panel utilities ---------- */
+.slide-panel {
+  animation: slide-in-right var(--duration-normal) var(--ease-out-soft) both;
+  will-change: transform, opacity;
+}
+
+.slide-panel--left {
+  animation: slide-in-left var(--duration-normal) var(--ease-out-soft) both;
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide-panel,
+  .slide-panel--left {
+    animation-name: fade-in-only;
+    will-change: opacity;
+  }
+}
+
+/* ---------- Dialog ---------- */
+@keyframes dialog-scale-in {
+  from { transform: scale(0.95); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+@keyframes dialog-overlay-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ---------- Popover / dropdown ---------- */
+@keyframes popover-open {
+  from { transform: scale(0.95); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+@keyframes dropdown-fade-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Tap pulse (form controls) ---------- */
+@keyframes tap-pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+
+.tap-pulse:active {
+  animation: tap-pulse var(--duration-fast) var(--ease-out-soft);
+}
+
+/* ---------- Check glow (checkbox) ---------- */
+@keyframes check-glow {
+  0%   { box-shadow: 0 0 0 0 oklch(0.696 0.170 162.480 / 0.6); }
+  60%  { box-shadow: 0 0 0 6px oklch(0.696 0.170 162.480 / 0.0); }
+  100% { box-shadow: 0 0 0 0 oklch(0.696 0.170 162.480 / 0); }
+}
+
+/* ---------- Skeleton shimmer ---------- */
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

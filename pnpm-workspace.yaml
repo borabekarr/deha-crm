@@ -4,6 +4,8 @@ packages:
 nodeLinker: hoisted
 allowBuilds:
   core-js: true
+  esbuild: true
   msgpackr-extract: true
   msw: false
+  odiff-bin: true
   protobufjs: true

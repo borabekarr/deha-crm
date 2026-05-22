@@ -2,6 +2,7 @@ import { createRootRoute, Outlet, useLocation } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import { Agentation } from 'agentation'
 import { motionTransition } from '../lib/motion'
+import Toaster from '../components/ui/toaster'
 
 const CURRENT_YEAR = new Date().getFullYear()
 
@@ -11,12 +12,15 @@ export const Route = createRootRoute({
 
 function RootLayout() {
   const location = useLocation()
-  const isMobileShell = location.pathname === '/dashboard'
+  const isFullScreenShell =
+    location.pathname === '/dashboard' ||
+    location.pathname.startsWith('/primitives')
 
-  if (isMobileShell) {
+  if (isFullScreenShell) {
     return (
       <>
         <Outlet />
+        <Toaster />
         {import.meta.env.DEV && <TanStackRouterDevtools />}
         {import.meta.env.DEV && <Agentation />}
       </>
@@ -34,6 +38,7 @@ function RootLayout() {
       <footer className="border-t px-6 py-3 text-sm text-muted-foreground">
         &copy; {CURRENT_YEAR} Deha Automation
       </footer>
+      <Toaster />
       {import.meta.env.DEV && <TanStackRouterDevtools />}
       {import.meta.env.DEV && <Agentation />}
     </>
