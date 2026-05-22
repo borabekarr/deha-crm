@@ -49,7 +49,7 @@ export function PopoverSection() {
             <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Filter by status</p>
             {['Active', 'Pending', 'Closed'].map((s) => (
               <label key={s} className="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300 cursor-pointer">
-                <input type="checkbox" className="accent-emerald-500" defaultChecked={s === 'Active'} />
+                <input type="checkbox" aria-label={s} className="accent-emerald-500" defaultChecked={s === 'Active'} />
                 {s}
               </label>
             ))}

@@ -1,0 +1,5 @@
+export { DashboardHeader } from './DashboardHeader'
+export { HeroSection } from './HeroSection'
+export { MetricGrid } from './MetricGrid'
+export { PersonalGoalTracker } from './PersonalGoalTracker'
+export { TasksTeaser } from './TasksTeaser'
