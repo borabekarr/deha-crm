@@ -19,9 +19,9 @@ test.describe('gallery smoke', () => {
       (els) => els.map((el) => (el as HTMLAnchorElement).getAttribute('href')),
     );
     await Promise.all(
-      anchors
-        .filter((href): href is string => Boolean(href))
-        .map((href) => expect(page.locator(`#${href.slice(1)}`)).toHaveCount(1)),
+      anchors.flatMap((href) =>
+        href ? [expect(page.locator(`#${href.slice(1)}`)).toHaveCount(1)] : [],
+      ),
     );
   });
 
