@@ -5,6 +5,10 @@ nodeLinker: hoisted
 overrides:
   form-data: ">=4.0.4"
   axios: ">=1.7.9"
+  "minimatch@<3.1.4": "^3.1.4"
+  "esbuild@<0.25.0": "^0.25.0"
+  "uuid@<11.1.1": "^11.1.1"
+  "tmp@<0.2.4": "^0.2.4"
 allowBuilds:
   core-js: true
   esbuild: true
