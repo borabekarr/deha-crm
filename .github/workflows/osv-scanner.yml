@@ -13,29 +13,19 @@ on:
     - cron: '0 6 * * 1'
 
 permissions:
-  security-events: write
   contents: read
-  actions: read
 
 jobs:
-  osv-scan-pr:
-    if: github.event_name == 'pull_request'
-    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable-pr.yml@v2.3.8
-    with:
-      scan-args: |-
-        --lockfile=./pnpm-lock.yaml
-    permissions:
-      security-events: write
-      contents: read
-      actions: read
+  scan:
+    name: Scan dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-  osv-scan:
-    if: github.event_name == 'push' || github.event_name == 'schedule'
-    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.3.8
-    with:
-      scan-args: |-
-        --lockfile=./pnpm-lock.yaml
-    permissions:
-      security-events: write
-      contents: read
-      actions: read
+      - name: Run OSV-Scanner
+        uses: google/osv-scanner-action/osv-scanner-action@v2.3.8
+        with:
+          scan-args: |-
+            --lockfile=./pnpm-lock.yaml
+            --format=table
+            --fail-on-vuln
