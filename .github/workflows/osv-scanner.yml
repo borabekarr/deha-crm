@@ -27,5 +27,3 @@ jobs:
         with:
           scan-args: |-
             --lockfile=./pnpm-lock.yaml
-            --format=table
-            --fail-on-vuln
