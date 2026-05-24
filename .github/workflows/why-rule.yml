@@ -1,0 +1,86 @@
+name: WHY-rule
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, labeled, unlabeled]
+    paths:
+      - 'apps/web/src/components/ui/**'
+      - 'apps/web/src/features/**'
+      - 'packages/**'
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  why-rule:
+    name: Require Root cause + lessons file
+    runs-on: ubuntu-latest
+    steps:
+      - name: Detect bypass label
+        id: bypass
+        run: |
+          if [[ "${{ contains(github.event.pull_request.labels.*.name, 'bypass-why-rule') }}" == "true" ]]; then
+            echo "::warning::WHY-rule bypassed via 'bypass-why-rule' label. Audit signal logged."
+            echo "bypass=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "bypass=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.bypass.outputs.bypass != 'true'
+        with:
+          fetch-depth: 0
+
+      - name: Check for "Root cause:" line in PR description or commit messages
+        if: steps.bypass.outputs.bypass != 'true'
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if printf "%s" "$PR_BODY" | grep -qiE '^Root cause:'; then
+            echo "OK: 'Root cause:' line found in PR description."
+            exit 0
+          fi
+          if git log --format=%B "${BASE_SHA}..${HEAD_SHA}" | grep -qiE '^Root cause:'; then
+            echo "OK: 'Root cause:' line found in a commit body."
+            exit 0
+          fi
+          cat <<'MSG'
+          ::error::WHY-rule violation. This PR touches bug-prone paths but no 'Root cause:' line was found.
+
+          Add a line starting with 'Root cause:' to either:
+            - the PR description (recommended), OR
+            - one of the commit message bodies.
+
+          The line should explain WHY the bug existed, not just WHAT was changed.
+
+          Emergency bypass: add the 'bypass-why-rule' label to this PR (logged in CI output for audit).
+          See lessons/README.md for context.
+          MSG
+          exit 1
+
+      - name: Check for lessons file addition or update
+        if: steps.bypass.outputs.bypass != 'true'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          DIFF=$(git diff --name-only --diff-filter=AM "${BASE_SHA}..${HEAD_SHA}")
+          if printf "%s" "$DIFF" | grep -qE '^lessons/.+\.md$'; then
+            echo "OK: at least one lesson file added or modified under lessons/."
+            exit 0
+          fi
+          cat <<'MSG'
+          ::error::WHY-rule violation. This PR touches bug-prone paths but no file was added or modified under lessons/.
+
+          Add a lesson file under lessons/<slug>.md explaining the root cause.
+          The 'Root cause:' line in the PR description documents the WHY for reviewers;
+          the lessons/ entry persists it so the same shape catches itself next time.
+
+          See lessons/README.md for the file format.
+
+          Emergency bypass: add the 'bypass-why-rule' label to this PR (logged for audit).
+          MSG
+          exit 1
