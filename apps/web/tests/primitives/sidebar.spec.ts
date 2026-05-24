@@ -34,3 +34,19 @@ test('accessibility (axe)', async ({ page }) => {
 test('visual snapshot', async ({ page }) => {
   await expect(page.locator('#sidebar')).toHaveScreenshot('sidebar-default.png')
 })
+
+test('morph indicator renders on active sidebar item', async ({ page }) => {
+  const section = page.locator('#sidebar')
+  // An active SidebarItem renders the morph indicator — check it's present
+  await expect(section.locator('[data-motion-indicator="true"]').first()).toBeVisible()
+})
+
+test('hover pill appears when sidebar item is hovered', async ({ page }) => {
+  const section = page.locator('#sidebar')
+  // Hover over the second sidebar item (non-active) to trigger hover pill
+  const items = section.locator('a[aria-current], a:not([aria-current])')
+  await items.nth(1).hover()
+  await page.waitForTimeout(50)
+  // Hover pill should be mounted
+  await expect(section.locator('[data-motion-hover-pill="sidebar-hover-pill"]').first()).toBeVisible()
+})

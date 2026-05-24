@@ -1,18 +1,61 @@
 import * as React from 'react'
+import { use } from 'react'
 import * as TabsPrimitive from '@radix-ui/react-tabs'
+import { m, LayoutGroup, useReducedMotion } from 'framer-motion'
+import { tabMorph } from '@deha/motion-tokens'
 import type { TabsProps } from '@deha/ui-contracts'
 import { cn } from '@/lib/utils'
 
 // ---------------------------------------------------------------------------
-// Root — thin wrapper that passes through TabsProps + strips reducedMotion
+// Context — tracks active value for shared-element indicator (no useEffect)
 // ---------------------------------------------------------------------------
-function Tabs({ ref, className, reducedMotion: _reducedMotion, ...props }: TabsProps & React.ComponentProps<typeof TabsPrimitive.Root>) { // eslint-disable-line @typescript-eslint/no-unused-vars
+const TabsContext = React.createContext<{
+  activeValue: string
+  scopeId: string
+}>({ activeValue: '', scopeId: 'tabs' })
+
+// ---------------------------------------------------------------------------
+// Root — thin wrapper that passes through TabsProps + strips reducedMotion
+// Wraps in LayoutGroup so layoutId is scoped per root instance.
+// ---------------------------------------------------------------------------
+function Tabs({
+  ref,
+  className,
+  reducedMotion: _reducedMotion, // eslint-disable-line @typescript-eslint/no-unused-vars
+  defaultValue,
+  value: controlledValue,
+  onValueChange,
+  ...props
+}: TabsProps & React.ComponentProps<typeof TabsPrimitive.Root>) {
+  const [internalValue, setInternalValue] = React.useState(() => controlledValue ?? defaultValue ?? '')
+  const activeValue = controlledValue ?? internalValue
+
+  // Stable unique scope per mount
+  const scopeId = React.useId()
+
+  const handleValueChange = React.useCallback(
+    (v: string) => {
+      setInternalValue(v)
+      onValueChange?.(v)
+    },
+    [onValueChange],
+  )
+
+  const ctx = React.useMemo(() => ({ activeValue, scopeId }), [activeValue, scopeId])
+
   return (
-    <TabsPrimitive.Root
-      ref={ref}
-      className={cn('flex flex-col gap-4', className)}
-      {...props}
-    />
+    <TabsContext.Provider value={ctx}>
+      <LayoutGroup id={`tabs-indicator-${scopeId}`}>
+        <TabsPrimitive.Root
+          ref={ref}
+          className={cn('flex flex-col gap-4', className)}
+          value={activeValue}
+          onValueChange={handleValueChange}
+          defaultValue={controlledValue !== undefined ? undefined : defaultValue}
+          {...props}
+        />
+      </LayoutGroup>
+    </TabsContext.Provider>
   )
 }
 Tabs.displayName = 'Tabs'
@@ -37,12 +80,32 @@ function TabsList({ ref, className, ...props }: React.ComponentProps<typeof Tabs
 TabsList.displayName = 'TabsList'
 
 // ---------------------------------------------------------------------------
-// Trigger — pill button; active state uses dark bg to match prototype
+// Trigger — pill button; morphing shared-element indicator behind active tab
+// Active background is rendered as a layoutId m.span (derived state only,
+// no useEffect). Static bg classes removed from active state — indicator handles it.
 // ---------------------------------------------------------------------------
-function TabsTrigger({ ref, className, ...props }: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
+function TabsTrigger({
+  ref,
+  className,
+  value,
+  children,
+  ...props
+}: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
+  const { activeValue, scopeId } = use(TabsContext)
+  const isActive = activeValue === value
+
+  const prefersReducedMotion = useReducedMotion() ?? false
+  const morphConfig = tabMorph({ reducedMotion: prefersReducedMotion })
+  const transition = {
+    type: 'tween' as const,
+    duration: morphConfig.duration / 1000,
+    ease: morphConfig.ease as [number, number, number, number],
+  }
+
   return (
     <TabsPrimitive.Trigger
       ref={ref}
+      value={value}
       className={cn(
         // base: .tabs-trigger — inline-flex; align-items:center; gap:.3rem;
         // padding:.5rem 1rem; font-size:var(--text-13); font-weight:600; color:neutral-500
@@ -50,16 +113,27 @@ function TabsTrigger({ ref, className, ...props }: React.ComponentProps<typeof T
         'relative z-10 inline-flex cursor-pointer items-center gap-1.5 rounded-full border-0',
         'bg-transparent px-4 py-2 font-sans text-[13px] font-semibold text-neutral-500',
         'transition-colors duration-150 ease-out',
-        // active: .tabs-trigger[aria-selected="true"] — bg:neutral-900; color:#fff;
-        // box-shadow:0 4px 12px -2px rgb(15 23 42 / .2); font-weight:700
-        'data-[state=active]:bg-neutral-900 data-[state=active]:font-bold data-[state=active]:text-white',
-        'data-[state=active]:shadow-[0_4px_12px_-2px_rgb(15_23_42_/_0.2)]',
+        // active text + weight only — bg handled by motion indicator
+        'data-[state=active]:font-bold data-[state=active]:text-white',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1',
         'disabled:pointer-events-none disabled:opacity-50',
         className,
       )}
       {...props}
-    />
+    >
+      {/* Morphing background indicator — only rendered in active trigger.
+          Framer Motion moves it to the new position via shared layoutId. */}
+      {isActive && (
+        <m.span
+          layoutId={`tabs-indicator-${scopeId}`}
+          data-motion-indicator="true"
+          className="absolute inset-0 -z-[1] rounded-full bg-neutral-900 shadow-[0_4px_12px_-2px_rgb(15_23_42_/_0.2)]"
+          transition={transition}
+          aria-hidden
+        />
+      )}
+      {children}
+    </TabsPrimitive.Trigger>
   )
 }
 TabsTrigger.displayName = 'TabsTrigger'

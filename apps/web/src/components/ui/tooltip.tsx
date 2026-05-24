@@ -1,9 +1,17 @@
 import * as React from 'react'
+import { use } from 'react'
 import * as TooltipPrimitive from '@radix-ui/react-tooltip'
+import { AnimatePresence, m, useReducedMotion } from 'framer-motion'
 import type { TooltipProps } from '@deha/ui-contracts'
+import { windowMorph } from '@deha/motion-tokens'
 import { cn } from '@/lib/utils'
 
 // Default Tooltip export = contract-level (Tooltip content="..."); named exports (TooltipProvider, TooltipRoot, TooltipTrigger, TooltipContent) = manual composition.
+
+// ---------------------------------------------------------------------------
+// Internal context — tracks open state so TooltipContent can drive AnimatePresence
+// ---------------------------------------------------------------------------
+const TooltipOpenContext = React.createContext(false)
 
 // ---------------------------------------------------------------------------
 // Provider — wrap once near the app root; exported for consumer convenience
@@ -19,30 +27,57 @@ TooltipProvider.displayName = 'TooltipProvider'
 const Tooltip = ({
   reducedMotion: _reducedMotion, // eslint-disable-line @typescript-eslint/no-unused-vars
   content,
-  open,
+  open: openProp,
   defaultOpen,
   onOpenChange,
   delayDuration = 300,
   children,
-}: TooltipProps & { children: React.ReactNode }) => (
-  <TooltipPrimitive.Provider>
-    <TooltipPrimitive.Root
-      open={open}
-      defaultOpen={defaultOpen}
-      onOpenChange={onOpenChange}
-      delayDuration={delayDuration}
-    >
-      <TooltipPrimitive.Trigger asChild>{children}</TooltipPrimitive.Trigger>
-      <TooltipContent>{content}</TooltipContent>
-    </TooltipPrimitive.Root>
-  </TooltipPrimitive.Provider>
-)
+}: TooltipProps & { children: React.ReactNode }) => {
+  const [internalOpen, setInternalOpen] = React.useState(defaultOpen ?? false)
+  const isOpen = openProp ?? internalOpen
+  const handleOpenChange = (next: boolean) => {
+    if (openProp === undefined) setInternalOpen(next)
+    onOpenChange?.(next)
+  }
+  return (
+    <TooltipOpenContext.Provider value={isOpen}>
+      <TooltipPrimitive.Provider>
+        <TooltipPrimitive.Root
+          open={openProp}
+          defaultOpen={defaultOpen}
+          onOpenChange={handleOpenChange}
+          delayDuration={delayDuration}
+        >
+          <TooltipPrimitive.Trigger asChild>{children}</TooltipPrimitive.Trigger>
+          <TooltipContent>{content}</TooltipContent>
+        </TooltipPrimitive.Root>
+      </TooltipPrimitive.Provider>
+    </TooltipOpenContext.Provider>
+  )
+}
 Tooltip.displayName = 'Tooltip'
 
 // ---------------------------------------------------------------------------
-// TooltipRoot — manual-composition entry point (no Provider/Trigger/Content)
+// TooltipRoot — manual-composition entry point; tracks open state for AnimatePresence
 // ---------------------------------------------------------------------------
-const TooltipRoot = TooltipPrimitive.Root
+function TooltipRoot({
+  open: openProp,
+  defaultOpen,
+  onOpenChange,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Root>) {
+  const [internalOpen, setInternalOpen] = React.useState(defaultOpen ?? false)
+  const isOpen = openProp ?? internalOpen
+  const handleOpenChange = (next: boolean) => {
+    if (openProp === undefined) setInternalOpen(next)
+    onOpenChange?.(next)
+  }
+  return (
+    <TooltipOpenContext.Provider value={isOpen}>
+      <TooltipPrimitive.Root open={openProp} defaultOpen={defaultOpen} onOpenChange={handleOpenChange} {...props} />
+    </TooltipOpenContext.Provider>
+  )
+}
 TooltipRoot.displayName = 'TooltipRoot'
 
 // ---------------------------------------------------------------------------
@@ -65,28 +100,46 @@ TooltipPortal.displayName = 'TooltipPortal'
 // The kbd inside uses semi-transparent borders/bg (matching prototype .kbd)
 // sideOffset default 6 px (comfortable for hover targets)
 // ---------------------------------------------------------------------------
-function TooltipContent({ ref, className, sideOffset = 6, ...props }: React.ComponentProps<typeof TooltipPrimitive.Content>) {
+function TooltipContent({ ref, className, sideOffset = 6, children, ...props }: React.ComponentProps<typeof TooltipPrimitive.Content>) {
+  const isOpen = use(TooltipOpenContext)
+  const reducedMotion = useReducedMotion() ?? false
+  const morphConfig = windowMorph({ reducedMotion })
+  const transition = {
+    type: 'tween' as const,
+    duration: morphConfig.duration / 1000,
+    ease: morphConfig.ease as [number, number, number, number],
+  }
+
   return (
     <TooltipPrimitive.Portal>
-      <TooltipPrimitive.Content
-        ref={ref}
-        sideOffset={sideOffset}
-        className={cn(
-          // prototype: dark slate bg, white text — matches .tooltip span
-          'z-50 max-w-xs rounded-lg',
-          'bg-neutral-900 px-3 py-1.5',
-          'text-[13px] font-semibold text-white leading-snug',
-          'shadow-[0_8px_20px_-4px_rgb(15_23_42_/_0.3)]',
-          // Radix-driven animation
-          'data-[state=delayed-open]:animate-in data-[state=closed]:animate-out',
-          'data-[state=closed]:fade-out-0 data-[state=delayed-open]:fade-in-0',
-          'data-[state=closed]:zoom-out-95 data-[state=delayed-open]:zoom-in-95',
-          'data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1',
-          'data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1',
-          className,
+      <AnimatePresence>
+        {isOpen && (
+          <TooltipPrimitive.Content
+            ref={ref}
+            forceMount
+            sideOffset={sideOffset}
+            className={cn(
+              // prototype: dark slate bg, white text — matches .tooltip span
+              'z-50 max-w-xs rounded-lg',
+              'bg-neutral-900 px-3 py-1.5',
+              'text-[13px] font-semibold text-white leading-snug',
+              'shadow-[0_8px_20px_-4px_rgb(15_23_42_/_0.3)]',
+              className,
+            )}
+            {...props}
+          >
+            <m.div
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={transition}
+              style={{ transformOrigin: 'var(--radix-tooltip-content-transform-origin)' }}
+            >
+              {children}
+            </m.div>
+          </TooltipPrimitive.Content>
         )}
-        {...props}
-      />
+      </AnimatePresence>
     </TooltipPrimitive.Portal>
   )
 }

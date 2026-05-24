@@ -1,18 +1,46 @@
 import * as React from 'react'
+import { use } from 'react'
 import * as SelectPrimitive from '@radix-ui/react-select'
+import { AnimatePresence, m, useReducedMotion } from 'framer-motion'
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 import type { SelectProps } from '@deha/ui-contracts'
+import { windowMorph } from '@deha/motion-tokens'
 import { cn } from '@/lib/utils'
 
 // ---------------------------------------------------------------------------
-// Root — strips reducedMotion before forwarding to Radix Root
+// Internal context — shares open state so SelectContent can drive AnimatePresence
 // ---------------------------------------------------------------------------
-const Select = ({
+const SelectOpenContext = React.createContext(false)
+
+// ---------------------------------------------------------------------------
+// Root — strips reducedMotion before forwarding to Radix Root, tracks open state
+// ---------------------------------------------------------------------------
+function Select({
   reducedMotion: _reducedMotion, // eslint-disable-line @typescript-eslint/no-unused-vars
+  open: openProp,
+  defaultOpen,
+  onOpenChange,
   ...props
-}: SelectProps & React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root>) => (
-  <SelectPrimitive.Root {...props} />
-)
+}: SelectProps & React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root>) {
+  const [isOpen, setIsOpen] = React.useState(defaultOpen ?? false)
+  const controlled = openProp !== undefined
+  const open = controlled ? openProp : isOpen
+
+  const handleOpenChange = (next: boolean) => {
+    if (!controlled) setIsOpen(next)
+    onOpenChange?.(next)
+  }
+
+  return (
+    <SelectOpenContext.Provider value={open}>
+      <SelectPrimitive.Root
+        open={open}
+        onOpenChange={handleOpenChange}
+        {...props}
+      />
+    </SelectOpenContext.Provider>
+  )
+}
 Select.displayName = 'Select'
 
 // ---------------------------------------------------------------------------
@@ -71,47 +99,64 @@ SelectTrigger.displayName = 'SelectTrigger'
 // inset top highlight, max-h 14rem, overflow scroll.
 // ---------------------------------------------------------------------------
 function SelectContent({ ref, className, children, position = 'popper', ...props }: React.ComponentProps<typeof SelectPrimitive.Content>) {
+  // AnimatePresence + forceMount: Radix owns DOM lifecycle; we own animation lifecycle.
+  // forceMount keeps the node alive for exit animation; AnimatePresence drives mount/unmount.
+  const isOpen = use(SelectOpenContext)
+  const reducedMotion = useReducedMotion() ?? false
+  const morphConfig = windowMorph({ reducedMotion })
+  const transition = {
+    type: 'tween' as const,
+    duration: morphConfig.duration / 1000,
+    ease: morphConfig.ease as [number, number, number, number],
+  }
+
   return (
-    <SelectPrimitive.Portal>
-      <SelectPrimitive.Content
-        ref={ref}
-        position={position}
-        sideOffset={6}
-        className={cn(
-          // shape
-          'z-50 min-w-[var(--radix-select-trigger-width)] rounded-[12px]',
-          // surface
-          'bg-white border border-neutral-200',
-          'shadow-[0_8px_32px_-4px_rgb(15_23_42_/_0.18),0_2px_8px_-2px_rgb(15_23_42_/_0.08),inset_0_1px_0_rgb(255_255_255_/_0.5)]',
-          // scroll
-          'max-h-56 overflow-hidden',
-          // animation
-          'data-[state=open]:animate-in data-[state=closed]:animate-out',
-          'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-          'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
-          'data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2',
-          'data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
-          className,
-        )}
-        {...props}
-      >
-        <SelectPrimitive.ScrollUpButton className="flex items-center justify-center py-1 text-neutral-500">
-          <ChevronUpIcon className="size-4" />
-        </SelectPrimitive.ScrollUpButton>
-        <SelectPrimitive.Viewport
-          className={cn(
-            'p-1',
-            position === 'popper' &&
-              'h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]',
-          )}
-        >
-          {children}
-        </SelectPrimitive.Viewport>
-        <SelectPrimitive.ScrollDownButton className="flex items-center justify-center py-1 text-neutral-500">
-          <ChevronDownIcon className="size-4" />
-        </SelectPrimitive.ScrollDownButton>
-      </SelectPrimitive.Content>
-    </SelectPrimitive.Portal>
+    <AnimatePresence>
+      {isOpen && (
+        <SelectPrimitive.Portal>
+          <SelectPrimitive.Content
+            ref={ref}
+            position={position}
+            sideOffset={6}
+            className={cn(
+              // shape
+              'z-50 min-w-[var(--radix-select-trigger-width)] rounded-[12px]',
+              // surface
+              'bg-white border border-neutral-200',
+              'shadow-[0_8px_32px_-4px_rgb(15_23_42_/_0.18),0_2px_8px_-2px_rgb(15_23_42_/_0.08),inset_0_1px_0_rgb(255_255_255_/_0.5)]',
+              // scroll
+              'max-h-56 overflow-hidden',
+              className,
+            )}
+            {...props}
+          >
+            <m.div
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.92 }}
+              transition={transition}
+              style={{ transformOrigin: 'var(--radix-select-content-transform-origin)' }}
+            >
+              <SelectPrimitive.ScrollUpButton className="flex items-center justify-center py-1 text-neutral-500">
+                <ChevronUpIcon className="size-4" />
+              </SelectPrimitive.ScrollUpButton>
+              <SelectPrimitive.Viewport
+                className={cn(
+                  'p-1',
+                  position === 'popper' &&
+                    'h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]',
+                )}
+              >
+                {children}
+              </SelectPrimitive.Viewport>
+              <SelectPrimitive.ScrollDownButton className="flex items-center justify-center py-1 text-neutral-500">
+                <ChevronDownIcon className="size-4" />
+              </SelectPrimitive.ScrollDownButton>
+            </m.div>
+          </SelectPrimitive.Content>
+        </SelectPrimitive.Portal>
+      )}
+    </AnimatePresence>
   )
 }
 SelectContent.displayName = 'SelectContent'

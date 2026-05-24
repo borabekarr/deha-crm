@@ -1,12 +1,14 @@
 import * as React from 'react'
 import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area'
+import { m, useScroll, useTransform, useReducedMotion } from 'framer-motion'
+import { progressiveBlur } from '@deha/motion-tokens'
 import type { ScrollAreaProps } from '@deha/ui-contracts'
 import { cn } from '@/lib/utils'
 
 // ---------------------------------------------------------------------------
 // Root — scrollable container with custom scrollbar styling.
 // Props from @deha/ui-contracts: type, scrollHideDelay, orientation, children.
-// No progressive blur — that comes in a later pass.
+// Optional progressiveHeader: ReactNode — renders a blur-on-scroll sticky header.
 // ---------------------------------------------------------------------------
 function ScrollArea({
   ref,
@@ -16,9 +18,20 @@ function ScrollArea({
   type = 'hover',
   scrollHideDelay = 600,
   orientation = 'vertical',
+  progressiveHeader,
   ...props
 }: Omit<ScrollAreaProps, 'children'> &
-  React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> & { ref?: React.Ref<React.ElementRef<typeof ScrollAreaPrimitive.Root>> }) {
+  React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> & {
+    ref?: React.Ref<React.ElementRef<typeof ScrollAreaPrimitive.Root>>
+    progressiveHeader?: React.ReactNode
+  }) {
+  const viewportRef = React.useRef<HTMLDivElement>(null)
+  const isReducedMotion = useReducedMotion() ?? false
+  const blurFn = progressiveBlur({ reducedMotion: isReducedMotion })
+
+  const { scrollYProgress } = useScroll({ container: viewportRef })
+  const blurPx = useTransform(scrollYProgress, [0, 0.08], [blurFn(0), blurFn(1)])
+
   return (
     <ScrollAreaPrimitive.Root
       ref={ref}
@@ -27,7 +40,22 @@ function ScrollArea({
       className={cn('relative overflow-hidden', className)}
       {...props}
     >
-      <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit]">
+      {progressiveHeader != null && (
+        <m.div
+          data-scroll-area-progressive-header=""
+          style={{ '--blur-px': blurPx } as React.CSSProperties}
+          className={cn(
+            'sticky top-0 z-10',
+            'bg-background/90',
+            'supports-[backdrop-filter]:bg-background/70',
+            'supports-[backdrop-filter]:[backdrop-filter:blur(var(--blur-px,0px))]',
+            'transition-[background-color] duration-200',
+          )}
+        >
+          {progressiveHeader}
+        </m.div>
+      )}
+      <ScrollAreaPrimitive.Viewport ref={viewportRef} tabIndex={0} className="h-full w-full rounded-[inherit]">
         {children}
       </ScrollAreaPrimitive.Viewport>
 

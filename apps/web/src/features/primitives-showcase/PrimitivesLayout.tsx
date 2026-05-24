@@ -20,6 +20,15 @@ const NAV_ITEMS = [
   { id: 'toast', label: 'Toast' },
   { id: 'context-menu', label: 'Context Menu' },
   { id: 'calendar', label: 'Calendar' },
+  { id: 'motion-tabs', label: 'Motion Tabs' },
+  { id: 'toastiva', label: 'Toastiva' },
+  { id: 'swipe-actions', label: 'Swipe Actions' },
+  { id: 'wheel-date-picker', label: 'Wheel Date Picker' },
+  { id: 'linear-bottom-tabs', label: 'Linear Bottom Tabs' },
+  { id: 'maps-sheet', label: 'Maps Sheet' },
+  { id: 'progressive-blur', label: 'Progressive Blur' },
+  { id: 'ios-popover', label: 'iOS Popover' },
+  { id: 'fab', label: 'FAB' },
 ] as const
 
 export function PrimitivesLayout() {

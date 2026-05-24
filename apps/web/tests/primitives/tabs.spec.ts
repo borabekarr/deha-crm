@@ -35,3 +35,14 @@ test('accessibility (axe)', async ({ page }) => {
 test('visual snapshot', async ({ page }) => {
   await expect(page.locator('#tabs')).toHaveScreenshot('tabs-default.png')
 })
+
+test('morph indicator renders under active tab', async ({ page }) => {
+  const section = page.locator('#tabs')
+  // The first tab is active by default — indicator should already be present
+  await expect(section.locator('[data-motion-indicator="true"]').first()).toBeVisible()
+
+  // Click the second tab and verify the indicator moves there
+  const tabs = section.locator('[role="tab"]')
+  await tabs.nth(1).click()
+  await expect(section.locator('[data-motion-indicator="true"]').first()).toBeVisible()
+})

@@ -34,3 +34,11 @@ test('accessibility (axe)', async ({ page }) => {
 test('visual snapshot', async ({ page }) => {
   await expect(page.locator('#navigation-menu')).toHaveScreenshot('navigation-menu-default.png')
 })
+
+test('morph indicator renders on hover over nav item', async ({ page }) => {
+  const section = page.locator('#navigation-menu')
+  // Hover over the first nav item to trigger the morph indicator
+  const firstItem = section.locator('button, a').first()
+  await firstItem.hover()
+  await expect(section.locator('[data-motion-indicator="true"]').first()).toBeVisible()
+})

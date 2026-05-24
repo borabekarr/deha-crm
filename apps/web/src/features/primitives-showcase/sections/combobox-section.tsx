@@ -40,6 +40,7 @@ export function ComboboxSection() {
           placeholder="Search city..."
           emptyText="No city found"
           className="w-64"
+          aria-label="City selector"
         />
         {city && (
           <p className="text-xs text-neutral-500 dark:text-neutral-400">
@@ -57,6 +58,7 @@ export function ComboboxSection() {
           placeholder="Search lead..."
           emptyText="No lead found"
           className="w-64"
+          aria-label="Lead selector"
         />
         {lead && (
           <p className="text-xs text-neutral-500 dark:text-neutral-400">

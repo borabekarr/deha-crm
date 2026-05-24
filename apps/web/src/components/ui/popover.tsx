@@ -1,17 +1,38 @@
 import * as React from 'react'
+import { use } from 'react'
 import * as PopoverPrimitive from '@radix-ui/react-popover'
+import { AnimatePresence, m, useReducedMotion } from 'framer-motion'
 import type { PopoverProps } from '@deha/ui-contracts'
+import { windowMorph } from '@deha/motion-tokens'
 import { cn } from '@/lib/utils'
 
 // ---------------------------------------------------------------------------
-// Root — strips reducedMotion before forwarding to Radix Root
+// Internal context — tracks open state so PopoverContent can drive AnimatePresence
+// ---------------------------------------------------------------------------
+const PopoverOpenContext = React.createContext(false)
+
+// ---------------------------------------------------------------------------
+// Root — strips reducedMotion before forwarding to Radix Root; tracks open state
 // ---------------------------------------------------------------------------
 const Popover = ({
   reducedMotion: _reducedMotion, // eslint-disable-line @typescript-eslint/no-unused-vars
+  open: openProp,
+  defaultOpen,
+  onOpenChange,
   ...props
-}: PopoverProps & React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Root>) => (
-  <PopoverPrimitive.Root {...props} />
-)
+}: PopoverProps & React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Root>) => {
+  const [internalOpen, setInternalOpen] = React.useState(defaultOpen ?? false)
+  const isOpen = openProp ?? internalOpen
+  const handleOpenChange = (next: boolean) => {
+    if (openProp === undefined) setInternalOpen(next)
+    onOpenChange?.(next)
+  }
+  return (
+    <PopoverOpenContext.Provider value={isOpen}>
+      <PopoverPrimitive.Root open={openProp} defaultOpen={defaultOpen} onOpenChange={handleOpenChange} {...props} />
+    </PopoverOpenContext.Provider>
+  )
+}
 Popover.displayName = 'Popover'
 
 // ---------------------------------------------------------------------------
@@ -44,31 +65,49 @@ interface PopoverContentProps
   sideOffset?: number
 }
 
-function PopoverContent({ ref, className, sideOffset = 8, ...props }: PopoverContentProps & { ref?: React.Ref<React.ElementRef<typeof PopoverPrimitive.Content>> }) {
+function PopoverContent({ ref, className, sideOffset = 8, children, ...props }: PopoverContentProps & { ref?: React.Ref<React.ElementRef<typeof PopoverPrimitive.Content>> }) {
+  const isOpen = use(PopoverOpenContext)
+  const reducedMotion = useReducedMotion() ?? false
+  const morphConfig = windowMorph({ reducedMotion })
+  const transition = {
+    type: 'tween' as const,
+    duration: morphConfig.duration / 1000,
+    ease: morphConfig.ease as [number, number, number, number],
+  }
+
   return (
     <PopoverPrimitive.Portal>
-      <PopoverPrimitive.Content
-        ref={ref}
-        sideOffset={sideOffset}
-        className={cn(
-          // base shape — rounded-2xl, white bg with glass edge
-          'z-50 w-72 rounded-2xl',
-          'bg-white border border-white/60',
-          'shadow-[0_8px_32px_-4px_rgb(15_23_42_/_0.14),0_2px_8px_-2px_rgb(15_23_42_/_0.08)]',
-          // generous padding to match the prototype quick-action popover
-          'px-5 pt-5 pb-6 min-h-[6rem]',
-          // animation: fade + translate driven by Radix data attributes
-          'data-[state=open]:animate-in data-[state=closed]:animate-out',
-          'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-          'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
-          'data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2',
-          'data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
-          // focus ring
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500',
-          className,
+      <AnimatePresence>
+        {isOpen && (
+          <PopoverPrimitive.Content
+            ref={ref}
+            forceMount
+            sideOffset={sideOffset}
+            className={cn(
+              // base shape — rounded-2xl, white bg with glass edge
+              'z-50 w-72 rounded-2xl',
+              'bg-white border border-white/60',
+              'shadow-[0_8px_32px_-4px_rgb(15_23_42_/_0.14),0_2px_8px_-2px_rgb(15_23_42_/_0.08)]',
+              // generous padding to match the prototype quick-action popover
+              'px-5 pt-5 pb-6 min-h-[6rem]',
+              // focus ring
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500',
+              className,
+            )}
+            {...props}
+          >
+            <m.div
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={transition}
+              style={{ transformOrigin: 'var(--radix-popover-content-transform-origin)' }}
+            >
+              {children}
+            </m.div>
+          </PopoverPrimitive.Content>
         )}
-        {...props}
-      />
+      </AnimatePresence>
     </PopoverPrimitive.Portal>
   )
 }

@@ -17,7 +17,7 @@ export function PopoverSection() {
       <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4 space-y-4">
         <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Basic popover</p>
         <Popover open={open1} onOpenChange={setOpen1}>
-          <PopoverTrigger>
+          <PopoverTrigger asChild>
             <button
               type="button"
               className="rounded-xl border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-600"
@@ -37,7 +37,7 @@ export function PopoverSection() {
       <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4 space-y-4">
         <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Popover with actions</p>
         <Popover open={open2} onOpenChange={setOpen2}>
-          <PopoverTrigger>
+          <PopoverTrigger asChild>
             <button
               type="button"
               className="rounded-xl border border-emerald-500 bg-emerald-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-600"

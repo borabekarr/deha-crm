@@ -36,3 +36,13 @@ test('accessibility (axe)', async ({ page }) => {
 test('visual snapshot', async ({ page }) => {
   await expect(page.locator('#tooltip')).toHaveScreenshot('tooltip-default.png')
 })
+
+test('windowMorph entry: content visible after hover', async ({ page }) => {
+  const section = page.locator('#tooltip')
+  const trigger = section.locator('button').first()
+  await trigger.hover()
+  // Wait for tooltip delay + framer-motion entry animation
+  await page.waitForTimeout(500)
+  const content = page.locator('[data-radix-popper-content-wrapper]').first()
+  await expect(content).toBeVisible()
+})

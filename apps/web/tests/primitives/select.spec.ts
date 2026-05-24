@@ -35,3 +35,12 @@ test('accessibility (axe)', async ({ page }) => {
 test('visual snapshot', async ({ page }) => {
   await expect(page.locator('#select')).toHaveScreenshot('select-default.png')
 })
+
+test('windowMorph entry: content visible after open', async ({ page }) => {
+  const section = page.locator('#select')
+  const trigger = section.locator('button[role="combobox"]').first()
+  await trigger.click()
+  // Poll until framer-motion entry animation completes (windowMorph ~220ms) — no fixed wait
+  const content = page.locator('[data-radix-popper-content-wrapper]').first()
+  await expect(content).toBeVisible({ timeout: 2000 })
+})

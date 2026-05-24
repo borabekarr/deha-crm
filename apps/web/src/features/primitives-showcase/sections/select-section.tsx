@@ -21,7 +21,7 @@ export function SelectSection() {
       <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4 space-y-4">
         <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Basic select</p>
         <Select>
-          <SelectTrigger className="w-64">
+          <SelectTrigger className="w-64" aria-label="Select a region">
             <SelectValue placeholder="Select a region" />
           </SelectTrigger>
           <SelectContent>
@@ -36,7 +36,7 @@ export function SelectSection() {
       <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4 space-y-4">
         <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Grouped select</p>
         <Select>
-          <SelectTrigger className="w-64">
+          <SelectTrigger className="w-64" aria-label="Select lead stage">
             <SelectValue placeholder="Select lead stage" />
           </SelectTrigger>
           <SelectContent>
@@ -58,7 +58,7 @@ export function SelectSection() {
       <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4 space-y-4">
         <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Disabled</p>
         <Select disabled>
-          <SelectTrigger className="w-64">
+          <SelectTrigger className="w-64" aria-label="Disabled select">
             <SelectValue placeholder="Disabled select" />
           </SelectTrigger>
           <SelectContent>

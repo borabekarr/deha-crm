@@ -1,5 +1,6 @@
 import * as React from 'react'
 import * as PopoverPrimitive from '@radix-ui/react-popover'
+import { AnimatePresence, m, useReducedMotion } from 'framer-motion'
 import {
   Command,
   CommandInput,
@@ -10,6 +11,7 @@ import {
 } from 'cmdk'
 import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react'
 import type { ComboboxProps } from '@deha/ui-contracts'
+import { windowMorph } from '@deha/motion-tokens'
 import { cn } from '@/lib/utils'
 
 // ---------------------------------------------------------------------------
@@ -27,6 +29,7 @@ interface ComboboxPropsExtended extends Omit<ComboboxProps, 'children'> {
   creatable?: boolean
   onCreate?: (query: string) => void
   className?: string
+  'aria-label'?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -51,6 +54,7 @@ const Combobox = ({
   onCreate,
   reducedMotion: _reducedMotion, // eslint-disable-line @typescript-eslint/no-unused-vars
   className,
+  'aria-label': ariaLabel,
 }: ComboboxPropsExtended) => {
   const listboxId = React.useId()
 
@@ -71,6 +75,14 @@ const Combobox = ({
   }
 
   const [query, setQuery] = React.useState('')
+
+  const reducedMotion = useReducedMotion() ?? false
+  const morphConfig = windowMorph({ reducedMotion })
+  const transition = {
+    type: 'tween' as const,
+    duration: morphConfig.duration / 1000,
+    ease: morphConfig.ease as [number, number, number, number],
+  }
 
   const handleQueryChange = (q: string) => {
     setQuery(q)
@@ -101,6 +113,7 @@ const Combobox = ({
         <button
           type="button"
           role="combobox"
+          aria-label={ariaLabel}
           aria-expanded={isOpen}
           aria-haspopup="listbox"
           aria-controls={listboxId}
@@ -139,25 +152,30 @@ const Combobox = ({
 
       {/* Floating panel */}
       <PopoverPrimitive.Portal>
-        <PopoverPrimitive.Content
-          sideOffset={6}
-          align="start"
-          // Match trigger width
-          style={{ width: 'var(--radix-popover-trigger-width)' }}
-          className={cn(
-            // shape
-            'z-50 rounded-[12px] p-0',
-            // surface — prototype .combo-list
-            'bg-white border border-neutral-200',
-            'shadow-[0_8px_32px_-4px_rgb(15_23_42_/_0.18),0_2px_8px_-2px_rgb(15_23_42_/_0.08)]',
-            // animation
-            'data-[state=open]:animate-in data-[state=closed]:animate-out',
-            'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-            'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
-            'data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2',
-            'focus:outline-none',
-          )}
-        >
+        <AnimatePresence>
+          {isOpen && (
+          <PopoverPrimitive.Content
+            forceMount
+            sideOffset={6}
+            align="start"
+            // Match trigger width
+            style={{ width: 'var(--radix-popover-trigger-width)' }}
+            className={cn(
+              // shape
+              'z-50 rounded-[12px] p-0',
+              // surface — prototype .combo-list
+              'bg-white border border-neutral-200',
+              'shadow-[0_8px_32px_-4px_rgb(15_23_42_/_0.18),0_2px_8px_-2px_rgb(15_23_42_/_0.08)]',
+              'focus:outline-none',
+            )}
+          >
+            <m.div
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={transition}
+              style={{ transformOrigin: 'var(--radix-popover-content-transform-origin)' }}
+            >
           <Command
             // Disable cmdk's built-in filtering — Radix + cmdk do the filtering via shouldFilter
             className="flex flex-col overflow-hidden rounded-[12px]"
@@ -245,7 +263,10 @@ const Combobox = ({
               )}
             </CommandList>
           </Command>
-        </PopoverPrimitive.Content>
+            </m.div>
+          </PopoverPrimitive.Content>
+          )}
+        </AnimatePresence>
       </PopoverPrimitive.Portal>
     </PopoverPrimitive.Root>
   )

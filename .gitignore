@@ -68,3 +68,7 @@ packages/*/node_modules
 
 # Playwright run artifacts
 apps/web/test-results/
+
+# rit3zh reference clones
+plans/archive/rit3zh-refs/*/node_modules/
+plans/archive/rit3zh-refs/*/*.lock
