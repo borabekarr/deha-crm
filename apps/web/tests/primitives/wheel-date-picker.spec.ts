@@ -18,13 +18,13 @@ async function scrollWheelToIndex(
   const ITEM_HEIGHT = 40
   await page.evaluate(
     ({ label, top }: { label: string; top: number }) => {
-      const listbox = document.querySelector(
-        `#wheel-date-picker [role="listbox"][aria-label="${label}"]`,
+      const wheel = document.querySelector(
+        `#wheel-date-picker [data-wheel-column="${label}"]`,
       ) as HTMLElement | null
-      if (!listbox) throw new Error(`Wheel not found: ${label}`)
-      listbox.scrollTop = top
-      listbox.dispatchEvent(new Event('scroll'))
-      listbox.dispatchEvent(new Event('scrollend'))
+      if (!wheel) throw new Error(`Wheel not found: ${label}`)
+      wheel.scrollTop = top
+      wheel.dispatchEvent(new Event('scroll'))
+      wheel.dispatchEvent(new Event('scrollend'))
     },
     { label: wheelLabel, top: index * ITEM_HEIGHT },
   )
@@ -51,22 +51,22 @@ test('renders: all three wheels are present', async ({ page }) => {
   const picker = section.locator('[data-testid="wheel-date-picker"]').first()
   await expect(picker).toBeVisible()
 
-  await expect(picker.locator('[role="listbox"][aria-label="Month"]')).toBeVisible()
-  await expect(picker.locator('[role="listbox"][aria-label="Day"]')).toBeVisible()
-  await expect(picker.locator('[role="listbox"][aria-label="Year"]')).toBeVisible()
+  await expect(picker.locator('[data-wheel-column="Month"]')).toBeVisible()
+  await expect(picker.locator('[data-wheel-column="Day"]')).toBeVisible()
+  await expect(picker.locator('[data-wheel-column="Year"]')).toBeVisible()
 })
 
 test('interaction: scrolling month wheel updates displayed selected value', async ({ page }) => {
   const section = page.locator('#wheel-date-picker')
   const picker = section.locator('[data-testid="wheel-date-picker"]').first()
-  const monthWheel = picker.locator('[role="listbox"][aria-label="Month"]')
+  const monthWheel = picker.locator('[data-wheel-column="Month"]')
 
   // Scroll the month wheel to January (index 0) — drives selection without
   // relying on initial scroll-restore behavior in headless chromium.
   await scrollWheelToIndex(page, 'Month', 0)
 
-  const januaryOption = monthWheel.locator('[role="option"]', { hasText: 'January' })
-  await expect(januaryOption).toHaveAttribute('aria-selected', 'true', { timeout: 2000 })
+  const januaryOption = monthWheel.locator('[data-wheel-item="Month"]', { hasText: 'January' })
+  await expect(januaryOption).toHaveAttribute('data-wheel-item-active', 'true', { timeout: 2000 })
 
   const displayText = section.locator('text=/January/i').first()
   await expect(displayText).toBeVisible()
@@ -75,13 +75,13 @@ test('interaction: scrolling month wheel updates displayed selected value', asyn
 test('interaction: scrolling day wheel updates displayed selected value', async ({ page }) => {
   const section = page.locator('#wheel-date-picker')
   const picker = section.locator('[data-testid="wheel-date-picker"]').first()
-  const dayWheel = picker.locator('[role="listbox"][aria-label="Day"]')
+  const dayWheel = picker.locator('[data-wheel-column="Day"]')
 
   // Scroll to day index 0 (day 1)
   await scrollWheelToIndex(page, 'Day', 0)
 
-  const dayOneOption = dayWheel.locator('[role="option"]').first()
-  await expect(dayOneOption).toHaveAttribute('aria-selected', 'true')
+  const dayOneOption = dayWheel.locator('[data-wheel-item="Day"]').first()
+  await expect(dayOneOption).toHaveAttribute('data-wheel-item-active', 'true')
 })
 
 // React StrictMode in dev re-subscribes the per-wheel store, which races
@@ -92,32 +92,29 @@ test('interaction: scrolling day wheel updates displayed selected value', async 
 test.fixme('keyboard: ArrowDown on month wheel moves to next month', async ({ page }) => {
   const section = page.locator('#wheel-date-picker')
   const picker = section.locator('[data-testid="wheel-date-picker"]').first()
-  const monthWheel = picker.locator('[role="listbox"][aria-label="Month"]')
+  const monthWheel = picker.locator('[data-wheel-column="Month"]')
 
   await scrollWheelToIndex(page, 'Month', 0)
   await monthWheel.focus()
   await page.keyboard.press('ArrowDown')
-  // The keyboard handler triggers smooth scrollTo which in headless chromium
-  // may not emit incremental scroll events. Nudge the scroll position so the
-  // store snapshot lands on index 1.
   await scrollWheelToIndex(page, 'Month', 1)
 
-  const febOption = monthWheel.locator('[role="option"]', { hasText: 'February' })
-  await expect(febOption).toHaveAttribute('aria-selected', 'true', { timeout: 2000 })
+  const febOption = monthWheel.locator('[data-wheel-item="Month"]', { hasText: 'February' })
+  await expect(febOption).toHaveAttribute('data-wheel-item-active', 'true', { timeout: 2000 })
 })
 
 test.fixme('keyboard: ArrowUp on month wheel moves to previous month', async ({ page }) => {
   const section = page.locator('#wheel-date-picker')
   const picker = section.locator('[data-testid="wheel-date-picker"]').first()
-  const monthWheel = picker.locator('[role="listbox"][aria-label="Month"]')
+  const monthWheel = picker.locator('[data-wheel-column="Month"]')
 
   await scrollWheelToIndex(page, 'Month', 4)
   await monthWheel.focus()
   await page.keyboard.press('ArrowUp')
   await scrollWheelToIndex(page, 'Month', 3)
 
-  const aprilOption = monthWheel.locator('[role="option"]', { hasText: 'April' })
-  await expect(aprilOption).toHaveAttribute('aria-selected', 'true', { timeout: 2000 })
+  const aprilOption = monthWheel.locator('[data-wheel-item="Month"]', { hasText: 'April' })
+  await expect(aprilOption).toHaveAttribute('data-wheel-item-active', 'true', { timeout: 2000 })
 })
 
 test('accessibility (axe): zero serious violations', async ({ page }) => {
@@ -143,12 +140,12 @@ test('reduced-motion: scroll-behavior is instant (no smooth scroll)', async ({ p
   // We verify this by checking the computed scroll-behavior CSS.
   const section = page.locator('#wheel-date-picker')
   const picker = section.locator('[data-testid="wheel-date-picker"]').first()
-  const monthWheel = picker.locator('[role="listbox"][aria-label="Month"]')
+  const monthWheel = picker.locator('[data-wheel-column="Month"]')
 
   // The scrollBehavior is set as an inline style — in reduced-motion mode it
   // should be 'auto' (which maps to instant in CSS).
   // In normal mode there is no inline scroll-behavior style.
-  // We just assert the wheel is present and operable regardless of mode.
+  // We just assert the wheel is present and the hidden a11y select is wired.
   await expect(monthWheel).toBeVisible()
-  await expect(monthWheel).toHaveAttribute('role', 'listbox')
+  await expect(picker.locator('select[aria-label="Month"]')).toBeAttached()
 })

@@ -230,29 +230,24 @@ function WheelColumn({
   )
   const currentIndex = clamp(Math.round(scrollTop / ITEM_HEIGHT), 0, items.length - 1)
 
-  // Keyboard
-  function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
-    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return
-    e.preventDefault()
-    const delta = e.key === 'ArrowDown' ? 1 : -1
-    const next = clamp(currentIndex + delta, 0, items.length - 1)
-    const el = elRef.current
-    if (el) {
-      el.scrollTo({
-        top: next * ITEM_HEIGHT,
-        behavior: reducedMotion ? 'instant' : 'smooth',
-      })
-    }
-    onSettle(next)
-  }
-
-  const wheelId = ariaLabel.replace(/\s+/g, '-')
-
   return (
     <div
       className="relative flex flex-col items-stretch"
       style={{ width: 90, height: WHEEL_HEIGHT }}
     >
+      {/* Hidden native select — owns keyboard, AT, focus, form participation */}
+      <select
+        className="sr-only"
+        value={selectedIndex}
+        onChange={(e) => onSettle(Number(e.target.value))}
+        aria-label={ariaLabel}
+        data-wheel-select={ariaLabel}
+      >
+        {items.map((label, idx) => (
+          <option key={label} value={idx}>{label}</option>
+        ))}
+      </select>
+
       {/* Selection highlight band */}
       <div
         aria-hidden="true"
@@ -274,14 +269,11 @@ function WheelColumn({
         style={{ height: ITEM_HEIGHT * HALF }}
       />
 
-      {/* Scroll container */}
+      {/* Scroll container — decorative, hidden from AT */}
       <div
         ref={refCallback}
-        role="listbox"
-        tabIndex={0}
-        aria-label={ariaLabel}
-        aria-activedescendant={`wheel-item-${wheelId}-${currentIndex}`}
-        onKeyDown={handleKeyDown}
+        aria-hidden="true"
+        data-wheel-column={ariaLabel}
         className={cn(
           'relative z-0 overflow-y-scroll overscroll-contain outline-none',
           '[scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
@@ -296,30 +288,11 @@ function WheelColumn({
       >
         {items.map((label, idx) => {
           const isActive = idx === currentIndex
-          function activateItem() {
-            const el = elRef.current
-            if (el) {
-              el.scrollTo({
-                top: idx * ITEM_HEIGHT,
-                behavior: reducedMotion ? 'instant' : 'smooth',
-              })
-            }
-            onSettle(idx)
-          }
           return (
           <div
             key={label}
-            id={`wheel-item-${wheelId}-${idx}`}
-            role="option"
-            aria-selected={isActive}
-            tabIndex={isActive ? 0 : -1}
-            onClick={activateItem}
-            onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                activateItem()
-              }
-            }}
+            data-wheel-item={ariaLabel}
+            data-wheel-item-active={isActive}
             className={cn(
               'flex items-center justify-center select-none cursor-default',
               'transition-colors duration-150',
