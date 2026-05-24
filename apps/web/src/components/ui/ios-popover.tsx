@@ -1,13 +1,10 @@
+/* eslint-disable react-refresh/only-export-components */
 import * as React from 'react'
 import * as PopoverPrimitive from '@radix-ui/react-popover'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, m, useReducedMotion } from 'framer-motion'
 import { popoverScaleFromAnchor } from '@deha/motion-tokens'
 import { cn } from '@/lib/utils'
-
-// ---------------------------------------------------------------------------
-// Internal context — tracks open state so IOSPopoverContent can drive AnimatePresence
-// ---------------------------------------------------------------------------
-const IOSPopoverOpenContext = React.createContext(false)
+import { IOSPopoverOpenContext, useIOSPopoverOpen } from './ios-popover-context'
 
 // ---------------------------------------------------------------------------
 // Root — tracks open state and exposes via context
@@ -69,7 +66,7 @@ function IOSPopoverContent({
   children,
   ...props
 }: IOSPopoverContentProps) {
-  const isOpen = React.useContext(IOSPopoverOpenContext)
+  const isOpen = useIOSPopoverOpen()
   const reducedMotion = useReducedMotion() ?? false
   const scaleConfig = popoverScaleFromAnchor({ reducedMotion })
   const transition = {
@@ -97,17 +94,17 @@ function IOSPopoverContent({
             )}
             {...props}
           >
-            <motion.div
-              initial={{ opacity: 0, scale: 0 }}
+            <m.div
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
               transition={transition}
               style={{
                 transformOrigin: 'var(--radix-popover-content-transform-origin)',
               }}
             >
               {children}
-            </motion.div>
+            </m.div>
           </PopoverPrimitive.Content>
         )}
       </AnimatePresence>
@@ -123,7 +120,7 @@ function IOSPopoverArrow({
   className,
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Arrow>) {
-  const isOpen = React.useContext(IOSPopoverOpenContext)
+  const isOpen = useIOSPopoverOpen()
   const reducedMotion = useReducedMotion() ?? false
   const scaleConfig = popoverScaleFromAnchor({ reducedMotion })
   const transition = {
@@ -135,10 +132,10 @@ function IOSPopoverArrow({
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.span
-          initial={{ opacity: 0, scale: 0 }}
+        <m.span
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0 }}
+          exit={{ opacity: 0, scale: 0.95 }}
           transition={transition}
           style={{ display: 'contents' }}
         >
@@ -149,7 +146,7 @@ function IOSPopoverArrow({
             )}
             {...props}
           />
-        </motion.span>
+        </m.span>
       )}
     </AnimatePresence>
   )
@@ -159,6 +156,7 @@ IOSPopoverArrow.displayName = 'IOSPopover.Arrow'
 // ---------------------------------------------------------------------------
 // Compound export
 // ---------------------------------------------------------------------------
+export { IOSPopoverRoot, IOSPopoverTrigger, IOSPopoverContent, IOSPopoverArrow }
 export const IOSPopover = {
   Root: IOSPopoverRoot,
   Trigger: IOSPopoverTrigger,

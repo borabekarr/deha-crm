@@ -1,10 +1,11 @@
-// Compound namespace pattern; fast-refresh still works on the namespace export.
+// Compound namespace pattern — sub-components exported individually for fast-refresh.
 /* eslint-disable react-refresh/only-export-components */
 import * as React from 'react'
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import { useDrag } from '@use-gesture/react'
 import { swipeReveal } from '@deha/motion-tokens'
 import { cn } from '@/lib/utils'
+import { SwipeActionsContext, useSwipeActionsContext } from './swipe-actions-context'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -29,26 +30,11 @@ interface SwipeActionsSlotProps {
 }
 
 // ---------------------------------------------------------------------------
-// Internal context — shares layout refs and motion state down
-// ---------------------------------------------------------------------------
-interface SwipeActionsCtx {
-  leftWidth: number
-  rightWidth: number
-  onLeftAction?: () => void
-  onRightAction?: () => void
-}
-
-const Ctx = React.createContext<SwipeActionsCtx>({
-  leftWidth: 0,
-  rightWidth: 0,
-})
-
-// ---------------------------------------------------------------------------
 // LeftActions + RightActions — reveal slots
 // They measure their own width so Root can compute thresholds.
 // ---------------------------------------------------------------------------
 function LeftActions({ children, className }: SwipeActionsSlotProps) {
-  const { leftWidth } = React.useContext(Ctx)
+  const { leftWidth } = useSwipeActionsContext()
   return (
     <div
       aria-hidden="true"
@@ -65,7 +51,7 @@ function LeftActions({ children, className }: SwipeActionsSlotProps) {
 LeftActions.displayName = 'SwipeActions.LeftActions'
 
 function RightActions({ children, className }: SwipeActionsSlotProps) {
-  const { rightWidth } = React.useContext(Ctx)
+  const { rightWidth } = useSwipeActionsContext()
   return (
     <div
       aria-hidden="true"
@@ -204,57 +190,58 @@ function Root({ children, className, onLeftAction, onRightAction }: SwipeActions
     { axis: 'x', filterTaps: true, from: () => [dragX, 0] },
   )
 
-  const ctxValue: SwipeActionsCtx = React.useMemo(
+  const ctxValue = React.useMemo(
     () => ({ leftWidth, rightWidth, onLeftAction, onRightAction }),
     [leftWidth, rightWidth, onLeftAction, onRightAction],
   )
 
   return (
-    <Ctx.Provider value={ctxValue}>
-      <div
-        className={cn('relative overflow-hidden select-none touch-pan-y', className)}
-        role="listitem"
-      >
-        {/* Hidden measurement wrappers */}
-        {left && (
-          <div ref={measureLeft} className="absolute inset-y-0 left-0 flex items-stretch" style={{ visibility: 'hidden', pointerEvents: 'none' }}>
-            {left}
-          </div>
-        )}
-        {right && (
-          <div ref={measureRight} className="absolute inset-y-0 right-0 flex items-stretch" style={{ visibility: 'hidden', pointerEvents: 'none' }}>
-            {right}
-          </div>
-        )}
-
-        {/* Visible reveal underlays */}
-        {left && dragX > 0 && (
-          <div className="absolute inset-y-0 left-0 flex items-stretch" style={{ width: leftWidth }}>
-            {left}
-          </div>
-        )}
-        {right && dragX < 0 && (
-          <div className="absolute inset-y-0 right-0 flex items-stretch" style={{ width: rightWidth }}>
-            {right}
-          </div>
-        )}
-
-        {/* Draggable content — bind() goes on a plain div to avoid framer-motion onDrag type collision */}
-        <div
-          {...bind()}
-          className="relative z-10 cursor-grab active:cursor-grabbing"
-          style={{ touchAction: 'pan-y' }}
+    <SwipeActionsContext.Provider value={ctxValue}>
+      <ul className={cn('list-none m-0 p-0', className)}>
+        <li
+          className="relative overflow-hidden select-none touch-pan-y"
         >
-          <motion.div
-            animate={{ x: dragX }}
-            transition={spring}
-            data-testid="swipe-content"
+          {/* Hidden measurement wrappers */}
+          {left && (
+            <div ref={measureLeft} className="absolute inset-y-0 left-0 flex items-stretch" style={{ visibility: 'hidden', pointerEvents: 'none' }}>
+              {left}
+            </div>
+          )}
+          {right && (
+            <div ref={measureRight} className="absolute inset-y-0 right-0 flex items-stretch" style={{ visibility: 'hidden', pointerEvents: 'none' }}>
+              {right}
+            </div>
+          )}
+
+          {/* Visible reveal underlays */}
+          {left && dragX > 0 && (
+            <div className="absolute inset-y-0 left-0 flex items-stretch" style={{ width: leftWidth }}>
+              {left}
+            </div>
+          )}
+          {right && dragX < 0 && (
+            <div className="absolute inset-y-0 right-0 flex items-stretch" style={{ width: rightWidth }}>
+              {right}
+            </div>
+          )}
+
+          {/* Draggable content — bind() goes on a plain div to avoid framer-motion onDrag type collision */}
+          <div
+            {...bind()}
+            className="relative z-10 cursor-grab active:cursor-grabbing"
+            style={{ touchAction: 'pan-y' }}
           >
-            {content}
-          </motion.div>
-        </div>
-      </div>
-    </Ctx.Provider>
+            <m.div
+              animate={{ x: dragX }}
+              transition={spring}
+              data-testid="swipe-content"
+            >
+              {content}
+            </m.div>
+          </div>
+        </li>
+      </ul>
+    </SwipeActionsContext.Provider>
   )
 }
 Root.displayName = 'SwipeActions.Root'
@@ -262,4 +249,5 @@ Root.displayName = 'SwipeActions.Root'
 // ---------------------------------------------------------------------------
 // Namespace export
 // ---------------------------------------------------------------------------
+export { Root, LeftActions, RightActions, Content }
 export const SwipeActions = { Root, LeftActions, RightActions, Content }

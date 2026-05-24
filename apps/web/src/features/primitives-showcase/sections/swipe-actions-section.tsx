@@ -42,10 +42,10 @@ export function SwipeActionsSection() {
         </p>
       </div>
 
-      <div role="list" aria-label="Messages" className="rounded-xl border border-neutral-200 dark:border-neutral-700 overflow-hidden bg-white dark:bg-neutral-900 divide-y divide-neutral-100 dark:divide-neutral-800">
+      <ul aria-label="Messages" className="rounded-xl border border-neutral-200 dark:border-neutral-700 overflow-hidden bg-white dark:bg-neutral-900 divide-y divide-neutral-100 dark:divide-neutral-800">
         {CONTACTS.map((contact) => (
+          <li key={contact.id}>
           <SwipeActions.Root
-            key={contact.id}
             onLeftAction={() => console.log(`Archive: ${contact.name}`)}
             onRightAction={() => console.log(`Delete: ${contact.name}`)}
           >
@@ -114,8 +114,9 @@ export function SwipeActionsSection() {
               </div>
             </SwipeActions.Content>
           </SwipeActions.Root>
+          </li>
         ))}
-      </div>
+      </ul>
 
       <p className="text-xs text-neutral-400 dark:text-neutral-500">
         Tip: drag a row left or right. Honors prefers-reduced-motion (instant snaps).

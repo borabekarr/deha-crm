@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as PopoverPrimitive from '@radix-ui/react-popover'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, m, useReducedMotion } from 'framer-motion'
 import {
   Command,
   CommandInput,
@@ -169,7 +169,7 @@ const Combobox = ({
               'focus:outline-none',
             )}
           >
-            <motion.div
+            <m.div
               initial={{ opacity: 0, scale: 0.92 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
@@ -263,7 +263,7 @@ const Combobox = ({
               )}
             </CommandList>
           </Command>
-            </motion.div>
+            </m.div>
           </PopoverPrimitive.Content>
           )}
         </AnimatePresence>

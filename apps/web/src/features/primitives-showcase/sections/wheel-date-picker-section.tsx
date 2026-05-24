@@ -16,7 +16,7 @@ export function WheelDatePickerSection() {
         </h2>
         <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
           iOS-style scroll-snap wheels for month, day, and year selection.
-          No JS animation — pure CSS scroll-snap. Keyboard and reduced-motion
+          No JS animation: pure CSS scroll-snap. Keyboard and reduced-motion
           aware.
         </p>
         <p className="mt-1 text-xs text-neutral-400 dark:text-neutral-500">
@@ -43,7 +43,7 @@ export function WheelDatePickerSection() {
       {/* Variant 2 — historical date */}
       <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4 space-y-4">
         <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
-          Historical date (1990 — 2050 range)
+          Historical date (1990 to 2050 range)
         </p>
         <div className="flex flex-col items-start gap-4">
           <WheelDatePicker

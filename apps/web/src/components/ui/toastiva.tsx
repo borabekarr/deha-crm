@@ -2,92 +2,24 @@
 // Composes on top of the existing use-toast queue; no useEffect anywhere.
 /* eslint-disable react-refresh/only-export-components */
 import * as React from 'react'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, m, useReducedMotion } from 'framer-motion'
 import { useDrag } from '@use-gesture/react'
 import { windowMorph } from '@deha/motion-tokens'
 import { cn } from '@/lib/utils'
 import { useSyncExternalStore } from 'react'
+import {
+  type ToastivaPosition,
+  type ToastivaVariant,
+  type ToastivaItem,
+  toastiva,
+  useToastiva,
+  _subscribe,
+  _getSnapshot,
+  _dismissToastiva,
+} from './toastiva-context'
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-export type ToastivaPosition =
-  | 'top-left'
-  | 'top-center'
-  | 'top-right'
-  | 'bottom-left'
-  | 'bottom-center'
-  | 'bottom-right'
-
-export type ToastivaVariant = 'default' | 'success' | 'warning' | 'danger'
-
-export interface ToastivaItem {
-  id: string
-  title?: string
-  description?: string
-  variant?: ToastivaVariant
-  position?: ToastivaPosition
-  duration?: number
-}
-
-type ToastivaInput = Omit<ToastivaItem, 'id'>
-
-// ---------------------------------------------------------------------------
-// Module-level store (no useEffect — uses useSyncExternalStore)
-// ---------------------------------------------------------------------------
-let _toastivaItems: ToastivaItem[] = []
-const _toastivaSubscribers = new Set<() => void>()
-
-function _notify() {
-  _toastivaSubscribers.forEach((cb) => cb())
-}
-
-function _subscribe(cb: () => void) {
-  _toastivaSubscribers.add(cb)
-  return () => { _toastivaSubscribers.delete(cb) }
-}
-
-function _getSnapshot(): ToastivaItem[] {
-  return _toastivaItems
-}
-
-// ---------------------------------------------------------------------------
-// Public imperative API (mirror of toastiva RN library shape)
-// ---------------------------------------------------------------------------
-function _show(input: ToastivaInput): string {
-  const id = Math.random().toString(36).slice(2)
-  const dur = input.duration ?? 4000
-  _toastivaItems = [..._toastivaItems, { ...input, id }]
-  _notify()
-  setTimeout(() => { _dismissToastiva(id) }, dur)
-  return id
-}
-
-export function toastiva(input: ToastivaInput): string { return _show(input) }
-toastiva.success = (title: string, opts?: Omit<ToastivaInput, 'title' | 'variant'>) =>
-  _show({ ...opts, title, variant: 'success' })
-toastiva.warning = (title: string, opts?: Omit<ToastivaInput, 'title' | 'variant'>) =>
-  _show({ ...opts, title, variant: 'warning' })
-toastiva.danger = (title: string, opts?: Omit<ToastivaInput, 'title' | 'variant'>) =>
-  _show({ ...opts, title, variant: 'danger' })
-toastiva.dismiss = _dismissToastiva
-
-function _dismissToastiva(id: string): void {
-  _toastivaItems = _toastivaItems.filter((t) => t.id !== id)
-  _notify()
-}
-
-// ---------------------------------------------------------------------------
-// useToastiva — React binding (useSyncExternalStore, no useEffect)
-// ---------------------------------------------------------------------------
-export function useToastiva(): {
-  toasts: ToastivaItem[]
-  dismiss: (id: string) => void
-  show: (input: ToastivaInput) => string
-} {
-  const toasts = useSyncExternalStore(_subscribe, _getSnapshot, _getSnapshot)
-  return { toasts, dismiss: _dismissToastiva, show: _show }
-}
+export type { ToastivaPosition, ToastivaVariant, ToastivaItem }
+export { toastiva, useToastiva }
 
 // ---------------------------------------------------------------------------
 // Position helpers
@@ -182,7 +114,7 @@ function ToastivaCard({ item, position, reducedMotion }: ToastivaCardProps) {
     : { y: 32, opacity: 0, scale: 0.96 }
 
   return (
-    <motion.div
+    <m.div
       layout
       initial={reducedMotion ? { opacity: 0 } : slideInitial}
       animate={{
@@ -254,7 +186,7 @@ function ToastivaCard({ item, position, reducedMotion }: ToastivaCardProps) {
         </button>
       </div>
     </div>
-    </motion.div>
+    </m.div>
   )
 }
 
@@ -336,3 +268,5 @@ export function Toastiva({ defaultPosition = 'bottom-right' }: ToastivaProps) {
     </>
   )
 }
+
+export { ToastivaCard, ToastivaContainer }

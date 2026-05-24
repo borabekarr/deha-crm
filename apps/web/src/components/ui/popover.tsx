@@ -1,6 +1,7 @@
 import * as React from 'react'
+import { use } from 'react'
 import * as PopoverPrimitive from '@radix-ui/react-popover'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, m, useReducedMotion } from 'framer-motion'
 import type { PopoverProps } from '@deha/ui-contracts'
 import { windowMorph } from '@deha/motion-tokens'
 import { cn } from '@/lib/utils'
@@ -65,7 +66,7 @@ interface PopoverContentProps
 }
 
 function PopoverContent({ ref, className, sideOffset = 8, children, ...props }: PopoverContentProps & { ref?: React.Ref<React.ElementRef<typeof PopoverPrimitive.Content>> }) {
-  const isOpen = React.useContext(PopoverOpenContext)
+  const isOpen = use(PopoverOpenContext)
   const reducedMotion = useReducedMotion() ?? false
   const morphConfig = windowMorph({ reducedMotion })
   const transition = {
@@ -95,7 +96,7 @@ function PopoverContent({ ref, className, sideOffset = 8, children, ...props }: 
             )}
             {...props}
           >
-            <motion.div
+            <m.div
               initial={{ opacity: 0, scale: 0.92 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
@@ -103,7 +104,7 @@ function PopoverContent({ ref, className, sideOffset = 8, children, ...props }: 
               style={{ transformOrigin: 'var(--radix-popover-content-transform-origin)' }}
             >
               {children}
-            </motion.div>
+            </m.div>
           </PopoverPrimitive.Content>
         )}
       </AnimatePresence>

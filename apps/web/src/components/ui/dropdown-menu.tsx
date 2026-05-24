@@ -1,6 +1,7 @@
 import * as React from 'react'
+import { use } from 'react'
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
-import { AnimatePresence, motion, LayoutGroup, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, m, LayoutGroup, useReducedMotion } from 'framer-motion'
 import type { DropdownMenuProps } from '@deha/ui-contracts'
 import { windowMorph, tabPillSlide } from '@deha/motion-tokens'
 import { cn } from '@/lib/utils'
@@ -84,7 +85,7 @@ DropdownMenuGroup.displayName = 'DropdownMenuGroup'
 // Escape closes (free from Radix).
 // ---------------------------------------------------------------------------
 function DropdownMenuContent({ ref, className, sideOffset = 6, children, ...props }: React.ComponentProps<typeof DropdownMenuPrimitive.Content>) {
-  const isOpen = React.useContext(DropdownMenuOpenContext)
+  const isOpen = use(DropdownMenuOpenContext)
   const reducedMotion = useReducedMotion() ?? false
   const morphConfig = windowMorph({ reducedMotion })
   const transition = {
@@ -119,7 +120,7 @@ function DropdownMenuContent({ ref, className, sideOffset = 6, children, ...prop
             )}
             {...props}
           >
-            <motion.div
+            <m.div
               initial={{ opacity: 0, scale: 0.92 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
@@ -131,7 +132,7 @@ function DropdownMenuContent({ ref, className, sideOffset = 6, children, ...prop
                   {children}
                 </LayoutGroup>
               </DropdownHoverContext.Provider>
-            </motion.div>
+            </m.div>
           </DropdownMenuPrimitive.Content>
         )}
       </AnimatePresence>
@@ -162,7 +163,7 @@ DropdownMenuLabel.displayName = 'DropdownMenuLabel'
 // Prototype .menu button: flex, gap .4rem, icons via .msi, red for destructive
 // ---------------------------------------------------------------------------
 function DropdownMenuItem({ ref, className, destructive, onMouseEnter, onMouseLeave, onFocus, onBlur, children, ...props }: React.ComponentProps<typeof DropdownMenuPrimitive.Item> & { destructive?: boolean }) {
-  const { hoveredId, setHoveredId, scopeId, prefersReducedMotion } = React.useContext(DropdownHoverContext)
+  const { hoveredId, setHoveredId, scopeId, prefersReducedMotion } = use(DropdownHoverContext)
   const itemId = React.useId()
   const isHovered = hoveredId === itemId
 
@@ -194,7 +195,7 @@ function DropdownMenuItem({ ref, className, destructive, onMouseEnter, onMouseLe
     >
       {/* Hover-only pill — slides between items via shared layoutId */}
       {isHovered && (
-        <motion.span
+        <m.span
           layoutId={`dropdown-hover-pill-${scopeId}`}
           data-motion-hover-pill="dropdown-hover-pill"
           className={cn(

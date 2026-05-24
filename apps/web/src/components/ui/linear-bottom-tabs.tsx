@@ -1,30 +1,10 @@
-// Compound namespace pattern — fast-refresh-safe
+// Compound namespace pattern — sub-components exported individually for fast-refresh.
 /* eslint-disable react-refresh/only-export-components */
 import * as React from 'react'
-import { motion, LayoutGroup, useReducedMotion } from 'framer-motion'
+import { m, LayoutGroup, useReducedMotion } from 'framer-motion'
 import { tabPillSlide } from '@deha/motion-tokens'
 import { cn } from '@/lib/utils'
-
-// ---------------------------------------------------------------------------
-// Context — active tab value + hover tab value + scope id
-// ---------------------------------------------------------------------------
-interface LinearBottomTabsContextValue {
-  activeValue: string
-  setActiveValue: (v: string) => void
-  hoveredValue: string | null
-  setHoveredValue: (v: string | null) => void
-  scopeId: string
-  prefersReducedMotion: boolean
-}
-
-const LinearBottomTabsContext = React.createContext<LinearBottomTabsContextValue>({
-  activeValue: '',
-  setActiveValue: () => undefined,
-  hoveredValue: null,
-  setHoveredValue: () => undefined,
-  scopeId: 'linear-bottom-tabs',
-  prefersReducedMotion: false,
-})
+import { LinearBottomTabsContext, useLinearBottomTabsContext } from './linear-bottom-tabs-context'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -124,7 +104,7 @@ function LinearBottomTabsTab({
   ...props
 }: LinearBottomTabsTabProps) {
   const { activeValue, setActiveValue, setHoveredValue, hoveredValue, scopeId, prefersReducedMotion } =
-    React.useContext(LinearBottomTabsContext)
+    useLinearBottomTabsContext()
 
   const isActive = activeValue === value
   const isHovered = hoveredValue === value
@@ -175,7 +155,7 @@ function LinearBottomTabsTab({
     >
       {/* Per-tab active indicator — always present when active */}
       {isActive && (
-        <motion.span
+        <m.span
           layoutId={`linear-tab-active-${scopeId}`}
           data-motion-indicator="true"
           className="absolute inset-0 -z-[1] rounded-xl bg-white/20 ring-1 ring-white/20"
@@ -187,7 +167,7 @@ function LinearBottomTabsTab({
       {/* Hover pill — slides between tabs via shared layoutId; rendered inside
           the hovered tab so it inherits a real bounding box. */}
       {isHovered && (
-        <motion.span
+        <m.span
           layoutId={`linear-tab-pill-${scopeId}`}
           data-motion-pill="linear-tab-pill"
           className="absolute inset-0 -z-[1] rounded-xl bg-white/15"
@@ -226,6 +206,7 @@ LinearBottomTabsTab.displayName = 'LinearBottomTabs.Tab'
 // ---------------------------------------------------------------------------
 // Compound namespace export
 // ---------------------------------------------------------------------------
+export { LinearBottomTabsRoot, LinearBottomTabsTab }
 export const LinearBottomTabs = {
   Root: LinearBottomTabsRoot,
   Tab: LinearBottomTabsTab,

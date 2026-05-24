@@ -142,8 +142,7 @@ function useWheelStore(): WheelStore {
   // Cleanup on unmount via useLayoutEffect with empty deps
   React.useLayoutEffect(() => {
     return () => _free(store.id)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [store.id])
 
   return store
 }
@@ -206,8 +205,7 @@ function WheelColumn({
         bag.el = null
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [id, scrollHandler, scrollEndHandler],
+    [id, scrollHandler, scrollEndHandler, selectedIndex],
   )
 
   // Sync scroll position when selectedIndex changes
@@ -221,7 +219,7 @@ function WheelColumn({
       top: selectedIndex * ITEM_HEIGHT,
       behavior: reducedMotion ? 'instant' : 'smooth',
     })
-  })
+  }, [selectedIndex, reducedMotion])
 
   // Read scroll state — subscribe and getSnapshot are plain object properties,
   // not ref accesses, so the React Compiler accepts them.
@@ -296,21 +294,31 @@ function WheelColumn({
           paddingBottom: ITEM_HEIGHT * HALF,
         }}
       >
-        {items.map((label, idx) => (
+        {items.map((label, idx) => {
+          const isActive = idx === currentIndex
+          function activateItem() {
+            const el = elRef.current
+            if (el) {
+              el.scrollTo({
+                top: idx * ITEM_HEIGHT,
+                behavior: reducedMotion ? 'instant' : 'smooth',
+              })
+            }
+            onSettle(idx)
+          }
+          return (
           <div
             key={label}
             id={`wheel-item-${wheelId}-${idx}`}
             role="option"
-            aria-selected={idx === currentIndex}
-            onClick={() => {
-              const el = elRef.current
-              if (el) {
-                el.scrollTo({
-                  top: idx * ITEM_HEIGHT,
-                  behavior: reducedMotion ? 'instant' : 'smooth',
-                })
+            aria-selected={isActive}
+            tabIndex={isActive ? 0 : -1}
+            onClick={activateItem}
+            onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                activateItem()
               }
-              onSettle(idx)
             }}
             className={cn(
               'flex items-center justify-center select-none cursor-default',
@@ -323,7 +331,8 @@ function WheelColumn({
           >
             {label}
           </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

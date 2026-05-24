@@ -1,6 +1,7 @@
 import * as React from 'react'
+import { use } from 'react'
 import * as NavigationMenuPrimitive from '@radix-ui/react-navigation-menu'
-import { motion, LayoutGroup, useReducedMotion } from 'framer-motion'
+import { m, LayoutGroup, useReducedMotion } from 'framer-motion'
 import { tabMorph } from '@deha/motion-tokens'
 import type { NavigationMenuProps } from '@deha/ui-contracts'
 import { cn } from '@/lib/utils'
@@ -77,7 +78,7 @@ NavigationMenuItem.displayName = 'NavigationMenuItem'
 //   color neutral-500, pill radius. Active: neutral-900 bg, white text.
 // ---------------------------------------------------------------------------
 function NavigationMenuTrigger({ ref, className, children, ...props }: React.ComponentProps<typeof NavigationMenuPrimitive.Trigger>) {
-  const { hoveredId, setHoveredId, scopeId } = React.useContext(NavigationMenuContext)
+  const { hoveredId, setHoveredId, scopeId } = use(NavigationMenuContext)
   const itemId = React.useId()
   const isHovered = hoveredId === itemId
 
@@ -109,7 +110,7 @@ function NavigationMenuTrigger({ ref, className, children, ...props }: React.Com
     >
       {/* Morphing background indicator */}
       {isHovered && (
-        <motion.span
+        <m.span
           layoutId={`nav-indicator-${scopeId}`}
           data-motion-indicator="true"
           className="absolute inset-0 -z-[1] rounded-full bg-muted"
@@ -163,7 +164,7 @@ NavigationMenuContent.displayName = 'NavigationMenuContent'
 // Prototype .navmenu a active state: neutral-900 bg, white text, inner shadow.
 // ---------------------------------------------------------------------------
 function NavigationMenuLink({ ref, className, active, ...props }: React.ComponentProps<typeof NavigationMenuPrimitive.Link> & { active?: boolean }) {
-  const { hoveredId, setHoveredId, scopeId } = React.useContext(NavigationMenuContext)
+  const { hoveredId, setHoveredId, scopeId } = use(NavigationMenuContext)
   const itemId = React.useId()
   // Show indicator when hovered OR when link is explicitly marked active
   const isHighlighted = hoveredId === itemId || (active === true && hoveredId === null)
@@ -197,7 +198,7 @@ function NavigationMenuLink({ ref, className, active, ...props }: React.Componen
     >
       {/* Morphing background indicator */}
       {isHighlighted && (
-        <motion.span
+        <m.span
           layoutId={`nav-indicator-${scopeId}`}
           data-motion-indicator="true"
           className="absolute inset-0 -z-[1] rounded-full bg-muted"

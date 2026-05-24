@@ -115,7 +115,7 @@ export function MapsSheetSection() {
                 <button
                   key={place.id}
                   type="button"
-                  className="flex w-full items-center gap-3 rounded-xl border border-neutral-100 dark:border-neutral-700/60 bg-neutral-50 dark:bg-neutral-800/60 px-3 py-3 text-left hover:bg-neutral-100 dark:hover:bg-neutral-700/60 transition-colors"
+                  className="flex w-full items-center gap-3 rounded-xl border border-neutral-100 dark:border-neutral-700/60 bg-neutral-50 dark:bg-neutral-800/60 p-3 text-left hover:bg-neutral-100 dark:hover:bg-neutral-700/60 transition-colors"
                 >
                   {/* Emoji icon */}
                   <span

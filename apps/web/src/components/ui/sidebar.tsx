@@ -1,6 +1,7 @@
 import * as React from 'react'
+import { use } from 'react'
 import { Drawer } from 'vaul'
-import { motion, LayoutGroup, useReducedMotion } from 'framer-motion'
+import { m, LayoutGroup, useReducedMotion } from 'framer-motion'
 import { tabMorph, tabPillSlide } from '@deha/motion-tokens'
 import type { SidebarProps } from '@deha/ui-contracts'
 import { cn } from '@/lib/utils'
@@ -111,7 +112,7 @@ SidebarHeader.displayName = 'SidebarHeader'
 // Two LayoutGroups: one for active indicator, one for hover pill.
 // ---------------------------------------------------------------------------
 const SidebarContent = ({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) => {
-  const { scopeId } = React.useContext(SidebarContext)
+  const { scopeId } = use(SidebarContext)
   return (
     <div
       className={cn('flex flex-1 flex-col overflow-y-auto overflow-x-hidden px-3 py-4 gap-1', className)}
@@ -147,7 +148,7 @@ interface SidebarItemProps extends React.AnchorHTMLAttributes<HTMLAnchorElement>
 }
 
 function SidebarItem({ ref, className, active, icon, children, onMouseEnter, onMouseLeave, onFocus, onBlur, ...props }: SidebarItemProps & { ref?: React.Ref<HTMLAnchorElement> }) {
-  const { scopeId, setHoveredItemId, hoveredItemId } = React.useContext(SidebarContext)
+  const { scopeId, setHoveredItemId, hoveredItemId } = use(SidebarContext)
 
   // Stable item id derived from children string or icon — use useId as stable fallback
   const itemId = React.useId()
@@ -189,7 +190,7 @@ function SidebarItem({ ref, className, active, icon, children, onMouseEnter, onM
     >
       {/* Full-row morph indicator — only rendered on active item */}
       {active && (
-        <motion.span
+        <m.span
           layoutId={`sidebar-indicator-${scopeId}`}
           data-motion-indicator="true"
           className="absolute inset-0 -z-[1] rounded-lg bg-[var(--emerald-50,oklch(0.979_0.021_166.113))]"
@@ -199,7 +200,7 @@ function SidebarItem({ ref, className, active, icon, children, onMouseEnter, onM
       )}
       {/* Hover-only pill — second layer, distinct layoutId; hidden when no item hovered */}
       {isHovered && (
-        <motion.span
+        <m.span
           layoutId={`sidebar-hover-pill-${scopeId}`}
           data-motion-hover-pill="sidebar-hover-pill"
           className="absolute inset-0 -z-[2] rounded-lg bg-neutral-100 dark:bg-neutral-800"

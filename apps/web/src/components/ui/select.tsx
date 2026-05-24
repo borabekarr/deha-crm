@@ -1,6 +1,7 @@
 import * as React from 'react'
+import { use } from 'react'
 import * as SelectPrimitive from '@radix-ui/react-select'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, m, useReducedMotion } from 'framer-motion'
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 import type { SelectProps } from '@deha/ui-contracts'
 import { windowMorph } from '@deha/motion-tokens'
@@ -100,7 +101,7 @@ SelectTrigger.displayName = 'SelectTrigger'
 function SelectContent({ ref, className, children, position = 'popper', ...props }: React.ComponentProps<typeof SelectPrimitive.Content>) {
   // AnimatePresence + forceMount: Radix owns DOM lifecycle; we own animation lifecycle.
   // forceMount keeps the node alive for exit animation; AnimatePresence drives mount/unmount.
-  const isOpen = React.useContext(SelectOpenContext)
+  const isOpen = use(SelectOpenContext)
   const reducedMotion = useReducedMotion() ?? false
   const morphConfig = windowMorph({ reducedMotion })
   const transition = {
@@ -129,7 +130,7 @@ function SelectContent({ ref, className, children, position = 'popper', ...props
             )}
             {...props}
           >
-            <motion.div
+            <m.div
               initial={{ opacity: 0, scale: 0.92 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.92 }}
@@ -151,7 +152,7 @@ function SelectContent({ ref, className, children, position = 'popper', ...props
               <SelectPrimitive.ScrollDownButton className="flex items-center justify-center py-1 text-neutral-500">
                 <ChevronDownIcon className="size-4" />
               </SelectPrimitive.ScrollDownButton>
-            </motion.div>
+            </m.div>
           </SelectPrimitive.Content>
         </SelectPrimitive.Portal>
       )}

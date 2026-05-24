@@ -1,31 +1,17 @@
+/* eslint-disable react-refresh/only-export-components */
 import * as React from 'react'
 import { useReducedMotion } from 'framer-motion'
 import { Drawer } from 'vaul'
 import { cn } from '@/lib/utils'
 import { sheetDetent } from '@deha/motion-tokens'
-
-// ---------------------------------------------------------------------------
-// Snap points for Apple Maps peek / half / full behaviour
-// ---------------------------------------------------------------------------
-const SNAP_POINTS = [0.18, 0.5, 0.95] as const
-const FADE_FROM_INDEX = 1
-
-// Map snap index → overlay opacity (0 at peek, ~0.3 at half, ~0.5 at full)
-const OVERLAY_OPACITY: Record<number, number> = { 0: 0, 1: 0.3, 2: 0.5 }
-
-// ---------------------------------------------------------------------------
-// Context
-// ---------------------------------------------------------------------------
-interface MapsSheetCtx {
-  activeSnapIndex: number
-  reducedMotion: boolean
-  transitionDuration: number
-}
-const MapsSheetContext = React.createContext<MapsSheetCtx>({
-  activeSnapIndex: 0,
-  reducedMotion: false,
-  transitionDuration: 280,
-})
+import {
+  type MapsSheetCtx,
+  MapsSheetContext,
+  useMapsSheetContext,
+  SNAP_POINTS,
+  FADE_FROM_INDEX,
+  OVERLAY_OPACITY,
+} from './maps-sheet-context'
 
 // ---------------------------------------------------------------------------
 // Root
@@ -92,7 +78,7 @@ MapsSheetTrigger.displayName = 'MapsSheet.Trigger'
 // Backdrop — custom because Vaul's Overlay has no built-in opacity-by-snap-point API
 // ---------------------------------------------------------------------------
 function MapsSheetBackdrop({ className }: { className?: string }) {
-  const { activeSnapIndex, transitionDuration } = React.use(MapsSheetContext)
+  const { activeSnapIndex, transitionDuration } = useMapsSheetContext()
   const opacity = OVERLAY_OPACITY[activeSnapIndex] ?? 0
 
   return (
@@ -116,7 +102,7 @@ function MapsSheetContent({
   children,
   ...props
 }: React.ComponentProps<typeof Drawer.Content>) {
-  const { transitionDuration } = React.use(MapsSheetContext)
+  const { transitionDuration } = useMapsSheetContext()
 
   return (
     <Drawer.Portal>
@@ -189,6 +175,7 @@ MapsSheetTitle.displayName = 'MapsSheet.Title'
 // ---------------------------------------------------------------------------
 // Compound namespace export
 // ---------------------------------------------------------------------------
+export { MapsSheetRoot, MapsSheetTrigger, MapsSheetBackdrop, MapsSheetContent, MapsSheetHeader, MapsSheetTitle }
 export const MapsSheet = {
   Root: MapsSheetRoot,
   Trigger: MapsSheetTrigger,

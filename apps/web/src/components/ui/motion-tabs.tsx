@@ -1,20 +1,12 @@
 // Compound namespace pattern: all sub-components are collected into MotionTabs
-// and only the namespace is exported — fast-refresh still works on the namespace.
+// and also exported individually for fast-refresh compatibility.
 /* eslint-disable react-refresh/only-export-components */
 import * as React from 'react'
 import * as TabsPrimitive from '@radix-ui/react-tabs'
-import { motion, LayoutGroup, useReducedMotion } from 'framer-motion'
+import { m, LayoutGroup, useReducedMotion } from 'framer-motion'
 import { tabMorph } from '@deha/motion-tokens'
 import { cn } from '@/lib/utils'
-
-// ---------------------------------------------------------------------------
-// Internal context — tracks which tab value is currently active so Trigger
-// can conditionally render the shared layoutId indicator without useEffect.
-// ---------------------------------------------------------------------------
-const MotionTabsContext = React.createContext<{
-  activeValue: string
-  setActiveValue: (v: string) => void
-}>({ activeValue: '', setActiveValue: () => undefined })
+import { MotionTabsContext, useMotionTabsContext } from './motion-tabs-context'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -50,8 +42,13 @@ function MotionTabsRoot({
     [onValueChange],
   )
 
+  const ctxValue = React.useMemo(
+    () => ({ activeValue, setActiveValue: handleValueChange }),
+    [activeValue, handleValueChange],
+  )
+
   return (
-    <MotionTabsContext.Provider value={{ activeValue, setActiveValue: handleValueChange }}>
+    <MotionTabsContext.Provider value={ctxValue}>
       <LayoutGroup id={scopeId}>
         <TabsPrimitive.Root
           ref={ref}
@@ -102,7 +99,7 @@ function MotionTabsTrigger({
   value,
   ...props
 }: React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger> & { ref?: React.Ref<HTMLButtonElement> }) {
-  const { activeValue } = React.useContext(MotionTabsContext)
+  const { activeValue } = useMotionTabsContext()
   const isActive = activeValue === value
 
   const prefersReducedMotion = useReducedMotion() ?? false
@@ -133,7 +130,7 @@ function MotionTabsTrigger({
       {/* Morphing background indicator — only rendered in active trigger so
           framer-motion's shared-layout animation moves it to the new position */}
       {isActive && (
-        <motion.span
+        <m.span
           layoutId="motion-tabs-indicator"
           className="absolute inset-0 -z-[1] rounded-full bg-neutral-900 dark:bg-neutral-100 shadow-[0_4px_12px_-2px_rgb(15_23_42_/_0.2)]"
           transition={transition}
@@ -170,6 +167,7 @@ MotionTabsContent.displayName = 'MotionTabs.Content'
 // ---------------------------------------------------------------------------
 // Compound namespace export
 // ---------------------------------------------------------------------------
+export { MotionTabsRoot, MotionTabsList, MotionTabsTrigger, MotionTabsContent }
 export const MotionTabs = {
   Root: MotionTabsRoot,
   List: MotionTabsList,

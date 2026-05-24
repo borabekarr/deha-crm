@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { motion, LayoutGroup, useReducedMotion } from 'framer-motion'
+import { m, LayoutGroup, useReducedMotion } from 'framer-motion'
 import { tabMorph } from '@deha/motion-tokens'
 import type { PaginationProps } from '@deha/ui-contracts'
 import { cn } from '@/lib/utils'
@@ -167,7 +167,7 @@ function Pagination({
             >
               {/* Morphing active indicator — only rendered behind the current page */}
               {p === page && (
-                <motion.span
+                <m.span
                   layoutId={`pagination-indicator-${scopeId}`}
                   data-motion-indicator="true"
                   className="absolute inset-0 -z-[1] rounded-xl bg-neutral-900"

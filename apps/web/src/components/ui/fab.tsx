@@ -1,40 +1,26 @@
+/* eslint-disable react-refresh/only-export-components */
 import * as React from 'react'
 import {
   AnimatePresence,
-  motion,
+  m,
   useReducedMotion,
   type Variants,
 } from 'framer-motion'
 import { fabStaggerOpen } from '@deha/motion-tokens'
 import { cn } from '@/lib/utils'
-
-// ---------------------------------------------------------------------------
-// Context
-// ---------------------------------------------------------------------------
-interface FABContextValue {
-  open: boolean
-  setOpen: (v: boolean) => void
-}
-
-const FABContext = React.createContext<FABContextValue | null>(null)
-
-function useFABContext() {
-  const ctx = React.useContext(FABContext)
-  if (!ctx) throw new Error('FAB compound components must be used inside <FAB.Root>')
-  return ctx
-}
+import { FabContext, useFabContext } from './fab-context'
 
 // ---------------------------------------------------------------------------
 // Root
 // ---------------------------------------------------------------------------
-interface FABRootProps {
+interface FabRootProps {
   children: React.ReactNode
   open?: boolean
   onOpenChange?: (v: boolean) => void
   defaultOpen?: boolean
 }
 
-function FABRoot({ children, open: openProp, onOpenChange, defaultOpen = false }: FABRootProps) {
+function FabRoot({ children, open: openProp, onOpenChange, defaultOpen = false }: FabRootProps) {
   const [internalOpen, setInternalOpen] = React.useState(defaultOpen)
   const isOpen = openProp ?? internalOpen
 
@@ -46,23 +32,25 @@ function FABRoot({ children, open: openProp, onOpenChange, defaultOpen = false }
     [openProp, onOpenChange],
   )
 
-  return <FABContext.Provider value={{ open: isOpen, setOpen }}>{children}</FABContext.Provider>
+  const contextValue = React.useMemo(() => ({ open: isOpen, setOpen }), [isOpen, setOpen])
+
+  return <FabContext.Provider value={contextValue}>{children}</FabContext.Provider>
 }
-FABRoot.displayName = 'FAB.Root'
+FabRoot.displayName = 'Fab.Root'
 
 // ---------------------------------------------------------------------------
 // Trigger (default: the circular FAB button)
 // ---------------------------------------------------------------------------
-interface FABTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface FabTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** If true, renders as fixed; if false, renders as absolute (for showcase). Default true. */
   fixed?: boolean
 }
 
-function FABTrigger({ className, fixed = true, 'aria-label': ariaLabel, ...props }: FABTriggerProps) {
-  const { open, setOpen } = useFABContext()
+function FabTrigger({ className, fixed = true, 'aria-label': ariaLabel, ...props }: FabTriggerProps) {
+  const { open, setOpen } = useFabContext()
 
   return (
-    <motion.button
+    <m.button
       type="button"
       aria-label={ariaLabel ?? (open ? 'Close menu' : 'Open menu')}
       aria-expanded={open}
@@ -76,7 +64,7 @@ function FABTrigger({ className, fixed = true, 'aria-label': ariaLabel, ...props
         fixed ? 'fixed bottom-6 right-6' : 'absolute bottom-6 right-6',
         className,
       )}
-      {...(props as React.ComponentPropsWithoutRef<typeof motion.button>)}
+      {...(props as React.ComponentPropsWithoutRef<typeof m.button>)}
     >
       {/* Plus icon — morphs to X via parent rotate */}
       <svg
@@ -94,15 +82,15 @@ function FABTrigger({ className, fixed = true, 'aria-label': ariaLabel, ...props
         <line x1="12" y1="5" x2="12" y2="19" />
         <line x1="5" y1="12" x2="19" y2="12" />
       </svg>
-    </motion.button>
+    </m.button>
   )
 }
-FABTrigger.displayName = 'FAB.Trigger'
+FabTrigger.displayName = 'Fab.Trigger'
 
 // ---------------------------------------------------------------------------
 // MenuItem
 // ---------------------------------------------------------------------------
-interface FABMenuItemProps {
+interface FabMenuItemProps {
   label: string
   icon: React.ReactNode
   onClick?: () => void
@@ -115,20 +103,20 @@ const menuItemVariants: Variants = {
   exit: { opacity: 0, y: 8, scale: 0.94 },
 }
 
-function FABMenuItem({ label, icon, onClick, className }: FABMenuItemProps) {
-  const { setOpen } = useFABContext()
+function FabMenuItem({ label, icon, onClick, className }: FabMenuItemProps) {
+  const { setOpen } = useFabContext()
 
-  const handleClick = () => {
+  const activateItem = () => {
     onClick?.()
     setOpen(false)
   }
 
   return (
-    <motion.button
+    <m.button
       type="button"
       role="menuitem"
       variants={menuItemVariants}
-      onClick={handleClick}
+      onClick={activateItem}
       className={cn(
         'flex w-full items-center gap-3 rounded-2xl bg-white/90 dark:bg-neutral-900/90 px-4 py-3 text-sm font-medium text-neutral-800 dark:text-neutral-100 shadow-md shadow-black/5 hover:bg-white dark:hover:bg-neutral-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100',
         className,
@@ -138,23 +126,23 @@ function FABMenuItem({ label, icon, onClick, className }: FABMenuItemProps) {
         {icon}
       </span>
       <span>{label}</span>
-    </motion.button>
+    </m.button>
   )
 }
-FABMenuItem.displayName = 'FAB.MenuItem'
+FabMenuItem.displayName = 'Fab.MenuItem'
 
 // ---------------------------------------------------------------------------
 // Overlay — full-screen backdrop + staggered menu list
 // ---------------------------------------------------------------------------
-interface FABOverlayProps {
+interface FabOverlayProps {
   children: React.ReactNode
   /** If true, overlay uses fixed; if false, absolute (for showcase). Default true. */
   fixed?: boolean
   className?: string
 }
 
-function FABOverlay({ children, fixed = true, className }: FABOverlayProps) {
-  const { open, setOpen } = useFABContext()
+function FabOverlay({ children, fixed = true, className }: FabOverlayProps) {
+  const { open, setOpen } = useFabContext()
   const reducedMotion = useReducedMotion() ?? false
   const stagger = fabStaggerOpen({ reducedMotion })
 
@@ -208,7 +196,7 @@ function FABOverlay({ children, fixed = true, className }: FABOverlayProps) {
       {open && (
         <>
           {/* Backdrop */}
-          <motion.div
+          <m.div
             key="fab-backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -222,7 +210,7 @@ function FABOverlay({ children, fixed = true, className }: FABOverlayProps) {
           />
 
           {/* Menu items column */}
-          <motion.div
+          <m.div
             key="fab-menu"
             role="menu"
             aria-label="Floating action menu"
@@ -238,20 +226,21 @@ function FABOverlay({ children, fixed = true, className }: FABOverlayProps) {
             )}
           >
             {children}
-          </motion.div>
+          </m.div>
         </>
       )}
     </AnimatePresence>
   )
 }
-FABOverlay.displayName = 'FAB.Overlay'
+FabOverlay.displayName = 'Fab.Overlay'
 
 // ---------------------------------------------------------------------------
 // Compound export
 // ---------------------------------------------------------------------------
-export const FAB = {
-  Root: FABRoot,
-  Trigger: FABTrigger,
-  Overlay: FABOverlay,
-  MenuItem: FABMenuItem,
+export { FabRoot, FabTrigger, FabOverlay, FabMenuItem }
+export const Fab = {
+  Root: FabRoot,
+  Trigger: FabTrigger,
+  Overlay: FabOverlay,
+  MenuItem: FabMenuItem,
 }

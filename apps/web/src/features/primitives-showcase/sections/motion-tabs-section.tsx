@@ -29,10 +29,10 @@ export function MotionTabsSection() {
             </MotionTabs.Trigger>
           </MotionTabs.List>
           <MotionTabs.Content value="home">
-            <p className="text-sm text-neutral-600 dark:text-neutral-300">Home panel — the indicator morphs here.</p>
+            <p className="text-sm text-neutral-600 dark:text-neutral-300">Home panel (the indicator morphs here).</p>
           </MotionTabs.Content>
           <MotionTabs.Content value="search">
-            <p className="text-sm text-neutral-600 dark:text-neutral-300">Search panel — indicator morphed from Home.</p>
+            <p className="text-sm text-neutral-600 dark:text-neutral-300">Search panel (indicator morphed from Home).</p>
           </MotionTabs.Content>
         </MotionTabs.Root>
       </div>

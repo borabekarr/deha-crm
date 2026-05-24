@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area'
-import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion'
+import { m, useScroll, useTransform, useReducedMotion } from 'framer-motion'
 import { progressiveBlur } from '@deha/motion-tokens'
 import type { ScrollAreaProps } from '@deha/ui-contracts'
 import { cn } from '@/lib/utils'
@@ -41,7 +41,7 @@ function ScrollArea({
       {...props}
     >
       {progressiveHeader != null && (
-        <motion.div
+        <m.div
           data-scroll-area-progressive-header=""
           style={{ '--blur-px': blurPx } as React.CSSProperties}
           className={cn(
@@ -53,7 +53,7 @@ function ScrollArea({
           )}
         >
           {progressiveHeader}
-        </motion.div>
+        </m.div>
       )}
       <ScrollAreaPrimitive.Viewport ref={viewportRef} tabIndex={0} className="h-full w-full rounded-[inherit]">
         {children}

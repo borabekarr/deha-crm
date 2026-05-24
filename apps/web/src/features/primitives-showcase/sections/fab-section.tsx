@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FAB } from '@/components/ui/fab'
+import { Fab } from '@/components/ui/fab'
 
 const MENU_ITEMS = [
   {
@@ -96,29 +96,29 @@ export function FABSection() {
           </div>
 
           {/* Contained FAB */}
-          <FAB.Root>
-            <FAB.Overlay fixed={false}>
+          <Fab.Root>
+            <Fab.Overlay fixed={false}>
               {MENU_ITEMS.map((item) => (
-                <FAB.MenuItem
+                <Fab.MenuItem
                   key={item.id}
                   label={item.label}
                   icon={item.icon}
                   onClick={() => {}}
                 />
               ))}
-            </FAB.Overlay>
-            <FAB.Trigger fixed={false} aria-label="Open CRM actions" />
-          </FAB.Root>
+            </Fab.Overlay>
+            <Fab.Trigger fixed={false} aria-label="Open CRM actions" />
+          </Fab.Root>
         </div>
       </div>
 
       {/* Fixed FAB toggle */}
       <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-6">
         <p className="mb-4 text-xs font-medium text-neutral-400 uppercase tracking-wider">
-          Fixed FAB (position: fixed — bottom-right of viewport)
+          Fixed FAB (position: fixed, bottom-right of viewport)
         </p>
         <p className="mb-4 text-sm text-neutral-500 dark:text-neutral-400">
-          Click the button below to mount a truly fixed FAB. The FAB will appear
+          Click the button below to mount a truly fixed Fab. The FAB will appear
           fixed to the bottom-right corner of the page. Click it to open/close the
           menu. Clicking anywhere outside, or pressing{' '}
           <kbd className="font-mono text-xs bg-neutral-100 dark:bg-neutral-700 px-1.5 py-0.5 rounded border border-neutral-200 dark:border-neutral-600">Esc</kbd>
@@ -134,25 +134,25 @@ export function FABSection() {
           </button>
           {mounted && (
             <span className="inline-flex items-center text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-              FAB active — look bottom-right
+              FAB active: look bottom-right
             </span>
           )}
         </div>
 
         {mounted && (
-          <FAB.Root>
-            <FAB.Overlay fixed>
+          <Fab.Root>
+            <Fab.Overlay fixed>
               {MENU_ITEMS.map((item) => (
-                <FAB.MenuItem
+                <Fab.MenuItem
                   key={item.id}
                   label={item.label}
                   icon={item.icon}
                   onClick={() => {}}
                 />
               ))}
-            </FAB.Overlay>
-            <FAB.Trigger fixed aria-label="Open CRM actions" />
-          </FAB.Root>
+            </Fab.Overlay>
+            <Fab.Trigger fixed aria-label="Open CRM actions" />
+          </Fab.Root>
         )}
       </div>
     </section>

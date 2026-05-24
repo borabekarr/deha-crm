@@ -1,6 +1,7 @@
 import * as React from 'react'
+import { use } from 'react'
 import * as TooltipPrimitive from '@radix-ui/react-tooltip'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, m, useReducedMotion } from 'framer-motion'
 import type { TooltipProps } from '@deha/ui-contracts'
 import { windowMorph } from '@deha/motion-tokens'
 import { cn } from '@/lib/utils'
@@ -100,7 +101,7 @@ TooltipPortal.displayName = 'TooltipPortal'
 // sideOffset default 6 px (comfortable for hover targets)
 // ---------------------------------------------------------------------------
 function TooltipContent({ ref, className, sideOffset = 6, children, ...props }: React.ComponentProps<typeof TooltipPrimitive.Content>) {
-  const isOpen = React.useContext(TooltipOpenContext)
+  const isOpen = use(TooltipOpenContext)
   const reducedMotion = useReducedMotion() ?? false
   const morphConfig = windowMorph({ reducedMotion })
   const transition = {
@@ -127,7 +128,7 @@ function TooltipContent({ ref, className, sideOffset = 6, children, ...props }: 
             )}
             {...props}
           >
-            <motion.div
+            <m.div
               initial={{ opacity: 0, scale: 0.92 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
@@ -135,7 +136,7 @@ function TooltipContent({ ref, className, sideOffset = 6, children, ...props }: 
               style={{ transformOrigin: 'var(--radix-tooltip-content-transform-origin)' }}
             >
               {children}
-            </motion.div>
+            </m.div>
           </TooltipPrimitive.Content>
         )}
       </AnimatePresence>

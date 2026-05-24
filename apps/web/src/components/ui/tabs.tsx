@@ -1,6 +1,7 @@
 import * as React from 'react'
+import { use } from 'react'
 import * as TabsPrimitive from '@radix-ui/react-tabs'
-import { motion, LayoutGroup, useReducedMotion } from 'framer-motion'
+import { m, LayoutGroup, useReducedMotion } from 'framer-motion'
 import { tabMorph } from '@deha/motion-tokens'
 import type { TabsProps } from '@deha/ui-contracts'
 import { cn } from '@/lib/utils'
@@ -80,7 +81,7 @@ TabsList.displayName = 'TabsList'
 
 // ---------------------------------------------------------------------------
 // Trigger — pill button; morphing shared-element indicator behind active tab
-// Active background is rendered as a layoutId motion.span (derived state only,
+// Active background is rendered as a layoutId m.span (derived state only,
 // no useEffect). Static bg classes removed from active state — indicator handles it.
 // ---------------------------------------------------------------------------
 function TabsTrigger({
@@ -90,7 +91,7 @@ function TabsTrigger({
   children,
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
-  const { activeValue, scopeId } = React.useContext(TabsContext)
+  const { activeValue, scopeId } = use(TabsContext)
   const isActive = activeValue === value
 
   const prefersReducedMotion = useReducedMotion() ?? false
@@ -123,7 +124,7 @@ function TabsTrigger({
       {/* Morphing background indicator — only rendered in active trigger.
           Framer Motion moves it to the new position via shared layoutId. */}
       {isActive && (
-        <motion.span
+        <m.span
           layoutId={`tabs-indicator-${scopeId}`}
           data-motion-indicator="true"
           className="absolute inset-0 -z-[1] rounded-full bg-neutral-900 shadow-[0_4px_12px_-2px_rgb(15_23_42_/_0.2)]"
