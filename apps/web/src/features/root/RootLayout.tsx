@@ -3,6 +3,7 @@ import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import { Agentation } from 'agentation'
 import { motionTransition } from '@/lib/motion'
 import Toaster from '@/components/ui/toaster'
+import { Toastiva } from '@/components/ui/toastiva'
 
 const CURRENT_YEAR = new Date().getFullYear()
 
@@ -17,6 +18,7 @@ export function RootLayout() {
       <>
         <Outlet />
         <Toaster />
+        <Toastiva />
         {import.meta.env.DEV && <TanStackRouterDevtools />}
         {import.meta.env.DEV && <Agentation />}
       </>
@@ -35,6 +37,7 @@ export function RootLayout() {
         &copy; {CURRENT_YEAR} Deha Automation
       </footer>
       <Toaster />
+      <Toastiva />
       {import.meta.env.DEV && <TanStackRouterDevtools />}
       {import.meta.env.DEV && <Agentation />}
     </>

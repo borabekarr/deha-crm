@@ -1,7 +1,18 @@
 import * as React from 'react'
 import * as NavigationMenuPrimitive from '@radix-ui/react-navigation-menu'
+import { motion, LayoutGroup, useReducedMotion } from 'framer-motion'
+import { tabMorph } from '@deha/motion-tokens'
 import type { NavigationMenuProps } from '@deha/ui-contracts'
 import { cn } from '@/lib/utils'
+
+// ---------------------------------------------------------------------------
+// Context — tracks hovered/active item for shared-element morph indicator
+// ---------------------------------------------------------------------------
+const NavigationMenuContext = React.createContext<{
+  hoveredId: string | null
+  setHoveredId: (id: string | null) => void
+  scopeId: string
+}>({ hoveredId: null, setHoveredId: () => undefined, scopeId: 'nav' })
 
 // ---------------------------------------------------------------------------
 // Root — pill-shaped horizontal nav bar
@@ -13,21 +24,31 @@ const NavigationMenu = ({
   className,
   children,
   ...props
-}: NavigationMenuProps & React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Root>) => (
-  <NavigationMenuPrimitive.Root
-    className={cn(
-      'relative inline-flex items-center gap-1 p-1.5 rounded-full',
-      'bg-white/70 backdrop-blur-[40px]',
-      'border border-white/60',
-      'shadow-[0_4px_6px_-1px_rgb(0_0_0_/_0.10),0_2px_4px_-1px_rgb(0_0_0_/_0.06),inset_0_1px_0_rgb(255_255_255_/_0.4)]',
-      className,
-    )}
-    {...props}
-  >
-    {children}
-    <NavigationMenuViewport />
-  </NavigationMenuPrimitive.Root>
-)
+}: NavigationMenuProps & React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Root>) => {
+  const [hoveredId, setHoveredId] = React.useState<string | null>(null)
+  const scopeId = React.useId()
+  const ctx = React.useMemo(() => ({ hoveredId, setHoveredId, scopeId }), [hoveredId, scopeId])
+
+  return (
+    <NavigationMenuContext.Provider value={ctx}>
+      <LayoutGroup id={`nav-indicator-${scopeId}`}>
+        <NavigationMenuPrimitive.Root
+          className={cn(
+            'relative inline-flex items-center gap-1 p-1.5 rounded-full',
+            'bg-white/70 backdrop-blur-[40px]',
+            'border border-white/60',
+            'shadow-[0_4px_6px_-1px_rgb(0_0_0_/_0.10),0_2px_4px_-1px_rgb(0_0_0_/_0.06),inset_0_1px_0_rgb(255_255_255_/_0.4)]',
+            className,
+          )}
+          {...props}
+        >
+          {children}
+          <NavigationMenuViewport />
+        </NavigationMenuPrimitive.Root>
+      </LayoutGroup>
+    </NavigationMenuContext.Provider>
+  )
+}
 NavigationMenu.displayName = 'NavigationMenu'
 
 // ---------------------------------------------------------------------------
@@ -56,21 +77,46 @@ NavigationMenuItem.displayName = 'NavigationMenuItem'
 //   color neutral-500, pill radius. Active: neutral-900 bg, white text.
 // ---------------------------------------------------------------------------
 function NavigationMenuTrigger({ ref, className, children, ...props }: React.ComponentProps<typeof NavigationMenuPrimitive.Trigger>) {
+  const { hoveredId, setHoveredId, scopeId } = React.useContext(NavigationMenuContext)
+  const itemId = React.useId()
+  const isHovered = hoveredId === itemId
+
+  const prefersReducedMotion = useReducedMotion() ?? false
+  const morphConfig = tabMorph({ reducedMotion: prefersReducedMotion })
+  const transition = {
+    type: 'tween' as const,
+    duration: morphConfig.duration / 1000,
+    ease: morphConfig.ease as [number, number, number, number],
+  }
+
   return (
     <NavigationMenuPrimitive.Trigger
       ref={ref}
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full px-4 py-2',
+        'relative inline-flex items-center gap-1.5 rounded-full px-4 py-2',
         'text-[13px] font-semibold text-neutral-500',
         'transition-colors duration-150 ease-out',
         'hover:text-neutral-900',
-        'data-[state=open]:bg-neutral-900 data-[state=open]:text-white',
-        'data-[state=open]:shadow-[inset_0_1px_2px_rgb(0_0_0_/_0.2)]',
+        'data-[state=open]:text-white',
         'outline-none select-none',
         className,
       )}
+      onMouseEnter={() => setHoveredId(itemId)}
+      onMouseLeave={() => setHoveredId(null)}
+      onFocus={() => setHoveredId(itemId)}
+      onBlur={() => setHoveredId(null)}
       {...props}
     >
+      {/* Morphing background indicator */}
+      {isHovered && (
+        <motion.span
+          layoutId={`nav-indicator-${scopeId}`}
+          data-motion-indicator="true"
+          className="absolute inset-0 -z-[1] rounded-full bg-muted"
+          transition={transition}
+          aria-hidden
+        />
+      )}
       {children}
       <svg
         className="relative top-px size-3 flex-shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
@@ -116,22 +162,51 @@ NavigationMenuContent.displayName = 'NavigationMenuContent'
 // Link — plain nav link (no dropdown)
 // Prototype .navmenu a active state: neutral-900 bg, white text, inner shadow.
 // ---------------------------------------------------------------------------
-function NavigationMenuLink({ ref, className, ...props }: React.ComponentProps<typeof NavigationMenuPrimitive.Link>) {
+function NavigationMenuLink({ ref, className, active, ...props }: React.ComponentProps<typeof NavigationMenuPrimitive.Link> & { active?: boolean }) {
+  const { hoveredId, setHoveredId, scopeId } = React.useContext(NavigationMenuContext)
+  const itemId = React.useId()
+  // Show indicator when hovered OR when link is explicitly marked active
+  const isHighlighted = hoveredId === itemId || (active === true && hoveredId === null)
+
+  const prefersReducedMotion = useReducedMotion() ?? false
+  const morphConfig = tabMorph({ reducedMotion: prefersReducedMotion })
+  const transition = {
+    type: 'tween' as const,
+    duration: morphConfig.duration / 1000,
+    ease: morphConfig.ease as [number, number, number, number],
+  }
+
   return (
     <NavigationMenuPrimitive.Link
       ref={ref}
+      active={active}
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full px-4 py-2',
+        'relative inline-flex items-center gap-1.5 rounded-full px-4 py-2',
         'text-[13px] font-semibold text-neutral-500 no-underline',
         'transition-colors duration-150 ease-out',
         'hover:text-neutral-900',
-        'data-[active]:bg-neutral-900 data-[active]:text-white',
-        'data-[active]:shadow-[inset_0_1px_2px_rgb(0_0_0_/_0.2)]',
+        'data-[active]:text-white',
         'outline-none',
         className,
       )}
+      onMouseEnter={() => setHoveredId(itemId)}
+      onMouseLeave={() => setHoveredId(null)}
+      onFocus={() => setHoveredId(itemId)}
+      onBlur={() => setHoveredId(null)}
       {...props}
-    />
+    >
+      {/* Morphing background indicator */}
+      {isHighlighted && (
+        <motion.span
+          layoutId={`nav-indicator-${scopeId}`}
+          data-motion-indicator="true"
+          className="absolute inset-0 -z-[1] rounded-full bg-muted"
+          transition={transition}
+          aria-hidden
+        />
+      )}
+      {props.children}
+    </NavigationMenuPrimitive.Link>
   )
 }
 NavigationMenuLink.displayName = 'NavigationMenuLink'

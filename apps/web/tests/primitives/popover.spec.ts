@@ -35,3 +35,13 @@ test('accessibility (axe)', async ({ page }) => {
 test('visual snapshot', async ({ page }) => {
   await expect(page.locator('#popover')).toHaveScreenshot('popover-default.png')
 })
+
+test('windowMorph entry: content visible after open', async ({ page }) => {
+  const section = page.locator('#popover')
+  const trigger = section.locator('button').first()
+  await trigger.click({ force: true })
+  // Wait for framer-motion entry animation to reach opacity 1
+  await page.waitForTimeout(350)
+  const content = page.locator('[data-radix-popper-content-wrapper]').first()
+  await expect(content).toBeVisible()
+})

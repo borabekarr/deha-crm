@@ -36,3 +36,27 @@ test('accessibility (axe)', async ({ page }) => {
 test('visual snapshot', async ({ page }) => {
   await expect(page.locator('#dropdown-menu')).toHaveScreenshot('dropdown-menu-default.png')
 })
+
+test('windowMorph entry: content visible after open', async ({ page }) => {
+  const section = page.locator('#dropdown-menu')
+  const trigger = section.locator('button').first()
+  await trigger.click({ force: true })
+  // Wait for framer-motion entry animation to reach opacity 1
+  await page.waitForTimeout(350)
+  const content = page.locator('[data-radix-popper-content-wrapper]').first()
+  await expect(content).toBeVisible()
+})
+
+test('hover pill appears when dropdown item is hovered', async ({ page }) => {
+  const section = page.locator('#dropdown-menu')
+  const trigger = section.locator('button').first()
+  await trigger.click({ force: true })
+  await page.waitForTimeout(350)
+
+  // Hover over the first dropdown item
+  const item = page.locator('[role="menuitem"]').first()
+  await item.hover()
+  await page.waitForTimeout(50)
+
+  await expect(page.locator('[data-motion-hover-pill="dropdown-hover-pill"]').first()).toBeVisible()
+})

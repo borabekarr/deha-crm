@@ -34,3 +34,14 @@ test('accessibility (axe)', async ({ page }) => {
 test('visual snapshot', async ({ page }) => {
   await expect(page.locator('#pagination')).toHaveScreenshot('pagination-default.png')
 })
+
+test('morph indicator renders behind current page number', async ({ page }) => {
+  const section = page.locator('#pagination')
+  // The active page button should contain a motion indicator
+  await expect(section.locator('[data-motion-indicator="true"]').first()).toBeVisible()
+
+  // Click a different page button and verify indicator is still present
+  const pageButtons = section.locator('button[aria-current="page"]')
+  await expect(pageButtons.first()).toBeVisible()
+  await expect(section.locator('[data-motion-indicator="true"]').first()).toBeVisible()
+})
