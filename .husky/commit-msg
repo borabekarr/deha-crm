@@ -1,0 +1,54 @@
+#!/bin/sh
+# .husky/commit-msg — local soft-warn for the WHY-rule.
+#
+# Fires when the commit touches bug-prone paths but the message lacks a
+# "Root cause:" line. Does NOT block; the GitHub Action does the hard
+# gate on PR. This is a friendly local nudge.
+#
+# Bypass (local): HUSKY=0 git commit ...
+# Bypass (CI):    add 'bypass-why-rule' label to the PR (audited).
+
+MSG_FILE="$1"
+[ -z "$MSG_FILE" ] && exit 0
+[ ! -f "$MSG_FILE" ] && exit 0
+
+MSG="$(cat "$MSG_FILE")"
+
+# Skip merge / revert / rebase auto-messages.
+case "$MSG" in
+  "Merge "*|"Revert "*|"fixup!"*|"squash!"*) exit 0 ;;
+esac
+
+# Staged files at commit-msg time include everything pre-commit prepared.
+STAGED="$(git diff --cached --name-only --diff-filter=AM 2>/dev/null || true)"
+[ -z "$STAGED" ] && exit 0
+
+# Bug-prone path patterns (keep in sync with .github/workflows/why-rule.yml).
+PATTERNS='^(apps/web/src/components/ui/|apps/web/src/features/|packages/)'
+
+if ! printf "%s\n" "$STAGED" | grep -qE "$PATTERNS"; then
+  exit 0
+fi
+
+# Bug-prone path touched. Require Root cause line in message.
+if printf "%s" "$MSG" | grep -qiE '^Root cause:'; then
+  exit 0
+fi
+
+cat >&2 <<'WARN'
+
+[why-rule] Soft warning: this commit touches bug-prone paths but lacks a
+  "Root cause:" line. The GitHub Action will fail the PR on push unless:
+    1. You add "Root cause: <one-line WHY>" to the PR description or
+       a commit body, AND
+    2. You include a new or updated file under lessons/.
+
+  This is a local warning only. The commit proceeds. Address before push,
+  or accept the CI red.
+
+  See lessons/README.md for the file format and rationale.
+  Emergency bypass on PR: add 'bypass-why-rule' label (audited).
+
+WARN
+
+exit 0
