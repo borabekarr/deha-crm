@@ -388,15 +388,15 @@ export function WheelDatePicker({
   }
 
   return (
-    <div
+    <fieldset
       className={cn(
+        'border-0 p-0 m-0 min-w-0',
         'inline-flex items-center gap-1 rounded-2xl',
         'bg-white dark:bg-neutral-900',
         'border border-neutral-200 dark:border-neutral-700',
         'px-3 py-2 shadow-sm',
         className,
       )}
-      role="group"
       aria-label="Date picker"
       data-testid="wheel-date-picker"
     >
@@ -427,6 +427,6 @@ export function WheelDatePicker({
         reducedMotion={reducedMotion}
         aria-label="Year"
       />
-    </div>
+    </fieldset>
   )
 }
