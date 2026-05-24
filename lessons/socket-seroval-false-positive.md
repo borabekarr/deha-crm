@@ -5,7 +5,8 @@ metadata:
   type: lesson
   category: supply-chain
   incident-date: 2026-05-24
-verification-command: gh pr view 15 --json statusCheckRollup --jq '.statusCheckRollup[] | select(.name == "Socket Security: Pull Request Alerts")'
+verification-command: |
+  gh pr view 15 --json statusCheckRollup --jq '.statusCheckRollup[] | select(.name == "Socket Security: Pull Request Alerts")'
 ---
 
 # Lesson: seroval Socket alert is a false positive — accept it
