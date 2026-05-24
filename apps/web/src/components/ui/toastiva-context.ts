@@ -1,5 +1,3 @@
-import { useSyncExternalStore } from 'react'
-
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -68,15 +66,3 @@ toastiva.warning = (title: string, opts?: Omit<ToastivaInput, 'title' | 'variant
 toastiva.danger = (title: string, opts?: Omit<ToastivaInput, 'title' | 'variant'>) =>
   _show({ ...opts, title, variant: 'danger' })
 toastiva.dismiss = _dismissToastiva
-
-// ---------------------------------------------------------------------------
-// useToastiva — React binding (useSyncExternalStore, no useEffect)
-// ---------------------------------------------------------------------------
-export function useToastiva(): {
-  toasts: ToastivaItem[]
-  dismiss: (id: string) => void
-  show: (input: ToastivaInput) => string
-} {
-  const toasts = useSyncExternalStore(_subscribe, _getSnapshot, _getSnapshot)
-  return { toasts, dismiss: _dismissToastiva, show: _show }
-}
