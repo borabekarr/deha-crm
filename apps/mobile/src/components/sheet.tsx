@@ -131,7 +131,7 @@ function Content({ children }: ContentProps) {
   const handleShow = useCallback(() => {
     translateY.value = SCREEN_H;
     translateY.value = withTiming(DETENTS[1], { duration: cfg.duration, easing: cfg.easing });
-  }, [translateY, cfg]);
+  }, [translateY, cfg, SCREEN_H, DETENTS]);
 
   const panGesture = Gesture.Pan()
     .onBegin(() => {
