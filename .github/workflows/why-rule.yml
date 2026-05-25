@@ -27,7 +27,7 @@ jobs:
             echo "bypass=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         if: steps.bypass.outputs.bypass != 'true'
         with:
           fetch-depth: 0
