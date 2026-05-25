@@ -24,6 +24,8 @@ const SwipeActionButton: React.FC<ISwipeActionButtonProps> &
   }: ISwipeActionButtonProps) => {
     const overlapWidth = 1;
 
+    const BASE_W = actionWidth + overlapWidth;
+
     const outerStyle = useAnimatedStyle(() => {
       const raw = side === "left" ? translateX.value : -translateX.value;
       const visibleW = Math.max(0, raw);
@@ -31,9 +33,11 @@ const SwipeActionButton: React.FC<ISwipeActionButtonProps> &
       const extraW = Math.max(0, layerW - total);
 
       if (!fullSwipeEnabled) {
+        const targetW = (isDominant ? actionWidth + extraW : actionWidth) + overlapWidth;
+        const ratio = BASE_W > 0 ? targetW / BASE_W : 1;
         return {
-          width:
-            (isDominant ? actionWidth + extraW : actionWidth) + overlapWidth,
+          transform: [{ scaleX: ratio }],
+          transformOrigin: side === "left" ? "left center" : "right center",
           opacity: 1,
         };
       }
@@ -41,12 +45,22 @@ const SwipeActionButton: React.FC<ISwipeActionButtonProps> &
       const p = commitTransition.value;
       if (isDominant) {
         const restingW = actionWidth + extraW;
-        const w = restingW + (layerW - restingW) * p;
-        return { width: w + overlapWidth, opacity: 1 };
+        const targetW = restingW + (layerW - restingW) * p + overlapWidth;
+        const ratio = BASE_W > 0 ? targetW / BASE_W : 1;
+        return {
+          transform: [{ scaleX: ratio }],
+          transformOrigin: side === "left" ? "left center" : "right center",
+          opacity: 1,
+        };
       }
 
-      const w = actionWidth * (1 - p);
-      return { width: w + overlapWidth, opacity: 1 - p };
+      const targetW = actionWidth * (1 - p) + overlapWidth;
+      const ratio = BASE_W > 0 ? targetW / BASE_W : 1;
+      return {
+        transform: [{ scaleX: ratio }],
+        transformOrigin: side === "left" ? "left center" : "right center",
+        opacity: 1 - p,
+      };
     });
 
     const contentStyle = useAnimatedStyle(() => {
@@ -76,7 +90,7 @@ const SwipeActionButton: React.FC<ISwipeActionButtonProps> &
       : styles.alignCenter;
 
     return (
-      <Animated.View style={[styles.actionButton, action.style, outerStyle]}>
+      <Animated.View style={[styles.actionButton, action.style, { width: BASE_W }, outerStyle]}>
         <Pressable
           onPress={() => onActionPress(action, { side, isDominant })}
           style={styles.pressable}

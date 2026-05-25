@@ -2,6 +2,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -15,7 +16,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Popover as ExpoPopover } from 'expo-ios-popover';
 import type { TooltipProps } from '@deha/ui-contracts';
-import { windowMorph } from '../lib/choreography';
+import { popoverScaleFromAnchor, windowMorph } from '../lib/choreography';
 import { colors } from '../lib/tokens';
 
 // ---------------------------------------------------------------------------
@@ -78,8 +79,13 @@ function TooltipRoot({
     setOpen(false);
   }, [setOpen]);
 
+  const ctxValue = useMemo(
+    () => ({ open, setOpen, isReduced }),
+    [open, setOpen, isReduced],
+  );
+
   return (
-    <TooltipContext.Provider value={{ open, setOpen, isReduced }}>
+    <TooltipContext.Provider value={ctxValue}>
       <ExpoPopover animated={!isReduced} onVisibilityChange={setOpen}>
         <ExpoPopover.Trigger>
           <Pressable
@@ -110,17 +116,20 @@ interface InternalContentProps {
 
 function TooltipContent({ children, isReduced, setOpen }: InternalContentProps) {
   const opacity = useSharedValue(0);
+  const scale = useSharedValue(0.92);
   const cfg = windowMorph({ reducedMotion: isReduced });
+  const scaleCfg = popoverScaleFromAnchor({ reducedMotion: isReduced });
 
   const handleShow = useCallback(() => {
     opacity.value = withTiming(1, { duration: cfg.duration, easing: cfg.easing });
-  }, [opacity, cfg.duration, cfg.easing]);
+    scale.value = withTiming(1, { duration: scaleCfg.duration, easing: scaleCfg.easing });
+  }, [opacity, scale, cfg.duration, cfg.easing, scaleCfg.duration, scaleCfg.easing]);
 
   const handleDismiss = useCallback(() => {
     setOpen(false);
   }, [setOpen]);
 
-  const animStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
+  const animStyle = useAnimatedStyle(() => ({ opacity: opacity.value, transform: [{ scale: scale.value }] }));
 
   return (
     <ExpoPopover.Content

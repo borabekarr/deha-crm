@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -81,10 +81,13 @@ function ComboboxRoot({
     [onInputChange, open, setOpen],
   );
 
+  const ctxValue = useMemo(
+    () => ({ value, inputValue, onValueChange: handleValueChange, onInputChange: handleInputChange, open, setOpen, isReduced, triggerRef }),
+    [value, inputValue, handleValueChange, handleInputChange, open, setOpen, isReduced, triggerRef],
+  );
+
   return (
-    <ComboboxContext.Provider
-      value={{ value, inputValue, onValueChange: handleValueChange, onInputChange: handleInputChange, open, setOpen, isReduced, triggerRef }}
-    >
+    <ComboboxContext.Provider value={ctxValue}>
       {children}
     </ComboboxContext.Provider>
   );

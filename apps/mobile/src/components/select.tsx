@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -65,10 +65,13 @@ function SelectRoot({
     if (!disabled) setOpenState(v);
   }, [disabled]);
 
+  const ctxValue = useMemo(
+    () => ({ value, onValueChange: handleValueChange, setOpen, open, isReduced, triggerRef, placeholder, disabled }),
+    [value, handleValueChange, setOpen, open, isReduced, triggerRef, placeholder, disabled],
+  );
+
   return (
-    <SelectContext.Provider
-      value={{ value, onValueChange: handleValueChange, setOpen, open, isReduced, triggerRef, placeholder, disabled }}
-    >
+    <SelectContext.Provider value={ctxValue}>
       {children}
     </SelectContext.Provider>
   );

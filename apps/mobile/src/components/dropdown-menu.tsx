@@ -2,6 +2,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -15,7 +16,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import PopoverView, { PopoverPlacement } from 'react-native-popover-view';
 import type { DropdownMenuProps } from '@deha/ui-contracts';
-import { windowMorph } from '../lib/choreography';
+import { tabPillSlide, windowMorph } from '../lib/choreography';
 import { colors } from '../lib/tokens';
 
 export interface DropdownMenuItem {
@@ -62,8 +63,13 @@ function DropdownMenuRoot({
     [controlledOpen, onOpenChange],
   );
 
+  const ctxValue = useMemo(
+    () => ({ open, setOpen, isReduced, triggerRef }),
+    [open, setOpen, isReduced, triggerRef],
+  );
+
   return (
-    <DropdownMenuContext.Provider value={{ open, setOpen, isReduced, triggerRef }}>
+    <DropdownMenuContext.Provider value={ctxValue}>
       {children}
     </DropdownMenuContext.Provider>
   );
@@ -84,7 +90,22 @@ function Trigger({ children }: { children: React.ReactNode }) {
 interface ItemProps { onSelect?: () => void; disabled?: boolean; children: React.ReactNode; }
 
 function Item({ onSelect, disabled = false, children }: ItemProps) {
-  const { setOpen } = useDropdownCtx();
+  const { setOpen, isReduced } = useDropdownCtx();
+  const highlight = useSharedValue(0);
+  const pillCfg = tabPillSlide({ reducedMotion: isReduced });
+
+  const highlightStyle = useAnimatedStyle(() => ({
+    opacity: highlight.value,
+  }));
+
+  const handlePressIn = useCallback(() => {
+    highlight.value = withTiming(1, { duration: pillCfg.duration, easing: pillCfg.easing });
+  }, [highlight, pillCfg.duration, pillCfg.easing]);
+
+  const handlePressOut = useCallback(() => {
+    highlight.value = withTiming(0, { duration: pillCfg.duration, easing: pillCfg.easing });
+  }, [highlight, pillCfg.duration, pillCfg.easing]);
+
   const handlePress = useCallback(() => {
     if (disabled) return;
     onSelect?.();
@@ -94,11 +115,14 @@ function Item({ onSelect, disabled = false, children }: ItemProps) {
   return (
     <Pressable
       onPress={handlePress}
-      style={({ pressed }) => [s.item, pressed && s.itemPressed, disabled && s.itemDisabled]}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      style={[s.item, disabled && s.itemDisabled]}
       accessibilityRole="menuitem"
       accessibilityState={{ disabled }}
       disabled={disabled}
     >
+      <Animated.View style={[StyleSheet.absoluteFill, s.itemHighlight, highlightStyle]} />
       {typeof children === 'string'
         ? <Text style={[s.itemText, disabled && s.itemTextDisabled]}>{children}</Text>
         : children}
@@ -159,8 +183,8 @@ export const DropdownMenu = Object.assign(DropdownMenuRoot, { Trigger, Content, 
 const s = StyleSheet.create({
   popover:          { borderRadius: 12, overflow: 'hidden', minWidth: 160 },
   contentWrap:      { backgroundColor: colors.background },
-  item:             { paddingVertical: 11, paddingHorizontal: 14, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
-  itemPressed:      { backgroundColor: colors.border },
+  item:             { paddingVertical: 11, paddingHorizontal: 14, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border, overflow: 'hidden' },
+  itemHighlight:    { backgroundColor: colors.border },
   itemDisabled:     { opacity: 0.4 },
   itemText:         { fontSize: 15, color: colors.foreground },
   itemTextDisabled: { color: colors.mutedFg },

@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -59,10 +59,13 @@ function DatePickerRoot({
     [controlled, onValueChange],
   );
 
+  const ctxValue = useMemo(
+    () => ({ value, setValue, open, setOpen, placeholder, disabled }),
+    [value, setValue, open, setOpen, placeholder, disabled],
+  );
+
   return (
-    <DatePickerContext.Provider
-      value={{ value, setValue, open, setOpen, placeholder, disabled }}
-    >
+    <DatePickerContext.Provider value={ctxValue}>
       <Popover
         open={open}
         onOpenChange={setOpen}

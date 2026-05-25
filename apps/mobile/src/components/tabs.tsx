@@ -2,6 +2,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -70,8 +71,13 @@ function TabsRoot({ value, defaultValue = '', onValueChange, children, reducedMo
     [value, onValueChange, indicatorX, indicatorW, isReduced],
   );
 
+  const ctxValue = useMemo(
+    () => ({ active, setActive, isReduced, indicatorX, indicatorW, registerTrigger }),
+    [active, setActive, isReduced, indicatorX, indicatorW, registerTrigger],
+  );
+
   return (
-    <TabsContext.Provider value={{ active, setActive, isReduced, indicatorX, indicatorW, registerTrigger }}>
+    <TabsContext.Provider value={ctxValue}>
       <View style={styles.root}>{children}</View>
     </TabsContext.Provider>
   );

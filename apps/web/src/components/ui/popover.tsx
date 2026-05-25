@@ -3,7 +3,7 @@ import { use } from 'react'
 import * as PopoverPrimitive from '@radix-ui/react-popover'
 import { AnimatePresence, m, useReducedMotion } from 'framer-motion'
 import type { PopoverProps } from '@deha/ui-contracts'
-import { windowMorph } from '@deha/motion-tokens'
+import { windowMorph, popoverScaleFromAnchor } from '@deha/motion-tokens'
 import { cn } from '@/lib/utils'
 
 // ---------------------------------------------------------------------------
@@ -74,6 +74,12 @@ function PopoverContent({ ref, className, sideOffset = 8, children, ...props }: 
     duration: morphConfig.duration / 1000,
     ease: morphConfig.ease as [number, number, number, number],
   }
+  const scaleConfig = popoverScaleFromAnchor({ reducedMotion })
+  const scaleTransition = {
+    type: 'tween' as const,
+    duration: scaleConfig.duration / 1000,
+    ease: scaleConfig.ease as [number, number, number, number],
+  }
 
   return (
     <PopoverPrimitive.Portal>
@@ -101,9 +107,16 @@ function PopoverContent({ ref, className, sideOffset = 8, children, ...props }: 
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
               transition={transition}
-              style={{ transformOrigin: 'var(--radix-popover-content-transform-origin)' }}
+              style={{ transformOrigin: 'var(--radix-popper-transform-origin)' }}
             >
-              {children}
+              <m.div
+                style={{ transformOrigin: 'var(--radix-popper-transform-origin)' }}
+                initial={{ scale: 0.92 }}
+                animate={{ scale: 1 }}
+                transition={scaleTransition}
+              >
+                {children}
+              </m.div>
             </m.div>
           </PopoverPrimitive.Content>
         )}

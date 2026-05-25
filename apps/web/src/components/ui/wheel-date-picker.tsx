@@ -15,6 +15,7 @@
 import * as React from 'react'
 import { useSyncExternalStore } from 'react'
 import { useReducedMotion } from 'framer-motion'
+import { wheelSnap } from '@deha/motion-tokens'
 import { cn } from '@/lib/utils'
 
 // ---------------------------------------------------------------------------
@@ -282,6 +283,7 @@ function WheelColumn({
           height: WHEEL_HEIGHT,
           scrollSnapType: 'y mandatory',
           scrollBehavior: reducedMotion ? 'auto' : undefined,
+          transitionTimingFunction: `cubic-bezier(${wheelSnap({ reducedMotion }).ease.join(',')})`,
           paddingTop: ITEM_HEIGHT * HALF,
           paddingBottom: ITEM_HEIGHT * HALF,
         }}

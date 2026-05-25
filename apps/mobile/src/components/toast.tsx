@@ -19,6 +19,7 @@ import Animated, {
 import type { ToastProps } from '@deha/ui-contracts';
 import { windowMorph } from '../lib/choreography';
 import { colors } from '../lib/tokens';
+import { z } from '../lib/z';
 import { useToast, dismiss as dismissToast, type ToastEntry } from '../hooks/use-toast';
 
 // ---------------------------------------------------------------------------
@@ -131,7 +132,7 @@ const styles = StyleSheet.create({
     top: 56,
     left: 16,
     right: 16,
-    zIndex: 9999,
+    zIndex: z.toast,
     gap: 8,
   },
   toast: {
@@ -140,11 +141,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 6,
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
   },
   content: {
     flex: 1,

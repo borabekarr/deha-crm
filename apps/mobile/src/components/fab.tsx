@@ -23,6 +23,7 @@ import Animated, {
 import { fabStaggerOpen } from '../lib/choreography';
 import type { FabStagger } from '../lib/choreography';
 import { colors } from '../lib/tokens';
+import { z } from '../lib/z';
 
 // ---------------------------------------------------------------------------
 // Vendor loader — expo-fab (FloatingActionButton)
@@ -106,9 +107,14 @@ function FallbackItem({ action, index, stagger, isOpen }: FallbackItemProps) {
 }
 
 // ---------------------------------------------------------------------------
+// Module-scoped stable default
+// ---------------------------------------------------------------------------
+const EMPTY_FAB_ACTIONS: FabAction[] = [];
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
-export function Fab({ actions = [], onPress, style, staggerConfig }: FabProps) {
+export function Fab({ actions = EMPTY_FAB_ACTIONS, onPress, style, staggerConfig }: FabProps) {
   const osReduced = useReducedMotion();
   const isOpen = useSharedValue<boolean>(false);
 
@@ -161,7 +167,7 @@ const styles = StyleSheet.create({
     bottom: 24,
     right: 20,
     alignItems: 'flex-end',
-    zIndex: 1000,
+    zIndex: z.fab,
   },
   actionsStack: {
     marginBottom: 12,
@@ -190,11 +196,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 8,
+    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)',
   },
   fabIcon: {
     color: colors.primaryFg,

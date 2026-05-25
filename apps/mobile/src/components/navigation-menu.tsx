@@ -2,6 +2,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -80,8 +81,13 @@ function NavigationMenuRoot({
     [value, onValueChange, pillX, pillW, isReduced],
   );
 
+  const ctxValue = useMemo(
+    () => ({ active, setActive, isReduced, pillX, pillW, registerItem }),
+    [active, setActive, isReduced, pillX, pillW, registerItem],
+  );
+
   return (
-    <NavigationMenuContext.Provider value={{ active, setActive, isReduced, pillX, pillW, registerItem }}>
+    <NavigationMenuContext.Provider value={ctxValue}>
       <View style={styles.root} accessibilityRole="tablist">
         {children}
       </View>
@@ -159,11 +165,7 @@ const styles = StyleSheet.create({
     left: 0,
     backgroundColor: colors.background,
     borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    elevation: 2,
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
   },
   item: {
     paddingVertical: 7,

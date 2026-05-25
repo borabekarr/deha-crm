@@ -2,6 +2,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useMemo,
   useState,
 } from 'react';
 import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -71,8 +72,13 @@ function SidebarRoot({
     [controlledCollapsed, onCollapsedChange, isReduced, translateX, hiddenX],
   );
 
+  const ctxValue = useMemo(
+    () => ({ collapsed, setCollapsed, isReduced, translateX, side }),
+    [collapsed, setCollapsed, isReduced, translateX, side],
+  );
+
   return (
-    <SidebarContext.Provider value={{ collapsed, setCollapsed, isReduced, translateX, side }}>
+    <SidebarContext.Provider value={ctxValue}>
       <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
         {children}
       </View>
@@ -163,11 +169,7 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
     borderColor: colors.border,
     paddingTop: 48,
-    shadowColor: '#000',
-    shadowOffset: { width: 2, height: 0 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
   },
   header: {
     paddingHorizontal: 16,

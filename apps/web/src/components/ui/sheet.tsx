@@ -1,6 +1,8 @@
 import * as React from 'react'
 import { Drawer } from 'vaul'
+import { useReducedMotion } from 'framer-motion'
 import type { SheetProps } from '@deha/ui-contracts'
+import { sheetDetent, swipeReveal } from '@deha/motion-tokens'
 import { cn } from '@/lib/utils'
 
 // Side context lets SheetContent inherit positioning from the root Sheet without re-prop-drilling.
@@ -60,6 +62,10 @@ const sidePositionClasses: Record<'top' | 'right' | 'bottom' | 'left', string> =
 // ---------------------------------------------------------------------------
 function SheetContent({ ref, className, children, ...props }: React.ComponentProps<typeof Drawer.Content>) {
   const { side } = React.use(SheetContext)
+  const prefersReduced = useReducedMotion() ?? false
+  const detentConfig = sheetDetent({ reducedMotion: prefersReduced })
+  const swipeSpring = swipeReveal({ reducedMotion: prefersReduced })
+
   return (
     <Drawer.Portal>
       <SheetOverlay />
@@ -73,6 +79,10 @@ function SheetContent({ ref, className, children, ...props }: React.ComponentPro
           'outline-none',
           className,
         )}
+        style={{
+          transitionTimingFunction: `cubic-bezier(${detentConfig.ease.join(',')})`,
+        }}
+        data-swipe-spring={swipeSpring.type === 'spring' ? String(swipeSpring.stiffness) : '0'}
         {...props}
       >
         {/* Drag handle indicator */}

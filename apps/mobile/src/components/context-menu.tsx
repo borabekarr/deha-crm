@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useAnimatedStyle, useReducedMotion, useSharedValue, withTiming,
@@ -40,8 +40,12 @@ function ContextMenuRoot({ open: ctrl, onOpenChange, reducedMotion, children }: 
     if (ctrl === undefined) setInternal(v);
     onOpenChange?.(v);
   }, [ctrl, onOpenChange]);
+  const ctxValue = useMemo(
+    () => ({ open, setOpen, isReduced, anchor, setAnchor }),
+    [open, setOpen, isReduced, anchor, setAnchor],
+  );
   return (
-    <ContextMenuContext.Provider value={{ open, setOpen, isReduced, anchor, setAnchor }}>
+    <ContextMenuContext.Provider value={ctxValue}>
       {children}
     </ContextMenuContext.Provider>
   );
@@ -120,8 +124,7 @@ const styles = StyleSheet.create({
   menu: {
     position: 'absolute', backgroundColor: colors.background, borderRadius: 12,
     borderWidth: 1, borderColor: colors.border,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12, shadowRadius: 12, elevation: 8, overflow: 'hidden',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)', overflow: 'hidden',
   },
   item: { paddingVertical: 11, paddingHorizontal: 16 },
   itemPressed: { backgroundColor: colors.border },

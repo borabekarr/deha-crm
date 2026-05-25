@@ -3,7 +3,7 @@ import { use } from 'react'
 import * as TooltipPrimitive from '@radix-ui/react-tooltip'
 import { AnimatePresence, m, useReducedMotion } from 'framer-motion'
 import type { TooltipProps } from '@deha/ui-contracts'
-import { windowMorph } from '@deha/motion-tokens'
+import { windowMorph, popoverScaleFromAnchor } from '@deha/motion-tokens'
 import { cn } from '@/lib/utils'
 
 // Default Tooltip export = contract-level (Tooltip content="..."); named exports (TooltipProvider, TooltipRoot, TooltipTrigger, TooltipContent) = manual composition.
@@ -109,6 +109,12 @@ function TooltipContent({ ref, className, sideOffset = 6, children, ...props }: 
     duration: morphConfig.duration / 1000,
     ease: morphConfig.ease as [number, number, number, number],
   }
+  const scaleConfig = popoverScaleFromAnchor({ reducedMotion })
+  const scaleTransition = {
+    type: 'tween' as const,
+    duration: scaleConfig.duration / 1000,
+    ease: scaleConfig.ease as [number, number, number, number],
+  }
 
   return (
     <TooltipPrimitive.Portal>
@@ -135,7 +141,14 @@ function TooltipContent({ ref, className, sideOffset = 6, children, ...props }: 
               transition={transition}
               style={{ transformOrigin: 'var(--radix-tooltip-content-transform-origin)' }}
             >
-              {children}
+              <m.div
+                style={{ transformOrigin: 'var(--radix-tooltip-content-transform-origin)' }}
+                initial={{ scale: 0.92 }}
+                animate={{ scale: 1 }}
+                transition={scaleTransition}
+              >
+                {children}
+              </m.div>
             </m.div>
           </TooltipPrimitive.Content>
         )}

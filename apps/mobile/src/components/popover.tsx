@@ -2,6 +2,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useMemo,
   useState,
 } from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
@@ -13,7 +14,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import type { PopoverProps } from '@deha/ui-contracts';
-import { windowMorph } from '../lib/choreography';
+import { popoverScaleFromAnchor, windowMorph } from '../lib/choreography';
 import { colors } from '../lib/tokens';
 
 type VendorPopoverProps = {
@@ -82,8 +83,13 @@ function PopoverRoot({
     [controlledOpen, onOpenChange],
   );
 
+  const ctxValue = useMemo(
+    () => ({ open, setOpen, isReduced }),
+    [open, setOpen, isReduced],
+  );
+
   return (
-    <PopoverContext.Provider value={{ open, setOpen, isReduced }}>
+    <PopoverContext.Provider value={ctxValue}>
       {children}
     </PopoverContext.Provider>
   );
@@ -110,7 +116,9 @@ interface ContentProps {
 function Content({ children, style, onDismiss }: ContentProps) {
   const { open, isReduced, setOpen } = usePopoverCtx();
   const opacity = useSharedValue(0);
+  const scale = useSharedValue(0.92);
   const cfg = windowMorph({ reducedMotion: isReduced });
+  const scaleCfg = popoverScaleFromAnchor({ reducedMotion: isReduced });
 
   const handleDismiss = useCallback(() => {
     setOpen(false);
@@ -119,10 +127,12 @@ function Content({ children, style, onDismiss }: ContentProps) {
 
   const handleShow = useCallback(() => {
     opacity.value = withTiming(1, { duration: cfg.duration, easing: cfg.easing });
-  }, [opacity, cfg.duration, cfg.easing]);
+    scale.value = withTiming(1, { duration: scaleCfg.duration, easing: scaleCfg.easing });
+  }, [opacity, scale, cfg.duration, cfg.easing, scaleCfg.duration, scaleCfg.easing]);
 
   const backdropStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
+    transform: [{ scale: scale.value }],
   }));
 
   if (VendorPopover?.Content) {
@@ -194,10 +204,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     minWidth: 240,
     maxWidth: '90%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 6,
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
   },
 });

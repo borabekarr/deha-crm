@@ -1,17 +1,37 @@
 import * as React from 'react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
+import { AnimatePresence, m, useReducedMotion } from 'framer-motion'
 import type { DialogProps } from '@deha/ui-contracts'
+import { windowMorph } from '@deha/motion-tokens'
 import { cn } from '@/lib/utils'
+
+// ---------------------------------------------------------------------------
+// Internal context — tracks open state so DialogContent can drive AnimatePresence
+// ---------------------------------------------------------------------------
+const DialogOpenContext = React.createContext(false)
 
 // ---------------------------------------------------------------------------
 // Root — strips reducedMotion before forwarding to Radix Root
 // ---------------------------------------------------------------------------
 const Dialog = ({
   reducedMotion: _reducedMotion, // eslint-disable-line @typescript-eslint/no-unused-vars
+  open: openProp,
+  defaultOpen,
+  onOpenChange,
   ...props
-}: DialogProps & React.ComponentPropsWithoutRef<typeof DialogPrimitive.Root>) => (
-  <DialogPrimitive.Root {...props} />
-)
+}: DialogProps & React.ComponentPropsWithoutRef<typeof DialogPrimitive.Root>) => {
+  const [internalOpen, setInternalOpen] = React.useState(defaultOpen ?? false)
+  const isOpen = openProp ?? internalOpen
+  const handleOpenChange = (next: boolean) => {
+    if (openProp === undefined) setInternalOpen(next)
+    onOpenChange?.(next)
+  }
+  return (
+    <DialogOpenContext.Provider value={isOpen}>
+      <DialogPrimitive.Root open={openProp} defaultOpen={defaultOpen} onOpenChange={handleOpenChange} {...props} />
+    </DialogOpenContext.Provider>
+  )
+}
 Dialog.displayName = 'Dialog'
 
 // ---------------------------------------------------------------------------
@@ -51,27 +71,44 @@ DialogOverlay.displayName = 'DialogOverlay'
 // Content — white card, rounded-2xl, shadow-overlay-strong
 // ---------------------------------------------------------------------------
 function DialogContent({ ref, className, children, ...props }: React.ComponentProps<typeof DialogPrimitive.Content>) {
+  const isOpen = React.use(DialogOpenContext)
+  const prefersReduced = useReducedMotion() ?? false
+  const morphConfig = windowMorph({ reducedMotion: prefersReduced })
+  const transition = {
+    type: 'tween' as const,
+    duration: morphConfig.duration / 1000,
+    ease: morphConfig.ease as [number, number, number, number],
+  }
+
   return (
     <DialogPortal>
       <DialogOverlay />
-      <DialogPrimitive.Content
-        ref={ref}
-        className={cn(
-          'fixed left-1/2 top-1/2 z-50 -tranneutral-x-1/2 -tranneutral-y-1/2',
-          'w-full max-w-md rounded-2xl bg-white p-6',
-          'shadow-[var(--shadow-overlay-strong)]',
-          'data-[state=open]:animate-in data-[state=closed]:animate-out',
-          'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-          'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
-          'data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%]',
-          'data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]',
-          'focus:outline-none',
-          className,
+      <AnimatePresence>
+        {isOpen && (
+          <DialogPrimitive.Content
+            ref={ref}
+            forceMount
+            className={cn(
+              'fixed left-1/2 top-1/2 z-50 -tranneutral-x-1/2 -tranneutral-y-1/2',
+              'w-full max-w-md rounded-2xl bg-white p-6',
+              'shadow-[var(--shadow-overlay-strong)]',
+              'focus:outline-none',
+              className,
+            )}
+            {...props}
+          >
+            <m.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={transition}
+              style={{ transformOrigin: 'center center' }}
+            >
+              {children}
+            </m.div>
+          </DialogPrimitive.Content>
         )}
-        {...props}
-      >
-        {children}
-      </DialogPrimitive.Content>
+      </AnimatePresence>
     </DialogPortal>
   )
 }

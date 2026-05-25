@@ -2,6 +2,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useMemo,
   useState,
 } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -58,8 +59,13 @@ function DialogRoot({
     [controlledOpen, onOpenChange],
   );
 
+  const ctxValue = useMemo(
+    () => ({ open, setOpen, isReduced }),
+    [open, setOpen, isReduced],
+  );
+
   return (
-    <DialogContext.Provider value={{ open, setOpen, isReduced }}>
+    <DialogContext.Provider value={ctxValue}>
       {children}
     </DialogContext.Provider>
   );
@@ -157,11 +163,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     borderRadius: 16,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 10,
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
   },
   header: {
     padding: 20,

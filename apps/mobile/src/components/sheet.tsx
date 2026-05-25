@@ -8,6 +8,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useMemo,
   useState,
 } from 'react';
 import type { AppleMapsSheetProps as _NativeSheetProps } from 'expo-apple-maps-sheet';
@@ -18,11 +19,12 @@ import Animated, {
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
+  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import type { SheetProps } from '@deha/ui-contracts';
-import { sheetDetent } from '../lib/choreography';
+import { sheetDetent, swipeReveal } from '../lib/choreography';
 import { colors } from '../lib/tokens';
 
 const { height: SCREEN_H } = Dimensions.get('window');
@@ -77,8 +79,13 @@ function SheetRoot({
     [controlledOpen, onOpenChange],
   );
 
+  const ctxValue = useMemo(
+    () => ({ open, setOpen, isReduced }),
+    [open, setOpen, isReduced],
+  );
+
   return (
-    <SheetContext.Provider value={{ open, setOpen, isReduced }}>
+    <SheetContext.Provider value={ctxValue}>
       {children}
     </SheetContext.Provider>
   );
@@ -98,6 +105,7 @@ function Content({ children }: ContentProps) {
   const startY = useSharedValue(0);
 
   const cfg = sheetDetent({ reducedMotion: isReduced });
+  const springCfg = swipeReveal({ reducedMotion: isReduced });
 
   const dismiss = useCallback(() => {
     translateY.value = withTiming(SCREEN_H, { duration: cfg.duration, easing: cfg.easing }, () => {
@@ -107,9 +115,13 @@ function Content({ children }: ContentProps) {
 
   const snapToDetent = useCallback(
     (toY: number) => {
-      translateY.value = withTiming(toY, { duration: cfg.duration, easing: cfg.easing });
+      if (springCfg.type === 'spring') {
+        translateY.value = withSpring(toY, { stiffness: springCfg.stiffness, damping: springCfg.damping });
+      } else {
+        translateY.value = withTiming(toY, { duration: 0 });
+      }
     },
-    [translateY, cfg],
+    [translateY, springCfg],
   );
 
   // Animate in when open flips to true
@@ -185,11 +197,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 16,
     paddingHorizontal: 16,
     paddingTop: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    elevation: 8,
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
   },
   handle: {
     width: 40,
