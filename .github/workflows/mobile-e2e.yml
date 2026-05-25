@@ -21,12 +21,34 @@ jobs:
           node-version: 22
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
-      - run: pnpm dlx eas-cli@latest build --profile ci --platform ios --local --non-interactive --output ./mobile.app
+      - name: Expo prebuild (account-free, no EAS)
+        run: pnpm --filter @deha/mobile exec expo prebuild --platform ios --no-install --clean
+      - name: Pod install
+        run: pod install
+        working-directory: apps/mobile/ios
+      - name: Resolve scheme + build
         working-directory: apps/mobile
-      - run: |
+        run: |
+          WORKSPACE=$(find ios -maxdepth 1 -name '*.xcworkspace' | head -1)
+          SCHEME=$(basename "$WORKSPACE" .xcworkspace)
+          echo "Workspace: $WORKSPACE  Scheme: $SCHEME"
+          xcodebuild \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -derivedDataPath build \
+            -destination 'platform=iOS Simulator,name=iPhone 15' \
+            build CODE_SIGNING_ALLOWED=NO | xcbeautify || exit 1
+      - name: Boot simulator + install app
+        working-directory: apps/mobile
+        run: |
+          APP_PATH=$(find build/Build/Products/Debug-iphonesimulator -maxdepth 1 -name '*.app' | head -1)
+          if [ -z "$APP_PATH" ]; then
+            echo "::error::No .app produced by xcodebuild"; exit 1
+          fi
           xcrun simctl boot "iPhone 15" || true
-          xcrun simctl install booted ./mobile.app
-        working-directory: apps/mobile
+          xcrun simctl install booted "$APP_PATH"
       - run: curl -Ls "https://get.maestro.mobile.dev" | bash
       - run: ~/.maestro/bin/maestro test maestro/
         working-directory: apps/mobile

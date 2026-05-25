@@ -1,7 +1,7 @@
 import React, {
   createContext,
+  use,
   useCallback,
-  useContext,
   useMemo,
   useRef,
   useState,
@@ -36,7 +36,7 @@ interface DropdownMenuCtx {
 const DropdownMenuContext = createContext<DropdownMenuCtx | null>(null);
 
 function useDropdownCtx() {
-  const ctx = useContext(DropdownMenuContext);
+  const ctx = use(DropdownMenuContext);
   if (!ctx) throw new Error('DropdownMenu sub-component used outside <DropdownMenu>');
   return ctx;
 }
@@ -123,9 +123,7 @@ function Item({ onSelect, disabled = false, children }: ItemProps) {
       disabled={disabled}
     >
       <Animated.View style={[StyleSheet.absoluteFill, s.itemHighlight, highlightStyle]} />
-      {typeof children === 'string'
-        ? <Text style={[s.itemText, disabled && s.itemTextDisabled]}>{children}</Text>
-        : children}
+      {children}
     </Pressable>
   );
 }
@@ -145,7 +143,7 @@ function Content({ items, children }: ContentProps) {
 
   const renderItem = useCallback(
     ({ item }: { item: DropdownMenuItem }) => (
-      <Item key={item.key} onSelect={item.onSelect} disabled={item.disabled}>{item.label}</Item>
+      <Item key={item.key} onSelect={item.onSelect} disabled={item.disabled}><Label disabled={item.disabled}>{item.label}</Label></Item>
     ),
     [],
   );
@@ -178,7 +176,12 @@ function Content({ items, children }: ContentProps) {
   );
 }
 
-export const DropdownMenu = Object.assign(DropdownMenuRoot, { Trigger, Content, Item });
+// DropdownMenu.Label — renders a styled text label inside a menu item.
+function Label({ children, disabled }: { children: string; disabled?: boolean }) {
+  return <Text style={[s.itemText, disabled && s.itemTextDisabled]}>{children}</Text>;
+}
+
+export const DropdownMenu = Object.assign(DropdownMenuRoot, { Trigger, Content, Item, Label });
 
 const s = StyleSheet.create({
   popover:          { borderRadius: 12, overflow: 'hidden', minWidth: 160 },

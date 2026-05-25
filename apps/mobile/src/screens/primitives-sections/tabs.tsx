@@ -9,9 +9,9 @@ export default function TabsSection() {
       <Text style={s.title}>Tabs</Text>
       <Tabs value={active} onValueChange={setActive}>
         <Tabs.List>
-          <Tabs.Trigger value="account">Account</Tabs.Trigger>
-          <Tabs.Trigger value="password">Password</Tabs.Trigger>
-          <Tabs.Trigger value="settings">Settings</Tabs.Trigger>
+          <Tabs.Trigger value="account"><Text>Account</Text></Tabs.Trigger>
+          <Tabs.Trigger value="password"><Text>Password</Text></Tabs.Trigger>
+          <Tabs.Trigger value="settings"><Text>Settings</Text></Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content value="account">
           <Text style={s.body}>Manage your account details.</Text>

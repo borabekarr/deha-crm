@@ -1,7 +1,7 @@
 import React, {
   createContext,
+  use,
   useCallback,
-  useContext,
   useMemo,
   useState,
 } from 'react';
@@ -55,7 +55,7 @@ interface PopoverCtx {
 const PopoverContext = createContext<PopoverCtx | null>(null);
 
 function usePopoverCtx() {
-  const ctx = useContext(PopoverContext);
+  const ctx = use(PopoverContext);
   if (!ctx) throw new Error('Popover sub-component used outside <Popover>');
   return ctx;
 }

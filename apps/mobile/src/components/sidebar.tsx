@@ -1,7 +1,7 @@
 import React, {
   createContext,
+  use,
   useCallback,
-  useContext,
   useMemo,
   useState,
 } from 'react';
@@ -32,7 +32,7 @@ interface SidebarCtx {
 const SidebarContext = createContext<SidebarCtx | null>(null);
 
 function useSidebarCtx() {
-  const ctx = useContext(SidebarContext);
+  const ctx = use(SidebarContext);
   if (!ctx) throw new Error('Sidebar sub-component used outside <Sidebar>');
   return ctx;
 }

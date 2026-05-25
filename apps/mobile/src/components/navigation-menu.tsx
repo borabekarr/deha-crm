@@ -1,7 +1,7 @@
 import React, {
   createContext,
+  use,
   useCallback,
-  useContext,
   useMemo,
   useRef,
   useState,
@@ -28,7 +28,7 @@ interface NavigationMenuCtx {
 const NavigationMenuContext = createContext<NavigationMenuCtx | null>(null);
 
 function useNavCtx() {
-  const ctx = useContext(NavigationMenuContext);
+  const ctx = use(NavigationMenuContext);
   if (!ctx) throw new Error('NavigationMenu sub-component used outside <NavigationMenu>');
   return ctx;
 }
@@ -107,10 +107,19 @@ function Item({ value, children }: ItemProps) {
   const { active, setActive, pillX, pillW, registerItem } = useNavCtx();
   const isActive = active === value;
 
-  const pillStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: pillX.value }],
-    width: pillW.value,
-  }));
+  // Use compositor-safe scaleX instead of layout-property width.
+  // 1px base pill scaled by measured width; double-translateX keeps left-edge origin.
+  const pillStyle = useAnimatedStyle(() => {
+    const w = pillW.value;
+    const halfW = w / 2;
+    return {
+      transform: [
+        { translateX: pillX.value + halfW },
+        { scaleX: w },
+        { translateX: -0.5 },
+      ],
+    };
+  });
 
   const onLayout = useCallback(
     (e: { nativeEvent: { layout: LayoutRectangle } }) => {
@@ -163,6 +172,7 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     left: 0,
+    width: 1,
     backgroundColor: colors.background,
     borderRadius: 8,
     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',

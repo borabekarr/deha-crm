@@ -13,9 +13,9 @@ export default function ContextMenuSection() {
           </View>
         </ContextMenu.Trigger>
         <ContextMenu.Content>
-          <ContextMenu.Item onSelect={() => {}}>Copy</ContextMenu.Item>
-          <ContextMenu.Item onSelect={() => {}}>Share</ContextMenu.Item>
-          <ContextMenu.Item destructive onSelect={() => {}}>Delete</ContextMenu.Item>
+          <ContextMenu.Item onSelect={() => {}}><Text>Copy</Text></ContextMenu.Item>
+          <ContextMenu.Item onSelect={() => {}}><Text>Share</Text></ContextMenu.Item>
+          <ContextMenu.Item destructive onSelect={() => {}}><Text>Delete</Text></ContextMenu.Item>
         </ContextMenu.Content>
       </ContextMenu>
     </View>

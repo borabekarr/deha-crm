@@ -16,9 +16,9 @@ export default function SidebarSection() {
             <Sidebar.Header>
               <Text style={s.panelTitle}>Navigation</Text>
             </Sidebar.Header>
-            <Sidebar.Item active>Dashboard</Sidebar.Item>
-            <Sidebar.Item>Reports</Sidebar.Item>
-            <Sidebar.Item>Settings</Sidebar.Item>
+            <Sidebar.Item active><Text>Dashboard</Text></Sidebar.Item>
+            <Sidebar.Item><Text>Reports</Text></Sidebar.Item>
+            <Sidebar.Item><Text>Settings</Text></Sidebar.Item>
           </Sidebar.Panel>
         </Sidebar>
       </View>

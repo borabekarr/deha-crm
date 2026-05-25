@@ -73,7 +73,7 @@ export function Pagination({
         {items.map((item, i) => {
           if (item === 'ellipsis') {
             return (
-              <View key={`e-${i}`} style={styles.pageItem}>
+              <View key={`e-${items[i - 1] ?? 'start'}-${items[i + 1] ?? 'end'}`} style={styles.pageItem}>
                 <Text style={styles.ellipsis}>…</Text>
               </View>
             );

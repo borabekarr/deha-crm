@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import React, { createContext, use, useCallback, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -26,7 +26,7 @@ interface ComboboxCtx {
 const ComboboxContext = createContext<ComboboxCtx | null>(null);
 
 function useComboboxCtx() {
-  const ctx = useContext(ComboboxContext);
+  const ctx = use(ComboboxContext);
   if (!ctx) throw new Error('Combobox sub-component used outside <Combobox>');
   return ctx;
 }

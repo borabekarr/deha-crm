@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, use, useCallback, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -27,7 +27,7 @@ interface DatePickerCtx {
 const DatePickerContext = createContext<DatePickerCtx | null>(null);
 
 function useDatePickerCtx() {
-  const ctx = useContext(DatePickerContext);
+  const ctx = use(DatePickerContext);
   if (!ctx) throw new Error('DatePicker sub-component used outside <DatePicker>');
   return ctx;
 }

@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import React, { createContext, use, useCallback, useMemo, useRef, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useAnimatedStyle, useReducedMotion, useSharedValue, withTiming,
@@ -21,7 +21,7 @@ interface ItemProps {
 
 const ContextMenuContext = createContext<Ctx | null>(null);
 function useCtx() {
-  const ctx = useContext(ContextMenuContext);
+  const ctx = use(ContextMenuContext);
   if (!ctx) throw new Error('ContextMenu sub-component used outside <ContextMenu>');
   return ctx;
 }

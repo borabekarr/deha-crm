@@ -61,10 +61,6 @@ export function dismiss(id: string): void {
   _notify();
 }
 
-export function dismissAll(): void {
-  _toasts = [];
-  _notify();
-}
 
 // ---------------------------------------------------------------------------
 // Hook

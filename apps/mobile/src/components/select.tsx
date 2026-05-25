@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import React, { createContext, use, useCallback, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -26,7 +26,7 @@ interface SelectCtx {
 const SelectContext = createContext<SelectCtx | null>(null);
 
 function useSelectCtx() {
-  const ctx = useContext(SelectContext);
+  const ctx = use(SelectContext);
   if (!ctx) throw new Error('Select sub-component used outside <Select>');
   return ctx;
 }

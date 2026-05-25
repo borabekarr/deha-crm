@@ -1,7 +1,7 @@
 import React, {
   createContext,
+  use,
   useCallback,
-  useContext,
   useMemo,
   useState,
 } from 'react';
@@ -28,7 +28,7 @@ interface DialogCtx {
 const DialogContext = createContext<DialogCtx | null>(null);
 
 function useDialogCtx() {
-  const ctx = useContext(DialogContext);
+  const ctx = use(DialogContext);
   if (!ctx) throw new Error('Dialog sub-component used outside <Dialog>');
   return ctx;
 }

@@ -98,12 +98,17 @@ function loadVendor(): VendorSwipeActionsNamespace | null {
 }
 
 // ---------------------------------------------------------------------------
+// Stable module-scope defaults (avoids new array reference on every render)
+// ---------------------------------------------------------------------------
+const EMPTY_ACTIONS: SwipeActionDef[] = [];
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 export function SwipeActions({
   children,
-  leftActions = [],
-  rightActions = [],
+  leftActions = EMPTY_ACTIONS,
+  rightActions = EMPTY_ACTIONS,
   onCommit,
   actionWidth = 80,
   fullSwipeEnabled = false,

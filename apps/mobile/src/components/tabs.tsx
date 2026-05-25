@@ -1,7 +1,7 @@
 import React, {
   createContext,
+  use,
   useCallback,
-  useContext,
   useMemo,
   useRef,
   useState,
@@ -28,7 +28,7 @@ interface TabsCtx {
 const TabsContext = createContext<TabsCtx | null>(null);
 
 function useTabsCtx() {
-  const ctx = useContext(TabsContext);
+  const ctx = use(TabsContext);
   if (!ctx) throw new Error('Tabs sub-component used outside <Tabs>');
   return ctx;
 }
@@ -88,14 +88,26 @@ function TabsRoot({ value, defaultValue = '', onValueChange, children, reducedMo
 // ---------------------------------------------------------------------------
 function List({ children }: { children: React.ReactNode }) {
   const { indicatorX, indicatorW } = useTabsCtx();
-  const animStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: indicatorX.value }],
-    width: indicatorW.value,
-  }));
+
+  // Use compositor-safe transform instead of animating layout property `width`.
+  // Base indicator is 1px wide; scaleX grows it to the measured tab width.
+  // The double-translateX trick pins the scale origin to the left edge:
+  //   move right by half-width → scaleX → move left by 0.5 (half of 1px base)
+  const animStyle = useAnimatedStyle(() => {
+    const w = indicatorW.value;
+    const halfW = w / 2;
+    return {
+      transform: [
+        { translateX: indicatorX.value + halfW },
+        { scaleX: w },
+        { translateX: -0.5 },
+      ],
+    };
+  });
 
   return (
     <View style={styles.list}>
-      <Animated.View style={[styles.indicator, animStyle]} />
+      <Animated.View style={[styles.indicator, styles.indicatorBase, animStyle]} />
       {children}
     </View>
   );
@@ -163,6 +175,9 @@ const styles = StyleSheet.create({
     height: 2,
     backgroundColor: colors.primary,
     borderRadius: 1,
+  },
+  indicatorBase: {
+    width: 1,
   },
   trigger: {
     paddingVertical: 10,

@@ -8,9 +8,9 @@ export default function NavigationMenuSection() {
     <View style={s.wrap}>
       <Text style={s.title}>Navigation Menu</Text>
       <NavigationMenu value={active} onValueChange={setActive}>
-        <NavigationMenu.Item value="home">Home</NavigationMenu.Item>
-        <NavigationMenu.Item value="explore">Explore</NavigationMenu.Item>
-        <NavigationMenu.Item value="profile">Profile</NavigationMenu.Item>
+        <NavigationMenu.Item value="home"><Text>Home</Text></NavigationMenu.Item>
+        <NavigationMenu.Item value="explore"><Text>Explore</Text></NavigationMenu.Item>
+        <NavigationMenu.Item value="profile"><Text>Profile</Text></NavigationMenu.Item>
       </NavigationMenu>
       <Text style={s.hint}>Active: {active}</Text>
     </View>

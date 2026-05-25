@@ -6,14 +6,12 @@
  */
 import React, {
   createContext,
+  use,
   useCallback,
-  useContext,
   useMemo,
   useState,
 } from 'react';
-import type { AppleMapsSheetProps as _NativeSheetProps } from 'expo-apple-maps-sheet';
-type _SheetNativeSurface = _NativeSheetProps;
-import { Dimensions, Modal, Pressable, StyleSheet, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, {
   runOnJS,
   useAnimatedStyle,
@@ -27,11 +25,14 @@ import type { SheetProps } from '@deha/ui-contracts';
 import { sheetDetent, swipeReveal } from '../lib/choreography';
 import { colors } from '../lib/tokens';
 
-const { height: SCREEN_H } = Dimensions.get('window');
-const DETENTS = [0.18, 0.5, 0.95].map((r) => SCREEN_H * (1 - r));
+const DETENT_RATIOS = [0.18, 0.5, 0.95] as const;
 
-function snapToNearest(y: number): number {
-  return DETENTS.reduce((prev, curr) =>
+function computeDetents(screenH: number): number[] {
+  return DETENT_RATIOS.map((r) => screenH * (1 - r));
+}
+
+function snapToNearest(y: number, detents: number[]): number {
+  return detents.reduce((prev, curr) =>
     Math.abs(curr - y) < Math.abs(prev - y) ? curr : prev,
   );
 }
@@ -48,7 +49,7 @@ interface SheetCtx {
 const SheetContext = createContext<SheetCtx | null>(null);
 
 function useSheetCtx() {
-  const ctx = useContext(SheetContext);
+  const ctx = use(SheetContext);
   if (!ctx) throw new Error('Sheet sub-component used outside <Sheet>');
   return ctx;
 }
@@ -100,6 +101,8 @@ interface ContentProps {
 
 function Content({ children }: ContentProps) {
   const { open, setOpen, isReduced } = useSheetCtx();
+  const { height: SCREEN_H } = useWindowDimensions();
+  const DETENTS = useMemo(() => computeDetents(SCREEN_H), [SCREEN_H]);
 
   const translateY = useSharedValue(SCREEN_H);
   const startY = useSharedValue(0);
@@ -111,7 +114,7 @@ function Content({ children }: ContentProps) {
     translateY.value = withTiming(SCREEN_H, { duration: cfg.duration, easing: cfg.easing }, () => {
       runOnJS(setOpen)(false);
     });
-  }, [translateY, cfg, setOpen]);
+  }, [translateY, cfg, setOpen, SCREEN_H]);
 
   const snapToDetent = useCallback(
     (toY: number) => {
@@ -144,7 +147,7 @@ function Content({ children }: ContentProps) {
         runOnJS(dismiss)();
         return;
       }
-      runOnJS(snapToDetent)(snapToNearest(candidate));
+      runOnJS(snapToDetent)(snapToNearest(candidate, DETENTS));
     });
 
   const sheetStyle = useAnimatedStyle(() => ({
@@ -191,7 +194,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    height: SCREEN_H,
+    top: 0,
     backgroundColor: colors.background,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,

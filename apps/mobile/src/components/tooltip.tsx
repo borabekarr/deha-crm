@@ -1,7 +1,7 @@
 import React, {
   createContext,
+  use,
   useCallback,
-  useContext,
   useMemo,
   useRef,
   useState,
@@ -31,7 +31,7 @@ interface TooltipCtx {
 const TooltipContext = createContext<TooltipCtx | null>(null);
 
 function useTooltipCtx() {
-  const ctx = useContext(TooltipContext);
+  const ctx = use(TooltipContext);
   if (!ctx) throw new Error('Tooltip sub-component used outside <Tooltip>');
   return ctx;
 }
@@ -137,19 +137,22 @@ function TooltipContent({ children, isReduced, setOpen }: InternalContentProps) 
       onDismiss={handleDismiss}
     >
       <Animated.View style={[styles.bubble, animStyle]} onLayout={handleShow}>
-        {typeof children === 'string' ? (
-          <Text style={styles.text} numberOfLines={0}>
-            {children}
-          </Text>
-        ) : (
-          <View style={styles.childWrap}>{children}</View>
-        )}
+        <View style={styles.childWrap}>{children}</View>
       </Animated.View>
     </ExpoPopover.Content>
   );
 }
 
-export const Tooltip = TooltipRoot;
+// Tooltip.Text — convenience subcomponent for plain-text content.
+function TooltipText({ children }: { children: string }) {
+  return (
+    <Text style={styles.text} numberOfLines={0}>
+      {children}
+    </Text>
+  );
+}
+
+export const Tooltip = Object.assign(TooltipRoot, { Text: TooltipText });
 
 // ---------------------------------------------------------------------------
 // Styles

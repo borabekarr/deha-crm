@@ -5,7 +5,6 @@
     "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
-      "expo-apple-maps-sheet": ["src/components/vendor/expo-apple-maps-sheet"],
       "expo-fab": ["src/components/vendor/expo-fab"],
       "expo-ios-like-date-picker": ["src/components/vendor/expo-ios-like-date-picker"],
       "ios-like-swipe-actions": ["src/components/vendor/expo-ios-like-swipe-actions"],
