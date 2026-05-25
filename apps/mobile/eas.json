@@ -1,0 +1,10 @@
+{
+  "cli": { "version": ">= 16.0.0" },
+  "build": {
+    "ci": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": { "simulator": true }
+    }
+  }
+}

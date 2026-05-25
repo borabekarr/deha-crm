@@ -1,0 +1,16 @@
+appId: com.deha.mobile
+---
+- launchApp:
+    arguments:
+      reducedMotion: "true"
+- assertVisible: "Primitives"
+- scrollUntilVisible:
+    element: "TABS"
+    direction: DOWN
+- assertVisible: "TABS"
+- tapOn: "Password"
+- assertVisible: "Change your password here."
+- tapOn: "Settings"
+- assertVisible: "Tweak your preferences."
+- tapOn: "Account"
+- assertVisible: "Manage your account details."

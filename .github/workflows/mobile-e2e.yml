@@ -1,0 +1,37 @@
+name: mobile-e2e
+on:
+  pull_request:
+    paths:
+      - 'apps/mobile/**'
+      - 'packages/**'
+      - '.github/workflows/mobile-e2e.yml'
+  push:
+    branches: [main]
+jobs:
+  maestro:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm dlx eas-cli@latest build --profile ci --platform ios --local --non-interactive --output ./mobile.app
+        working-directory: apps/mobile
+      - run: |
+          xcrun simctl boot "iPhone 15" || true
+          xcrun simctl install booted ./mobile.app
+        working-directory: apps/mobile
+      - run: curl -Ls "https://get.maestro.mobile.dev" | bash
+      - run: ~/.maestro/bin/maestro test maestro/
+        working-directory: apps/mobile
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-debug
+          path: ~/.maestro/tests/

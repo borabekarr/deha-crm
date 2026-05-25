@@ -1,0 +1,14 @@
+appId: com.deha.mobile
+---
+- launchApp
+- assertVisible: "Primitives"
+- scrollUntilVisible:
+    element: "DROPDOWN MENU"
+    direction: DOWN
+- assertVisible: "DROPDOWN MENU"
+- tapOn: "Actions ▾"
+- assertVisible: "Edit"
+- assertVisible: "Duplicate"
+- assertVisible: "Delete"
+- tapOn: "Edit"
+- assertNotVisible: "Duplicate"

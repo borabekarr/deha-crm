@@ -1,0 +1,14 @@
+appId: com.deha.mobile
+---
+- launchApp:
+    arguments:
+      reducedMotion: "true"
+- assertVisible: "Primitives"
+- scrollUntilVisible:
+    element: "PAGINATION"
+    direction: DOWN
+- assertVisible: "PAGINATION"
+- assertVisible: "Page 3 of 8"
+- tapOn:
+    text: "4"
+- assertVisible: "Page 4 of 8"

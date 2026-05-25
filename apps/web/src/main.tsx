@@ -5,7 +5,7 @@ if (import.meta.env.DEV) {
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createRouter, RouterProvider } from '@tanstack/react-router'
-import { LazyMotion, domAnimation } from 'framer-motion'
+import { LazyMotion, domMax } from 'framer-motion'
 import './index.css'
 
 import { routeTree } from './routeTree.gen'
@@ -24,7 +24,7 @@ declare module '@tanstack/react-router' {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <LazyMotion features={domAnimation} strict>
+    <LazyMotion features={domMax} strict>
       <AnalyticsProvider>
         <RouterProvider router={router} />
       </AnalyticsProvider>

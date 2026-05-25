@@ -1,0 +1,16 @@
+appId: com.deha.mobile
+---
+- launchApp:
+    arguments:
+      reducedMotion: "true"
+- assertVisible: "Primitives"
+- scrollUntilVisible:
+    element: "POPOVER"
+    direction: DOWN
+- assertVisible: "POPOVER"
+- tapOn: "Open Popover"
+- assertVisible: "This is a popover."
+- assertVisible: "Tap outside to dismiss."
+- tapOn:
+    point: "10%, 10%"
+- assertNotVisible: "This is a popover."

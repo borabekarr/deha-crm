@@ -1,16 +1,8 @@
 const { getDefaultConfig } = require('expo/metro-config');
-const path = require('path');
 
-const projectRoot = __dirname;
-const workspaceRoot = path.resolve(projectRoot, '../..');
-
-const config = getDefaultConfig(projectRoot);
-
-config.watchFolders = [workspaceRoot];
-config.resolver.nodeModulesPaths = [
-  path.resolve(projectRoot, 'node_modules'),
-  path.resolve(workspaceRoot, 'node_modules'),
-];
-config.resolver.disableHierarchicalLookup = true;
+// SDK 56+: expo/metro-config auto-configures monorepo settings.
+// Manual watchFolders, nodeModulesPaths, and disableHierarchicalLookup
+// are not needed and cause expo-doctor failures.
+const config = getDefaultConfig(__dirname);
 
 module.exports = config;

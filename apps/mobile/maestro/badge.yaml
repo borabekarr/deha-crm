@@ -1,0 +1,15 @@
+appId: com.deha.mobile
+---
+- launchApp
+- assertVisible: "Primitives"
+- scrollUntilVisible:
+    element: "BADGE"
+    direction: DOWN
+- assertVisible: "BADGE"
+- assertVisible: "Default"
+- assertVisible: "Secondary"
+- assertVisible: "Outline"
+- assertVisible: "Destructive"
+- assertVisible: "Success"
+- assertVisible: "Warning"
+- assertVisible: "Neutral"

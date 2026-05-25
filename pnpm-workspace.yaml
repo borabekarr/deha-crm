@@ -10,6 +10,7 @@ overrides:
   "uuid@<11.1.1": "^11.1.1"
   "tmp@<0.2.4": "^0.2.4"
 allowBuilds:
+  '@shopify/react-native-skia': true
   core-js: true
   esbuild: true
   msgpackr-extract: true

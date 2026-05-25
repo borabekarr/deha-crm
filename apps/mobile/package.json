@@ -4,14 +4,27 @@
   "main": "index.ts",
   "private": true,
   "dependencies": {
-    "@deha/api": "workspace:*",
     "@deha/core": "workspace:*",
     "@deha/motion-tokens": "workspace:*",
-    "@deha/ui-contracts": "workspace:*",
-    "expo": "~56.0.3",
+    "@react-native-picker/picker": "^2.11.4",
+    "@react-navigation/native": "^7.2.4",
+    "@react-navigation/native-stack": "^7.15.1",
+    "@shopify/react-native-skia": "^2.6.2",
+    "expo": "~56.0.4",
+    "expo-blur": "56.0.3",
+    "expo-haptics": "56.0.3",
+    "expo-ios-popover": "0.1.5",
     "expo-status-bar": "~56.0.4",
+    "expo-symbols": "56.0.5",
     "react": "19.2.3",
-    "react-native": "0.85.3"
+    "react-native": "0.85.3",
+    "react-native-calendars": "^1.1314.0",
+    "react-native-gesture-handler": "2.31.1",
+    "react-native-popover-view": "^6.1.0",
+    "react-native-reanimated": "4.3.1",
+    "react-native-safe-area-context": "^5.8.0",
+    "react-native-screens": "^4.25.2",
+    "toastiva": "0.1.13"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
@@ -25,6 +38,8 @@
     "typecheck": "tsc --noEmit",
     "start": "expo start",
     "android": "expo start --android",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "test:e2e": "maestro test maestro/",
+    "build:ci": "eas build --profile ci --platform ios --local --output ./mobile.app"
   }
 }

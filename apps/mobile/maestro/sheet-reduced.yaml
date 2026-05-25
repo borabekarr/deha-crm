@@ -1,0 +1,15 @@
+appId: com.deha.mobile
+---
+- launchApp:
+    arguments:
+      reducedMotion: "true"
+- assertVisible: "Primitives"
+- scrollUntilVisible:
+    element: "SHEET"
+    direction: DOWN
+- assertVisible: "SHEET"
+- tapOn: "Open Sheet"
+- assertVisible: "Bottom Sheet"
+- assertVisible: "Drag down or tap outside to dismiss."
+- tapOn: "Close"
+- assertNotVisible: "Bottom Sheet"
