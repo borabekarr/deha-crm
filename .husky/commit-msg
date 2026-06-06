@@ -30,7 +30,12 @@ if ! printf "%s\n" "$STAGED" | grep -qE "$PATTERNS"; then
   exit 0
 fi
 
-# Bug-prone path touched. Require Root cause line in message.
+# Only nudge for fix-type commits (keep in sync with why-rule.yml scope).
+if ! printf "%s" "$MSG" | grep -qiE '^fix(\(.+\))?!?:'; then
+  exit 0
+fi
+
+# Bug-prone path touched by a fix commit. Require Root cause line in message.
 if printf "%s" "$MSG" | grep -qiE '^Root cause:'; then
   exit 0
 fi

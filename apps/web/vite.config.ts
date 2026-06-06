@@ -3,14 +3,30 @@ import { TanStackRouterVite } from '@tanstack/router-plugin/vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { visualizer } from 'rollup-plugin-visualizer'
 
 export default defineConfig(() => ({
   server: {
-    // host '0.0.0.0' + wildcard *.zrok.io hosts intentional for /host-public
-    // tunnel sharing. Dev-only; firewall must restrict 5173 on shared networks.
+    // ── Dev review channels ────────────────────────────────────────────────
+    // Primary (SSH tunnel): ssh -L 5173:localhost:5173 <user>@<vps>
+    //   then open http://localhost:5173 — HMR works over the same port;
+    //   no --host flag needed by the client.
+    // Colleague sharing (zrok): run /host-public; set PUBLIC_TUNNEL=1 if you
+    //   need a wss/clientPort override for a public HTTPS tunnel endpoint.
+    // ─────────────────────────────────────────────────────────────────────
     host: '0.0.0.0',
+    port: 5173,
+    strictPort: true, // fail fast rather than silently moving to 5174+, which breaks tunnel mapping
     allowedHosts: ['.share.zrok.io', '.zrok.io', 'localhost'],
+    // HMR: no hard-coded clientPort/protocol/host overrides here so that the
+    // default Vite behaviour (ws on the same host:port the browser used)
+    // works cleanly over the SSH tunnel.  If PUBLIC_TUNNEL=1 is set (zrok
+    // HTTPS public URL), switch to wss on port 443 so the browser can reach
+    // the WebSocket through the TLS terminator.
+    ...(process.env.PUBLIC_TUNNEL === '1'
+      ? { hmr: { protocol: 'wss', clientPort: 443 } }
+      : {}),
   },
   build: {
     // Emit brand SVGs as separate hashed files rather than inlining as data URIs.
@@ -56,7 +72,7 @@ export default defineConfig(() => ({
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
 }))
