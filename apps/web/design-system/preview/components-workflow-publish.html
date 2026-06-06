@@ -1,0 +1,213 @@
+<!doctype html>
+<!-- @dsCard group="Brand" name="Workflow Publish Button" subtitle="Publish button + popover for the AI workflow editor" --><html><head><meta charset="utf-8"><link rel="stylesheet" href="_base.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  body { background: #F8FAFC; font-family: 'Montserrat', sans-serif; }
+  .card {
+    padding: 32px 24px 80px;
+    display: flex; flex-direction: column; align-items: flex-end;
+    background: #F8FAFC;
+    background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.06) 0%, #F8FAFC 55%);
+  }
+
+  /* ── Publish button ── */
+  .pb-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 10px 18px;
+    background: #0F172A;
+    border: none; border-radius: 12px;
+    font-family: 'Montserrat'; font-size: 14px; font-weight: 800; color: #fff;
+    cursor: pointer; user-select: none;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.10),
+      inset 0 -2px 0 rgba(0,0,0,0.25),
+      0 2px 6px rgba(15,23,42,0.20);
+    transition: background 150ms, transform 120ms cubic-bezier(.22,1,.36,1);
+    letter-spacing: -0.01em;
+    margin-bottom: 10px;
+  }
+  .pb-btn:hover { background: #1E293B; }
+  .pb-btn:active { transform: scale(0.97); }
+  .pb-btn .pb-chevron { font-size: 18px; transition: transform 300ms cubic-bezier(.22,1,.36,1); }
+  .pb-btn.open .pb-chevron { transform: rotate(180deg); }
+  .pb-btn .material-icons { font-size: 17px; }
+
+  /* ── Popover ── */
+  .pb-popover {
+    display: none;
+    width: 360px;
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow:
+      0 12px 40px rgba(15,23,42,0.12),
+      0 4px 12px rgba(15,23,42,0.06),
+      inset 0 1px 0 rgba(255,255,255,1);
+  }
+  .pb-popover.open {
+    display: block;
+    animation: popIn 220ms cubic-bezier(.22,1,.36,1) forwards;
+  }
+  @keyframes popIn {
+    from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Header */
+  .pb-pop-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 18px 14px;
+  }
+  .pb-pop-title { font-size: 15px; font-weight: 900; color: #0F172A; letter-spacing: -0.02em; }
+  .pb-version {
+    font-size: 11px; font-weight: 700; color: #475569;
+    background: #F1F5F9; border: 1px solid #E2E8F0;
+    padding: 3px 8px; border-radius: 8px; letter-spacing: 0.02em;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+  }
+
+  /* Update Workflow button */
+  .pb-update-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: calc(100% - 36px); margin: 0 18px 14px;
+    padding: 13px;
+    background: #0F172A;
+    border: none; border-radius: 12px;
+    font-family: 'Montserrat'; font-size: 14px; font-weight: 800; color: #fff;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.25);
+    letter-spacing: -0.01em;
+    transition: background 150ms, transform 100ms cubic-bezier(.22,1,.36,1);
+  }
+  .pb-update-btn:hover { background: #1E293B; }
+  .pb-update-btn:active { transform: scale(0.98); }
+  .pb-update-btn .material-icons { font-size: 18px; }
+
+  /* Last edited row */
+  .pb-edited {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px;
+    border-top: 1px solid #F1F5F9;
+    cursor: pointer;
+    transition: background 140ms;
+  }
+  .pb-edited:hover { background: #F8FAFC; }
+  .pb-edited-left { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: #64748B; }
+  .pb-edited-left .material-icons { font-size: 16px; color: #94A3B8; }
+  .pb-edited .arrow { font-size: 16px; color: #CBD5E1; }
+
+  /* Divider */
+  .pb-div { height: 1px; background: #F1F5F9; margin: 4px 0; }
+
+  /* Action rows */
+  .pb-action {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 11px 18px;
+    cursor: pointer;
+    transition: background 140ms;
+  }
+  .pb-action:hover { background: #F8FAFC; }
+  .pb-action:active { background: #F1F5F9; }
+  .pb-action:last-child { margin-bottom: 6px; }
+  .pb-action-left { display: flex; align-items: center; gap: 12px; }
+
+  /* Deha semantic-pill style icon square */
+  .pb-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: grid; place-items: center; flex-shrink: 0;
+    background-image: radial-gradient(ellipse at top right, rgba(255,255,255,0.18) 0%, transparent 55%), linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+    background-size: cover, 7px 7px, 7px 7px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.55),
+      inset 0 -2px 0 rgba(15,23,42,0.18),
+      inset 0 0 0 1px rgba(15,23,42,0.10);
+  }
+  .pb-icon .material-icons {
+    font-size: 18px; color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.30);
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
+  }
+
+  .pb-action-label { font-size: 14px; font-weight: 700; color: #0F172A; letter-spacing: -0.01em; }
+  .pb-action .arrow { font-size: 16px; color: #CBD5E1; }
+</style>
+<link rel="stylesheet" href="_darkmode.css">
+</head><body>
+<div class="card">
+
+  <!-- Publish button -->
+  <button class="pb-btn" id="pbBtn">
+    <span class="material-icons">rocket_launch</span>
+    Publish
+    <span class="material-icons pb-chevron">expand_more</span>
+  </button>
+
+  <!-- Popover — hidden by default, toggles on click -->
+  <div class="pb-popover" id="pbPopover" data-comment-anchor="dd0e2fad34-div">
+
+    <div class="pb-pop-head">
+      <span class="pb-pop-title">Customer Support Agent</span>
+      <span class="pb-version">V1.2</span>
+    </div>
+
+    <button class="pb-update-btn">
+      <span class="material-icons">sync</span>
+      Update Workflow
+    </button>
+
+    <div class="pb-edited">
+      <div class="pb-edited-left">
+        <span class="material-icons">schedule</span>
+        12m ago by Ethan Walker
+      </div>
+      <span class="material-icons arrow">chevron_right</span>
+    </div>
+
+    <div class="pb-div"></div>
+
+    <!-- Run Workflow — emerald (success) -->
+    <div class="pb-action">
+      <div class="pb-action-left">
+        <div class="pb-icon" style="background-color:#10B981;">
+          <span class="material-icons">play_arrow</span>
+        </div>
+        <span class="pb-action-label">Run Workflow</span>
+      </div>
+      <span class="material-icons arrow">chevron_right</span>
+    </div>
+
+    <!-- View Execution Log — warning yellow -->
+    <div class="pb-action">
+      <div class="pb-action-left">
+        <div class="pb-icon" style="background-color:#EAB308;">
+          <span class="material-icons">history</span>
+        </div>
+        <span class="pb-action-label">View Execution Log</span>
+      </div>
+      <span class="material-icons arrow">chevron_right</span>
+    </div>
+
+    <!-- Generate API Endpoint — hot orange -->
+    <div class="pb-action">
+      <div class="pb-action-left">
+        <div class="pb-icon" style="background-color:#F97316;">
+          <span class="material-icons">api</span>
+        </div>
+        <span class="pb-action-label">Generate API Endpoint</span>
+      </div>
+      <span class="material-icons arrow">chevron_right</span>
+    </div>
+
+  </div>
+
+</div>
+<script>
+function togglePopover() {
+  document.getElementById('pbBtn').classList.toggle('open');
+  document.getElementById('pbPopover').classList.toggle('open');
+}
+document.getElementById('pbBtn').addEventListener('click', togglePopover);
+</script>
+<script src="_darkmode.js"></script>
+</body></html>

@@ -1,0 +1,74 @@
+<!doctype html>
+<!-- @dsCard group="Brand" name="Toggles, segmented & sliders" subtitle="Switch, segmented control, slider track" viewport="700x200" --><html><head><meta charset="utf-8"><link rel="stylesheet" href="_base.css">
+<style>
+  .row { display:flex; align-items:center; gap: 20px; padding: 4px 0 12px; }
+  .row + .row { border-top: 1px dashed #E2E8F0; padding-top: 14px; }
+  .title { font-weight: 800; font-size: 14px; color: #0F172A; min-width: 130px; }
+  .meta  { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 10px; color: #64748B; margin-top: 4px; }
+
+  /* Slider */
+  .slider { width: 220px; height: 8px; background: #E2E8F0; border-radius: 9999px; position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.06); cursor: pointer; }
+  .slider .fill { position:absolute; left:0; top:0; bottom:0; width: 65%; background: #10B981; border-radius: 9999px; transition: width 260ms cubic-bezier(.22,1,.36,1); }
+  .slider .thumb { position:absolute; left: 65%; top: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; background: #fff; border-radius: 50%; border: 1px solid #E2E8F0; box-shadow: 0 2px 6px rgba(0,0,0,0.15); cursor: grab; transition: left 260ms cubic-bezier(.22,1,.36,1), transform 130ms cubic-bezier(.34,1.56,.64,1); }
+  .slider .thumb:hover { transform: translate(-50%, -50%) scale(1.12); }
+  .slider .thumb:active { cursor: grabbing; }
+  /* Disable position easing while actively dragging so the thumb tracks the pointer */
+  .slider.dragging .fill, .slider.dragging .thumb { transition: transform 130ms cubic-bezier(.34,1.56,.64,1); }
+  .slider.dragging .thumb { transform: translate(-50%, -50%) scale(1.2); }
+</style>
+<link rel="stylesheet" href="_controls.css">
+<link rel="stylesheet" href="_darkmode.css">
+</head><body><div class="card" data-comment-anchor="8fd51e555f-div">
+  <div class="row">
+    <div class="title">Toggle<div class="meta">switch</div></div>
+    <div class="sw-base sw-off"></div>
+    <div class="sw-base sw-on" data-comment-anchor="2dde1d4988-div"></div>
+  </div>
+  <div class="row">
+    <div class="title">Segmented<div class="meta">radio (1 of n)</div></div>
+    <div class="seg" data-comment-anchor="08203025e7-div"><span class="seg-pill"></span><button class="active" data-comment-anchor="83ff9736ca-button">Leads</button><button>Qualified</button></div>
+  </div>
+  <div class="row">
+    <div class="title">Slider<div class="meta">range input</div></div>
+    <div class="slider"><div class="fill"></div><div class="thumb"></div></div>
+  </div>
+</div>
+<script>
+  // Slider
+  document.querySelectorAll('.slider').forEach(function (slider) {
+    var fill = slider.querySelector('.fill');
+    var thumb = slider.querySelector('.thumb');
+    var pressed = false;
+
+    function setFromClientX(clientX) {
+      var rect = slider.getBoundingClientRect();
+      var pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+      var v = (pct * 100) + '%';
+      fill.style.width = v;
+      thumb.style.left = v;
+    }
+
+    slider.addEventListener('pointerdown', function (e) {
+      pressed = true;
+      slider.setPointerCapture(e.pointerId);
+      // first set animates to the click point (no .dragging yet)
+      setFromClientX(e.clientX);
+    });
+    slider.addEventListener('pointermove', function (e) {
+      if (!pressed) return;
+      slider.classList.add('dragging'); // instant tracking once moving
+      setFromClientX(e.clientX);
+    });
+    function end(e) {
+      if (!pressed) return;
+      pressed = false;
+      slider.classList.remove('dragging');
+      try { slider.releasePointerCapture(e.pointerId); } catch (err) {}
+    }
+    slider.addEventListener('pointerup', end);
+    slider.addEventListener('pointercancel', end);
+  });
+</script>
+<script src="_controls.js"></script>
+<script src="_darkmode.js"></script>
+</body></html>

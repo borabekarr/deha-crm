@@ -1,0 +1,162 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="_base.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_leads-table.css">
+<link rel="stylesheet" href="_darkmode.css">
+<style>
+  /* ── print-ready overrides ───────────────────────────────────────── */
+  @page { size: A4 landscape; margin: 1cm; }
+  html, body { background: #fff !important; }
+  body { display:block !important; }
+
+  /* freeze any animation/transition at its END state */
+  *, *::before, *::after {
+    animation-delay: -99s !important; animation-duration: .001s !important;
+    animation-iteration-count: 1 !important; animation-fill-mode: both !important;
+    animation-play-state: running !important; transition-duration: 0s !important;
+  }
+
+  .lt-app{
+    width: 100% !important; margin: 0 !important; border-radius: 0 !important;
+    box-shadow: none !important; border: 1px solid #E2E8F0;
+  }
+  /* keep the score/sentiment fill bars at full width in print */
+  .lt-row.enter{ transform:none !important; }
+
+  @media print {
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .lt-app{ border:none; }
+    /* hide interactive-only chrome that has no meaning on paper */
+    #ltViewMoreWrap, .lt-fade, #ltFoot, .lt-toast, .lt-head-actions,
+    #ltFilterBtn, #ltAskBtn, .lt-clear { display:none !important; }
+    .lt-thead{ position:static !important; }
+    .lt-search input{ box-shadow:none !important; }
+    /* avoid splitting a lead row across pages */
+    .lt-rowwrap{ break-inside: avoid; }
+    .lt-analytics, .lt-controls{ break-inside: avoid; }
+    .lt-thead{ break-after: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="lt-app" data-screen-label="Leads table">
+
+  <!-- left rail -->
+  <div class="lt-rail">
+    <div class="lt-rail-logo">D</div>
+    <button class="lt-rail-btn" aria-label="Dashboard"><span class="material-symbols-outlined">grid_view</span></button>
+    <button class="lt-rail-btn" aria-label="Inbox"><span class="material-symbols-outlined">inbox</span></button>
+    <button class="lt-rail-btn active" aria-label="Leads"><span class="material-symbols-outlined">group</span></button>
+    <button class="lt-rail-btn" aria-label="Pipeline"><span class="material-symbols-outlined">view_kanban</span></button>
+    <button class="lt-rail-btn" aria-label="Calendar"><span class="material-symbols-outlined">calendar_today</span></button>
+    <div class="lt-rail-sp"></div>
+    <button class="lt-rail-btn" aria-label="Insights"><span class="material-symbols-outlined">monitoring</span></button>
+    <button class="lt-rail-btn" aria-label="Theme"><span class="material-symbols-outlined">light_mode</span></button>
+  </div>
+
+  <!-- main -->
+  <div class="lt-main">
+
+    <div class="lt-header">
+      <div>
+        <div class="lt-title">Leads <span class="count" id="ltCount"></span></div>
+        <div class="lt-subtitle">Your pipeline, scored and triaged by AI — start where it matters today.</div>
+      </div>
+      <div class="lt-head-actions">
+        <button class="lt-iconbtn" id="ltDensity" aria-label="Row density" title="Row density"><span class="material-symbols-outlined">density_medium</span></button>
+        <button class="lt-iconbtn" id="ltCols" aria-label="Columns" title="Configure columns"><span class="material-symbols-outlined">tune</span></button>
+      </div>
+    </div>
+
+    <!-- analytics header -->
+    <div class="lt-analytics">
+      <div class="lt-an-card">
+        <div class="lt-an-title"><span>Pipeline distribution</span><span class="material-symbols-outlined">bar_chart</span></div>
+        <div id="ltPipeDist"></div>
+      </div>
+      <div class="lt-an-card" style="display:flex;flex-direction:column">
+        <div class="lt-an-title"><span>Performance</span><span class="material-symbols-outlined">insights</span></div>
+        <div class="lt-metrics" id="ltMetrics" style="flex:1"></div>
+      </div>
+    </div>
+
+    <!-- search + quick filters -->
+    <div class="lt-controls">
+      <div class="lt-searchbar">
+        <div class="lt-search">
+          <span class="material-symbols-outlined">auto_awesome</span>
+          <input type="text" id="ltSearch" placeholder="Ask in plain language — “hot leads in negotiation above ₺1M closing before August”" aria-label="Search leads">
+        </div>
+        <button class="lt-btn" id="ltFilterBtn"><span class="material-symbols-outlined">filter_alt</span>Filter</button>
+        <button class="lt-btn lt-btn-ai" id="ltAskBtn"><span class="material-symbols-outlined">bolt</span>Ask AI</button>
+      </div>
+      <div class="lt-quick">
+        <button class="lt-qf" data-qf="hot"><span class="material-symbols-outlined">local_fire_department</span>Sıcak adaylar <span class="qf-sub">Hot leads</span></button>
+        <button class="lt-qf" data-qf="value"><span class="material-symbols-outlined">apartment</span>Yüksek değerli <span class="qf-sub">≥ ₺1.8M</span></button>
+        <button class="lt-qf" data-qf="earn"><span class="material-symbols-outlined">bolt</span>Earn today <span class="qf-sub">score ≥ 65</span></button>
+        <button class="lt-clear" id="ltClear"><span class="material-symbols-outlined">close</span>Clear</button>
+        <span class="lt-result-ct" id="ltResultCt"></span>
+      </div>
+    </div>
+
+    <!-- table -->
+    <div class="lt-table">
+      <div class="lt-thead lt-grid">
+        <div class="lt-th">Lead</div>
+        <div class="lt-th num sortable" data-sort="score">AI Score<span class="lt-sort"><span class="material-symbols-outlined">arrow_downward</span></span></div>
+        <div class="lt-th sortable" data-sort="value">Value<span class="lt-sort"><span class="material-symbols-outlined">arrow_downward</span></span></div>
+        <div class="lt-th">Stage</div>
+        <div class="lt-th num sortable" data-sort="sentiment">Sentiment<span class="lt-sort"><span class="material-symbols-outlined">arrow_downward</span></span></div>
+        <div class="lt-th">Source</div>
+        <div class="lt-th sortable" data-sort="last">Last Contact<span class="lt-sort"><span class="material-symbols-outlined">arrow_downward</span></span></div>
+        <div class="lt-th">Temp</div>
+      </div>
+      <div class="lt-body" id="ltBody"></div>
+
+      <!-- view more -->
+      <div class="lt-viewmore-wrap" id="ltViewMoreWrap" style="display:none">
+        <div class="lt-fade"></div>
+        <button class="lt-viewmore" id="ltViewMore">View more (<span id="ltViewMoreCount"></span>)<span class="material-symbols-outlined">expand_more</span></button>
+      </div>
+    </div>
+
+    <!-- footer / pagination -->
+    <div class="lt-foot" id="ltFoot" style="display:none">
+      <div class="lt-foot-info" id="ltFootInfo"></div>
+      <div class="lt-pages" id="ltPages"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- toast -->
+<div class="lt-toast" id="ltToast"><span class="material-symbols-outlined">auto_awesome</span><span id="ltToastMsg"></span></div>
+
+<script src="_leads-table-data.js"></script>
+<script src="_leads-table-render.js"></script>
+<script>
+  (function(){ var c=document.getElementById('ltCount'); if(window.DEHA_LEADS) c.textContent=window.DEHA_LEADS.LEADS.length; })();
+
+  // Expand every lead into one continuous list, wait for fonts, then print.
+  (function(){
+    function expandAll(){ if (window.__ltExpandAllForPrint) window.__ltExpandAllForPrint(); }
+    // render() runs ~360ms after load; expand a little after that
+    setTimeout(expandAll, 600);
+    var done=false;
+    function go(){
+      if (done) return; done=true;
+      expandAll();
+      setTimeout(function(){ window.print(); }, 500);
+    }
+    if (document.fonts && document.fonts.ready) {
+      Promise.all([document.fonts.ready, new Promise(function(r){ setTimeout(r, 1100); })]).then(go);
+    } else {
+      setTimeout(go, 1300);
+    }
+  })();
+</script>
+<script src="_darkmode.js"></script>
+</body></html>

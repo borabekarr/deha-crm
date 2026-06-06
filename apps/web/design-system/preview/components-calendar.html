@@ -1,0 +1,317 @@
+<!doctype html>
+<!-- @dsCard group="Brand" name="Calendar" --><html><head><meta charset="utf-8"><link rel="stylesheet" href="_base.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  body { background: #E4E8ED; font-family: 'Montserrat', sans-serif; }
+  .card { padding: 24px; background: #E4E8ED; background-image: none; }
+
+  /* ── Gray outer shell ── */
+  .cal-outer {
+    background: #D4DCE8;
+    border-radius: 28px;
+    padding: 10px;
+    box-shadow: 0 16px 56px rgba(15,23,42,0.13), 0 3px 10px rgba(15,23,42,0.06);
+  }
+
+  /* ── White inner panel ── */
+  .cal-panel { background: #fff; border-radius: 20px; overflow: hidden; }
+
+  /* ── Header (inside panel) ── */
+  .cal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 16px 10px;
+    border-bottom: 1px solid #F8FAFC;
+  }
+  .cal-title-area { display: flex; align-items: center; gap: 8px; }
+  .cal-month-yr { font-size: 20px; font-weight: 900; color: #0F172A; letter-spacing: -0.02em; }
+  .cal-count { background: #E2E8F0; color: #64748B; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 9999px; }
+  .cal-actions { display: flex; gap: 5px; align-items: center; }
+  .cal-today-btn { background: #0F172A; border: 1px solid transparent; border-radius: 9999px; padding: 6px 14px; font-family: 'Montserrat'; font-size: 12px; font-weight: 800; color: #fff; cursor: pointer; transition: background 150ms, color 150ms, transform 120ms cubic-bezier(.22,1,.36,1); box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.22); }
+  .cal-today-btn:hover { background: #1E293B; }
+  .cal-today-btn:active { transform: scale(0.94); }
+  .cal-today-btn.is-today { background: #E2E8F0; color: #0F172A; border-color: #CBD5E1; box-shadow: inset 0 2px 4px rgba(0,0,0,0.10), inset 0 1px 2px rgba(0,0,0,0.06); }
+  .cal-today-btn.is-today:hover { background: #D8E0EA; }
+  .cal-nav-btn { background: #fff; border: 1px solid #E2E8F0; border-radius: 50%; width: 30px; height: 30px; display: grid; place-items: center; cursor: pointer; transition: background 150ms, transform 120ms cubic-bezier(.22,1,.36,1); box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgba(0,0,0,0.04); }
+  .cal-nav-btn:hover { background: #F8FAFC; }
+  .cal-nav-btn:active { transform: scale(0.88); }
+  .cal-nav-btn .material-icons { font-size: 17px; color: #64748B; }
+
+  /* ── Day headers ── */
+  .cal-dow-row { display: grid; grid-template-columns: repeat(7,1fr); padding: 10px 6px 4px; }
+  .cal-dow { text-align: center; font-size: 11px; font-weight: 700; color: #94A3B8; letter-spacing: 0.04em; padding: 4px 0; }
+
+  /* ── Grid ── */
+  .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); padding: 4px 4px 8px; }
+
+  /* ── Cell ── */
+  .cal-cell {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 3px 2px 5px; cursor: pointer; border-radius: 10px; user-select: none;
+  }
+  /* No background on the whole cell — hover scoped to number only */
+  .cal-date-num {
+    width: 30px; height: 30px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 600; color: #0F172A;
+    transition: background 140ms, transform 110ms cubic-bezier(.22,1,.36,1);
+  }
+  .cal-cell.other-month .cal-date-num { color: #CBD5E1; font-weight: 500; }
+  /* Hover: only non-selected, non-other-month cells */
+  .cal-cell:not(.other-month):not(.selected):hover .cal-date-num { background: #F1F5F9; }
+  /* Click animation */
+  .cal-cell:active .cal-date-num { transform: scale(0.85); background: #E2E8F0 !important; }
+  .cal-cell.selected:active .cal-date-num { background: #0F172A !important; }
+  /* Selected: black bg, white text, inner + outer shadow */
+  .cal-cell.selected .cal-date-num {
+    background: #0F172A; color: #fff; font-weight: 800;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.28), 0 1px 3px rgba(0,0,0,0.18),
+                inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.28);
+  }
+  /* Hover on selected: stay black */
+  .cal-cell.selected:hover .cal-date-num { background: #0F172A; }
+
+  .cal-dots { display: flex; gap: 5px; justify-content: center; min-height: 8px; margin-top: 5px; }
+  .cal-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── Divider ── */
+  .cal-divider { height: 1px; background: #F1F5F9; }
+
+  /* ── Events ── */
+  .cal-events { padding: 14px 12px 10px; }
+  .cal-ev-label { font-size: 10px; font-weight: 700; color: #94A3B8; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+  .cal-ev-item { display: flex; align-items: center; padding: 10px 2px; border-bottom: 1px solid #F8FAFC; }
+  .cal-ev-item:last-of-type { border-bottom: none; }
+  .cev-left { display: flex; align-items: center; gap: 8px; flex: 1; overflow: hidden; }
+  .cev-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .cev-time { font-size: 13px; font-weight: 500; color: #94A3B8; min-width: 38px; flex-shrink: 0; }
+  .cev-title { font-size: 14px; font-weight: 700; color: #0F172A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* Deha semantic-colors pill style */
+  .cev-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border-radius: 9999px; flex-shrink: 0;
+    color: #fff;
+    font-size: 11px; font-weight: 800; font-family: 'Montserrat';
+    text-shadow: 0 1px 2px rgba(0,0,0,0.28);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(15,23,42,0.18), inset 0 0 0 1px rgba(15,23,42,0.10);
+    background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+    background-size: 7px 7px;
+    white-space: nowrap;
+  }
+  .cev-badge .material-icons { font-size: 12px; color: rgba(255,255,255,0.85); }
+  .cal-no-events { font-size: 13px; font-weight: 500; color: #CBD5E1; padding: 6px 0 4px; }
+  .cal-add-row { display: flex; align-items: center; gap: 10px; padding: 10px 2px 4px; cursor: pointer; opacity: 0.7; transition: opacity 150ms; }
+  .cal-add-row:hover { opacity: 1; }
+  .cal-add-icon { width: 26px; height: 26px; border-radius: 50%; background: #F1F5F9; display: grid; place-items: center; color: #94A3B8; }
+  .cal-add-icon .material-icons { font-size: 16px; }
+  .cal-add-text { font-size: 13px; font-weight: 500; color: #94A3B8; }
+
+  /* ── Theme toggle ── */
+  #themeToggle{position:fixed;top:14px;right:14px;z-index:1000;display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 13px;border-radius:9999px;border:1px solid rgba(15,23,42,.14);background:rgba(255,255,255,.9);color:#0F172A;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;letter-spacing:.02em;cursor:pointer;box-shadow:0 4px 14px -6px rgba(15,23,42,.25);}
+  [data-theme="dark"] #themeToggle{border-color:rgba(255,255,255,.16);background:rgba(30,41,59,.92);color:#F1F5F9;}
+
+  /* ── Dark mode ── */
+  [data-theme="dark"] body{ background:#0B1220 !important; }
+  [data-theme="dark"] .card{ background:#0B1220 !important; }
+  [data-theme="dark"] .cal-outer{ background:#334155; box-shadow:0 16px 56px rgba(0,0,0,.5), 0 3px 10px rgba(0,0,0,.3); }
+  [data-theme="dark"] .cal-panel{ background:#1E293B; }
+  [data-theme="dark"] .cal-header{ border-bottom-color:#334155; }
+  [data-theme="dark"] .cal-month-yr{ color:#F1F5F9; }
+  [data-theme="dark"] .cal-count{ background:#334155; color:#CBD5E1; }
+  [data-theme="dark"] .cal-today-btn{ background:#10B981; box-shadow:inset 0 1px 0 rgba(255,255,255,.2), inset 0 -2px 0 rgba(0,0,0,.22); }
+  [data-theme="dark"] .cal-today-btn:hover{ background:#34D399; }
+  [data-theme="dark"] .cal-today-btn.is-today{ background:#334155; color:#F1F5F9; border-color:#475569; box-shadow:inset 0 2px 4px rgba(0,0,0,.3); }
+  [data-theme="dark"] .cal-today-btn.is-today:hover{ background:#3d4a5c; }
+  [data-theme="dark"] .cal-nav-btn{ background:#1E293B; border-color:#334155; box-shadow:inset 0 1px 0 rgba(255,255,255,.05); }
+  [data-theme="dark"] .cal-nav-btn:hover{ background:#0F172A; }
+  [data-theme="dark"] .cal-nav-btn .material-icons{ color:#94A3B8; }
+  [data-theme="dark"] .cal-date-num{ color:#F1F5F9; }
+  [data-theme="dark"] .cal-cell.other-month .cal-date-num{ color:#475569; }
+  [data-theme="dark"] .cal-cell:not(.other-month):not(.selected):hover .cal-date-num{ background:rgba(255,255,255,.07); }
+  [data-theme="dark"] .cal-cell:active .cal-date-num{ background:#334155 !important; }
+  [data-theme="dark"] .cal-cell.selected .cal-date-num{ background:#10B981; color:#fff; box-shadow:0 2px 8px rgba(16,185,129,.4), inset 0 1px 0 rgba(255,255,255,.2), inset 0 -2px 0 rgba(0,0,0,.2); }
+  [data-theme="dark"] .cal-cell.selected:hover .cal-date-num{ background:#10B981; }
+  [data-theme="dark"] .cal-cell.selected:active .cal-date-num{ background:#059669 !important; }
+  [data-theme="dark"] .cal-divider{ background:#334155; }
+  [data-theme="dark"] .cal-ev-item{ border-bottom-color:#334155; }
+  [data-theme="dark"] .cev-title{ color:#F1F5F9; }
+  [data-theme="dark"] .cal-no-events{ color:#475569; }
+  [data-theme="dark"] .cal-add-icon{ background:#334155; color:#CBD5E1; }
+
+  /* Morph-in when switching days (event panel rebuilds → fresh nodes replay this) */
+  @keyframes calEvIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes calLabelIn { from { opacity: 0; transform: translateY(-5px); filter: blur(2px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
+  #calEvents > * { animation: calEvIn .42s cubic-bezier(.22,1,.36,1) both; }
+  #calEvents > .cal-ev-label { animation: calLabelIn .34s cubic-bezier(.22,1,.36,1) both; }
+  #calEvents > *:nth-child(2) { animation-delay: .05s; }
+  #calEvents > *:nth-child(3) { animation-delay: .10s; }
+  #calEvents > *:nth-child(4) { animation-delay: .15s; }
+  #calEvents > *:nth-child(5) { animation-delay: .20s; }
+  #calEvents > *:nth-child(6) { animation-delay: .25s; }
+  #calEvents > *:nth-child(7) { animation-delay: .30s; }
+  #calEvents > *:nth-child(8) { animation-delay: .35s; }
+  /* Selected day pill gives a little morph pop when it moves */
+  @keyframes calSelPop { 0% { transform: scale(.7); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
+  .cal-cell.selected .cal-date-num { animation: calSelPop .34s cubic-bezier(.34,1.4,.5,1); }
+</style>
+</head><body>
+<div class="card">
+  <div class="cal-outer">
+    <div class="cal-panel">
+
+      <!-- Header -->
+      <div class="cal-header">
+        <div class="cal-title-area">
+          <span class="cal-month-yr">May 2026</span>
+          <span class="cal-count">62</span>
+        </div>
+        <div class="cal-actions">
+          <button class="cal-today-btn" onclick="goToday()">Today</button>
+          <button class="cal-nav-btn" onclick="prevMonth()"><span class="material-icons">chevron_left</span></button>
+          <button class="cal-nav-btn" onclick="nextMonth()"><span class="material-icons">chevron_right</span></button>
+        </div>
+      </div>
+
+      <!-- Day headers -->
+      <div class="cal-dow-row">
+        <div class="cal-dow">Sun</div><div class="cal-dow">Mon</div><div class="cal-dow">Tue</div>
+        <div class="cal-dow">Wed</div><div class="cal-dow">Thu</div><div class="cal-dow">Fri</div><div class="cal-dow">Sat</div>
+      </div>
+
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-divider"></div>
+      <div class="cal-events" id="calEvents" data-comment-anchor="9d2ec48cec-div"></div>
+
+    </div>
+  </div>
+</div>
+<button id="themeToggle" aria-label="Toggle dark mode"><span aria-hidden="true">◐</span><span class="tg-label">Dark</span></button>
+<script>(function(){var K='deha-theme';var R=document.documentElement;function apply(d){var st=document.createElement('style');st.textContent='*,*::before,*::after{transition:none!important;animation:none!important}';document.head.appendChild(st);if(d)R.setAttribute('data-theme','dark');else R.removeAttribute('data-theme');void R.offsetWidth;requestAnimationFrame(function(){requestAnimationFrame(function(){st.remove();});});}if(localStorage.getItem(K)==='dark')R.setAttribute('data-theme','dark');var b=document.getElementById('themeToggle');function s(){var d=R.getAttribute('data-theme')==='dark';b.querySelector('.tg-label').textContent=d?'Light':'Dark';}s();b.addEventListener('click',function(){var d=R.getAttribute('data-theme')==='dark';apply(!d);localStorage.setItem(K,d?'light':'dark');s();});})();</script>
+
+<script>
+var B='#3B82F6', O='#F97316', P='#EC4899';
+var INFO = {};
+INFO[B] = {badge:'Meeting', icon:'group', color:'#3B82F6', bc:'#2563EB', bbg:'#EFF6FF',
+  titles:['Team standup','Client call','Weekly sync','Strategy review','Product meeting','Investor call','Sprint planning'],
+  times:['9:00','9:30','10:00','11:00','14:00','15:00','16:30']};
+INFO[O] = {badge:'Review', icon:'rate_review', color:'#F97316', bc:'#EA580C', bbg:'#FFF7ED',
+  titles:['Property visit','Site inspection','Listing review','Market analysis','Buyer showing','Lease signing','Portfolio review'],
+  times:['10:00','10:30','11:30','13:00','14:00','15:30','16:00']};
+INFO[P] = {badge:'Personal', icon:'self_improvement', color:'#EC4899', bc:'#DB2777', bbg:'#FDF2F8',
+  titles:['Yoga class','Gym session','Dinner out','Evening run','Coffee break','Personal errand','Family time'],
+  times:['7:30','8:00','18:00','18:30','19:00','19:30','20:00']};
+
+// May 2026 has predefined dot data
+var MAY_DOTS = {
+  1:[B,B,P],2:[P],3:[P],4:[B,O,P],5:[B,O],6:[B,O],7:[B,B,O],8:[B,O],9:[O],
+  10:[P],11:[B,O,P],12:[B,O,P],13:[O,B],14:[B,B,O],15:[B,O,O],16:[P],
+  17:[P],18:[B,O],19:[B,P],20:[P,O,B],21:[B,B,O],22:[P],23:[P],
+  24:[P],25:[B,O],26:[B,B,P],27:[O,B],28:[O,B,B],29:[B,P,O],30:[P],31:[P]
+};
+
+var MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+var DAY_NAMES   = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+
+var curYear = 2026, curMonth = 4, sel = 4; // May 2026, day 4 selected
+
+/* Generate dot array for any day in any month */
+function getDots(year, month, day) {
+  if (year === 2026 && month === 4) return MAY_DOTS[day] || [];
+  var h = (year * 1200 + month * 100 + day) % 19;
+  if (h < 4)  return [];
+  if (h < 7)  return [P];
+  if (h < 10) return [B];
+  if (h < 13) return [O, P];
+  if (h < 16) return [B, O];
+  return [B, O, P];
+}
+
+/* Build 42-cell grid for the month */
+function buildCells(year, month) {
+  var firstDOW   = new Date(year, month, 1).getDay();
+  var daysInMon  = new Date(year, month + 1, 0).getDate();
+  var prevDays   = new Date(year, month, 0).getDate();
+  var cells = [];
+  for (var i = firstDOW - 1; i >= 0; i--) cells.push({d: prevDays - i, m:'p'});
+  for (var d = 1; d <= daysInMon; d++)    cells.push({d: d, m:'c'});
+  while (cells.length < 42)              cells.push({d: cells.length - firstDOW - daysInMon + 1, m:'n'});
+  return cells;
+}
+
+function getEvents(day) {
+  var dots = getDots(curYear, curMonth, day);
+  return dots.map(function(color, i) {
+    var info = INFO[color]; if (!info) return null;
+    return {
+      time:  info.times[(day * 2 + i * 3) % info.times.length],
+      title: info.titles[(day + i * 4)    % info.titles.length],
+      dot: color, badge: info.badge, icon: info.icon, color: info.color
+    };
+  }).filter(Boolean).sort(function(a,b){ return a.time.localeCompare(b.time); });
+}
+
+function countMonthEvents(year, month) {
+  var n = new Date(year, month + 1, 0).getDate(), total = 0;
+  for (var d = 1; d <= n; d++) total += getDots(year, month, d).length;
+  return total;
+}
+
+function renderHeader() {
+  document.querySelector('.cal-month-yr').textContent = MONTH_NAMES[curMonth] + ' ' + curYear;
+  document.querySelector('.cal-count').textContent    = countMonthEvents(curYear, curMonth);
+  var isToday = (curYear === 2026 && curMonth === 4 && sel === 26);
+  document.querySelector('.cal-today-btn').classList.toggle('is-today', isToday);
+}
+
+function renderGrid() {
+  var g = document.getElementById('calGrid'); g.innerHTML = '';
+  buildCells(curYear, curMonth).forEach(function(c) {
+    var el  = document.createElement('div');
+    var dots = c.m === 'c' ? getDots(curYear, curMonth, c.d) : [];
+    el.className = 'cal-cell' + (c.m !== 'c' ? ' other-month' : '') + (c.m === 'c' && c.d === sel ? ' selected' : '');
+    el.innerHTML = '<div class="cal-date-num">' + c.d + '</div>' +
+      '<div class="cal-dots">' + dots.map(function(clr){ return '<div class="cal-dot" style="background:'+clr+'"></div>'; }).join('') + '</div>';
+    if (c.m === 'c') { el.onclick = function(){ sel = c.d; renderGrid(); renderEvents(); }; }
+    g.appendChild(el);
+  });
+}
+
+function renderEvents() {
+  var ev     = document.getElementById('calEvents');
+  var events = getEvents(sel);
+  var dow    = new Date(curYear, curMonth, sel).getDay();
+  var cnt    = events.length;
+  var label  = DAY_NAMES[dow] + ', ' + MONTH_NAMES[curMonth].slice(0,3).toUpperCase() + ' ' + sel + ' · ' + cnt + (cnt===1?' EVENT':' EVENTS');
+  if (cnt > 0) {
+    var html = '<div class="cal-ev-label">' + label + '</div>';
+    events.forEach(function(item) {
+      html += '<div class="cal-ev-item"><div class="cev-left">' +
+        '<div class="cev-dot" style="background:'+item.dot+'"></div>' +
+        '<span class="cev-time">'+item.time+'</span>' +
+        '<span class="cev-badge" style="background-color:'+item.color+'"><span class="material-icons">'+item.icon+'</span>'+item.badge+'</span>' +
+        '<span class="cev-title">'+item.title+'</span>' +
+        '</div></div>';
+    });
+    html += '<div class="cal-add-row"><div class="cal-add-icon"><span class="material-icons">add</span></div><span class="cal-add-text">Add event</span></div>';
+    ev.innerHTML = html;
+  } else {
+    ev.innerHTML = '<div class="cal-ev-label">'+label+'</div><div class="cal-no-events">No events scheduled.</div><div class="cal-add-row"><div class="cal-add-icon"><span class="material-icons">add</span></div><span class="cal-add-text">Add event</span></div>';
+  }
+}
+
+function render() { renderHeader(); renderGrid(); renderEvents(); }
+
+function prevMonth() {
+  curMonth--; if (curMonth < 0) { curMonth = 11; curYear--; }
+  sel = 1; render();
+}
+function nextMonth() {
+  curMonth++; if (curMonth > 11) { curMonth = 0; curYear++; }
+  sel = 1; render();
+}
+function goToday() {
+  curYear = 2026; curMonth = 4; sel = 26; render();
+}
+
+render();
+</script>
+</body></html>

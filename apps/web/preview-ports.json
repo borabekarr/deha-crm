@@ -1,0 +1,10 @@
+{
+  "leads-table": {
+    "port": 5173,
+    "route": "/leads"
+  },
+  "placeholder": {
+    "port": 5174,
+    "route": "/"
+  }
+}

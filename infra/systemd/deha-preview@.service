@@ -1,0 +1,14 @@
+[Unit]
+Description=Deha web preview on port %i
+After=network.target
+
+[Service]
+WorkingDirectory=/home/bora/deha-crm
+Environment=PATH=/home/bora/.local/bin:/usr/bin:/bin
+EnvironmentFile=-%h/.config/deha-preview/%i.env
+ExecStart=/home/bora/.local/bin/pnpm --filter web exec vite --host 0.0.0.0 --port %i --strictPort
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=default.target

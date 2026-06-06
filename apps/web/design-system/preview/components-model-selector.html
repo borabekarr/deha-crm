@@ -1,0 +1,294 @@
+<!doctype html>
+<!-- @dsCard group="Brand" name="AI Model Selector" subtitle="AI chatbot model picker — Auto/Instant/Reasoning/Pro" --><html><head><meta charset="utf-8"><link rel="stylesheet" href="_base.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  body { background: #F8FAFC; font-family: 'Montserrat', sans-serif; }
+  .card {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: flex-start; gap: 14px;
+    padding: 32px 24px;
+    background: #F8FAFC;
+    background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.07) 0%, #F8FAFC 55%);
+  }
+
+  /* ── Trigger pill ── */
+  .ms-trigger {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px;
+    background: rgba(255,255,255,0.92); backdrop-filter: blur(20px);
+    border: 1px solid #CBD5E1;
+    border-radius: 9999px;
+    cursor: pointer; user-select: none;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,1),
+      inset 0 -2px 4px rgba(15,23,42,0.06),
+      inset 0 0 0 1px rgba(15,23,42,0.04),
+      0 2px 8px rgba(15,23,42,0.07);
+    transition: box-shadow 150ms, transform 120ms cubic-bezier(.22,1,.36,1);
+    font-family: 'Montserrat';
+  }
+  .ms-trigger:hover { box-shadow: inset 0 1px 0 #fff, inset 0 -2px 4px rgba(15,23,42,0.08), 0 4px 16px rgba(15,23,42,0.10); }
+  .ms-trigger:active { transform: scale(0.97); }
+  .ms-t-icon    { font-size: 18px; color: #475569; }
+  .ms-t-model   { font-size: 14px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em; }
+  .ms-t-sep     { width: 1px; height: 16px; background: #E2E8F0; }
+  .ms-t-label   { font-size: 13px; font-weight: 600; color: #94A3B8; }
+  .ms-t-chevron { font-size: 18px; color: #94A3B8; transition: transform 300ms cubic-bezier(.22,1,.36,1); }
+  .ms-trigger.open .ms-t-chevron { transform: rotate(180deg); }
+
+  /* ── Gray outer shell ── */
+  .ms-outer {
+    background: #D4DCE8;
+    border-radius: 30px;
+    padding: 10px;
+    box-shadow: 0 16px 56px rgba(15,23,42,0.13), 0 3px 10px rgba(15,23,42,0.06);
+    transition: opacity 220ms, transform 260ms cubic-bezier(.22,1,.36,1);
+  }
+  .ms-outer.hidden { opacity: 0; transform: translateY(-8px) scale(0.98); pointer-events: none; }
+
+  /* ── White inner panel ── */
+  .ms-panel {
+    background: #fff;
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,1),
+      inset 0 -1px 0 rgba(15,23,42,0.04),
+      inset 0 0 0 1px rgba(15,23,42,0.04);
+    width: 420px;
+  }
+
+  /* ── Model rows ── */
+  .ms-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    cursor: pointer; user-select: none;
+    position: relative;
+    transition: background 140ms, transform 100ms cubic-bezier(.22,1,.36,1);
+  }
+  .ms-row::after {
+    content: ''; position: absolute;
+    bottom: 0; left: 14px; right: 14px;
+    height: 1px; background: #F1F5F9;
+  }
+  .ms-row:last-of-type::after { display: none; }
+  .ms-row:hover { background: #F8FAFC; }
+  .ms-row:active { transform: scale(0.985); background: #F1F5F9; }
+  /* Selected: black bg, white text */
+  .ms-row.sel {
+    background: #0F172A;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -2px 0 rgba(0,0,0,0.25);
+  }
+  .ms-row.sel:hover { background: #1E293B; }
+  .ms-row.sel .ms-name { color: #fff; }
+  .ms-row.sel .ms-desc { color: rgba(255,255,255,0.55); }
+  .ms-row.sel::after { display: none; }
+  .ms-row:has(+ .ms-row.sel)::after { display: none; }
+
+  /* ── Icon square (Deha semantic-pill style) ── */
+  .ms-icon {
+    width: 38px; height: 38px; border-radius: 11px;
+    display: grid; place-items: center; flex-shrink: 0;
+    background-color: var(--icon-c, #10B981);
+    background-image: radial-gradient(ellipse at top right, rgba(255,255,255,0.18) 0%, transparent 55%), linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+    background-size: cover, 7px 7px, 7px 7px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.55),
+      inset 0 -2px 0 rgba(15,23,42,0.20),
+      inset 0 0 0 1px rgba(15,23,42,0.12),
+      0 2px 6px rgba(0,0,0,0.10);
+  }
+  .ms-icon .material-icons {
+    font-size: 20px; color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
+  }
+
+  /* ── Text ── */
+  .ms-text { flex: 1; min-width: 0; }
+  .ms-name-row { display: flex; align-items: center; gap: 7px; }
+  .ms-name { font-size: 15px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em; line-height: 1.2; }
+  .ms-desc { font-size: 12px; font-weight: 500; color: #94A3B8; margin-top: 2px; }
+
+  /* ── Meta column (right side) ── */
+  .ms-meta {
+    position: relative;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: flex-end;
+    height: 24px;
+    min-width: 152px; /* fixed width so all rows align on the same right edge */
+  }
+
+  /* Check */
+  .ms-check {
+    font-size: 20px; color: #fff;
+    font-weight: 900;
+    opacity: 0; transform: scale(0.6);
+    transition: opacity 200ms, transform 200ms cubic-bezier(.22,1,.36,1);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.45), 0 0 1px rgba(255,255,255,0.4);
+    -webkit-text-stroke: 1px #fff;
+  }
+
+  /* Stats — visible by default on all rows; animation handles selected state */
+  .ms-stats {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+  .ms-stat {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; font-weight: 800;
+    color: #64748B;            /* slate for white-bg non-selected rows */
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+  .ms-stat .material-icons {
+    font-size: 14px;
+    color: #94A3B8;
+  }
+  /* On selected (black bg): override to white */
+  .ms-row.sel .ms-stat { color: rgba(255,255,255,0.95); }
+  .ms-row.sel .ms-stat .material-icons { color: rgba(255,255,255,0.65); }
+
+  /* Check hidden for non-selected rows (no layout space reserved) */
+  .ms-row:not(.sel) .ms-check { display: none; }
+
+  /* Selected without stats (Auto): just show check, no animation */
+  .ms-row.sel .ms-check { opacity: 1; transform: scale(1); }
+
+  /* Selected WITH stats: remove display:flex override (already flex by default), animate both */
+  .ms-row.sel.has-stats .ms-check {
+    position: absolute; right: 0; top: 50%;
+    transform: translateY(-50%) scale(1);
+    animation: morphCheck 6s ease-in-out infinite;
+  }
+  .ms-row.sel.has-stats .ms-stats {
+    animation: morphStats 6s ease-in-out infinite;
+  }
+
+  @keyframes morphCheck {
+    0%, 42%   { opacity: 1; transform: translateY(-50%) scale(1) rotate(0); filter: blur(0); }
+    50%, 92%  { opacity: 0; transform: translateY(-50%) scale(0.5) rotate(-20deg); filter: blur(4px); }
+    100%      { opacity: 1; transform: translateY(-50%) scale(1) rotate(0); filter: blur(0); }
+  }
+  @keyframes morphStats {
+    0%, 42%   { opacity: 0; transform: scale(0.82) translateX(-5px); filter: blur(3px); }
+    50%, 92%  { opacity: 1; transform: scale(1) translateX(0); filter: blur(0); }
+    100%      { opacity: 0; transform: scale(0.82) translateX(10px); filter: blur(3px); }
+  }
+
+  /* Badge */
+  .ms-badge {
+    font-size: 10px; font-weight: 800; letter-spacing: 0.06em;
+    padding: 2px 7px; border-radius: 9999px; flex-shrink: 0;
+  }
+  .ms-badge.new {
+    background: #10B981; color: #fff;
+    background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+    background-size: 7px 7px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(15,23,42,0.18);
+  }
+  .ms-badge.pro {
+    background: linear-gradient(135deg, #F59E0B, #EF4444);
+    color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.15);
+  }
+</style>
+<link rel="stylesheet" href="_darkmode.css">
+</head><body>
+<div class="card" data-comment-anchor="fd2543b90c-div">
+
+  <!-- Trigger -->
+  <div class="ms-trigger open" id="trigger" onclick="togglePanel()">
+    <span class="material-icons ms-t-icon" id="triggerIcon">auto_awesome</span>
+    <span class="ms-t-model" id="triggerLabel">Auto</span>
+    <span class="ms-t-sep"></span>
+    <span class="ms-t-label">Select Model</span>
+    <span class="material-icons ms-t-chevron">expand_more</span>
+  </div>
+
+  <!-- Gray outer shell wrapping the white panel -->
+  <div class="ms-outer" id="msOuter" data-comment-anchor="1ebde1d3ae-div">
+    <div class="ms-panel">
+
+      <!-- Auto: no stats -->
+      <div class="ms-row sel" onclick="pick(this,'Auto','auto_awesome')">
+        <div class="ms-icon" style="--icon-c:#10B981"><span class="material-icons">auto_awesome</span></div>
+        <div class="ms-text">
+          <div class="ms-name-row"><span class="ms-name">Auto</span></div>
+          <div class="ms-desc">Choose for me</div>
+        </div>
+        <div class="ms-meta">
+          <span class="material-icons ms-check">done</span>
+        </div>
+      </div>
+
+      <!-- Instant: 1.6× speed, 1× power, 0.8× cost -->
+      <div class="ms-row has-stats" onclick="pick(this,'Instant','bolt')">
+        <div class="ms-icon" style="--icon-c:#F97316"><span class="material-icons">bolt</span></div>
+        <div class="ms-text">
+          <div class="ms-name-row"><span class="ms-name">Instant</span><span class="ms-badge new">NEW</span></div>
+          <div class="ms-desc">Answer instantly</div>
+        </div>
+        <div class="ms-meta">
+          <div class="ms-stats">
+            <span class="ms-stat"><span class="material-icons">speed</span>1.6×</span>
+            <span class="ms-stat"><span class="material-icons">psychology</span>1×</span>
+            <span class="ms-stat"><span class="material-icons">paid</span>0.8×</span>
+          </div>
+          <span class="material-icons ms-check">done</span>
+        </div>
+      </div>
+
+      <!-- Reasoning: 0.7× speed, 2.3× power, 1.7× cost -->
+      <div class="ms-row has-stats" onclick="pick(this,'Reasoning','psychology')">
+        <div class="ms-icon" style="--icon-c:#EAB308"><span class="material-icons">psychology</span></div>
+        <div class="ms-text">
+          <div class="ms-name-row"><span class="ms-name">Reasoning</span></div>
+          <div class="ms-desc">Think hard</div>
+        </div>
+        <div class="ms-meta">
+          <div class="ms-stats">
+            <span class="ms-stat"><span class="material-icons">speed</span>0.7×</span>
+            <span class="ms-stat"><span class="material-icons">psychology</span>2.3×</span>
+            <span class="ms-stat"><span class="material-icons">paid</span>1.7×</span>
+          </div>
+          <span class="material-icons ms-check">done</span>
+        </div>
+      </div>
+
+      <!-- Pro: 0.4× speed, 4× power, 2× cost -->
+      <div class="ms-row has-stats" onclick="pick(this,'Pro','rocket_launch')">
+        <div class="ms-icon" style="--icon-c:#EF4444"><span class="material-icons">rocket_launch</span></div>
+        <div class="ms-text">
+          <div class="ms-name-row"><span class="ms-name">Pro</span><span class="ms-badge pro">PRO</span></div>
+          <div class="ms-desc">Expert-level thinking</div>
+        </div>
+        <div class="ms-meta">
+          <div class="ms-stats">
+            <span class="ms-stat"><span class="material-icons">speed</span>0.4×</span>
+            <span class="ms-stat"><span class="material-icons">psychology</span>4×</span>
+            <span class="ms-stat"><span class="material-icons">paid</span>2×</span>
+          </div>
+          <span class="material-icons ms-check">done</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+<script>
+function togglePanel() {
+  document.getElementById('trigger').classList.toggle('open');
+  document.getElementById('msOuter').classList.toggle('hidden');
+}
+function pick(row, name, icon) {
+  document.querySelectorAll('.ms-row').forEach(function(r) { r.classList.remove('sel'); });
+  row.classList.add('sel');
+  document.getElementById('triggerLabel').textContent = name;
+  document.getElementById('triggerIcon').textContent = icon;
+}
+</script>
+<script src="_darkmode.js"></script>
+</body></html>
