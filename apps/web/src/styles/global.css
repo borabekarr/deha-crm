@@ -1,0 +1,6 @@
+/* global.css
+ * Deha Design System — global stylesheet entry point.
+ * Design-system CSS tokens and component styles are imported here in a later step (Step 3+).
+ * For now this file is intentionally minimal: just the Tailwind v4 import.
+ */
+@import "tailwindcss";
