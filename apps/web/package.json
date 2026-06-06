@@ -13,8 +13,6 @@
     "check-bundle-budget": "MODE_BUDGET=1 vite build && node ./scripts/check-bundle-budget.mjs"
   },
   "dependencies": {
-    "@deha/motion-tokens": "workspace:*",
-    "@deha/ui-contracts": "workspace:*",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-context-menu": "^2.2.16",
     "@radix-ui/react-dialog": "^1.1.15",
