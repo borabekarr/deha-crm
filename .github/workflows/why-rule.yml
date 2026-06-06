@@ -32,8 +32,23 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check for "Root cause:" line in PR description or commit messages
+      - name: Detect fix-type commits in range
+        id: scope
         if: steps.bypass.outputs.bypass != 'true'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if git log --format=%s "${BASE_SHA}..${HEAD_SHA}" | grep -qiE '^fix(\(.+\))?!?:'; then
+            echo "WHY-rule active: range contains a fix() commit."
+            echo "is_fix=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "WHY-rule skipped: no fix() commit in range (feature/chore PR)."
+            echo "is_fix=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check for "Root cause:" line in PR description or commit messages
+        if: steps.bypass.outputs.bypass != 'true' && steps.scope.outputs.is_fix == 'true'
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -62,7 +77,7 @@ jobs:
           exit 1
 
       - name: Check for lessons file addition or update
-        if: steps.bypass.outputs.bypass != 'true'
+        if: steps.bypass.outputs.bypass != 'true' && steps.scope.outputs.is_fix == 'true'
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}

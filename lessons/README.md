@@ -4,12 +4,12 @@ This directory is the project's append-only library of post-incident lessons. Ea
 
 ## Why this exists
 
-The WHY-rule (`.github/workflows/why-rule.yml`) requires every PR touching bug-prone paths (`apps/web/src/components/ui/`, `apps/web/src/features/`, `packages/`) to do BOTH:
+The WHY-rule (`.github/workflows/why-rule.yml`) requires every **fix** PR touching bug-prone paths (`apps/web/src/components/ui/`, `apps/web/src/features/`, `packages/`) to do BOTH:
 
 1. Include a line starting with `Root cause:` in the PR description or a commit body.
 2. Add or update at least one file in this directory.
 
-The two-part requirement forces every bug fix to answer **why** the bug existed, not just **how** it was fixed. The lesson file becomes a permanent record so the same shape catches itself the next time.
+The rule only activates when the PR's commit range contains a conventional `fix(...)` commit (e.g. `fix:`, `fix(ui):`, `fix!:`). Feature and chore PRs touching the same paths pass without a lesson, since there is no bug to explain. The two-part requirement forces every bug fix to answer **why** the bug existed, not just **how** it was fixed. The lesson file becomes a permanent record so the same shape catches itself the next time.
 
 This rule was installed 2026-05-24 as Workstream 3 of the Deha-CRM postmortem (see `~/claude-code-system/.claude/lessons/hallucinated-kill-list-2026-05-24.md` for the prior incident that motivated the broader anti-hallucination system).
 
