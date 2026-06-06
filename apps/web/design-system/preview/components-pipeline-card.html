@@ -1,0 +1,585 @@
+<!doctype html>
+<!-- @dsCard group="Brand" name="Pipeline Card" subtitle="Daily Briefing cards — 4 AI signal types, inverted action popover" viewport="700x1500" --><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="_base.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_pipeline-card.css">
+<link rel="stylesheet" href="_darkmode.css">
+</head>
+<body>
+
+<div class="card" style="padding:0;">
+  <div class="frame" data-comment-anchor="ab98aade36-div">
+
+    <!-- Daily summary header -->
+    <div class="brief-head" data-screen-label="Daily briefing header">
+      <span class="brief-sun"><span class="material-symbols-outlined">wb_twilight</span></span>
+      <div class="brief-head-txt">
+        <span class="brief-eyebrow">Good morning · Tue 3 Jun</span>
+        <span class="brief-title">Your daily briefing</span>
+      </div>
+      <div class="brief-stats">
+        <button class="brief-stat" data-filter="all"><span class="brief-stat-n" id="hCount">4</span><span class="brief-stat-l" id="hCountL">actions</span></button>
+        <button class="brief-stat" data-filter="value"><span class="brief-stat-n" id="hTotal">₺133,200</span><span class="brief-stat-l">in play</span></button>
+        <button class="brief-stat" data-filter="crit"><span class="brief-stat-n crit" id="hCrit">2</span><span class="brief-stat-l">critical</span></button>
+      </div>
+    </div>
+
+    <p class="sec">AI-ranked — most critical action first</p>
+    <div class="stack" id="stack"></div>
+  </div>
+</div>
+
+<!-- shared detail overlay (inverted popover) + toast -->
+<div class="pcx-overlay" id="pcxOverlay"><div class="pcx-outer" data-comment-anchor="36e4b6eebf-div"><div class="pcx-card" id="pcxCard"></div></div></div>
+<div class="pc-toast" id="toast"><span class="material-symbols-outlined">check_circle</span><span id="toastMsg">Done</span></div>
+
+<script>
+(function(){
+  const $  = (s, r) => (r||document).querySelector(s);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const fmt = n => '₺' + Math.round(n).toLocaleString('en-US');
+  // compact currency for the space-constrained left panel stat (₺19K / ₺9.8K)
+  const fmtK = n => { if (n==null) return '—'; const a=Math.abs(n); if (a>=1000){ const k=n/1000; return '₺' + (a>=10000 ? Math.round(k) : Math.round(k*10)/10) + 'K'; } return '₺' + Math.round(n); };
+
+  const PRI = { high:{label:'HIGH PRIORITY'}, med:{label:'MEDIUM PRIORITY'}, low:{label:'LOW PRIORITY'} };
+  const TYPES = {
+    marketing:  { badge:'Campaign Decision', icon:'campaign', cls:'t-marketing',  short:'campaign',  applyIcon:'pause_circle', tone:'orange' },
+    pricing:    { badge:'Price Update',      icon:'sell',     cls:'t-pricing',    short:'price update', applyIcon:'send', tone:'violet' },
+    lead:       { badge:'Qualified Lead',    icon:'how_to_reg', cls:'t-lead',     short:'lead list', applyIcon:'call', tone:'sky' },
+    automation: { badge:'Automation',        icon:'settings_suggest', cls:'t-automation', short:'automation', applyIcon:'build', tone:'slate' }
+  };
+
+  // ── briefing data (AI-ranked: critical first) ─────────────────────────────
+  const CARDS = [
+    // 1 — Automation ERROR (high, red, pulse)
+    { id:'auto1', type:'automation', priority:'high', isError:true, category:'Automation · Error', catTone:'red',
+      impact:88, impactWhy:'The queued fix — retry the step and switch the sender domain — cleared 9 of the last 10 delivery failures like this one.',
+      title:'“Proposal Follow-up” automation is failing',
+      desc:'Mail delivery failed on the last 3 triggers — 12 customers have dropped out of the sequence since Tuesday.',
+      potential:19200, atRisk:true, potentialLabel:'revenue at risk', applyLabel:'Apply fix',
+      chips:[{icon:'bolt', label:'Automation', count:'1', tone:'red'},{icon:'group', label:'Affected', count:'12', tone:'slate'}],
+      discussSugg:['What exactly broke?','Is the fix safe?'],
+      finding:'Surfaced because a live revenue automation has been silently erroring for 36 hours. Three consecutive triggers failed at the same step, and the affected contacts are mid-funnel — every hour without delivery widens the drop-off.',
+      reco:'Suggested fix is already queued: retry the failed send and switch the sender domain. One approval applies it.',
+      confidence:5,
+      evidence:{ title:'What broke', kind:'rows', rows:[
+        {ic:'error', k:'Failing step', v:'Send email · “Day 3 nudge”'},
+        {ic:'replay', k:'Failed triggers', v:'3 of last 3', trend:'down', td:'100%'},
+        {ic:'schedule', k:'Failing since', v:'36 hours ago'} ] },
+      entities:{ title:'Affected contacts', list:[
+        {init:'EY', name:'Emre Yıldız', sub:'Stuck at “Day 3 nudge” · 2 days'},
+        {init:'SA', name:'Selin Acar', sub:'Stuck at “Day 3 nudge” · 2 days'},
+        {init:'KT', name:'Kaan Toprak', sub:'Stuck at “Day 3 nudge” · 1 day'} ], more:9 },
+      outcomes:{ act:{v:'₺19,200', sub:'pipeline kept moving — 12 contacts re-enter the sequence'},
+                 dont:{v:'12 → 0', sub:'contacts go cold and new triggers keep failing too'} },
+      history:'The last delivery failure in Q1 lost 7 contacts before anyone caught it — the same retry-and-swap fix recovered the sequence within an hour.',
+      workflowLink:'Proposal Follow-up' },
+
+    // 2 — Marketing campaign (high, red)
+    { id:'mkt1', type:'marketing', priority:'high',
+      impact:79, impactWhy:'In comparable campaigns, pausing at this ROAS preserved about 79% of the remaining budget for redeployment.',
+      title:'Beşiktaş campaign budget runs out in 2 days',
+      desc:'CTR fell from 1.2% to 0.4% over 7 days and ROAS is down to 1.2× — spend is burning with almost no return.',
+      potential:24000, atRisk:true, potentialLabel:'budget at risk', applyLabel:'Approve pause',
+      chips:[{icon:'campaign', label:'Campaign', count:'1', tone:'orange'},{icon:'donut_large', label:'Segments', count:'2', tone:'slate'}],
+      discussSugg:['Why pause now?','Is there an alternative?'],
+      finding:'Surfaced because daily spend is accelerating while conversions have flattened for 5 days straight. The budget empties in roughly 48 hours, so today is the last window to redirect it before it is gone.',
+      reco:'Pause the budget and redirect the remaining ₺24,000 to the high-intent Kadıköy segment.',
+      confidence:4,
+      evidence:{ title:'Campaign metrics — 7-day trend', kind:'rows', rows:[
+        {ic:'visibility', k:'Impressions', v:'48.2k', trend:'up', td:'18%'},
+        {ic:'ads_click', k:'Click-through rate', v:'0.4%', trend:'down', td:'67%'},
+        {ic:'shopping_cart_checkout', k:'Conversions', v:'3 this week', trend:'down', td:'72%'} ] },
+      entities:{ title:'Affected campaigns', list:[
+        {init:'BŞ', name:'Beşiktaş Spring Launch', sub:'₺24,000 remaining · ends in 2 days', val:'1.2× ROAS'},
+        {init:'KD', name:'Kadıköy Retargeting', sub:'suggested redirect target', tag:'TARGET'} ] },
+      outcomes:{ act:{v:'₺24,000', sub:'remaining budget protected and moved to a converting segment'},
+                 dont:{v:'₺0', sub:'budget fully spent at 1.2× ROAS over the next 48 hours'} },
+      history:'A similar pause in March recovered 60% of a stalling campaign’s budget and lifted blended ROAS to 2.4×.' },
+
+    // 3 — Qualified lead (medium, amber)
+    { id:'lead1', type:'lead', priority:'med',
+      impact:74, impactWhy:'Across the three leads, the average historical conversion for this behaviour pattern — repeat views plus a WhatsApp open — is about 74%.',
+      title:'3 new qualified leads — call today',
+      desc:'Mehmet Y. viewed the Beşiktaş apartment twice yesterday and opened WhatsApp. The buying window is narrowing.',
+      potential:52000, atRisk:false, potentialLabel:'potential GCI', applyLabel:'Start calls',
+      chips:[{icon:'group', label:'Leads', count:'3', tone:'sky'},{icon:'local_fire_department', label:'Hottest', tone:'red'}],
+      discussSugg:['Who do I call first?','Draft an opener'],
+      finding:'Surfaced because three leads crossed the qualified threshold in the last 24 hours, and the strongest just showed buying intent twice. Call-back conversion drops by roughly half after 24 hours, so today is the window.',
+      reco:'Call Mehmet first while intent is hot, then work down the list by score.',
+      confidence:4,
+      evidence:{ title:'Preferred contact channel', kind:'rows', rows:[
+        {ic:'forum', k:'From historical replies', v:'WhatsApp — 3× faster than email'} ] },
+      entities:{ title:'Leads — hottest first', list:[
+        {init:'MY', name:'Mehmet Yılmaz', score:'92 · HOT', scoreCls:'', hot:true, call:true,
+         sub:'Viewed Beşiktaş apt ×2 · opened WhatsApp · 14h ago',
+         strat:'Lead with the price advantage — mention you noticed his interest and that a similar unit just sold.'},
+        {init:'Zİ', name:'Zeynep İnce', score:'81 · WARM', scoreCls:'warm', call:true,
+         sub:'Requested the floor plan · 1 day ago'},
+        {init:'OK', name:'Onur Kaya', score:'68 · WARM', scoreCls:'warm', call:true,
+         sub:'Used the mortgage calculator · 2 days ago'} ] },
+      outcomes:{ act:{v:'3 calls', sub:'queued now while intent is high — tasks created automatically'},
+                 dont:{v:'Window closes', sub:'call-back conversion roughly halves after 24 hours'} },
+      history:'Leads called within the day this quarter closed at 2.3× the rate of next-day callbacks.' },
+
+    // 4 — Price update (low, green)
+    { id:'price1', type:'pricing', priority:'low',
+      impact:66, impactWhy:'Listings re-priced to within 3% of the market closed about 66% faster across this portfolio over the past two quarters.',
+      title:'3% discount suggestion for Kadıköy portfolio',
+      desc:'2 units have sat unsold for 45 days and competing listings are 3% lower — a small cut should accelerate a close.',
+      potential:38000, atRisk:false, potentialLabel:'portfolio value', applyLabel:'Apply & notify',
+      chips:[{icon:'group', label:'Customers', count:'8', tone:'sky'},{icon:'sell', label:'Discount', count:'3%', tone:'emerald'}],
+      discussSugg:['Why 3%, not 5%?','Show the comparables'],
+      finding:'Surfaced because two listings have aged past 45 days while comparable units nearby reduced their asking prices last week. A 3% adjustment closes the gap and gives 8 watching customers a reason to act now.',
+      reco:'Apply the 3% cut and auto-send the notification draft below to the 8 watching customers.',
+      confidence:3,
+      evidence:{ title:'Price comparison', kind:'price', current:'₺1.42M', market:'₺1.38M', suggested:'₺1.38M',
+        draft:'Good news — the Kadıköy unit you saved is now ₺1.38M, a 3% reduction. Would you like to schedule a viewing this week before it moves?' },
+      entities:{ title:'Customers to notify', list:[
+        {init:'AD', name:'Ayşe Demir', sub:'Saved this listing · last contact 6 days ago'},
+        {init:'BÇ', name:'Burak Çelik', sub:'Viewed twice · last contact 11 days ago'},
+        {init:'EK', name:'Elif Korkmaz', sub:'Inquired in March · last contact 24 days ago'} ], more:5 },
+      outcomes:{ act:{v:'~9 days', sub:'estimated time-to-close · 8 customers notified instantly'},
+                 dont:{v:'45+ days', sub:'listings keep aging while nearby prices stay lower'} },
+      history:'The last 3% adjustment in this portfolio closed a 50-day-old unit within a week.' }
+  ];
+
+  let data = CARDS.slice();
+  const stack = document.getElementById('stack');
+
+  // ── toast ────────────────────────────────────────────────────────────────
+  let toastT;
+  function toast(msg){
+    $('#toastMsg').textContent = msg;
+    const t = $('#toast'); t.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(()=> t.classList.remove('show'), 1800);
+  }
+
+  function ripple(e, el){
+    const r = el.getBoundingClientRect(), size = Math.max(r.width, r.height);
+    const s = document.createElement('span'); s.className='pc-ripple';
+    s.style.width = s.style.height = size+'px';
+    s.style.left = (e.clientX - r.left - size/2)+'px'; s.style.top = (e.clientY - r.top - size/2)+'px';
+    el.appendChild(s); setTimeout(()=> s.remove(), 500);
+  }
+  function tween(el, from, to, dur, f){
+    if (!el) return; const t0 = performance.now(); let raf;
+    function step(now){ let p=Math.min(1,(now-t0)/dur); p=1-Math.pow(1-p,3); el.textContent=f(from+(to-from)*p); if(p<1) raf=requestAnimationFrame(step); }
+    raf = requestAnimationFrame(step);
+    setTimeout(()=>{ cancelAnimationFrame(raf); el.textContent=f(to); }, dur+70);
+  }
+
+  // ── popover management ───────────────────────────────────────────────────
+  function closeAllPops(){
+    document.querySelectorAll('.pc-pop.open').forEach(p=>p.classList.remove('open'));
+    document.querySelectorAll('.pc-snooze.open').forEach(b=>b.classList.remove('open'));
+  }
+
+  // ── card markup ──────────────────────────────────────────────────────────
+  function tagHTML(t){
+    const cnt = (t.count!=null && t.count!=='') ? `<span class="ct-count">${esc(t.count)}</span>` : '';
+    return `<span class="pc-tag t-${t.tone||'slate'}${cnt?'':' no-count'}"><span class="material-symbols-outlined">${t.icon}</span>${esc(t.label)}${cnt}</span>`;
+  }
+  function catTagHTML(d){
+    const T = TYPES[d.type];
+    return `<span class="pc-tag pc-cat-tag no-count t-${d.catTone||T.tone}"><span class="material-symbols-outlined">${T.icon}</span>${esc(d.category||T.badge)}</span>`;
+  }
+  function leftInner(d){
+    const T = TYPES[d.type];
+    const aff = [];
+    const affHTML = aff.length ? `<div class="pc-left-aff">${aff.map(tagHTML).join('')}</div>` : '';
+    const potCell = d.potential==null
+      ? `<div class="pc-stat-cell"><div class="pc-stat-n na">—</div><div class="pc-stat-l">${esc(d.potentialLabel||'potential')}</div></div>`
+      : `<div class="pc-stat-cell"><div class="pc-stat-n${d.atRisk?' at-risk':''}" data-pot>${fmtK(d.potential)}</div><div class="pc-stat-l">${esc(d.potentialLabel||'potential')}</div></div>`;
+    return `
+      <div class="pc-pri"><span class="pc-pri-dot"></span>${PRI[d.priority].label}</div>
+      <div class="pc-ghost"><span class="material-symbols-outlined">${T.icon}</span></div>
+      <div class="pc-mid">
+        <div class="pc-stats">
+          <div class="pc-stat-cell impact">
+            <div class="pc-impact-row"><span class="pc-impact-n" data-impact>0</span><span class="pc-impact-pct">%</span></div>
+            <div class="pc-stat-l toggle" data-why-toggle>Impact score<span class="material-symbols-outlined">expand_more</span></div>
+            <div class="pc-bar"><div class="pc-bar-fill" data-bar style="width:0%"></div></div>
+          </div>
+          ${potCell}
+        </div>
+        ${affHTML}
+        <div class="pc-why" data-why><div class="pc-why-in"><span class="material-symbols-outlined">auto_awesome</span>${esc(d.impactWhy)}</div></div>
+      </div>`;
+  }
+  function rightInner(d){
+    const T = TYPES[d.type];
+    return `
+      <div class="pc-r-head">
+        ${catTagHTML(d)}
+        <div class="pc-head-tools">
+          <div class="pc-snooze-wrap">
+            <button class="pc-snooze" data-snooze aria-haspopup="menu" aria-label="Snooze options"><span class="material-symbols-outlined">more_horiz</span></button>
+            <div class="pc-pop" data-snooze-pop role="menu">
+              <button class="pc-pop-item" data-snz="tomorrow" role="menuitem"><span class="material-symbols-outlined">bedtime</span>Snooze to tomorrow</button>
+              <button class="pc-pop-item" data-snz="low" role="menuitem"><span class="material-symbols-outlined">south</span>Lower priority</button>
+            </div>
+          </div>
+          <button class="pc-expand" data-expand aria-label="Open details" aria-haspopup="dialog"><span class="material-symbols-outlined">open_in_full</span></button>
+        </div>
+      </div>
+      <div class="pc-body-txt">
+        <div class="pc-title">${esc(d.title)}</div>
+        <div class="pc-desc">${esc(d.desc)}</div>
+        <div class="pc-chips" data-chips>${(d.chips||[]).map(tagHTML).join('')}</div>
+      </div>
+      <div class="pc-discuss" data-discuss>
+        <div class="pc-discuss-in">
+          <div class="pc-discuss-ctx"><span class="pc-ai-orb"><span class="material-symbols-outlined">auto_awesome</span></span><span>I’ve loaded everything about this ${esc(T.short)} — ask before you decide.</span></div>
+          <div class="pc-discuss-sugg">${(d.discussSugg||[]).map(s=>`<button class="pc-sugg" data-sugg>${esc(s)}</button>`).join('')}</div>
+          <div class="pc-discuss-input"><input placeholder="Ask about this card…" data-discuss-input aria-label="Ask about this card"><button class="pc-discuss-send" data-discuss-send aria-label="Send"><span class="material-symbols-outlined">arrow_upward</span></button></div>
+        </div>
+      </div>
+      <div class="pc-foot">
+        <div class="pc-actions">
+          <button class="pc-discuss-btn" data-discuss-btn><span class="material-symbols-outlined">forum</span>Discuss</button>
+          <button class="pc-apply" data-apply>${applyInner(d)}</button>
+        </div>
+      </div>`;
+  }
+  function applyInner(d){
+    return `<span class="pc-apply-label"><span class="material-symbols-outlined">${TYPES[d.type].applyIcon}</span>${esc(d.applyLabel)}</span><span class="pc-spin"></span><span class="pc-check"><span class="material-symbols-outlined">check</span></span>`;
+  }
+
+  // ── apply flow (shared by card + popover) ────────────────────────────────
+  function applyToast(d){
+    return ({ marketing:'Campaign paused · budget redirected', pricing:'Price updated · 8 customers notified',
+              lead:'Calls queued · 3 tasks created', automation:'Fix applied · sequence resumed' })[d.type] || 'Applied';
+  }
+  function runApply(btn, d, done){
+    if (btn.classList.contains('is-loading') || btn.classList.contains('is-done')) return;
+    btn.classList.add('is-loading');
+    setTimeout(()=>{ btn.classList.remove('is-loading'); btn.classList.add('is-done'); }, 850);
+    setTimeout(()=>{ toast(applyToast(d)); if (done) done(); }, 1480);
+  }
+
+  function demote(d, shell){
+    var order = ['high','med','low'], i = order.indexOf(d.priority);
+    if (i >= 0 && i < order.length-1) d.priority = order[i+1];
+    var left = shell.querySelector('.pc-left');
+    if (left){
+      left.className = 'pc-left pri-' + d.priority + (d.isError ? ' is-error' : '');
+      var pri = left.querySelector('.pc-pri');
+      if (pri) pri.innerHTML = '<span class="pc-pri-dot"></span>' + PRI[d.priority].label;
+    }
+    toast('Priority lowered to ' + PRI[d.priority].label.replace(' PRIORITY',''));
+  }
+
+  function removeCard(id){
+    const shell = stack.querySelector('.shell[data-id="'+id+'"]');
+    if (shell){
+      shell.style.overflow = 'hidden';
+      shell.style.maxHeight = shell.offsetHeight + 'px';
+      shell.classList.add('is-removing');
+      requestAnimationFrame(()=>{ shell.style.maxHeight = '0px'; shell.style.marginBottom = '-22px'; });
+      setTimeout(()=> shell.remove(), 420);
+    }
+    data = data.filter(x=>x.id!==id);
+    updateHeader();
+    setTimeout(checkEmpty, 460);
+  }
+
+  function updateHeader(){
+    const n = data.length;
+    const total = data.reduce((a,x)=> a + (x.potential||0), 0);
+    const crit = data.filter(x=>x.priority==='high').length;
+    $('#hCount').textContent = n;
+    $('#hCountL').textContent = n===1 ? 'action' : 'actions';
+    $('#hTotal').textContent = fmt(total);
+    $('#hCrit').textContent = crit;
+  }
+
+  function checkEmpty(){
+    if (data.length) return;
+    stack.innerHTML = `
+      <div class="shell"><div style="background:var(--r-bg,#fff);border-radius:24px;padding:34px 26px;text-align:center;font-family:'Montserrat';box-shadow:inset 0 1px 0 rgba(255,255,255,0.6);">
+        <div style="width:54px;height:54px;border-radius:16px;margin:0 auto 14px;display:grid;place-items:center;color:#fff;background:linear-gradient(150deg,#34D399,#10B981);box-shadow:0 8px 22px rgba(16,185,129,0.34),inset 0 1px 0 rgba(255,255,255,0.5);"><span class="material-symbols-outlined" style="font-size:28px">task_alt</span></div>
+        <div style="font-size:16px;font-weight:800;color:#0F172A;letter-spacing:-0.01em">No actions for today</div>
+        <div style="font-size:12.5px;font-weight:500;color:#64748B;margin-top:5px;line-height:1.5">Your pipeline looks healthy. The briefing refills overnight.</div>
+        <div style="display:flex;align-items:flex-end;justify-content:center;gap:5px;height:38px;margin-top:18px">
+          ${[5,3,7,4,6,2,4].map((h,i)=>`<div style="width:13px;border-radius:4px 4px 2px 2px;height:${h*5+6}px;background:${i===6?'#10B981':'#CBD5E1'}"></div>`).join('')}
+        </div>
+        <div style="font-size:9.5px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#94A3B8;margin-top:8px">Cards handled this week</div>
+      </div></div>`;
+    const card = stack.querySelector('.shell > div');
+    if (document.documentElement.classList.contains('dark')){ card.style.background='#1E293B'; card.querySelectorAll('div')[0]; }
+  }
+
+  // ── wire a card ──────────────────────────────────────────────────────────
+  function wire(shell, card, d){
+    const q = s => card.querySelector(s);
+    const left = q('.pc-left'), right = q('.pc-right');
+    // LEFT panel → toggles the Impact Score reveal (NOT the popover); chips hide while open
+    const why = q('[data-why]'), toggleLabel = q('[data-why-toggle]');
+    function toggleWhy(){ const o = why.classList.toggle('open'); left.classList.toggle('why-open', o); if (toggleLabel) toggleLabel.classList.toggle('open', o); }
+    left.addEventListener('click', e=>{ e.stopPropagation(); toggleWhy(); });
+    // snooze menu
+    const snz = q('[data-snooze]'), snzPop = q('[data-snooze-pop]');
+    snz.addEventListener('click', e=>{ e.stopPropagation(); const willOpen = !snzPop.classList.contains('open'); closeAllPops(); if (willOpen){ snzPop.classList.add('open'); snz.classList.add('open'); } });
+    snzPop.querySelectorAll('.pc-pop-item').forEach(b=> b.addEventListener('click', e=>{
+      e.stopPropagation(); closeAllPops();
+      if (b.dataset.snz === 'low') { demote(d, shell); }
+      else { toast('Snoozed to tomorrow'); removeCard(d.id); }
+    }));
+    // RIGHT panel opens the detail popover (except interactive controls), plus the explicit chevron
+    const expand = q('[data-expand]'); if (expand) expand.addEventListener('click', e=>{ e.stopPropagation(); openDetail(d); });
+    right.addEventListener('click', e=>{
+      if (e.target.closest('button, input, a, .pc-pop, .pc-discuss')) return;
+      openDetail(d);
+    });
+    // inline discuss
+    const dBtn = q('[data-discuss-btn]'), dPanel = q('[data-discuss]');
+    dBtn.addEventListener('click', e=>{ e.stopPropagation(); const o = dPanel.classList.toggle('open'); dBtn.classList.toggle('open', o); if (o){ const inp=q('[data-discuss-input]'); setTimeout(()=> inp && inp.focus(), 140); } });
+    card.querySelectorAll('[data-sugg]').forEach(s=> s.addEventListener('click', e=>{ e.stopPropagation(); toast('Thinking that through…'); }));
+    const send = q('[data-discuss-send]'); if (send) send.addEventListener('click', e=>{ e.stopPropagation(); const inp=q('[data-discuss-input]'); if (inp && inp.value.trim()){ toast('Sent to AI assistant'); inp.value=''; } });
+    // apply
+    const apply = q('[data-apply]');
+    apply.addEventListener('click', e=>{ e.stopPropagation(); ripple(e, apply); runApply(apply, d, ()=> removeCard(d.id)); });
+  }
+
+  // ── build + mount a card ─────────────────────────────────────────────────
+  function buildCard(d, i){
+    const shell = document.createElement('div'); shell.className = 'shell';
+    shell.dataset.id = d.id;
+    shell.setAttribute('data-screen-label', 'Briefing — ' + (d.category || TYPES[d.type].badge));
+    const card = document.createElement('div'); card.className = 'pc';
+    // Apply priority color + bar SYNCHRONOUSLY so the resting state is always
+    // correct — CSS transitions/animations stay play-pending (blank) when rAF is
+    // throttled in the preview/capture context, so we never gate visuals on them.
+    const left = document.createElement('div'); left.className = 'pc-left pri-' + d.priority + (d.isError ? ' is-error' : '');
+    left.innerHTML = leftInner(d);
+    const right = document.createElement('div'); right.className = 'pc-right'; right.innerHTML = rightInner(d);
+    card.appendChild(left); card.appendChild(right); shell.appendChild(card);
+    const bar = left.querySelector('[data-bar]'); if (bar) bar.style.width = d.impact + '%';
+    wire(shell, card, d);
+    // count-up numbers: rAF tween with a setTimeout that forces the final value,
+    // so they animate when focused and still show the real number when throttled.
+    setTimeout(()=>{
+      tween(left.querySelector('[data-impact]'), 0, d.impact, 700, v=>Math.round(v));
+      const potEl = right.querySelector('[data-pot]'); if (potEl) tween(potEl, 0, d.potential, 760, fmtK);
+    }, 60);
+    return shell;
+  }
+
+  // ── detail overlay (inverted) ────────────────────────────────────────────
+  function evidenceBlock(d){
+    const e = d.evidence; if (!e) return '';
+    let inner = '';
+    if (e.kind==='rows'){
+      inner = `<div class="pcx-ev-rows">${e.rows.map(r=>`
+        <div class="pcx-ev-row"><span class="pcx-ev-ic"><span class="material-symbols-outlined">${r.ic}</span></span>
+          <div class="pcx-ev-txt"><div class="pcx-ev-k">${esc(r.k)}</div><div class="pcx-ev-v">${esc(r.v)}</div></div>
+          ${r.trend?`<span class="pcx-trend ${r.trend}"><span class="material-symbols-outlined">${r.trend==='up'?'trending_up':r.trend==='down'?'trending_down':'trending_flat'}</span>${esc(r.td||'')}</span>`:''}
+        </div>`).join('')}</div>`;
+    } else if (e.kind==='price'){
+      inner = `<div class="pcx-price">
+        <div class="pcx-price-cell"><div class="pcx-price-l">Current</div><div class="pcx-price-v">${esc(e.current)}</div></div>
+        <div class="pcx-price-cell"><div class="pcx-price-l">Market avg</div><div class="pcx-price-v">${esc(e.market)}</div></div>
+        <div class="pcx-price-cell sug"><div class="pcx-price-l">Suggested</div><div class="pcx-price-v">${esc(e.suggested)}</div></div>
+      </div>`;
+    }
+    const draft = e.draft ? `<div class="pcx-draft" style="margin-top:10px"><div class="pcx-draft-head"><span class="material-symbols-outlined">edit_note</span>AI-drafted notification</div><div class="pcx-draft-body">${esc(e.draft)}</div><div class="pcx-draft-foot"><span class="material-symbols-outlined">lock</span>Sent only after you approve</div></div>` : '';
+    return `<div class="pcx-block"><p class="pcx-sec-title">${esc(e.title)}</p>${inner}${draft}</div>`;
+  }
+  function entitiesBlock(d){
+    const en = d.entities; if (!en) return '';
+    const rows = en.list.map(p=>`
+      <div class="pcx-ent-row">
+        <span class="pcx-ent-av${p.hot?' hot':''}">${esc(p.init)}</span>
+        <div class="pcx-ent-main">
+          <div class="pcx-ent-name">${esc(p.name)}${p.score?`<span class="pcx-ent-score ${p.scoreCls||''}">${esc(p.score)}</span>`:''}${p.tag?`<span class="pcx-ent-score cool">${esc(p.tag)}</span>`:''}</div>
+          <div class="pcx-ent-sub">${esc(p.sub)}</div>
+          ${p.strat?`<div class="pcx-strat"><span class="material-symbols-outlined">campaign</span><span>${esc(p.strat)}</span></div>`:''}
+        </div>
+        ${p.val?`<span class="pcx-ent-val">${esc(p.val)}</span>`:''}
+        ${p.call?`<button class="pcx-ent-call" data-call="${esc(p.name)}" aria-label="Call ${esc(p.name)}"><span class="material-symbols-outlined">call</span></button>`:''}
+      </div>`).join('');
+    const more = en.more ? `<button class="pcx-ghost-link" data-more style="margin-top:8px"><span class="material-symbols-outlined">expand_more</span>+${en.more} more</button>` : '';
+    return `<div class="pcx-block"><p class="pcx-sec-title">${esc(en.title)}</p><div class="pcx-ent">${rows}</div>${more}</div>`;
+  }
+  function outcomesBlock(d){
+    const o = d.outcomes; if (!o) return '';
+    // "If you don't" on the LEFT (smaller), "If you apply" on the RIGHT (larger).
+    // Prize-sheet bezel + dotted white panel; color carried by the AI-model-selector style icon square.
+    return `<div class="pcx-block"><p class="pcx-sec-title">Expected outcome</p><div class="pcx-outcomes">
+      <div class="pcx-out dont"><div class="pcx-out-in">
+        <div class="pcx-out-ic"><span class="material-symbols-outlined">close</span></div>
+        <div class="pcx-out-head">If you don’t</div><div class="pcx-out-v">${esc(o.dont.v)}</div><div class="pcx-out-sub">${esc(o.dont.sub)}</div>
+      </div></div>
+      <div class="pcx-out act"><div class="pcx-out-in">
+        <div class="pcx-out-ic"><span class="material-symbols-outlined">check</span></div>
+        <div class="pcx-out-head">If you apply</div><div class="pcx-out-v">${esc(o.act.v)}</div><div class="pcx-out-sub">${esc(o.act.sub)}</div>
+      </div></div>
+    </div></div>`;
+  }
+  // AI finding is no longer read-aloud by default — the user activates a mini chat
+  function askBlock(d){
+    return `<div class="pcx-block pcx-ask">
+      <div class="pcx-ask-prompt" data-ask-prompt>
+        <div class="pcx-ask-q"><div class="pcx-ask-label">AI insight</div><div class="pcx-ask-question">Why did the AI surface this ${esc(TYPES[d.type].short)}?</div></div>
+        <button class="pcx-ask-btn" data-ask-open>Ask AI<span class="material-symbols-outlined">keyboard_arrow_down</span></button>
+      </div>
+      <div class="pcx-chat" data-chat></div>
+    </div>`;
+  }
+  function historyBlock(d){
+    if (!d.history) return '';
+    return `<div class="pcx-block"><p class="pcx-sec-title">Related history</p><div class="pcx-hist"><span class="material-symbols-outlined">history</span><p class="pcx-hist-p">${esc(d.history)}</p></div></div>`;
+  }
+  function secondaryBlock(d){
+    const links = [];
+    if (d.workflowLink) links.push(`<button class="pcx-ghost-link" data-sec="wf"><span class="material-symbols-outlined">open_in_new</span>Open “${esc(d.workflowLink)}” editor</button>`);
+    links.push(`<button class="pcx-ghost-link" data-sec="snooze"><span class="material-symbols-outlined">bedtime</span>Snooze (tomorrow)</button>`);
+    links.push(`<button class="pcx-ghost-link" data-sec="assign"><span class="material-symbols-outlined">person_add</span>Assign to someone</button>`);
+    links.push(`<button class="pcx-ghost-link" data-sec="about"><span class="material-symbols-outlined">help</span>About this card type</button>`);
+    return `<div class="pcx-secondary">${links.join('')}</div>`;
+  }
+  function detailHTML(d){
+    const headCls = d.priority==='med' ? 'pri-med' : d.priority==='low' ? 'pri-low' : '';
+    return `
+      <div class="pcx-head ${headCls}">
+        <div class="pcx-head-top">
+          <div class="pcx-head-meta">
+            ${catTagHTML(d)}
+            <span class="pc-pri pcx-pri"><span class="pc-pri-dot"></span>${PRI[d.priority].label}</span>
+          </div>
+          <button class="pcx-close" data-x aria-label="Close"><span class="material-icons">close</span></button>
+        </div>
+        <div class="pcx-head-title">${esc(d.title)}</div>
+        <div class="pcx-head-desc">${esc(d.desc)}</div>
+        <div class="pcx-head-statsrow">
+        <div class="pcx-head-stats">
+          <div class="pcx-hstat pcx-imp" data-ximpact aria-expanded="false"><div class="pcx-hstat-n">${d.impact}<span class="pcx-hstat-pct">%</span></div><div class="pcx-hstat-l">Impact score<span class="material-symbols-outlined pcx-impact-chev">expand_more</span></div></div>
+          <div class="pcx-hstat-div"></div>
+          <div class="pcx-hstat"><div class="pcx-hstat-n">${d.potential==null?'—':fmt(d.potential)}</div><div class="pcx-hstat-l">${esc(d.potentialLabel||'potential')}</div></div>
+        </div>
+        <div class="pcx-head-actions">
+          <button class="pc-discuss-btn" data-xdiscuss><span class="material-symbols-outlined">forum</span>Discuss</button>
+          <button class="pc-apply" data-xapply>${applyInner(d)}</button>
+        </div>
+        </div>
+        <div class="pcx-head-why" data-ximpact-why><div class="pcx-head-why-in"><span class="material-symbols-outlined">auto_awesome</span>${esc(d.impactWhy)}</div></div>
+      </div>
+      <div class="pcx-body">
+        ${askBlock(d)}
+        ${evidenceBlock(d)}
+        ${outcomesBlock(d)}
+        ${entitiesBlock(d)}
+        ${historyBlock(d)}
+        ${secondaryBlock(d)}
+      </div>`;
+  }
+  function openDetail(d){
+    const host = $('#pcxCard'); host.innerHTML = detailHTML(d);
+    $('#pcxOverlay').classList.add('open');
+    host.scrollTop = 0; const body = host.querySelector('.pcx-body'); if (body) body.scrollTop = 0;
+    $('[data-x]', host).addEventListener('click', e=>{ e.stopPropagation(); closeDetail(); });
+    const xApply = $('[data-xapply]', host);
+    xApply.addEventListener('click', e=>{ e.stopPropagation(); ripple(e, xApply); runApply(xApply, d, ()=>{ closeDetail(); setTimeout(()=> removeCard(d.id), 280); }); });
+    $('[data-xdiscuss]', host).addEventListener('click', e=>{ e.stopPropagation(); toast('Context chat loaded for this ' + TYPES[d.type].short); });
+    const ximp = $('[data-ximpact]', host), ximpWhy = $('[data-ximpact-why]', host);
+    if (ximp && ximpWhy) ximp.addEventListener('click', e=>{ e.stopPropagation(); const o = ximpWhy.classList.toggle('open'); ximp.classList.toggle('open', o); ximp.setAttribute('aria-expanded', o); });
+    const askBtn = $('[data-ask-open]', host); if (askBtn) askBtn.addEventListener('click', e=>{ e.stopPropagation(); askBtn.classList.remove('clicked'); void askBtn.offsetWidth; askBtn.classList.add('clicked'); setTimeout(()=> runAskChat(host, d), 180); });
+    host.querySelectorAll('[data-call]').forEach(b=> b.addEventListener('click', e=>{ e.stopPropagation(); toast('Calling ' + b.dataset.call + '…'); }));
+    const more = $('[data-more]', host); if (more) more.addEventListener('click', e=>{ e.stopPropagation(); toast('Showing all affected'); });
+    host.querySelectorAll('[data-sec]').forEach(b=> b.addEventListener('click', e=>{
+      e.stopPropagation();
+      const m = { wf:'Opening automation editor…', snooze:'Snoozed to tomorrow', assign:'Assign to teammate…', about:'About this card type' };
+      toast(m[b.dataset.sec] || 'Done');
+      if (b.dataset.sec==='snooze'){ closeDetail(); removeCard(d.id); }
+    }));
+  }
+  function closeDetail(){ $('#pcxOverlay').classList.remove('open'); }
+
+  // mini AI chat: send the question → stream thinking steps → reveal the answer,
+  // then a live follow-up box. New messages append to a scrollable log so the
+  // section never grows — only the log scrolls.
+  function runAskChat(host, d){
+    const prompt = host.querySelector('[data-ask-prompt]');
+    const chat = host.querySelector('[data-chat]');
+    if (!chat || chat.classList.contains('open')) return;
+    chat.classList.add('open'); prompt.classList.add('asked');
+    const q = 'Why did the AI surface this ' + TYPES[d.type].short + '?';
+    const steps = ['Reading the signal data', 'Comparing with similar past cases', 'Estimating impact & confidence'];
+    chat.innerHTML = `
+      <div class="pcx-chat-log" data-log>
+        <div class="pcx-msg user"><div class="pcx-bubble">${esc(q)}</div></div>
+        <div class="pcx-msg ai">
+          <span class="pcx-ai-av">AI</span>
+          <div class="pcx-ai-body">
+            <div class="pcx-think" data-think>
+              ${steps.map((s,i)=>`<div class="pcx-think-step" data-step="${i}"><span class="pcx-think-ic"><span class="pcx-spin sm"></span></span>${esc(s)}</div>`).join('')}
+            </div>
+            <div class="pcx-answer" data-answer></div>
+          </div>
+        </div>
+      </div>
+      <div class="pcx-msgbox"><input placeholder="Ask a follow-up…" data-followup aria-label="Ask a follow-up"><button class="pcx-msgbox-send" data-followup-send aria-label="Send"><span class="material-symbols-outlined">arrow_upward</span></button></div>`;
+    const log = chat.querySelector('[data-log]');
+    function scrollLog(){ log.scrollTop = log.scrollHeight; }
+    const stepEls = chat.querySelectorAll('[data-step]');
+    function markDone(el){ el.classList.add('done'); const ic = el.querySelector('.pcx-think-ic'); if (ic) ic.innerHTML = '<span class="material-symbols-outlined">check</span>'; }
+    let i = 0;
+    function tick(){
+      if (i < stepEls.length){
+        if (i > 0) markDone(stepEls[i-1]);
+        stepEls[i].classList.add('active'); i++;
+        setTimeout(tick, 660);
+      } else {
+        markDone(stepEls[stepEls.length-1]);
+        const ans = chat.querySelector('[data-answer]');
+        const conf = Array.from({length:5},(_,k)=>`<span class="pcx-conf-dot${k<d.confidence?' on':''}"></span>`).join('');
+        ans.innerHTML = `<div class="pcx-bubble ai">${esc(d.finding)}${d.reco?`<div class="pcx-answer-reco"><span class="material-symbols-outlined">tips_and_updates</span><span>${esc(d.reco)}</span></div>`:''}<div class="pcx-conf"><span class="pcx-conf-label">Confidence</span><div class="pcx-conf-dots">${conf}</div></div></div>`;
+        ans.classList.add('show'); scrollLog();
+      }
+    }
+    setTimeout(tick, 360);
+
+    // live follow-up: append to the scrollable log, AI answers back
+    const fi = chat.querySelector('[data-followup]'), fs = chat.querySelector('[data-followup-send]');
+    let replying = false;
+    function aiReply(){
+      const r = document.createElement('div'); r.className = 'pcx-msg ai';
+      r.innerHTML = '<span class="pcx-ai-av">AI</span><div class="pcx-ai-body"><div class="pcx-bubble ai">Good question — going on the signals above, acting now gives the strongest outcome. I can draft the next step or pull more detail whenever you want.</div></div>';
+      log.appendChild(r); scrollLog();
+    }
+    function sendFollowup(){
+      const text = (fi.value || '').trim();
+      if (!text || replying) return;
+      fi.value = '';
+      const u = document.createElement('div'); u.className = 'pcx-msg user';
+      u.innerHTML = '<div class="pcx-bubble">' + esc(text) + '</div>';
+      log.appendChild(u); scrollLog();
+      replying = true;
+      setTimeout(()=>{ aiReply(); replying = false; }, 560);
+    }
+    function pulseSend(){ if (fs){ fs.classList.remove('act'); void fs.offsetWidth; fs.classList.add('act'); } }
+    if (fs) fs.addEventListener('click', ev=>{ ev.stopPropagation(); pulseSend(); sendFollowup(); });
+    if (fi){
+      fi.addEventListener('click', ev=> ev.stopPropagation());
+      fi.addEventListener('keydown', ev=>{ if (ev.key === 'Enter' && !ev.shiftKey){ ev.preventDefault(); pulseSend(); sendFollowup(); } });
+    }
+  }
+
+  // ── mount ────────────────────────────────────────────────────────────────
+  data.forEach((d,i)=> stack.appendChild(buildCard(d,i)));
+  updateHeader();
+
+  document.querySelectorAll('.brief-stat').forEach(b=> b.addEventListener('click', ()=>{
+    const f = b.dataset.filter;
+    toast(f==='crit' ? 'Filtering to critical actions' : f==='value' ? 'Sorting by potential value' : 'Showing all actions');
+  }));
+
+  document.addEventListener('click', e=>{ if (!e.target.closest('.pc-snooze-wrap')) closeAllPops(); });
+  $('#pcxOverlay').addEventListener('click', e=>{ if (e.target === e.currentTarget) closeDetail(); });
+  document.addEventListener('keydown', e=>{ if (e.key==='Escape'){ closeAllPops(); closeDetail(); } });
+})();
+</script>
+<script src="_darkmode.js"></script>
+</body></html>

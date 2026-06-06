@@ -1,0 +1,487 @@
+<!doctype html>
+<!-- @dsCard group="Brand" name="AI Workflow — Add Elements" viewport="1200x800" -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <title>AI Workflow — Add Elements</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      font-family: 'Montserrat', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Dot Canvas — white background ─── */
+    #canvas {
+      width: 100%; height: 100%;
+      background-color: #FFFFFF;
+      background-image: radial-gradient(circle, #CBD5E1 1px, transparent 1px);
+      background-size: 22px 22px;
+      cursor: default;
+      user-select: none;
+      position: relative;
+    }
+
+    .canvas-hint {
+      position: absolute;
+      bottom: 30px; left: 50%;
+      transform: translateX(-50%);
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 14px;
+      background: rgba(255,255,255,0.80);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(15,23,42,0.08);
+      border-radius: 9999px;
+      font-size: 11px; font-weight: 700; color: #64748B;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      pointer-events: none;
+      box-shadow: 0 1px 4px rgba(15,23,42,0.06);
+    }
+    .canvas-hint .material-icons { font-size: 14px; }
+
+    /* ─── Gray outer shell (matches .te-outer / .wf-outer) ─── */
+    .pop-outer {
+      position: fixed;
+      background: #D4DCE8;
+      border-radius: 24px;
+      padding: 10px;
+      box-shadow:
+        0 12px 40px rgba(15,23,42,0.12),
+        0 2px 8px rgba(15,23,42,0.06);
+      z-index: 100;
+      opacity: 0;
+      transform: scale(0.96) translateY(6px);
+      transform-origin: top left;
+      pointer-events: none;
+      transition:
+        opacity 180ms cubic-bezier(.22,1,.36,1),
+        transform 180ms cubic-bezier(.22,1,.36,1);
+    }
+    .pop-outer.visible {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      pointer-events: all;
+    }
+
+    /* ─── White inner panel ─── */
+    .pop-inner {
+      background: #FFFFFF;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 -1px 0 rgba(15,23,42,0.03);
+    }
+
+    /* ─── Badge icon — design-system polished style ─── */
+    /* matches .wf-tag / .badge.gci polish from Pills component */
+    .badge-icon {
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      border-radius: 8px;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.55),
+        inset 0 -2px 0 rgba(15,23,42,0.18),
+        inset 0 0 0 1px rgba(15,23,42,0.10);
+      background-image:
+        linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+      background-size: 7px 7px;
+    }
+    .badge-icon .material-icons {
+      color: #fff;
+      line-height: 1; display: block;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.28);
+    }
+    .badge-icon-lg { width: 28px; height: 28px; }
+    .badge-icon-lg .material-icons { font-size: 14px; }
+    .badge-icon-sm { width: 26px; height: 26px; border-radius: 7px; }
+    .badge-icon-sm .material-icons { font-size: 13px; }
+
+    /* ─── Add Elements — width ─── */
+    #ae-inner { width: 290px; }
+
+    .ae-header { padding: 16px 16px 10px; }
+
+    .ae-title {
+      font-size: 15px; font-weight: 800; color: #0F172A;
+      letter-spacing: -0.025em;
+      margin-bottom: 11px;
+    }
+
+    /* Segmented tabs */
+    .ae-tabs {
+      display: flex;
+      background: #F1F5F9;
+      border-radius: 10px;
+      padding: 3px; gap: 2px;
+      margin-bottom: 11px;
+    }
+    .ae-tab {
+      flex: 1; padding: 6px 0;
+      border: none; background: transparent;
+      border-radius: 7px;
+      font-family: 'Montserrat'; font-size: 12px; font-weight: 700;
+      color: #64748B; cursor: pointer;
+      transition: all 140ms;
+    }
+    .ae-tab.active {
+      background: #fff; color: #0F172A;
+      box-shadow: 0 1px 3px rgba(15,23,42,0.10), 0 0 0 0.5px rgba(15,23,42,0.06);
+    }
+    .ae-tab:not(.active):hover { color: #334155; }
+
+    /* Search */
+    .ae-search {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 11px;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 9px;
+      box-shadow: inset 0 1px 2px rgba(15,23,42,0.03);
+    }
+    .ae-search .material-icons { font-size: 15px; color: #94A3B8; flex-shrink: 0; }
+    .ae-search input {
+      border: none; background: transparent; flex: 1;
+      font-family: 'Montserrat'; font-size: 12px; font-weight: 500; color: #0F172A;
+      outline: none;
+    }
+    .ae-search input::placeholder { color: #94A3B8; }
+
+    /* Category list */
+    .ae-list { padding: 4px 8px; }
+
+    .ae-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 9px;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: background 100ms;
+    }
+    .ae-item:hover, .ae-item.hovered { background: #F1F5F9; }
+    .ae-item.hovered .ae-chevron { color: #64748B !important; }
+
+    .ae-name {
+      flex: 1;
+      font-size: 13px; font-weight: 700; color: #0F172A;
+      letter-spacing: -0.01em;
+    }
+
+    .ae-chevron {
+      font-size: 16px !important; line-height: 1 !important;
+      color: #D1D5DB !important;
+      transition: color 100ms;
+      display: block !important;
+    }
+
+    /* Footer */
+    .ae-sep { height: 1px; background: #F1F5F9; margin: 4px 0; }
+
+    .ae-footer { padding: 6px 8px 10px; }
+
+    .ae-ai-btn {
+      width: 100%; padding: 10px 0;
+      border: 1.5px solid transparent;
+      border-radius: 9px;
+      font-family: 'Montserrat'; font-size: 12px; font-weight: 800;
+      cursor: pointer;
+      background-image:
+        linear-gradient(#fff, #fff),
+        linear-gradient(135deg, #6EE7B7 0%, #10B981 50%, #059669 100%);
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
+      color: #065F46;
+      letter-spacing: -0.01em;
+      transition: background-image 140ms;
+    }
+    .ae-ai-btn:hover {
+      background-image:
+        linear-gradient(#ECFDF5, #ECFDF5),
+        linear-gradient(135deg, #6EE7B7 0%, #10B981 50%, #059669 100%);
+    }
+
+    /* ─── Nodes — width ─── */
+    #nodes-inner { width: 200px; }
+
+    .nodes-header {
+      padding: 12px 14px 6px;
+      font-size: 10px; font-weight: 800; color: #94A3B8;
+      letter-spacing: 0.12em; text-transform: uppercase;
+    }
+
+    .nodes-list {
+      padding: 2px 8px 10px;
+      max-height: 340px;
+      overflow-y: auto;
+    }
+    .nodes-list::-webkit-scrollbar { width: 3px; }
+    .nodes-list::-webkit-scrollbar-track { background: transparent; }
+    .nodes-list::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 99px; }
+
+    .node-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 7px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 100ms;
+    }
+    .node-item:hover { background: #F1F5F9; }
+    .node-item:hover .node-add-btn { opacity: 1; }
+
+    .node-name {
+      flex: 1;
+      font-size: 12px; font-weight: 700; color: #0F172A;
+      letter-spacing: -0.01em;
+    }
+
+    .node-add-btn {
+      width: 18px; height: 18px;
+      border-radius: 5px;
+      background: #10B981;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      opacity: 0;
+      transition: opacity 120ms;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.45),
+        inset 0 -1px 0 rgba(15,23,42,0.18),
+        0 1px 3px rgba(16,185,129,0.30);
+    }
+    .node-add-btn .material-icons {
+      font-size: 12px; color: #fff;
+      line-height: 1; display: block;
+      text-shadow: 0 1px 1px rgba(0,0,0,0.20);
+    }
+  </style>
+<link rel="stylesheet" href="_controls.css">
+<link rel="stylesheet" href="_darkmode.css">
+</head>
+<body>
+
+<div id="canvas">
+  <div class="canvas-hint">
+    <span class="material-icons">mouse</span>
+    Right-click anywhere to add elements
+  </div>
+</div>
+
+<!-- ── Add Elements ── -->
+<div id="ae-outer" class="pop-outer">
+  <div class="pop-inner" id="ae-inner">
+    <div class="ae-header">
+      <div class="ae-title">Add Elements</div>
+      <div class="seg fill" id="ae-tabs" data-seg-managed style="margin-bottom:11px">
+        <span class="seg-pill"></span>
+        <button class="active" data-tab="general">General</button>
+        <button data-tab="integrations">Integrations</button>
+      </div>
+      <div class="ae-search">
+        <span class="material-icons">search</span>
+        <input id="ae-search-input" type="text" placeholder="Search..." autocomplete="off">
+      </div>
+    </div>
+    <div class="ae-list" id="ae-list"></div>
+    <div class="ae-sep"></div>
+    <div class="ae-footer">
+      <button class="ae-ai-btn">✦ AI Recommendations</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Nodes ── -->
+<div id="nodes-outer" class="pop-outer">
+  <div class="pop-inner" id="nodes-inner">
+    <div class="nodes-header">Nodes</div>
+    <div class="nodes-list" id="nodes-list"></div>
+  </div>
+</div>
+
+<script>
+/* ─── Data ─── */
+const GENERAL_CATS = [
+  { id: 'input',     name: 'Input',           icon: 'login',         color: '#4F46E5' },
+  { id: 'output',    name: 'Output',          icon: 'logout',        color: '#10B981' },
+  { id: 'llm',       name: 'LLM',             icon: 'psychology',    color: '#8B5CF6' },
+  { id: 'action',    name: 'Action',          icon: 'bolt',          color: '#F59E0B' },
+  { id: 'kb',        name: 'Knowledge Base',  icon: 'folder_open',   color: '#334155' },
+  { id: 'database',  name: 'Database',        icon: 'storage',       color: '#EF4444' },
+  { id: 'docreader', name: 'Document Reader', icon: 'description',   color: '#D97706' },
+  { id: 'logic',     name: 'Logic',           icon: 'call_split',    color: '#F97316' },
+  { id: 'utils',     name: 'Utilities',       icon: 'grid_view',     color: '#0D9488' },
+];
+
+const INTEGRATION_CATS = [
+  { id: 'notion',    name: 'Notion',          icon: 'article',       color: '#000000' },
+  { id: 'slack',     name: 'Slack',           icon: 'chat',          color: '#4A154B' },
+  { id: 'stripe',    name: 'Stripe',          icon: 'credit_card',   color: '#635BFF' },
+  { id: 'airtable',  name: 'Airtable',        icon: 'table_chart',   color: '#EF4444' },
+  { id: 'gmail',     name: 'Gmail',           icon: 'email',         color: '#EA4335' },
+  { id: 'sheets',    name: 'Google Sheets',   icon: 'grid_on',       color: '#0F9D58' },
+  { id: 'github',    name: 'GitHub',          icon: 'code',          color: '#24292E' },
+  { id: 'hubspot',   name: 'HubSpot',         icon: 'hub',           color: '#FF7A59' },
+];
+
+const NODES = {
+  input:     [{ name: 'Text Prompt',     icon: 'notes',           color: '#4F46E5' }, { name: 'URL Fetcher',     icon: 'link',            color: '#4F46E5' }, { name: 'File Upload',     icon: 'upload_file',     color: '#4F46E5' }, { name: 'Audio Upload',    icon: 'mic',             color: '#4F46E5' }, { name: 'Image Upload',    icon: 'image',           color: '#4F46E5' }, { name: 'Form Input',      icon: 'edit_note',       color: '#4F46E5' }, { name: 'Webhook',         icon: 'webhook',         color: '#4F46E5' }, { name: 'Database Query',  icon: 'storage',         color: '#4F46E5' }],
+  output:    [{ name: 'Text Output',     icon: 'text_fields',     color: '#059669' }, { name: 'Audio Output',    icon: 'graphic_eq',      color: '#059669' }, { name: 'Image Output',    icon: 'image',           color: '#059669' }, { name: 'Email Send',      icon: 'send',            color: '#059669' }, { name: 'Slack Message',   icon: 'chat',            color: '#059669' }, { name: 'Webhook Push',    icon: 'webhook',         color: '#059669' }],
+  llm:       [{ name: 'Claude',          icon: 'smart_toy',       color: '#7C3AED' }, { name: 'GPT-4o',          icon: 'smart_toy',       color: '#7C3AED' }, { name: 'Gemini 2.0',      icon: 'auto_awesome',    color: '#7C3AED' }, { name: 'Mistral',         icon: 'psychology',      color: '#7C3AED' }, { name: 'Llama 3',         icon: 'memory',          color: '#7C3AED' }],
+  action:    [{ name: 'Write to Notion', icon: 'edit',            color: '#D97706' }, { name: 'Send Email',      icon: 'email',           color: '#D97706' }, { name: 'HTTP Request',    icon: 'http',            color: '#D97706' }, { name: 'Create Record',   icon: 'add_circle',      color: '#D97706' }, { name: 'Slack Post',      icon: 'chat_bubble',     color: '#D97706' }],
+  kb:        [{ name: 'Vector Search',   icon: 'manage_search',   color: '#334155' }, { name: 'Embed Document',  icon: 'upload_file',     color: '#334155' }, { name: 'Semantic Search', icon: 'travel_explore',  color: '#334155' }, { name: 'Hybrid Search',   icon: 'search',          color: '#334155' }],
+  database:  [{ name: 'Query',           icon: 'search',          color: '#DC2626' }, { name: 'Insert Row',      icon: 'add',             color: '#DC2626' }, { name: 'Update Row',      icon: 'edit',            color: '#DC2626' }, { name: 'Delete Row',      icon: 'delete',          color: '#DC2626' }],
+  docreader: [{ name: 'PDF Reader',      icon: 'picture_as_pdf',  color: '#B45309' }, { name: 'Word Document',   icon: 'article',         color: '#B45309' }, { name: 'CSV Parser',      icon: 'table_chart',     color: '#B45309' }, { name: 'HTML Scraper',    icon: 'code',            color: '#B45309' }],
+  logic:     [{ name: 'If / Else',       icon: 'call_split',      color: '#EA580C' }, { name: 'Loop',            icon: 'loop',            color: '#EA580C' }, { name: 'Switch',          icon: 'alt_route',       color: '#EA580C' }, { name: 'Filter',          icon: 'filter_list',     color: '#EA580C' }],
+  utils:     [{ name: 'Delay',           icon: 'timer',           color: '#0F766E' }, { name: 'Transform',       icon: 'transform',       color: '#0F766E' }, { name: 'Format Date',     icon: 'calendar_today',  color: '#0F766E' }, { name: 'JSON Parse',      icon: 'data_object',     color: '#0F766E' }],
+  notion:    [{ name: 'Write Page',      icon: 'article',         color: '#000' },    { name: 'Read Database',   icon: 'table_chart',     color: '#000' },    { name: 'Create Entry',    icon: 'add',             color: '#000' }],
+  slack:     [{ name: 'Send Message',    icon: 'chat',            color: '#4A154B' }, { name: 'DM User',         icon: 'person',          color: '#4A154B' }, { name: 'Post to Channel', icon: 'campaign',        color: '#4A154B' }],
+  stripe:    [{ name: 'Create Customer', icon: 'person_add',      color: '#635BFF' }, { name: 'Charge Card',     icon: 'credit_card',     color: '#635BFF' }, { name: 'Create Invoice',  icon: 'receipt',         color: '#635BFF' }],
+  airtable:  [{ name: 'Query Records',   icon: 'search',          color: '#EF4444' }, { name: 'Create Record',   icon: 'add',             color: '#EF4444' }, { name: 'Update Record',   icon: 'edit',            color: '#EF4444' }],
+  gmail:     [{ name: 'Send Email',      icon: 'send',            color: '#EA4335' }, { name: 'Read Inbox',      icon: 'inbox',           color: '#EA4335' }, { name: 'Create Draft',    icon: 'drafts',          color: '#EA4335' }],
+  sheets:    [{ name: 'Append Row',      icon: 'add',             color: '#0F9D58' }, { name: 'Read Range',      icon: 'table_rows',      color: '#0F9D58' }, { name: 'Update Cell',     icon: 'edit',            color: '#0F9D58' }],
+  github:    [{ name: 'Create Issue',    icon: 'bug_report',      color: '#24292E' }, { name: 'Open PR',         icon: 'merge',           color: '#24292E' }, { name: 'Push Commit',     icon: 'commit',          color: '#24292E' }],
+  hubspot:   [{ name: 'Create Contact',  icon: 'person_add',      color: '#FF7A59' }, { name: 'Update Deal',     icon: 'handshake',       color: '#FF7A59' }, { name: 'Send Email',      icon: 'email',           color: '#FF7A59' }],
+};
+
+/* ─── DOM refs ─── */
+const aeOuter     = document.getElementById('ae-outer');
+const nodesOuter  = document.getElementById('nodes-outer');
+const aeListEl    = document.getElementById('ae-list');
+const nodesListEl = document.getElementById('nodes-list');
+let activeTab     = 'general';
+let hideTimer     = null;
+
+/* ─── Render categories ─── */
+function renderCategories(filter) {
+  filter = (filter || '').toLowerCase();
+  const cats = (activeTab === 'general' ? GENERAL_CATS : INTEGRATION_CATS)
+    .filter(c => c.name.toLowerCase().includes(filter));
+
+  aeListEl.innerHTML = cats.map(cat => `
+    <div class="ae-item" data-id="${cat.id}">
+      <div class="badge-icon badge-icon-lg" style="background-color:${cat.color}">
+        <span class="material-icons">${cat.icon}</span>
+      </div>
+      <span class="ae-name">${cat.name}</span>
+      <span class="material-icons ae-chevron">chevron_right</span>
+    </div>
+  `).join('');
+
+  aeListEl.querySelectorAll('.ae-item').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      clearTimeout(hideTimer);
+      const all = [...GENERAL_CATS, ...INTEGRATION_CATS];
+      const cat = all.find(c => c.id === el.dataset.id);
+      if (cat) showNodes(cat, el);
+    });
+  });
+}
+
+/* ─── Show nodes flyout ─── */
+function showNodes(cat, itemEl) {
+  document.querySelectorAll('.ae-item').forEach(e => e.classList.remove('hovered'));
+  itemEl.classList.add('hovered');
+
+  nodesListEl.innerHTML = (NODES[cat.id] || []).map(n => `
+    <div class="node-item">
+      <div class="badge-icon badge-icon-sm" style="background-color:${n.color}">
+        <span class="material-icons">${n.icon}</span>
+      </div>
+      <span class="node-name">${n.name}</span>
+      <div class="node-add-btn"><span class="material-icons">add</span></div>
+    </div>
+  `).join('');
+
+  nodesOuter.classList.add('visible');
+
+  /* Position: right of ae-outer, aligned to hovered row */
+  const aeRect   = aeOuter.getBoundingClientRect();
+  const itemRect = itemEl.getBoundingClientRect();
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const nw = nodesOuter.offsetWidth, nh = nodesOuter.offsetHeight;
+
+  let nx = aeRect.right + 8;
+  if (nx + nw > vw - 10) nx = aeRect.left - nw - 8;
+  if (nx < 10) nx = 10;
+
+  let ny = itemRect.top - 10;
+  if (ny + nh > vh - 10) ny = vh - nh - 10;
+  if (ny < 10) ny = 10;
+
+  nodesOuter.style.left = nx + 'px';
+  nodesOuter.style.top  = ny + 'px';
+}
+
+function hideNodes() {
+  nodesOuter.classList.remove('visible');
+  document.querySelectorAll('.ae-item').forEach(e => e.classList.remove('hovered'));
+}
+
+/* ─── Open Add Elements ─── */
+function openAE(x, y) {
+  aeOuter.classList.add('visible');
+  hideNodes();
+  document.getElementById('ae-search-input').value = '';
+  renderCategories('');
+
+  requestAnimationFrame(() => {
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const w  = aeOuter.offsetWidth,  h  = aeOuter.offsetHeight;
+    if (x + w > vw - 10) x = vw - w - 10;
+    if (y + h > vh - 10) y = vh - h - 10;
+    if (x < 10) x = 10;
+    if (y < 10) y = 10;
+    aeOuter.style.left = x + 'px';
+    aeOuter.style.top  = y + 'px';
+  });
+}
+
+function closeAll() {
+  aeOuter.classList.remove('visible');
+  nodesOuter.classList.remove('visible');
+  document.querySelectorAll('.ae-item').forEach(e => e.classList.remove('hovered'));
+}
+
+/* ─── Events ─── */
+document.getElementById('canvas').addEventListener('contextmenu', e => {
+  e.preventDefault();
+  openAE(e.clientX, e.clientY);
+});
+
+document.addEventListener('mousedown', e => {
+  if (!aeOuter.contains(e.target) && !nodesOuter.contains(e.target)) closeAll();
+});
+
+aeOuter.addEventListener('mouseleave', e => {
+  if (!nodesOuter.contains(e.relatedTarget))
+    hideTimer = setTimeout(hideNodes, 90);
+});
+nodesOuter.addEventListener('mouseenter', () => clearTimeout(hideTimer));
+nodesOuter.addEventListener('mouseleave', e => {
+  if (!aeOuter.contains(e.relatedTarget))
+    hideTimer = setTimeout(hideNodes, 90);
+});
+
+document.querySelectorAll('#ae-tabs button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#ae-tabs button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeTab = btn.dataset.tab;
+    hideNodes();
+    renderCategories(document.getElementById('ae-search-input').value);
+  });
+});
+
+document.getElementById('ae-search-input').addEventListener('input', e => {
+  renderCategories(e.target.value);
+  hideNodes();
+});
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
+
+renderCategories('');
+</script>
+<script src="_controls.js"></script>
+<script src="_darkmode.js"></script>
+</body>
+</html>

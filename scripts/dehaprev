@@ -1,0 +1,350 @@
+#!/usr/bin/env bash
+# dehaprev — Deha CRM preview-port manager
+# Manages systemd user service deha-preview@<port> instances for vite previews.
+set -euo pipefail
+
+# ---------------------------------------------------------------------------
+# Paths
+# ---------------------------------------------------------------------------
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+REGISTRY="$REPO_ROOT/apps/web/preview-ports.json"
+ENV_DIR="$HOME/.config/deha-preview"
+VPS="bora@178.104.8.163"
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+die() { echo "error: $*" >&2; exit 1; }
+warn() { echo "warn: $*" >&2; }
+
+# Python helper script path (written on first use)
+PYHELPER="$REPO_ROOT/.claude/tmp/dehaprev_helper.py"
+
+# Ensure python helper exists
+ensure_pyhelper() {
+  mkdir -p "$(dirname "$PYHELPER")"
+  cat > "$PYHELPER" << 'PYEOF'
+import json, sys, os
+
+REGISTRY = sys.argv[2]
+
+def load():
+    try:
+        with open(REGISTRY) as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
+
+def save(data):
+    with open(REGISTRY, 'w') as f:
+        json.dump(data, f, indent=2)
+        f.write('\n')
+
+cmd = sys.argv[1]
+
+if cmd == 'get_port':
+    component = sys.argv[3]
+    data = load()
+    entry = data.get(component)
+    if entry:
+        print(entry['port'])
+
+elif cmd == 'get_route':
+    component = sys.argv[3]
+    data = load()
+    entry = data.get(component)
+    if entry:
+        print(entry.get('route', '/'))
+
+elif cmd == 'get_component':
+    port = sys.argv[3]
+    data = load()
+    for comp, entry in data.items():
+        if str(entry.get('port', '')) == port:
+            print(comp)
+            break
+
+elif cmd == 'write':
+    component = sys.argv[3]
+    port = int(sys.argv[4])
+    route = sys.argv[5]
+    data = load()
+    data[component] = {'port': port, 'route': route}
+    save(data)
+    print(f"registry updated: {component} -> port {port}, route {route}")
+
+elif cmd == 'dump':
+    print(json.dumps(load()))
+PYEOF
+}
+
+# Registry operations via helper script
+registry_port() {
+  ensure_pyhelper
+  python3 "$PYHELPER" get_port "$REGISTRY" "$1"
+}
+
+registry_route() {
+  ensure_pyhelper
+  python3 "$PYHELPER" get_route "$REGISTRY" "$1"
+}
+
+registry_component_for_port() {
+  ensure_pyhelper
+  python3 "$PYHELPER" get_component "$REGISTRY" "$1"
+}
+
+registry_write() {
+  ensure_pyhelper
+  python3 "$PYHELPER" write "$REGISTRY" "$1" "$2" "$3"
+}
+
+registry_read() {
+  ensure_pyhelper
+  python3 "$PYHELPER" dump "$REGISTRY"
+}
+
+# Check if systemd service instance is active
+service_is_active() {
+  systemctl --user is-active "deha-preview@$1" &>/dev/null
+}
+
+# Get list of active preview ports
+active_ports() {
+  systemctl --user list-units 'deha-preview@*.service' --no-legend 2>/dev/null \
+    | awk '{print $1}' \
+    | grep -oP '(?<=deha-preview@)\d+(?=\.service)' \
+    || true
+}
+
+# Check if a port is free (no active service AND nothing listening)
+port_is_free() {
+  local p="$1"
+  if service_is_active "$p" 2>/dev/null; then
+    return 1
+  fi
+  if ss -tlnp 2>/dev/null | awk '{print $4}' | grep -qP ":${p}$"; then
+    return 1
+  fi
+  return 0
+}
+
+# Find next free port starting from base
+next_free_port() {
+  local p=5173
+  while ! port_is_free "$p"; do
+    p=$((p + 1))
+  done
+  echo "$p"
+}
+
+# Poll until port responds 200 or timeout
+wait_for_200() {
+  local port="$1"
+  local deadline=$(( $(date +%s) + 12 ))
+  while [ "$(date +%s)" -lt "$deadline" ]; do
+    local code
+    code=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:${port}/" 2>/dev/null || echo "000")
+    if [ "$code" = "200" ]; then
+      return 0
+    fi
+    sleep 1
+  done
+  return 1
+}
+
+# ---------------------------------------------------------------------------
+# Subcommands
+# ---------------------------------------------------------------------------
+
+cmd_start() {
+  local component="${1:-}"
+  local explicit_port="${2:-}"
+  [ -z "$component" ] && die "start requires <component>"
+
+  # Resolve port
+  local port=""
+  if [ -n "$explicit_port" ]; then
+    port="$explicit_port"
+  else
+    port="$(registry_port "$component")"
+    if [ -z "$port" ]; then
+      port="$(next_free_port)"
+    fi
+  fi
+
+  # Resolve route
+  local route
+  route="$(registry_route "$component")"
+  if [ -z "$route" ]; then
+    route="/"
+    warn "no route found for '$component' in registry — defaulting to /"
+  fi
+
+  # Persist registry
+  registry_write "$component" "$port" "$route"
+
+  # Write env file
+  mkdir -p "$ENV_DIR"
+  printf 'VITE_PREVIEW_ROUTE=%s\n' "$route" > "$ENV_DIR/${port}.env"
+  echo "wrote $ENV_DIR/${port}.env"
+
+  # Start service
+  systemctl --user start "deha-preview@${port}"
+  echo "started deha-preview@${port}"
+
+  # Poll for readiness
+  if wait_for_200 "$port"; then
+    echo "up: http://localhost:${port}${route}"
+  else
+    echo "warn: service started but port ${port} did not return 200 within 12s — may still be starting"
+  fi
+
+  echo ""
+  echo "URL:  http://localhost:${port}${route}"
+  echo "SSH tunnel:"
+  echo "  ssh -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -L ${port}:localhost:${port} ${VPS}"
+}
+
+cmd_stop() {
+  local target="${1:-}"
+  [ -z "$target" ] && die "stop requires <component|port>"
+
+  local port=""
+  if [[ "$target" =~ ^[0-9]+$ ]]; then
+    port="$target"
+  else
+    port="$(registry_port "$target")"
+    [ -z "$port" ] && die "unknown component '$target' — not found in registry"
+  fi
+
+  systemctl --user stop "deha-preview@${port}"
+  echo "stopped deha-preview@${port}"
+}
+
+cmd_restart() {
+  local target="${1:-}"
+  [ -z "$target" ] && die "restart requires <component|port>"
+
+  local port=""
+  local component=""
+
+  if [[ "$target" =~ ^[0-9]+$ ]]; then
+    port="$target"
+    component="$(registry_component_for_port "$port")"
+    [ -z "$component" ] && die "no component mapped to port $port in registry"
+  else
+    component="$target"
+    port="$(registry_port "$component")"
+    [ -z "$port" ] && die "unknown component '$component' — not found in registry"
+  fi
+
+  systemctl --user stop "deha-preview@${port}" 2>/dev/null || true
+  cmd_start "$component" "$port"
+}
+
+cmd_list() {
+  local ports
+  ports="$(active_ports)"
+
+  if [ -z "$ports" ]; then
+    echo "no active deha-preview instances"
+    return 0
+  fi
+
+  printf '%-8s %-20s %-15s %-10s %s\n' PORT COMPONENT ROUTE STATUS REACHABLE
+  printf '%-8s %-20s %-15s %-10s %s\n' '----' '---------' '-----' '------' '---------'
+
+  for port in $ports; do
+    local component route status reachable
+
+    component="$(registry_component_for_port "$port")"
+    [ -z "$component" ] && component="(unknown)"
+
+    # Try env file first, then registry
+    if [ -f "$ENV_DIR/${port}.env" ]; then
+      route="$(grep -oP '(?<=VITE_PREVIEW_ROUTE=).+' "$ENV_DIR/${port}.env" 2>/dev/null || echo '/')"
+    else
+      route="$(registry_route "$component")"
+      [ -z "$route" ] && route="/"
+    fi
+
+    if service_is_active "$port"; then
+      status="active"
+    else
+      status="inactive"
+    fi
+
+    local code
+    code="$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:${port}/" --connect-timeout 2 2>/dev/null || echo "000")"
+    if [ "$code" = "200" ]; then
+      reachable="yes (${code})"
+    else
+      reachable="no (${code})"
+    fi
+
+    printf '%-8s %-20s %-15s %-10s %s\n' "$port" "$component" "$route" "$status" "$reachable"
+  done
+}
+
+cmd_tunnel() {
+  local ports
+  ports="$(active_ports)"
+
+  if [ -z "$ports" ]; then
+    echo "no active deha-preview instances — nothing to tunnel"
+    return 0
+  fi
+
+  local forwards=""
+  for port in $ports; do
+    forwards="$forwards -L ${port}:localhost:${port}"
+  done
+
+  echo "ssh -o ServerAliveInterval=30 -o ServerAliveCountMax=3${forwards} ${VPS}"
+}
+
+cmd_help() {
+  cat <<'EOF'
+dehaprev — Deha CRM preview-port manager
+
+USAGE:
+  dehaprev start <component> [port]   Start a vite preview for <component>
+  dehaprev stop <component|port>      Stop a running preview instance
+  dehaprev restart <component|port>   Restart a preview instance
+  dehaprev list                       List all active preview instances
+  dehaprev tunnel                     Print ssh tunnel command for all active ports
+  dehaprev help                       Show this help
+
+EXAMPLES:
+  dehaprev start leads-table          # uses registry port/route or next free
+  dehaprev start leads-table 5173     # explicit port
+  dehaprev stop leads-table
+  dehaprev stop 5173
+  dehaprev list
+  dehaprev tunnel
+
+REGISTRY:
+  apps/web/preview-ports.json         Component -> {port, route} mapping
+
+ENV FILES:
+  ~/.config/deha-preview/<port>.env   Per-port VITE_PREVIEW_ROUTE override
+EOF
+}
+
+# ---------------------------------------------------------------------------
+# Dispatch
+# ---------------------------------------------------------------------------
+SUBCMD="${1:-help}"
+shift 2>/dev/null || true
+
+case "$SUBCMD" in
+  start)   cmd_start "$@" ;;
+  stop)    cmd_stop "$@" ;;
+  restart) cmd_restart "$@" ;;
+  list)    cmd_list "$@" ;;
+  tunnel)  cmd_tunnel "$@" ;;
+  help|--help|-h) cmd_help ;;
+  *) die "unknown subcommand '$SUBCMD'. Run 'dehaprev help'." ;;
+esac

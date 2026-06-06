@@ -1,0 +1,605 @@
+<!-- @dsCard group="Components" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="_base.css">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+<style>
+  .material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal; font-style: normal; line-height: 1;
+    letter-spacing: normal; text-transform: none; display: inline-block;
+    white-space: nowrap; word-wrap: normal; direction: ltr;
+    font-feature-settings: 'liga'; -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+    font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+  }
+  body { background:#F8FAFC; }
+  .card {
+    display:flex; flex-direction:column; align-items:center; gap:14px;
+    padding:34px 24px 40px;
+    background:#F8FAFC;
+    background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.07) 0%, #F8FAFC 55%);
+  }
+  .hint { font-family: ui-monospace,"SF Mono",Menlo,monospace; font-size:10.5px; color:var(--fg4); letter-spacing:0.01em; }
+
+  /* ════════════════ Grey bezel — own shell, no zoom (the card owns the hover) ════ */
+  .shell.sel-shell { zoom: 0.65; padding:11px; transition: transform 300ms cubic-bezier(.22,1,.36,1), box-shadow 300ms ease; }
+
+  /* ════════════════ The sheet ════════════════ */
+  .sheet {
+    --body:#FFFFFF;
+    --header:#F4F7FB;
+    --edge:rgba(15,23,42,0.07);
+    --hi:rgba(255,255,255,0.92);
+    --title:#0F172A;
+    --vendor:#64748B;
+    --m-label:#334155;
+    --m-icbg:#EEF2F8; --m-icbd:rgba(15,23,42,0.10); --m-icfg:#64748B;
+    --track:#E5EAF1;
+    --hdr-label:#94A3B8;
+    --navbg:rgba(15,23,42,0.04); --navbd:rgba(15,23,42,0.10); --navfg:#64748B;
+    --dot:rgba(15,23,42,0.16); --dot-on:#0F172A;
+    --specs-bd:rgba(15,23,42,0.12); --specs-fg:#64748B; --specs-rule:rgba(15,23,42,0.10);
+    --cta-bg:
+      linear-gradient(rgba(255,255,255,0.10) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.10) 1px, transparent 1px),
+      linear-gradient(180deg,#34D399 0%,#10B981 100%);
+    --cta-size:14px 14px,14px 14px,cover;
+    --cta-fg:#FFFFFF;
+    --cta-glow:rgba(16,185,129,0.45);
+    --cta-edge: inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -2px 0 rgba(0,40,30,0.22), inset 0 0 0 1px rgba(255,255,255,0.16);
+    --hover-glow:rgba(16,185,129,0.30);
+
+    position:relative; width:430px; box-sizing:border-box;
+    border-radius:30px; overflow:hidden;
+    background:var(--body);
+    box-shadow: inset 0 1px 0 var(--hi), inset 0 0 0 1px var(--edge);
+    transition: box-shadow 300ms ease, translate 300ms cubic-bezier(.22,1,.36,1);
+  }
+  /* Resting state is fully visible. The entrance is a progressive enhancement
+     that animates FROM hidden, gated on motion preference + an .intro class
+     that JS removes after it plays — so print/PDF/snapshot/reduced-motion all
+     render the populated card, never a blank shell. */
+  @media (prefers-reduced-motion: no-preference) {
+    .sheet.intro { animation: sheetIn 600ms cubic-bezier(.16,1.28,.3,1); }
+  }
+  @keyframes sheetIn { 0% { transform: scale(0.85); } 100% { transform: scale(1); } }
+  .shell.sel-shell:hover { transform: translateY(-5px); box-shadow: 0 24px 54px -18px rgba(16,185,129,0.30), 0 10px 26px -14px rgba(15,23,42,0.28); }
+  html.dark .shell.sel-shell:hover { box-shadow: 0 26px 60px -18px rgba(16,185,129,0.34), 0 12px 28px -14px rgba(0,0,0,0.55); }
+  .shell.sel-shell:hover .sheet {
+    box-shadow: inset 0 1px 0 var(--hi), inset 0 0 0 1px var(--edge),
+                0 22px 50px -18px var(--hover-glow), 0 10px 26px -14px rgba(15,23,42,0.30);
+  }
+
+  /* ── Header ── */
+  .sh-head {
+    position:relative; display:flex; align-items:center; justify-content:space-between;
+    padding:18px 18px 16px; background:var(--header);
+    border-bottom:1px solid var(--edge);
+  }
+  .nav-btn {
+    width:44px; height:44px; border-radius:50%; flex-shrink:0; cursor:pointer; border:none;
+    display:grid; place-items:center; color:var(--navfg);
+    background:var(--navbg); box-shadow: inset 0 0 0 1px var(--navbd), inset 0 1px 0 var(--hi);
+    transition: transform 140ms cubic-bezier(.22,1,.36,1), background 160ms, color 160ms;
+  }
+  .nav-btn .material-symbols-outlined { font-size:22px; }
+  .nav-btn:hover { background:var(--m-icbg); color:var(--title); transform:scale(1.06); }
+  .nav-btn:active { transform:scale(0.92); }
+  .sh-head-mid { display:flex; flex-direction:column; align-items:center; gap:9px; }
+  .sh-title {
+    font-size:13px; font-weight:800; letter-spacing:0.22em; text-transform:uppercase;
+    color:var(--hdr-label);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .sheet.intro .sh-title { animation: titleIn 460ms ease; }
+  }
+  @keyframes titleIn { 0% { opacity:0; transform:translateY(4px); } 100% { opacity:1; transform:translateY(0); } }
+  .dots { display:flex; align-items:center; gap:6px; }
+  .dot {
+    width:7px; height:7px; border-radius:9999px; background:var(--dot);
+    transition: width 320ms cubic-bezier(.22,1,.36,1), background 280ms ease;
+  }
+  .dot.on { width:18px; background:var(--dot-on); }
+
+  /* ── Body ── */
+  .sh-body { padding:22px 22px 22px; display:flex; flex-direction:column; gap:22px; }
+
+  /* identity */
+  .ident { display:flex; align-items:center; gap:16px; }
+  .logo {
+    --accent:#10B981;
+    position:relative; width:62px; height:62px; border-radius:17px; flex-shrink:0;
+    display:grid; place-items:center;
+    background:
+      radial-gradient(ellipse at top right, rgba(255,255,255,0.22) 0%, transparent 56%),
+      linear-gradient(160deg, color-mix(in srgb, var(--accent) 78%, #fff) 0%, var(--accent) 60%, color-mix(in srgb, var(--accent) 82%, #000) 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(0,0,0,0.22),
+      inset 0 0 0 1px rgba(255,255,255,0.16), 0 6px 18px -4px color-mix(in srgb, var(--accent) 60%, transparent);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .sheet.intro .logo { animation: logoEnter 720ms cubic-bezier(.16,1.4,.3,1); }
+  }
+  @keyframes logoEnter { 0% { transform: scale(0.6) rotate(-30deg); } 100% { transform: scale(1) rotate(0); } }
+  /* ambient glow halo behind the logo */
+  .logo::before {
+    content:''; position:absolute; inset:-14px; z-index:-1; border-radius:26px;
+    background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 65%, transparent) 0%, transparent 68%);
+    filter: blur(8px); opacity:0.85;
+  }
+  .logo .material-symbols-outlined { font-size:34px; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.30); }
+  /* morph (no flip) when model changes — blur + scale cross-dissolve, glyph swaps mid-blur */
+  .logo.pulsing { animation: logoMorph 560ms cubic-bezier(.4,0,.2,1); }
+  .logo.pulsing::before { animation: haloPulse 760ms ease-out; }
+  @keyframes logoMorph {
+    0%   { filter: blur(0);   transform: scale(1); }
+    35%  { filter: blur(9px); transform: scale(0.78); }
+    65%  { filter: blur(9px); transform: scale(0.78); }
+    100% { filter: blur(0);   transform: scale(1); }
+  }
+  @keyframes haloPulse {
+    0%   { opacity:0.7; filter:blur(8px); transform:scale(0.9); }
+    50%  { opacity:1;   filter:blur(15px); transform:scale(1.08); }
+    100% { opacity:0.85; filter:blur(8px); transform:scale(1); }
+  }
+
+  .ident-text { min-width:0; }
+  .ident-name {
+    font-size:25px; font-weight:800; letter-spacing:-0.02em; color:var(--title); line-height:1.05;
+  }
+  .ident-vendor { margin-top:3px; font-size:14px; font-weight:600; color:var(--vendor); }
+  .swap { transition: opacity 220ms ease, transform 320ms cubic-bezier(.16,1.2,.3,1); }
+  .swapping .swap { opacity:0; transform:translateY(8px); }
+
+  /* metrics grid */
+  .metrics { display:grid; grid-template-columns:1fr 1fr; gap:18px 26px; }
+  .metric { display:flex; flex-direction:column; gap:10px; }
+  .m-top { display:flex; align-items:center; gap:8px; }
+  /* colorful glossy icon tile — matches the AI Model Selector option icon badge */
+  .m-ic {
+    width:24px; height:24px; border-radius:8px; flex-shrink:0; display:grid; place-items:center;
+    background-color: var(--ic, #10B981);
+    background-image:
+      radial-gradient(ellipse at top right, rgba(255,255,255,0.20) 0%, transparent 55%),
+      linear-gradient(rgba(255,255,255,0.14) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.14) 1px, transparent 1px);
+    background-size: cover, 6px 6px, 6px 6px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -2px 0 rgba(15,23,42,0.22), inset 0 0 0 1px rgba(15,23,42,0.12), 0 2px 6px rgba(0,0,0,0.12);
+  }
+  .m-ic .material-symbols-outlined { font-size:15px; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.35); }
+  .m-label { font-size:14.5px; font-weight:700; color:var(--m-label); letter-spacing:-0.01em; }
+  /* solid glossy stat badge — matches the "pills, chips & badges" .badge family */
+  .m-badge {
+    position:relative; margin-left:auto; text-align:center;
+    font-size:11px; font-weight:800; letter-spacing:0.04em;
+    padding:3px 11px; border-radius:9999px; white-space:nowrap; color:#fff;
+    box-sizing:border-box;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.22);
+    box-shadow: inset 0 -2px 5px rgba(0,0,0,0.14), inset 0 -1px 0 rgba(255,255,255,0.15);
+    transition: background 360ms ease, color 360ms ease, box-shadow 360ms ease,
+                width 420ms cubic-bezier(.5,0,.2,1);
+  }
+  .m-badge-txt { display:inline-block; will-change:filter,opacity,transform; }
+  /* outgoing label clone, stacked dead-centre so it cross-dissolves in place */
+  .m-badge-ghost {
+    position:absolute; left:0; right:0; top:3px; text-align:center;
+    pointer-events:none; will-change:filter,opacity,transform;
+  }
+  .m-badge.tone-good    { background:#10B981; }
+  .m-badge.tone-neutral { background:#64748B; }
+  .m-badge.tone-cost    { background:#FACC15; color:#451A03; text-shadow:none; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.10), inset 0 -1px 0 rgba(255,255,255,0.25); }
+  @media (prefers-reduced-motion: no-preference) {
+    .m-badge.morphing .m-badge-txt { animation: txtMorphIn 420ms cubic-bezier(.22,1,.36,1); }
+    .m-badge .m-badge-ghost        { animation: txtMorphOut 260ms cubic-bezier(.4,0,.7,0.2) forwards; }
+  }
+  /* true morph: the pill reshapes (width) while the old word melts away through
+     a blur and the new word condenses in from a blur — a gooey cross-dissolve,
+     no flip/rotation. */
+  @keyframes txtMorphOut {
+    0%   { opacity:1; filter:blur(0);   transform:scale(1)    translateY(0); }
+    100% { opacity:0; filter:blur(6px); transform:scale(0.82) translateY(1px); }
+  }
+  @keyframes txtMorphIn {
+    0%   { opacity:0; filter:blur(8px); transform:scale(1.18); }
+    55%  { opacity:1; filter:blur(0); }
+    100% { opacity:1; filter:blur(0);  transform:scale(1); }
+  }
+
+  /* identity name/vendor morph: the OLD word fully blurs OUT first, THEN the NEW
+     word blurs IN — sequential, never overlapping (no double-exposure). */
+  .morph-host { position:relative; }
+  .morph-cur { display:inline-block; will-change:filter,opacity,transform; }
+  @media (prefers-reduced-motion: no-preference) {
+    .morph-host .morph-cur.morph-out { animation: txtMorphOut 220ms cubic-bezier(.4,0,.7,0.2) forwards; }
+    .morph-host .morph-cur.morph-in  { animation: txtMorphIn 360ms cubic-bezier(.22,1,.36,1); }
+  }
+
+  .bar { height:7px; border-radius:9999px; background:var(--track); overflow:hidden; box-shadow: inset 0 1px 2px rgba(15,23,42,0.06); }
+  .bar-fill {
+    height:100%; width:var(--w, 0%); border-radius:9999px;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.18) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.18) 1px, transparent 1px),
+      linear-gradient(90deg, var(--barcolor,#10B981), var(--barcolor,#10B981));
+    background-size:7px 7px,7px 7px,cover;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -1px 0 rgba(0,40,30,0.20);
+    transition: width 760ms cubic-bezier(.16,1.16,.3,1);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .sheet.intro .bar-fill { animation: barIn 840ms cubic-bezier(.16,1.16,.3,1); }
+  }
+  @keyframes barIn { 0% { width: 0%; } 100% { width: var(--w, 0%); } }
+
+  /* specs button */
+  .specs-wrap { display:flex; align-items:center; gap:12px; }
+  .specs-rule { flex:1; height:1px; background:var(--specs-rule); }
+  .specs-btn {
+    font-family: ui-monospace,"SF Mono",Menlo,monospace;
+    font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase;
+    color:var(--specs-fg); cursor:pointer; border:1px solid var(--specs-bd); background:transparent;
+    padding:8px 14px; border-radius:11px; white-space:nowrap;
+    transition: color 180ms, border-color 180ms, box-shadow 220ms, transform 140ms cubic-bezier(.22,1,.36,1);
+  }
+  .specs-btn:hover {
+    color:#10B981; border-color:rgba(16,185,129,0.45);
+    box-shadow: 0 0 0 3px rgba(16,185,129,0.10), 0 4px 14px -6px rgba(16,185,129,0.5);
+    animation: specsPulse 1.6s ease-in-out infinite;
+  }
+  .specs-btn:active { transform:scale(0.96); }
+  @keyframes specsPulse {
+    0%,100%{ box-shadow:0 0 0 3px rgba(16,185,129,0.10), 0 4px 14px -6px rgba(16,185,129,0.45); }
+    50%{ box-shadow:0 0 0 5px rgba(16,185,129,0.05), 0 6px 18px -6px rgba(16,185,129,0.7); }
+  }
+
+  /* confirm CTA */
+  .confirm {
+    position:relative; width:100%; padding:17px; border:none; cursor:pointer; overflow:hidden;
+    border-radius:18px; display:inline-flex; align-items:center; justify-content:center; gap:10px;
+    font-family:'Montserrat'; font-size:16.5px; font-weight:800; letter-spacing:0.01em;
+    color:var(--cta-fg); background:var(--cta-bg); background-size:var(--cta-size);
+    box-shadow: 0 14px 30px -10px var(--cta-glow), 0 4px 10px rgba(15,23,42,0.12), var(--cta-edge);
+    transition: transform 200ms cubic-bezier(.22,1,.36,1), box-shadow 220ms, filter 200ms;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .confirm .material-symbols-outlined { font-size:21px; }
+  #confirmIcon { font-variation-settings:'FILL' 1, 'wght' 700, 'GRAD' 0, 'opsz' 24; text-shadow: 0 2px 4px rgba(0,0,0,0.32); }
+  html.dark #confirmIcon { text-shadow: 0 1px 2px rgba(15,23,42,0.20); }
+  #confirmText { text-shadow: 0 2px 4px rgba(0,0,0,0.32); }
+  html.dark #confirmText { text-shadow: 0 1px 2px rgba(15,23,42,0.20); }
+  .confirm:hover { transform: scale(1.035) translateY(-1px); box-shadow: 0 20px 40px -10px var(--cta-glow), 0 6px 14px rgba(15,23,42,0.16), var(--cta-edge); filter:brightness(1.02); }
+  .confirm:active { transform: scale(0.97); }
+  .confirm.flash::after {
+    content:''; position:absolute; inset:0; background:rgba(255,255,255,0.85);
+    animation: ctaFlash 460ms ease-out forwards; pointer-events:none;
+  }
+  @keyframes ctaFlash { 0%{opacity:0.9} 100%{opacity:0} }
+
+  .confetti { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:6; }
+
+  /* ════════════════ Dark mode (System A) — flip local vars only ════════════════ */
+  html.dark .sheet {
+    --body:#171C25;
+    --header:#1B212C;
+    --edge:rgba(255,255,255,0.07);
+    --hi:rgba(255,255,255,0.06);
+    --title:#F1F5F9;
+    --vendor:#94A3B8;
+    --m-label:#CBD5E1;
+    --m-icbg:rgba(255,255,255,0.06); --m-icbd:rgba(255,255,255,0.10); --m-icfg:#94A3B8;
+    --track:rgba(255,255,255,0.09);
+    --hdr-label:#7C8AA0;
+    --navbg:rgba(255,255,255,0.05); --navbd:rgba(255,255,255,0.09); --navfg:#94A3B8;
+    --dot:rgba(255,255,255,0.20); --dot-on:#F1F5F9;
+    --specs-bd:rgba(255,255,255,0.12); --specs-fg:#94A3B8; --specs-rule:rgba(255,255,255,0.10);
+    --cta-bg: linear-gradient(180deg,#FFFFFF,#F1F4F8);
+    --cta-size:cover;
+    --cta-fg:#0B1220;
+    --cta-glow:rgba(255,255,255,0.22);
+    --cta-edge: inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -2px 0 rgba(15,23,42,0.10), inset 0 0 0 1px rgba(15,23,42,0.04);
+    --hover-glow:rgba(16,185,129,0.34);
+    --good-bg:rgba(16,185,129,0.14); --good-fg:#34D399; --good-bd:rgba(16,185,129,0.30);
+    --neu-bg:rgba(255,255,255,0.06); --neu-fg:#CBD5E1; --neu-bd:rgba(255,255,255,0.10);
+    --cost-bg:rgba(234,179,8,0.14); --cost-fg:#FACC15; --cost-bd:rgba(234,179,8,0.32);
+  }
+  html.dark .sheet { box-shadow: inset 0 1px 0 var(--hi), inset 0 0 0 1px var(--edge), 0 1px 2px rgba(0,0,0,0.4); }
+</style>
+<link rel="stylesheet" href="_darkmode.css">
+</head><body>
+<div class="card" data-comment-anchor="modelsheet-card">
+
+  <div class="shell sel-shell" data-screen-label="AI Model Selection Sheet" data-comment-anchor="05a9d6c06e-div">
+    <div class="sheet" id="sheet">
+
+      <!-- Header -->
+      <div class="sh-head">
+        <button class="nav-btn" id="prevBtn" aria-label="Previous model"><span class="material-symbols-outlined">chevron_left</span></button>
+        <div class="sh-head-mid">
+          <div class="sh-title">Select Intelligence</div>
+          <div class="dots" id="dots"></div>
+        </div>
+        <button class="nav-btn" id="nextBtn" aria-label="Next model"><span class="material-symbols-outlined">chevron_right</span></button>
+      </div>
+
+      <!-- Body -->
+      <div class="sh-body">
+        <!-- identity -->
+        <div class="ident">
+          <div class="logo" id="logo" data-comment-anchor="df7a3da479-div"><span class="material-symbols-outlined" id="logoGlyph">auto_awesome</span></div>
+          <div class="ident-text" data-comment-anchor="9da6db338b-div">
+            <div class="ident-name morph-host" id="mName"><span class="morph-cur">Atlas Pro</span></div>
+            <div class="ident-vendor morph-host" id="mVendor"><span class="morph-cur">Deha Labs</span></div>
+          </div>
+        </div>
+
+        <!-- metrics -->
+        <div class="metrics" id="metrics" data-comment-anchor="99e32bd186-div">
+          <!-- Speed -->
+          <div class="metric" data-comment-anchor="6813ac8441-div">
+            <div class="m-top">
+              <span class="m-ic" data-comment-anchor="9d5132b3a8-span" style="--ic:#F97316"><span class="material-symbols-outlined">bolt</span></span>
+              <span class="m-label">Speed</span>
+              <span class="m-badge" data-badge="speed" data-comment-anchor="9aae7e2e17-span">FAST</span>
+            </div>
+            <div class="bar"><div class="bar-fill" data-fill="speed"></div></div>
+          </div>
+          <!-- IQ -->
+          <div class="metric">
+            <div class="m-top">
+              <span class="m-ic" style="--ic:#8B5CF6"><span class="material-symbols-outlined">neurology</span></span>
+              <span class="m-label">IQ</span>
+              <span class="m-badge" data-badge="iq">GENIUS</span>
+            </div>
+            <div class="bar"><div class="bar-fill" data-fill="iq"></div></div>
+          </div>
+          <!-- Price -->
+          <div class="metric">
+            <div class="m-top">
+              <span class="m-ic" style="--ic:#10B981"><span class="material-symbols-outlined">attach_money</span></span>
+              <span class="m-label">Price</span>
+              <span class="m-badge" data-badge="price" data-comment-anchor="ecb67cf14e-span">STANDARD</span>
+            </div>
+            <div class="bar"><div class="bar-fill" data-fill="price"></div></div>
+          </div>
+          <!-- Privacy -->
+          <div class="metric">
+            <div class="m-top">
+              <span class="m-ic" style="--ic:#3B82F6"><span class="material-symbols-outlined">lock</span></span>
+              <span class="m-label">Privacy</span>
+              <span class="m-badge" data-badge="privacy">HIGH</span>
+            </div>
+            <div class="bar"><div class="bar-fill" data-fill="privacy"></div></div>
+          </div>
+        </div>
+
+        <!-- specs -->
+        <div class="specs-wrap">
+          <span class="specs-rule"></span>
+          <button class="specs-btn" id="specsBtn">View Full Specs: Atlas Pro</button>
+          <span class="specs-rule"></span>
+        </div>
+
+        <!-- confirm -->
+        <button class="confirm" id="confirmBtn">
+          <span class="material-symbols-outlined" id="confirmIcon" data-comment-anchor="97d71c1dd4-span">check</span>
+          <span id="confirmText" data-comment-anchor="3fd0fb9310-span">Confirm Selection</span>
+        </button>
+      </div>
+
+      <canvas class="confetti" id="confetti"></canvas>
+    </div>
+  </div>
+
+  <div class="hint">click ‹ › to switch model · tap “Confirm Selection”</div>
+</div>
+
+<script>
+const MODELS = [
+  { name:'Atlas Pro', vendor:'Deha Labs', glyph:'auto_awesome', accent:'#10B981',
+    speed:{v:0.66,label:'FAST',tone:'good'},  iq:{v:0.90,label:'GENIUS',tone:'good'},
+    price:{v:0.50,label:'STANDARD',tone:'neutral'}, privacy:{v:0.82,label:'HIGH',tone:'good'} },
+  { name:'Nimbus Flash', vendor:'Northwind AI', glyph:'bolt', accent:'#F97316',
+    speed:{v:0.96,label:'INSTANT',tone:'good'}, iq:{v:0.58,label:'SHARP',tone:'neutral'},
+    price:{v:0.26,label:'LOW',tone:'good'},     privacy:{v:0.80,label:'HIGH',tone:'good'} },
+  { name:'Sage Max', vendor:'Meridian', glyph:'neurology', accent:'#EAB308',
+    speed:{v:0.40,label:'STEADY',tone:'neutral'}, iq:{v:1.0,label:'PROFOUND',tone:'good'},
+    price:{v:0.92,label:'PREMIUM',tone:'cost'},  privacy:{v:0.95,label:'MAX',tone:'good'} },
+];
+const KEYS = ['speed','iq','price','privacy'];
+
+// value→hue: speed/iq/privacy low=red·mid=yellow·high=green; price inverted (low=green·high=red)
+function mcHex(h){ return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]; }
+function mcMix(a,b,t){ const A=mcHex(a),B=mcHex(b); return 'rgb('+Math.round(A[0]+(B[0]-A[0])*t)+','+Math.round(A[1]+(B[1]-A[1])*t)+','+Math.round(A[2]+(B[2]-A[2])*t)+')'; }
+function metricColor(key, v){
+  const RED='#EF4444', YEL='#EAB308', GRN='#10B981';
+  const lo = key==='price' ? GRN : RED, hi = key==='price' ? RED : GRN;
+  return v<0.5 ? mcMix(lo, YEL, v/0.5) : mcMix(YEL, hi, (v-0.5)/0.5);
+}
+// Badge + bar colour is driven by the metric's TONE so equal-quality tags read
+// identically (e.g. "LOW" price and "INSTANT" speed are both good → same green).
+var TONE_COLOR = { good:'#10B981', neutral:'#64748B', cost:'#FACC15' };
+function toneColor(tone){ return TONE_COLOR[tone] || TONE_COLOR.neutral; }
+// the metric badge wears the SAME colour as the bar below it (all metrics, all models)
+function badgeIsLight(col){ const m=col.match(/\d+/g); return (0.299*m[0]+0.587*m[1]+0.114*m[2]) > 150; }
+function paintBadge(badge, col){
+  badge.style.background = col;
+  if (badgeIsLight(col)) { badge.style.color = '#42320a'; badge.style.textShadow = 'none'; }
+  else { badge.style.color = '#fff'; badge.style.textShadow = '0 1px 2px rgba(0,0,0,0.22)'; }
+}
+// text morph identical to the badge cross-dissolve (blur out → blur in)
+function setMorphText(host, text){
+  let cur = host.querySelector('.morph-cur');
+  if(!cur){ cur=document.createElement('span'); cur.className='morph-cur'; host.innerHTML=''; host.appendChild(cur); }
+  cur.textContent = text;
+}
+function morphText(host, text){
+  let cur = host.querySelector('.morph-cur');
+  if(!cur){ setMorphText(host, ''); cur = host.querySelector('.morph-cur'); }
+  if(cur.textContent === text) return;
+  cur.classList.remove('morph-in','morph-out'); void cur.offsetWidth;
+  cur.classList.add('morph-out');                 // 1) blur the CURRENT word out
+  setTimeout(()=>{
+    cur.textContent = text;                       // 2) swap only after it's fully gone
+    cur.classList.remove('morph-out'); void cur.offsetWidth;
+    cur.classList.add('morph-in');                // 3) bring the NEW word in
+    setTimeout(()=>{ cur.classList.remove('morph-in'); }, 380);
+  }, 220);
+}
+
+const sheet   = document.getElementById('sheet');
+const logo    = document.getElementById('logo');
+const dotsEl  = document.getElementById('dots');
+const mNameEl = document.getElementById('mName');
+const mVendorEl = document.getElementById('mVendor');
+let idx = 0;
+
+// build dots
+MODELS.forEach((_,i)=>{ const d=document.createElement('span'); d.className='dot'+(i===0?' on':''); dotsEl.appendChild(d); });
+
+function setText(id,val){ document.getElementById(id).textContent = val; }
+
+function render(animate){
+  const m = MODELS[idx];
+
+  // dots
+  [...dotsEl.children].forEach((d,i)=> d.classList.toggle('on', i===idx));
+
+  // identity (with optional swap-out/in)
+  const applyMeta = ()=>{
+    document.getElementById('logoGlyph').textContent = m.glyph;
+    logo.style.setProperty('--accent', m.accent);
+    document.getElementById('specsBtn').textContent = 'View Full Specs: ' + m.name;
+  };
+  if (animate){
+    // name + vendor morph with the EXACT same blur cross-dissolve as the badges
+    morphText(mNameEl, m.name);
+    morphText(mVendorEl, m.vendor);
+    // logo morph
+    logo.classList.remove('pulsing'); void logo.offsetWidth; logo.classList.add('pulsing');
+    setTimeout(applyMeta, 200);   // swap glyph/accent mid-blur
+  } else {
+    setMorphText(mNameEl, m.name);
+    setMorphText(mVendorEl, m.vendor);
+    applyMeta();
+  }
+
+  // metrics — bar widths are set to their TARGET immediately, so the resting
+  // DOM is fully populated. The left-to-right sweep is layered on top (CSS
+  // `barIn` keyframe on entrance via .intro; width transition on switch).
+  KEYS.forEach((k)=>{
+    const data = m[k];
+    const badge = document.querySelector('[data-badge="'+k+'"]');
+    const fill  = document.querySelector('[data-fill="'+k+'"]');
+    const col = toneColor(data.tone);
+    fill.style.setProperty('--barcolor', col);
+
+    let cur = badge.querySelector('.m-badge-txt');
+    if (!cur){ badge.innerHTML = '<span class="m-badge-txt"></span>'; cur = badge.querySelector('.m-badge-txt'); }
+
+    if (animate){
+      // ── morph ── reshape the pill + cross-dissolve old word into new
+      const startW = badge.offsetWidth;
+      const ghost = document.createElement('span');
+      ghost.className = 'm-badge-ghost';
+      ghost.textContent = cur.textContent;   // the word leaving
+      badge.appendChild(ghost);
+
+      cur.textContent = data.label;          // the word arriving
+      badge.className = 'm-badge';           // tag colour matches the bar below
+      paintBadge(badge, col);
+      void badge.offsetWidth;
+      badge.classList.add('morphing');       // (re)trigger the blur-in
+
+      // measure the new natural width, then tween width start→end
+      badge.style.width = 'auto';
+      const endW = badge.offsetWidth;
+      badge.style.width = startW + 'px';
+      void badge.offsetWidth;
+      badge.style.width = endW + 'px';
+
+      setTimeout(()=>{
+        if (ghost.parentNode) ghost.remove();
+        badge.classList.remove('morphing');
+        badge.style.width = '';
+      }, 440);
+
+      fill.style.setProperty('--w', (data.v*100).toFixed(1)+'%');
+      fill.style.width = 'var(--w)';
+    } else {
+      // resting: full target committed immediately
+      cur.textContent = data.label;
+      badge.className = 'm-badge';
+      paintBadge(badge, col);
+      fill.style.setProperty('--w', (data.v*100).toFixed(1)+'%');
+      fill.style.width = 'var(--w)';
+    }
+  });
+}
+
+function go(dir){
+  idx = (idx + dir + MODELS.length) % MODELS.length;
+  render(true);
+}
+document.getElementById('prevBtn').addEventListener('click', ()=> go(-1));
+document.getElementById('nextBtn').addEventListener('click', ()=> go(1));
+
+// ── entrance ── resting state is already fully visible (render below populates
+// everything). The .intro class only adds the one-time motion, then is removed.
+render(false);
+sheet.classList.add('intro');
+document.querySelectorAll('.m-badge').forEach(b=> b.classList.add('morphing'));
+setTimeout(()=>{
+  sheet.classList.remove('intro');
+  document.querySelectorAll('.m-badge').forEach(b=> b.classList.remove('morphing'));
+}, 1300);
+
+// ── specs (no-op demo) ──
+document.getElementById('specsBtn').addEventListener('click', e=> e.preventDefault());
+
+// ── confirm + confetti ──
+const confirmBtn = document.getElementById('confirmBtn');
+const cf = makeConfetti(document.getElementById('confetti'));
+let confirmTimer = null;
+confirmBtn.addEventListener('click', ()=>{
+  confirmBtn.classList.remove('flash'); void confirmBtn.offsetWidth; confirmBtn.classList.add('flash');
+  cf.burst();
+  setText('confirmText','Selected'); document.getElementById('confirmIcon').textContent='check_circle';
+  clearTimeout(confirmTimer);
+  confirmTimer = setTimeout(()=>{ setText('confirmText','Confirm Selection'); document.getElementById('confirmIcon').textContent='check'; }, 1600);
+});
+
+// ── lightweight white-particle confetti, bursting up from the CTA ──
+function makeConfetti(canvas){
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio||1, 2);
+  let parts=[], raf=null;
+  function size(){ const r=canvas.getBoundingClientRect(); canvas.width=r.width*dpr; canvas.height=r.height*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
+  function tick(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    for(let i=parts.length-1;i>=0;i--){
+      const p=parts[i]; p.life++; p.vy+=p.g; p.vx*=0.99; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr;
+      const fade = p.life>p.ttl-22 ? Math.max(0,(p.ttl-p.life)/22) : 1;
+      ctx.save(); ctx.globalAlpha=fade*p.a; ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.fillStyle=p.color;
+      ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore();
+      if(p.life>=p.ttl) parts.splice(i,1);
+    }
+    if(parts.length) raf=requestAnimationFrame(tick); else { raf=null; ctx.clearRect(0,0,canvas.width,canvas.height); }
+  }
+  function burst(){
+    size(); const r=canvas.getBoundingClientRect();
+    const ox=r.width/2, oy=r.height-46;
+    const COLORS=['#FFFFFF','#D1FAE5','#A7F3D0','#6EE7B7'];
+    for(let i=0;i<34;i++){
+      const ang=(-Math.PI/2)+(Math.random()-0.5)*Math.PI*0.9;
+      const sp=(3.4+Math.random()*4.2);
+      parts.push({ x:ox+(Math.random()-0.5)*150, y:oy, vx:Math.cos(ang)*sp, vy:Math.sin(ang)*sp-Math.random()*2,
+        g:0.13+Math.random()*0.05, w:3+Math.random()*4, h:3+Math.random()*5, a:0.9,
+        rot:Math.random()*6.28, vr:(Math.random()-0.5)*0.5, color:COLORS[(Math.random()*COLORS.length)|0],
+        life:0, ttl:64+Math.random()*40 });
+    }
+    if(!raf) raf=requestAnimationFrame(tick);
+  }
+  return { burst, size };
+}
+window.addEventListener('resize', ()=> cf.size());
+</script>
+<script src="_darkmode.js"></script>
+</body></html>

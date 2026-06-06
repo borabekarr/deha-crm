@@ -1,0 +1,1331 @@
+<!doctype html>
+<!-- @dsCard group="Brand" name="To-Do List" subtitle="Animated daily to-do — drag-right to complete" viewport="700x720" --><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="_base.css">
+<link rel="stylesheet" href="_controls.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  body { background: var(--bg-app); }
+  .material-icons {
+    font-family: 'Material Icons'; font-weight: normal; font-style: normal;
+    line-height: 1; letter-spacing: normal; text-transform: none; display: inline-block;
+    white-space: nowrap; word-wrap: normal; direction: ltr;
+    -webkit-font-feature-settings: 'liga'; font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+  }
+  .frame {
+    padding: 40px 24px 56px;
+    display: flex; justify-content: center;
+    background-image: radial-gradient(ellipse 80% 60% at 50% 120%, rgba(16,185,129,0.12) 0%, transparent 60%);
+  }
+
+  /* ── App surface (the white "phone" card) ─────────────────────────── */
+  .todo {
+    --tdo-surface:    linear-gradient(168deg, #FFFFFF 0%, #F6F8FB 100%);
+    --tdo-track:      #EEF2F7;       /* faint grey rail behind task cards */
+    --tdo-card:       #FFFFFF;
+    --tdo-card-bd:    rgba(15,23,42,0.06);
+    --tdo-ico-bg:     #F1F5F9;
+    --tdo-ico-fg:     #64748B;
+    --tdo-shadow:
+      0 30px 70px -22px rgba(15,23,42,0.34),
+      0 8px 20px -10px rgba(15,23,42,0.16),
+      inset 0 1px 0 rgba(255,255,255,0.95);
+    --tdo-cardshadow:
+      inset 0 1px 0 rgba(255,255,255,1),
+      inset 0 -2px 0 rgba(15,23,42,0.05),
+      0 4px 12px -6px rgba(15,23,42,0.14);
+    --td-act-bg:      var(--slate-300);   /* grey strip behind swipe-left actions */
+
+    position: relative;
+    width: 420px;
+    box-sizing: border-box;
+    padding: 30px 24px 22px;
+    border-radius: 40px;
+    background: var(--tdo-surface);
+    border: 1px solid rgba(15,23,42,0.05);
+    box-shadow: var(--tdo-shadow);
+    font-family: var(--font-display);
+    color: var(--fg1);
+    user-select: none;
+    overflow: hidden;
+  }
+
+  /* ── Header ───────────────────────────────────────────────────────── */
+  .td-head { display: flex; align-items: flex-start; justify-content: space-between; }
+  .td-month { font-size: 11px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--fg4); }
+  .td-day { font-size: 30px; font-weight: 900; letter-spacing: -0.02em; color: var(--fg1); margin-top: 4px; line-height: 1; }
+  .td-nav { display: flex; gap: 6px; }
+  .td-nav button {
+    width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--tdo-card-bd);
+    background: var(--tdo-card); color: var(--fg3); cursor: pointer;
+    display: grid; place-items: center; padding: 0;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,1), 0 2px 6px -3px rgba(15,23,42,0.2);
+    transition: transform 180ms cubic-bezier(.34,1.56,.64,1), color 160ms, background 160ms;
+  }
+  .td-nav button .material-icons { font-size: 20px; }
+  .td-nav button:hover { color: var(--fg1); transform: translateY(-1px); }
+  .td-nav button:active { transform: scale(0.9); }
+
+  /* ── Calendar week ────────────────────────────────────────────────── */
+  .td-week { position: relative; display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 22px; }
+  .td-week-pill {
+    position: absolute; top: 0; left: 0; z-index: 0;
+    border-radius: 15px; background: #0F172A;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 12px -4px rgba(15,23,42,0.4);
+    transition: transform 420ms cubic-bezier(.22,1,.36,1), width 360ms cubic-bezier(.22,1,.36,1), height 360ms cubic-bezier(.22,1,.36,1);
+    pointer-events: none;
+  }
+  .td-week-pill.no-anim { transition: none; }
+  .td-daybtn {
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+    padding: 11px 0 12px; border-radius: 15px; cursor: pointer;
+    border: 1px solid transparent; background: transparent;
+    font-family: var(--font-display);
+    transition: transform 200ms cubic-bezier(.34,1.56,.64,1), background 180ms, box-shadow 180ms;
+  }
+  .td-daybtn .dow { font-size: 9.5px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg4); }
+  .td-daybtn .dnum { font-size: 16px; font-weight: 800; color: var(--fg3); font-variant-numeric: tabular-nums; }
+  .td-daybtn:hover { background: rgba(15,23,42,0.035); }
+  .td-daybtn.active {
+    background: transparent;
+    border-color: transparent;
+  }
+  .td-daybtn.active:hover { background: transparent; }
+  .td-daybtn.active .dow { color: rgba(255,255,255,0.65); }
+  .td-daybtn.active .dnum { color: #fff; font-weight: 900; }
+
+  /* ── Section header / stats ───────────────────────────────────────── */
+  .td-sec { display: flex; align-items: center; justify-content: space-between; margin-top: 26px; margin-bottom: 14px; }
+  .td-sec h2 { margin: 0; font-size: 19px; font-weight: 900; letter-spacing: -0.015em; color: var(--fg1); }
+  .td-stats { display: flex; align-items: center; gap: 20px; }
+  .td-stat { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--fg3); }
+  .td-stat-lbl { display: inline-flex; align-items: baseline; gap: 2px; }
+  .td-stat .dot-done {
+    width: 17px; height: 17px; border-radius: 50%; background: var(--brand-primary);
+    display: grid; place-items: center; color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 2px 6px -1px rgba(16,185,129,0.6);
+  }
+  .td-stat .dot-done .material-icons { font-size: 12px; }
+  .td-stat .spin {
+    width: 13px; height: 13px; border-radius: 50%; flex: none;
+    border: 2px dotted var(--fg4);
+  }
+  .td-stat b { font-variant-numeric: tabular-nums; color: var(--fg2); }
+
+  /* ── Task list ────────────────────────────────────────────────────── */
+  .td-list { display: flex; flex-direction: column; gap: 11px; max-height: 258px; overflow-y: auto; overflow-x: hidden; padding: 4px; margin: -4px; scrollbar-width: thin; scrollbar-color: var(--slate-300) transparent; }
+  .td-list::-webkit-scrollbar { width: 6px; }
+  .td-list::-webkit-scrollbar-thumb { background: var(--slate-300); border-radius: 9999px; }
+  .td-list::-webkit-scrollbar-track { background: transparent; }
+  .task-row.filtered-out { display: none; }
+
+  /* ── Tag filter pills ── */
+  .td-filters { display: flex; gap: 7px; overflow-x: auto; scrollbar-width: none; padding: 4px 2px 13px; margin: 0 -2px 3px; }
+  .td-filters::-webkit-scrollbar { display: none; }
+  .td-filt {
+    flex: none; display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 13px; border-radius: 9999px; cursor: pointer; border: 1px solid var(--tdo-card-bd);
+    background: var(--tdo-card); color: var(--fg3); font-family: var(--font-display);
+    font-size: 11px; font-weight: 800; letter-spacing: 0.02em; white-space: nowrap;
+    box-shadow: var(--tdo-cardshadow);
+    transition: background 160ms, color 160ms, border-color 160ms, transform 160ms cubic-bezier(.34,1.56,.64,1);
+  }
+  .td-filt .fdot { width: 8px; height: 8px; border-radius: 50%; background: var(--fcolor, var(--fg4)); flex: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); }
+  .td-filt .fct { font-variant-numeric: tabular-nums; opacity: 0.55; }
+  .td-filt:hover { transform: translateY(-1px); color: var(--fg1); }
+  .td-filt:active { transform: scale(0.95); }
+  .td-filt.on { background: #0F172A; color: #fff; border-color: transparent; box-shadow: 0 5px 13px -5px rgba(15,23,42,0.45), inset 0 1px 0 rgba(255,255,255,0.14); }
+  .td-filt.on .fct { opacity: 0.7; }
+  html.dark .td-filt.on { background: #0B1220; }
+
+  .task-row {
+    position: relative;
+    flex: none;
+    border-radius: 19px;
+    overflow: hidden;
+    /* resting bg transparent — green complete-reveal & grey action strip are separate layers below the card */
+    background: transparent;
+    box-shadow: 0 0 0 transparent;
+    transition: box-shadow 260ms cubic-bezier(.22,1,.36,1);
+  }
+  /* the green reveal label, behind the sliding card */
+  .reveal {
+    position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; gap: 9px;
+    padding-left: 22px; color: #fff; font-size: 14px; font-weight: 800;
+    letter-spacing: 0.01em; text-shadow: 0 1px 2px rgba(0,0,0,0.18);
+    background: var(--brand-primary);
+    opacity: 0; pointer-events: none;
+    /* smooth fade — no snap on cancel */
+    transition: opacity 180ms ease;
+  }
+  .reveal .rv-check {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: rgba(255,255,255,0.22); display: grid; place-items: center;
+    box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.7);
+    transform: scale(0.7); transition: transform 200ms cubic-bezier(.34,1.56,.64,1);
+  }
+  .reveal .rv-check .material-icons { font-size: 17px; }
+  .task-row.armed .reveal .rv-check { transform: scale(1); background: rgba(255,255,255,0.34); }
+  .task-row.armed { box-shadow: var(--shadow-emerald-glow); }
+
+  /* the actual sliding white card */
+  .task {
+    --tag: #EF4444; --tag-bg: var(--semantic-danger-bg);
+    position: relative; z-index: 3;
+    display: flex; align-items: center; gap: 12px;
+    padding: 15px 15px;
+    background: var(--tdo-card);
+    border: 1px solid var(--tdo-card-bd);
+    border-radius: 19px;
+    box-shadow: var(--tdo-cardshadow);
+    cursor: grab;
+    touch-action: pan-y;
+    will-change: transform;
+    /* visible end-state is the base — entrance animates FROM .preanim */
+    opacity: 1;
+  }
+  /* preanim matches row-out direction — enter = reverse of exit (both horizontal) */
+  .task.preanim { opacity: 0; transform: translateX(38px) scale(0.93); }
+  .task.anim { transition: opacity 340ms ease, transform 420ms cubic-bezier(.22,1,.38,1); }
+  .task.dragging { cursor: grabbing; transition: none; box-shadow: 0 18px 34px -14px rgba(15,23,42,0.4), var(--tdo-cardshadow); }
+  /* no overshoot on settle-back — prevents the "spawn past origin" artefact */
+  .task.settling { transition: transform 320ms cubic-bezier(.4,0,.06,1); }
+  /* hover lift (only when not dragging / completed) */
+  .task-row:not(.is-done) .task:not(.dragging):hover { border-color: var(--tag); box-shadow: 0 0 0 1px var(--tag), var(--tdo-cardshadow); transition: border-color 160ms ease, box-shadow 160ms ease; }
+  .task:active { cursor: grabbing; }
+
+  /* checkbox */
+  .t-check {
+    flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%;
+    border: 2px solid var(--slate-300); background: var(--tdo-card);
+    display: grid; place-items: center; cursor: pointer; padding: 0;
+    color: #fff; position: relative;
+    transition: transform 220ms cubic-bezier(.34,1.56,.64,1), border-color 200ms, background 200ms;
+  }
+  .t-check .material-icons { font-size: 16px; opacity: 0; transform: scale(0.4); transition: opacity 200ms, transform 240ms cubic-bezier(.34,1.56,.64,1); }
+  .t-check:hover { border-color: var(--brand-primary-300); }
+
+  /* icon tile */
+  .t-ico {
+    flex-shrink: 0; width: 42px; height: 42px; border-radius: 13px;
+    display: grid; place-items: center; overflow: hidden;
+    background-color: var(--tag);
+    background-image:
+      radial-gradient(ellipse at top right, rgba(255,255,255,0.18) 0%, transparent 55%),
+      linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+    background-size: cover, 7px 7px, 7px 7px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.55),
+      inset 0 -2px 0 rgba(15,23,42,0.20),
+      inset 0 0 0 1px rgba(15,23,42,0.12),
+      0 2px 6px rgba(0,0,0,0.10);
+    transition: transform 240ms cubic-bezier(.34,1.56,.64,1);
+  }
+  .t-ico .material-icons { font-size: 21px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.35); filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15)); }
+
+  .t-main { flex: 1; min-width: 0; }
+  .t-title { font-size: 14.5px; font-weight: 800; color: var(--fg1); letter-spacing: -0.015em; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .t-badge {
+    display: inline-flex; align-items: center; gap: 4px; margin-top: 7px;
+    font-size: 9.5px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1;
+    padding: 4px 10px 4px 8px; border-radius: 9999px;
+    background: var(--tag); color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.30);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), inset 0 -1.5px 0 rgba(0,0,0,0.18), inset 0 0 0 1px rgba(0,0,0,0.06);
+  }
+  .t-badge .material-icons { font-size: 11px; margin-left: -1px; }
+  .t-badge.pop { animation: badge-pop 460ms cubic-bezier(.34,1.7,.5,1) both; }
+  @keyframes badge-pop { 0% { transform: scale(0); } 70% { transform: scale(1.18); } 100% { transform: scale(1); } }
+
+  /* right side: time, and the hover "Complete" pill */
+  .t-right { flex-shrink: 0; display: flex; align-items: center; position: relative; min-width: 56px; justify-content: flex-end; }
+  .t-time { font-size: 12.5px; font-weight: 700; color: var(--fg4); font-variant-numeric: tabular-nums; transition: opacity 200ms, transform 200ms; white-space: nowrap; }
+  .t-complete {
+    position: absolute; right: 0;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 7px 12px; border-radius: 9999px; border: none; cursor: pointer;
+    background: var(--brand-primary); color: #fff; font-family: var(--font-display);
+    font-size: 11.5px; font-weight: 800; white-space: nowrap;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.18);
+    box-shadow: var(--shadow-emerald-glow-sm), inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -2px 0 rgba(0,0,0,0.2);
+    background-image: linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
+    background-size: 9px 9px;
+    opacity: 0; transform: translateX(8px) scale(0.9); pointer-events: none;
+    transition: opacity 200ms, transform 240ms cubic-bezier(.34,1.56,.64,1), filter 160ms;
+  }
+  .t-complete .material-icons { font-size: 14px; }
+  .t-complete:hover { transform: translateX(0) scale(1.04); filter: brightness(1.06); }
+  .t-complete:active { transform: scale(0.96); }
+  /* (complete-on-hover pill removed — completion is via the checkbox or drag-right) */
+
+  /* ── swipe-left action buttons (edit / delete) ── */
+  .actions { position:absolute; inset:0; z-index:1; display:flex; align-items:center; justify-content:flex-end; gap:8px; padding-right:13px; }
+  .actions::before { content:''; position:absolute; inset:0; z-index:0; background: var(--td-act-bg); }
+  .t-act { position:relative; z-index:1; width:48px; height:48px; border-radius:14px; border:none; cursor:pointer; display:grid; place-items:center; color:#fff;
+           background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+           background-size: 8px 8px;
+           box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -2px 0 rgba(0,0,0,0.2); transition: filter 150ms, transform 160ms cubic-bezier(.34,1.56,.64,1); }
+  .t-act .material-icons { font-size:18px; background:rgba(255,255,255,0.18); border-radius:50%; padding:5px; box-shadow: 0 3px 7px -1px rgba(15,23,42,0.5), 0 1px 2px rgba(15,23,42,0.35); }
+  .t-act.del { background-color:var(--semantic-danger); }
+  .t-act.edit { background-color:#0F172A; }
+  .t-act:hover { filter:brightness(1.1); }
+  .t-act:active { transform:scale(0.9); }
+  .task-row.reordering { z-index:5; overflow:visible; }
+  .task-row.reordering .task { box-shadow: 0 22px 44px -14px rgba(15,23,42,0.45), var(--tdo-cardshadow); cursor:grabbing; }
+
+  /* ── Completed state ──────────────────────────────────────────────── */
+  .task-row.is-done .task {
+    background: color-mix(in srgb, var(--brand-primary) 8%, var(--tdo-card));
+    border-color: color-mix(in srgb, var(--brand-primary) 26%, transparent);
+    cursor: default;
+  }
+  .task-row.is-done { box-shadow: 0 0 0 transparent; }
+  .task-row.is-done .t-check {
+    border-color: var(--brand-primary); background: var(--brand-primary);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 4px 12px -2px rgba(16,185,129,0.6);
+  }
+  .task-row.is-done .t-check .material-icons { opacity: 1; transform: scale(1); }
+  .task-row.is-done .t-title { color: var(--fg3); text-decoration: line-through; text-decoration-color: var(--slate-300); }
+  .task-row.is-done .t-ico { background-color: var(--brand-primary); }
+  .task-row.is-done .t-complete { display: none; }
+  .task-row.is-done .t-time { opacity: 1 !important; transform: none !important; color: var(--brand-primary-600); }
+  .task-row.is-done:hover .t-time { opacity: 1; transform: none; }
+  .task-row.glow .task { animation: done-glow 900ms cubic-bezier(.22,1,.36,1); }
+  /* confetti burst */
+  @keyframes confetti-burst { 0%{transform:translate(0,0) scale(1);opacity:1;} 100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0;} }
+  @keyframes done-glow {
+    0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand-primary) 50%, transparent), var(--tdo-cardshadow); }
+    40%  { box-shadow: 0 0 0 6px color-mix(in srgb, var(--brand-primary) 30%, transparent), 0 14px 30px -8px rgba(16,185,129,0.5); }
+    100% { box-shadow: 0 0 0 0 transparent, var(--tdo-cardshadow); }
+  }
+
+  /* tap micro-pop */
+  .task.tap { animation: tap-pop 320ms cubic-bezier(.34,1.56,.64,1); }
+  @keyframes tap-pop { 0% { transform: scale(1); } 45% { transform: scale(0.985); } 100% { transform: scale(1); } }
+
+  /* filter morph — tasks ease OUT (soft blur, settle down) when hidden, glide IN when shown · slow + fluent */
+  .task.morphing-out { animation: task-morph-out 460ms cubic-bezier(.4,0,.2,1) forwards; }
+  @keyframes task-morph-out { 0%{opacity:1;filter:blur(0);transform:scale(1) translateY(0);} 100%{opacity:0;filter:blur(4px);transform:scale(.94) translateY(-2px);} }
+  .task.morphing-in { animation: task-morph-in 560ms cubic-bezier(.22,1,.36,1); }
+  @keyframes task-morph-in { 0%{opacity:0;filter:blur(6px);transform:scale(.96) translateY(4px);} 60%{opacity:1;filter:blur(0);} 100%{opacity:1;filter:blur(0);transform:scale(1) translateY(0);} }
+
+  /* ── Bottom bar ───────────────────────────────────────────────────── */
+  .td-bar {
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 22px;
+    padding: 5px;
+    border-radius: 9999px;
+    background: var(--shell-bg);
+    border: none;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 0 0 0 1px rgba(15,23,42,0.04);
+    transition: transform 200ms cubic-bezier(.34,1.56,.64,1), box-shadow 200ms;
+  }
+  .td-bar:hover { transform: translateY(-2px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 0 0 0 1px rgba(15,23,42,0.04), 0 10px 22px -8px rgba(15,23,42,0.28); }
+  /* add button + its grey bar act as ONE unit on hover: the whole bar lifts
+     together (grey stays grey, the button does NOT move independently) */
+  .td-bar:has(.btn-add:hover) {
+    transform: translateY(-2px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 0 0 0 1px rgba(15,23,42,0.04), 0 12px 26px -8px rgba(15,23,42,0.32);
+  }
+  .td-bar:has(.btn-add:hover) .btn-add { transform: none; filter: brightness(1.1); }
+  .td-bar:has(.btn-add:active) { transform: translateY(-1px); }
+  .td-bar:has(.btn-add:active) .btn-add { transform: scale(0.985); }
+  .bar-ico {
+    width: 42px; height: 42px; border-radius: 50%; border: none; cursor: pointer;
+    background: transparent; color: var(--fg3); display: grid; place-items: center; padding: 0;
+    transition: background 160ms, color 160ms, transform 180ms cubic-bezier(.34,1.56,.64,1);
+  }
+  .bar-ico:hover { background: var(--bg-chip); color: var(--fg1); }
+  .bar-ico:active { transform: scale(0.9); }
+  .bar-ico .material-icons { font-size: 22px; }
+  .btn-add {
+    flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 14px 22px; border-radius: 9999px; border: none; cursor: pointer;
+    background: #0F172A; color: #fff; font-family: var(--font-display);
+    font-size: 14px; font-weight: 800; letter-spacing: 0.01em;
+    background-image: linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-size: 9px 9px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -2px 0 rgba(0,0,0,0.4), 0 8px 20px -8px rgba(15,23,42,0.6);
+    transition: transform 200ms cubic-bezier(.34,1.56,.64,1), filter 160ms, box-shadow 200ms;
+  }
+  .btn-add { font-weight: 900; }
+  .btn-add .material-icons { font-size: 22px; -webkit-text-stroke: 0.7px currentColor; transition: transform 300ms cubic-bezier(.34,1.56,.64,1); }
+  .btn-add:hover { filter: brightness(1.12); box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -2px 0 rgba(0,0,0,0.4), 0 10px 22px -10px rgba(15,23,42,0.6); }
+  .btn-add:active { transform: scale(0.97); }
+  .btn-add.flash { animation: add-flash 460ms cubic-bezier(.22,1,.36,1); }
+  @keyframes add-flash {
+    0% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -2px 0 rgba(0,0,0,0.4), 0 0 0 0 rgba(255,255,255,0.9); }
+    40% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -2px 0 rgba(0,0,0,0.4), 0 0 0 5px rgba(255,255,255,0.0); transform: translateY(-3px); }
+    100% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -2px 0 rgba(0,0,0,0.4), 0 8px 20px -8px rgba(15,23,42,0.6); }
+  }
+
+  /* empty state */
+  .td-empty {
+    display: none; flex-direction: column; align-items: center; gap: 8px;
+    padding: 34px 0 30px; text-align: center;
+  }
+  .td-list.empty + .td-empty { display: flex; }
+  .td-empty .ee-ico {
+    width: 54px; height: 54px; border-radius: 16px; background: var(--brand-primary-50);
+    color: var(--brand-primary); display: grid; place-items: center; margin-bottom: 4px;
+  }
+  .td-empty .ee-ico .material-icons { font-size: 28px; }
+  .td-empty .ee-t { font-size: 14px; font-weight: 800; color: var(--fg2); }
+  .td-empty .ee-s { font-size: 12px; font-weight: 600; color: var(--fg4); }
+
+  @media (max-width: 460px) {
+    .frame { padding: 20px 12px 36px; }
+    .todo { width: 100%; max-width: 420px; padding: 26px 18px 18px; }
+  }
+
+  /* ── Dark mode (System A — html.dark) ─────────────────────────────── */
+  html.dark .frame { background-image: radial-gradient(ellipse 80% 60% at 50% 120%, rgba(16,185,129,0.16) 0%, transparent 60%); }
+  html.dark .todo {
+    --tdo-surface: linear-gradient(168deg, #1E293B 0%, #172033 100%);
+    --tdo-track:   #0F172A;
+    --tdo-card:    #243449;
+    --tdo-card-bd: rgba(255,255,255,0.07);
+    --tdo-ico-bg:  #0F172A;
+    --tdo-ico-fg:  #94A3B8;
+    --tdo-shadow:
+      0 30px 70px -22px rgba(0,0,0,0.7),
+      0 8px 20px -10px rgba(0,0,0,0.5),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+    --tdo-cardshadow:
+      inset 0 1px 0 rgba(255,255,255,0.08),
+      inset 0 -2px 0 rgba(0,0,0,0.3),
+      0 4px 12px -6px rgba(0,0,0,0.4);
+    border-color: rgba(255,255,255,0.06);
+    --td-act-bg: #0F172A;
+  }
+  html.dark .td-nav button { box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 10px 22px -10px rgba(0,0,0,0.6); }
+  html.dark .td-week-pill { background:#0B1220; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12); }
+  html.dark .td-daybtn.active { background:transparent; border-color:transparent; box-shadow:none; }
+  html.dark .td-daybtn.active .dnum { color:#fff; }
+  html.dark .td-bar { background: var(--shell-bg); box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
+  html.dark .td-bar:has(.btn-add:hover) { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 12px 26px -8px rgba(0,0,0,0.6); }
+  html.dark .t-check { border-color: var(--slate-600); }
+  html.dark .btn-add { background-color: #060B16; }
+  html.dark .task-row.is-done .t-title { text-decoration-color: var(--slate-600); }
+  html.dark .planning-fix { } /* placeholder */
+
+  /* reduced component (shell.zoom) hover */
+  .shell.zoom:hover { transform: scale(1.005); }
+
+  /* ── task details / edit popover ── */
+  .td-scrim { position:absolute; inset:0; z-index:30; background:rgba(15,23,42,0.28); -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px); opacity:0; pointer-events:none; transition:opacity 200ms ease; border-radius:40px; }
+  .td-scrim.show { opacity:1; pointer-events:auto; }
+  html.dark .td-scrim { background:rgba(0,0,0,0.5); }
+  .td-pop {
+    position:absolute; z-index:31; left:50%; top:50%; width:300px; box-sizing:border-box;
+    max-height: calc(100% - 24px); display:flex; flex-direction:column;
+    transform:translate(-50%,-46%) scale(0.96); opacity:0; pointer-events:none;
+    background:var(--tdo-card); border:1px solid var(--tdo-card-bd); border-radius:22px;
+    padding:18px; box-shadow:0 26px 60px -16px rgba(15,23,42,0.5), inset 0 1px 0 rgba(255,255,255,0.9);
+    transition:opacity 200ms ease, transform 260ms cubic-bezier(.22,1,.36,1); font-family:var(--font-display);
+  }
+  .td-pop.show { opacity:1; pointer-events:auto; transform:translate(-50%,-50%) scale(1); }
+  .td-pop-head { display:flex; align-items:center; gap:11px; }
+  .td-pop-ic { flex:none; width:42px; height:42px; border-radius:13px; display:grid; place-items:center; overflow:hidden;
+    background-color:var(--tag);
+    background-image: radial-gradient(ellipse at top right, rgba(255,255,255,0.18) 0%, transparent 55%), linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+    background-size: cover, 7px 7px, 7px 7px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(15,23,42,0.20), inset 0 0 0 1px rgba(15,23,42,0.12), 0 2px 6px rgba(0,0,0,0.10); }
+  .td-pop-ic .material-icons { font-size:21px; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.35); filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15)); }
+  .td-pop-x { margin-left:auto; width:28px; height:28px; border-radius:50%; border:none; cursor:pointer; background:var(--bg-chip); color:var(--fg3); display:grid; place-items:center; }
+  .td-pop-x .material-icons { font-size:17px; }
+  .td-pop-label { font-size:9.5px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:var(--fg4); margin:16px 0 6px; }
+  .td-pop-input { width:100%; box-sizing:border-box; font-family:var(--font-display); font-size:14.5px; font-weight:700; color:var(--fg1); background:var(--bg-app); border:1px solid var(--tdo-card-bd); border-radius:12px; padding:11px 13px; outline:none; }
+  .td-pop-input:focus { border-color:var(--brand-primary); }
+  .td-pop-row { display:flex; gap:10px; }
+  .td-pop-row .td-pop-input { flex:1; }
+  .td-pop-pris { display:flex; flex-wrap:wrap; gap:7px; }
+  .td-pop-pri {
+    display:inline-flex; align-items:center; gap:4px;
+    font-size:9.5px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; line-height:1;
+    padding:4px 10px 4px 8px; border-radius:9999px; cursor:pointer; border:none; color:#fff;
+    background:var(--tag); text-shadow:0 1px 2px rgba(0,0,0,0.30);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), inset 0 -1.5px 0 rgba(0,0,0,0.18), inset 0 0 0 1px rgba(0,0,0,0.06);
+    opacity:0.34; filter:saturate(0.55); transition:opacity 160ms, filter 160ms, transform 140ms cubic-bezier(.34,1.56,.64,1);
+  }
+  .td-pop-pri .material-icons { font-size:11px; margin-left:-1px; }
+  .td-pop-pri.on { opacity:1; filter:none; }
+  .td-pop-pri:active { transform:scale(0.94); }
+  .td-pop-save { display:inline-flex; align-items:center; justify-content:center; gap:7px; width:100%; margin-top:18px; padding:13px; border-radius:13px; border:none; cursor:pointer; color:#fff; font-family:var(--font-display); font-size:13px; font-weight:800; text-shadow:0 1px 2px rgba(0,0,0,0.2);
+    background-color:var(--brand-primary);
+    background-image: linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size:9px 9px;
+    box-shadow:var(--shadow-emerald-glow-sm), inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -2px 0 rgba(0,0,0,0.18); transition:filter 150ms, transform 140ms; }
+  .td-pop-save .material-icons { font-size:17px; }
+  .td-pop-save:hover { filter:brightness(1.05); } .td-pop-save:active { transform:scale(0.98); }
+  .task-row.removing .task { animation: row-morph-out 360ms cubic-bezier(.4,0,.2,1) forwards; }
+  @keyframes row-morph-out {
+    0%  { opacity:1; transform:scale(1); filter:blur(0); }
+    35% { opacity:0.7; transform:scale(0.96) translateX(3px); filter:blur(0); }
+    100%{ opacity:0; transform:scale(0.84) translateY(-7px); filter:blur(6px); }
+  }
+
+  /* ── popover scroll body ── */
+  .td-pop-scroll { overflow-y:auto; overflow-x:hidden; margin:0 -4px; padding:0 4px 2px; scrollbar-width:thin; scrollbar-color:var(--slate-300) transparent; }
+  .td-pop-scroll::-webkit-scrollbar { width:5px; }
+  .td-pop-scroll::-webkit-scrollbar-thumb { background:var(--slate-300); border-radius:9999px; }
+  .td-pop-scroll::-webkit-scrollbar-track { background:transparent; }
+
+  /* ── schedule segmented uses the canonical .seg control (see _controls.css) ── */
+
+  /* ── cadence pills ── */
+  .td-pop-cads { display:flex; flex-wrap:wrap; gap:6px; }
+  .td-pop-cad { font-size:10.5px; font-weight:800; letter-spacing:0.02em; padding:7px 11px; border-radius:9px; cursor:pointer; border:1px solid var(--tdo-card-bd); background:var(--tdo-card); color:var(--fg3); font-family:var(--font-display); transition:background 150ms, color 150ms, border-color 150ms, transform 140ms cubic-bezier(.34,1.56,.64,1); }
+  .td-pop-cad.on { background:var(--brand-primary); color:#fff; border-color:transparent; box-shadow:var(--shadow-emerald-glow-sm), inset 0 1px 0 rgba(255,255,255,0.3); }
+  .td-pop-cad:active { transform:scale(0.94); }
+
+  /* ── day-of-week pills ── */
+  .td-pop-days { display:flex; gap:5px; }
+  .td-pop-dow { flex:1; min-width:0; height:34px; border-radius:9px; border:1px solid var(--tdo-card-bd); background:var(--tdo-card); color:var(--fg3); font-family:var(--font-display); font-size:11px; font-weight:800; cursor:pointer; transition:background 150ms, color 150ms, transform 140ms cubic-bezier(.34,1.56,.64,1); }
+  .td-pop-dow.on { background:#0F172A; color:#fff; border-color:transparent; }
+  html.dark .td-pop-dow.on { background:var(--brand-primary); }
+  .td-pop-dow:active { transform:scale(0.92); }
+
+  /* ── day-of-month select ── */
+  .td-pop-select { width:100%; box-sizing:border-box; font-family:var(--font-display); font-size:13.5px; font-weight:700; color:var(--fg1); background:var(--bg-app); border:1px solid var(--tdo-card-bd); border-radius:12px; padding:11px 13px; outline:none; cursor:pointer; }
+  .td-pop-select:focus { border-color:var(--brand-primary); }
+
+  /* ── repeat marker on list rows ── */
+  .t-repeat { display:none; align-items:center; color:var(--fg4); margin-right:6px; }
+  .t-repeat .material-icons { font-size:14px; }
+  .task-row.is-repeat .t-repeat { display:inline-flex; }
+  .task-row.is-done .t-repeat { color:var(--brand-primary-600); }
+</style>
+<link rel="stylesheet" href="_darkmode.css">
+</head><body><div class="card" style="padding:0; background:var(--bg-app);">
+  <div class="frame">
+    <div class="shell zoom" style="border-radius:48px; padding:8px;" data-comment-anchor="94823ff2bf-div">
+    <section class="todo" data-screen-label="Daily To-Do" aria-label="Daily to-do list" data-comment-anchor="ef8909b38b-section">
+
+      <!-- Header -->
+      <div class="td-head">
+        <div>
+          <div class="td-month" id="tdMonth">February 8</div>
+          <div class="td-day" id="tdDay">Sunday</div>
+        </div>
+        <div class="td-nav" data-comment-anchor="6787f4b9e5-div">
+          <button id="navPrev" aria-label="Previous day"><span class="material-icons">chevron_left</span></button>
+          <button id="navNext" aria-label="Next day"><span class="material-icons">chevron_right</span></button>
+        </div>
+      </div>
+
+      <!-- Week -->
+      <div class="td-week" id="tdWeek" data-comment-anchor="214f592592-div"></div>
+
+      <!-- Section + stats -->
+      <div class="td-sec">
+        <h2>Your tasks</h2>
+        <div class="td-stats" data-comment-anchor="5dd2df9d29-div">
+          <span class="td-stat"><span class="dot-done"><span class="material-icons">check</span></span><span class="td-stat-lbl"><b id="statDone">2</b>completed</span></span>
+          <span class="td-stat"><span class="spin" data-comment-anchor="85e0d9efb8-span"></span><span class="td-stat-lbl"><b id="statWait">3</b>waiting</span></span>
+        </div>
+      </div>
+
+      <!-- Tag filters -->
+      <div class="td-filters" id="tdFilters"></div>
+
+      <!-- List -->
+      <div class="td-list" id="tdList" data-comment-anchor="836ab97425-div"></div>
+      <div class="td-empty">
+        <span class="ee-ico"><span class="material-icons">task_alt</span></span>
+        <span class="ee-t">All done for today</span>
+        <span class="ee-s">Add a task to keep the momentum going.</span>
+      </div>
+
+      <!-- Bottom bar -->
+      <div class="td-bar" data-comment-anchor="fa23de7917-div">
+        <button class="btn-add" id="btnAdd" data-comment-anchor="c3a5441024-button"><span class="material-icons" data-comment-anchor="953936a6fa-span">add</span>Add Task</button>
+      </div>
+
+      <!-- task details / edit / add popover -->
+      <div class="td-scrim" id="tdScrim"></div>
+      <div class="td-pop" id="tdPop" role="dialog" aria-label="Task editor" data-comment-anchor="e916355dc3-div">
+        <div class="td-pop-head">
+          <span class="td-pop-ic" id="tdPopIc" data-comment-anchor="ff58c137c6-span"><span class="material-icons">priority_high</span></span>
+          <div style="flex:1; font-size:14px; font-weight:800; color:var(--fg1);" id="tdPopHd">Task details</div>
+          <button class="td-pop-x" id="tdPopX" aria-label="Close"><span class="material-icons">close</span></button>
+        </div>
+        <div class="td-pop-scroll">
+          <div class="td-pop-label">Task name</div>
+          <input class="td-pop-input" id="tdPopTitle" type="text" placeholder="What needs doing?">
+          <div class="td-pop-label">Tag</div>
+          <div class="td-pop-pris" id="tdPopPris" data-comment-anchor="f6f1c2ecdc-div"></div>
+          <div class="td-pop-label">Schedule</div>
+          <div class="seg fill" id="tdPopRep" data-seg-managed data-comment-anchor="fa386885e4-div">
+            <span class="seg-pill"></span>
+            <button data-rep="once" class="active">One-time</button>
+            <button data-rep="repeat">Repeats</button>
+          </div>
+          <div id="tdPopRepBox" hidden>
+            <div class="td-pop-label">Repeat every</div>
+            <div class="td-pop-cads" id="tdPopCads"></div>
+            <div id="tdPopOnBox">
+              <div class="td-pop-label" id="tdPopOnLbl">On</div>
+              <div class="td-pop-days" id="tdPopDays"></div>
+              <select class="td-pop-select" id="tdPopDom" hidden></select>
+            </div>
+          </div>
+          <div class="td-pop-label">Time</div>
+          <input class="td-pop-input" id="tdPopTime" type="text" placeholder="2:00 PM">
+        </div>
+        <button class="td-pop-save" id="tdPopSave" data-comment-anchor="f25b7f097f-button"><span class="material-icons" id="tdPopSaveIc">check</span><span id="tdPopSaveTxt">Save changes</span></button>
+      </div>
+
+    </section>
+    </div>
+  </div>
+</div>
+
+<script src="_controls.js"></script>
+<script>
+/* =========================================================================
+   Deha — Daily To-Do List
+   Vanilla JS. Drag-right-to-complete, FLIP reorder, staggered load,
+   add-task pop, live stats. Built on colors_and_type tokens.
+   ========================================================================= */
+(function () {
+  'use strict';
+
+  /* ---- Tag presets (badge label, color, tint, icon tile) ------------ */
+  var PRIORITY = {
+    urgent_important: { label: 'Urgent & Important', color: '#EF4444', bg: 'var(--semantic-danger-bg)',  bi: 'priority_high' },
+    urgent:           { label: 'Urgent',             color: '#F97316', bg: 'var(--semantic-hot-bg)',     bi: 'bolt' },
+    important:        { label: 'Important',          color: '#EAB308', bg: 'var(--semantic-warning-bg)', bi: 'flag' }
+  };
+  var DEFAULT_PRI = 'urgent_important';
+
+  function badgeHTML(p) {
+    return '<span class="material-icons">' + (p.bi || 'label') + '</span>' + p.label;
+  }
+
+  /* ---- Seed tasks ---------------------------------------------------- */
+  var seed = [
+    { id: 't1', title: 'Review design mockups',  time: '2:00 PM',  priority: 'urgent_important', icon: 'image_search' },
+    { id: 't2', title: 'Client call preparation', time: '3:30 PM',  priority: 'urgent',           icon: 'description' },
+    { id: 't3', title: 'Code review PR #234',     time: '5:00 PM',  priority: 'important',        icon: 'code' },
+    { id: 't4', title: 'Finalize Q1 budget',      time: '10:00 AM', priority: 'urgent_important', icon: 'account_balance', repeat: 'repeat', cad: 'quarterly', dom: 1 },
+    { id: 't5', title: 'Reply to investor email', time: '11:30 AM', priority: 'urgent',           icon: 'mail' },
+    { id: 't6', title: 'Read industry report',    time: '7:00 PM',  priority: 'important',        icon: 'menu_book', repeat: 'repeat', cad: 'weekly', dow: 6 }
+  ];
+
+  /* ---- Pool of fallback tasks --------------------------------------- */
+  var pool = [
+    { title: 'Standup sync notes',   time: '9:30 AM',  priority: 'important',        icon: 'groups' },
+    { title: 'Refactor auth module', time: '11:00 AM', priority: 'urgent',           icon: 'lock' },
+    { title: 'Polish empty states',  time: '1:00 PM',  priority: 'important',        icon: 'brush' },
+    { title: 'QA the release build', time: '4:15 PM',  priority: 'urgent',           icon: 'fact_check' },
+    { title: 'Update the roadmap',   time: '6:00 PM',  priority: 'urgent_important', icon: 'flag' }
+  ];
+  var poolIdx = 0;
+  var uid = 100;
+
+  /* ---- Per-day task lists (0=Mon … 6=Sun) — switching days swaps the list ---- */
+  var DAY_TASKS = {
+    0: [ // Monday
+      { id:'mo1', title:'Weekly planning sync',      time:'9:00 AM',  priority:'urgent_important', icon:'event_note' },
+      { id:'mo2', title:'Approve marketing budget',  time:'11:00 AM', priority:'urgent',           icon:'account_balance' },
+      { id:'mo3', title:'1:1 with design lead',      time:'2:00 PM',  priority:'important',        icon:'forum' },
+      { id:'mo4', title:'Triage support backlog',    time:'4:00 PM',  priority:'urgent',           icon:'support_agent' }
+    ],
+    1: [ // Tuesday
+      { id:'tu1', title:'Ship onboarding v2',        time:'10:00 AM', priority:'urgent_important', icon:'rocket_launch' },
+      { id:'tu2', title:'Investor deck review',      time:'12:00 PM', priority:'urgent',           icon:'slideshow' },
+      { id:'tu3', title:'Refine pricing model',      time:'1:30 PM',  priority:'important',        icon:'sell', repeat:'repeat', cad:'monthly', dom:2 },
+      { id:'tu4', title:'Interview · backend role',  time:'3:00 PM',  priority:'important',        icon:'person_search' },
+      { id:'tu5', title:'Reply to partner email',    time:'5:30 PM',  priority:'urgent',           icon:'mail' }
+    ],
+    2: [ // Wednesday
+      { id:'we1', title:'Roadmap deep-work block',   time:'9:30 AM',  priority:'urgent_important', icon:'map' },
+      { id:'we2', title:'QA the release build',      time:'2:00 PM',  priority:'urgent',           icon:'fact_check' },
+      { id:'we3', title:'Read industry report',      time:'6:00 PM',  priority:'important',        icon:'menu_book' }
+    ],
+    3: [ // Thursday
+      { id:'th1', title:'Board update draft',        time:'10:00 AM', priority:'urgent_important', icon:'description' },
+      { id:'th2', title:'Customer discovery calls',  time:'1:00 PM',  priority:'urgent',           icon:'call', repeat:'repeat', cad:'weekly', dow:3 },
+      { id:'th3', title:'Polish empty states',       time:'3:30 PM',  priority:'important',        icon:'brush' },
+      { id:'th4', title:'Renew SSL certificates',    time:'5:00 PM',  priority:'urgent',           icon:'lock' }
+    ],
+    4: [ // Friday
+      { id:'fr1', title:'Demo day rehearsal',        time:'9:00 AM',  priority:'urgent_important', icon:'co_present' },
+      { id:'fr2', title:'Close sprint & retro',      time:'11:30 AM', priority:'urgent',           icon:'checklist' },
+      { id:'fr3', title:'Approve payroll',           time:'1:00 PM',  priority:'urgent_important', icon:'payments', repeat:'repeat', cad:'monthly', dom:28 },
+      { id:'fr4', title:'Publish changelog',         time:'3:00 PM',  priority:'important',        icon:'campaign' },
+      { id:'fr5', title:'Plan weekend on-call',      time:'5:00 PM',  priority:'important',        icon:'schedule' }
+    ],
+    5: [ // Saturday
+      { id:'sa1', title:'Inbox zero sweep',          time:'10:30 AM', priority:'important',        icon:'mark_email_read' },
+      { id:'sa2', title:'Sketch Q2 OKRs',            time:'12:00 PM', priority:'important',        icon:'lightbulb' }
+    ],
+    6: seed   // Sunday — the original set
+  };
+  var dayState = { 6: seed };   // live per-day arrays (edits persist within session)
+  var activeTasks = seed;
+
+  function loadDay(date) {
+    var wd = (date.getDay() + 6) % 7;
+    if (!dayState[wd]) dayState[wd] = (DAY_TASKS[wd] || []).map(function (t) { return Object.assign({}, t); });
+    activeTasks = dayState[wd];
+  }
+
+  var list = document.getElementById('tdList');
+  var statDone = document.getElementById('statDone');
+  var statWait = document.getElementById('statWait');
+  var baseDone = 2; // completed tasks not in today's visible list (matches reference)
+
+  /* ===================================================================
+     Rendering
+     =================================================================== */
+  function makeRow(task, delay) {
+    var p = PRIORITY[task.priority] || PRIORITY[DEFAULT_PRI];
+
+    var row = document.createElement('div');
+    row.className = 'task-row';
+    row.dataset.id = task.id;
+    row.dataset.pri = task.priority;
+    row._task = task;
+    if (task.done) row.classList.add('is-done');
+    if (task.repeat === 'repeat') row.classList.add('is-repeat');
+
+    row.innerHTML =
+      '<div class="reveal"><span class="rv-check"><span class="material-icons">check</span></span>Complete</div>' +
+      '<div class="actions"><button class="t-act edit" aria-label="Edit task"><span class="material-icons">edit</span></button><button class="t-act del" aria-label="Delete task"><span class="material-icons">delete</span></button></div>' +
+      '<div class="task" style="--tag:' + p.color + ';--tag-bg:' + p.bg + ';">' +
+        '<span class="t-ico"><span class="material-icons">' + task.icon + '</span></span>' +
+        '<div class="t-main">' +
+          '<div class="t-title">' + task.title + '</div>' +
+          '<span class="t-badge">' + badgeHTML(p) + '</span>' +
+        '</div>' +
+        '<div class="t-right">' +
+          '<span class="t-repeat"><span class="material-icons">repeat</span></span>' +
+          '<span class="t-time">' + task.time + '</span>' +
+          '<button class="t-complete"><span class="material-icons">check</span>Complete</button>' +
+        '</div>' +
+      '</div>';
+
+    var card = row.querySelector('.task');
+    // staggered entrance: start hidden, transition to the visible base state.
+    // setTimeout (not rAF) so the resting state still resolves if frames are throttled.
+    if (delay != null) {
+      card.classList.add('preanim', 'anim');
+      setTimeout(function () { card.classList.remove('preanim'); }, 30 + delay);
+      setTimeout(function () { card.classList.remove('anim'); }, 30 + delay + 660);
+    }
+
+    wireRow(row);
+    return row;
+  }
+
+  function render() {
+    list.innerHTML = '';
+    activeTasks.forEach(function (t, i) { list.appendChild(makeRow(t, 80 + i * 90)); });
+    updateStats();
+  }
+
+  // swap the visible day using the SAME motion as the quick-filter transition:
+  // current tasks fade + collapse out (whole row), the new day's tasks grow + fade in.
+  function changeDay() {
+    var old = Array.prototype.slice.call(list.children);
+    function mountNew() {
+      list.innerHTML = '';
+      activeTasks.forEach(function (t) {
+        var row = makeRow(t, null);          // no preanim entrance — showRowFilter drives it
+        row.classList.add('filtered-out');   // start collapsed/hidden
+        list.appendChild(row);
+      });
+      // reveal with the exact quick-filter "show" motion (whole-row grow + fade)
+      Array.prototype.slice.call(list.children).forEach(function (row) { showRowFilter(row); });
+      updateStats();
+    }
+    if (old.length) {
+      old.forEach(function (r) {
+        // exit exactly like the quick-filter "hide": whole row fades + collapses
+        var h = r.offsetHeight;
+        r.style.overflow = 'hidden'; r.style.maxHeight = h + 'px';
+        void r.offsetWidth;
+        r.style.transition = 'max-height 460ms cubic-bezier(.4,0,.2,1), margin-bottom 460ms cubic-bezier(.4,0,.2,1), opacity 280ms ease, transform 360ms cubic-bezier(.4,0,.2,1)';
+        r.style.opacity = '0'; r.style.transform = 'scale(.96)';
+        r.style.maxHeight = '0px'; r.style.marginBottom = '-11px';
+      });
+      setTimeout(mountNew, 470);
+    } else {
+      mountNew();
+    }
+  }
+
+  function updateStats() {
+    var done = 0, wait = 0;
+    list.querySelectorAll('.task-row').forEach(function (r) {
+      if (r.classList.contains('is-done')) done++; else wait++;
+    });
+    list.classList.toggle('empty', list.children.length === 0);
+    tween(statDone, +statDone.textContent, baseDone + done);
+    tween(statWait, +statWait.textContent, wait);
+    refreshFilters();
+  }
+
+  /* ===================================================================
+     Tag filters
+     =================================================================== */
+  var filtersEl = document.getElementById('tdFilters');
+  var activeFilter = 'all';
+
+  function buildFilters() {
+    var html = '<button class="td-filt on" data-f="all">All<span class="fct" data-c="all">0</span></button>';
+    Object.keys(PRIORITY).forEach(function (k) {
+      var p = PRIORITY[k];
+      html += '<button class="td-filt" data-f="' + k + '">' +
+        '<span class="fdot" style="--fcolor:' + p.color + '"></span>' + p.label +
+        '<span class="fct" data-c="' + k + '">0</span></button>';
+    });
+    filtersEl.innerHTML = html;
+    filtersEl.querySelectorAll('.td-filt').forEach(function (b) {
+      b.addEventListener('click', function () {
+        activeFilter = b.dataset.f;
+        filtersEl.querySelectorAll('.td-filt').forEach(function (x) { x.classList.toggle('on', x === b); });
+        applyFilter(true);
+      });
+    });
+  }
+  function rowMatches(r) { return activeFilter === 'all' || r.dataset.pri === activeFilter; }
+  // hide: fade the WHOLE row out (so the green reveal / grey actions behind the card never
+  // flash through at full opacity) while its height collapses — slow + fluent.
+  function hideRowFilter(r) {
+    if (r.classList.contains('filtered-out') || r.dataset.filtering) return;
+    r.dataset.filtering = '1';
+    var h = r.offsetHeight;
+    r.style.overflow = 'hidden'; r.style.maxHeight = h + 'px';
+    void r.offsetWidth;
+    r.style.transition = 'max-height 520ms cubic-bezier(.4,0,.2,1), margin-bottom 520ms cubic-bezier(.4,0,.2,1), opacity 300ms ease, transform 360ms cubic-bezier(.4,0,.2,1)';
+    r.style.opacity = '0'; r.style.transform = 'scale(.96)';
+    r.style.maxHeight = '0px'; r.style.marginBottom = '-11px';
+    setTimeout(function () {
+      r.classList.add('filtered-out');
+      r.style.maxHeight = ''; r.style.overflow = ''; r.style.transition = ''; r.style.marginBottom = ''; r.style.opacity = ''; r.style.transform = '';
+      delete r.dataset.filtering;
+    }, 540);
+  }
+  // show: the row grows from collapsed while the WHOLE row fades + settles in
+  function showRowFilter(r) {
+    if (!r.classList.contains('filtered-out')) return;
+    r.classList.remove('filtered-out');
+    r.style.maxHeight = 'none';
+    var h = r.scrollHeight;
+    r.style.overflow = 'hidden'; r.style.maxHeight = '0px'; r.style.marginBottom = '-11px'; r.style.opacity = '0'; r.style.transform = 'scale(.96)';
+    void r.offsetWidth;
+    r.style.transition = 'max-height 560ms cubic-bezier(.22,1,.36,1), margin-bottom 560ms cubic-bezier(.22,1,.36,1), opacity 420ms ease 80ms, transform 520ms cubic-bezier(.22,1,.36,1) 80ms';
+    r.style.maxHeight = h + 'px'; r.style.marginBottom = '0px'; r.style.opacity = '1'; r.style.transform = 'scale(1)';
+    setTimeout(function () {
+      r.style.maxHeight = ''; r.style.overflow = ''; r.style.transition = ''; r.style.marginBottom = ''; r.style.opacity = ''; r.style.transform = '';
+    }, 660);
+  }
+  function applyFilter(animate) {
+    list.querySelectorAll('.task-row').forEach(function (r) {
+      var show = rowMatches(r), hidden = r.classList.contains('filtered-out');
+      if (show && hidden) { animate ? showRowFilter(r) : r.classList.remove('filtered-out'); }
+      else if (!show && !hidden) { animate ? hideRowFilter(r) : r.classList.add('filtered-out'); }
+    });
+  }
+  function refreshFilters() {
+    var counts = { all: 0 };
+    Object.keys(PRIORITY).forEach(function (k) { counts[k] = 0; });
+    list.querySelectorAll('.task-row').forEach(function (r) {
+      counts.all++;
+      if (counts[r.dataset.pri] != null) counts[r.dataset.pri]++;
+    });
+    filtersEl.querySelectorAll('.fct').forEach(function (el) { el.textContent = counts[el.dataset.c] || 0; });
+    applyFilter(false);
+  }
+
+  function tween(el, from, to) {
+    if (from === to) { el.textContent = to; return; }
+    var t0 = performance.now(), dur = 420, done = false;
+    (function step(now) {
+      if (done) return;
+      var k = Math.min(1, (now - t0) / dur);
+      k = 1 - Math.pow(1 - k, 3);
+      el.textContent = Math.round(from + (to - from) * k);
+      if (k < 1) requestAnimationFrame(step); else done = true;
+    })(t0);
+    // safety: guarantee the final value even if frames are throttled
+    setTimeout(function () { done = true; el.textContent = to; }, dur + 90);
+  }
+
+  /* ===================================================================
+     FLIP — animate reordering when a card moves to the top
+     =================================================================== */
+  function flip(mutate) {
+    var rows = Array.prototype.slice.call(list.children);
+    var first = rows.map(function (r) { return r.getBoundingClientRect().top; });
+
+    mutate();
+
+    rows.forEach(function (r, i) {
+      if (!r.isConnected || r.parentNode !== list) return;
+      var dy = first[i] - r.getBoundingClientRect().top;
+      if (!dy) return;
+      r.style.transition = 'none';
+      r.style.transform = 'translateY(' + dy + 'px)';
+      void r.offsetWidth; // force reflow so the next change animates (no rAF needed)
+      r.style.transition = 'transform 520ms cubic-bezier(.2,1.1,.3,1)';
+      r.style.transform = '';
+      // safety: clear inline transform even if transitionend never fires
+      setTimeout(function () { r.style.transition = ''; r.style.transform = ''; }, 580);
+    });
+  }
+
+  /* ===================================================================
+     Complete a task — fill check, glow, move to top
+     =================================================================== */
+  function completeRow(row, fromDrag) {
+    if (row.classList.contains('is-done')) return;
+    row.classList.add('is-done', 'glow');
+    row.addEventListener('animationend', function clr(e) {
+      if (e.animationName === 'done-glow') { row.classList.remove('glow'); row.removeEventListener('animationend', clr); }
+    });
+    if (fromDrag) launchConfetti(row);
+    updateStats();
+  }
+
+  function uncompleteRow(row) {
+    if (!row.classList.contains('is-done')) return;
+    flip(function () {
+      row.classList.remove('is-done');
+      // drop back below any other completed rows
+      var ref = null, kids = list.children;
+      for (var i = 0; i < kids.length; i++) {
+        if (!kids[i].classList.contains('is-done') && kids[i] !== row) { ref = kids[i]; break; }
+      }
+      list.insertBefore(row, ref);
+    });
+    updateStats();
+  }
+
+  function launchConfetti(row) {
+    var rect = row.getBoundingClientRect();
+    var cx = rect.left + rect.width * 0.3, cy = rect.top + rect.height / 2;
+    var colors = ['#10B981','#34D399','#6EE7B7','#fff','#BBF7D0','#059669'];
+    for (var i = 0; i < 22; i++) {
+      var dot = document.createElement('span');
+      var angle = (i / 22) * Math.PI * 2 - Math.PI / 2;
+      var dist = 28 + Math.random() * 52;
+      var dx = (Math.cos(angle) * dist).toFixed(1);
+      var dy = (Math.sin(angle) * dist - 12).toFixed(1);
+      var size = (4 + Math.random() * 4).toFixed(1);
+      dot.style.cssText =
+        'position:fixed;width:' + size + 'px;height:' + size + 'px;border-radius:50%;pointer-events:none;z-index:9999;' +
+        'background:' + colors[i % colors.length] + ';left:' + cx + 'px;top:' + cy + 'px;' +
+        '--dx:' + dx + 'px;--dy:' + dy + 'px;' +
+        'animation:confetti-burst 580ms cubic-bezier(.2,1,.4,1) ' + (i * 16) + 'ms both;';
+      document.body.appendChild(dot);
+      (function(d){ setTimeout(function(){ d.remove(); }, 700 + i * 16); })(dot);
+    }
+  }
+
+  function removeRow(row) {
+    var h = row.offsetHeight;
+    row.classList.add('removing');
+    setTimeout(function () {
+      row.style.transition = 'max-height 280ms ease, opacity 240ms ease, margin 280ms ease';
+      row.style.maxHeight = h + 'px'; row.style.overflow = 'hidden';
+      requestAnimationFrame(function () { row.style.maxHeight = '0px'; row.style.opacity = '0'; row.style.marginBottom = '-11px'; });
+    }, 220);
+    setTimeout(function () { if (row.parentNode) row.parentNode.removeChild(row); updateStats(); }, 560);
+  }
+
+  /* ===================================================================
+     Per-row wiring: checkbox, tap pop, drag (complete / actions / reorder)
+     =================================================================== */
+  function wireRow(row) {
+    var card = row.querySelector('.task');
+    var pill = row.querySelector('.t-complete');
+    var reveal = row.querySelector('.reveal');
+
+    if (pill) pill.addEventListener('click', function (e) {
+      e.stopPropagation();
+      completeRow(row);
+    });
+
+    /* ---- Pointer drag: right = complete · left = edit/delete · vertical = reorder ---- */
+    var del = row.querySelector('.t-act.del'), edit = row.querySelector('.t-act.edit');
+    var startX = 0, startY = 0, dragging = false, mode = null, armed = false, didDrag = false;
+    var W = 0, threshold = 0, pid = null, roTop = 0;
+    var ACT_W = 130;
+
+    function releaseCard() { if (pid != null) { try { card.releasePointerCapture(pid); } catch (_) {} pid = null; } }
+    function settleClosed() {
+      card.classList.add('settling'); card.style.transform = ''; row.classList.remove('act-open', 'armed');
+      card.addEventListener('transitionend', function clr() { card.classList.remove('settling'); card.removeEventListener('transitionend', clr); });
+      setTimeout(function () { card.classList.remove('settling'); }, 480);
+    }
+
+    card.addEventListener('pointerdown', function (e) {
+      if (e.target.closest('.t-check') || e.target.closest('.t-act') || e.target.closest('.t-complete')) return;
+      if (e.button != null && e.button !== 0) return;
+      if (row.classList.contains('act-open')) { settleClosed(); return; }
+      startX = e.clientX; startY = e.clientY; dragging = true; mode = null; armed = false; didDrag = false;
+      W = card.offsetWidth; threshold = W * 0.4; pid = e.pointerId;
+      try { card.setPointerCapture(pid); } catch (_) {}
+    });
+
+    card.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      var mx = e.clientX - startX, my = e.clientY - startY;
+      if (!mode) {
+        if (Math.abs(mx) < 6 && Math.abs(my) < 6) return;
+        didDrag = true;
+        // require a clear vertical intent before treating the gesture as a reorder —
+        // otherwise a horizontal swipe stays a swipe and the task never jumps position
+        if (Math.abs(my) > Math.abs(mx) * 1.5 && Math.abs(my) > 10) { mode = 'reorder'; roTop = row.getBoundingClientRect().top; row.classList.add('reordering'); }
+        else if (mx < 0) { if (row.classList.contains('is-done')) { dragging = false; releaseCard(); return; } mode = 'left'; card.classList.add('dragging'); }
+        else { if (row.classList.contains('is-done')) { dragging = false; releaseCard(); return; } mode = 'right'; card.classList.add('dragging'); reveal.style.opacity = '1'; }
+      }
+      if (mode === 'reorder') {
+        card.style.transform = 'translateY(' + my + 'px)';
+      } else if (mode === 'right') {
+        var dx = Math.max(0, mx);
+        /* 1:1 tracking up to a gentle cap — no friction step at threshold */
+        var damp = Math.min(dx, W * 0.84);
+        card.style.transform = 'translateX(' + damp + 'px)';
+        var na = dx >= threshold;
+        if (na !== armed) { armed = na; row.classList.toggle('armed', armed); if (armed && navigator.vibrate) navigator.vibrate(8); }
+      } else {
+        var lx = Math.max(-ACT_W - 26, Math.min(0, mx));
+        var d2 = lx < -ACT_W ? -ACT_W + (lx + ACT_W) * 0.3 : lx;
+        card.style.transform = 'translateX(' + d2 + 'px)';
+      }
+    });
+
+    function endDrag() {
+      if (!dragging) { releaseCard(); return; }
+      dragging = false; releaseCard(); card.classList.remove('dragging');
+      if (mode === 'reorder') {
+        var my = parseFloat((/translateY\(([-0-9.]+)px\)/.exec(card.style.transform) || [])[1]) || 0;
+        var sibs = Array.prototype.slice.call(list.children).filter(function (r) { return r !== row; });
+        var center = roTop + my + row.offsetHeight / 2, ref = null;
+        for (var i = 0; i < sibs.length; i++) { var rb = sibs[i].getBoundingClientRect(); if (center < rb.top + rb.height / 2) { ref = sibs[i]; break; } }
+        card.style.transform = '';
+        flip(function () { list.insertBefore(row, ref); });
+        row.classList.remove('reordering');
+      } else if (mode === 'right') {
+        reveal.style.opacity = '';
+        if (armed) {
+          /* phase 1: fly card off-screen right */
+          card.style.transition = 'transform 220ms cubic-bezier(.4,0,.2,1)';
+          card.style.transform = 'translateX(' + W + 'px)';
+          row.classList.remove('armed');
+          /* phase 2: after fly-off, slide back to default with ease-out */
+          setTimeout(function(){
+            card.style.transition = 'transform 360ms cubic-bezier(.4,0,0,1)';
+            card.style.transform = '';
+            /* phase 3: INSTANTLY apply done state once settle is complete */
+            setTimeout(function(){
+              card.style.transition = '';
+              completeRow(row, true);
+            }, 380);
+          }, 230);
+        } else { settleClosed(); } }
+      } else if (mode === 'left') {
+        var cur = parseFloat((/translateX\(([-0-9.]+)px\)/.exec(card.style.transform) || [])[1]) || 0;
+        card.classList.add('settling');
+        if (cur <= -ACT_W * 0.5) { card.style.transform = 'translateX(' + (-ACT_W) + 'px)'; row.classList.add('act-open'); }
+        else { card.style.transform = ''; row.classList.remove('act-open'); }
+        card.addEventListener('transitionend', function clr() { card.classList.remove('settling'); card.removeEventListener('transitionend', clr); });
+        setTimeout(function () { card.classList.remove('settling'); }, 480);
+      }
+      mode = null; armed = false;
+    }
+    card.addEventListener('pointerup', endDrag);
+    card.addEventListener('pointercancel', endDrag);
+
+    if (del) del.addEventListener('click', function (e) { e.stopPropagation(); removeRow(row); });
+    if (edit) edit.addEventListener('click', function (e) { e.stopPropagation(); settleClosed(); openPop(row, 'edit'); });
+
+    /* ---- Tap micro-pop + open details popover (genuine tap, not a drag) ---- */
+    card.addEventListener('click', function (e) {
+      if (didDrag) { didDrag = false; return; }
+      if (e.target.closest('.t-act') || e.target.closest('.t-complete')) return;
+      card.classList.remove('tap'); void card.offsetWidth; card.classList.add('tap');
+      openPop(row, 'view');
+    });
+  }
+
+  /* ===================================================================
+     Add task — slide up + pop, flash the button
+     =================================================================== */
+  var btnAdd = document.getElementById('btnAdd');
+  btnAdd.addEventListener('click', function () {
+    btnAdd.classList.remove('flash'); void btnAdd.offsetWidth; btnAdd.classList.add('flash');
+    openPop(null, 'add');
+  });
+
+  // insert a brand-new task at the top of the pending group, with a pop
+  function insertTask(task) {
+    var row = makeRow(task, 0);
+    var badge = row.querySelector('.t-badge');
+    badge.classList.add('pop');
+    var ref = null, kids = list.children;
+    for (var i = 0; i < kids.length; i++) {
+      if (!kids[i].classList.contains('is-done')) { ref = kids[i]; break; }
+    }
+    flip(function () { list.insertBefore(row, ref); });
+    updateStats();
+  }
+
+  /* ===================================================================
+     Calendar week + header nav
+     =================================================================== */
+  var DOW = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+  var DAYNAME = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var weekEl = document.getElementById('tdWeek');
+  var weekPill = null;
+  var cur = new Date(2026, 1, 8);   // Sunday, Feb 8 2026
+  var weekDays = [];                // 7 Date objects, Mon → Sun
+  var activeIdx = 0;
+
+  function startOfWeek(d) { var x = new Date(d); var wd = (x.getDay() + 6) % 7; x.setDate(x.getDate() - wd); x.setHours(0, 0, 0, 0); return x; }
+
+  function computeWeek() {
+    var mon = startOfWeek(cur);
+    weekDays = [];
+    for (var i = 0; i < 7; i++) { var d = new Date(mon); d.setDate(mon.getDate() + i); weekDays.push(d); }
+    activeIdx = (cur.getDay() + 6) % 7;
+  }
+
+  function buildWeek() {
+    computeWeek();
+    weekEl.innerHTML = '';
+    weekPill = document.createElement('span');
+    weekPill.className = 'td-week-pill no-anim';
+    weekEl.appendChild(weekPill);
+    DOW.forEach(function (d, i) {
+      var b = document.createElement('button');
+      b.className = 'td-daybtn' + (i === activeIdx ? ' active' : '');
+      b.innerHTML = '<span class="dow">' + d + '</span><span class="dnum">' + weekDays[i].getDate() + '</span>';
+      b.addEventListener('click', function () { cur = new Date(weekDays[i]); selectInWeek(i); });
+      weekEl.appendChild(b);
+    });
+    // place the pill on the active day without animating the first time
+    movePill();
+    requestAnimationFrame(function () {
+      movePill();
+      requestAnimationFrame(function () { weekPill.classList.remove('no-anim'); });
+    });
+    setTimeout(function () { movePill(); weekPill.classList.remove('no-anim'); }, 120);
+    updateHeader();
+  }
+
+  function movePill() {
+    if (!weekPill) return;
+    var active = weekEl.querySelector('.td-daybtn.active');
+    if (!active) return;
+    weekPill.style.width = active.offsetWidth + 'px';
+    weekPill.style.height = active.offsetHeight + 'px';
+    weekPill.style.transform = 'translate(' + active.offsetLeft + 'px,' + active.offsetTop + 'px)';
+  }
+
+  function updateHeader() {
+    document.getElementById('tdMonth').textContent = MONTHS[cur.getMonth()] + ' ' + cur.getDate();
+    document.getElementById('tdDay').textContent = DAYNAME[activeIdx];
+  }
+
+  function selectInWeek(i) {
+    activeIdx = i;
+    weekEl.querySelectorAll('.td-daybtn').forEach(function (b, k) { b.classList.toggle('active', k === i); });
+    movePill();
+    updateHeader();
+    loadDay(cur); changeDay();   // the day's task list changes with the day
+  }
+
+  // step one day; when we cross the Mon–Sun boundary, slide the whole strip to the adjacent week
+  function slideWeek(dir) {
+    // dir: 1 = next (current strip exits LEFT, new enters from RIGHT) · -1 = prev (mirror)
+    var outX = dir > 0 ? -34 : 34;
+    weekEl.style.transition = 'transform 200ms cubic-bezier(.4,0,.6,1), opacity 200ms ease';
+    weekEl.style.transform = 'translateX(' + outX + 'px)';
+    weekEl.style.opacity = '0';
+    setTimeout(function () {
+      buildWeek();                                       // rebuild with the new week's dates + header
+      loadDay(cur); changeDay();                          // and swap in the new active day's tasks
+      weekEl.style.transition = 'none';
+      weekEl.style.transform = 'translateX(' + (-outX) + 'px)';
+      weekEl.style.opacity = '0';
+      void weekEl.offsetWidth;
+      weekEl.style.transition = 'transform 380ms cubic-bezier(.22,1,.36,1), opacity 300ms ease';
+      weekEl.style.transform = 'translateX(0)';
+      weekEl.style.opacity = '1';
+      setTimeout(function () { weekEl.style.transition = ''; weekEl.style.transform = ''; }, 400);
+    }, 200);
+  }
+
+  function navBy(delta) {
+    var prevMon = weekDays.length ? weekDays[0].getTime() : null;
+    cur.setDate(cur.getDate() + delta);
+    var mon = startOfWeek(cur);
+    if (prevMon === null || mon.getTime() !== prevMon) slideWeek(delta > 0 ? 1 : -1);  // cross-week → slide strip
+    else selectInWeek((cur.getDay() + 6) % 7);                                          // same week → slide pill
+  }
+
+  document.getElementById('navPrev').addEventListener('click', function () { navBy(-1); });
+  document.getElementById('navNext').addEventListener('click', function () { navBy(1); });
+
+  /* ===================================================================
+     Init
+     =================================================================== */
+  document.addEventListener('pointerdown', function (e) {
+    var inRow = e.target.closest('.task-row');
+    list.querySelectorAll('.task-row.act-open').forEach(function (r) {
+      if (r !== inRow) { r.classList.remove('act-open'); var c = r.querySelector('.task'); c.style.transition = 'transform 280ms cubic-bezier(.4,0,0,1)'; c.style.transform = ''; setTimeout(function () { c.style.transition = ''; }, 310); }
+    });
+  });
+
+  /* ===================================================================
+     Task details / edit popover
+     =================================================================== */
+  /* ===================================================================
+     Task popover — view / edit / add (name, tag, schedule, time)
+     =================================================================== */
+  var pop = document.getElementById('tdPop'), scrim = document.getElementById('tdScrim');
+  var popTitle = document.getElementById('tdPopTitle'), popTime = document.getElementById('tdPopTime');
+  var popPris = document.getElementById('tdPopPris'), popIc = document.getElementById('tdPopIc');
+  var popSave = document.getElementById('tdPopSave'), popX = document.getElementById('tdPopX');
+  var popSaveTxt = document.getElementById('tdPopSaveTxt'), popSaveIc = document.getElementById('tdPopSaveIc');
+  var popHd = document.getElementById('tdPopHd');
+  var popRep = document.getElementById('tdPopRep');
+  var popRepBox = document.getElementById('tdPopRepBox'), popCads = document.getElementById('tdPopCads');
+  var popOnBox = document.getElementById('tdPopOnBox'), popOnLbl = document.getElementById('tdPopOnLbl');
+  var popDays = document.getElementById('tdPopDays'), popDom = document.getElementById('tdPopDom');
+
+  var CADS = ['daily', 'weekly', 'monthly', 'quarterly', 'yearly'];
+  var CADLBL = { daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly', quarterly: 'Quarterly', yearly: 'Yearly' };
+  var DOWS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+  var popRow = null, popMode = 'view';
+  var st = { pri: DEFAULT_PRI, repeat: 'once', cad: 'weekly', dow: 1, dom: 1 };
+
+  // day-of-month select (built once)
+  (function () { var h = ''; for (var d = 1; d <= 28; d++) h += '<option value="' + d + '">Day ' + d + '</option>'; popDom.innerHTML = h; })();
+
+  function renderPris() {
+    popPris.innerHTML = Object.keys(PRIORITY).map(function (k) {
+      var p = PRIORITY[k];
+      return '<button class="td-pop-pri' + (k === st.pri ? ' on' : '') + '" data-pri="' + k + '" style="--tag:' + p.color + '">' + badgeHTML(p) + '</button>';
+    }).join('');
+  }
+  function renderCads() {
+    popCads.innerHTML = CADS.map(function (c) {
+      return '<button class="td-pop-cad' + (c === st.cad ? ' on' : '') + '" data-cad="' + c + '">' + CADLBL[c] + '</button>';
+    }).join('');
+  }
+  function renderDays() {
+    popDays.innerHTML = DOWS.map(function (d, i) {
+      return '<button class="td-pop-dow' + (i === st.dow ? ' on' : '') + '" data-dow="' + i + '">' + d + '</button>';
+    }).join('');
+  }
+  function syncSchedule() {
+    var rep = st.repeat === 'repeat';
+    popRep.querySelectorAll('button').forEach(function (b) { b.classList.toggle('active', b.dataset.rep === st.repeat); });
+    if (popRep.__segMove) popRep.__segMove();
+    popRepBox.hidden = !rep;
+    if (!rep) return;
+    if (st.cad === 'daily') {
+      popOnBox.hidden = true;
+    } else if (st.cad === 'weekly') {
+      popOnBox.hidden = false; popOnLbl.textContent = 'On'; popDays.hidden = false; popDom.hidden = true;
+    } else {
+      popOnBox.hidden = false; popOnLbl.textContent = 'On day'; popDays.hidden = true; popDom.hidden = false; popDom.value = st.dom;
+    }
+  }
+  function syncIcon() {
+    var p = PRIORITY[st.pri] || PRIORITY[DEFAULT_PRI];
+    popIc.querySelector('.material-icons').textContent = (popMode !== 'add' && popRow) ? popRow._task.icon : p.bi;
+    popIc.style.setProperty('--tag', p.color); popIc.style.setProperty('--tag-bg', p.bg);
+  }
+
+  function openPop(row, mode) {
+    popMode = mode || 'view'; popRow = row;
+    if (row) {
+      var t = row._task;
+      st.pri = t.priority; st.repeat = t.repeat || 'once';
+      st.cad = t.cad || 'weekly'; st.dow = (t.dow != null ? t.dow : 1); st.dom = (t.dom != null ? t.dom : 1);
+      popTitle.value = t.title; popTime.value = t.time;
+      popHd.textContent = (mode === 'edit') ? 'Edit task' : 'Task details';
+      popSaveTxt.textContent = 'Save changes'; popSaveIc.textContent = 'check';
+    } else {
+      st.pri = DEFAULT_PRI; st.repeat = 'once'; st.cad = 'weekly'; st.dow = 1; st.dom = 1;
+      popTitle.value = ''; popTime.value = '';
+      popHd.textContent = 'New task'; popSaveTxt.textContent = 'Add task'; popSaveIc.textContent = 'add';
+    }
+    renderPris(); renderCads(); renderDays(); syncSchedule(); syncIcon();
+    scrim.classList.add('show'); pop.classList.add('show');
+    if (mode === 'edit' || mode === 'add') setTimeout(function () { popTitle.focus(); if (mode === 'edit') popTitle.select(); }, 140);
+  }
+  function closePop() { scrim.classList.remove('show'); pop.classList.remove('show'); popRow = null; }
+
+  popPris.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-pri]'); if (!b) return;
+    st.pri = b.dataset.pri;
+    popPris.querySelectorAll('.td-pop-pri').forEach(function (x) { x.classList.toggle('on', x === b); });
+    syncIcon();
+  });
+  popRep.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-rep]'); if (!b) return;
+    st.repeat = b.dataset.rep; syncSchedule();
+  });
+  popCads.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-cad]'); if (!b) return;
+    st.cad = b.dataset.cad;
+    popCads.querySelectorAll('.td-pop-cad').forEach(function (x) { x.classList.toggle('on', x === b); });
+    syncSchedule();
+  });
+  popDays.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-dow]'); if (!b) return;
+    st.dow = +b.dataset.dow;
+    popDays.querySelectorAll('.td-pop-dow').forEach(function (x) { x.classList.toggle('on', x === b); });
+  });
+  popDom.addEventListener('change', function () { st.dom = +popDom.value; });
+
+  popSave.addEventListener('click', function () {
+    var p = PRIORITY[st.pri] || PRIORITY[DEFAULT_PRI];
+    if (popMode === 'add') {
+      insertTask({
+        id: 't' + (uid++), title: popTitle.value.trim() || 'New task', time: popTime.value.trim() || 'Anytime',
+        priority: st.pri, icon: p.bi, repeat: st.repeat, cad: st.cad, dow: st.dow, dom: st.dom
+      });
+      closePop(); return;
+    }
+    if (!popRow) { closePop(); return; }
+    var t = popRow._task;
+    t.title = popTitle.value.trim() || t.title;
+    t.time = popTime.value.trim() || t.time;
+    t.priority = st.pri; t.repeat = st.repeat; t.cad = st.cad; t.dow = st.dow; t.dom = st.dom;
+    var card = popRow.querySelector('.task');
+    card.style.setProperty('--tag', p.color); card.style.setProperty('--tag-bg', p.bg);
+    popRow.dataset.pri = t.priority;
+    popRow.classList.toggle('is-repeat', t.repeat === 'repeat');
+    popRow.querySelector('.t-title').textContent = t.title;
+    popRow.querySelector('.t-time').textContent = t.time;
+    var badge = popRow.querySelector('.t-badge'); badge.innerHTML = badgeHTML(p);
+    badge.classList.remove('pop'); void badge.offsetWidth; badge.classList.add('pop');
+    updateStats();
+    closePop();
+  });
+  popX.addEventListener('click', closePop);
+  scrim.addEventListener('click', closePop);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePop(); });
+
+  buildWeek();
+  buildFilters();
+  render();
+})();
+
+</script>
+<script src="_darkmode.js"></script>
+</body></html>

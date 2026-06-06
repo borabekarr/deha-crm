@@ -1,0 +1,650 @@
+<!doctype html>
+<!-- @dsCard group="Brand" name="Statistics Graph Card" subtitle="CRM deal pipeline widget — live value, trend chart &amp; quick actions" --><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="_base.css">
+<link rel="stylesheet" href="_controls.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<style>
+  .frame {
+    padding: 26px 22px 30px;
+    background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.10) 0%, rgba(248,250,252,1) 55%, #FFFFFF 100%);
+  }
+  .sec {
+    font-family: 'Montserrat'; font-size: 11px; font-weight: 800;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--slate-500, #64748B);
+    margin: 4px 2px 4px;
+  }
+  .sec-sub {
+    font-family: 'Montserrat'; font-size: 12px; font-weight: 600;
+    color: var(--slate-400, #94A3B8); margin: 0 2px 18px; letter-spacing: -0.005em;
+  }
+  .sg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .cap {
+    font-family: 'Montserrat'; font-size: 11.5px; font-weight: 700;
+    color: var(--slate-500, #64748B); margin: 10px 4px 0; letter-spacing: -0.005em;
+  }
+  .cap b { color: var(--slate-700, #334155); font-weight: 800; }
+
+  /* ───────────────────────── widget surface ───────────────────────── */
+  .sg-card {
+    /* stage tokens: accent (line/fill/CTA), accent-deep (button base), accent-text (AA-safe label) */
+    --accent:#10B981; --accent-deep:#059669; --accent-text:#047857;
+    --glow:rgba(16,185,129,0.42); --ring:rgba(16,185,129,0.22); --glow2:rgba(16,185,129,0.78);
+    --ctaglow:rgba(16,185,129,0.55); --flashc:rgba(16,185,129,0.24);
+    position: relative; width: 100%; height: 364px; box-sizing: border-box;
+    border-radius: 24px; overflow: hidden; font-family: 'Montserrat';
+    background: var(--bg-card-solid, #fff);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), inset 0 0 0 1px rgba(15,23,42,0.05), 0 1px 2px rgba(15,23,42,0.04);
+    opacity: 1; transform: none;
+  }
+  .sg-card.acc-good { --accent:#10B981; --accent-deep:#059669; --accent-text:#047857; --glow:rgba(16,185,129,0.42); --ring:rgba(16,185,129,0.22); --glow2:rgba(16,185,129,0.78); --ctaglow:rgba(16,185,129,0.55); --flashc:rgba(16,185,129,0.24); }
+  .sg-card.acc-warn { --accent:#EAB308; --accent-deep:#CA8A04; --accent-text:#A16207; --glow:rgba(234,179,8,0.42); --ring:rgba(234,179,8,0.22); --glow2:rgba(234,179,8,0.78); --ctaglow:rgba(234,179,8,0.55); --flashc:rgba(234,179,8,0.24); }
+  .sg-card.acc-risk { --accent:#EF4444; --accent-deep:#DC2626; --accent-text:#B91C1C; --glow:rgba(239,68,68,0.42); --ring:rgba(239,68,68,0.22); --glow2:rgba(239,68,68,0.78); --ctaglow:rgba(239,68,68,0.55); --flashc:rgba(239,68,68,0.24); }
+  html.dark .sg-card {
+    background: #161E2E;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), inset 0 0 0 1px rgba(255,255,255,0.05), 0 2px 8px rgba(0,0,0,0.4);
+  }
+  /* lighter, sparser AA-safe label colors in dark mode */
+  html.dark .sg-card.acc-good { --accent-text:#34D399; }
+  html.dark .sg-card.acc-warn { --accent-text:#FACC15; }
+  html.dark .sg-card.acc-risk { --accent-text:#F87171; }
+
+  /* sparse dot texture behind the chart (replaces the dense grid) */
+  .sg-card::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background-image: radial-gradient(circle, rgba(15,23,42,0.055) 1.1px, transparent 1.4px);
+    background-size: 22px 22px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 42%, transparent 70%);
+            mask-image: linear-gradient(to bottom, #000 0%, #000 42%, transparent 70%);
+  }
+  html.dark .sg-card::before {
+    background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1.1px, transparent 1.4px);
+  }
+
+  /* chart layer (full-bleed, behind content) */
+  .sg-chart { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+  .sg-chart svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .sg-line { fill: none; stroke: var(--accent); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+    filter: drop-shadow(0 1px 5px var(--glow));
+    transition: stroke-width 220ms, filter 220ms; }
+  .sg-dot {
+    position: absolute; width: 11px; height: 11px; border-radius: 50%; background: var(--accent); z-index: 1;
+    transform: translate(-50%, -50%); box-shadow: 0 0 0 4px var(--ring), 0 0 14px var(--glow2);
+  }
+  .sg-dot::after {
+    content: ''; position: absolute; inset: -4px; border-radius: 50%;
+    border: 2px solid var(--accent); opacity: 0.6; animation: sg-ping 1.9s cubic-bezier(.22,1,.36,1) infinite;
+  }
+  @keyframes sg-ping { 0% { transform: scale(0.7); opacity: 0.65; } 70%,100% { transform: scale(2.1); opacity: 0; } }
+
+  /* content layer */
+  .sg-inner { position: relative; z-index: 2; height: 100%; box-sizing: border-box; padding: 17px 18px 16px; display: flex; flex-direction: column; }
+
+  .sg-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .sg-id { display: flex; align-items: center; gap: 11px; min-width: 0; }
+  .sg-avatar {
+    width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center;
+    font-size: 12.5px; font-weight: 800; letter-spacing: 0.01em; color: var(--fg2, #334155);
+    background: var(--bg-chip, #F1F5F9); box-shadow: inset 0 0 0 1px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.7);
+    position: relative;
+  }
+  .sg-avatar .material-symbols-outlined { font-size: 19px; color: var(--accent-text); }
+  html.dark .sg-avatar { color: #E2E8F0; background: rgba(255,255,255,0.07); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.09); }
+  .sg-avatar::after { content: ''; position: absolute; inset: -2px; border-radius: 50%; border: 2px solid var(--accent); opacity: 0.85; }
+  .sg-name { font-size: 16px; font-weight: 800; color: var(--fg1, #0F172A); line-height: 1.15; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sg-sub  { font-size: 12px; font-weight: 600; color: var(--fg3, #64748B); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .sg-sync {
+    flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
+    font-size: 11.5px; font-weight: 700; color: var(--fg3, #64748B);
+    background: transparent; border: none; font-family: 'Montserrat'; padding: 3px 5px; border-radius: 9px;
+    transition: transform 140ms cubic-bezier(.34,1.56,.64,1);
+  }
+  .sg-sync .material-symbols-outlined { font-size: 15px; transition: transform 700ms cubic-bezier(.22,1,.36,1); }
+  .sg-sync:hover { color: var(--fg1, #0F172A); }
+  .sg-sync:active { transform: scale(0.93); }
+  .sg-sync.spin .material-symbols-outlined { transform: rotate(360deg); }
+
+  /* time-range filter for the trend, sized to sit under the header text */
+  /* time-range filter — hidden by default, revealed on card click; card behind blurs */
+  .sg-scrim {
+    position: absolute; inset: 0; z-index: 6; border-radius: 24px; pointer-events: none;
+    opacity: 0; background: rgba(255,255,255,0.10);
+    -webkit-backdrop-filter: blur(0px); backdrop-filter: blur(0px);
+    transition: opacity 240ms ease, backdrop-filter 280ms ease, -webkit-backdrop-filter 280ms ease;
+  }
+  .sg-card.filters-open .sg-scrim {
+    opacity: 1; pointer-events: auto;
+    background: rgba(255,255,255,0.28);
+    -webkit-backdrop-filter: blur(5px) saturate(1.05); backdrop-filter: blur(5px) saturate(1.05);
+  }
+  html.dark .sg-card.filters-open .sg-scrim { background: rgba(2,6,23,0.40); }
+
+  .sg-rangepop {
+    position: absolute; left: 50%; top: 50%; z-index: 7; width: auto;
+    padding: 6px; border-radius: 18px;
+    background: var(--bg-card-solid, #fff);
+    box-shadow:
+      0 32px 64px -16px rgba(15,23,42,0.45),
+      0 10px 28px -8px  rgba(15,23,42,0.28),
+      0 2px  8px  0     rgba(15,23,42,0.12),
+      inset 0 0 0 1px rgba(15,23,42,0.06),
+      inset 0 1px 0 rgba(255,255,255,0.90);
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 12px)) scale(0.95);
+    transform-origin: 50% 50%;
+    pointer-events: none; visibility: hidden;
+    transition: opacity 240ms cubic-bezier(.16,1,.3,1), transform 360ms cubic-bezier(.16,1,.3,1), visibility 0s linear 360ms;
+  }
+  html.dark .sg-rangepop {
+    background: #222C3E;
+    box-shadow:
+      0 32px 64px -16px rgba(0,0,0,0.70),
+      0 10px 28px -8px  rgba(0,0,0,0.45),
+      0 2px  8px  0     rgba(0,0,0,0.30),
+      inset 0 0 0 1px rgba(255,255,255,0.09),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .sg-card.filters-open .sg-rangepop {
+    opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; visibility: visible;
+    transition: opacity 240ms cubic-bezier(.16,1,.3,1), transform 360ms cubic-bezier(.16,1,.3,1);
+  }
+  .sg-poplabel {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 9.5px; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase;
+    color: var(--fg4, #94A3B8); margin: 6px 9px 8px;
+  }
+  .sg-poplabel .material-symbols-outlined { font-size: 14px; }
+
+  /* vertical segmented control — canonical .seg pill, stacked & left-aligned.
+     align-items:stretch makes every button the width of the longest label,
+     so the pill is trimmed to that width (not the full popup). */
+  .seg.vert { flex-direction: column; align-items: stretch; width: auto; border-radius: 14px; padding: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.06); }
+  .seg.vert .seg-pill {
+    left: 4px; right: 4px; width: auto; top: 4px; bottom: auto; height: 0; border-radius: 9999px;
+    transition: top 300ms cubic-bezier(.22,1,.36,1), height 300ms cubic-bezier(.22,1,.36,1);
+  }
+  .seg.vert button { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 8px 16px; text-align: center; border-radius: 9999px; font-size: 12px; transition: color 200ms, background 160ms, transform 110ms cubic-bezier(.22,1,.36,1); }
+  .seg.vert button .material-symbols-outlined { font-size: 16px; }
+  .seg.vert button:not(.active):hover { color: var(--fg1, #0F172A); background: rgba(15,23,42,0.05); }
+  html.dark .seg.vert button:not(.active):hover { color: #fff; background: rgba(255,255,255,0.07); }
+  .seg.vert button:active { transform: scale(0.96); }
+  /* brief highlight pulse on the just-picked option */
+  .seg.vert button.just-picked { animation: sg-pick 460ms cubic-bezier(.34,1.56,.64,1); }
+  @keyframes sg-pick { 0%{ transform: scale(0.96);} 45%{ transform: scale(1.04);} 100%{ transform: scale(1);} }
+
+  /* "applying…" loader bar — collapses to zero height when idle so it adds no bottom space */
+  .sg-poploader { height: 0; border-radius: 9999px; margin: 0 6px; background: var(--bg-chip, #F1F5F9); overflow: hidden; opacity: 0; transition: opacity 160ms ease, height 200ms ease, margin 200ms ease; }
+  html.dark .sg-poploader { background: rgba(255,255,255,0.08); }
+  .sg-poploader::after { content: ''; display: block; height: 100%; width: 0; border-radius: inherit; background: var(--accent); }
+  .sg-rangepop.loading .sg-poploader { height: 3px; margin: 9px 6px 3px; opacity: 1; }
+  .sg-rangepop.loading .sg-poploader::after { animation: sg-load 640ms cubic-bezier(.4,0,.2,1) forwards; }
+  @keyframes sg-load { from { width: 0; } to { width: 100%; } }
+
+  /* current-range chip in the value label row — the affordance that opens the filter */
+  .sg-rangechip {
+    display: inline-flex; align-items: center; gap: 1px; cursor: pointer; vertical-align: baseline;
+    font-family: 'Montserrat'; font-size: 9.5px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--accent-text); background: var(--bg-chip, #F1F5F9); border: none; border-radius: 9999px;
+    padding: 2px 4px 2px 8px; margin-left: 6px; line-height: 1.4;
+    box-shadow: inset 0 0 0 1px rgba(15,23,42,0.06); transition: transform 140ms cubic-bezier(.34,1.56,.64,1), box-shadow 160ms;
+  }
+  html.dark .sg-rangechip { background: rgba(255,255,255,0.08); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08); }
+  .sg-rangechip .material-symbols-outlined { font-size: 14px; transition: transform 300ms cubic-bezier(.22,1,.36,1); }
+  .sg-rangechip:hover { box-shadow: inset 0 0 0 1px var(--accent); }
+  .sg-card.filters-open .sg-rangechip .material-symbols-outlined { transform: rotate(180deg); }
+
+  .sg-spacer { flex: 1 1 auto; min-height: 30px; }
+
+  .sg-vlabel { font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg4, #94A3B8); margin-bottom: 5px; }
+  .sg-value { font-size: 34px; font-weight: 800; letter-spacing: -0.025em; line-height: 1; color: var(--fg1, #0F172A); font-variant-numeric: tabular-nums; }
+
+  /* delta pill — matches metric-card .m-delta exactly (white text on solid color = AA-safe) */
+  .sg-sub2 { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+  .sg-delta-pill {
+    display: inline-flex; align-items: center; gap: 4px; color: #fff; font-size: 11px; font-weight: 800;
+    padding: 3px 9px; border-radius: 16px; text-shadow: 0 1px 1px rgba(0,0,0,0.18);
+    background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+    background-size: 7px 7px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(15,23,42,0.18), inset 0 0 0 1px rgba(15,23,42,0.10);
+  }
+  .sg-delta-pill .material-icons { font-size: 12px; }
+  .sg-delta-pill.up   { background-color: #10B981; }
+  .sg-delta-pill.down { background-color: #EF4444; }
+  .sg-period { font-size: 11px; font-weight: 600; color: var(--fg4, #94A3B8); }
+
+  /* likelihood meter — small but effective */
+  .sg-meter { margin-top: 14px; }
+  .sg-meter-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .sg-meter-label { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg3, #64748B); }
+  .sg-meter-val { font-size: 14px; font-weight: 800; color: var(--accent-text); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+  .sg-meter-track {
+    position: relative; height: 9px; border-radius: 9999px; overflow: hidden;
+    background: var(--bg-chip, #F1F5F9); box-shadow: inset 0 1px 2px rgba(15,23,42,0.12), inset 0 0 0 1px rgba(15,23,42,0.04);
+  }
+  html.dark .sg-meter-track { background: rgba(255,255,255,0.08); box-shadow: inset 0 1px 2px rgba(0,0,0,0.45); }
+  .sg-meter-fill {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 9999px; background-color: var(--accent);
+    background-image: linear-gradient(rgba(255,255,255,0.20) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.20) 1px, transparent 1px);
+    background-size: 7px 7px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -1px 0 rgba(0,0,0,0.14);
+    transition: width 750ms cubic-bezier(.22,1,.36,1), background-color 300ms;
+  }
+  /* four tick segments for an at-a-glance read */
+  .sg-meter-track::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+    background-image: linear-gradient(90deg, rgba(15,23,42,0.10) 1px, transparent 1px);
+    background-size: 25% 100%;
+  }
+  html.dark .sg-meter-track::after { background-image: linear-gradient(90deg, rgba(255,255,255,0.12) 1px, transparent 1px); }
+
+  /* actions */
+  .sg-actions { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+  .sg-cta {
+    flex: 1; height: 46px; border: none; border-radius: 9999px; cursor: pointer; font-family: 'Montserrat';
+    font-size: 14px; font-weight: 800; color: #fff; letter-spacing: 0.01em; text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    position: relative; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    background-color: var(--accent);
+    background-image: radial-gradient(ellipse at top right, rgba(255,255,255,0.18) 0%, transparent 55%), linear-gradient(rgba(255,255,255,0.10) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.10) 1px, transparent 1px);
+    background-size: cover, 14px 14px, 14px 14px;
+    box-shadow: 0 8px 22px -8px var(--ctaglow), inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -2px 0 rgba(0,0,0,0.22), inset 0 0 0 1px rgba(255,255,255,0.14);
+    transition: filter 200ms, transform 160ms cubic-bezier(.34,1.56,.64,1), box-shadow 200ms;
+  }
+  .sg-cta .material-symbols-outlined { font-size: 18px; }
+  .sg-cta:hover { filter: brightness(1.05); box-shadow: 0 12px 28px -8px var(--ctaglow), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -2px 0 rgba(0,0,0,0.22), inset 0 0 0 1px rgba(255,255,255,0.18); }
+  .sg-cta:active { transform: scale(0.97); }
+  .sg-cta:focus-visible, .sg-sync:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ── in-button "thinking" sequence (no card values change) ── */
+  .sg-cta.thinking { pointer-events: none; cursor: default; }
+  .sg-cta.thinking:hover { filter: none; }
+  /* shimmer sweep while working */
+  .sg-cta.thinking::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,0.32) 50%, transparent 80%);
+    background-size: 220% 100%; animation: sg-sweep 1900ms linear infinite;
+  }
+  @keyframes sg-sweep { 0% { background-position: 140% 0; } 100% { background-position: -140% 0; } }
+
+  /* spinner ring that morphs into a check on completion */
+  .sg-spin {
+    width: 16px; height: 16px; flex-shrink: 0; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff;
+    animation: sg-rot 1100ms linear infinite;
+  }
+  @keyframes sg-rot { to { transform: rotate(360deg); } }
+  .sg-cta.done::after { display: none; }
+  .sg-check { width: 16px; height: 16px; flex-shrink: 0; display: grid; place-items: center; }
+  .sg-check .material-symbols-outlined { font-size: 17px; animation: sg-pop 360ms cubic-bezier(.34,1.56,.64,1); }
+  @keyframes sg-pop { 0% { transform: scale(0.2); opacity: 0; } 60% { transform: scale(1.18); } 100% { transform: scale(1); opacity: 1; } }
+
+  /* morphing step text — each line slides up + de-blurs into place */
+  .sg-step {
+    display: inline-block; font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .sg-step.morph { animation: sg-morph 340ms cubic-bezier(.22,1,.36,1); }
+  @keyframes sg-morph {
+    0%   { opacity: 0; transform: translateY(8px); filter: blur(3px); }
+    100% { opacity: 1; transform: translateY(0);   filter: blur(0); }
+  }
+
+  .sg-ripple { position: absolute; border-radius: 50%; transform: scale(0); background: rgba(255,255,255,0.4); pointer-events: none; animation: sg-rip 520ms cubic-bezier(.22,1,.36,1); }
+  @keyframes sg-rip { to { transform: scale(2.6); opacity: 0; } }
+
+  .sg-flash { position: absolute; inset: 0; z-index: 1; pointer-events: none; border-radius: 24px; opacity: 0;
+    background: radial-gradient(ellipse at 50% 60%, var(--flashc) 0%, transparent 70%); }
+  .sg-flash.go { animation: sg-flash 720ms ease-out; }
+  @keyframes sg-flash { 0% { opacity: 0; } 20% { opacity: 1; } 100% { opacity: 0; } }
+
+  .sg-card.lift { cursor: pointer; }
+  .shell.zoom:hover .sg-line { stroke-width: 3; filter: drop-shadow(0 1px 9px var(--glow2)); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sg-card, .sg-dot::after { animation: none !important; }
+  }
+
+  .sg-toast {
+    position: fixed; z-index: 400; left: 50%; bottom: 22px; transform: translate(-50%, 14px); opacity: 0;
+    display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 9999px;
+    background: #0F172A; color: #fff; font-family: 'Montserrat'; font-size: 12px; font-weight: 800;
+    box-shadow: 0 10px 30px rgba(15,23,42,0.3); pointer-events: none;
+    transition: opacity 240ms, transform 320ms cubic-bezier(.34,1.56,.64,1);
+  }
+  html.dark .sg-toast { background: #fff; color: #0F172A; }
+  .sg-toast .material-symbols-outlined { font-size: 15px; }
+  .sg-toast.show { opacity: 1; transform: translate(-50%, 0); }
+</style>
+<link rel="stylesheet" href="_darkmode.css">
+</head>
+<body>
+
+<div class="card" style="padding:0;">
+  <div class="frame">
+    <p class="sec">Outcome card — the metric card, evolved</p>
+    <p class="sec-sub">A value, its 30-day trend, and the likelihood of the outcome. One component across CRM use cases — the trend line and the likelihood always agree.</p>
+    <div class="sg-grid" id="row"></div>
+  </div>
+</div>
+
+<div class="sg-toast" id="toast"><span class="material-symbols-outlined">check_circle</span><span id="toastMsg">Done</span></div>
+
+<script>
+(function(){
+  const $ = (s,r)=>(r||document).querySelector(s);
+  const fmtInt = n => Math.round(n).toLocaleString('en-US');
+  const fmtMoney = (n,unit) => unit==='$' ? '$'+fmtInt(n) : fmtInt(n)+(unit||'');
+
+  const ACCENTS = { good:{c:'#10B981'}, warn:{c:'#EAB308'}, risk:{c:'#EF4444'} };
+
+  // a smooth value series that ENDS at the current value and trends with `dir`.
+  // dir > 0 rises into the present, dir < 0 falls — so the line direction is honest.
+  function genSeries(n, dir){
+    const a = []; let v = 50;
+    const drift = dir * 1.5;
+    for (let i=0;i<n;i++){ v += drift + (Math.random()-0.5)*7; a.push(v); }
+    return a;
+  }
+
+  // Use cases. stage + delta direction + likelihood are kept consistent on purpose:
+  //  good  → rising line, up delta, high likelihood
+  //  warn  → softening line, down delta, moderate likelihood
+  //  risk  → falling line, down delta, low likelihood
+  const CARDS = [
+    { stage:'good', use:'Sales CRM', initials:'AC', name:'Acme Corp', sub:'Enterprise SaaS · Negotiation',
+      vlabel:'Deal value', value:82384, unit:'$', dir:'up', delta:'+6.2%', period:'this week',
+      likeLabel:'Win likelihood', like:74, cta:'Advance deal', ctaIcon:'arrow_forward',
+      cap:'<b>Sales CRM</b> — value rising, win likelihood high. All three signals agree.' },
+
+    { stage:'risk', initials:'NS', use:'Sales CRM', name:'Northstar Inc', sub:'Mid-market Fintech · Qualified',
+      vlabel:'Deal value', value:24800, unit:'$', dir:'down', delta:'−9.4%', period:'this week',
+      likeLabel:'Win likelihood', like:21, cta:'Re-engage', ctaIcon:'send',
+      cap:'<b>The fix</b> — falling trend now reads with a <b>low</b> win likelihood (no contradiction).' },
+
+    { stage:'warn', icon:'home', use:'Real estate', name:'1242 Oak Street', sub:'58 days on market · Cedar Park',
+      vlabel:'List price', value:589000, unit:'$', dir:'down', delta:'−4.2%', period:'price cut',
+      likeLabel:'Sale likelihood', like:43, cta:'Reprice', ctaIcon:'sell',
+      cap:'<b>Real estate</b> — a repriced listing. Same card; “value” = list price, “likelihood” = sale odds.' },
+
+    { stage:'good', icon:'autorenew', use:'SaaS renewal', name:'Northwind Co.', sub:'Annual plan · Renews in 30d',
+      vlabel:'Contract value', value:48000, unit:'$', dir:'up', delta:'+8.0%', period:'usage MoM',
+      likeLabel:'Renewal likelihood', like:86, cta:'Send renewal', ctaIcon:'outgoing_mail',
+      cap:'<b>SaaS</b> — “likelihood” becomes renewal odds; usage up, renewal near-certain.' }
+  ];
+
+  function buildChart(card, d){
+    const W = 312, H = 364;
+    const TOP = 58, BAND = 92;
+    const acc = ACCENTS[d.stage].c;
+    const data = d._series;
+    const min = Math.min(...data), max = Math.max(...data), rng = (max-min)||1;
+    const pts = data.map((v,i)=>{
+      const x = (i/(data.length-1)) * W;
+      const y = TOP + (1 - (v-min)/rng) * BAND;
+      return [x, y];
+    });
+    const line = pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+    const area = line + ` L${W},${H} L0,${H} Z`;
+    const last = pts[pts.length-1];
+    const gid = 'sgg-' + Math.random().toString(36).slice(2,8);
+    const chart = $('.sg-chart', card);
+    chart.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+      <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${acc}" stop-opacity="0.24"/>
+        <stop offset="55%" stop-color="${acc}" stop-opacity="0.06"/>
+        <stop offset="100%" stop-color="${acc}" stop-opacity="0"/>
+      </linearGradient></defs>
+      <path d="${area}" fill="url(#${gid})" class="sg-area"/>
+      <path d="${line}" class="sg-line" stroke="${acc}"/>
+    </svg>`;
+    const lineEl = $('.sg-line', card), areaEl = $('.sg-area', card);
+    const len = lineEl.getTotalLength();
+    lineEl.style.transition = 'none';
+    lineEl.style.strokeDasharray = len; lineEl.style.strokeDashoffset = len;
+    areaEl.style.opacity = '0';
+    setTimeout(()=>{
+      lineEl.style.transition = 'stroke-dashoffset 900ms cubic-bezier(.33,1,.68,1)';
+      lineEl.style.strokeDashoffset = '0';
+      areaEl.style.transition = 'opacity 700ms ease 200ms'; areaEl.style.opacity = '1';
+    }, 40);
+    setTimeout(()=>{
+      lineEl.style.transition = 'none'; lineEl.style.strokeDasharray = 'none'; lineEl.style.strokeDashoffset = '0';
+      areaEl.style.transition = 'none'; areaEl.style.opacity = '1';
+    }, 1150);
+    const dot = $('.sg-dot', card);
+    dot.style.left = (last[0]/W*100) + '%';
+    dot.style.top  = (last[1]/H*100) + '%';
+  }
+
+  let toastT;
+  function toast(msg){
+    $('#toastMsg').textContent = msg; const t = $('#toast'); t.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('show'), 1700);
+  }
+  function ripple(e, el){
+    const r = el.getBoundingClientRect(), size = Math.max(r.width, r.height);
+    const s = document.createElement('span'); s.className='sg-ripple';
+    s.style.width=s.style.height=size+'px';
+    s.style.left=((e.clientX||r.left+r.width/2)-r.left-size/2)+'px';
+    s.style.top=((e.clientY||r.top+r.height/2)-r.top-size/2)+'px';
+    el.appendChild(s); setTimeout(()=>s.remove(),540);
+  }
+  function flash(card){ const f = $('.sg-flash', card); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); }
+
+  // stage is derived from the data so it can never contradict itself
+  function stageFor(dir, like){
+    if (dir==='up' && like>=60) return 'good';
+    if (like<35 || (dir==='down' && like<50)) return like<35 ? 'risk' : 'warn';
+    return 'warn';
+  }
+  function applyStage(card, d){
+    const st = (d.like>=60 && d.dir==='up') ? 'good' : (d.like<35 ? 'risk' : 'warn');
+    d.stage = st;
+    card.className = 'sg-card lift acc-' + st;
+  }
+
+  function setDelta(card, d){
+    const pill = $('.sg-delta-pill', card);
+    const up = d.dir==='up';
+    pill.className = 'sg-delta-pill ' + (up?'up':'down');
+    pill.innerHTML = `<span class="material-icons">${up?'trending_up':'trending_down'}</span>${d.delta}`;
+    $('.sg-period', card).textContent = d.period;
+  }
+  function setMeter(card, d){
+    $('.sg-meter-val', card).textContent = d.like + '%';
+    const fill = $('.sg-meter-fill', card);
+    fill.style.width = '0%';
+    void fill.offsetWidth;                 // reflow → gives the transition a start point (no rAF, works offscreen)
+    fill.style.width = Math.max(3, Math.min(100, d.like)) + '%';
+  }
+
+  function build(d){
+    d._series = genSeries(26, d.dir==='up' ? 1 : -1);
+    const shell = document.createElement('div'); shell.className = 'shell zoom';
+    const card = document.createElement('div'); card.className = 'sg-card lift acc-' + d.stage; card.tabIndex = 0;
+    card.setAttribute('role','button'); card.setAttribute('aria-label', 'Open detail for ' + d.name);
+    const avatarInner = d.icon ? `<span class="material-symbols-outlined">${d.icon}</span>` : d.initials;
+    card.innerHTML = `
+      <div class="sg-chart"></div>
+      <div class="sg-dot"></div>
+      <div class="sg-flash"></div>
+      <div class="sg-inner">
+        <div class="sg-head">
+          <div class="sg-id">
+            <div class="sg-avatar">${avatarInner}</div>
+            <div style="min-width:0">
+              <div class="sg-name">${d.name}</div>
+              <div class="sg-sub">${d.sub}</div>
+            </div>
+          </div>
+          <button class="sg-sync" data-sync aria-label="Sync data"><span class="material-symbols-outlined">sync</span><span class="sg-upd">2h ago</span></button>
+        </div>
+        <div class="sg-spacer"></div>
+        <div class="sg-vlabel">${d.vlabel}<button class="sg-rangechip" data-rangechip aria-label="Change trend range">Monthly<span class="material-symbols-outlined">expand_more</span></button></div>
+        <div class="sg-value" data-value></div>
+        <div class="sg-sub2">
+          <span class="sg-delta-pill"></span>
+          <span class="sg-period"></span>
+        </div>
+        <div class="sg-meter">
+          <div class="sg-meter-top">
+            <span class="sg-meter-label">${d.likeLabel}</span>
+            <span class="sg-meter-val">0%</span>
+          </div>
+          <div class="sg-meter-track"><div class="sg-meter-fill"></div></div>
+        </div>
+        <div class="sg-actions">
+          <button class="sg-cta" data-cta><span class="material-symbols-outlined">insights</span>Get Optimization Report</button>
+        </div>
+      </div>
+      <div class="sg-scrim" data-scrim></div>
+      <div class="sg-rangepop" data-rangepop>
+        <div class="sg-poplabel"><span class="material-symbols-outlined">timeline</span>Trend range</div>
+        <div class="seg vert" data-seg-managed role="group" aria-label="Trend range">
+          <span class="seg-pill"></span>
+          <button data-r="Today"><span class="material-symbols-outlined">today</span>Today</button>
+          <button data-r="Weekly"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><rect x="1.5" y="3.5" width="15" height="13" rx="2" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M1.5 7.5h15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M5.5 1.5v4M12.5 1.5v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><text x="9" y="14.5" text-anchor="middle" fill="currentColor" font-size="5.8" font-weight="900" font-family="Montserrat,sans-serif">7</text></svg>Weekly</button>
+          <button class="active" data-r="Monthly"><span class="material-symbols-outlined">calendar_month</span>Monthly</button>
+          <button data-r="Quarterly"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><circle cx="9" cy="9" r="7.5" stroke="currentColor" stroke-width="1.4" fill="none" opacity="0.3"/><path d="M9 1.5A7.5 7.5 0 0 1 16.5 9L13.5 9A4.5 4.5 0 0 0 9 4.5Z" fill="currentColor"/><circle cx="9" cy="9" r="4.5" stroke="currentColor" stroke-width="1.4" fill="none" opacity="0.3"/></svg>Quarterly</button>
+          <button data-r="Yearly"><span class="material-symbols-outlined">event_repeat</span>Yearly</button>
+        </div>
+        <div class="sg-poploader" data-poploader></div>
+      </div>`;
+    shell.appendChild(card);
+    const cap = document.createElement('p'); cap.className='cap'; cap.innerHTML = d.cap;
+    const wrap = document.createElement('div'); wrap.appendChild(shell); wrap.appendChild(cap);
+    $('#row').appendChild(wrap);
+
+    setDelta(card, d);
+    setMeter(card, d);
+    buildChart(card, d);
+    setTimeout(()=> tweenValue(card, 0, d), 60);
+
+    wire(card, d);
+    return card;
+  }
+
+  function tweenValue(card, from, d){
+    const to = d.value;
+    const el = $('[data-value]', card); const t0 = performance.now(); let raf;
+    function step(now){ let p=Math.min(1,(now-t0)/750); p=1-Math.pow(1-p,3);
+      el.textContent = fmtMoney(from+(to-from)*p, d.unit);
+      if(p<1) raf=requestAnimationFrame(step); }
+    raf=requestAnimationFrame(step);
+    setTimeout(()=>{ cancelAnimationFrame(raf); el.textContent=fmtMoney(to, d.unit); }, 810);
+  }
+
+  function sync(card, d){
+    const btn = $('[data-sync]', card);
+    btn.classList.add('spin'); setTimeout(()=>btn.classList.remove('spin'), 700);
+    d._series = genSeries(26, d.dir==='up' ? 1 : -1);
+    buildChart(card, d);
+    tweenValue(card, Math.round(d.value*0.99), d);
+    $('.sg-upd', card).textContent = 'just now';
+    toast('Synced · ' + d.name);
+  }
+
+  // In-button thinking sequence — morphing steps, no card values change.
+  function runThinking(cta, d){
+    if (cta.classList.contains('thinking') || cta.classList.contains('done')) return;
+    const steps = [
+      'Analyzing trend',
+      'Scoring signals',
+      'Modeling scenarios',
+      'Drafting report'
+    ];
+    const original = cta.innerHTML;
+    cta.classList.add('thinking');
+    cta.setAttribute('aria-busy', 'true');
+    cta.innerHTML = '<span class="sg-spin"></span><span class="sg-step morph">' + steps[0] + '</span>';
+    const stepEl = $('.sg-step', cta);
+    let i = 0;
+    const STEP_MS = 3000;
+    const timer = setInterval(()=>{
+      i++;
+      if (i < steps.length){
+        stepEl.classList.remove('morph'); void stepEl.offsetWidth;
+        stepEl.textContent = steps[i]; stepEl.classList.add('morph');
+      } else {
+        clearInterval(timer);
+        // morph spinner → check, swap to "Report ready"
+        cta.classList.remove('thinking'); cta.classList.add('done');
+        cta.innerHTML = '<span class="sg-check"><span class="material-symbols-outlined">check</span></span><span class="sg-step morph">Report ready</span>';
+        toast('Optimization report ready · ' + d.name);
+        setTimeout(()=>{
+          cta.classList.remove('done');
+          cta.removeAttribute('aria-busy');
+          cta.innerHTML = original;
+        }, 1500);
+      }
+    }, STEP_MS);
+  }
+
+  function wire(card, d){
+    const cta = $('[data-cta]', card), syncBtn = $('[data-sync]', card), seg = $('.seg.vert', card);
+    const chip = $('[data-rangechip]', card);
+    const RANGE_PTS = { Today:24, Weekly:7, Monthly:30, Quarterly:13, Yearly:12 };
+    seg.__segInit = true;  // we own the vertical pill; stop _controls.js horizontal mover
+
+    function moveVert(){
+      const pill = seg.querySelector('.seg-pill');
+      const a = seg.querySelector('button.active');
+      if (!pill || !a) return;
+      pill.style.top = a.offsetTop + 'px';
+      pill.style.height = a.offsetHeight + 'px';
+    }
+    function openFilters(){ card.classList.add('filters-open'); moveVert(); }
+    function closeFilters(){ card.classList.remove('filters-open'); }
+    function toggleFilters(){ card.classList.contains('filters-open') ? closeFilters() : openFilters(); }
+
+    // initial pill placement without animating in
+    const pill0 = seg.querySelector('.seg-pill');
+    pill0.style.transition = 'none'; moveVert();
+    setTimeout(()=>{ pill0.style.transition = ''; moveVert(); }, 60);
+
+    const pop = $('[data-rangepop]', card);
+    seg.addEventListener('click', e=>{
+      const b = e.target.closest('button'); if(!b || !seg.contains(b)) return;
+      e.stopPropagation();
+      if (pop.classList.contains('loading')) return;             // ignore clicks mid-apply
+      seg.querySelectorAll('button').forEach(x=> x.classList.toggle('active', x===b));
+      moveVert();
+      b.classList.remove('just-picked'); void b.offsetWidth; b.classList.add('just-picked');
+      const label = b.dataset.r;
+      // let the user SEE the selection land, run a short "applying" loader, THEN close
+      pop.classList.add('loading');
+      setTimeout(()=>{
+        pop.classList.remove('loading');
+        chip.firstChild.textContent = label;                     // reflect choice on the chip
+        d._series = genSeries(RANGE_PTS[label] || 26, d.dir==='up' ? 1 : -1);
+        buildChart(card, d);
+        closeFilters();
+      }, 760);
+    });
+    chip.addEventListener('click', e=>{ e.stopPropagation(); toggleFilters(); });
+
+    cta.addEventListener('click', e=>{
+      e.stopPropagation(); ripple(e, cta);
+      runThinking(cta, d);
+    });
+    syncBtn.addEventListener('click', e=>{ e.stopPropagation(); sync(card, d); });
+    // click the card body (or the blur scrim) → toggle the filter
+    card.addEventListener('click', e=>{
+      if (e.target.closest('[data-rangepop],[data-rangechip],[data-cta],[data-sync]')) return;
+      toggleFilters();
+    });
+    card.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggleFilters(); } });
+  }
+
+  CARDS.forEach((d)=> build(d));
+
+  // click anywhere outside an open card closes its filter tooltip
+  document.addEventListener('click', e=>{
+    document.querySelectorAll('.sg-card.filters-open').forEach(card=>{
+      if (!card.contains(e.target)) card.classList.remove('filters-open');
+    });
+  });
+})();
+</script>
+<script src="_controls.js"></script>
+<script src="_darkmode.js"></script>
+</body></html>

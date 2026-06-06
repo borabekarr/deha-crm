@@ -1,0 +1,27 @@
+<!doctype html>
+<!-- @dsCard group="Brand" name="Radii" subtitle="6 → 24px + pill" viewport="700x180" --><html><head><meta charset="utf-8"><link rel="stylesheet" href="_base.css">
+<style>
+  .row { display:flex; align-items:flex-end; gap: 18px; flex-wrap: wrap; }
+  .ri { display:flex; flex-direction:column; align-items:flex-start; gap: 6px; }
+  .box { background: #FFFFFF; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.4); }
+  .b6  { width: 50px; height: 50px; border-radius: 6px; }
+  .b8  { width: 50px; height: 50px; border-radius: 8px; }
+  .b12 { width: 50px; height: 50px; border-radius: 12px; }
+  .b16 { width: 70px; height: 70px; border-radius: 16px; }
+  .b20 { width: 80px; height: 80px; border-radius: 20px; }
+  .b24 { width: 90px; height: 90px; border-radius: 24px; }
+  .pill { width: 80px; height: 32px; border-radius: 16px; }
+  .meta { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 10px; color: #64748B; }
+  .role { font-size: 11px; font-weight: 700; color: #0F172A; }
+</style>
+</head><body><div class="card">
+  <div class="row">
+    <div class="ri"><div class="box b6"></div><div class="role">xs</div><div class="meta">6px</div></div>
+    <div class="ri"><div class="box b8"></div><div class="role">sm · chip</div><div class="meta">8px</div></div>
+    <div class="ri"><div class="box b12"></div><div class="role">md</div><div class="meta">12px</div></div>
+    <div class="ri"><div class="box b16"></div><div class="role">lg · button</div><div class="meta">16px</div></div>
+    <div class="ri"><div class="box b20"></div><div class="role">xl · metric card</div><div class="meta">20px</div></div>
+    <div class="ri"><div class="box b24"></div><div class="role">2xl · hero / chart</div><div class="meta">24px</div></div>
+    <div class="ri"><div class="box pill"></div><div class="role">pill</div><div class="meta">16px</div></div>
+  </div>
+</div></body></html>

@@ -1,0 +1,359 @@
+<!doctype html>
+<!-- @dsCard group="Brand" name="FAB (expanding)" subtitle="Close btn fixed, distinct colors, dots bg, Montserrat Black, light/dark theme, no hover delay" viewport="700x720" --><html><head><meta charset="utf-8"><link rel="stylesheet" href="_base.css">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  body { background: #F8FAFC; }
+  .frame {
+    padding: 28px; display: flex; justify-content: center;
+    background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.10) 0%, rgba(248,250,252,1) 50%, #FFFFFF 100%);
+  }
+
+  /* ── Phone screen ──────────────────────────────────────────────── */
+  .fab-screen {
+    position: relative; width: 360px; height: 620px;
+    background: #FFFFFF; border-radius: 30px; overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(15,23,42,0.06);
+    font-family: 'Montserrat'; user-select: none;
+
+    /* ── expanded panel tokens (light mode) ──────────────────── */
+    --fp-bg:       #FFFFFF;
+    --fp-fg:       #0F172A;
+    --fp-sub:      #64748B;
+    --fp-sep:      rgba(15,23,42,0.07);
+    --fp-hover:    rgba(15,23,42,0.05);
+    --fp-close-bg: rgba(15,23,42,0.07);
+    --fp-close-fg: #64748B;
+    --fp-dots:     rgba(15,23,42,0.07);
+    --fp-shadow:
+      0 0 0 1px rgba(15,23,42,0.09),
+      0 30px 70px -12px rgba(15,23,42,0.25),
+      inset 0 1px 0 rgba(255,255,255,0.9);
+  }
+  html.dark .fab-screen {
+    background: #1E293B;
+    --fp-bg:       #0F172A;
+    --fp-fg:       #F1F5F9;
+    --fp-sub:      #64748B;
+    --fp-sep:      rgba(255,255,255,0.08);
+    --fp-hover:    rgba(255,255,255,0.07);
+    --fp-close-bg: rgba(255,255,255,0.10);
+    --fp-close-fg: #94A3B8;
+    --fp-dots:     rgba(255,255,255,0.12);
+    --fp-shadow:
+      0 30px 70px -12px rgba(0,0,0,0.65),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+
+  /* ── Backdrop content ──────────────────────────────────────────── */
+  .sc-content { padding: 26px 22px 0; }
+  .sc-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 22px; }
+  .sc-greet { font-size: 13px; font-weight: 600; color: #94A3B8; margin-bottom: 3px; }
+  .sc-name { font-size: 24px; font-weight: 800; color: #0F172A; letter-spacing: -0.02em; }
+  html.dark .sc-name { color: #F1F5F9; }
+  .sc-avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: #10B981; color: #fff; display: grid; place-items: center;
+    font-size: 14px; font-weight: 800;
+    background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+    background-size: 8px 8px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(15,23,42,0.18), inset 0 0 0 1px rgba(15,23,42,0.10);
+  }
+  .sc-hero {
+    background: #0F172A; color: #fff; border-radius: 22px;
+    padding: 22px 22px 20px; margin-bottom: 22px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  .sc-hero-label { font-size: 12px; font-weight: 600; color: #94A3B8; margin-bottom: 10px; }
+  .sc-hero-row { display: flex; align-items: baseline; gap: 10px; }
+  .sc-hero-num { font-size: 36px; font-weight: 900; letter-spacing: -0.03em; }
+  .sc-hero-pill {
+    font-size: 11px; font-weight: 800; color: #fff; padding: 3px 9px; border-radius: 16px;
+    background: #10B981; display: inline-flex; align-items: center; gap: 3px;
+  }
+  .sc-hero-pill .material-icons { font-size: 12px; }
+  .sc-sec { font-size: 12px; font-weight: 800; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.10em; margin-bottom: 14px; }
+  .sc-list { display: flex; flex-direction: column; gap: 14px; }
+  .sc-item { display: flex; align-items: center; gap: 13px; }
+  .sc-ic { width: 40px; height: 40px; border-radius: 50%; background: #F1F5F9; display: grid; place-items: center; color: #475569; font-size: 15px; font-weight: 800; flex-shrink: 0; }
+  html.dark .sc-ic { background: #0F172A; color: #94A3B8; }
+  .sc-it-name { font-size: 14px; font-weight: 700; color: #0F172A; }
+  html.dark .sc-it-name { color: #F1F5F9; }
+  .sc-it-meta { font-size: 12px; font-weight: 500; color: #94A3B8; }
+  .sc-it-amt { margin-left: auto; font-size: 14px; font-weight: 800; color: #0F172A; }
+  html.dark .sc-it-amt { color: #F1F5F9; }
+
+  /* ── Blur veil ─────────────────────────────────────────────────── */
+  .fab-veil {
+    position: absolute; inset: 0; z-index: 5;
+    background: rgba(15,23,42,0.28);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    opacity: 0; pointer-events: none;
+    transition: opacity 320ms ease;
+  }
+  .fab-screen.open .fab-veil { opacity: 1; pointer-events: auto; }
+
+  /* collapsed FAB: grid-line background (not dots) + bolder icon */
+  .fab {
+    position: absolute; right: 18px; bottom: 18px; z-index: 6;
+    width: 58px; height: 58px; border-radius: 9999px;
+    background: #10B981;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+    background-size: 9px 9px;
+    box-shadow:
+      0 14px 34px -8px rgba(16,185,129,0.55),
+      inset 0 1px 0 rgba(255,255,255,0.5),
+      inset 0 -2px 0 rgba(0,0,0,0.22),
+      inset 0 0 0 1px rgba(255,255,255,0.15);
+    cursor: pointer; overflow: hidden;
+    transition:
+      width 500ms cubic-bezier(.34,1.2,.5,1),
+      height 500ms cubic-bezier(.34,1.2,.5,1),
+      border-radius 440ms cubic-bezier(.34,1.2,.5,1),
+      background-color 300ms ease,
+      background-size 300ms ease,
+      box-shadow 300ms ease;
+  }
+
+  /* ── Expanded panel: thinner dots, NO border-radius transition on open ── */
+  .fab-screen.open .fab {
+    width: calc(100% - 32px); height: 460px;
+    border-radius: 26px;  /* snaps instantly — no radius animation on open */
+    background-color: var(--fp-bg);
+    background-image:
+      radial-gradient(circle, var(--fp-dots) 0.6px, transparent 1px);
+    background-size: 22px 22px;
+    box-shadow: var(--fp-shadow);
+    /* omit border-radius from transition so it snaps to 26px immediately */
+    transition:
+      width 500ms cubic-bezier(.34,1.2,.5,1),
+      height 500ms cubic-bezier(.34,1.2,.5,1),
+      background-color 300ms ease,
+      background-size 300ms ease,
+      box-shadow 300ms ease;
+  }
+
+  /* ── Plus glyph ────────────────────────────────────────────────── */
+  .fab-plus {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    color: #fff;
+    transition: opacity 180ms ease, transform 280ms cubic-bezier(.4,0,.2,1);
+  }
+  .fab-plus .material-icons { font-size: 28px; -webkit-text-stroke: 1px rgba(255,255,255,0.9); }
+  .fab-screen.open .fab-plus { opacity: 0; transform: rotate(45deg) scale(0.6); }
+
+  /* ── Menu content ──────────────────────────────────────────────── */
+  .fab-menu {
+    position: absolute; inset: 0; padding: 15px 14px 14px;
+    display: flex; flex-direction: column;
+    pointer-events: none;
+  }
+  .fab-screen.open .fab-menu { pointer-events: auto; }
+
+  /* Header row: title left, close right — shown together */
+  .fab-menu-hd {
+    display: flex; align-items: flex-start; gap: 8px;
+    opacity: 0; transform: translateY(10px);
+    transition: opacity 220ms ease, transform 320ms cubic-bezier(.32,1.32,.5,1);
+  }
+  .fab-screen.open .fab-menu-hd { opacity: 1; transform: none; transition-delay: 120ms; }
+
+  .fab-head { flex: 1; min-width: 0; padding-top: 1px; padding-left: 8px; }
+  .fab-head-title { font-size: 17px; font-weight: 900; color: var(--fp-fg); letter-spacing: -0.015em; }
+  .fab-head-sub { font-size: 12px; font-weight: 500; color: var(--fp-sub); margin-top: 3px; line-height: 1.3; }
+
+  /* Close button — lives in the header row, no position:absolute */
+  .fab-close {
+    flex-shrink: 0; width: 33px; height: 33px; border-radius: 50%;
+    background: var(--fp-close-bg); border: none; cursor: pointer;
+    display: grid; place-items: center; color: var(--fp-close-fg);
+    opacity: 0; transform: scale(0.5); pointer-events: none;
+    transition: opacity 200ms ease, transform 240ms cubic-bezier(.32,1.32,.5,1), background 150ms;
+  }
+  .fab-close:hover { filter: brightness(1.12); }
+  .fab-close .material-icons { font-size: 18px; }
+  .fab-screen.open .fab-close { opacity: 1; transform: scale(1); pointer-events: auto; transition-delay: 160ms; }
+
+  .fab-menu-sep {
+    height: 1px; background: var(--fp-sep);
+    margin: 10px 0 6px;
+    opacity: 0; transition: opacity 200ms ease;
+  }
+  .fab-screen.open .fab-menu-sep { opacity: 1; transition-delay: 140ms; }
+
+  /* Menu items */
+  .fab-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 11px 8px; border-radius: 14px; cursor: pointer;
+    opacity: 0; transform: translateY(14px);
+    transition: opacity 200ms ease, transform 340ms cubic-bezier(.32,1.32,.5,1), background 80ms;
+  }
+  /* ── Hover: higher specificity overrides nth-child stagger delays ── */
+  .fab-screen.open .fab-item:nth-child(n):hover { transition-delay: 0ms !important; background: var(--fp-hover); }
+  .fab-item:hover { background: var(--fp-hover); transition-delay: 0ms !important; }
+  .fab-screen.open .fab-item { opacity: 1; transform: none; }
+  .fab-screen.open .fab-item:nth-child(3){ transition-delay: 175ms; }
+  .fab-screen.open .fab-item:nth-child(4){ transition-delay: 225ms; }
+  .fab-screen.open .fab-item:nth-child(5){ transition-delay: 275ms; }
+  .fab-screen.open .fab-item:nth-child(6){ transition-delay: 325ms; }
+
+  /* ── Icon tiles — each item has its own --ic-bg ── */
+  .fab-item-ic {
+    width: 44px; height: 44px; border-radius: 13px; flex-shrink: 0;
+    display: grid; place-items: center; color: #fff;
+    background-color: var(--ic-bg, #10B981);
+    background-image:
+      radial-gradient(ellipse at top right, rgba(255,255,255,0.22) 0%, transparent 55%),
+      linear-gradient(rgba(255,255,255,0.12) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.12) 1px, transparent 1px);
+    background-size: cover, 7px 7px, 7px 7px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.55),
+      inset 0 -2px 0 rgba(0,0,0,0.22),
+      inset 0 0 0 1px rgba(15,23,42,0.12),
+      0 2px 6px rgba(0,0,0,0.10);
+  }
+  .fab-item-ic .material-symbols-outlined { font-size: 22px; text-shadow: 0 1px 2px rgba(0,0,0,0.35); filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15)); }
+
+  .fab-item-tx { flex: 1; min-width: 0; }
+  .fab-item-title { font-size: 15px; font-weight: 900; color: var(--fp-fg); margin-bottom: 2px; letter-spacing: -0.01em; }
+  .fab-item-sub { font-size: 12px; font-weight: 500; color: var(--fp-sub); line-height: 1.4; }
+  .fab-item .chev { color: var(--fp-sub); font-size: 18px; }
+
+  /* hint below the shell */
+  .hint { margin-top: 16px; text-align: center; font-size: 12px; font-weight: 600; color: #94A3B8; }
+  .hint b { color: #10B981; font-weight: 800; }
+</style>
+<link rel="stylesheet" href="_darkmode.css">
+</head><body>
+
+<div class="card" style="padding:0; background:#F8FAFC;">
+  <div class="frame">
+    <div>
+      <div class="shell">
+        <div class="fab-screen" id="screen">
+
+          <!-- Backdrop content -->
+          <div class="sc-content">
+            <div class="sc-top">
+              <div>
+                <div class="sc-greet">Good afternoon</div>
+                <div class="sc-name">Riley Chen</div>
+              </div>
+              <div class="sc-avatar">RC</div>
+            </div>
+            <div class="sc-hero">
+              <div class="sc-hero-label">Pipeline value</div>
+              <div class="sc-hero-row">
+                <div class="sc-hero-num">$1.24M</div>
+                <span class="sc-hero-pill"><span class="material-icons">trending_up</span>12%</span>
+              </div>
+            </div>
+            <div class="sc-sec">Recent activity</div>
+            <div class="sc-list">
+              <div class="sc-item">
+                <div class="sc-ic">AM</div>
+                <div><div class="sc-it-name">Acme Manufacturing</div><div class="sc-it-meta">Proposal sent · 2h ago</div></div>
+                <div class="sc-it-amt">$84K</div>
+              </div>
+              <div class="sc-item">
+                <div class="sc-ic">NW</div>
+                <div><div class="sc-it-name">Northwind Co.</div><div class="sc-it-meta">Call logged · 5h ago</div></div>
+                <div class="sc-it-amt">$32K</div>
+              </div>
+              <div class="sc-item">
+                <div class="sc-ic">VL</div>
+                <div><div class="sc-it-name">Vertex Labs</div><div class="sc-it-meta">New lead · Yesterday</div></div>
+                <div class="sc-it-amt">$19K</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Blur veil (click to close) -->
+          <div class="fab-veil" onclick="toggleFab(false)"></div>
+
+          <!-- Morphing FAB -->
+          <div class="fab" id="fab" onclick="onFabClick(event)">
+            <span class="fab-plus" data-comment-anchor="36b0650829-span"><span class="material-icons">add</span></span>
+
+            <div class="fab-menu" data-comment-anchor="e6564fcb10-div">
+
+              <!-- Header row: title + close aligned together, no dead space -->
+              <div class="fab-menu-hd">
+                <div class="fab-head" data-comment-anchor="fc6847bf5d-div">
+                  <div class="fab-head-title" data-comment-anchor="251ccb71ca-div">Quick create</div>
+                  <div class="fab-head-sub">Add something to your workspace</div>
+                </div>
+                <button class="fab-close" onclick="event.stopPropagation(); toggleFab(false);" aria-label="Close" data-comment-anchor="3e39bafc2b-button">
+                  <span class="material-icons">close</span>
+                </button>
+              </div>
+
+              <div class="fab-menu-sep"></div>
+
+              <!-- New lead — emerald -->
+              <div class="fab-item" style="--ic-bg:#10B981" onclick="pick(event,'New lead')">
+                <div class="fab-item-ic"><span class="material-symbols-outlined">person_add</span></div>
+                <div class="fab-item-tx">
+                  <div class="fab-item-title">New lead</div>
+                  <div class="fab-item-sub">Capture a contact and start a pipeline.</div>
+                </div>
+                <span class="material-symbols-outlined chev">chevron_right</span>
+              </div>
+
+              <!-- Log activity — blue -->
+              <div class="fab-item" style="--ic-bg:#3B82F6" onclick="pick(event,'Log activity')">
+                <div class="fab-item-ic"><span class="material-symbols-outlined">bolt</span></div>
+                <div class="fab-item-tx">
+                  <div class="fab-item-title">Log activity</div>
+                  <div class="fab-item-sub">Record a call, email, or meeting note.</div>
+                </div>
+                <span class="material-symbols-outlined chev">chevron_right</span>
+              </div>
+
+              <!-- Create task — violet · "done" icon changed to check_circle -->
+              <div class="fab-item" style="--ic-bg:#8B5CF6" onclick="pick(event,'Create task')">
+                <div class="fab-item-ic"><span class="material-symbols-outlined" data-comment-anchor="1ef6ea96fb-span">check_circle</span></div>
+                <div class="fab-item-tx">
+                  <div class="fab-item-title">Create task</div>
+                  <div class="fab-item-sub">Add a follow-up with an owner and due date.</div>
+                </div>
+                <span class="material-symbols-outlined chev">chevron_right</span>
+              </div>
+
+              <!-- New deal — orange -->
+              <div class="fab-item" style="--ic-bg:#F97316" onclick="pick(event,'New deal')">
+                <div class="fab-item-ic"><span class="material-symbols-outlined">handshake</span></div>
+                <div class="fab-item-tx">
+                  <div class="fab-item-title">New deal</div>
+                  <div class="fab-item-sub">Open an opportunity in your pipeline.</div>
+                </div>
+                <span class="material-symbols-outlined chev">chevron_right</span>
+              </div>
+
+            </div><!-- /.fab-menu -->
+          </div><!-- /.fab -->
+
+        </div><!-- /.fab-screen -->
+      </div><!-- /.shell -->
+      <div class="hint">Tap the <b>+</b> button · Esc to close</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const screen = document.getElementById('screen');
+  function toggleFab(open) { screen.classList.toggle('open', open); }
+  function onFabClick(e) {
+    if (!screen.classList.contains('open')) toggleFab(true);
+  }
+  function pick(e, label) {
+    e.stopPropagation();
+    toggleFab(false);
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') toggleFab(false); });
+</script>
+<script src="_darkmode.js"></script>
+</body></html>
