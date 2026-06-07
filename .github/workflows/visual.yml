@@ -18,15 +18,15 @@ jobs:
     name: Playwright visual regression
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v5
         with:
           run_install: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -40,9 +40,10 @@ jobs:
 
       - name: Upload Playwright report and diff artifacts
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: playwright-visual-report
+          if-no-files-found: ignore
           path: |
             apps/web/playwright-report/
             apps/web/test-results/
