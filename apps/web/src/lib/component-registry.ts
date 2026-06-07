@@ -178,6 +178,43 @@ export const registry: RegistryEntry[] = [
     sourceHtml: '/design-system/preview/components-cards.html',
     Component: lazy(() => import('@/components/design-system/cards/Cards')),
   },
+  {
+    slug: 'controls',
+    name: 'Controls',
+    category: 'Primitives',
+    subtitle: 'Segmented control, toggle switch, slider',
+    viewport: { width: 700, height: 240 },
+    sourceHtml: '/design-system/preview/components-controls.html',
+    Component: lazy(() => import('@/components/design-system/controls/Controls')),
+  },
+  {
+    slug: 'fab',
+    name: 'FAB',
+    category: 'Primitives',
+    subtitle: 'Expanding floating action button (light/dark)',
+    viewport: { width: 700, height: 720 },
+    sourceHtml: '/design-system/preview/components-fab.html',
+    Component: lazy(() => import('@/components/design-system/fab/Fab')),
+  },
+  // ── Metrics & Charts ──────────────────────────────────────────────────────
+  {
+    slug: 'metric-card',
+    name: 'Metric card',
+    category: 'Metrics & Charts',
+    subtitle: 'Numeral + delta + sparkline; click to expand',
+    viewport: { width: 700, height: 320 },
+    sourceHtml: '/design-system/preview/components-metric-card.html',
+    Component: lazy(() => import('@/components/design-system/metric-card/MetricCard')),
+  },
+  {
+    slug: 'metric-circle',
+    name: 'Metric circle',
+    category: 'Metrics & Charts',
+    subtitle: 'Circular progress metric',
+    viewport: { width: 700, height: 320 },
+    sourceHtml: '/design-system/preview/components-metric-circle.html',
+    Component: lazy(() => import('@/components/design-system/metric-circle/MetricCircle')),
+  },
   // ── Data ─────────────────────────────────────────────────────────────────
   {
     slug: 'leads-table',

@@ -20,10 +20,17 @@ export function usePillIndicator(
     if (!root) return
     const btn = root.querySelector<HTMLElement>('button.active')
     if (!btn) return
+
+    const nextLeft = btn.offsetLeft
+    const nextWidth = btn.offsetWidth
+
+    // The bounce lives in CSS: .pills-seg-pill transitions `left` with an
+    // overshoot curve, so a slide springs slightly past the target then settles.
+    // Width transitions with a plain ease-out, so the box never stretches.
     setPos(prev =>
-      prev.left === btn.offsetLeft && prev.width === btn.offsetWidth
+      prev.left === nextLeft && prev.width === nextWidth
         ? prev
-        : { left: btn.offsetLeft, width: btn.offsetWidth }
+        : { left: nextLeft, width: nextWidth }
     )
   }
 

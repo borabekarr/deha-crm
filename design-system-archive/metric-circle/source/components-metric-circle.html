@@ -1,0 +1,235 @@
+<!doctype html>
+<!-- @dsCard group="Brand" name="Metric Circle" subtitle="Glowing capsule donut — percentage + dollar" --><html><head><meta charset="utf-8"><link rel="stylesheet" href="_base.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  body { background: #F8FAFC; }
+  .frame {
+    padding: 34px 30px;
+    display: flex; flex-direction: column; align-items: center; gap: 24px;
+    background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.10) 0%, rgba(248,250,252,1) 50%, #FFFFFF 100%);
+  }
+  .hint {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+    color: var(--fg4); display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 2px;
+  }
+  .hint .material-icons { font-size: 14px; }
+
+  /* ── Grey pill bezel (own shell per component) ──────────────────────── */
+  .shell.pill-shell { border-radius: 9999px; width: 180px; max-width: 100%; padding: 5px; }
+
+  /* ── The capsule ────────────────────────────────────────────────────── */
+  .metric-circle {
+    --c0: #0FB57C; --c1: #3DF0A6; --glow: #10E08F;
+    --num: #0F172A; --label: #94A3B8; --track: rgba(15,23,42,0.08);
+    position: relative;
+    width: 100%;
+    min-height: 62px;
+    border-radius: 9999px;
+    display: flex; align-items: center; gap: 11px;
+    padding: 0 18px 0 11px;
+    box-sizing: border-box;
+    cursor: default;
+    user-select: none;
+    font-family: var(--font-display);
+    background: linear-gradient(180deg, #FFFFFF 0%, #EDF1F7 100%);
+    border: 1px solid #E2E8F0;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,1),
+      inset 0 -3px 6px rgba(15,23,42,0.05),
+      0 16px 34px -16px rgba(15,23,42,0.24);
+    transition: none;
+  }
+
+  /* ── Ring ───────────────────────────────────────────────────────────── */
+  .ring-wrap { position: relative; width: 40px; height: 40px; flex-shrink: 0; }
+  .halo {
+    position: absolute; inset: -14%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 58%, var(--glow), transparent 62%);
+    opacity: 0.22; filter: blur(10px);
+    pointer-events: none;
+  }
+  .ring { position: relative; width: 40px; height: 40px; display: block; }
+  .track { fill: none; stroke: var(--track); stroke-width: 11; }
+  .prog {
+    fill: none; stroke-width: 11; stroke-linecap: round;
+    stroke-dasharray: 251.327;
+    transform: rotate(90deg); transform-origin: center; transform-box: fill-box;
+    filter: drop-shadow(0 0 4px var(--glow));
+    transition: stroke-dashoffset 950ms cubic-bezier(.34,1.56,.64,1), filter 500ms ease;
+  }
+  .s0 { stop-color: var(--c0); transition: stop-color 700ms ease; }
+  .s1 { stop-color: var(--c1); transition: stop-color 700ms ease; }
+
+  /* ── Text ───────────────────────────────────────────────────────────── */
+  /* Base state is visible; the pop is gated behind .anim (added by JS inside
+     rAF) so throttled/hidden tabs never freeze on the hidden keyframe. */
+  .metric-circle.anim .text-block { animation: textPop 720ms cubic-bezier(.34,1.56,.64,1); }
+  @keyframes textPop {
+    0%   { opacity: 0; transform: scale(0.8); }
+    60%  { opacity: 1; }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .num {
+    display: flex; align-items: baseline;
+    font-size: 19px; font-weight: 800; line-height: 1;
+    letter-spacing: -0.025em; color: var(--num);
+    font-variant-numeric: tabular-nums;
+    transform-origin: left center;
+  }
+  .num .cur { font-size: 15px; font-weight: 800; margin-right: 2px; opacity: 0.92; }
+  .num .suf { font-size: 15px; font-weight: 800; margin-left: 1px; }
+  .mc-label {
+    font-size: 11px; font-weight: 600; color: var(--label);
+    margin-top: 3px; letter-spacing: 0.005em;
+    transform-origin: left center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .metric-circle, .prog, .num, .label, .halo { transition: none !important; }
+    .text-block, .metric-circle.pop, .metric-circle.pop .ring { animation: none !important; }
+  }
+</style>
+<link rel="stylesheet" href="_darkmode.css">
+<style>
+  /* ── Dark mode (System A) — the neon capsule from the reference ─────── */
+  html.dark .metric-circle {
+    --num: #F8FAFC; --label: #868D97; --track: rgba(255,255,255,0.06);
+    background: radial-gradient(132% 130% at 50% -12%, #3E4248 0%, #2B2E33 47%, #1E2024 100%);
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.10),
+      inset 0 -4px 10px rgba(0,0,0,0.5),
+      0 22px 46px -18px rgba(0,0,0,0.75);
+  }
+  html.dark .halo { opacity: 0.42; }
+</style>
+</head><body>
+
+<div class="card" style="padding:0; background:#F8FAFC;">
+  <div class="frame" data-comment-anchor="metric-circle-frame">
+
+    <div class="shell pill-shell" data-comment-anchor="a59d45885b-div">
+      <div class="metric-circle" data-preset="emerald" data-format="pct" data-value="67" data-pct="0.67" data-screen-label="Metric · 67%" data-comment-anchor="1bc8e41b27-div">
+        <div class="ring-wrap">
+          <span class="halo"></span>
+          <svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
+            <defs><linearGradient id="grad-a" x1="0" y1="1" x2="1" y2="0">
+              <stop class="s0" offset="0%"></stop><stop class="s1" offset="100%"></stop>
+            </linearGradient></defs>
+            <circle class="track" cx="50" cy="50" r="40"></circle>
+            <circle class="prog" cx="50" cy="50" r="40" stroke="url(#grad-a)" stroke-dashoffset="82.94"></circle>
+          </svg>
+        </div>
+        <div class="text-block">
+          <div class="num" data-comment-anchor="ce14f9e4c0-div"><span class="num-val">67</span><span class="suf">%</span></div>
+          <div class="mc-label">Sales by Day</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="shell pill-shell">
+      <div class="metric-circle" data-preset="fuchsia" data-format="dollar" data-value="234" data-pct="0.58" data-screen-label="Metric · $234">
+        <div class="ring-wrap">
+          <span class="halo"></span>
+          <svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
+            <defs><linearGradient id="grad-b" x1="0" y1="1" x2="1" y2="0">
+              <stop class="s0" offset="0%"></stop><stop class="s1" offset="100%"></stop>
+            </linearGradient></defs>
+            <circle class="track" cx="50" cy="50" r="40"></circle>
+            <circle class="prog" cx="50" cy="50" r="40" stroke="url(#grad-b)" stroke-dashoffset="105.56"></circle>
+          </svg>
+        </div>
+        <div class="text-block">
+          <div class="num" data-comment-anchor="28e5645ddf-div"><span class="cur">$</span><span class="num-val">234</span></div>
+          <div class="mc-label">Sales by Day</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const C = 2 * Math.PI * 40; // 251.327
+  const PRESETS = {
+    emerald: { c0: '#0FB57C', c1: '#3DF0A6', glow: '#10E08F' },
+    fuchsia: { c0: '#C026D3', c1: '#FB7AD2', glow: '#E83BC4' },
+    violet:  { c0: '#6D28D9', c1: '#A78BFA', glow: '#8B5CF6' },
+    sky:     { c0: '#0284C7', c1: '#56C7F7', glow: '#27A6F0' },
+    amber:   { c0: '#EA8C0B', c1: '#FCD34D', glow: '#F9A825' },
+  };
+  const ORDER = Object.keys(PRESETS);
+
+  function applyPreset(pill, name) {
+    const p = PRESETS[name] || PRESETS.emerald;
+    pill.style.setProperty('--c0', p.c0);
+    pill.style.setProperty('--c1', p.c1);
+    pill.style.setProperty('--glow', p.glow);
+    pill.dataset.preset = name;
+  }
+  function setRing(pill, pct) {
+    pill.querySelector('.prog').style.strokeDashoffset = (C * (1 - pct)).toFixed(2);
+  }
+  const c1 = 1.70158, c3 = c1 + 1;
+  const easeOutBack = t => 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+
+  function tweenNumber(el, from, to, dur) {
+    const start = performance.now();
+    function frame(now) {
+      const t = Math.min(1, (now - start) / dur);
+      const v = Math.round(from + (to - from) * easeOutBack(t));
+      el.textContent = v;
+      if (t < 1) requestAnimationFrame(frame); else el.textContent = to;
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function update(pill) {
+    let name = ORDER[Math.floor(Math.random() * ORDER.length)];
+    if (name === pill.dataset.preset) name = ORDER[(ORDER.indexOf(name) + 1) % ORDER.length];
+    applyPreset(pill, name);
+
+    const pct = 0.18 + Math.random() * 0.78;
+    setRing(pill, pct);
+
+    const fmt = pill.dataset.format;
+    const from = parseFloat(pill.dataset.curValue);
+    const to = fmt === 'pct' ? Math.round(pct * 100) : Math.round(120 + pct * 460);
+    tweenNumber(pill.querySelector('.num-val'), from, to, 880);
+    pill.dataset.curValue = to;
+
+    pill.classList.remove('pop'); void pill.offsetWidth; pill.classList.add('pop');
+  }
+
+  document.querySelectorAll('.metric-circle').forEach((pill, i) => {
+    const prog = pill.querySelector('.prog');
+    const numVal = pill.querySelector('.num-val');
+    const value = parseFloat(pill.dataset.value);
+    const pct = parseFloat(pill.dataset.pct);
+    prog.style.strokeDasharray = C;
+    applyPreset(pill, pill.dataset.preset);
+    pill.dataset.curValue = value;
+
+    // Entrance: HTML already shows the final state. Reset to hidden and sweep
+    // back up — but ONLY inside rAF, so a throttled/hidden tab keeps the final
+    // state instead of freezing on "empty".
+    setTimeout(() => {
+      requestAnimationFrame(() => {
+        pill.classList.add('anim');
+        prog.style.transition = 'none';
+        prog.style.strokeDashoffset = C;   // empty
+        numVal.textContent = '0';
+        requestAnimationFrame(() => {
+          prog.style.transition = '';
+          setRing(pill, pct);
+          tweenNumber(numVal, 0, value, 980);
+        });
+      });
+    }, 100 + i * 150);
+
+  });
+</script>
+<script src="_darkmode.js"></script>
+</body></html>

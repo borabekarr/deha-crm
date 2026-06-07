@@ -146,7 +146,15 @@
   --tracking-wide:        0.05em;
   --tracking-wider:       0.10em;
   --tracking-widest:      0.15em;
+
+  /* Animation speed multiplier. Default 1 (normal). The UI library Slow-Down
+     toggle flips data-anim-slow on the root, scaling every calc()-wrapped
+     duration and delay across the design system. */
+  --anim-mult:            1;
 }
+
+/* Slow-Down toggle: quadruples all calc(<n>ms * var(--anim-mult)) timings. */
+:root[data-anim-slow="true"] { --anim-mult: 4; }
 
 /* =========================================================================
    Dark mode
