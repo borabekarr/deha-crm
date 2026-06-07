@@ -28,16 +28,7 @@
   position: absolute; top: 3px; bottom: 3px; left: 0; width: 0;
   background: #0F172A; border-radius: 9999px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.18); z-index: 0;
-  transition: left calc(280ms * var(--anim-mult)) cubic-bezier(.22,1,.36,1), width calc(280ms * var(--anim-mult)) cubic-bezier(.22,1,.36,1);
-}
-
-/* Squash-against-the-contact-side bounce for the segmented pill.
-   Gated behind .seg-armed so it never fires on initial page load. */
-@keyframes seg-squash {
-  0%   { transform: scaleX(1); }
-  45%  { transform: scaleX(.88); }
-  75%  { transform: scaleX(1.04); }
-  100% { transform: scaleX(1); }
+  transition: left 300ms cubic-bezier(.22,1,.36,1), width 300ms cubic-bezier(.22,1,.36,1);
 }
 .seg button {
   position: relative; z-index: 1;
@@ -45,7 +36,7 @@
   font-size: 12px; font-weight: 800; border: none; background: none;
   color: #64748B; cursor: pointer; font-family: 'Montserrat', sans-serif;
   white-space: nowrap;
-  transition: color calc(240ms * var(--anim-mult)), transform calc(120ms * var(--anim-mult)) cubic-bezier(.22,1,.36,1);
+  transition: color 240ms, transform 120ms cubic-bezier(.22,1,.36,1);
 }
 .seg button.active { color: #FFFFFF; font-weight: 900; }
 .seg button:active { transform: scale(0.93); }
@@ -69,43 +60,18 @@
 .sw-base {
   width: 60px; height: 32px; border-radius: 9999px; position: relative;
   cursor: pointer; user-select: none; display: inline-block; flex-shrink: 0;
-  transition: transform calc(140ms * var(--anim-mult)) cubic-bezier(.22,1,.36,1);
+  transition: transform 140ms cubic-bezier(.22,1,.36,1);
 }
 .sw-base:active { transform: scale(0.95); }
 .sw-base::after {
-  content: ''; position: absolute; top: 4px; left: 4px;
-  width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%;
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 28px; height: 28px; box-sizing: border-box; border-radius: 50%;
   background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,1);
-  transition: left calc(280ms * var(--anim-mult)) cubic-bezier(.22,1,.36,1), width calc(220ms * var(--anim-mult)) cubic-bezier(.22,1,.36,1), background calc(200ms * var(--anim-mult));
+  transition: left 280ms cubic-bezier(.34,1.56,.64,1), width 220ms cubic-bezier(.34,1.56,.64,1), background 200ms;
 }
 /* iOS-style knob stretch while pressed */
-.sw-base:active::after { width: 30px; }
-.sw-on:active::after { left: 26px; }
-
-/* Squash-against-the-contact-side bounce. The knob halts exactly at its rim
-   (non-overshoot ease above), then this scaleX dip-and-recover reads as the
-   knob flattening against the side it landed on. Gated behind .sw-armed so it
-   never fires on initial page load (initial markup is sw-base sw-off). */
-@keyframes sw-squash-right {
-  0%   { transform: scaleX(1); }
-  45%  { transform: scaleX(.88); }
-  75%  { transform: scaleX(1.04); }
-  100% { transform: scaleX(1); }
-}
-@keyframes sw-squash-left {
-  0%   { transform: scaleX(1); }
-  45%  { transform: scaleX(.88); }
-  75%  { transform: scaleX(1.04); }
-  100% { transform: scaleX(1); }
-}
-.sw-armed.sw-on::after {
-  transform-origin: right center;
-  animation: sw-squash-right calc(260ms * var(--anim-mult)) cubic-bezier(.22,1,.36,1);
-}
-.sw-armed.sw-off::after {
-  transform-origin: left center;
-  animation: sw-squash-left calc(260ms * var(--anim-mult)) cubic-bezier(.22,1,.36,1);
-}
+.sw-base:active::after { width: 34px; }
+.sw-on:active::after { left: 24px; }
 .sw-off { background: #CBD5E1; }
 .sw-on {
   background: #10B981;
@@ -117,4 +83,4 @@
     inset 0 -2px 0 rgba(15,23,42,0.14),
     inset 0 0 0 1px rgba(15,23,42,0.08);
 }
-.sw-on::after { left: 32px; }
+.sw-on::after { left: 30px; }

@@ -1,0 +1,276 @@
+<!doctype html>
+<!-- @dsCard group="Brand" name="Metric card" subtitle="Hero numeral + delta chip + sparkline" viewport="700x220" --><html><head><meta charset="utf-8"><link rel="stylesheet" href="_base.css">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  body { background: #F8FAFC; }
+  .frame { padding: 24px; background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.10) 0%, rgba(248,250,252,1) 50%, #FFFFFF 100%); }
+  .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  .metric {
+    background: rgba(255,255,255,0.7); backdrop-filter: blur(40px);
+    border: 1px solid #CBD5E1;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 -2px 0 rgba(15,23,42,0.14), inset 0 0 0 1px rgba(15,23,42,0.07);
+    border-radius: 20px; padding: 18px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'Montserrat';
+    cursor: pointer;
+    user-select: none;
+  }
+  /* Hover motion is handled by the wrapping .shell.zoom (grey + card move as one). */
+
+  .m-left { display:flex; flex-direction:column; gap: 12px; }
+  .m-label { font-size: 14px; font-weight: 700; color: #475569; display:flex; align-items:center; gap: 6px; }
+  .m-label .material-symbols-outlined { font-size: 16px; }
+  .m-num { font-size: 32px; font-weight: 800; color: #0F172A; letter-spacing: -0.02em; line-height: 1; }
+  .m-row { display:flex; align-items:center; gap: 8px; }
+  .m-delta { display:inline-flex; align-items:center; gap: 4px; color:#fff; font-size:11px; font-weight:800; padding: 3px 9px; border-radius: 16px; text-shadow: 0 1px 1px rgba(0,0,0,0.18); }
+  .m-delta .material-icons { font-size: 12px; }
+  .m-delta.up   { background: #10B981; background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px); background-size: 7px 7px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(15,23,42,0.18), inset 0 0 0 1px rgba(15,23,42,0.10); }
+  .m-delta.down { background: #EF4444; background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px); background-size: 7px 7px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(15,23,42,0.18), inset 0 0 0 1px rgba(15,23,42,0.10); }
+  .m-sub { font-size: 11px; color: #94A3B8; font-weight: 500; }
+
+  .m-spark {
+    width: 88px; height: 52px;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 18%, #000 82%, transparent 100%);
+            mask-image: linear-gradient(90deg, transparent 0%, #000 18%, #000 82%, transparent 100%);
+  }
+  .m-spark svg { display:block; width: 100%; height: 100%; overflow: visible; }
+
+  /* ── OVERLAY ── */
+  .exp-overlay {
+    position: fixed; inset: 0;
+    background: rgba(15,23,42,0.38);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 300;
+    opacity: 0; pointer-events: none;
+    transition: opacity 220ms;
+  }
+  .exp-overlay.open { opacity: 1; pointer-events: all; }
+
+  /* ── GRAY OUTER SHELL ── */
+  .exp-outer {
+    background: #D4DCE8;
+    border-radius: 30px;
+    padding: 10px;
+    width: 320px;
+    box-shadow:
+      0 32px 80px rgba(0,0,0,0.24),
+      0 6px 20px rgba(0,0,0,0.12);
+    transform: translateY(16px) scale(0.95);
+    transition: transform 300ms cubic-bezier(.22,1,.36,1);
+  }
+  .exp-overlay.open .exp-outer { transform: translateY(0) scale(1); }
+
+  /* ── WHITE INNER CARD ── */
+  .exp-card {
+    background: #FFFFFF;
+    border-radius: 22px;
+    overflow: hidden;
+    font-family: 'Montserrat';
+    box-shadow: inset 0 1px 0 rgba(255,255,255,1);
+  }
+
+  .exp-top {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 16px 0;
+  }
+  .exp-crumb {
+    font-size: 12px; font-weight: 600; color: #94A3B8;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .exp-crumb .material-symbols-outlined { font-size: 14px; }
+  .exp-crumb strong { color: #475569; font-weight: 700; }
+  .exp-close {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: #F1F5F9; border: none; cursor: pointer;
+    display: grid; place-items: center; color: #64748B;
+    transition: background 150ms;
+    flex-shrink: 0;
+  }
+  .exp-close:hover { background: #E2E8F0; }
+  .exp-close .material-icons { font-size: 15px; }
+
+  .exp-body { padding: 14px 16px 0; }
+  .exp-num-row { display: flex; align-items: baseline; gap: 8px; line-height: 1; }
+  .exp-num { font-size: 44px; font-weight: 900; color: #0F172A; letter-spacing: -0.03em; }
+  .exp-goal { font-size: 15px; font-weight: 600; color: #94A3B8; }
+
+  .exp-badge-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+  .exp-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    color: #fff; font-size: 11px; font-weight: 800;
+    padding: 4px 10px; border-radius: 16px;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.18);
+    background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+    background-size: 7px 7px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(15,23,42,0.18), inset 0 0 0 1px rgba(15,23,42,0.10);
+  }
+  .exp-badge .material-icons { font-size: 12px; }
+  .exp-badge.up   { background-color: #10B981; }
+  .exp-badge.down { background-color: #EF4444; }
+  .exp-period { font-size: 11px; color: #94A3B8; font-weight: 600; }
+
+  .exp-insight { font-size: 13px; color: #475569; font-weight: 500; line-height: 1.55; margin-top: 12px; }
+  .exp-insight b { color: #0F172A; font-weight: 800; }
+
+  .exp-chart-wrap { margin-top: 18px; }
+  .exp-chart-svg-wrap { position: relative; overflow: hidden; }
+  .exp-chart-svg-wrap svg { display: block; width: 100%; height: 128px; }
+  .exp-chart-svg-wrap::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 2;
+    background: linear-gradient(to right, #fff 0%, transparent 16%, transparent 84%, #fff 100%);
+  }
+  .exp-axis {
+    display: flex; justify-content: space-between;
+    padding: 5px 14px 14px;
+    font-size: 10px; font-weight: 700; color: #94A3B8;
+    font-family: 'Montserrat'; letter-spacing: 0.03em;
+  }
+</style>
+<link rel="stylesheet" href="_darkmode.css">
+</head><body>
+
+<div class="card" style="padding:0; background:#F8FAFC;">
+  <div class="frame" data-comment-anchor="644fb1c87b-div">
+    <div class="grid">
+
+      <div class="shell zoom"><div class="metric" onclick="openExpanded('leads')">
+        <div class="m-left">
+          <div class="m-label"><span class="material-symbols-outlined">group</span>New Leads</div>
+          <div class="m-num">142</div>
+          <div class="m-row">
+            <span class="m-delta up"><span class="material-icons">trending_up</span>+12%</span>
+            <span class="m-sub">vs last month</span>
+          </div>
+        </div>
+        <div class="m-spark">
+          <svg viewBox="0 0 100 40" preserveAspectRatio="none">
+            <defs><linearGradient id="mc1" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#10B981" stop-opacity="0.45"/><stop offset="100%" stop-color="#10B981" stop-opacity="0"/></linearGradient></defs>
+            <path d="M0,30 C18,32 30,22 48,18 C66,14 82,8 100,6 L100,40 L0,40 Z" fill="url(#mc1)"/>
+            <path d="M0,30 C18,32 30,22 48,18 C66,14 82,8 100,6" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div></div>
+
+      <div class="shell zoom"><div class="metric" onclick="openExpanded('value')">
+        <div class="m-left">
+          <div class="m-label"><span class="material-symbols-outlined">payments</span>Predicted Value</div>
+          <div class="m-num"><span style="margin-right:3px;">$</span>1.2M</div>
+          <div class="m-row">
+            <span class="m-delta down"><span class="material-icons">trending_down</span>−8.1%</span>
+          </div>
+        </div>
+        <div class="m-spark">
+          <svg viewBox="0 0 100 40" preserveAspectRatio="none">
+            <defs><linearGradient id="mc3" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#EF4444" stop-opacity="0.45"/><stop offset="100%" stop-color="#EF4444" stop-opacity="0"/></linearGradient></defs>
+            <path d="M0,8 C18,10 32,16 48,22 C64,26 78,30 100,32 L100,40 L0,40 Z" fill="url(#mc3)"/>
+            <path d="M0,8 C18,10 32,16 48,22 C64,26 78,30 100,32" fill="none" stroke="#EF4444" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div></div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Expanded detail overlay -->
+<div class="exp-overlay" id="expOverlay" onclick="handleOutsideClick(event)">
+  <div class="exp-outer">
+    <div class="exp-card" id="expCard"></div>
+  </div>
+</div>
+
+<script>
+const METRICS = {
+  leads: {
+    icon: 'group', label: 'New Leads',
+    num: '142', goal: '/ 160 goal',
+    dir: 'up', delta: '+12%', period: 'vs last month',
+    insight: 'You gained <b>+15 leads</b> this month. At this pace you\'ll hit your monthly target <b>4 days early</b>.',
+    color: '#10B981', gradId: 'expG1',
+    axes: ['Jan','Feb','Mar','Apr','May','Jun'],
+    solidLine: 'M0,91 C20,90 40,78 60,75 C80,72 100,68 120,66 C140,64 160,57 180,50 C200,43 220,38 240,33',
+    solidArea: 'M0,91 C20,90 40,78 60,75 C80,72 100,68 120,66 C140,64 160,57 180,50 C200,43 220,38 240,33 L240,120 L0,120 Z',
+    dashLine: 'M240,33 C260,28 280,24 300,20',
+    dashArea: 'M240,33 C260,28 280,24 300,20 L300,120 L240,120 Z',
+    dotX: 240, dotY: 33
+  },
+  value: {
+    icon: 'payments', label: 'Predicted Value',
+    num: '$1.2M', goal: '/ $1.4M target',
+    dir: 'down', delta: '−8.1%', period: 'vs last month',
+    insight: 'Portfolio value dropped by <b>$108K</b>. 3 listings need re-evaluation to recover momentum.',
+    color: '#EF4444', gradId: 'expG2',
+    axes: ['Jan','Feb','Mar','Apr','May','Jun'],
+    solidLine: 'M0,30 C20,32 40,37 60,40 C80,43 100,48 120,54 C140,60 160,63 180,66 C200,69 220,80 240,86',
+    solidArea: 'M0,30 C20,32 40,37 60,40 C80,43 100,48 120,54 C140,60 160,63 180,66 C200,69 220,80 240,86 L240,120 L0,120 Z',
+    dashLine: 'M240,86 C260,88 280,89 300,90',
+    dashArea: 'M240,86 C260,88 280,89 300,90 L300,120 L240,120 Z',
+    dotX: 240, dotY: 86
+  }
+};
+
+function openExpanded(key) {
+  const m = METRICS[key];
+  const arrowIcon = m.dir === 'up' ? 'trending_up' : 'trending_down';
+  document.getElementById('expCard').innerHTML = `
+    <div class="exp-top">
+      <div class="exp-crumb">
+        <span class="material-symbols-outlined">${m.icon}</span>
+        Dashboard <span style="color:#CBD5E1;margin:0 1px">/</span> <strong>${m.label}</strong>
+      </div>
+      <button class="exp-close" onclick="closeExpanded()"><span class="material-icons">close</span></button>
+    </div>
+    <div class="exp-body">
+      <div class="exp-num-row">
+        <div class="exp-num">${m.num}</div>
+        <div class="exp-goal">${m.goal}</div>
+      </div>
+      <div class="exp-badge-row">
+        <span class="exp-badge ${m.dir}"><span class="material-icons">${arrowIcon}</span>${m.delta}</span>
+        <span class="exp-period">${m.period}</span>
+      </div>
+      <div class="exp-insight">${m.insight}</div>
+    </div>
+    <div class="exp-chart-wrap">
+      <div class="exp-chart-svg-wrap">
+        <svg viewBox="0 0 300 120" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="${m.gradId}" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="${m.color}" stop-opacity="0.32"/>
+              <stop offset="100%" stop-color="${m.color}" stop-opacity="0.03"/>
+            </linearGradient>
+            <linearGradient id="${m.gradId}D" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="${m.color}" stop-opacity="0.12"/>
+              <stop offset="100%" stop-color="${m.color}" stop-opacity="0.01"/>
+            </linearGradient>
+          </defs>
+          <path d="${m.solidArea}" fill="url(#${m.gradId})"/>
+          <path d="${m.dashArea}" fill="url(#${m.gradId}D)"/>
+          <path d="${m.solidLine}" fill="none" stroke="${m.color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="${m.dashLine}" fill="none" stroke="${m.color}" stroke-width="2" stroke-dasharray="5,4" stroke-linecap="round" stroke-opacity="0.6"/>
+          <circle cx="${m.dotX}" cy="${m.dotY}" r="8" fill="${m.color}" fill-opacity="0.18"/>
+          <circle cx="${m.dotX}" cy="${m.dotY}" r="4.5" fill="${m.color}" stroke="#fff" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="exp-axis">${m.axes.map(a => `<span>${a}</span>`).join('')}</div>
+    </div>
+  `;
+  document.getElementById('expOverlay').classList.add('open');
+}
+
+function closeExpanded() {
+  document.getElementById('expOverlay').classList.remove('open');
+}
+
+function handleOutsideClick(e) {
+  if (e.target === document.getElementById('expOverlay')) closeExpanded();
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeExpanded(); });
+</script>
+<script src="_darkmode.js"></script>
+</body></html>
