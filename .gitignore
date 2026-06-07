@@ -72,3 +72,6 @@ apps/web/test-results/
 # rit3zh reference clones
 plans/archive/rit3zh-refs/*/node_modules/
 plans/archive/rit3zh-refs/*/*.lock
+
+# Static gallery snapshot (build artifact)
+design-system-dist/

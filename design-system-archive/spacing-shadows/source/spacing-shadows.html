@@ -1,0 +1,45 @@
+<!doctype html>
+<!-- @dsCard group="Brand" name="Shadows" subtitle="glass, glass-sm, recessed, emerald-glow" viewport="700x360" --><html><head><meta charset="utf-8"><link rel="stylesheet" href="_base.css">
+<style>
+  body { background: #F8FAFC; }
+  .grid3 { display:grid; grid-template-columns: repeat(3, 1fr); gap: 24px; padding: 30px 24px 36px; }
+  .sh { aspect-ratio: 1.2; background: #FFFFFF; border-radius: 20px; display:flex; flex-direction:column; justify-content:flex-end; padding: 14px; }
+  .sh-name { font-size: 13px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em; }
+  .sh-meta { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 9px; color: #64748B; margin-top: 3px; line-height: 1.4; }
+
+  .glass     { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.6); }
+  .inner     { background: rgba(255,255,255,0.95); border: 1px solid #CBD5E1;
+               box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 -2px 0 rgba(15,23,42,0.14), inset 0 0 0 1px rgba(15,23,42,0.07); }
+  .recessed  { background: #F1F5F9; box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.06); }
+  .emerald-glow {
+    background-color: #10B981;
+    background-image:
+      linear-gradient(to right,  rgba(255,255,255,0.07) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,0.07) 1px, transparent 1px);
+    background-size: 24px 24px;
+    box-shadow: 0 10px 40px -10px rgba(16,185,129,0.5), inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(15,23,42,0.18), inset 0 0 0 1px rgba(15,23,42,0.10);
+    color:#fff;
+  }
+  .emerald-glow .sh-name { color:#fff; }
+  .emerald-glow .sh-meta { color: rgba(255,255,255,0.8); }
+</style>
+</head><body><div class="card" style="padding:0; background:#F8FAFC;">
+  <div class="grid3">
+    <div class="sh inner">
+      <div class="sh-name">shadow-inner ★ default</div>
+      <div class="sh-meta">Cards, pills, badges<br>inset top 1px white · inset bottom –2px · inset ring 1px</div>
+    </div>
+    <div class="sh glass">
+      <div class="sh-name">shadow-glass</div>
+      <div class="sh-meta">Glass surface cards<br>4/6 + 2/4 + inset 1px</div>
+    </div>
+    <div class="sh recessed">
+      <div class="sh-name">shadow-recessed</div>
+      <div class="sh-meta">Pressed surfaces<br>inset 2/4</div>
+    </div>
+    <div class="sh emerald-glow" style="grid-column: 1 / 4; aspect-ratio: auto; height: 110px;">
+      <div class="sh-name">shadow-emerald-glow</div>
+      <div class="sh-meta">Hero accent cards · 10/40 –10 · rgba(16,185,129,0.5)</div>
+    </div>
+  </div>
+</div></body></html>

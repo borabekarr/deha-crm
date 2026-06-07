@@ -1,0 +1,13 @@
+.swatches { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; }
+.sw { aspect-ratio: 1; border-radius: 10px; display:flex; flex-direction:column; justify-content:flex-end; padding: 6px; font-size: 9px; font-weight: 700; line-height: 1.1; }
+.sw.lite { color: #0F172A; }
+.sw.dark { color: #fff; }
+.cn-label-row { display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 10px; }
+.cn-lr-title { font-weight: 900; font-size: 18px; letter-spacing: -0.02em; color: #0F172A; display:flex; align-items:center; gap:8px; }
+.cn-lr-dot { width: 14px; height: 14px; border-radius: 4px; background: #64748B; }
+.cn-lr-meta { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11px; color: #64748B; }
+
+/* Dark mode — chrome adapts, swatch fills stay */
+html.dark .card { background: #1E293B; background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.08) 0%, rgba(30,41,59,1) 50%, #1E293B 100%); }
+html.dark .cn-lr-title { color: #F1F5F9; }
+html.dark .cn-lr-meta { color: #94A3B8; }

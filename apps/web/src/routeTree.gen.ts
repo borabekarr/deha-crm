@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LeadsRouteImport } from './routes/leads'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ComponentsSlugRouteImport } from './routes/components.$slug'
 
 const LeadsRoute = LeadsRouteImport.update({
   id: '/leads',
@@ -22,31 +23,40 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ComponentsSlugRoute = ComponentsSlugRouteImport.update({
+  id: '/components/$slug',
+  path: '/components/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/leads': typeof LeadsRoute
+  '/components/$slug': typeof ComponentsSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/leads': typeof LeadsRoute
+  '/components/$slug': typeof ComponentsSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/leads': typeof LeadsRoute
+  '/components/$slug': typeof ComponentsSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/leads'
+  fullPaths: '/' | '/leads' | '/components/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/leads'
-  id: '__root__' | '/' | '/leads'
+  to: '/' | '/leads' | '/components/$slug'
+  id: '__root__' | '/' | '/leads' | '/components/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LeadsRoute: typeof LeadsRoute
+  ComponentsSlugRoute: typeof ComponentsSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/components/$slug': {
+      id: '/components/$slug'
+      path: '/components/$slug'
+      fullPath: '/components/$slug'
+      preLoaderRoute: typeof ComponentsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LeadsRoute: LeadsRoute,
+  ComponentsSlugRoute: ComponentsSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

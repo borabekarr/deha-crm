@@ -1,0 +1,105 @@
+<!doctype html>
+<!-- @dsCard group="Brand" name="Leads Table" subtitle="Premium CRM data grid — sort, filter, select, paginate, CSV export" viewport="1380x920" --><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="_base.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_leads-table.css">
+<link rel="stylesheet" href="_lead-popover.css">
+<link rel="stylesheet" href="_darkmode.css">
+</head>
+<body>
+
+<div class="lt-app" data-screen-label="Leads table">
+
+  <!-- main -->
+  <div class="lt-main">
+
+    <div class="lt-header" data-comment-anchor="9277cf7afc-div">
+      <div>
+        <div class="lt-title">Leads <span class="count" id="ltCount"></span></div>
+        <div class="lt-subtitle">Your pipeline, scored and triaged by AI — start where it matters today.</div>
+      </div>
+      <div class="lt-head-actions">
+        <button class="lt-iconbtn" id="ltDensity" aria-label="Row density" title="Row density"><span class="material-symbols-outlined">density_medium</span></button>
+        <button class="lt-iconbtn" id="ltCols" aria-label="Columns" title="Configure columns"><span class="material-symbols-outlined">tune</span></button>
+      </div>
+    </div>
+
+    <!-- search + quick filters -->
+    <div class="lt-controls" data-comment-anchor="24a5016eda-div">
+      <div class="lt-searchbar">
+        <div class="lt-search">
+          <span class="material-symbols-outlined">search</span>
+          <input type="text" id="ltSearch" placeholder="Ask AI — “hot leads in negotiation”" aria-label="Search leads" data-comment-anchor="f762bd98a3-input">
+        </div>
+        <button class="lt-btn" id="ltFilterBtn" data-comment-anchor="9f1184bd57-button"><span class="material-symbols-outlined">filter_alt</span>Filter</button>
+        <button class="lt-btn lt-btn-ai" id="ltAskBtn" data-comment-anchor="c340db3d07-button"><span class="material-symbols-outlined">bolt</span>Ask AI</button>
+      </div>
+      <div class="lt-quick">
+        <button class="lt-qf" data-qf="hot" data-comment-anchor="16d368bc87-button" style="--qf-c:#F97316">
+          <span class="material-symbols-outlined">local_fire_department</span>
+          <span class="lt-qf-tx"><span class="qf-lb">Sıcak adaylar</span><span class="qf-sub">Hot leads</span></span>
+        </button>
+        <button class="lt-qf" data-qf="value" style="--qf-c:#10B981">
+          <span class="material-symbols-outlined">apartment</span>
+          <span class="lt-qf-tx"><span class="qf-lb">Yüksek değerli</span><span class="qf-sub">≥ ₺1.8M</span></span>
+        </button>
+        <button class="lt-qf" data-qf="earn" data-comment-anchor="229cbb9eb5-button" style="--qf-c:#EAB308">
+          <span class="material-symbols-outlined">bolt</span>
+          <span class="lt-qf-tx"><span class="qf-lb">Earn today</span><span class="qf-sub">score ≥ 65</span></span>
+        </button>
+        <button class="lt-clear" id="ltClear"><span class="material-symbols-outlined">close</span>Clear</button>
+        <span class="lt-result-ct" id="ltResultCt"></span>
+      </div>
+    </div>
+
+    <!-- table -->
+    <div class="lt-table">
+      <div class="lt-thead lt-grid" data-comment-anchor="d7c76da855-div">
+        <div class="lt-th"><span class="lt-th-ic material-symbols-outlined">person</span>Lead</div>
+        <div class="lt-th num sortable" data-sort="score"><span class="lt-th-ic material-symbols-outlined">target</span>AI Score<span class="lt-sort"><span class="material-symbols-outlined">arrow_downward</span></span></div>
+        <div class="lt-th sortable" data-sort="value"><span class="lt-th-ic material-symbols-outlined">payments</span>Value<span class="lt-sort"><span class="material-symbols-outlined">arrow_downward</span></span></div>
+        <div class="lt-th"><span class="lt-th-ic material-symbols-outlined">flag</span>Stage</div>
+        <div class="lt-th num sortable" data-sort="sentiment"><span class="lt-th-ic material-symbols-outlined">mood</span>Sentiment<span class="lt-sort"><span class="material-symbols-outlined">arrow_downward</span></span></div>
+        <div class="lt-th"><span class="lt-th-ic material-symbols-outlined">hub</span>Source</div>
+        <div class="lt-th sortable" data-sort="last"><span class="lt-th-ic material-symbols-outlined">schedule</span>Last Contact<span class="lt-sort"><span class="material-symbols-outlined">arrow_downward</span></span></div>
+        <div class="lt-th"><span class="lt-th-ic material-symbols-outlined">thermostat</span>Temp</div>
+      </div>
+      <div class="lt-body" id="ltBody" data-comment-anchor="ec6e911a57-div"></div>
+
+      <!-- view more -->
+      <div class="lt-viewmore-wrap" id="ltViewMoreWrap" style="display:none">
+        <div class="lt-fade"></div>
+        <button class="lt-viewmore" id="ltViewMore">View more (<span id="ltViewMoreCount"></span>)<span class="material-symbols-outlined">expand_more</span></button>
+      </div>
+    </div>
+
+    <!-- footer / pagination -->
+    <div class="lt-foot" id="ltFoot" style="display:none">
+      <div class="lt-foot-info" id="ltFootInfo"></div>
+      <div class="lt-pages" id="ltPages"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- toast -->
+<div class="lt-toast" id="ltToast"><span class="material-symbols-outlined">auto_awesome</span><span id="ltToastMsg"></span></div>
+
+<!-- lead details popover (React, schema + tier driven) -->
+<div id="leadPopRoot"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script src="_leads-table-data.js"></script>
+<script src="_lead-metrics.js"></script>
+<script src="_leads-table-render.js"></script>
+<script type="text/babel" src="_lead-popover.jsx"></script>
+<script>
+  // keep header count in sync
+  (function(){ var c=document.getElementById('ltCount'); if(window.DEHA_LEADS) c.textContent=window.DEHA_LEADS.LEADS.length; })();
+</script>
+<script src="_darkmode.js"></script>
+</body></html>

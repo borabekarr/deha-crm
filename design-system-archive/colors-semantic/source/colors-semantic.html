@@ -1,0 +1,63 @@
+<!doctype html>
+<!-- @dsCard group="Brand" name="Semantic colors" subtitle="Success / Warning / Danger / Hot Lead" viewport="700x200" --><html><head><meta charset="utf-8"><link rel="stylesheet" href="_base.css">
+<style>
+  .grid4 { display:grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .sem { padding: 14px; border-radius: 16px; display:flex; flex-direction:column; gap: 10px; }
+  .pill {
+    display:inline-flex; align-items:center; gap: 6px;
+    padding: 4px 10px; border-radius: 9999px;
+    font-size: 11px; font-weight: 800; align-self:flex-start;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.28);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.55),
+      inset 0 -2px 0 rgba(15,23,42,0.18),
+      inset 0 0 0 1px rgba(15,23,42,0.10);
+    background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+    background-size: 7px 7px;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .sem-name { font-size: 13px; font-weight: 800; letter-spacing: -0.01em; }
+  .sem-hex  { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 10px; opacity: 0.7; }
+  .sem-use  { font-size: 11px; font-weight: 600; line-height: 1.35; opacity: 0.8; }
+</style>
+</head><body><div class="card">
+  <div class="grid4">
+    <div class="sem" style="background:#ECFDF5; color:#047857">
+      <span class="dot" style="background:#10B981"></span>
+      <div>
+        <div class="sem-name">Success</div>
+        <div class="sem-hex">#10B981</div>
+      </div>
+      <div class="pill" style="background:#10B981">+12%</div>
+      <div class="sem-use">Growth deltas. Low-priority tasks. Confirmed actions.</div>
+    </div>
+    <div class="sem" style="background:#FEFCE8; color:#854D0E">
+      <span class="dot" style="background:#FBBF24"></span>
+      <div>
+        <div class="sem-name">Warning</div>
+        <div class="sem-hex">#FBBF24</div>
+      </div>
+      <div class="pill" style="background:#FBBF24">#1</div>
+      <div class="sem-use">Medium-priority tasks. Leaderboard #1 avatar.</div>
+    </div>
+    <div class="sem" style="background:#FEF2F2; color:#B91C1C">
+      <span class="dot" style="background:#EF4444"></span>
+      <div>
+        <div class="sem-name">Danger</div>
+        <div class="sem-hex">#EF4444</div>
+      </div>
+      <div class="pill" style="background:#EF4444">12:00</div>
+      <div class="sem-use">High-priority tasks. Urgent timer chips.</div>
+    </div>
+    <div class="sem" style="background:#FFF7ED; color:#C2410C">
+      <span class="dot" style="background:#F97316"></span>
+      <div>
+        <div class="sem-name">Hot</div>
+        <div class="sem-hex">#F97316</div>
+      </div>
+      <div class="pill" style="background:#F97316">Hot Lead</div>
+      <div class="sem-use">Trending-up icons. The "Hot Lead" stat.</div>
+    </div>
+  </div>
+</div></body></html>
