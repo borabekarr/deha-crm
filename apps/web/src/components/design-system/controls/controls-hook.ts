@@ -15,43 +15,27 @@ export function segRef(el: HTMLDivElement | null): void {
   const pill = el.querySelector<HTMLSpanElement>('.seg-pill')
   if (!pill) return
 
-  // Previous pill left in px. null until after the initial silent placement →
-  // squash is skipped on page load and only fires on real user-driven changes.
-  let prevLeft: number | null = null
-
-  function move(animate = true): void {
+  // Reposition the pill over the active button. The bounce lives in CSS: the
+  // .seg-pill transition uses an overshoot curve on `left`, so a user-driven
+  // slide springs slightly past the target then settles (width uses a plain
+  // ease-out, so the box never stretches). `animate=false` disables the
+  // transition for silent placement on initial mount and on resize.
+  function reposition(animate: boolean): void {
     const active = el!.querySelector<HTMLButtonElement>('button.active')
     if (!active) return
-
-    const nextLeft = active.offsetLeft
-    const nextWidth = active.offsetWidth
-
-    pill!.style.left = nextLeft + 'px'
-    pill!.style.width = nextWidth + 'px'
-
-    // Trigger squash only on real positional change after the initial measure.
-    if (animate && prevLeft !== null && prevLeft !== nextLeft) {
-      const movedRight = nextLeft > prevLeft
-      pill!.style.transformOrigin = movedRight ? 'right center' : 'left center'
-      const name = 'seg-squash'
-      // Re-trigger reliably: clear → force reflow → set animation string.
-      pill!.style.animation = 'none'
-      void pill!.offsetWidth
-      pill!.style.animation = `${name} calc(260ms * var(--anim-mult)) cubic-bezier(.22,1,.36,1)`
+    if (!animate) pill!.style.transition = 'none'
+    pill!.style.left = active.offsetLeft + 'px'
+    pill!.style.width = active.offsetWidth + 'px'
+    if (!animate) {
+      void pill!.offsetWidth // flush so the silent placement is not animated
+      pill!.style.transition = ''
     }
-
-    prevLeft = nextLeft
   }
 
-  // Initial placement without transition (no squash on load).
-  pill.style.transition = 'none'
-  move(false)
-  const resumeTimer = setTimeout(() => {
-    pill.style.transition = ''
-    move(false)
-  }, 60)
+  reposition(false)
+  const resumeTimer = setTimeout(() => reposition(false), 60)
 
-  function onResize(): void { move(false) }
+  function onResize(): void { reposition(false) }
   window.addEventListener('resize', onResize)
 
   function onClick(e: Event): void {
@@ -59,7 +43,7 @@ export function segRef(el: HTMLDivElement | null): void {
     if (!btn || !el!.contains(btn)) return
     el!.querySelectorAll('button').forEach((b) => b.classList.remove('active'))
     btn.classList.add('active')
-    move()
+    reposition(true)
   }
   el.addEventListener('click', onClick)
 

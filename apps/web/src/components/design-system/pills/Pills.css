@@ -37,12 +37,6 @@
   background: #F1F5F9; border-radius: 9999px; padding: 3px;
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.06); font-family:'Montserrat';
 }
-@keyframes pseg-squash {
-  0%   { transform: scaleX(1) }
-  45%  { transform: scaleX(.88) }
-  75%  { transform: scaleX(1.04) }
-  100% { transform: scaleX(1) }
-}
 
 .pills-seg-pill {
   position: absolute; top: 3px; bottom: 3px; z-index: 0; border-radius: 9999px;
@@ -50,7 +44,7 @@
   background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
   background-size: 7px 7px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 8px -1px rgba(16,185,129,0.6);
-  transition: left calc(340ms * var(--anim-mult)) cubic-bezier(.22,1,.36,1), width calc(340ms * var(--anim-mult)) cubic-bezier(.22,1,.36,1);
+  transition: left calc(300ms * var(--anim-mult)) cubic-bezier(.34,1.3,.64,1), width calc(300ms * var(--anim-mult)) cubic-bezier(.22,1,.36,1);
 }
 .pills-seg button {
   position:relative; z-index:1; border:none; background:transparent;

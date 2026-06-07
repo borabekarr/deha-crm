@@ -28,17 +28,9 @@
   position: absolute; top: 3px; bottom: 3px; left: 0; width: 0;
   background: #0F172A; border-radius: 9999px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.18); z-index: 0;
-  transition: left calc(280ms * var(--anim-mult)) cubic-bezier(.22,1,.36,1), width calc(280ms * var(--anim-mult)) cubic-bezier(.22,1,.36,1);
+  transition: left calc(300ms * var(--anim-mult)) cubic-bezier(.34,1.3,.64,1), width calc(300ms * var(--anim-mult)) cubic-bezier(.22,1,.36,1);
 }
 
-/* Squash-against-the-contact-side bounce for the segmented pill.
-   Gated behind .seg-armed so it never fires on initial page load. */
-@keyframes seg-squash {
-  0%   { transform: scaleX(1); }
-  45%  { transform: scaleX(.88); }
-  75%  { transform: scaleX(1.04); }
-  100% { transform: scaleX(1); }
-}
 .seg button {
   position: relative; z-index: 1;
   padding: 6px 18px; border-radius: 9999px;
