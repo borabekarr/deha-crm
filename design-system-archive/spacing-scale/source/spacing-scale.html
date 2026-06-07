@@ -1,0 +1,25 @@
+<!doctype html>
+<!-- @dsCard group="Brand" name="Spacing scale" subtitle="4-point grid · 4 → 48px" viewport="700x160" --><html><head><meta charset="utf-8"><link rel="stylesheet" href="_base.css">
+<style>
+  .row { display:flex; align-items:flex-end; gap: 6px; }
+  .ru  { display:flex; flex-direction:column; align-items:center; gap: 6px; }
+  .bar { background: #10B981; border-radius: 4px; width: 100%; }
+  .b1  { height: 4px; }   .b2 { height: 8px; }   .b3 { height: 12px; }
+  .b4  { height: 16px; }  .b5 { height: 20px; }  .b6 { height: 24px; }
+  .b8  { height: 32px; }  .b10 { height: 40px; } .b12 { height: 48px; }
+  .label { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 10px; color: #64748B; }
+  .role  { font-size: 10px; font-weight: 700; color: #0F172A; text-align:center; }
+</style>
+</head><body><div class="card">
+  <div class="row">
+    <div class="ru" style="width:55px"><div class="bar b1"></div><div class="role">1</div><div class="label">4px</div></div>
+    <div class="ru" style="width:55px"><div class="bar b2"></div><div class="role">2</div><div class="label">8px</div></div>
+    <div class="ru" style="width:55px"><div class="bar b3"></div><div class="role">3</div><div class="label">12px</div></div>
+    <div class="ru" style="width:65px"><div class="bar b4"></div><div class="role">4 · page</div><div class="label">16px</div></div>
+    <div class="ru" style="width:65px"><div class="bar b5"></div><div class="role">5 · card pad</div><div class="label">20px</div></div>
+    <div class="ru" style="width:65px"><div class="bar b6"></div><div class="role">6 · gap</div><div class="label">24px</div></div>
+    <div class="ru" style="width:55px"><div class="bar b8"></div><div class="role">8</div><div class="label">32px</div></div>
+    <div class="ru" style="width:55px"><div class="bar b10"></div><div class="role">10</div><div class="label">40px</div></div>
+    <div class="ru" style="width:55px"><div class="bar b12"></div><div class="role">12</div><div class="label">48px</div></div>
+  </div>
+</div></body></html>

@@ -1,0 +1,50 @@
+name: Visual Regression
+
+on:
+  pull_request:
+    branches:
+      - main
+      - 'feat/**'
+  push:
+    branches:
+      - main
+      - feat/ui-library
+
+permissions:
+  contents: read
+
+jobs:
+  visual:
+    name: Playwright visual regression
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v5
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm --filter @deha/web exec playwright install --with-deps chromium
+
+      - name: Run visual regression suite
+        run: pnpm --filter @deha/web test:e2e
+
+      - name: Upload Playwright report and diff artifacts
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: playwright-visual-report
+          if-no-files-found: ignore
+          path: |
+            apps/web/playwright-report/
+            apps/web/test-results/
+          retention-days: 14
