@@ -20,11 +20,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@v6
         with:
           run_install: false
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: '22'
           cache: 'pnpm'
@@ -40,7 +40,7 @@ jobs:
 
       - name: Upload Playwright report and diff artifacts
         if: failure()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-visual-report
           if-no-files-found: ignore
