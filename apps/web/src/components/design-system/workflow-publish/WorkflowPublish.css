@@ -1,0 +1,301 @@
+/* WorkflowPublish.css
+   CSS verbatim from components-workflow-publish.html with a wp- prefix added
+   to component-local classes to avoid collisions with shared global styles.
+   Dark-mode overrides mirror the html.dark .pb-* blocks from _darkmode.css.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* ── Shell wrapper ───────────────────────────────────────────────────────── */
+/* overflow: visible ensures the absolutely-positioned bezel+popover can paint
+   outside the shell's border-radius boundary without being clipped. */
+.wp-shell {
+  position: relative;
+  padding: 32px 24px 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  background: #F8FAFC;
+  background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.06) 0%, #F8FAFC 55%);
+  border-radius: 20px;
+  overflow: visible;
+}
+
+/* ── Button anchor — gives popover its positioning context ───────────────── */
+/* overflow: visible is explicit so the absolutely-positioned bezel + popover
+   are never clipped by this container (border-radius alone does not clip, but
+   explicit visible prevents any future accidental addition of clip). */
+.wp-btn-anchor {
+  position: relative;
+  display: inline-block;
+  overflow: visible;
+}
+
+/* ── Publish button ──────────────────────────────────────────────────────── */
+.wp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  background: #0F172A;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: #fff;
+  cursor: pointer;
+  user-select: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.10),
+    inset 0 -2px 0 rgba(0,0,0,0.25),
+    0 2px 6px rgba(15,23,42,0.20);
+  transition: background calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  letter-spacing: -0.01em;
+}
+.wp-btn:hover { background: #1E293B; }
+.wp-btn:active { transform: scale(0.97); }
+
+.wp-btn .wp-chevron {
+  font-size: 18px;
+  transition: transform calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+}
+.wp-btn.open .wp-chevron { transform: rotate(180deg); }
+
+.wp-btn .material-icons { font-size: 17px; }
+
+/* ── Grey bezel — outer ring wrapping the white popover card ─────────────── */
+/* Matches .wf-outer / .wtc-outer / .tp-outer pattern across the design system */
+/* right: 0 right-aligns the bezel to the button edge so the 360px popover    */
+/* stays fully within the viewport when the button is near the right margin.   */
+/* overflow: visible on both .wp-shell and .wp-btn-anchor ensures no clipping. */
+.wp-bezel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 50;
+  background: #D4DCE8;
+  border-radius: 24px;
+  padding: 10px;
+}
+
+/* ── Popover ─────────────────────────────────────────────────────────────── */
+/* position: static overrides <dialog>'s native absolute/fixed positioning so
+   it flows in-place inside .wp-bezel rather than floating to viewport centre. */
+.wp-popover {
+  display: none;
+  position: static;
+  width: 360px;
+  background: #fff;
+  border: 1px solid #CBD5E1;
+  border-top-color: rgba(255,255,255,0.9);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow:
+    0 12px 40px rgba(15,23,42,0.12),
+    0 4px 12px rgba(15,23,42,0.06),
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 0 0 1px rgba(15,23,42,0.04);
+}
+.wp-popover.open {
+  display: block;
+  transform-origin: top center;
+  animation: wp-popIn calc(340ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.64,1) forwards;
+}
+.wp-popover.open.closing {
+  transform-origin: top center;
+  animation: wp-popOut calc(220ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) forwards;
+}
+
+/* Open: dynamic-island bounce — compress then overshoot settle, anchored top-right */
+@keyframes wp-popIn {
+  0%   { opacity: 0; transform: scaleX(0.72) scaleY(0.60); }
+  35%  { opacity: 1; transform: scaleX(1.04) scaleY(1.02); }
+  55%  { transform: scaleX(0.98) scaleY(0.99); }
+  75%  { transform: scaleX(1.01) scaleY(1.005); }
+  100% { opacity: 1; transform: scaleX(1) scaleY(1); }
+}
+
+/* Close: reverse — shrink + fade out */
+@keyframes wp-popOut {
+  from { opacity: 1; transform: scaleX(1) scaleY(1); }
+  to   { opacity: 0; transform: scaleX(0.88) scaleY(0.82); }
+}
+
+/* Header */
+.wp-pop-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 18px 14px;
+}
+.wp-pop-title {
+  font-size: 15px;
+  font-weight: 900;
+  color: #0F172A;
+  letter-spacing: -0.02em;
+}
+.wp-version {
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  padding: 3px 8px;
+  border-radius: 8px;
+  letter-spacing: 0.02em;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+}
+
+/* Update Workflow button */
+.wp-update-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: calc(100% - 36px);
+  margin: 0 18px 14px;
+  padding: 13px;
+  background: #0F172A;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: #fff;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.10),
+    inset 0 -2px 0 rgba(0,0,0,0.25);
+  letter-spacing: -0.01em;
+  transition: background calc(150ms * var(--anim-mult, 1)), transform calc(100ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+}
+.wp-update-btn:hover { background: #1E293B; }
+.wp-update-btn:active { transform: scale(0.98); }
+.wp-update-btn .material-icons { font-size: 18px; }
+
+/* Last edited row */
+.wp-edited {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-top: 1px solid #F1F5F9;
+  cursor: pointer;
+  transition: background calc(140ms * var(--anim-mult, 1));
+}
+.wp-edited:hover { background: #F8FAFC; }
+
+.wp-edited-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748B;
+}
+.wp-edited-left .material-icons { font-size: 16px; color: #94A3B8; }
+.wp-edited .wp-arrow { font-size: 16px; color: #CBD5E1; }
+
+/* Divider */
+.wp-div {
+  height: 1px;
+  background: #F1F5F9;
+  margin: 4px 0;
+}
+
+/* Action rows */
+.wp-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 18px;
+  cursor: pointer;
+  transition: background calc(140ms * var(--anim-mult, 1));
+}
+.wp-action:hover { background: #F8FAFC; }
+.wp-action:active { background: #F1F5F9; }
+.wp-action:last-child { margin-bottom: 6px; }
+
+.wp-action-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Semantic-pill style icon square (Deha surface treatment) */
+.wp-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  background-image:
+    radial-gradient(ellipse at top right, rgba(255,255,255,0.18) 0%, transparent 55%),
+    linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+  background-size: cover, 7px 7px, 7px 7px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.55),
+    inset 0 -2px 0 rgba(15,23,42,0.18),
+    inset 0 0 0 1px rgba(15,23,42,0.10);
+}
+.wp-icon .material-icons {
+  font-size: 18px;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.30);
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
+}
+
+.wp-action-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0F172A;
+  letter-spacing: -0.01em;
+}
+.wp-action .wp-arrow { font-size: 16px; color: #CBD5E1; }
+
+/* ── Dark mode overrides ──────────────────────────────────────────────────── */
+/* Mirror html.dark .pb-* blocks from _darkmode.css verbatim, prefixed to wp- */
+
+html.dark .wp-shell {
+  background: #0F172A !important;
+  background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.08) 0%, rgba(15,23,42,1) 55%, #0F172A 100%);
+  color: #F1F5F9;
+}
+
+html.dark .wp-btn { background: #F1F5F9; color: #0F172A; }
+html.dark .wp-btn:hover { background: #E2E8F0; }
+
+html.dark .wp-bezel { background: #020617; border: 1px solid #020617; }
+
+html.dark .wp-popover {
+  background: #1E293B;
+  border-color: #334155;
+  border-top-color: rgba(255,255,255,0.22);
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.50), 0 4px 12px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
+}
+
+html.dark .wp-pop-title { color: #F1F5F9; }
+
+html.dark .wp-version {
+  color: #CBD5E1;
+  background: #0F172A;
+  border-color: #334155;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+html.dark .wp-update-btn { background: #F1F5F9; color: #0F172A; }
+html.dark .wp-update-btn:hover { background: #E2E8F0; }
+
+html.dark .wp-edited { border-top-color: #334155; }
+html.dark .wp-edited:hover { background: #273449; }
+html.dark .wp-edited-left { color: #CBD5E1; }
+html.dark .wp-edited .wp-arrow { color: #475569; }
+
+html.dark .wp-div { background: #334155; }
+
+html.dark .wp-action:hover { background: #273449; }
+html.dark .wp-action:active { background: #334155; }
+html.dark .wp-action-label { color: #F1F5F9; }
+html.dark .wp-action .wp-arrow { color: #475569; }

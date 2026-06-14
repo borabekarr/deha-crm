@@ -1,0 +1,501 @@
+/* WorkflowAddElements.css
+   CSS verbatim from the source prototype (components-workflow-add-elements.html).
+   Scoped to this component — do not edit shared _controls.css seg/pill rules here.
+   Dark-mode overrides mirror the html.dark .* blocks from _darkmode.css.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* ── Canvas ──────────────────────────────────────────────────────────────── */
+.wae-canvas {
+  width: 100%;
+  height: 100%;
+  background-color: #FFFFFF;
+  background-image: radial-gradient(circle, #CBD5E1 1px, transparent 1px);
+  background-size: 22px 22px;
+  cursor: default;
+  user-select: none;
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.wae-canvas-hint {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: rgba(255, 255, 255, 0.80);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748B;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  pointer-events: none;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+  white-space: nowrap;
+}
+
+.wae-canvas-hint .material-icons {
+  font-size: 14px;
+}
+
+/* ── Pop outer shell (gray bezel) ────────────────────────────────────────── */
+/* position: absolute inside .wae-shell (position: relative) — coords are
+   shell-relative so they are never affected by viewport scrolling or resets
+   to the viewport left edge on close (the "close-spawn-left jump" bug). */
+.wae-pop-outer {
+  position: absolute;
+  background: #D4DCE8;
+  border-radius: 24px;
+  padding: 10px;
+  box-shadow:
+    0 12px 40px rgba(15, 23, 42, 0.12),
+    0 2px 8px rgba(15, 23, 42, 0.06);
+  z-index: 100;
+  opacity: 0;
+  transform: scale(0.96) translateY(6px);
+  transform-origin: top center;
+  pointer-events: none;
+  transition:
+    opacity calc(180ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
+    transform calc(180ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
+}
+
+.wae-pop-outer.visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  pointer-events: all;
+}
+
+/* ── White inner panel ───────────────────────────────────────────────────── */
+.wae-pop-inner {
+  background: #FFFFFF;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow:
+    inset 0 -1px 0 rgba(15, 23, 42, 0.03);
+}
+
+/* ── Badge icon ─────────────────────────────────────────────────────────── */
+/* Matches .wf-tag / .badge.gci polish from the Pills component */
+.wae-badge-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 8px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -2px 0 rgba(15, 23, 42, 0.18),
+    inset 0 0 0 1px rgba(15, 23, 42, 0.10);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.13) 1px, transparent 1px);
+  background-size: 7px 7px;
+}
+
+.wae-badge-icon .material-icons,
+.wae-badge-icon .material-symbols-outlined {
+  color: #fff;
+  line-height: 1;
+  display: block;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
+}
+
+.wae-badge-lg {
+  width: 28px;
+  height: 28px;
+}
+
+.wae-badge-lg .material-icons {
+  font-size: 14px;
+}
+
+.wae-badge-sm {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+}
+
+.wae-badge-sm .material-icons,
+.wae-badge-sm .material-symbols-outlined {
+  font-size: 13px;
+}
+
+/* ── Add Elements panel ──────────────────────────────────────────────────── */
+.wae-ae-inner {
+  width: 290px;
+}
+
+.wae-ae-header {
+  padding: 17px 16px 10px;
+}
+
+.wae-ae-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #0F172A;
+  letter-spacing: -0.025em;
+  margin-bottom: 11px;
+}
+
+.wae-ae-title .material-icons {
+  font-size: 17px;
+  color: #64748B;
+  flex-shrink: 0;
+}
+
+/* Search field */
+.wae-ae-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 11px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 9px;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.03);
+}
+
+.wae-ae-search .material-icons {
+  font-size: 15px;
+  color: #94A3B8;
+  flex-shrink: 0;
+}
+
+.wae-ae-search input {
+  border: none;
+  background: transparent;
+  flex: 1;
+  font-family: 'Montserrat', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #0F172A;
+  outline: none;
+}
+
+.wae-ae-search input::placeholder {
+  color: #94A3B8;
+}
+
+/* Category list */
+.wae-ae-list {
+  padding: 4px 8px;
+}
+
+.wae-ae-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 9px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: background calc(100ms * var(--anim-mult, 1));
+}
+
+.wae-ae-item:hover,
+.wae-ae-item.hovered {
+  background: #F1F5F9;
+}
+
+.wae-ae-item.hovered .wae-ae-chevron {
+  color: #64748B !important;
+}
+
+.wae-ae-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0F172A;
+  letter-spacing: -0.01em;
+}
+
+.wae-ae-chevron {
+  font-size: 16px !important;
+  line-height: 1 !important;
+  color: #D1D5DB !important;
+  transition: color calc(100ms * var(--anim-mult, 1));
+  display: block !important;
+}
+
+/* Footer */
+.wae-ae-sep {
+  height: 1px;
+  background: #F1F5F9;
+  margin: 4px 0;
+}
+
+.wae-ae-footer {
+  padding: 6px 8px 10px;
+}
+
+/* Item 8: exact .wae-badge-icon treatment — same background-image, background-size, box-shadow */
+.wae-ae-ai-btn {
+  width: 100%;
+  padding: 10px 0;
+  border: none;
+  border-radius: 9px;
+  font-family: 'Montserrat', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  background-color: #10B981;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.13) 1px, transparent 1px);
+  background-size: 7px 7px;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
+  letter-spacing: -0.01em;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -2px 0 rgba(15, 23, 42, 0.18),
+    inset 0 0 0 1px rgba(15, 23, 42, 0.10);
+  transition:
+    background-color calc(140ms * var(--anim-mult, 1)),
+    box-shadow calc(140ms * var(--anim-mult, 1));
+}
+
+.wae-ae-ai-btn:hover {
+  background-color: #059669;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -2px 0 rgba(15, 23, 42, 0.22),
+    inset 0 0 0 1px rgba(15, 23, 42, 0.12);
+}
+
+/* ── Nodes flyout panel ──────────────────────────────────────────────────── */
+.wae-nodes-inner {
+  width: 200px;
+}
+
+.wae-nodes-header {
+  padding: 13px 14px 6px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #94A3B8;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.wae-nodes-list {
+  padding: 2px 8px 10px;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.wae-nodes-list::-webkit-scrollbar {
+  width: 3px;
+}
+
+.wae-nodes-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.wae-nodes-list::-webkit-scrollbar-thumb {
+  background: #E2E8F0;
+  border-radius: 99px;
+}
+
+.wae-node-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background calc(100ms * var(--anim-mult, 1));
+}
+
+.wae-node-item:hover {
+  background: #F1F5F9;
+}
+
+.wae-node-item:hover .wae-node-add-btn {
+  opacity: 1;
+}
+
+.wae-node-name {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 700;
+  color: #0F172A;
+  letter-spacing: -0.01em;
+}
+
+.wae-node-add-btn {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: #10B981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity calc(120ms * var(--anim-mult, 1));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -1px 0 rgba(15, 23, 42, 0.18),
+    0 1px 3px rgba(16, 185, 129, 0.30);
+}
+
+.wae-node-add-btn .material-icons {
+  font-size: 12px;
+  color: #fff;
+  line-height: 1;
+  display: block;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.20);
+}
+
+/* ── Segmented tabs — inherit shared .seg styles from _controls.css ────── */
+/* The .seg / .seg-pill rules live in Controls.css (loaded globally).
+   Only add the fill-width modifier that _controls.css already provides (.seg.fill). */
+.wae-seg-wrap {
+  margin-bottom: 11px;
+}
+
+/* Item 3: icons inside seg buttons — centered both states */
+.wae-seg-wrap button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.wae-seg-wrap button .material-icons {
+  font-size: 13px;
+  line-height: 1;
+}
+
+/* ── Shell wrapper ───────────────────────────────────────────────────────── */
+/* overflow: visible so the absolute-positioned popover panels (.wae-pop-outer)
+   can extend beyond the shell boundary without being clipped. The canvas child
+   uses its own border-radius + overflow:hidden for inner content clipping.
+   The visual shell bezel (border-radius) is preserved by the canvas layer. */
+.wae-shell {
+  position: relative;
+  width: 1200px;
+  height: 800px;
+  background: var(--shell-bg, #C8D0DC);
+  border-radius: 28px;
+  overflow: visible;
+}
+
+/* ── Dark mode overrides ────────────────────────────────────────────────── */
+/* Mirror the html.dark .* blocks from _darkmode.css that cover this component */
+
+/* Item 7: ALL badge icons get white background + black icon in dark mode.
+   The inline backgroundColor is set per-category in TSX; !important overrides it.
+   Near-black (--ink) badges also benefit: white bg gives max contrast. */
+html.dark .wae-badge-icon {
+  background-color: #FFFFFF !important;
+}
+
+html.dark .wae-badge-icon .material-icons,
+html.dark .wae-badge-icon .material-symbols-outlined {
+  color: #0F172A !important;
+  text-shadow: none;
+}
+
+/* Keep the --ink lightening rule as fallback (now superseded by the rule above,
+   but left so the specificity chain is explicit). */
+html.dark .wae-badge-icon.wae-badge--ink {
+  background-color: #FFFFFF !important;
+}
+
+html.dark .wae-canvas {
+  background-color: #0F172A;
+  background-image: radial-gradient(circle, #334155 1px, transparent 1px);
+}
+
+html.dark .wae-canvas-hint {
+  background: rgba(30, 41, 59, 0.85);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #94A3B8;
+}
+
+html.dark .wae-pop-outer {
+  background: #020617;
+}
+
+html.dark .wae-pop-inner {
+  background: #1E293B;
+}
+
+html.dark .wae-ae-title {
+  color: #F1F5F9;
+}
+
+html.dark .wae-ae-title .material-icons {
+  color: #94A3B8;
+}
+
+html.dark .wae-ae-search {
+  background: #0F172A;
+  border-color: #334155;
+}
+
+html.dark .wae-ae-search input {
+  color: #F1F5F9;
+}
+
+html.dark .wae-ae-item:hover,
+html.dark .wae-ae-item.hovered {
+  background: #273449;
+}
+
+html.dark .wae-ae-item.hovered .wae-ae-chevron {
+  color: #94A3B8 !important;
+}
+
+html.dark .wae-ae-name {
+  color: #F1F5F9;
+}
+
+html.dark .wae-ae-chevron {
+  color: #475569 !important;
+}
+
+html.dark .wae-ae-sep {
+  background: #334155;
+}
+
+html.dark .wae-ae-ai-btn {
+  background-color: #059669;
+  color: #ECFDF5;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.28),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.20);
+}
+
+html.dark .wae-ae-ai-btn:hover {
+  background-color: #047857;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.32),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.24);
+}
+
+html.dark .wae-nodes-list::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+html.dark .wae-node-item:hover {
+  background: #273449;
+}
+
+html.dark .wae-node-name {
+  color: #F1F5F9;
+}

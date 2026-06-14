@@ -1,0 +1,393 @@
+<!doctype html>
+<!-- @dsCard group="Brand" name="Toast" subtitle="Morphing notification toast — types, loading, promise, stacking" --><html><head><meta charset="utf-8"><link rel="stylesheet" href="_base.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  body { background: #F8FAFC; font-family: var(--font-display); }
+  .card {
+    padding: 30px 24px 36px;
+    display: flex; flex-direction: column; gap: 26px;
+    background: #F8FAFC;
+    background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.06) 0%, #F8FAFC 55%);
+  }
+
+  /* ── section scaffolding ── */
+  .tst-sec { display: flex; flex-direction: column; gap: 12px; }
+  .tst-sec > .label { margin-left: 2px; }
+  .tst-bezel { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start; justify-content: center; }
+  /* a shell sized to hug its toast(s) */
+  .tst-sec .shell { padding: 14px; }
+
+  /* ─────────────────────────────────────────────────────────
+     Toast surface — flat glass card, glossy top, dark bottom edge.
+     Accent flows through --acc / --acc-bg / --acc-bd per type.
+     ───────────────────────────────────────────────────────── */
+  .tst {
+    --acc: var(--semantic-success);
+    --acc-bg: var(--semantic-success-bg);
+    --acc-bd: rgba(16,185,129,0.30);
+    position: relative;
+    width: 340px; box-sizing: border-box;
+    display: flex; flex-direction: column;
+    background: var(--bg-card-solid);
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-xl);
+    padding: 13px 14px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.9),
+      inset 0 -2px 0 rgba(15,23,42,0.06),
+      0 6px 18px -6px rgba(15,23,42,0.18),
+      0 2px 6px rgba(15,23,42,0.05);
+    overflow: hidden;
+  }
+  /* hairline accent rail down the left edge */
+  .tst::before {
+    content: ''; position: absolute; left: 0; top: 12px; bottom: 12px;
+    width: 3px; border-radius: 0 3px 3px 0;
+    background: var(--acc);
+    opacity: 0.85;
+  }
+
+  .tst-head { display: flex; align-items: center; gap: 11px; }
+
+  /* glossy accent icon tile — canonical .m-ic recipe (grid texture + gloss) */
+  .tst-ic {
+    width: 30px; height: 30px; border-radius: var(--radius-sm); flex-shrink: 0;
+    display: grid; place-items: center;
+    background-color: var(--acc);
+    background-image:
+      radial-gradient(ellipse at top right, rgba(255,255,255,0.22) 0%, transparent 55%),
+      linear-gradient(rgba(255,255,255,0.14) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.14) 1px, transparent 1px);
+    background-size: cover, 7px 7px, 7px 7px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.55),
+      inset 0 -2px 0 rgba(15,23,42,0.22),
+      inset 0 0 0 1px rgba(15,23,42,0.12),
+      0 2px 6px rgba(0,0,0,0.12);
+  }
+  .tst-ic .material-icons { font-size: 18px; color: #fff; line-height: 1; text-shadow: 0 1px 2px rgba(0,0,0,0.35); }
+
+  .tst-copy { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  .tst-title { font-size: var(--type-h5); font-weight: var(--weight-extrabold); color: var(--fg1); letter-spacing: -0.01em; line-height: 1.2; }
+  .tst-desc { font-size: var(--type-body-sm); font-weight: var(--weight-medium); color: var(--fg3); line-height: 1.45; }
+
+  /* close affordance (swipe / click to dismiss) */
+  .tst-x {
+    position: absolute; top: 10px; right: 10px;
+    width: 22px; height: 22px; border: none; background: none; cursor: pointer; padding: 0;
+    display: grid; place-items: center; border-radius: 6px; color: var(--fg4);
+    transition: background calc(140ms * var(--anim-mult,1)), color calc(140ms * var(--anim-mult,1)), transform calc(100ms * var(--anim-mult,1)) cubic-bezier(.22,1,.36,1);
+  }
+  .tst-x:hover { background: var(--bg-chip); color: var(--fg2); }
+  .tst-x:active { transform: scale(0.86); }
+  .tst-x .material-icons { font-size: 16px; }
+
+  /* collapsed = pill: header only, full radius, no body */
+  .tst.collapsed { width: auto; min-width: 200px; padding: 9px 16px 9px 11px; border-radius: var(--radius-circle); }
+  .tst.collapsed::before { display: none; }
+  .tst.collapsed .tst-ic { width: 26px; height: 26px; border-radius: var(--radius-circle); }
+  .tst.collapsed .tst-ic .material-icons { font-size: 16px; }
+  .tst.collapsed .tst-title { font-size: var(--type-body); }
+
+  /* expanded body holds desc + (action | progress) */
+  .tst-body { padding-left: 41px; display: flex; flex-direction: column; gap: 11px; margin-top: 8px; }
+
+  /* progress bar — semi-transparent accent fill over a chip track, mid-drain */
+  .tst-prog { height: 4px; border-radius: 9999px; background: var(--bg-chip); overflow: hidden; box-shadow: inset 0 1px 2px rgba(15,23,42,0.08); }
+  .tst-prog > i { display: block; height: 100%; border-radius: 9999px; background: var(--acc); opacity: 0.55; }
+
+  /* inline action button — emerald glossy mini, reuses btn-primary idiom */
+  .tst-actrow { display: flex; gap: 8px; }
+  .tst-act {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border: none; border-radius: var(--radius-sm); cursor: pointer;
+    font-family: var(--font-display); font-size: var(--type-body-sm); font-weight: var(--weight-extrabold);
+    color: #fff; background: var(--acc);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.18);
+    background-image:
+      linear-gradient(rgba(255,255,255,0.10) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.10) 1px, transparent 1px);
+    background-size: 7px 7px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -2px 0 rgba(0,0,0,0.20), inset 0 0 0 1px rgba(255,255,255,0.12), 0 2px 6px -2px var(--acc);
+    transition: filter calc(160ms * var(--anim-mult,1)), transform calc(160ms * var(--anim-mult,1)) cubic-bezier(.22,1,.36,1);
+  }
+  .tst-act:hover { filter: brightness(1.05); }
+  .tst-act:active { transform: scale(0.96); }
+  .tst-act .material-icons { font-size: 16px; }
+  .tst-act.ghost { background: var(--bg-chip); color: var(--fg2); text-shadow: none; background-image: none; box-shadow: inset 0 0 0 1px rgba(15,23,42,0.07); }
+
+  /* loading spinner glyph — type-neutral (grey rail + badge) */
+  .tst.loading { --acc: var(--fg3); }
+  .tst.loading .tst-ic { background-color: var(--fg3); }
+  .spin { animation: tst-spin calc(900ms * var(--anim-mult,1)) linear infinite; }
+  @keyframes tst-spin { to { transform: rotate(360deg); } }
+
+  /* ── type accents ── */
+  .tst.t-success { --acc: var(--semantic-success); --acc-bg: var(--semantic-success-bg); }
+  .tst.t-error   { --acc: var(--semantic-danger);  --acc-bg: var(--semantic-danger-bg); }
+  .tst.t-warning { --acc: var(--semantic-warning); --acc-bg: var(--semantic-warning-bg); }
+  /* info — reuses the existing "Deep-Dwell" violet from the leads popover */
+  .tst.t-info    { --acc: #8B5CF6; --acc-bg: #F5F3FF; --acc-bd: #DDD6FE; }
+
+  /* ── promise transition: loading → resolved pair ── */
+  .tst-promise { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .tst-arrow { color: var(--fg4); display: grid; place-items: center; }
+  .tst-arrow .material-icons { font-size: 26px; }
+
+  /* ── stacking demo: 3 toasts, downward peek offsets ── */
+  .tst-stack { position: relative; width: 340px; height: 132px; }
+  .tst-stack .tst { position: absolute; left: 50%; transition: none; }
+  .tst-stack .s0 { top: 0;  transform: translateX(-50%) scale(1);     z-index: 3; }
+  .tst-stack .s1 { top: 14px; transform: translateX(-50%) scale(0.955); z-index: 2; filter: brightness(0.985); opacity: 0.96; }
+  .tst-stack .s2 { top: 28px; transform: translateX(-50%) scale(0.91);  z-index: 1; filter: brightness(0.97);  opacity: 0.9; }
+  .tst-stack-badge {
+    position: absolute; top: 9px; right: 12px; z-index: 4;
+    font-size: 10px; font-weight: 800; color: var(--fg4);
+    background: var(--bg-chip); border-radius: 9999px; padding: 2px 8px;
+    box-shadow: inset 0 0 0 1px rgba(15,23,42,0.06);
+  }
+
+  /* ── dismiss affordance: mid-swipe toast (translated + faded) ── */
+  .tst.swiping { transform: translateX(54px) rotate(1.2deg); opacity: 0.55; }
+  .tst-swipe-hint { display: flex; align-items: center; gap: 6px; font-size: var(--type-meta); font-weight: 700; color: var(--fg4); margin-top: 8px; }
+  .tst-swipe-hint .material-icons { font-size: 16px; }
+
+  /* ── dark-mode tuning (System A: .dark) ── */
+  html.dark .tst { box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -2px 0 rgba(0,0,0,0.30), 0 8px 22px -8px rgba(0,0,0,0.6), 0 2px 6px rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.06); }
+  html.dark .tst.t-info { --acc: #A78BFA; --acc-bg: rgba(139,92,246,0.16); --acc-bd: rgba(139,92,246,0.34); }
+  html.dark .tst-stack-badge { box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08); }
+</style>
+<link rel="stylesheet" href="_darkmode.css">
+</head><body>
+<div class="card">
+
+  <!-- 1 ─ Collapsed pills (header-only morph state) -->
+  <div class="tst-sec">
+    <span class="label">Collapsed · header only</span>
+    <div class="tst-bezel">
+      <div class="shell zoom">
+        <div class="tst collapsed t-success">
+          <div class="tst-head">
+            <span class="tst-ic"><span class="material-icons">check_circle</span></span>
+            <div class="tst-copy"><span class="tst-title">Saved</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="shell zoom">
+        <div class="tst collapsed t-error">
+          <div class="tst-head">
+            <span class="tst-ic"><span class="material-icons">error</span></span>
+            <div class="tst-copy"><span class="tst-title">Upload failed</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="shell zoom">
+        <div class="tst collapsed t-warning">
+          <div class="tst-head">
+            <span class="tst-ic"><span class="material-icons">warning</span></span>
+            <div class="tst-copy"><span class="tst-title">Verify details</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="shell zoom">
+        <div class="tst collapsed t-info">
+          <div class="tst-head">
+            <span class="tst-ic"><span class="material-icons">info</span></span>
+            <div class="tst-copy"><span class="tst-title">New lead assigned</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 ─ Expanded cards (full morph state) with auto-dismiss progress -->
+  <div class="tst-sec">
+    <span class="label">Expanded · with auto-dismiss progress</span>
+    <div class="tst-bezel">
+      <div class="shell zoom">
+        <div class="tst t-success">
+          <button class="tst-x" aria-label="Dismiss"><span class="material-icons">close</span></button>
+          <div class="tst-head">
+            <span class="tst-ic"><span class="material-icons">check_circle</span></span>
+            <div class="tst-copy"><span class="tst-title">Deal saved</span></div>
+          </div>
+          <div class="tst-body">
+            <span class="tst-desc">Your pipeline changes are synced to the team.</span>
+            <div class="tst-prog"><i style="width:62%"></i></div>
+          </div>
+        </div>
+      </div>
+      <div class="shell zoom">
+        <div class="tst t-error">
+          <button class="tst-x" aria-label="Dismiss"><span class="material-icons">close</span></button>
+          <div class="tst-head">
+            <span class="tst-ic"><span class="material-icons">error</span></span>
+            <div class="tst-copy"><span class="tst-title">Network error</span></div>
+          </div>
+          <div class="tst-body">
+            <span class="tst-desc">Could not reach the server. Retry in a moment.</span>
+            <div class="tst-prog"><i style="width:34%"></i></div>
+          </div>
+        </div>
+      </div>
+      <div class="shell zoom">
+        <div class="tst t-warning">
+          <button class="tst-x" aria-label="Dismiss"><span class="material-icons">close</span></button>
+          <div class="tst-head">
+            <span class="tst-ic"><span class="material-icons">warning</span></span>
+            <div class="tst-copy"><span class="tst-title">Quota almost reached</span></div>
+          </div>
+          <div class="tst-body">
+            <span class="tst-desc">You have used 90% of your monthly sends.</span>
+            <div class="tst-prog"><i style="width:78%"></i></div>
+          </div>
+        </div>
+      </div>
+      <div class="shell zoom">
+        <div class="tst t-info">
+          <button class="tst-x" aria-label="Dismiss"><span class="material-icons">close</span></button>
+          <div class="tst-head">
+            <span class="tst-ic"><span class="material-icons">info</span></span>
+            <div class="tst-copy"><span class="tst-title">New lead assigned</span></div>
+          </div>
+          <div class="tst-body">
+            <span class="tst-desc">Mehmet Y. just entered your pipeline.</span>
+            <div class="tst-prog"><i style="width:50%"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 ─ Loading -->
+  <div class="tst-sec">
+    <span class="label">Loading · spinner, no progress</span>
+    <div class="tst-bezel">
+      <div class="shell zoom">
+        <div class="tst collapsed loading">
+          <div class="tst-head">
+            <span class="tst-ic"><span class="material-icons spin">autorenew</span></span>
+            <div class="tst-copy"><span class="tst-title">Uploading…</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="shell zoom">
+        <div class="tst loading">
+          <div class="tst-head">
+            <span class="tst-ic"><span class="material-icons spin">autorenew</span></span>
+            <div class="tst-copy"><span class="tst-title">Generating offer PDF</span></div>
+          </div>
+          <div class="tst-body">
+            <span class="tst-desc">Crunching the numbers for this lead…</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 ─ Promise transition -->
+  <div class="tst-sec">
+    <span class="label">Promise · loading resolves to success</span>
+    <div class="tst-bezel">
+      <div class="shell">
+        <div class="tst-promise">
+          <div class="tst collapsed loading" style="width:auto;">
+            <div class="tst-head">
+              <span class="tst-ic"><span class="material-icons spin">autorenew</span></span>
+              <div class="tst-copy"><span class="tst-title">Saving lead…</span></div>
+            </div>
+          </div>
+          <span class="tst-arrow"><span class="material-icons">east</span></span>
+          <div class="tst collapsed t-success" style="width:auto;">
+            <div class="tst-head">
+              <span class="tst-ic"><span class="material-icons">check_circle</span></span>
+              <div class="tst-copy"><span class="tst-title">Lead saved</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 ─ Action button -->
+  <div class="tst-sec">
+    <span class="label">With action</span>
+    <div class="tst-bezel">
+      <div class="shell zoom">
+        <div class="tst t-success">
+          <button class="tst-x" aria-label="Dismiss"><span class="material-icons">close</span></button>
+          <div class="tst-head">
+            <span class="tst-ic"><span class="material-icons">delete</span></span>
+            <div class="tst-copy"><span class="tst-title">Lead archived</span></div>
+          </div>
+          <div class="tst-body">
+            <span class="tst-desc">Removed from your active pipeline.</span>
+            <div class="tst-actrow">
+              <button class="tst-act"><span class="material-icons">undo</span>Undo</button>
+              <button class="tst-act ghost">Dismiss</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6 ─ Stacking -->
+  <div class="tst-sec">
+    <span class="label">Stacking · collapsed peek</span>
+    <div class="tst-bezel">
+      <div class="shell">
+        <div class="tst-stack">
+          <span class="tst-stack-badge">3</span>
+          <div class="tst collapsed t-info s2">
+            <div class="tst-head">
+              <span class="tst-ic"><span class="material-icons">info</span></span>
+              <div class="tst-copy"><span class="tst-title">Reminder set</span></div>
+            </div>
+          </div>
+          <div class="tst collapsed t-warning s1">
+            <div class="tst-head">
+              <span class="tst-ic"><span class="material-icons">warning</span></span>
+              <div class="tst-copy"><span class="tst-title">Follow-up due</span></div>
+            </div>
+          </div>
+          <div class="tst t-success s0">
+            <div class="tst-head">
+              <span class="tst-ic"><span class="material-icons">check_circle</span></span>
+              <div class="tst-copy"><span class="tst-title">Call logged</span></div>
+            </div>
+            <div class="tst-body">
+              <span class="tst-desc">3 notifications. Tap to expand the stack.</span>
+              <div class="tst-prog"><i style="width:70%"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7 ─ Dismiss affordance -->
+  <div class="tst-sec">
+    <span class="label">Swipe / click to dismiss</span>
+    <div class="tst-bezel">
+      <div class="shell">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div class="tst t-info swiping">
+            <button class="tst-x" aria-label="Dismiss"><span class="material-icons">close</span></button>
+            <div class="tst-head">
+              <span class="tst-ic"><span class="material-icons">info</span></span>
+              <div class="tst-copy"><span class="tst-title">Swipe me away</span></div>
+            </div>
+            <div class="tst-body">
+              <span class="tst-desc">Drag the toast aside, or tap ✕ to dismiss.</span>
+            </div>
+          </div>
+          <div class="tst-swipe-hint"><span class="material-icons">swipe</span>drag horizontally to dismiss</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script src="_darkmode.js"></script>
+</body></html>

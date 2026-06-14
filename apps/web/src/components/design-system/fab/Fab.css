@@ -21,7 +21,6 @@ body { background: #F8FAFC; }
   --fp-hover:     rgba(15,23,42,0.05);
   --fp-close-bg:  rgba(15,23,42,0.07);
   --fp-close-fg:  #64748B;
-  --fp-dots:      rgba(15,23,42,0.07);
   --fp-shadow:
     0 0 0 1px rgba(15,23,42,0.09),
     0 30px 70px -12px rgba(15,23,42,0.25),
@@ -32,19 +31,19 @@ body { background: #F8FAFC; }
 }
 html.dark .fab-screen {
   background: #1E293B;
-  --fp-bg:        #0F172A;
+  --fp-bg:        #1E293B;
   --fp-fg:        #F1F5F9;
-  --fp-sub:       #64748B;
-  --fp-sep:       rgba(255,255,255,0.08);
-  --fp-hover:     rgba(255,255,255,0.07);
-  --fp-close-bg:  rgba(255,255,255,0.10);
+  --fp-sub:       #94A3B8;
+  --fp-sep:       #334155;
+  --fp-hover:     #273449;
+  --fp-close-bg:  #334155;
   --fp-close-fg:  #94A3B8;
-  --fp-dots:      rgba(255,255,255,0.12);
   --fp-shadow:
+    0 0 0 1px #334155,
     0 30px 70px -12px rgba(0,0,0,0.65),
     inset 0 1px 0 rgba(255,255,255,0.06);
   /* FIX 4: bezel tokens (dark) */
-  --fp-bezel-bg:  #020617;
+  --fp-bezel-bg:  #0F172A;
 }
 
 /* ── Backdrop content ──────────────────────────────────────────── */
@@ -81,9 +80,10 @@ html.dark .sc-name { color: #F1F5F9; }
 html.dark .sc-ic { background: #0F172A; color: #94A3B8; }
 .sc-it-name { font-size: 14px; font-weight: 700; color: #0F172A; }
 html.dark .sc-it-name { color: #F1F5F9; }
+html.dark .sc-hero { background: #0F172A; box-shadow: inset 0 0 0 1px #334155, inset 0 1px 0 rgba(255,255,255,0.04); }
 .sc-it-meta { font-size: 12px; font-weight: 500; color: #94A3B8; }
 .sc-it-amt { margin-left: auto; font-size: 14px; font-weight: 800; color: #0F172A; }
-html.dark .sc-it-amt { color: #F1F5F9; }
+html.dark .sc-it-amt { color: #CBD5E1; }
 
 /* ── Blur veil ─────────────────────────────────────────────────── */
 .fab-veil {
@@ -91,7 +91,7 @@ html.dark .sc-it-amt { color: #F1F5F9; }
   background: rgba(15,23,42,0.28);
   -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
   opacity: 0; pointer-events: none;
-  transition: opacity calc(320ms * var(--anim-mult)) ease;
+  transition: opacity calc(320ms * var(--anim-mult, 1)) ease;
 }
 .fab-screen.open .fab-veil { opacity: 1; pointer-events: auto; }
 
@@ -111,25 +111,25 @@ html.dark .sc-it-amt { color: #F1F5F9; }
     inset 0 0 0 1px rgba(255,255,255,0.15);
   cursor: pointer; overflow: hidden;
   transition:
-    width calc(500ms * var(--anim-mult)) cubic-bezier(.34,1.2,.5,1),
-    height calc(500ms * var(--anim-mult)) cubic-bezier(.34,1.2,.5,1),
-    border-radius calc(440ms * var(--anim-mult)) cubic-bezier(.34,1.2,.5,1),
-    background-color calc(300ms * var(--anim-mult)) ease,
-    background-size calc(300ms * var(--anim-mult)) ease,
-    box-shadow calc(300ms * var(--anim-mult)) ease;
+    width calc(500ms * var(--anim-mult, 1)) cubic-bezier(.34,1.2,.5,1),
+    height calc(500ms * var(--anim-mult, 1)) cubic-bezier(.34,1.2,.5,1),
+    border-radius calc(440ms * var(--anim-mult, 1)) cubic-bezier(.34,1.2,.5,1),
+    background-color calc(300ms * var(--anim-mult, 1)) ease,
+    background-size calc(300ms * var(--anim-mult, 1)) ease,
+    box-shadow calc(300ms * var(--anim-mult, 1)) ease;
 }
 
 /* FIX 2: tactile press — only when the screen is NOT open (collapsed state only) */
 .fab-screen:not(.open) .fab:active {
   transform: scale(0.92);
   transition:
-    transform calc(80ms * var(--anim-mult)) ease,
-    width calc(500ms * var(--anim-mult)) cubic-bezier(.34,1.2,.5,1),
-    height calc(500ms * var(--anim-mult)) cubic-bezier(.34,1.2,.5,1),
-    border-radius calc(440ms * var(--anim-mult)) cubic-bezier(.34,1.2,.5,1),
-    background-color calc(300ms * var(--anim-mult)) ease,
-    background-size calc(300ms * var(--anim-mult)) ease,
-    box-shadow calc(300ms * var(--anim-mult)) ease;
+    transform calc(80ms * var(--anim-mult, 1)) ease,
+    width calc(500ms * var(--anim-mult, 1)) cubic-bezier(.34,1.2,.5,1),
+    height calc(500ms * var(--anim-mult, 1)) cubic-bezier(.34,1.2,.5,1),
+    border-radius calc(440ms * var(--anim-mult, 1)) cubic-bezier(.34,1.2,.5,1),
+    background-color calc(300ms * var(--anim-mult, 1)) ease,
+    background-size calc(300ms * var(--anim-mult, 1)) ease,
+    box-shadow calc(300ms * var(--anim-mult, 1)) ease;
 }
 
 /* ── Expanded panel: thinner dots, NO border-radius transition on open ── */
@@ -138,24 +138,22 @@ html.dark .sc-it-amt { color: #F1F5F9; }
   border-radius: 26px;  /* snaps instantly — no radius animation on open */
   /* FIX 4: grey bezel background; inner content sits on --fp-bg via .fab-menu padding */
   background-color: var(--fp-bezel-bg);
-  background-image:
-    radial-gradient(circle, var(--fp-dots) 0.6px, transparent 1px);
-  background-size: 22px 22px;
+  /* clear the inherited base grid-line linear-gradients — open background is a clean bezel */
+  background-image: none;
   box-shadow: var(--fp-shadow);
   /* omit border-radius from transition so it snaps to 26px immediately */
   transition:
-    width calc(500ms * var(--anim-mult)) cubic-bezier(.34,1.2,.5,1),
-    height calc(500ms * var(--anim-mult)) cubic-bezier(.34,1.2,.5,1),
-    background-color calc(300ms * var(--anim-mult)) ease,
-    background-size calc(300ms * var(--anim-mult)) ease,
-    box-shadow calc(300ms * var(--anim-mult)) ease;
+    width calc(500ms * var(--anim-mult, 1)) cubic-bezier(.34,1.2,.5,1),
+    height calc(500ms * var(--anim-mult, 1)) cubic-bezier(.34,1.2,.5,1),
+    background-color calc(300ms * var(--anim-mult, 1)) ease,
+    box-shadow calc(300ms * var(--anim-mult, 1)) ease;
 }
 
 /* ── Plus glyph ────────────────────────────────────────────────── */
 .fab-plus {
   position: absolute; inset: 0; display: grid; place-items: center;
   color: #fff;
-  transition: opacity calc(180ms * var(--anim-mult)) ease, transform calc(280ms * var(--anim-mult)) cubic-bezier(.4,0,.2,1);
+  transition: opacity calc(180ms * var(--anim-mult, 1)) ease, transform calc(280ms * var(--anim-mult, 1)) cubic-bezier(.4,0,.2,1);
 }
 .fab-plus .material-icons { font-size: 28px; -webkit-text-stroke: 1px rgba(255,255,255,0.9); }
 .fab-screen.open .fab-plus { opacity: 0; transform: rotate(45deg) scale(0.6); }
@@ -175,15 +173,24 @@ html.dark .sc-it-amt { color: #F1F5F9; }
   pointer-events: auto;
   background: var(--fp-bg);
   margin: var(--fp-bezel-pad, 10px);
+  border-radius: 20px;
+  border: 1px solid #CBD5E1;
+  border-top-color: rgba(255,255,255,0.9);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(15,23,42,0.04);
+}
+html.dark .fab-screen.open .fab-menu {
+  border-color: #334155;
+  border-top-color: rgba(255,255,255,0.22);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
 }
 
 /* Header row: title left, close right — shown together */
 .fab-menu-hd {
   display: flex; align-items: flex-start; gap: 8px;
   opacity: 0; transform: translateY(10px);
-  transition: opacity calc(220ms * var(--anim-mult)) ease, transform calc(320ms * var(--anim-mult)) cubic-bezier(.32,1.32,.5,1);
+  transition: opacity calc(220ms * var(--anim-mult, 1)) ease, transform calc(320ms * var(--anim-mult, 1)) cubic-bezier(.32,1.32,.5,1);
 }
-.fab-screen.open .fab-menu-hd { opacity: 1; transform: none; transition-delay: calc(120ms * var(--anim-mult)); }
+.fab-screen.open .fab-menu-hd { opacity: 1; transform: none; transition-delay: calc(120ms * var(--anim-mult, 1)); }
 
 .fab-head { flex: 1; min-width: 0; padding-top: 1px; padding-left: 8px; }
 .fab-head-title { font-size: 17px; font-weight: 900; color: var(--fp-fg); letter-spacing: -0.015em; }
@@ -195,18 +202,18 @@ html.dark .sc-it-amt { color: #F1F5F9; }
   background: var(--fp-close-bg); border: none; cursor: pointer;
   display: grid; place-items: center; color: var(--fp-close-fg);
   opacity: 0; transform: scale(0.5); pointer-events: none;
-  transition: opacity calc(200ms * var(--anim-mult)) ease, transform calc(240ms * var(--anim-mult)) cubic-bezier(.32,1.32,.5,1), background calc(150ms * var(--anim-mult));
+  transition: opacity calc(200ms * var(--anim-mult, 1)) ease, transform calc(240ms * var(--anim-mult, 1)) cubic-bezier(.32,1.32,.5,1), background calc(150ms * var(--anim-mult, 1));
 }
 .fab-close:hover { filter: brightness(1.12); }
 .fab-close .material-icons { font-size: 18px; }
-.fab-screen.open .fab-close { opacity: 1; transform: scale(1); pointer-events: auto; transition-delay: calc(160ms * var(--anim-mult)); }
+.fab-screen.open .fab-close { opacity: 1; transform: scale(1); pointer-events: auto; transition-delay: calc(160ms * var(--anim-mult, 1)); }
 
 .fab-menu-sep {
   height: 1px; background: var(--fp-sep);
   margin: 10px 0 6px;
-  opacity: 0; transition: opacity calc(200ms * var(--anim-mult)) ease;
+  opacity: 0; transition: opacity calc(200ms * var(--anim-mult, 1)) ease;
 }
-.fab-screen.open .fab-menu-sep { opacity: 1; transition-delay: calc(140ms * var(--anim-mult)); }
+.fab-screen.open .fab-menu-sep { opacity: 1; transition-delay: calc(140ms * var(--anim-mult, 1)); }
 
 /* Menu items */
 .fab-item {
@@ -216,9 +223,9 @@ html.dark .sc-it-amt { color: #F1F5F9; }
   /* FIX 1: background has its own short transition with explicit 0ms delay so
      hover-background always clears instantly, independent of entrance stagger delays */
   transition:
-    opacity calc(200ms * var(--anim-mult)) ease,
-    transform calc(340ms * var(--anim-mult)) cubic-bezier(.32,1.32,.5,1),
-    background calc(80ms * var(--anim-mult)) ease 0ms;
+    opacity calc(200ms * var(--anim-mult, 1)) ease,
+    transform calc(340ms * var(--anim-mult, 1)) cubic-bezier(.32,1.32,.5,1),
+    background calc(80ms * var(--anim-mult, 1)) ease 0ms;
 }
 /* FIX 1: hover background — no delay property needed here (baseline is 0ms) */
 .fab-item:hover { background: var(--fp-hover); }
@@ -228,27 +235,27 @@ html.dark .sc-it-amt { color: #F1F5F9; }
 /* FIX 1: nth-child stagger delays apply ONLY to opacity+transform, not background */
 .fab-screen.open .fab-item:nth-child(3){
   transition:
-    opacity calc(200ms * var(--anim-mult)) ease calc(175ms * var(--anim-mult)),
-    transform calc(340ms * var(--anim-mult)) cubic-bezier(.32,1.32,.5,1) calc(175ms * var(--anim-mult)),
-    background calc(80ms * var(--anim-mult)) ease 0ms;
+    opacity calc(200ms * var(--anim-mult, 1)) ease calc(175ms * var(--anim-mult, 1)),
+    transform calc(340ms * var(--anim-mult, 1)) cubic-bezier(.32,1.32,.5,1) calc(175ms * var(--anim-mult, 1)),
+    background calc(80ms * var(--anim-mult, 1)) ease 0ms;
 }
 .fab-screen.open .fab-item:nth-child(4){
   transition:
-    opacity calc(200ms * var(--anim-mult)) ease calc(225ms * var(--anim-mult)),
-    transform calc(340ms * var(--anim-mult)) cubic-bezier(.32,1.32,.5,1) calc(225ms * var(--anim-mult)),
-    background calc(80ms * var(--anim-mult)) ease 0ms;
+    opacity calc(200ms * var(--anim-mult, 1)) ease calc(225ms * var(--anim-mult, 1)),
+    transform calc(340ms * var(--anim-mult, 1)) cubic-bezier(.32,1.32,.5,1) calc(225ms * var(--anim-mult, 1)),
+    background calc(80ms * var(--anim-mult, 1)) ease 0ms;
 }
 .fab-screen.open .fab-item:nth-child(5){
   transition:
-    opacity calc(200ms * var(--anim-mult)) ease calc(275ms * var(--anim-mult)),
-    transform calc(340ms * var(--anim-mult)) cubic-bezier(.32,1.32,.5,1) calc(275ms * var(--anim-mult)),
-    background calc(80ms * var(--anim-mult)) ease 0ms;
+    opacity calc(200ms * var(--anim-mult, 1)) ease calc(275ms * var(--anim-mult, 1)),
+    transform calc(340ms * var(--anim-mult, 1)) cubic-bezier(.32,1.32,.5,1) calc(275ms * var(--anim-mult, 1)),
+    background calc(80ms * var(--anim-mult, 1)) ease 0ms;
 }
 .fab-screen.open .fab-item:nth-child(6){
   transition:
-    opacity calc(200ms * var(--anim-mult)) ease calc(325ms * var(--anim-mult)),
-    transform calc(340ms * var(--anim-mult)) cubic-bezier(.32,1.32,.5,1) calc(325ms * var(--anim-mult)),
-    background calc(80ms * var(--anim-mult)) ease 0ms;
+    opacity calc(200ms * var(--anim-mult, 1)) ease calc(325ms * var(--anim-mult, 1)),
+    transform calc(340ms * var(--anim-mult, 1)) cubic-bezier(.32,1.32,.5,1) calc(325ms * var(--anim-mult, 1)),
+    background calc(80ms * var(--anim-mult, 1)) ease 0ms;
 }
 
 /* ── Icon tiles — each item has its own --ic-bg ── */

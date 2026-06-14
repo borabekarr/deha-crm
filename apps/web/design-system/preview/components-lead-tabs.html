@@ -1,0 +1,316 @@
+<!doctype html>
+<!-- @dsCard group="Brand" name="Lead Tabs" subtitle="Lead-detail popover — Behaviour intent stream + Qualification brain map" viewport="1180x900" -->
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="_base.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_lead-tabs.css">
+<link rel="stylesheet" href="_darkmode.css">
+</head>
+<body>
+
+<div class="ltb-shell" data-screen-label="Lead Tabs">
+
+  <!-- header: health rail + identity + chips + close -->
+  <div class="ltb-head">
+    <span class="ltb-rail" aria-hidden="true"></span>
+    <div class="ltb-id">
+      <div class="ltb-name">Mehmet Yılmaz</div>
+      <div class="ltb-co">Yılmaz Holding · Istanbul</div>
+    </div>
+    <div class="ltb-chips">
+      <span class="ltb-chip ltb-chip-stage"><span class="material-symbols-outlined">flag</span>Negotiation</span>
+      <span class="ltb-chip ltb-chip-temp"><span class="material-symbols-outlined">local_fire_department</span>87 · Hot</span>
+    </div>
+    <button class="ltb-close" aria-label="Close"><span class="material-symbols-outlined">close</span></button>
+  </div>
+
+  <!-- tab switcher -->
+  <div class="ltb-tabs" role="tablist" aria-label="Lead detail tabs">
+    <button class="ltb-tab is-active" role="tab" data-tab="behaviour" aria-selected="true" id="ltb-tab-behaviour" aria-controls="ltb-panel-behaviour">
+      <span class="material-symbols-outlined">monitoring</span>Behaviour
+    </button>
+    <button class="ltb-tab" role="tab" data-tab="qualification" aria-selected="false" id="ltb-tab-qualification" aria-controls="ltb-panel-qualification" tabindex="-1">
+      <span class="material-symbols-outlined">psychology</span>Qualification
+    </button>
+    <span class="ltb-tab-ink" aria-hidden="true"></span>
+  </div>
+
+  <!-- panels -->
+  <div class="ltb-body">
+    <section class="ltb-panel is-active" role="tabpanel" data-panel="behaviour" id="ltb-panel-behaviour" aria-labelledby="ltb-tab-behaviour">
+      <div class="ltb-bx">
+
+        <!-- A. top strip: intent index + sparkline + channel filter -->
+        <div class="ltb-bx-rail" style="--i:0">
+
+          <div class="ltb-bx-intent">
+            <div class="ltb-bx-intent-num" data-target="78">0</div>
+            <div class="ltb-bx-intent-meta">
+              <span class="ltb-bx-trend"><span class="material-symbols-outlined">trending_up</span>+12</span>
+              <span class="ltb-bx-intent-lbl">Intent Index</span>
+            </div>
+          </div>
+
+          <div class="ltb-bx-spark" aria-label="7-day intent intensity" role="img">
+            <span class="ltb-bx-bar" style="--h:34%;--i:0"></span>
+            <span class="ltb-bx-bar" style="--h:52%;--i:1"></span>
+            <span class="ltb-bx-bar" style="--h:41%;--i:2"></span>
+            <span class="ltb-bx-bar" style="--h:68%;--i:3"></span>
+            <span class="ltb-bx-bar" style="--h:60%;--i:4"></span>
+            <span class="ltb-bx-bar" style="--h:84%;--i:5"></span>
+            <span class="ltb-bx-bar" style="--h:96%;--i:6"></span>
+          </div>
+
+          <div class="seg ltb-bx-seg" role="tablist" aria-label="Filter by channel">
+            <span class="ltb-bx-seg-ind" aria-hidden="true"></span>
+            <button class="ltb-bx-seg-btn is-active" data-channel="all">All</button>
+            <button class="ltb-bx-seg-btn" data-channel="doc">Document</button>
+            <button class="ltb-bx-seg-btn" data-channel="wa">WhatsApp</button>
+            <button class="ltb-bx-seg-btn" data-channel="voice">Voice</button>
+          </div>
+        </div>
+
+        <!-- B. four signal-strength tiles -->
+        <div class="ltb-bx-grid">
+
+          <!-- dwell -->
+          <div class="ltb-bx-tile" style="--i:1">
+            <div class="ltb-bx-tile-top">
+              <span class="ltb-bx-tile-ic"><span class="material-symbols-outlined">timer</span></span>
+              <span class="ltb-bx-tile-lbl">Deep-Dwell Time</span>
+            </div>
+            <div class="ltb-bx-tile-val">
+              <span class="ltb-bx-num">4m 12s</span>
+              <span class="ltb-bx-delta is-up"><span class="material-symbols-outlined">arrow_upward</span>+38%</span>
+            </div>
+            <p class="ltb-bx-tile-note">Time actually spent reading what you sent - not just opens.</p>
+          </div>
+
+          <!-- scroll_depth -->
+          <div class="ltb-bx-tile" style="--i:2">
+            <div class="ltb-bx-tile-top">
+              <span class="ltb-bx-tile-ic"><span class="material-symbols-outlined">unfold_more</span></span>
+              <span class="ltb-bx-tile-lbl">Scroll Depth</span>
+            </div>
+            <div class="ltb-bx-tile-val"><span class="ltb-bx-num">82%</span></div>
+            <div class="ltb-bx-prog"><span class="ltb-bx-prog-fill" style="--p:82%"></span></div>
+            <p class="ltb-bx-tile-note">Stuck on "Payment Plans" - the page they linger on.</p>
+          </div>
+
+          <!-- buying_horizon -->
+          <div class="ltb-bx-tile" style="--i:3">
+            <div class="ltb-bx-tile-top">
+              <span class="ltb-bx-tile-ic"><span class="material-symbols-outlined">hourglass_top</span></span>
+              <span class="ltb-bx-tile-lbl">Buying Horizon</span>
+            </div>
+            <div class="ltb-bx-tile-val"><span class="ltb-bx-urgency">Urgent - &lt;15 days</span></div>
+            <p class="ltb-bx-tile-note">Estimated time-to-close from behaviour pattern.</p>
+          </div>
+
+          <!-- interaction_vel -->
+          <div class="ltb-bx-tile" style="--i:4">
+            <div class="ltb-bx-tile-top">
+              <span class="ltb-bx-tile-ic"><span class="material-symbols-outlined">speed</span></span>
+              <span class="ltb-bx-tile-lbl">Interaction Velocity</span>
+            </div>
+            <div class="ltb-bx-vel">
+              <div class="ltb-bx-vel-row" data-channel="doc">
+                <span class="ltb-bx-vel-ch">Doc</span>
+                <span class="ltb-bx-vel-rail"><span class="ltb-bx-vel-bar" style="--p:54%"></span></span>
+              </div>
+              <div class="ltb-bx-vel-row" data-channel="wa">
+                <span class="ltb-bx-vel-ch">WA</span>
+                <span class="ltb-bx-vel-rail"><span class="ltb-bx-vel-bar" style="--p:92%"></span></span>
+              </div>
+              <div class="ltb-bx-vel-row" data-channel="voice">
+                <span class="ltb-bx-vel-ch">Voice</span>
+                <span class="ltb-bx-vel-rail"><span class="ltb-bx-vel-bar" style="--p:38%"></span></span>
+              </div>
+            </div>
+            <p class="ltb-bx-tile-note">Reply speed per channel vs the sector - lead where they move fastest.</p>
+          </div>
+        </div>
+
+        <!-- C. chronological signal feed -->
+        <div class="ltb-bx-feed">
+
+          <div class="ltb-bx-row" data-channel="wa" style="--i:5">
+            <span class="ltb-bx-dot is-pos" aria-hidden="true"></span>
+            <span class="ltb-bx-time">now</span>
+            <div class="ltb-bx-row-body">
+              <div class="ltb-bx-row-head">
+                <span class="ltb-bx-row-ch material-symbols-outlined" title="WhatsApp">chat</span>
+                <span class="ltb-bx-row-title">Re-engagement Spike</span>
+                <span class="ltb-bx-tag is-pos">Strong +</span>
+              </div>
+              <p class="ltb-bx-row-note">Sudden return after a quiet spell - intent is back.</p>
+            </div>
+          </div>
+
+          <div class="ltb-bx-row" data-channel="doc" style="--i:6">
+            <span class="ltb-bx-dot is-pos" aria-hidden="true"></span>
+            <span class="ltb-bx-time">2h</span>
+            <div class="ltb-bx-row-body">
+              <div class="ltb-bx-row-head">
+                <span class="ltb-bx-row-ch material-symbols-outlined" title="Document">description</span>
+                <span class="ltb-bx-row-title">Micro Hotspot</span>
+                <span class="ltb-bx-tag is-pos">Strong +</span>
+              </div>
+              <p class="ltb-bx-row-note">The single element they fixate on and keep returning to.</p>
+            </div>
+          </div>
+
+          <div class="ltb-bx-row" data-channel="doc" style="--i:7">
+            <span class="ltb-bx-dot is-risk" aria-hidden="true"></span>
+            <span class="ltb-bx-time">5h</span>
+            <div class="ltb-bx-row-body">
+              <div class="ltb-bx-row-head">
+                <span class="ltb-bx-row-ch material-symbols-outlined" title="Document">description</span>
+                <span class="ltb-bx-row-title">Friction Detection</span>
+                <span class="ltb-bx-tag is-risk">Risk −</span>
+              </div>
+              <p class="ltb-bx-row-note">Tagged distrust / confusion - reassure on this point.</p>
+            </div>
+          </div>
+
+          <div class="ltb-bx-row" data-channel="voice" style="--i:8">
+            <span class="ltb-bx-dot is-signal" aria-hidden="true"></span>
+            <span class="ltb-bx-time">1d</span>
+            <div class="ltb-bx-row-body">
+              <div class="ltb-bx-row-head">
+                <span class="ltb-bx-row-ch material-symbols-outlined" title="Voice">call</span>
+                <span class="ltb-bx-row-title">Geographic Shift</span>
+                <span class="ltb-bx-tag is-signal">Signal</span>
+              </div>
+              <p class="ltb-bx-row-note">Search area drift across the last sessions.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+    <section class="ltb-panel" role="tabpanel" data-panel="qualification" id="ltb-panel-qualification" aria-labelledby="ltb-tab-qualification" hidden>
+      <div class="ltb-brain-stage">
+
+        <!-- left spacer (label gutter) -->
+        <div class="ltb-brain-gutter" aria-hidden="true"></div>
+
+        <!-- center: single un-sliced raster brain + lit overlay + svg regions + labels -->
+        <div class="ltb-brain-canvas">
+          <img class="ltb-brain-base" src="/brain-ref/default.png" alt="Lead qualification brain map" draggable="false">
+          <img class="ltb-brain-lit" src="/brain-ref/orange-selected.png" alt="" aria-hidden="true" draggable="false">
+
+          <svg class="ltb-brain-svg" viewBox="0 0 800 800" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <!-- regions: rounded-rect hit + outline (geometry from BRAIN_REGION_BOXES, 800-space) -->
+            <!-- larger boxes first, smaller/foreground last so small ones win the pointer -->
+            <g class="ltb-region" data-id="purchase_factors" style="--rc:#4a65f2">
+              <path class="ltb-region-hit" d="M489,410 H676 a22,22 0 0 1 22,22 V727 a22,22 0 0 1 -22,22 H489 a22,22 0 0 1 -22,-22 V432 a22,22 0 0 1 22,-22 Z"/>
+              <path class="ltb-region-outline" d="M489,410 H676 a22,22 0 0 1 22,22 V727 a22,22 0 0 1 -22,22 H489 a22,22 0 0 1 -22,-22 V432 a22,22 0 0 1 22,-22 Z"/>
+            </g>
+            <g class="ltb-region" data-id="values" style="--rc:#fe8a01">
+              <path class="ltb-region-hit" d="M387,20 H641 a22,22 0 0 1 22,22 V266 a22,22 0 0 1 -22,22 H387 a22,22 0 0 1 -22,-22 V42 a22,22 0 0 1 22,-22 Z"/>
+              <path class="ltb-region-outline" d="M387,20 H641 a22,22 0 0 1 22,22 V266 a22,22 0 0 1 -22,22 H387 a22,22 0 0 1 -22,-22 V42 a22,22 0 0 1 22,-22 Z"/>
+            </g>
+            <g class="ltb-region" data-id="influencers" style="--rc:#a437eb">
+              <path class="ltb-region-hit" d="M138,494 H316 a22,22 0 0 1 22,22 V727 a22,22 0 0 1 -22,22 H138 a22,22 0 0 1 -22,-22 V516 a22,22 0 0 1 22,-22 Z"/>
+              <path class="ltb-region-outline" d="M138,494 H316 a22,22 0 0 1 22,22 V727 a22,22 0 0 1 -22,22 H138 a22,22 0 0 1 -22,-22 V516 a22,22 0 0 1 22,-22 Z"/>
+            </g>
+            <g class="ltb-region" data-id="aspirations" style="--rc:#fd5969">
+              <path class="ltb-region-hit" d="M158,20 H360 a22,22 0 0 1 22,22 V264 a22,22 0 0 1 -22,22 H158 a22,22 0 0 1 -22,-22 V42 a22,22 0 0 1 22,-22 Z"/>
+              <path class="ltb-region-outline" d="M158,20 H360 a22,22 0 0 1 22,22 V264 a22,22 0 0 1 -22,22 H158 a22,22 0 0 1 -22,-22 V42 a22,22 0 0 1 22,-22 Z"/>
+            </g>
+            <g class="ltb-region" data-id="fears" style="--rc:#b0e731">
+              <path class="ltb-region-hit" d="M126,278 H285 a22,22 0 0 1 22,22 V479 a22,22 0 0 1 -22,22 H126 a22,22 0 0 1 -22,-22 V300 a22,22 0 0 1 22,-22 Z"/>
+              <path class="ltb-region-outline" d="M126,278 H285 a22,22 0 0 1 22,22 V479 a22,22 0 0 1 -22,22 H126 a22,22 0 0 1 -22,-22 V300 a22,22 0 0 1 22,-22 Z"/>
+            </g>
+            <g class="ltb-region" data-id="preferences" style="--rc:#35e895">
+              <path class="ltb-region-hit" d="M322,281 H523 a22,22 0 0 1 22,22 V479 a22,22 0 0 1 -22,22 H322 a22,22 0 0 1 -22,-22 V303 a22,22 0 0 1 22,-22 Z"/>
+              <path class="ltb-region-outline" d="M322,281 H523 a22,22 0 0 1 22,22 V479 a22,22 0 0 1 -22,22 H322 a22,22 0 0 1 -22,-22 V303 a22,22 0 0 1 22,-22 Z"/>
+            </g>
+            <g class="ltb-region" data-id="dislikes" style="--rc:#14aafe">
+              <path class="ltb-region-hit" d="M516,277 H678 a22,22 0 0 1 22,22 V477 a22,22 0 0 1 -22,22 H516 a22,22 0 0 1 -22,-22 V299 a22,22 0 0 1 22,-22 Z"/>
+              <path class="ltb-region-outline" d="M516,277 H678 a22,22 0 0 1 22,22 V477 a22,22 0 0 1 -22,22 H516 a22,22 0 0 1 -22,-22 V299 a22,22 0 0 1 22,-22 Z"/>
+            </g>
+            <g class="ltb-region" data-id="challenges" style="--rc:#fdd02c">
+              <path class="ltb-region-hit" d="M333,20 H457 a22,22 0 0 1 22,22 V258 a22,22 0 0 1 -22,22 H333 a22,22 0 0 1 -22,-22 V42 a22,22 0 0 1 22,-22 Z"/>
+              <path class="ltb-region-outline" d="M333,20 H457 a22,22 0 0 1 22,22 V258 a22,22 0 0 1 -22,22 H333 a22,22 0 0 1 -22,-22 V42 a22,22 0 0 1 22,-22 Z"/>
+            </g>
+            <g class="ltb-region" data-id="keywords" style="--rc:#fc6d99">
+              <path class="ltb-region-hit" d="M325,498 H473 a22,22 0 0 1 22,22 V738 a22,22 0 0 1 -22,22 H325 a22,22 0 0 1 -22,-22 V520 a22,22 0 0 1 22,-22 Z"/>
+              <path class="ltb-region-outline" d="M325,498 H473 a22,22 0 0 1 22,22 V738 a22,22 0 0 1 -22,22 H325 a22,22 0 0 1 -22,-22 V520 a22,22 0 0 1 22,-22 Z"/>
+            </g>
+
+            <!-- leader lines: crisp vector polylines, colored by section token, non-scaling stroke -->
+            <g class="ltb-leader" data-id="aspirations" style="--rc:#fd5969">
+              <polyline class="ltb-leader-line" vector-effect="non-scaling-stroke" points="158,80 70,80 30,80"/>
+              <circle class="ltb-leader-dot" cx="158" cy="80" r="4"/>
+            </g>
+            <g class="ltb-leader" data-id="challenges" style="--rc:#fdd02c">
+              <polyline class="ltb-leader-line" vector-effect="non-scaling-stroke" points="395,20 395,-30 770,-30 770,150"/>
+              <circle class="ltb-leader-dot" cx="395" cy="20" r="4"/>
+            </g>
+            <g class="ltb-leader" data-id="values" style="--rc:#fe8a01">
+              <polyline class="ltb-leader-line" vector-effect="non-scaling-stroke" points="663,80 760,80 800,80"/>
+              <circle class="ltb-leader-dot" cx="663" cy="80" r="4"/>
+            </g>
+            <g class="ltb-leader" data-id="fears" style="--rc:#b0e731">
+              <polyline class="ltb-leader-line" vector-effect="non-scaling-stroke" points="104,390 50,390 10,390"/>
+              <circle class="ltb-leader-dot" cx="104" cy="390" r="4"/>
+            </g>
+            <g class="ltb-leader" data-id="preferences" style="--rc:#35e895">
+              <polyline class="ltb-leader-line" vector-effect="non-scaling-stroke" points="422,281 422,231 780,231 780,400"/>
+              <circle class="ltb-leader-dot" cx="422" cy="281" r="4"/>
+            </g>
+            <g class="ltb-leader" data-id="dislikes" style="--rc:#14aafe">
+              <polyline class="ltb-leader-line" vector-effect="non-scaling-stroke" points="700,388 770,388 800,388"/>
+              <circle class="ltb-leader-dot" cx="700" cy="388" r="4"/>
+            </g>
+            <g class="ltb-leader" data-id="influencers" style="--rc:#a437eb">
+              <polyline class="ltb-leader-line" vector-effect="non-scaling-stroke" points="116,620 50,620 10,620"/>
+              <circle class="ltb-leader-dot" cx="116" cy="620" r="4"/>
+            </g>
+            <g class="ltb-leader" data-id="keywords" style="--rc:#fc6d99">
+              <polyline class="ltb-leader-line" vector-effect="non-scaling-stroke" points="399,760 399,800 60,800"/>
+              <circle class="ltb-leader-dot" cx="399" cy="760" r="4"/>
+            </g>
+            <g class="ltb-leader" data-id="purchase_factors" style="--rc:#4a65f2">
+              <polyline class="ltb-leader-line" vector-effect="non-scaling-stroke" points="698,580 770,580 800,580"/>
+              <circle class="ltb-leader-dot" cx="698" cy="580" r="4"/>
+            </g>
+          </svg>
+
+          <!-- HTML labels, absolutely positioned on the outward side -->
+          <button class="ltb-region-label is-left"  data-id="aspirations"      style="top:8%;left:-2%;--rc:#fd5969"><span class="material-symbols-outlined">rocket_launch</span><span class="ltb-rl-txt">Aspirations</span></button>
+          <button class="ltb-region-label is-right" data-id="challenges"       style="top:-6%;right:-2%;--rc:#fdd02c"><span class="material-symbols-outlined">sync_problem</span><span class="ltb-rl-txt">Challenges</span></button>
+          <button class="ltb-region-label is-right" data-id="values"          style="top:8%;right:-2%;--rc:#fe8a01"><span class="material-symbols-outlined">verified</span><span class="ltb-rl-txt">Values</span></button>
+          <button class="ltb-region-label is-left"  data-id="fears"           style="top:46%;left:-2%;--rc:#b0e731"><span class="material-symbols-outlined">crisis_alert</span><span class="ltb-rl-txt">Fears</span></button>
+          <button class="ltb-region-label is-right" data-id="preferences"     style="top:26%;right:-2%;--rc:#35e895"><span class="material-symbols-outlined">tune</span><span class="ltb-rl-txt">Preferences</span></button>
+          <button class="ltb-region-label is-right" data-id="dislikes"        style="top:46%;right:-2%;--rc:#14aafe"><span class="material-symbols-outlined">thumb_down</span><span class="ltb-rl-txt">Dislikes</span></button>
+          <button class="ltb-region-label is-left"  data-id="influencers"     style="top:74%;left:-2%;--rc:#a437eb"><span class="material-symbols-outlined">groups</span><span class="ltb-rl-txt">Key Influencers</span></button>
+          <button class="ltb-region-label is-left"  data-id="keywords"        style="top:96%;left:6%;--rc:#fc6d99"><span class="material-symbols-outlined">label</span><span class="ltb-rl-txt">Key Words &amp; Phrases</span></button>
+          <button class="ltb-region-label is-right" data-id="purchase_factors" style="top:70%;right:-2%;--rc:#4a65f2"><span class="material-symbols-outlined">fact_check</span><span class="ltb-rl-txt">Purchase Factors</span></button>
+        </div>
+
+        <!-- right: detail preview panel -->
+        <div class="ltb-detail" data-empty="true">
+          <div class="ltb-detail-empty">
+            <span class="material-symbols-outlined">psychology</span>
+            <p>Hover a region to preview, click to explore.</p>
+          </div>
+          <div class="ltb-dp">
+            <div class="ltb-dp-header"><span class="material-symbols-outlined ltb-dp-ic">psychology</span><h3 class="ltb-dp-title"></h3></div>
+            <p class="ltb-dp-blurb"></p>
+            <div class="ltb-chips-row"></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </div>
+
+</div>
+
+<script src="_lead-tabs.js"></script>
+<script src="_darkmode.js"></script>
+</body></html>

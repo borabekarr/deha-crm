@@ -1,0 +1,750 @@
+/**
+ * todo-list-hook.ts
+ *
+ * Encapsulates all DOM-level side effects for TodoList:
+ *  - Staggered entrance animation on mount via callback ref
+ *  - Per-row pointer drag logic (right=complete, left=actions, vertical=reorder)
+ *  - FLIP reorder animation
+ *  - completeRow, uncompleteRow, removeRow, insertTask
+ *  - Confetti burst on drag-complete
+ *  - Week calendar pill positioning
+ *  - Tag filter show/hide with morph animation
+ *  - Stat counter tween
+ *
+ * NO raw useEffect anywhere in this folder.
+ * All side effects are triggered through callback refs or event handlers.
+ */
+
+// ── Types ────────────────────────────────────────────────────────────────────
+
+export interface Task {
+  id: string
+  title: string
+  time: string
+  priority: 'urgent_important' | 'urgent' | 'important'
+  icon: string
+  done?: boolean
+  repeat?: 'once' | 'repeat'
+  cad?: string
+  dow?: number
+  dom?: number
+}
+
+export interface TodoRefs {
+  list: HTMLDivElement | null
+  statDone: HTMLElement | null
+  statWait: HTMLElement | null
+  filtersEl: HTMLDivElement | null
+  weekEl: HTMLDivElement | null
+}
+
+interface MountState {
+  __todoTimer?: ReturnType<typeof setTimeout>
+}
+
+// ── Constants ────────────────────────────────────────────────────────────────
+
+export const PRIORITY = {
+  urgent_important: { label: 'Urgent & Important', color: '#EF4444', bg: 'var(--semantic-danger-bg)',  bi: 'priority_high' },
+  urgent:           { label: 'Urgent',             color: '#F97316', bg: 'var(--semantic-hot-bg)',     bi: 'bolt' },
+  important:        { label: 'Important',          color: '#EAB308', bg: 'var(--semantic-warning-bg)', bi: 'flag' },
+} as const
+
+export type PriorityKey = keyof typeof PRIORITY
+
+export const DEFAULT_PRI: PriorityKey = 'urgent_important'
+
+export const DOW = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
+export const DAYNAME = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+export const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
+export const CADS = ['daily', 'weekly', 'monthly', 'quarterly', 'yearly'] as const
+export const CADLBL: Record<string, string> = { daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly', quarterly: 'Quarterly', yearly: 'Yearly' }
+export const DOWS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+
+export const SEED_TASKS: Task[] = [
+  { id: 't1', title: 'Review design mockups',  time: '2:00 PM',  priority: 'urgent_important', icon: 'image_search' },
+  { id: 't2', title: 'Client call preparation', time: '3:30 PM',  priority: 'urgent',           icon: 'description' },
+  { id: 't3', title: 'Code review PR #234',     time: '5:00 PM',  priority: 'important',        icon: 'code' },
+  { id: 't4', title: 'Finalize Q1 budget',      time: '10:00 AM', priority: 'urgent_important', icon: 'account_balance', repeat: 'repeat', cad: 'quarterly', dom: 1 },
+  { id: 't5', title: 'Reply to investor email', time: '11:30 AM', priority: 'urgent',           icon: 'mail' },
+  { id: 't6', title: 'Read industry report',    time: '7:00 PM',  priority: 'important',        icon: 'menu_book', repeat: 'repeat', cad: 'weekly', dow: 6 },
+]
+
+const DAY_TASKS: Record<number, Task[]> = {
+  0: [
+    { id:'mo1', title:'Weekly planning sync',      time:'9:00 AM',  priority:'urgent_important', icon:'event_note' },
+    { id:'mo2', title:'Approve marketing budget',  time:'11:00 AM', priority:'urgent',           icon:'account_balance' },
+    { id:'mo3', title:'1:1 with design lead',      time:'2:00 PM',  priority:'important',        icon:'forum' },
+    { id:'mo4', title:'Triage support backlog',    time:'4:00 PM',  priority:'urgent',           icon:'support_agent' },
+  ],
+  1: [
+    { id:'tu1', title:'Ship onboarding v2',        time:'10:00 AM', priority:'urgent_important', icon:'rocket_launch' },
+    { id:'tu2', title:'Investor deck review',      time:'12:00 PM', priority:'urgent',           icon:'slideshow' },
+    { id:'tu3', title:'Refine pricing model',      time:'1:30 PM',  priority:'important',        icon:'sell', repeat:'repeat', cad:'monthly', dom:2 },
+    { id:'tu4', title:'Interview · backend role',  time:'3:00 PM',  priority:'important',        icon:'person_search' },
+    { id:'tu5', title:'Reply to partner email',    time:'5:30 PM',  priority:'urgent',           icon:'mail' },
+  ],
+  2: [
+    { id:'we1', title:'Roadmap deep-work block',   time:'9:30 AM',  priority:'urgent_important', icon:'map' },
+    { id:'we2', title:'QA the release build',      time:'2:00 PM',  priority:'urgent',           icon:'fact_check' },
+    { id:'we3', title:'Read industry report',      time:'6:00 PM',  priority:'important',        icon:'menu_book' },
+  ],
+  3: [
+    { id:'th1', title:'Board update draft',        time:'10:00 AM', priority:'urgent_important', icon:'description' },
+    { id:'th2', title:'Customer discovery calls',  time:'1:00 PM',  priority:'urgent',           icon:'call', repeat:'repeat', cad:'weekly', dow:3 },
+    { id:'th3', title:'Polish empty states',       time:'3:30 PM',  priority:'important',        icon:'brush' },
+    { id:'th4', title:'Renew SSL certificates',    time:'5:00 PM',  priority:'urgent',           icon:'lock' },
+  ],
+  4: [
+    { id:'fr1', title:'Demo day rehearsal',        time:'9:00 AM',  priority:'urgent_important', icon:'co_present' },
+    { id:'fr2', title:'Close sprint & retro',      time:'11:30 AM', priority:'urgent',           icon:'checklist' },
+    { id:'fr3', title:'Approve payroll',           time:'1:00 PM',  priority:'urgent_important', icon:'payments', repeat:'repeat', cad:'monthly', dom:28 },
+    { id:'fr4', title:'Publish changelog',         time:'3:00 PM',  priority:'important',        icon:'campaign' },
+    { id:'fr5', title:'Plan weekend on-call',      time:'5:00 PM',  priority:'important',        icon:'schedule' },
+  ],
+  5: [
+    { id:'sa1', title:'Inbox zero sweep',          time:'10:30 AM', priority:'important',        icon:'mark_email_read' },
+    { id:'sa2', title:'Sketch Q2 OKRs',            time:'12:00 PM', priority:'important',        icon:'lightbulb' },
+  ],
+  6: SEED_TASKS,
+}
+
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+export function badgeHTML(p: typeof PRIORITY[PriorityKey]): string {
+  return '<span class="material-icons">' + (p.bi || 'label') + '</span>' + p.label
+}
+
+export function startOfWeek(d: Date): Date {
+  const x = new Date(d)
+  const wd = (x.getDay() + 6) % 7
+  x.setDate(x.getDate() - wd)
+  x.setHours(0, 0, 0, 0)
+  return x
+}
+
+// ── Stat counter tween ───────────────────────────────────────────────────────
+
+export function tween(el: HTMLElement, from: number, to: number): void {
+  if (from === to) { el.textContent = String(to); return }
+  const t0 = performance.now()
+  const dur = 420
+  let done = false
+  const step = (now: number) => {
+    if (done) return
+    let k = Math.min(1, (now - t0) / dur)
+    k = 1 - Math.pow(1 - k, 3)
+    el.textContent = String(Math.round(from + (to - from) * k))
+    if (k < 1) requestAnimationFrame(step); else done = true
+  }
+  requestAnimationFrame(step)
+  setTimeout(() => { done = true; el.textContent = String(to) }, dur + 90)
+}
+
+// ── FLIP reorder animation ───────────────────────────────────────────────────
+
+export function flip(list: HTMLElement, mutate: () => void): void {
+  const rows = Array.from(list.children) as HTMLElement[]
+  const first = rows.map(r => r.getBoundingClientRect().top)
+  mutate()
+  rows.forEach((r, i) => {
+    if (!r.isConnected || r.parentNode !== list) return
+    const dy = first[i] - r.getBoundingClientRect().top
+    if (!dy) return
+    r.style.transition = 'none'
+    r.style.transform = 'translateY(' + dy + 'px)'
+    void r.offsetWidth
+    r.style.transition = 'transform 520ms cubic-bezier(.2,1.1,.3,1)'
+    r.style.transform = ''
+    setTimeout(() => { r.style.transition = ''; r.style.transform = '' }, 580)
+  })
+}
+
+// ── Confetti burst ───────────────────────────────────────────────────────────
+
+export function launchConfetti(row: HTMLElement): void {
+  const rect = row.getBoundingClientRect()
+  const cx = rect.left + rect.width * 0.35
+  const cy = rect.top + rect.height / 2
+  const colors = ['#10B981','#34D399','#6EE7B7','#fff','#BBF7D0','#059669','#A7F3D0','#FDE68A','#FCA5A5','#93C5FD']
+  const shapes = ['50%', '3px', '50% 0 50% 50%']
+  const count = 48
+  for (let i = 0; i < count; i++) {
+    const dot = document.createElement('span')
+    const angle = (i / count) * Math.PI * 2 - Math.PI / 2 + (Math.random() - 0.5) * 0.8
+    const dist = 36 + Math.random() * 90
+    const dx = (Math.cos(angle) * dist).toFixed(1)
+    const dy = (Math.sin(angle) * dist - 20).toFixed(1)
+    const size = (3 + Math.random() * 6).toFixed(1)
+    const shape = shapes[Math.floor(Math.random() * shapes.length)]
+    dot.style.cssText =
+      'position:fixed;width:' + size + 'px;height:' + size + 'px;border-radius:' + shape + ';pointer-events:none;z-index:9999;' +
+      'background:' + colors[i % colors.length] + ';left:' + cx + 'px;top:' + cy + 'px;' +
+      '--dx:' + dx + 'px;--dy:' + dy + 'px;' +
+      'animation:confetti-burst 700ms cubic-bezier(.15,1,.4,1) ' + (i * 10) + 'ms both;'
+    document.body.appendChild(dot)
+    setTimeout(() => { dot.remove() }, 820 + i * 10)
+  }
+}
+
+// ── Complete / uncomplete / remove ───────────────────────────────────────────
+
+export function completeRow(row: HTMLElement, list: HTMLElement, _fromDrag?: boolean): void {
+  if (row.classList.contains('is-done')) return
+  row.classList.add('is-done', 'glow')
+  const clr = (e: AnimationEvent) => {
+    if (e.animationName === 'done-glow') { row.classList.remove('glow'); row.removeEventListener('animationend', clr) }
+  }
+  row.addEventListener('animationend', clr)
+  launchConfetti(row)
+  updateStats(list)
+}
+
+export function uncompleteRow(row: HTMLElement, list: HTMLElement): void {
+  if (!row.classList.contains('is-done')) return
+  flip(list, () => {
+    row.classList.remove('is-done')
+    let ref: Element | null = null
+    for (let i = 0; i < list.children.length; i++) {
+      if (!list.children[i].classList.contains('is-done') && list.children[i] !== row) { ref = list.children[i]; break }
+    }
+    list.insertBefore(row, ref)
+  })
+  updateStats(list)
+}
+
+export function removeRow(row: HTMLElement, list: HTMLElement): void {
+  const h = row.offsetHeight
+  row.classList.add('removing')
+  // Let the exit animation (480ms) fully play, then collapse the row height
+  setTimeout(() => {
+    row.style.transition = 'max-height 320ms ease, opacity 200ms ease, margin 320ms ease'
+    row.style.maxHeight = h + 'px'
+    row.style.overflow = 'hidden'
+    requestAnimationFrame(() => {
+      row.style.maxHeight = '0px'
+      row.style.opacity = '0'
+      row.style.marginBottom = '-11px'
+    })
+  }, 460)
+  setTimeout(() => { if (row.parentNode) row.parentNode.removeChild(row); updateStats(list) }, 820)
+}
+
+// ── Stats update ─────────────────────────────────────────────────────────────
+
+const BASE_DONE = 2
+
+export function updateStats(
+  list: HTMLElement,
+  statDone?: HTMLElement | null,
+  statWait?: HTMLElement | null,
+  refreshFiltersFn?: () => void,
+): void {
+  let done = 0, wait = 0
+  list.querySelectorAll('.task-row').forEach(r => {
+    if (r.classList.contains('is-done')) done++; else wait++
+  })
+  list.classList.toggle('empty', list.children.length === 0)
+  if (statDone) tween(statDone, +(statDone.textContent || '0'), BASE_DONE + done)
+  if (statWait) tween(statWait, +(statWait.textContent || '0'), wait)
+  refreshFiltersFn?.()
+}
+
+// ── Tag filter show/hide ──────────────────────────────────────────────────────
+
+export function hideRowFilter(r: HTMLElement): void {
+  if (r.classList.contains('filtered-out') || r.dataset.filtering) return
+  r.dataset.filtering = '1'
+  const h = r.offsetHeight
+  r.style.overflow = 'hidden'
+  r.style.maxHeight = h + 'px'
+  void r.offsetWidth
+  r.style.transition = 'max-height 520ms cubic-bezier(.4,0,.2,1), margin-bottom 520ms cubic-bezier(.4,0,.2,1), opacity 300ms ease, transform 360ms cubic-bezier(.4,0,.2,1)'
+  r.style.opacity = '0'
+  r.style.transform = 'scale(.96)'
+  r.style.maxHeight = '0px'
+  r.style.marginBottom = '-11px'
+  setTimeout(() => {
+    r.classList.add('filtered-out')
+    r.style.maxHeight = ''
+    r.style.overflow = ''
+    r.style.transition = ''
+    r.style.marginBottom = ''
+    r.style.opacity = ''
+    r.style.transform = ''
+    delete r.dataset.filtering
+  }, 540)
+}
+
+export function showRowFilter(r: HTMLElement): void {
+  if (!r.classList.contains('filtered-out')) return
+  r.classList.remove('filtered-out')
+  r.style.maxHeight = 'none'
+  const h = r.scrollHeight
+  r.style.overflow = 'hidden'
+  r.style.maxHeight = '0px'
+  r.style.marginBottom = '-11px'
+  r.style.opacity = '0'
+  r.style.transform = 'scale(.96)'
+  void r.offsetWidth
+  r.style.transition = 'max-height 560ms cubic-bezier(.22,1,.36,1), margin-bottom 560ms cubic-bezier(.22,1,.36,1), opacity 420ms ease 80ms, transform 520ms cubic-bezier(.22,1,.36,1) 80ms'
+  r.style.maxHeight = h + 'px'
+  r.style.marginBottom = '0px'
+  r.style.opacity = '1'
+  r.style.transform = 'scale(1)'
+  setTimeout(() => {
+    r.style.maxHeight = ''
+    r.style.overflow = ''
+    r.style.transition = ''
+    r.style.marginBottom = ''
+    r.style.opacity = ''
+    r.style.transform = ''
+  }, 660)
+}
+
+// ── Make a task row DOM element ───────────────────────────────────────────────
+
+export function makeRow(
+  task: Task,
+  delay: number | null,
+  list: HTMLElement,
+  statDone: HTMLElement | null,
+  statWait: HTMLElement | null,
+  activeFilterRef: { current: string },
+  filtersEl: HTMLElement | null,
+  onOpenTaskPopover?: (task: Task) => void,
+): HTMLDivElement {
+  const p = PRIORITY[task.priority] || PRIORITY[DEFAULT_PRI]
+  const row = document.createElement('div')
+  row.className = 'task-row'
+  row.dataset.id = task.id
+  row.dataset.pri = task.priority
+  row.dataset.icon = task.icon
+  ;(row as HTMLDivElement & { _task: Task })._task = task
+  if (task.done) row.classList.add('is-done')
+  if (task.repeat === 'repeat') row.classList.add('is-repeat')
+
+  row.innerHTML =
+    '<div class="task-action-overlay">' +
+      '<button class="tao-btn tao-details" aria-label="Open task details"><span class="material-icons">open_in_full</span><span>Details</span></button>' +
+      '<button class="tao-btn tao-complete" aria-label="Complete task"><span class="material-icons">check</span><span>Done</span></button>' +
+      '<button class="tao-btn tao-del" aria-label="Delete task"><span class="material-icons">delete</span><span>Delete</span></button>' +
+    '</div>' +
+    '<div class="task" style="--tag:' + p.color + ';--tag-bg:' + p.bg + ';">' +
+      '<span class="t-ico"><span class="material-icons">' + task.icon + '</span></span>' +
+      '<div class="t-main">' +
+        '<div class="t-title">' + task.title + '</div>' +
+        '<span class="t-badge">' + badgeHTML(p) + '</span>' +
+      '</div>' +
+      '<div class="t-right">' +
+        '<span class="t-repeat"><span class="material-icons">repeat</span></span>' +
+        '<span class="t-time">' + task.time + '</span>' +
+        '<button class="t-complete"><span class="material-icons">check</span>Complete</button>' +
+      '</div>' +
+    '</div>'
+
+  const card = row.querySelector('.task') as HTMLElement
+  if (delay != null) {
+    card.classList.add('preanim', 'anim')
+    setTimeout(() => card.classList.remove('preanim'), 30 + delay)
+    setTimeout(() => card.classList.remove('anim'), 30 + delay + 660)
+  }
+
+  wireRow(row, list, statDone, statWait, activeFilterRef, filtersEl, onOpenTaskPopover)
+  return row
+}
+
+// ── Per-row drag wiring ───────────────────────────────────────────────────────
+
+export function wireRow(
+  row: HTMLDivElement,
+  list: HTMLElement,
+  statDone: HTMLElement | null,
+  statWait: HTMLElement | null,
+  activeFilterRef: { current: string },
+  filtersEl: HTMLElement | null,
+  onOpenTaskPopover?: (task: Task) => void,
+): void {
+  const card = row.querySelector('.task') as HTMLElement
+  const pill = row.querySelector('.t-complete') as HTMLButtonElement | null
+  const overlay = row.querySelector('.task-action-overlay') as HTMLElement | null
+  const taoComplete = row.querySelector('.tao-complete') as HTMLButtonElement | null
+  const taoDel = row.querySelector('.tao-del') as HTMLButtonElement | null
+  const taoDetails = row.querySelector('.tao-details') as HTMLButtonElement | null
+
+  const refreshFn = () => refreshFilters(list, filtersEl, activeFilterRef)
+  const statsFn = () => updateStats(list, statDone, statWait, refreshFn)
+
+  if (pill) pill.addEventListener('click', (e) => { e.stopPropagation(); completeRow(row, list) })
+
+  // Close all other revealed rows in the list
+  function closeOtherRevealed() {
+    list.querySelectorAll<HTMLElement>('.task-row.row-revealed').forEach(r => {
+      if (r !== row) closeReveal(r)
+    })
+  }
+
+  function openReveal() {
+    closeOtherRevealed()
+    row.classList.add('row-revealed')
+    card.classList.add('row-blurred')
+    if (overlay) {
+      overlay.querySelectorAll<HTMLElement>('.tao-btn').forEach((btn, i) => {
+        btn.style.animationDelay = (i * 40) + 'ms'
+        btn.classList.remove('tao-in')
+        void btn.offsetWidth
+        btn.classList.add('tao-in')
+      })
+    }
+  }
+
+  function closeReveal(targetRow: HTMLElement = row) {
+    targetRow.classList.remove('row-revealed')
+    const c = targetRow.querySelector<HTMLElement>('.task')
+    if (c) c.classList.remove('row-blurred')
+    targetRow.querySelectorAll<HTMLElement>('.tao-btn').forEach(btn => btn.classList.remove('tao-in'))
+  }
+
+  let startX = 0, startY = 0, dragging = false, mode: string | null = null
+  let didDrag = false
+  let pid: number | null = null, roTop = 0
+
+  function releaseCard() {
+    if (pid != null) { try { card.releasePointerCapture(pid) } catch { /* element may be unmounted */ } pid = null }
+  }
+
+  card.addEventListener('pointerdown', (e: PointerEvent) => {
+    const target = e.target as Element
+    if (target.closest('.t-complete') || target.closest('.tao-btn')) return
+    if (e.button != null && e.button !== 0) return
+    startX = e.clientX; startY = e.clientY; dragging = true; mode = null; didDrag = false
+    pid = e.pointerId
+    try { card.setPointerCapture(pid) } catch { /* element may not yet have pointer capture support */ }
+  })
+
+  card.addEventListener('pointermove', (e: PointerEvent) => {
+    if (!dragging) return
+    const mx = e.clientX - startX, my = e.clientY - startY
+    if (!mode) {
+      if (Math.abs(mx) < 6 && Math.abs(my) < 6) return
+      didDrag = true
+      if (Math.abs(my) > Math.abs(mx) * 1.5 && Math.abs(my) > 10) {
+        mode = 'reorder'; roTop = row.getBoundingClientRect().top; row.classList.add('reordering')
+        // close reveal if open so drag starts clean
+        closeReveal()
+      } else {
+        // horizontal swipe — no action, just cancel
+        mode = 'none'
+      }
+    }
+    if (mode === 'reorder') {
+      card.style.transform = 'translateY(' + my + 'px)'
+    }
+  })
+
+  function endDrag() {
+    if (!dragging) { releaseCard(); return }
+    dragging = false; releaseCard(); card.classList.remove('dragging')
+    if (mode === 'reorder') {
+      const myMatch = /translateY\(([-0-9.]+)px\)/.exec(card.style.transform)
+      const my = parseFloat(myMatch ? myMatch[1] : '0') || 0
+      const sibs = Array.from(list.children).filter(r => r !== row) as HTMLElement[]
+      const center = roTop + my + row.offsetHeight / 2
+      let ref: Element | null = null
+      for (let i = 0; i < sibs.length; i++) {
+        const rb = sibs[i].getBoundingClientRect()
+        if (center < rb.top + rb.height / 2) { ref = sibs[i]; break }
+      }
+      card.style.transform = ''
+      flip(list, () => { list.insertBefore(row, ref) })
+      row.classList.remove('reordering')
+    }
+    mode = null
+  }
+  card.addEventListener('pointerup', endDrag)
+  card.addEventListener('pointercancel', endDrag)
+
+  // Overlay action buttons
+  if (taoComplete) taoComplete.addEventListener('click', (e) => {
+    e.stopPropagation()
+    closeReveal()
+    completeRow(row, list, true)
+    statsFn()
+  })
+  if (taoDel) taoDel.addEventListener('click', (e) => {
+    e.stopPropagation()
+    closeReveal()
+    removeRow(row, list)
+    statsFn()
+  })
+  if (taoDetails) taoDetails.addEventListener('click', (e) => {
+    e.stopPropagation()
+    closeReveal()
+    const task = (row as HTMLDivElement & { _task: Task })._task
+    if (onOpenTaskPopover) onOpenTaskPopover(task)
+    // TODO: step10 — openTaskPopover(task) wires the actual popover
+  })
+
+  // Click to reveal/hide action buttons (only when not a drag)
+  card.addEventListener('click', (e: MouseEvent) => {
+    if (didDrag) { didDrag = false; return }
+    const target = e.target as Element
+    if (target.closest('.t-complete') || target.closest('.tao-btn')) return
+    if (row.classList.contains('row-revealed')) {
+      closeReveal()
+    } else {
+      openReveal()
+    }
+  })
+}
+
+// ── Tag filters ───────────────────────────────────────────────────────────────
+
+export function buildFilters(
+  filtersEl: HTMLElement,
+  list: HTMLElement,
+  activeFilterRef: { current: string },
+): void {
+  let html = '<button class="td-filt on" data-f="all">All<span class="fct" data-c="all">0</span></button>'
+  ;(Object.keys(PRIORITY) as PriorityKey[]).forEach(k => {
+    const p = PRIORITY[k]
+    html += '<button class="td-filt" data-f="' + k + '">' +
+      '<span class="fdot" style="--fcolor:' + p.color + '"></span>' + p.label +
+      '<span class="fct" data-c="' + k + '">0</span></button>'
+  })
+  filtersEl.innerHTML = html
+  filtersEl.querySelectorAll<HTMLElement>('.td-filt').forEach(b => {
+    b.addEventListener('click', () => {
+      activeFilterRef.current = b.dataset.f || 'all'
+      filtersEl.querySelectorAll('.td-filt').forEach(x => x.classList.toggle('on', x === b))
+      applyFilter(list, activeFilterRef, true)
+    })
+  })
+}
+
+export function refreshFilters(
+  list: HTMLElement,
+  filtersEl: HTMLElement | null,
+  activeFilterRef: { current: string },
+): void {
+  if (!filtersEl) return
+  const counts: Record<string, number> = { all: 0 }
+  ;(Object.keys(PRIORITY) as PriorityKey[]).forEach(k => { counts[k] = 0 })
+  list.querySelectorAll<HTMLElement>('.task-row').forEach(r => {
+    counts.all++
+    if (r.dataset.pri && counts[r.dataset.pri] != null) counts[r.dataset.pri]++
+  })
+  filtersEl.querySelectorAll<HTMLElement>('.fct').forEach(el => {
+    el.textContent = String(counts[el.dataset.c || ''] || 0)
+  })
+  applyFilter(list, activeFilterRef, false)
+}
+
+export function applyFilter(
+  list: HTMLElement,
+  activeFilterRef: { current: string },
+  animate: boolean,
+): void {
+  list.querySelectorAll<HTMLElement>('.task-row').forEach(r => {
+    const show = activeFilterRef.current === 'all' || r.dataset.pri === activeFilterRef.current
+    const hidden = r.classList.contains('filtered-out')
+    if (show && hidden) { if (animate) { showRowFilter(r) } else { r.classList.remove('filtered-out') } }
+    else if (!show && !hidden) { if (animate) { hideRowFilter(r) } else { r.classList.add('filtered-out') } }
+  })
+}
+
+// ── Week calendar ─────────────────────────────────────────────────────────────
+
+export function movePill(weekEl: HTMLElement, weekPill: HTMLElement | null): void {
+  if (!weekPill) return
+  const active = weekEl.querySelector<HTMLElement>('.td-daybtn.active')
+  if (!active) return
+  weekPill.style.width = active.offsetWidth + 'px'
+  weekPill.style.height = active.offsetHeight + 'px'
+  weekPill.style.transform = 'translate(' + active.offsetLeft + 'px,' + active.offsetTop + 'px)'
+}
+
+// ── Day change animation ──────────────────────────────────────────────────────
+
+export function changeDay(
+  list: HTMLElement,
+  newTasks: Task[],
+  statDone: HTMLElement | null,
+  statWait: HTMLElement | null,
+  activeFilterRef: { current: string },
+  filtersEl: HTMLElement | null,
+  onOpenTaskPopover?: (task: Task) => void,
+): void {
+  const old = Array.from(list.children) as HTMLElement[]
+  const mountNew = () => {
+    list.innerHTML = ''
+    newTasks.forEach(t => {
+      const row = makeRow(t, null, list, statDone, statWait, activeFilterRef, filtersEl, onOpenTaskPopover)
+      row.classList.add('filtered-out')
+      list.appendChild(row)
+    })
+    Array.from(list.children).forEach(r => showRowFilter(r as HTMLElement))
+    updateStats(list, statDone, statWait, () => refreshFilters(list, filtersEl, activeFilterRef))
+  }
+  if (old.length) {
+    old.forEach(r => {
+      const h = r.offsetHeight
+      r.style.overflow = 'hidden'; r.style.maxHeight = h + 'px'
+      void r.offsetWidth
+      r.style.transition = 'max-height 460ms cubic-bezier(.4,0,.2,1), margin-bottom 460ms cubic-bezier(.4,0,.2,1), opacity 280ms ease, transform 360ms cubic-bezier(.4,0,.2,1)'
+      r.style.opacity = '0'; r.style.transform = 'scale(.96)'
+      r.style.maxHeight = '0px'; r.style.marginBottom = '-11px'
+    })
+    setTimeout(mountNew, 470)
+  } else {
+    mountNew()
+  }
+}
+
+// ── Load day tasks ────────────────────────────────────────────────────────────
+
+const dayStateMap: Record<number, Task[]> = { 6: SEED_TASKS }
+
+export function getTasksForDay(date: Date): Task[] {
+  const wd = (date.getDay() + 6) % 7
+  if (!dayStateMap[wd]) {
+    dayStateMap[wd] = (DAY_TASKS[wd] || []).map(t => ({ ...t }))
+  }
+  return dayStateMap[wd]
+}
+
+// ── Insert task ───────────────────────────────────────────────────────────────
+
+let uid = 100
+export function nextUid(): string { return 't' + (uid++) }
+
+export function insertTask(
+  task: Task,
+  list: HTMLElement,
+  statDone: HTMLElement | null,
+  statWait: HTMLElement | null,
+  activeFilterRef: { current: string },
+  filtersEl: HTMLElement | null,
+  onOpenTaskPopover?: (task: Task) => void,
+): void {
+  const row = makeRow(task, 0, list, statDone, statWait, activeFilterRef, filtersEl, onOpenTaskPopover)
+  const badge = row.querySelector('.t-badge') as HTMLElement
+  badge.classList.add('pop')
+  let ref: Element | null = null
+  for (let i = 0; i < list.children.length; i++) {
+    if (!list.children[i].classList.contains('is-done')) { ref = list.children[i]; break }
+  }
+  flip(list, () => { list.insertBefore(row, ref) })
+  updateStats(list, statDone, statWait, () => refreshFilters(list, filtersEl, activeFilterRef))
+}
+
+// ── Progressive blur scroll helpers ──────────────────────────────────────────
+
+/** Updates the mask-image class on .td-list based on scroll position. */
+export function updateListScrollBlur(el: HTMLElement): void {
+  const { scrollTop, scrollHeight, clientHeight } = el
+  const atTop = scrollTop <= 4
+  const atBottom = scrollTop + clientHeight >= scrollHeight - 4
+  el.classList.toggle('td-scroll-bottom', !atTop && atBottom)
+  el.classList.toggle('td-scroll-mid', !atTop && !atBottom)
+  // default (neither class) = at top
+}
+
+/** Wires the scroll listener for .td-list vertical blur. No useEffect. */
+export function wireListScrollBlur(el: HTMLElement): (() => void) {
+  const handler = () => updateListScrollBlur(el)
+  el.addEventListener('scroll', handler, { passive: true })
+  // Initial state
+  updateListScrollBlur(el)
+  return () => el.removeEventListener('scroll', handler)
+}
+
+/** Updates the mask-image class on .td-filters based on horizontal scroll position. */
+export function updateFiltersScrollBlur(el: HTMLElement): void {
+  const { scrollLeft, scrollWidth, clientWidth } = el
+  const atLeft = scrollLeft <= 4
+  const atRight = scrollLeft + clientWidth >= scrollWidth - 4
+  el.classList.toggle('td-fscroll-right', !atLeft && atRight)
+  el.classList.toggle('td-fscroll-mid', !atLeft && !atRight)
+  // default (neither class) = at left
+}
+
+/** Wires the scroll listener for .td-filters horizontal blur. No useEffect. */
+export function wireFiltersScrollBlur(el: HTMLElement): (() => void) {
+  const handler = () => updateFiltersScrollBlur(el)
+  el.addEventListener('scroll', handler, { passive: true })
+  // Initial state
+  updateFiltersScrollBlur(el)
+  return () => el.removeEventListener('scroll', handler)
+}
+
+// ── Mount callback ref ─────────────────────────────────────────────────────
+
+export function todoMountRef(
+  el: HTMLDivElement | null,
+  refs: TodoRefs,
+  activeFilterRef: { current: string },
+  onOpenTaskPopover?: (task: Task) => void,
+): void {
+  if (!el) {
+    const s = el as unknown as (HTMLDivElement & MountState) | null
+    clearTimeout(s?.__todoTimer)
+    return
+  }
+  const s = el as HTMLDivElement & MountState
+  clearTimeout(s.__todoTimer)
+
+  const { list, statDone, statWait, filtersEl, weekEl } = refs
+  if (!list || !filtersEl || !weekEl) return
+
+  // Build filters
+  buildFilters(filtersEl, list, activeFilterRef)
+
+  // Wire progressive blur scroll listeners
+  const cleanupListBlur = wireListScrollBlur(list)
+  const cleanupFiltersBlur = wireFiltersScrollBlur(filtersEl)
+  ;(s as HTMLDivElement & MountState & { __blurCleanup?: () => void }).__blurCleanup = () => {
+    cleanupListBlur()
+    cleanupFiltersBlur()
+  }
+
+  // Build initial task list based on today
+  const initialDate = new Date()
+  initialDate.setHours(0, 0, 0, 0)
+  const initialTasks = getTasksForDay(initialDate)
+  list.innerHTML = ''
+  initialTasks.forEach((t, i) => {
+    list.appendChild(makeRow(t, 80 + i * 90, list, statDone, statWait, activeFilterRef, filtersEl, onOpenTaskPopover))
+  })
+
+  updateStats(list, statDone, statWait, () => refreshFilters(list, filtersEl, activeFilterRef))
+
+  // Close open action panels and revealed rows when clicking outside
+  const handleGlobalPointerDown = (e: PointerEvent) => {
+    const target = e.target as Element
+    const inRow = target.closest('.task-row')
+    list.querySelectorAll<HTMLElement>('.task-row.row-revealed').forEach(r => {
+      if (r !== inRow) {
+        r.classList.remove('row-revealed')
+        const c = r.querySelector<HTMLElement>('.task')
+        if (c) c.classList.remove('row-blurred')
+        r.querySelectorAll<HTMLElement>('.tao-btn').forEach(btn => btn.classList.remove('tao-in'))
+      }
+    })
+  }
+  document.addEventListener('pointerdown', handleGlobalPointerDown)
+  s.__todoTimer = setTimeout(() => {
+    document.removeEventListener('pointerdown', handleGlobalPointerDown)
+  }, 1000 * 60 * 60) // cleanup after 1hr (component unmount should ideally call cleanup)
+}
+
+export function todoCleanupRef(el: HTMLDivElement | null): void {
+  if (!el) return
+  const s = el as HTMLDivElement & MountState & { __blurCleanup?: () => void }
+  clearTimeout(s.__todoTimer)
+  delete s.__todoTimer
+  s.__blurCleanup?.()
+  delete s.__blurCleanup
+}

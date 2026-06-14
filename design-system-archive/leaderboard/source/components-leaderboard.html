@@ -1,0 +1,240 @@
+<!doctype html>
+<!-- @dsCard group="Brand" name="Leaderboard row" subtitle="Winning row treatment + segmented filter" viewport="700x260" --><html><head><meta charset="utf-8"><link rel="stylesheet" href="_base.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  body { background: #F8FAFC; }
+  .frame { padding: 24px; background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.10) 0%, rgba(248,250,252,1) 50%, #FFFFFF 100%); }
+  /* Gray outer shell (matches the theme-editor .te-outer bezel) */
+  .lb-outer {
+    background: #D4DCE8;
+    border-radius: 28px;
+    padding: 10px;
+    box-shadow: 0 16px 56px rgba(15,23,42,0.14), 0 3px 10px rgba(15,23,42,0.07);
+  }
+  .lb {
+    background: rgba(255,255,255,0.7); backdrop-filter: blur(40px);
+    border: none; border-radius: 24px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,1),
+      inset 0 -2px 0 rgba(15,23,42,0.10),
+      inset 1px 0 0 rgba(15,23,42,0.08),
+      inset -1px 0 0 rgba(15,23,42,0.08);
+    padding: 18px;
+    font-family: 'Montserrat';
+  }
+  .head { display:flex; justify-content:space-between; align-items:center; margin-bottom: 14px; }
+  .h-title { display:flex; align-items:center; gap: 6px; font-weight: 800; font-size: 16px; color: #0F172A; }
+  .h-title .material-icons { color: #10B981; font-size: 20px; }
+
+  /* Segmented — sliding active pill */
+  .seg { position:relative; display:flex; background: #F1F5F9; border-radius: 9999px; padding: 3px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.06); }
+  .seg-pill { position:absolute; top:3px; bottom:3px; left:0; width:0; background:#0F172A; border-radius:9999px; box-shadow:0 1px 2px rgba(0,0,0,0.18); z-index:0; }
+  .seg button { position:relative; z-index:1; padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 800; border:none; background:none; cursor:pointer; color:#64748B; font-family:'Montserrat'; transition: color 240ms; }
+  .seg button.active { color: #fff; }
+  .seg button:active { transform: scale(0.93); }
+
+  .colhead { display:flex; font-size:10px; font-weight:800; color:#94A3B8; text-transform: uppercase; letter-spacing: 0.1em; padding: 0 8px; margin-bottom: 6px; }
+  .colhead .l { flex: 1; }
+  .col-metric { overflow: hidden; }
+  .cm-anim { display:inline-block; animation: cmIn 340ms cubic-bezier(.22,1,.36,1); }
+  @keyframes cmIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+
+  .rows { display:flex; flex-direction:column; gap: 6px; }
+  .row {
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 10px 14px; border-radius: 16px; gap: 10px;
+    cursor: pointer; will-change: transform;
+  }
+  .row:not(.win):hover { background: rgba(15,23,42,0.04); }
+  .row.win {
+    background: rgba(236,253,245,0.6); border: 1px solid #D1FAE5;
+    position: relative; overflow: hidden;
+  }
+  .row.win::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:#10B981; }
+  .who { display:flex; align-items:center; gap:10px; }
+  .avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    display:grid; place-items:center; color:#fff;
+    font-weight: 800; font-size: 13px; flex-shrink: 0;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.5),
+      inset 0 -2px 0 rgba(0,0,0,0.18),
+      inset 0 0 0 1px rgba(255,255,255,0.15);
+    text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+    transition: background 320ms;
+  }
+  .a1 { background:#FACC15; }
+  .a2 {
+    background:#E2E8F0; color:#475569;
+    text-shadow: none;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.7),
+      inset 0 -2px 0 rgba(15,23,42,0.10),
+      inset 0 0 0 1px rgba(15,23,42,0.05);
+  }
+  .name { font-weight: 800; font-size: 14px; color: #0F172A; }
+  .sub  { font-size: 11px; font-weight: 700; color:#10B981; display:flex; align-items:center; gap:2px; margin-top: 4px; }
+  .sub .material-icons { font-size: 12px; }
+  .rev  { font-weight: 900; font-size: 16px; color: #0F172A; font-variant-numeric: tabular-nums; }
+</style>
+<link rel="stylesheet" href="_darkmode.css">
+</head><body><div class="card" style="padding:0; background:#F8FAFC;">
+  <div class="frame" data-comment-anchor="411b0e624d-div">
+    <div class="lb-outer">
+      <div id="lb-root"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" data-comment-anchor="38b8ca3dd9-div">
+const { useState, useRef, useLayoutEffect, useEffect } = React;
+
+const AGENTS = [
+  { id: 'deha',  name: 'Deha (You)',   you: true, revenue: 320, growth: 24 },
+  { id: 'selin', name: 'Selin Aydın',             revenue: 210, growth: 38 },
+  { id: 'mert',  name: 'Mert Yıldız',             revenue: 150, growth: 6  },
+  { id: 'bora',  name: 'Bora Bekar',              revenue: 95,  growth: 11 },
+];
+
+function fmt(metric, v) {
+  v = Math.round(v);
+  return metric === 'growth' ? '+' + v + '%' : '$' + v + 'K';
+}
+
+function Board() {
+  const [metric, setMetric] = useState('revenue');
+  const rowEls = useRef({});      // id -> element
+  const prevRects = useRef({});   // id -> DOMRect (last render)
+  const segRef = useRef(null);
+  const [pill, setPill] = useState({ left: 0, width: 0 });
+  const [armed, setArmed] = useState(false);
+
+  const ordered = AGENTS.slice().sort(function (a, b) { return b[metric] - a[metric]; });
+
+  /* Centralised number tween: when the metric changes, roll every agent's
+     displayed value from where it is now to its new target. */
+  const [display, setDisplay] = useState(function () {
+    const o = {}; AGENTS.forEach(function (a) { o[a.id] = a.revenue; }); return o;
+  });
+  const animRef = useRef(0);
+  const displayRef = useRef(display);
+  displayRef.current = display;
+  useEffect(function () {
+    const start = Object.assign({}, displayRef.current);
+    const t0 = Date.now(), dur = 700;
+    clearTimeout(animRef.current);
+    function tick() {
+      const t = Math.min(1, (Date.now() - t0) / dur);
+      const e = 1 - Math.pow(1 - t, 3);
+      const next = {};
+      AGENTS.forEach(function (a) { next[a.id] = start[a.id] + (a[metric] - start[a.id]) * e; });
+      setDisplay(next);
+      if (t < 1) animRef.current = setTimeout(tick, 16);
+    }
+    tick();
+    return function () { clearTimeout(animRef.current); };
+  }, [metric]);
+
+  /* FLIP: animate rows from their previous position to the new one.
+     Always measure the natural (transform-cleared) position first so a frozen
+     mid-transition can never corrupt the resting layout, then play the offset. */
+  useLayoutEffect(function () {
+    const ids = Object.keys(rowEls.current);
+    const natural = {};
+    ids.forEach(function (id) {
+      const el = rowEls.current[id];
+      if (!el) return;
+      el.style.transition = 'none';
+      el.style.transform = '';
+      natural[id] = el.getBoundingClientRect().top;
+    });
+    ids.forEach(function (id) {
+      const el = rowEls.current[id];
+      if (!el) return;
+      const pr = prevRects.current[id];
+      const nr = natural[id];
+      if (pr != null) {
+        const dy = pr - nr;
+        if (Math.abs(dy) > 0.5) {
+          el.style.transform = 'translateY(' + dy + 'px)';
+          el.getBoundingClientRect(); // commit the offset
+          el.style.transition = 'transform 560ms cubic-bezier(.22,1,.36,1)';
+          el.style.transform = '';
+        }
+      }
+      prevRects.current[id] = nr;
+    });
+  });
+
+  /* Slide the segmented pill under the active button. */
+  useLayoutEffect(function () {
+    const seg = segRef.current;
+    if (!seg) return;
+    const act = seg.querySelector('button.active');
+    if (act) setPill({ left: act.offsetLeft, width: act.offsetWidth });
+  }, [metric]);
+
+  useEffect(function () {
+    const t = setTimeout(function () { setArmed(true); }, 60);
+    return function () { clearTimeout(t); };
+  }, []);
+
+  const pillStyle = {
+    left: pill.left + 'px',
+    width: pill.width + 'px',
+    transition: armed
+      ? 'left 320ms cubic-bezier(.22,1,.36,1), width 320ms cubic-bezier(.22,1,.36,1)'
+      : 'none',
+  };
+
+  return (
+    <div className="lb">
+      <div className="head">
+        <div className="h-title"><span className="material-icons">leaderboard</span>Leaderboard</div>
+        <div className="seg" ref={segRef} data-comment-anchor="0f3ec6231f-div">
+          <span className="seg-pill" style={pillStyle}></span>
+          <button className={metric === 'revenue' ? 'active' : ''} onClick={function () { setMetric('revenue'); }}>Revenue</button>
+          <button className={metric === 'growth' ? 'active' : ''} onClick={function () { setMetric('growth'); }}>Growth %</button>
+        </div>
+      </div>
+
+      <div className="colhead">
+        <span className="l">Full Name</span>
+        <span className="col-metric"><span className="cm-anim" key={metric}>{metric === 'growth' ? 'Growth' : 'Revenue'}</span></span>
+      </div>
+
+      <div className="rows">
+        {ordered.map(function (agent, i) {
+          const rank = i + 1;
+          const leader = rank === 1;
+          const prominent = leader || agent.you;
+          return (
+            <div
+              key={agent.id}
+              className={'row' + (agent.you ? ' win' : '')}
+              ref={function (el) { rowEls.current[agent.id] = el; }}
+            >
+              <div className="who">
+                <div className={'avatar ' + (leader ? 'a1' : 'a2')}>{rank}</div>
+                <div>
+                  <div className="name" style={prominent ? null : { color: '#334155' }}>{agent.name}</div>
+                  {leader && <div className="sub"><span className="material-icons">trending_up</span>Top 1%</div>}
+                </div>
+              </div>
+              <div className="rev" style={leader ? null : { color: '#334155', fontSize: '15px' }}>{fmt(metric, display[agent.id])}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('lb-root')).render(<Board />);
+</script>
+<script src="_darkmode.js"></script>
+</body></html>

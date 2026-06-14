@@ -16,6 +16,7 @@ import {
   isActive,
   hasVoice,
   coldDropHours,
+  DOC_ANNOTATIONS,
   type MetricData,
   type Pill,
 } from './leadMetrics'
@@ -27,7 +28,12 @@ import {
   useScrollResetOnChange,
   useEdgeRecheck,
   useEscToClose,
+  useChannelSwitcher,
 } from './popover-hook'
+import { useBrainStage } from './brain-hook'
+import { FilterColumn } from './FilterColumn'
+import { InteractiveBrain } from './InteractiveBrain'
+import { DetailPanel } from './DetailPanel'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -51,9 +57,6 @@ const TEMP: Record<string, { c: string; ic: string }> = {
 const TONE_HEX: Record<string, string> = {
   g:'var(--g-l)', a:'var(--a-l)', r:'var(--r-l)', b:'var(--b-l)',
   v:'var(--v-l)', o:'var(--o-l)', slate:'var(--txt4)',
-}
-const SPEED_TONE: Record<string, string> = {
-  g:'#059669', b:'#0EA5A0', a:'#D97706', slate:'#64748B',
 }
 const TIER_ACC: Record<number, string> = {
   0:'var(--g-l)', 1:'var(--b-l)', 2:'var(--v-l)', 3:'var(--o-l)',
@@ -176,6 +179,7 @@ function Heatmap({ days }: { days: number[]; tag?: string; dir?: string }) {
         {days.map((lv, i) => {
           const tip = heatTip(i, lv, days.length)
           return (
+            // eslint-disable-next-line react/no-array-index-key -- heatmap days are positional slots with no domain id; array never reorders within a component instance
             <span key={i} className={'ldx-heat-box l' + (i < shown ? lv : 0)}>
               <span className="ldx-heat-tip">
                 <b>{tip.day}</b>
@@ -203,8 +207,8 @@ function DayWindow({ startH, endH, dayLb, rate, altRate }: { startH: number; end
       <div className="ldx-dw-head">
         <div className="ldx-dw-when-row">
           <span className="ldx-dw-day">{dayLb}</span>
-          <span className="ldx-dw-rate-badge">{rate}%</span>
           <span className="ldx-dw-time">{String(startH).padStart(2,'0')}:00 - {String(endH).padStart(2,'0')}:00</span>
+          <span className="ldx-dw-rate-badge">{rate}%</span>
         </div>
       </div>
       <div className="ldx-dw-track">
@@ -212,7 +216,7 @@ function DayWindow({ startH, endH, dayLb, rate, altRate }: { startH: number; end
           <span className="ldx-dw-flag">{rate}%</span>
         </div>
         {halves.map(t => <span key={'h' + t} className="ldx-dw-tick minor" style={{ left: ((t - lo) / span) * 100 + '%' }}><i /></span>)}
-        {hours.map(t => <span key={t} className="ldx-dw-tick" style={{ left: ((t - lo) / span) * 100 + '%' }}><i /><span className="ldx-dw-tick-lb">{String(t).padStart(2,'0')}:00</span></span>)}
+        {hours.map(t => <span key={t} className="ldx-dw-tick" style={{ left: ((t - lo) / span) * 100 + '%' }}><i /><span className="ldx-dw-tick-lb">{t}</span></span>)}
       </div>
       <div className="ldx-dw-legend"><span className="ldx-dw-dot on" />Peak window&nbsp;·&nbsp;<span className="ldx-dw-dot" />{altRate}% outside it</div>
     </div>
@@ -234,19 +238,18 @@ function Channels({ items }: { items: Array<{ name: string; share: number; prefe
   const segs = items.map(c => ({ c, color: chColor(c.name), pn: (c.share / tot) * 100 }))
   return (
     <div className="ldx-chwrap">
-      <div className="ldx-chbar">{segs.map((s, i) => <ChSeg key={i} s={s} />)}</div>
+      <div className="ldx-chbar">{segs.map((s) => <ChSeg key={s.c.name} s={s} />)}</div>
       <ul className="ldx-ch-bullets">
-        {segs.map((s, i) => {
+        {segs.map((s) => {
           const c = s.c
           return (
-            <li key={i} className="ldx-ch-bul">
-              <span className="ldx-ch-bul-dot" style={{ background: s.color }} />
-              <span className="ldx-ch-bul-name">{c.name}{c.preferred && <span className="ldx-ch-pref"><span className="material-symbols-outlined">star</span></span>}</span>
-              <div className="ldx-ch-bul-stats">
+            <li key={c.name} className="ldx-ch-bul">
+              <div className="ldx-ch-bul-head">
+                <span className="ldx-ch-bul-dot" style={{ background: s.color }} />
+                <span className="ldx-ch-bul-name">{c.name}{c.preferred && <span className="ldx-ch-pref"><span className="material-symbols-outlined">star</span></span>}</span>
                 <span className="ldx-ch-bul-time"><span className="material-symbols-outlined">schedule</span>{c.time}</span>
-                <span className={'ldx-vsbadge ' + c.vs.dir}><span className="material-icons">{c.vs.dir === 'up' ? 'trending_up' : 'trending_down'}</span>{c.vs.pct}% {c.vs.dir === 'up' ? 'faster' : 'slower'}</span>
-                <span className="ldx-speedtag" style={{ '--st': SPEED_TONE[c.speedTone] } as React.CSSProperties}>{c.speedLb}</span>
               </div>
+              <span className={'ldx-vsbadge ' + c.vs.dir}><span className="material-icons">{c.vs.dir === 'up' ? 'trending_up' : 'trending_down'}</span>{c.vs.pct}% {c.vs.dir === 'up' ? 'faster' : 'slower'}</span>
             </li>
           )
         })}
@@ -265,11 +268,11 @@ function ColBars({ items }: { items: Array<{ label: string; v: number; tone: str
   return (
     <div className="ldx-colbars-stacked">
       <div className="ldx-colbars-bar">
-        {[...items].reverse().map((it, i) => <ColBarSeg key={i} it={it} total={total} />)}
+        {[...items].reverse().map((it) => <ColBarSeg key={it.label} it={it} total={total} />)}
       </div>
       <div className="ldx-colbars-legend">
-        {items.map((it, i) => (
-          <div key={i} className={'ldx-colbars-leg' + (it.lead ? ' lead' : '')}>
+        {items.map((it) => (
+          <div key={it.label} className={'ldx-colbars-leg' + (it.lead ? ' lead' : '')}>
             <i style={{ background: TONE_HEX[it.tone] || 'var(--txt4)' }} />
             <span>{it.label}</span>
             <b>{fmtTL(Math.round(it.v / 1e5) * 1e5)}</b>
@@ -305,8 +308,8 @@ function Elasticity({ spoken, max, fmt, headroom }: { spoken: number; max: numbe
 function Bullets({ rows }: { rows: Array<{ ic?: string; tone?: string; t: string }> }) {
   return (
     <ul className="ldx-bul">
-      {rows.map((row, i) => (
-        <li key={i} className="ldx-bul-li">
+      {rows.map((row) => (
+        <li key={row.t} className="ldx-bul-li">
           <span className="ldx-bul-ic" style={{ color: TONE_HEX[row.tone || ''] || 'var(--txt3)' }}><span className="material-symbols-outlined">{row.ic || 'chevron_right'}</span></span>
           <span className="ldx-bul-t">{row.t}</span>
         </li>
@@ -338,12 +341,12 @@ function Viz({ d }: { d: any }) {
     case 'bar':
       return <Bar pct={d.pct} tone={d.tone} vlabel={d.vlabel} />
     case 'wbars':
-      return <div className="ldx-wbars">{d.items.map((it: unknown, i: number) => <WBar key={i} it={it as { n: string; w: number; tone: string; label?: string | null }} />)}</div>
+      return <div className="ldx-wbars">{d.items.map((it: unknown) => { const w = it as { n: string; w: number; tone: string; label?: string | null }; return <WBar key={w.n} it={w} /> })}</div>
     case 'split':
       return (
         <div>
-          <div className="ldx-split">{d.parts.map((p: { pct: number; tone: string }, i: number) => <SplitSeg key={i} p={p} />)}</div>
-          <div className="ldx-split-leg">{d.parts.map((p: { tone: string; label: string; pct: number }, i: number) => <span key={i}><i style={{ background: p.tone }} />{p.label}<b className="ldx-split-pct"> {Math.round(p.pct)}%</b></span>)}</div>
+          <div className="ldx-split">{d.parts.map((p: { pct: number; tone: string; label: string }) => <SplitSeg key={p.label} p={p} />)}</div>
+          <div className="ldx-split-leg">{d.parts.map((p: { tone: string; label: string; pct: number }) => <span key={p.label}><i style={{ background: p.tone }} />{p.label}<b className="ldx-split-pct"> {Math.round(p.pct)}%</b></span>)}</div>
         </div>
       )
     case 'spark':
@@ -358,7 +361,7 @@ function Viz({ d }: { d: any }) {
     case 'level':
       return (
         <div style={{ '--tone': d.tone } as React.CSSProperties}>
-          <div className="ldx-level">{[0,1,2].map(i => <i key={i} className={i <= d.lv ? 'on' : ''} />)}</div>
+          <div className="ldx-level">{([0,1,2] as const).map(lvl => <i key={lvl} className={lvl <= d.lv ? 'on' : ''} />)}</div>
           <div className="ldx-level-lb">{d.labels[d.lv]}</div>
         </div>
       )
@@ -366,16 +369,19 @@ function Viz({ d }: { d: any }) {
       return (
         <div className="ldx-dots" style={{ '--tone': d.tone } as React.CSSProperties}>
           <span className="ldx-dots-n">{d.n}</span>
-          <span className="ldx-dots-row">{Array.from({length:d.total}).map((_, i) => <i key={i} className={i < d.on ? 'on' : ''} style={{ transitionDelay:(i * 45) + 'ms' }} />)}</span>
+          <span className="ldx-dots-row">{
+            // eslint-disable-next-line react/no-array-index-key -- dot positions are pure indices with no domain id; transitionDelay depends on index so position IS the identity
+            Array.from({length:d.total}).map((_, i) => <i key={i} className={i < d.on ? 'on' : ''} style={{ transitionDelay:(i * 45) + 'ms' }} />)
+          }</span>
         </div>
       )
     case 'chips':
       return (
         <div className="ldx-chips">
-          {d.items.map((c: { tone: string; t: string }, i: number) => {
+          {d.items.map((c: { tone: string; t: string }) => {
             const tb = TONEBG[c.tone] || TONEBG.g
             return (
-              <span key={i} className="ldx-chip lead" style={{ '--ctone':tb[0], '--ctone-bg':tb[1], '--ctone-bd':tb[2] } as React.CSSProperties}>{c.t}</span>
+              <span key={c.t} className="ldx-chip lead" style={{ '--ctone':tb[0], '--ctone-bg':tb[1], '--ctone-bd':tb[2] } as React.CSSProperties}>{c.t}</span>
             )
           })}
         </div>
@@ -383,8 +389,8 @@ function Viz({ d }: { d: any }) {
     case 'phrase':
       return (
         <div className="ldx-phrase">
-          {d.rows.map((row: { ic?: string; t: string }, i: number) => (
-            <div key={i} className="ldx-phr">
+          {d.rows.map((row: { ic?: string; t: string }) => (
+            <div key={row.t} className="ldx-phr">
               {row.ic && <span className="material-symbols-outlined">{row.ic}</span>}
               <span>{row.t}</span>
             </div>
@@ -416,7 +422,7 @@ function HorizonWidget({ schema, d }: { schema: { icon: string; label: string };
         </div>
         <div className="ldx-hz">
           {d.horizons.map((h: { id: string; label: string }) => (
-            <button key={h.id} className={'ldx-hz-btn' + (h.id === hz ? ' on' : '')} onClick={() => setHz(h.id)}>{h.label}</button>
+            <button type="button" key={h.id} className={'ldx-hz-btn' + (h.id === hz ? ' on' : '')} onClick={() => setHz(h.id)}>{h.label}</button>
           ))}
         </div>
         <div className="ldx-hz-body"><Bar pct={cur.pct} tone={cur.tone} vlabel={null} /></div>
@@ -471,8 +477,8 @@ function WidgetFooter({ d }: { d: any }) {
         <div className="ldx-steps">
           <div className="ldx-steps-k"><span className="material-symbols-outlined">playlist_add_check</span>Recommended next steps</div>
           <ul className="ldx-steps-list">
-            {d.steps.map((s: { ic?: string; t: string }, i: number) => (
-              <li key={i}><span className="ldx-steps-ic"><span className="material-symbols-outlined">{s.ic || 'arrow_forward'}</span></span>{s.t}</li>
+            {d.steps.map((s: { ic?: string; t: string }) => (
+              <li key={s.t}><span className="ldx-steps-ic"><span className="material-symbols-outlined">{s.ic || 'arrow_forward'}</span></span>{s.t}</li>
             ))}
           </ul>
         </div>
@@ -496,7 +502,7 @@ function Widget({ schema, data }: { schema: { id: string; icon: string; label: s
     <div className={'ldx-w-shell' + (hero ? ' hero' : '')} style={{ '--acc': acc } as React.CSSProperties}>
       <section className="ldx-w">
         <div className="ldx-w-head">
-          <span className="ldx-w-ic"><span className="material-symbols-outlined">{hero ? 'auto_awesome' : schema.icon}</span></span>
+          <span className="ldx-w-ic"><span className="material-symbols-outlined">{hero ? 'neurology' : schema.icon}</span></span>
           <span className="ldx-w-label">{hero ? 'AI verdict' : schema.label}</span>
           {data.viz === 'heatmap' && (
             <span className={'ldx-tagbadge ldx-hm-hd-badge ' + (data.dir === 'up' ? 'up' : 'down')} style={{ marginLeft:'auto' }}>
@@ -526,6 +532,113 @@ function Skeletons() {
   )
 }
 
+// ── Collective Skeleton Canvas (Behavior pill) ────────────────────────────────
+
+const TONE_CLASS: Record<string, string> = {
+  depth: 'is-depth',
+  interest: 'is-interest',
+  friction: 'is-friction',
+}
+
+function CollectiveSkeletonCanvas() {
+  const { activeChannel, setChannel, indicatorPos, containerRef } = useChannelSwitcher('doc')
+
+  return (
+    <div className="ldx-canvas">
+      {/* Header: channel switcher */}
+      <div className="ldx-canvas-head">
+        <div className="ldx-seg" ref={containerRef}>
+          <span className="ldx-seg-ind" style={{ left: indicatorPos.left + 'px', width: indicatorPos.width + 'px' }} />
+          <button
+            type="button"
+            className={'cs-segbtn' + (activeChannel === 'doc' ? ' on' : '')}
+            onClick={() => setChannel('doc')}
+          >
+            <span className="material-symbols-outlined">description</span>
+            Document / PDF
+          </button>
+          <button
+            type="button"
+            className={'cs-segbtn' + (activeChannel === 'chat' ? ' on' : '')}
+            onClick={() => setChannel('chat')}
+          >
+            <span className="material-symbols-outlined">chat</span>
+            WhatsApp Chat
+          </button>
+          <button
+            type="button"
+            className={'cs-segbtn' + (activeChannel === 'voice' ? ' on' : '')}
+            onClick={() => setChannel('voice')}
+          >
+            <span className="material-symbols-outlined">call</span>
+            Voice Call
+          </button>
+        </div>
+      </div>
+
+      {/* View slots — always mounted, toggled via on class + data-attr */}
+      <div className="ldx-views">
+        <div className={'ldx-view ldx-view-doc' + (activeChannel === 'doc' ? ' on' : '')} data-channel="doc">
+          {/* ldx-doc-inner: positioned ancestor for page skeletons + annotation overlays */}
+          <div className="ldx-doc-inner">
+            {/* Page skeletons */}
+            <div className="ldx-page ldx-page-proposal">
+              <div className="ldx-page-bar ldx-page-bar--title" />
+              <div className="ldx-page-bar ldx-page-bar--subtitle" />
+              <div className="ldx-page-section ldx-page-section--pricing" />
+              <div className="ldx-page-bar ldx-page-bar--body" />
+              <div className="ldx-page-bar ldx-page-bar--body short" />
+              <div className="ldx-page-section ldx-page-section--floor-plan" />
+              <div className="ldx-page-bar ldx-page-bar--body" />
+              <div className="ldx-page-section ldx-page-section--payment-terms" />
+              <div className="ldx-page-bar ldx-page-bar--body short" />
+            </div>
+
+            {/* DOC_ANNOTATIONS overlay — absolutely positioned inside ldx-doc-inner */}
+            {DOC_ANNOTATIONS.map(anno => (
+              <div key={anno.id} className={'ldx-anno ' + (anno.tone === 'depth' ? 'anno-dwell' : anno.tone === 'interest' ? 'anno-scroll' : 'anno-friction')}>
+                {anno.tone === 'depth' && (
+                  <>
+                    <div className="ldx-anno-line" />
+                    <div className={'ldx-anno-badge ' + TONE_CLASS[anno.tone]}>{anno.label}</div>
+                  </>
+                )}
+                {anno.tone === 'interest' && (
+                  <>
+                    <div className="ldx-anno-scroll" />
+                    <div className={'ldx-anno-badge ' + TONE_CLASS[anno.tone]}>{anno.label}</div>
+                  </>
+                )}
+                {anno.tone === 'friction' && (
+                  <>
+                    <div className="ldx-anno-cross" />
+                    <div className={'ldx-anno-badge ' + TONE_CLASS[anno.tone]}>{anno.label}</div>
+                  </>
+                )}
+                <div className="ldx-tip">{anno.tooltip}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className={'ldx-view ldx-view-chat' + (activeChannel === 'chat' ? ' on' : '')} data-channel="chat">
+          <div className="ldx-view-placeholder">
+            <span className="material-symbols-outlined">chat</span>
+            <span>WhatsApp Chat view coming soon</span>
+          </div>
+        </div>
+
+        <div className={'ldx-view ldx-view-voice' + (activeChannel === 'voice' ? ' on' : '')} data-channel="voice">
+          <div className="ldx-view-placeholder">
+            <span className="material-symbols-outlined">call</span>
+            <span>Voice Call view coming soon</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Depth-tier segmented pill bar ─────────────────────────────────────────────
 
 function SegPills({ pills, active, onSelect }: { pills: Pill[]; active: number; onSelect: (p: Pill) => void }) {
@@ -535,7 +648,7 @@ function SegPills({ pills, active, onSelect }: { pills: Pill[]; active: number; 
     <div className="ldx-seg fill" ref={ref}>
       <span className="ldx-seg-pill" style={{ left: pos.left + 'px', width: pos.width + 'px' }} />
       {pills.map(p => (
-        <button key={p.id} className={'ldx-segbtn' + (p.id === active ? ' on' : '')} onClick={() => onSelect(p)}>
+        <button type="button" key={p.id} className={'ldx-segbtn' + (p.id === active ? ' on' : '')} onClick={() => onSelect(p)}>
           <span className={'ldx-pill-dot t' + p.tier} />
           <span className="ldx-segbtn-lb">{p.label}</span>
         </button>
@@ -558,7 +671,7 @@ interface Tool { ic: string; t: string; color: string }
 
 function LeadTools({ ws, lead }: { ws: string; lead: Lead }) {
   const tools: Tool[] = [
-    { ic:'auto_awesome',   t:'Ghostwrite follow-up', color:'#8B5CF6' },
+    { ic:'neurology',   t:'Ghostwrite follow-up', color:'#8B5CF6' },
     { ic:'travel_explore', t:'Match listings',        color:'#3B82F6' },
     { ic:'plagiarism',     t:'Ghost-buyer check',     color:'#F97316' },
     { ic:'insights',       t:'Propensity score',      color:'#10B981' },
@@ -579,8 +692,8 @@ function LeadTools({ ws, lead }: { ws: string; lead: Lead }) {
       <div className="ldx-tools-t"><span className="material-symbols-outlined">smart_toy</span>Lead-context AI tools</div>
       {!chatOpen ? (
         <div className="ldx-tools-btns">
-          {tools.map((t, i) => (
-            <button key={i} className="ldx-tool-card" style={{ '--tc': t.color } as React.CSSProperties} onClick={() => runTool(t)}>
+          {tools.map((t) => (
+            <button type="button" key={t.t} className="ldx-tool-card" style={{ '--tc': t.color } as React.CSSProperties} onClick={() => runTool(t)}>
               <span className="ldx-tool-card-ic"><span className="material-symbols-outlined">{t.ic}</span></span>
               <span className="ldx-tool-card-t">{t.t}</span>
               <span className="material-symbols-outlined ldx-tool-arrow">arrow_forward</span>
@@ -595,7 +708,7 @@ function LeadTools({ ws, lead }: { ws: string; lead: Lead }) {
               <span className="ldx-chat-name">{activeTool?.t}</span>
               <span className="ldx-chat-status">{thinking ? 'Thinking...' : 'Done'}</span>
             </div>
-            <button className="ldx-chat-x" onClick={closeChat}><span className="material-icons">close</span></button>
+            <button type="button" className="ldx-chat-x" onClick={closeChat}><span className="material-icons">close</span></button>
           </div>
           <div className="ldx-chat-body">
             {thinking
@@ -658,6 +771,8 @@ export default function LeadPopover({ lead, onClose }: LeadPopoverProps) {
   // Esc-to-close keydown subscription.
   useEscToClose(onClose)
 
+  const brain = useBrainStage()
+
   const metrics: MetricData = buildLeadMetrics(lead)
   const h = healthOf(lead.score)
   const voice = hasVoice(lead)
@@ -706,7 +821,7 @@ export default function LeadPopover({ lead, onClose }: LeadPopoverProps) {
         <div className="ldx-gate-ic t3"><span className="material-symbols-outlined">graphic_eq</span></div>
         <div className="ldx-gate-t">Deep voice & NLP analysis</div>
         <div className="ldx-gate-s">Runs prosody, hesitation and language-pattern models over {lead.name.split(' ')[0]}'s call recordings. This is the most expensive tier - it only runs when you ask.</div>
-        <button className="ldx-gate-btn t3" onClick={() => startCompute(4, 1200)}><span className="material-symbols-outlined">bolt</span>Run deep analysis</button>
+        <button type="button" className="ldx-gate-btn t3" onClick={() => startCompute(4, 1200)}><span className="material-symbols-outlined">bolt</span>Run deep analysis</button>
         <div className="ldx-gate-cost"><span className="material-symbols-outlined">bolt</span>Tier 3 - ~8s - uses voice credits</div>
       </div>
     ) : (
@@ -714,18 +829,23 @@ export default function LeadPopover({ lead, onClose }: LeadPopoverProps) {
         <div className="ldx-gate-ic gated"><span className="material-symbols-outlined">mic_off</span></div>
         <div className="ldx-gate-t">Insufficient data for voice analysis</div>
         <div className="ldx-gate-s">No call recordings or sufficient message history exist for {lead.name.split(' ')[0]} yet. Voice & deep-NLP metrics stay disabled until there's something to analyze.</div>
-        <button className="ldx-gate-btn t3" disabled><span className="material-symbols-outlined">block</span>Nothing to analyze</button>
+        <button type="button" className="ldx-gate-btn t3" disabled><span className="material-symbols-outlined">block</span>Nothing to analyze</button>
         <div className="ldx-gate-cost"><span className="material-symbols-outlined">info</span>Capture a call to unlock this tier</div>
       </div>
     )
-  } else if (curPill.tier === 1 && !computed.has(pill)) {
+  } else if (pill === 2) {
     body = (
-      <div className="ldx-gate">
-        <div className="ldx-gate-ic t2" style={{ background:'linear-gradient(150deg,var(--b-l),var(--b))', boxShadow:'0 8px 20px -8px var(--b-l)' }}><span className="material-symbols-outlined">ads_click</span></div>
-        <div className="ldx-gate-t">No recent activity</div>
-        <div className="ldx-gate-s">Behavioral signals normally compute automatically for active leads. {lead.name.split(' ')[0]} has been quiet for {Math.round(lead.last / 1440)} days, so they're paused - compute them anyway?</div>
-        <button className="ldx-gate-btn t2" style={{ background:'var(--b)' }} onClick={() => startCompute(2, 700)}><span className="material-symbols-outlined">play_arrow</span>Compute behavior signals</button>
-        <div className="ldx-gate-cost"><span className="material-symbols-outlined">bolt</span>Tier 1 - cheap - log aggregation</div>
+      <>
+        <CollectiveSkeletonCanvas />
+        <LeadTools ws={ws} lead={lead} />
+      </>
+    )
+  } else if (pill === 3) {
+    body = (
+      <div className={'ldx-brain-stage' + (brain.compact ? ' compact' : '')}>
+        <FilterColumn stage={brain} />
+        <InteractiveBrain stage={brain} />
+        <DetailPanel stage={brain} />
       </div>
     )
   } else {
@@ -735,7 +855,7 @@ export default function LeadPopover({ lead, onClose }: LeadPopoverProps) {
           {visible.map(s => <Widget key={s.id} schema={s} data={metrics[s.id]} />)}
         </div>
         {moreItems.length > 0 && !showMore[pill] && (
-          <button className="ldx-more" onClick={() => setShowMore(s => ({ ...s, [pill]:true }))}>
+          <button type="button" className="ldx-more" onClick={() => setShowMore(s => ({ ...s, [pill]:true }))}>
             <span className="material-symbols-outlined">expand_more</span>Show {moreItems.length} more
           </button>
         )}
@@ -747,18 +867,19 @@ export default function LeadPopover({ lead, onClose }: LeadPopoverProps) {
   const freshComputed = (curPill.tier >= 2) && computed.has(pill) && loading !== pill
 
   return (
+    // eslint-disable-next-line jsx-a11y/prefer-tag-over-role -- custom overlay CSS depends on div; swapping to <dialog> would break fixed-positioning and backdrop layout pixel-identically
     <div className="ldx-overlay open" onClick={onClose} aria-modal="true" role="dialog" aria-label="Lead details">
       <div className="ldx-outer" onClick={e => e.stopPropagation()}>
         <div className={'ldx-card' + (scrolled ? ' compact' : '')} data-screen-label="Lead details popover">
 
           <div className="ldx-head" style={{ '--hbg': HEALTH[h] } as React.CSSProperties}>
             <div className="ldx-head-top">
-              <span className="ldx-health-word">
-                <span className="material-symbols-outlined">{h === 'g' ? 'trending_up' : h === 'a' ? 'remove' : 'trending_down'}</span>
-                {HEALTH_WORD[h]}
-              </span>
-              <button className="ldx-close" onClick={onClose} aria-label="Close"><span className="material-icons">close</span></button>
+              <button type="button" className="ldx-close" onClick={onClose} aria-label="Close"><span className="material-icons">close</span></button>
             </div>
+            <span className="ldx-health-word">
+              <span className="material-symbols-outlined">{h === 'g' ? 'trending_up' : h === 'a' ? 'remove' : 'trending_down'}</span>
+              {HEALTH_WORD[h]}
+            </span>
 
             <div className="ldx-id">
               <span className="ldx-av" style={{ '--av': HEALTH[h] } as React.CSSProperties}>{initials(lead.name)}</span>
@@ -777,34 +898,36 @@ export default function LeadPopover({ lead, onClose }: LeadPopoverProps) {
             </div>
 
             <div className="ldx-verdict">
-              <div className="ldx-vmain">
-                <div className="ldx-vk"><span className="material-symbols-outlined">target</span>Win probability</div>
-                <div className="ldx-vrow">
-                  <span className="ldx-vnum">{lead.score}<span className="ldx-vpct">%</span></span>
-                  {winDelta === 0 ? (
-                    <span className="ldx-vdelta flat"><span className="material-icons">remove</span>flat</span>
-                  ) : (
-                    <span className={'ldx-vdelta ' + (winDelta > 0 ? 'up' : 'down')}>
-                      <span className="material-icons">{winDelta > 0 ? 'trending_up' : 'trending_down'}</span>
-                      {winDelta > 0 ? '+' : '-'}{Math.abs(winDelta)} pts
-                    </span>
-                  )}
+              <div className="ldx-vcard">
+                <div className="ldx-vmain">
+                  <div className="ldx-vk"><span className="material-symbols-outlined">target</span>Win probability</div>
+                  <div className="ldx-vrow">
+                    <span className="ldx-vnum">{lead.score}<span className="ldx-vpct">%</span></span>
+                    {winDelta === 0 ? (
+                      <span className="ldx-vdelta flat"><span className="material-icons">remove</span>flat</span>
+                    ) : (
+                      <span className={'ldx-vdelta ' + (winDelta > 0 ? 'up' : 'down')}>
+                        <span className="material-icons">{winDelta > 0 ? 'trending_up' : 'trending_down'}</span>
+                        {winDelta > 0 ? '+' : '-'}{Math.abs(winDelta)} pts
+                      </span>
+                    )}
+                  </div>
+                  <div className="ldx-vbar"><i style={{ width: lead.score + '%' }} /></div>
+                  <div className="ldx-vbar-cap">vs last week</div>
                 </div>
-                <div className="ldx-vbar"><i style={{ width: lead.score + '%' }} /></div>
-                <div className="ldx-vbar-cap">vs last week</div>
-              </div>
-              <div className="ldx-vside">
-                <div className="ldx-vstat">
-                  <div className="ldx-vk"><span className="material-symbols-outlined">account_balance_wallet</span>Pipeline value</div>
-                  <div className="ldx-vval">{lead.value ? fmtTL(lead.value) : '-'}</div>
-                </div>
-                <div className="ldx-vstat">
-                  <div className="ldx-vk"><span className="material-symbols-outlined">diamond</span>Pipeline LTV</div>
-                  <div className="ldx-vval">{lead.ltv ? fmtTL(lead.ltv) : '-'}</div>
-                </div>
-                <div className="ldx-vstat">
-                  <div className="ldx-vk"><span className="material-symbols-outlined">{sent.ic}</span>Sentiment</div>
-                  <div className="ldx-vval sm">{sent.word}</div>
+                <div className="ldx-vside">
+                  <div className="ldx-vstat">
+                    <div className="ldx-vk"><span className="material-symbols-outlined">account_balance_wallet</span>Pipeline value</div>
+                    <div className="ldx-vval">{lead.value ? fmtTL(lead.value) : '-'}</div>
+                  </div>
+                  <div className="ldx-vstat">
+                    <div className="ldx-vk"><span className="material-symbols-outlined">diamond</span>Pipeline LTV</div>
+                    <div className="ldx-vval">{lead.ltv ? fmtTL(lead.ltv) : '-'}</div>
+                  </div>
+                  <div className="ldx-vstat">
+                    <div className="ldx-vk"><span className="material-symbols-outlined">{sent.ic}</span>Sentiment</div>
+                    <div className="ldx-vval sm">{sent.word}</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -831,14 +954,15 @@ export default function LeadPopover({ lead, onClose }: LeadPopoverProps) {
             <div className="ldx-body" ref={bodyRef} onScroll={onBodyScroll}>
               <div className="ldx-scope">
                 <span className="ldx-scope-lb">
+                  <span className="material-symbols-outlined">monitoring</span>
                   {curPill.tier === 0 ? 'Auto-computed signals' : curPill.tier === 1 ? 'Behavioral logs' : curPill.tier === 2 ? 'AI profiling' : 'Voice & NLP'}
                 </span>
                 <span className="ldx-scope-meta">
-                  <span className="material-symbols-outlined">auto_awesome</span>
-                  {curPill.tier === 0 ? 'AI - auto - updated 2h ago' : (freshComputed ? 'AI - just now' : 'AI')}
+                  <span className="material-symbols-outlined">update</span>
+                  {curPill.tier === 0 ? 'updated 2h ago' : (freshComputed ? 'updated just now' : 'updated recently')}
                 </span>
                 {freshComputed && (
-                  <button className="ldx-recompute" onClick={() => recompute(pill, 850)}>
+                  <button type="button" className="ldx-recompute" onClick={() => recompute(pill, 850)}>
                     <span className="material-symbols-outlined">refresh</span>Recompute
                   </button>
                 )}

@@ -153,6 +153,52 @@ export function useEdgeRecheck(
   }, deps)
 }
 
+/* ── Channel switcher indicator ───────────────────────────────────────────────
+   Manages the active channel tab ('doc' | 'chat' | 'voice') and measures the
+   indicator pill position over the active `.cs-segbtn.on` segment — same
+   measurement shape as usePillIndicator. */
+export type ChannelId = 'doc' | 'chat' | 'voice'
+
+export interface ChannelSwitcherState {
+  activeChannel: ChannelId
+  setChannel: (id: ChannelId) => void
+  indicatorPos: PillPos
+  containerRef: (el: HTMLDivElement | null) => void
+}
+
+export function useChannelSwitcher(initial: ChannelId = 'doc'): ChannelSwitcherState {
+  const [activeChannel, setChannel] = useState<ChannelId>(initial)
+  const containerEl = useRef<HTMLDivElement | null>(null)
+  const [indicatorPos, setPos] = useState<PillPos>({ left: 3, width: 0 })
+
+  const measure = () => {
+    const root = containerEl.current; if (!root) return
+    const btn = root.querySelector('.cs-segbtn.on') as HTMLElement | null; if (!btn) return
+    setPos(prev =>
+      prev.left === btn.offsetLeft && prev.width === btn.offsetWidth
+        ? prev
+        : { left: btn.offsetLeft, width: btn.offsetWidth }
+    )
+  }
+
+  // Pre-paint measure on active change, then one delayed re-measure to catch
+  // font/open reflow — both scheduled inside a single layout effect so no plain
+  // useEffect is needed (project hard-rule: zero useEffect).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useLayoutEffect(() => {
+    measure()
+    const t = setTimeout(measure, 140)
+    return () => clearTimeout(t)
+  }, [activeChannel])
+
+  const containerRef = (el: HTMLDivElement | null) => {
+    containerEl.current = el
+    if (el) measure()
+  }
+
+  return { activeChannel, setChannel, indicatorPos, containerRef }
+}
+
 /* ── Esc-to-close ─────────────────────────────────────────────────────────────
    Subscribes to window keydown and invokes `onClose` on Escape. */
 export function useEscToClose(onClose: () => void): void {

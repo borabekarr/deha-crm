@@ -60,15 +60,15 @@ body { background: #F8FAFC; }
      any SVG/CSS filter on the stroke. Every filter-on-the-stroke approach
      (CSS drop-shadow+fill-box, then SVG feDropShadow) painted a Chromium
      black-square filter-region artifact, so the stroke stays filter-free. */
-  transition: stroke-dashoffset calc(950ms * var(--anim-mult)) cubic-bezier(.34,1.56,.64,1);
+  transition: stroke-dashoffset calc(950ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1);
 }
-.s0 { stop-color: var(--c0); transition: stop-color calc(700ms * var(--anim-mult)) ease; }
-.s1 { stop-color: var(--c1); transition: stop-color calc(700ms * var(--anim-mult)) ease; }
+.s0 { stop-color: var(--c0); transition: stop-color calc(700ms * var(--anim-mult, 1)) ease; }
+.s1 { stop-color: var(--c1); transition: stop-color calc(700ms * var(--anim-mult, 1)) ease; }
 
 /* ── Text ───────────────────────────────────────────────────────────── */
 /* Base state is visible; the pop is gated behind .anim (added by JS inside
    rAF) so throttled/hidden tabs never freeze on the hidden keyframe. */
-.metric-circle.anim .text-block { animation: textPop calc(720ms * var(--anim-mult)) cubic-bezier(.34,1.56,.64,1); }
+.metric-circle.anim .text-block { animation: textPop calc(720ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1); }
 @keyframes textPop {
   0%   { opacity: 0; transform: scale(0.8); }
   60%  { opacity: 1; }

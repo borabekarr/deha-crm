@@ -1,7 +1,7 @@
 // pills-hook.ts — all effect/measurement logic lives here per the no-use-effect convention.
 // Pills.tsx must have zero raw useEffect calls; import from this file instead.
 
-import { useState, useLayoutEffect, useEffect } from 'react'
+import { useState, useLayoutEffect, useEffect, useCallback } from 'react'
 import type { RefObject } from 'react'
 
 export interface PillPos {
@@ -15,7 +15,11 @@ export function usePillIndicator(
 ): PillPos {
   const [pos, setPos] = useState<PillPos>({ left: 3, width: 0 })
 
-  const measure = () => {
+  // Stable across renders (ref is stable); only remeasures when active changes.
+  // Wrapped in useCallback so both effects can declare it as a dep without
+  // extra re-runs — the callback identity only changes when ref changes (never
+  // in practice), preserving the byte-identical bounce/measure timing.
+  const measure = useCallback(() => {
     const root = ref.current
     if (!root) return
     const btn = root.querySelector<HTMLElement>('button.active')
@@ -32,13 +36,13 @@ export function usePillIndicator(
         ? prev
         : { left: nextLeft, width: nextWidth }
     )
-  }
+  }, [ref])
 
-  useLayoutEffect(measure, [active])
+  useLayoutEffect(measure, [measure, active])
   useEffect(() => {
     const t = setTimeout(measure, 140)
     return () => clearTimeout(t)
-  }, [active])
+  }, [measure, active])
 
   return pos
 }

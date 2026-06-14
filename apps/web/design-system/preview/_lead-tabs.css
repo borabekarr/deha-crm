@@ -1,0 +1,690 @@
+/* =========================================================================
+   Lead Tabs — self-contained prototype shell for the lead-detail popover.
+   Two tabs: Behaviour (intent stream) + Qualification (brain map).
+   Tokens copied from .ldx-overlay so this prototype stands alone.
+   Segmented sliding-pill idiom (cf. _controls.css) reused for the tab ink.
+   ========================================================================= */
+
+/* Register --i so typed calc() stagger delays resolve at runtime.
+   Without this, calc(var(--i)*Xms*...) is guaranteed-invalid (unregistered
+   custom property in a typed expression) and collapses to 0s — silently
+   killing every staggered entrance (behaviour tiles/feed/sparkline + brain
+   chips). Lives above the BRAIN banner so it's shared by all blocks. */
+@property --i { syntax: "<integer>"; inherits: false; initial-value: 0; }
+
+.ltb-shell {
+  --surface:#FFFFFF; --txt:#0F172A; --txt2:#475569; --txt3:#64748B; --txt4:#94A3B8; --txt5:#B6C0CE;
+  --line:#EFF2F6; --line-strong:#E2E8F0; --panel:#F8FAFC; --panel-bd:#EAEEF3; --hover:#F4F7FB; --track:#EDF1F6;
+  --g:#059669; --g-l:#10B981; --g-bg:#ECFDF5; --g-bd:#A7F3D0;
+  --a:#CA8A04; --a-l:#EAB308; --a-bg:#FEFCE8; --a-bd:#FDE68A;
+  --r:#DC2626; --r-l:#EF4444; --r-bg:#FEF2F2; --r-bd:#FECACA;
+  --b:#2563EB; --b-l:#3B82F6; --b-bg:#EFF6FF; --b-bd:#BFDBFE;
+  --v:#7C3AED; --v-l:#8B5CF6; --v-bg:#F5F3FF; --v-bd:#DDD6FE;
+  --o:#EA580C; --o-l:#F97316; --o-bg:#FFF7ED; --o-bd:#FED7AA;
+  --on-accent:#FFFFFF; --line-head:var(--line);
+  font-family: 'Montserrat';
+
+  width: min(1180px, calc(100vw - 48px));
+  margin: 32px auto;
+  background: var(--surface);
+  color: var(--txt);
+  border: 1px solid var(--line-strong);
+  border-top-color: rgba(255,255,255,.85);
+  border-radius: 22px;
+  box-shadow: 0 36px 90px rgba(0,0,0,0.16), 0 8px 24px rgba(0,0,0,0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── header: health rail + identity + chips + close ─────────────────────── */
+.ltb-head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.ltb-rail {
+  position: absolute;
+  left: 0; top: 14px; bottom: 14px;
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+  background: var(--g-l);
+}
+.ltb-id { min-width: 0; margin-left: 8px; }
+.ltb-name { font-size: 19px; font-weight: 900; letter-spacing: -0.02em; line-height: 1.15; }
+.ltb-co { font-size: 12px; font-weight: 600; color: var(--txt3); margin-top: 2px; }
+.ltb-chips { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.ltb-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 28px; padding: 0 11px;
+  border-radius: 9999px;
+  font-size: 11px; font-weight: 800; letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.ltb-chip .material-symbols-outlined { font-size: 15px; }
+.ltb-chip-stage { background: var(--b-bg); border: 1px solid var(--b-bd); color: var(--b); }
+.ltb-chip-temp { background: var(--o-bg); border: 1px solid var(--o-bd); color: var(--o); }
+.ltb-close {
+  width: 30px; height: 30px; flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--panel); border: 1px solid var(--panel-bd);
+  color: var(--txt3);
+  cursor: pointer; display: grid; place-items: center; padding: 0;
+  transition: background calc(160ms * var(--anim-mult, 1)), color calc(160ms * var(--anim-mult, 1));
+}
+.ltb-close:hover { background: var(--hover); color: var(--txt); }
+.ltb-close .material-symbols-outlined { font-size: 18px; }
+
+/* ── tab switcher: segmented sliding-pill ink ───────────────────────────── */
+.ltb-tabs {
+  position: relative;
+  display: flex;
+  gap: 4px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--line);
+}
+.ltb-tab {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 7px;
+  height: 46px; padding: 0 14px;
+  background: none; border: none; cursor: pointer;
+  font-family: 'Montserrat'; font-size: 13px; font-weight: 700;
+  color: var(--txt3);
+  transition: color calc(200ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+}
+.ltb-tab .material-symbols-outlined { font-size: 18px; }
+.ltb-tab:hover { color: var(--txt2); }
+.ltb-tab.is-active { color: var(--txt); }
+.ltb-tab-ink {
+  position: absolute;
+  left: 0; bottom: -1px;
+  height: 2px; width: 0;
+  border-radius: 2px 2px 0 0;
+  background: var(--g-l);
+  transform: translateX(0);
+  transition: transform calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
+              width calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+}
+
+/* ── body: cross-fading panels ──────────────────────────────────────────── */
+.ltb-body {
+  position: relative;
+  padding: 20px;
+  min-height: 360px;
+}
+.ltb-panel {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  inset: 20px;
+  transform: translateY(4px);
+  transition: opacity calc(260ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
+              transform calc(260ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+}
+.ltb-panel.is-active {
+  opacity: 1;
+  pointer-events: auto;
+  position: relative;
+  inset: auto;
+  transform: none;
+}
+
+/* === BRAIN === */
+/* Single un-sliced raster base (zero seams) + orange lit overlay revealed
+   through an inline clip-path, + crisp SVG vector leader lines. */
+
+.ltb-shell .ltb-brain-stage {
+  display: grid;
+  /* middle track must be a concrete size: an `auto` track holding a
+     width:100% + aspect-ratio child has no resolvable basis and collapses
+     to 0, taking the brain image + absolutely-positioned labels with it. */
+  grid-template-columns: minmax(0, 0.55fr) 300px minmax(0, 1.1fr);
+  align-items: center;
+  gap: 18px;
+  height: 100%;
+  min-height: 300px;
+}
+.ltb-shell .ltb-brain-gutter { min-width: 0; }
+
+.ltb-shell .ltb-brain-canvas {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  justify-self: center;
+  grid-column: 2;
+}
+.ltb-shell .ltb-brain-base {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: contain;
+  z-index: 0;
+  user-select: none; pointer-events: none;
+}
+.ltb-shell .ltb-brain-lit {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: contain;
+  z-index: 1;
+  opacity: 0;
+  user-select: none; pointer-events: none;
+  transition: opacity calc(180ms * var(--anim-mult, 1)) ease;
+}
+.ltb-shell .ltb-brain-lit.is-lit { opacity: 1; }
+
+.ltb-shell .ltb-brain-svg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  z-index: 2;
+  overflow: visible;
+}
+
+/* regions: transparent hit + outline that lights up */
+.ltb-shell .ltb-region-hit {
+  fill: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.ltb-shell .ltb-region-outline {
+  fill: none;
+  stroke: var(--rc);
+  stroke-width: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: stroke-width calc(180ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
+              opacity calc(180ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+}
+.ltb-shell .ltb-region.is-hovered .ltb-region-outline,
+.ltb-shell .ltb-region.is-active .ltb-region-outline {
+  stroke-width: 6;
+  opacity: 1;
+  filter: drop-shadow(0 0 6px var(--rc));
+}
+
+/* leader lines: crisp vectors, section-colored on activation */
+.ltb-shell .ltb-leader-line {
+  fill: none;
+  stroke: var(--line-strong);
+  stroke-width: 1;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  pointer-events: none;
+  transition: stroke calc(180ms * var(--anim-mult, 1)) ease,
+              stroke-width calc(180ms * var(--anim-mult, 1)) ease;
+}
+.ltb-shell .ltb-leader-dot {
+  fill: var(--line-strong);
+  pointer-events: none;
+  transition: fill calc(180ms * var(--anim-mult, 1)) ease;
+}
+.ltb-shell .ltb-leader { opacity: .55; transition: opacity calc(180ms * var(--anim-mult, 1)) ease; }
+.ltb-shell .ltb-leader.is-on { opacity: 1; }
+.ltb-shell .ltb-leader.is-on .ltb-leader-line { stroke: var(--rc); stroke-width: 2; }
+.ltb-shell .ltb-leader.is-on .ltb-leader-dot { fill: var(--rc); }
+
+/* labels */
+.ltb-shell .ltb-region-label {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 28px; padding: 0 10px;
+  border-radius: 9999px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  font-family: 'Montserrat'; font-size: 11px; font-weight: 700;
+  color: var(--txt2);
+  white-space: nowrap;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: opacity calc(160ms * var(--anim-mult, 1)) ease,
+              border-color calc(160ms * var(--anim-mult, 1)) ease,
+              color calc(160ms * var(--anim-mult, 1)) ease;
+}
+.ltb-shell .ltb-region-label.is-right { transform: translateY(-50%); }
+.ltb-shell .ltb-region-label .material-symbols-outlined { font-size: 15px; color: var(--rc, var(--txt3)); }
+.ltb-shell .ltb-region-label.is-hovered,
+.ltb-shell .ltb-region-label.is-active {
+  border-color: var(--rc);
+  color: var(--txt);
+}
+.ltb-shell .ltb-region-label.is-dimmed { opacity: .4; }
+
+/* detail panel */
+.ltb-shell .ltb-detail {
+  grid-column: 3;
+  min-width: 0;
+  align-self: stretch;
+  display: flex; flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--panel-bd);
+  border-radius: 16px;
+  padding: 18px;
+  min-height: 280px;
+}
+.ltb-shell .ltb-detail-empty {
+  margin: auto;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  color: var(--txt4);
+  text-align: center;
+}
+.ltb-shell .ltb-detail-empty .material-symbols-outlined { font-size: 36px; color: var(--txt5); }
+.ltb-shell .ltb-detail-empty p { font-size: 13px; font-weight: 600; margin: 0; max-width: 220px; }
+.ltb-shell .ltb-detail .ltb-dp { display: none; }
+.ltb-shell .ltb-detail[data-empty="true"] .ltb-detail-empty { display: flex; }
+.ltb-shell .ltb-detail:not([data-empty="true"]) .ltb-detail-empty { display: none; }
+.ltb-shell .ltb-detail:not([data-empty="true"]) .ltb-dp { display: block; }
+
+.ltb-shell .ltb-dp-header {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--rc) 14%, transparent);
+  color: var(--rc);
+  margin-bottom: 12px;
+}
+.ltb-shell .ltb-dp-ic { font-size: 19px; }
+.ltb-shell .ltb-dp-title { font-size: 15px; font-weight: 800; margin: 0; letter-spacing: -0.01em; }
+.ltb-shell .ltb-dp-blurb {
+  font-size: 13px; font-weight: 500; line-height: 1.55;
+  color: var(--txt2);
+  margin: 0 0 14px;
+  min-height: 4.6em;
+}
+.ltb-shell .ltb-dp-caret {
+  display: inline-block; width: 2px; height: 1em;
+  vertical-align: text-bottom;
+  background: var(--rc);
+  margin-left: 1px;
+  animation: ltb-caret-blink calc(900ms * var(--anim-mult, 1)) steps(1, end) infinite;
+}
+@keyframes ltb-caret-blink { 0%,50% { opacity: 1; } 50.01%,100% { opacity: 0; } }
+
+.ltb-shell .ltb-chips-row { display: flex; flex-wrap: wrap; gap: 7px; }
+.ltb-shell .ltb-chip-q {
+  display: inline-flex; align-items: center;
+  height: 26px; padding: 0 10px;
+  border-radius: 9999px;
+  font-size: 11px; font-weight: 700;
+  background: color-mix(in srgb, var(--rc) 12%, transparent);
+  color: var(--rc);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity calc(220ms * var(--anim-mult, 1)) ease,
+              transform calc(220ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  transition-delay: calc(var(--i) * 40ms * var(--anim-mult, 1));
+}
+.ltb-shell .ltb-chip-q.is-in { opacity: 1; transform: translateY(0); }
+
+/* === BEHAVIOUR === */
+/* "Intent Signal Stream" — single column: rail (A) → tiles (B) → feed (C).
+   Entrance stagger via --i; every duration AND delay wrapped in
+   calc(Xms * var(--anim-mult,1)). Tones via --g-l / --r-l / --b-l tokens. */
+
+.ltb-shell .ltb-bx {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* shared entrance for rail / tiles / rows */
+.ltb-shell .ltb-bx-rail,
+.ltb-shell .ltb-bx-tile,
+.ltb-shell .ltb-bx-row {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
+              transform calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  transition-delay: calc(var(--i) * 50ms * var(--anim-mult, 1));
+}
+.ltb-shell .ltb-bx.is-revealed .ltb-bx-rail,
+.ltb-shell .ltb-bx.is-revealed .ltb-bx-tile,
+.ltb-shell .ltb-bx.is-revealed .ltb-bx-row {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── A. top rail ─────────────────────────────────────────────────────────── */
+.ltb-shell .ltb-bx-rail {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 18px;
+  background: var(--panel);
+  border: 1px solid var(--panel-bd);
+  border-radius: 16px;
+}
+
+.ltb-shell .ltb-bx-intent { display: flex; align-items: baseline; gap: 12px; }
+.ltb-shell .ltb-bx-intent-num {
+  font-size: 46px; font-weight: 900; line-height: 1; letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--g);
+}
+.ltb-shell .ltb-bx-intent-meta { display: flex; flex-direction: column; gap: 3px; }
+.ltb-shell .ltb-bx-trend {
+  display: inline-flex; align-items: center; gap: 2px;
+  font-size: 12px; font-weight: 800; color: var(--g);
+}
+.ltb-shell .ltb-bx-trend .material-symbols-outlined { font-size: 16px; }
+.ltb-shell .ltb-bx-intent-lbl {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--txt3);
+}
+
+/* sparkline: vertical emerald bars, grow from scaleY(0) on reveal */
+.ltb-shell .ltb-bx-spark {
+  display: flex; align-items: flex-end; gap: 5px;
+  height: 46px; padding: 0 4px;
+}
+.ltb-shell .ltb-bx-bar {
+  flex: 1;
+  height: var(--h);
+  min-width: 4px;
+  border-radius: 3px 3px 1px 1px;
+  background: linear-gradient(180deg, var(--g-l), color-mix(in srgb, var(--g-l) 45%, transparent));
+  transform-origin: bottom;
+  transform: scaleY(0);
+  transition: transform calc(420ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  transition-delay: calc(var(--i) * 60ms * var(--anim-mult, 1));
+}
+.ltb-shell .ltb-bx.is-revealed .ltb-bx-bar { transform: scaleY(1); }
+
+/* channel filter — seg sliding pill */
+.ltb-shell .ltb-bx-seg {
+  position: relative; display: inline-flex;
+  background: var(--track); border-radius: 9999px; padding: 3px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+}
+.ltb-shell .ltb-bx-seg-ind {
+  position: absolute; top: 3px; bottom: 3px; left: 0; width: 0;
+  background: var(--g-l); border-radius: 9999px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 1px 2px rgba(16,185,129,0.4);
+  z-index: 0;
+  transform: translateX(0);
+  transition: transform calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
+              width calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+}
+.ltb-shell .ltb-bx-seg-btn {
+  position: relative; z-index: 1;
+  padding: 6px 13px; border-radius: 9999px;
+  font-family: 'Montserrat'; font-size: 11px; font-weight: 800;
+  border: none; background: none; color: var(--txt3); cursor: pointer;
+  white-space: nowrap;
+  transition: color calc(240ms * var(--anim-mult, 1));
+}
+.ltb-shell .ltb-bx-seg-btn:active { transform: scale(0.93); }
+.ltb-shell .ltb-bx-seg-btn.is-active { color: var(--on-accent); font-weight: 900; }
+
+/* ── B. four signal tiles ────────────────────────────────────────────────── */
+.ltb-shell .ltb-bx-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.ltb-shell .ltb-bx-tile {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  transition: opacity calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
+              transform calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
+              box-shadow calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  /* re-apply stagger: the transition shorthand above resets transition-delay to 0s */
+  transition-delay: calc(var(--i) * 50ms * var(--anim-mult, 1));
+}
+.ltb-shell .ltb-bx.is-revealed .ltb-bx-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
+}
+.ltb-shell .ltb-bx-tile-top { display: flex; align-items: center; gap: 8px; }
+.ltb-shell .ltb-bx-tile-ic {
+  display: grid; place-items: center;
+  width: 28px; height: 28px; border-radius: 9px;
+  background: var(--g-bg); color: var(--g);
+}
+.ltb-shell .ltb-bx-tile-ic .material-symbols-outlined { font-size: 17px; }
+.ltb-shell .ltb-bx-tile-lbl { font-size: 12px; font-weight: 800; color: var(--txt2); letter-spacing: -0.01em; }
+.ltb-shell .ltb-bx-tile-val { display: flex; align-items: center; gap: 8px; }
+.ltb-shell .ltb-bx-num {
+  font-size: 24px; font-weight: 900; letter-spacing: -0.02em; line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--txt);
+}
+.ltb-shell .ltb-bx-tile-note { font-size: 11.5px; font-weight: 500; line-height: 1.45; color: var(--txt3); margin: 0; }
+
+/* dwell sector delta badge */
+.ltb-shell .ltb-bx-delta {
+  display: inline-flex; align-items: center; gap: 1px;
+  height: 20px; padding: 0 7px; border-radius: 9999px;
+  font-size: 11px; font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.ltb-shell .ltb-bx-delta .material-symbols-outlined { font-size: 13px; }
+.ltb-shell .ltb-bx-delta.is-up { background: var(--g-bg); color: var(--g); }
+.ltb-shell .ltb-bx-delta.is-down { background: var(--a-bg); color: var(--a); }
+
+/* scroll_depth progress bar */
+.ltb-shell .ltb-bx-prog {
+  height: 6px; border-radius: 9999px; background: var(--track); overflow: hidden;
+}
+.ltb-shell .ltb-bx-prog-fill {
+  display: block; height: 100%; width: 0;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, var(--g), var(--g-l));
+  transition: width calc(620ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+}
+.ltb-shell .ltb-bx.is-revealed .ltb-bx-prog-fill { width: var(--p); }
+
+/* buying_horizon urgency chip */
+.ltb-shell .ltb-bx-urgency {
+  display: inline-flex; align-items: center;
+  height: 30px; padding: 0 14px; border-radius: 9999px;
+  font-size: 14px; font-weight: 900; letter-spacing: -0.01em;
+  background: var(--r-bg); color: var(--r);
+  border: 1px solid var(--r-bd);
+}
+
+/* interaction_vel per-channel mini-bars */
+.ltb-shell .ltb-bx-vel { display: flex; flex-direction: column; gap: 6px; }
+.ltb-shell .ltb-bx-vel-row { display: flex; align-items: center; gap: 8px; }
+.ltb-shell .ltb-bx-vel-ch {
+  width: 36px; flex-shrink: 0;
+  font-size: 10px; font-weight: 800; letter-spacing: 0.02em; color: var(--txt3);
+}
+.ltb-shell .ltb-bx-vel-rail {
+  flex: 1; height: 7px; border-radius: 9999px; background: var(--track); overflow: hidden;
+}
+.ltb-shell .ltb-bx-vel-bar {
+  display: block; height: 100%; width: var(--p);
+  border-radius: 9999px;
+  background: var(--txt4);
+  transition: background calc(280ms * var(--anim-mult, 1)) ease,
+              opacity calc(280ms * var(--anim-mult, 1)) ease;
+}
+/* selected-channel highlight (toggled in JS via .is-sel / .is-mute on rows) */
+.ltb-shell .ltb-bx-vel-row.is-sel .ltb-bx-vel-bar { background: var(--g-l); }
+.ltb-shell .ltb-bx-vel-row.is-mute .ltb-bx-vel-bar { opacity: .35; }
+
+/* ── C. chronological feed ───────────────────────────────────────────────── */
+.ltb-shell .ltb-bx-feed {
+  position: relative;
+  display: flex; flex-direction: column;
+  gap: 4px;
+  padding-left: 4px;
+}
+/* connecting vertical timeline rail */
+.ltb-shell .ltb-bx-feed::before {
+  content: ''; position: absolute;
+  left: 11px; top: 14px; bottom: 14px;
+  width: 2px; border-radius: 2px;
+  background: var(--line-strong);
+}
+.ltb-shell .ltb-bx-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: start;
+  gap: 12px;
+  padding: 10px 12px 10px 6px;
+  border-radius: 12px;
+  transition: opacity calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
+              transform calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
+              max-height calc(280ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
+              background calc(180ms * var(--anim-mult, 1)) ease;
+  transition-delay: calc(var(--i) * 50ms * var(--anim-mult, 1));
+  max-height: 120px;
+}
+.ltb-shell .ltb-bx.is-revealed .ltb-bx-row:hover { background: var(--hover); }
+/* filtered-out collapse state — must out-specify `.is-revealed .ltb-bx-row { opacity:1 }` */
+.ltb-shell .ltb-bx.is-revealed .ltb-bx-row.is-hidden,
+.ltb-shell .ltb-bx-row.is-hidden {
+  opacity: 0;
+  max-height: 0;
+  transform: translateX(-8px);
+  overflow: hidden;
+  padding-top: 0; padding-bottom: 0;
+  pointer-events: none;
+}
+
+.ltb-shell .ltb-bx-dot {
+  width: 12px; height: 12px; margin-top: 3px;
+  border-radius: 50%; z-index: 1;
+  box-shadow: 0 0 0 3px var(--surface);
+}
+.ltb-shell .ltb-bx-dot.is-pos { background: var(--g-l); }
+.ltb-shell .ltb-bx-dot.is-risk { background: var(--r-l); }
+.ltb-shell .ltb-bx-dot.is-signal { background: var(--b-l); }
+
+.ltb-shell .ltb-bx-time {
+  min-width: 28px;
+  font-size: 11px; font-weight: 800; color: var(--txt4);
+  font-variant-numeric: tabular-nums;
+  padding-top: 1px;
+}
+.ltb-shell .ltb-bx-row-body { min-width: 0; }
+.ltb-shell .ltb-bx-row-head { display: flex; align-items: center; gap: 7px; }
+.ltb-shell .ltb-bx-row-ch { font-size: 15px; color: var(--txt4); }
+.ltb-shell .ltb-bx-row-title { font-size: 13px; font-weight: 800; color: var(--txt); letter-spacing: -0.01em; }
+.ltb-shell .ltb-bx-tag {
+  margin-left: auto;
+  display: inline-flex; align-items: center;
+  height: 20px; padding: 0 9px; border-radius: 9999px;
+  font-size: 10px; font-weight: 800; letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.ltb-shell .ltb-bx-tag.is-pos { background: var(--g-bg); color: var(--g); }
+.ltb-shell .ltb-bx-tag.is-risk { background: var(--r-bg); color: var(--r); }
+.ltb-shell .ltb-bx-tag.is-signal { background: var(--b-bg); color: var(--b); }
+.ltb-shell .ltb-bx-row-note { font-size: 11.5px; font-weight: 500; line-height: 1.45; color: var(--txt3); margin: 4px 0 0; }
+
+/* === DARK + POLISH === */
+
+/* ── DARK MODE (System A — html.dark) ─────────────────────────────────────
+   Re-point the neutral token surface to the exact dark values used by
+   .ldx-overlay (_lead-popover.css L22-32) so this prototype matches the
+   real lead popover. Section colors (--rc / SECTIONS[].color) and the
+   behaviour tones (--g-l/--r-l/--b-l) are intentionally NOT flipped —
+   they stay vivid against the dark panel. */
+html.dark .ltb-shell {
+  --surface:#0F172A; --txt:#F1F5F9; --txt2:#CBD5E1; --txt3:#94A3B8; --txt4:#64748B; --txt5:#475569;
+  --line:rgba(255,255,255,0.07); --line-strong:rgba(255,255,255,0.11);
+  --panel:rgba(255,255,255,0.035); --panel-bd:rgba(255,255,255,0.08);
+  --hover:rgba(255,255,255,0.05); --track:rgba(255,255,255,0.09);
+  --g-bg:rgba(16,185,129,0.13); --g-bd:rgba(16,185,129,0.30); --g:#34D399;
+  --a-bg:rgba(234,179,8,0.13); --a-bd:rgba(234,179,8,0.30); --a:#FACC15;
+  --r-bg:rgba(239,68,68,0.13); --r-bd:rgba(239,68,68,0.32); --r:#F87171;
+  --b-bg:rgba(59,130,246,0.15); --b-bd:rgba(59,130,246,0.32); --b:#60A5FA;
+  --v-bg:rgba(139,92,246,0.16); --v-bd:rgba(139,92,246,0.34); --v:#A78BFA;
+  --o-bg:rgba(249,115,22,0.14); --o-bd:rgba(249,115,22,0.32); --o:#FB923C;
+  --on-accent:#FFFFFF; --line-head:#334155;
+
+  border-color: var(--line-head);             /* dark hairline */
+  border-top-color: rgba(255,255,255,0.16);    /* top-rim sheen */
+  box-shadow: 0 36px 90px rgba(0,0,0,0.50), 0 8px 24px rgba(0,0,0,0.30);
+}
+
+/* header / tab strip hairlines + close affordance on dark */
+html.dark .ltb-shell .ltb-head,
+html.dark .ltb-shell .ltb-tabs { border-bottom-color: var(--line-head); }
+html.dark .ltb-shell .ltb-close { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.10); }
+html.dark .ltb-shell .ltb-close:hover { background: rgba(255,255,255,0.09); }
+
+/* BRAIN — base/lit rasters stay; ensure vector + chrome read on dark.
+   Region outline glow, leader lines, labels, detail bezel, chips. */
+html.dark .ltb-shell .ltb-region-label {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.12);
+}
+html.dark .ltb-shell .ltb-leader-line,
+html.dark .ltb-shell .ltb-leader-dot { /* tokens already darkened via --line-strong */ }
+html.dark .ltb-shell .ltb-detail { background: rgba(255,255,255,0.035); border-color: rgba(255,255,255,0.08); }
+/* chip-q & dp-header use color-mix(--rc, transparent) — verified legible on
+   the slate panel because --rc stays the vivid section hue. */
+
+/* BEHAVIOUR — surfaces flip to dark; emerald Intent Index, tone dots and
+   sparkline emerald all stay (driven by --g/--g-l, not the neutral tokens). */
+html.dark .ltb-shell .ltb-bx-rail { background: rgba(255,255,255,0.035); border-color: rgba(255,255,255,0.08); }
+html.dark .ltb-shell .ltb-bx-tile {
+  background: rgba(255,255,255,0.03);
+  border-color: rgba(255,255,255,0.10);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.30);
+}
+html.dark .ltb-shell .ltb-bx.is-revealed .ltb-bx-tile:hover {
+  box-shadow: 0 12px 28px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.30);
+}
+/* feed timeline rail + dot rings read against the dark surface */
+html.dark .ltb-shell .ltb-bx-feed::before { background: rgba(255,255,255,0.11); }
+html.dark .ltb-shell .ltb-bx-dot { box-shadow: 0 0 0 3px var(--surface); }
+/* seg track inset shadow + active-btn white text both hold on dark */
+html.dark .ltb-shell .ltb-bx-seg { box-shadow: inset 0 2px 4px rgba(0,0,0,0.30); }
+
+/* no white flash: panels default to the dark surface during cross-fade */
+html.dark .ltb-shell .ltb-panel,
+html.dark .ltb-shell .ltb-body { background: var(--surface); }
+
+/* ── POLISH ───────────────────────────────────────────────────────────────
+   Health rail accent + focus-visible rings (a11y) for tab, region label,
+   and channel filter buttons. */
+.ltb-shell .ltb-rail { box-shadow: 0 0 10px color-mix(in srgb, var(--g-l) 55%, transparent); }
+.ltb-shell .ltb-tab:focus-visible,
+.ltb-shell .ltb-region-label:focus-visible,
+.ltb-shell .ltb-bx-seg-btn:focus-visible {
+  outline: 2px solid var(--g-l);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+.ltb-shell .ltb-region-label:focus-visible { border-radius: 9999px; }
+.ltb-shell .ltb-close:focus-visible { outline: 2px solid var(--g-l); outline-offset: 2px; }
+
+/* ── REDUCED MOTION ────────────────────────────────────────────────────────
+   Snap every entrance / transition to its end state and stop infinite anims.
+   JS already short-circuits the typewriter (L289) and Intent-Index count-up
+   (L395) under matchMedia('(prefers-reduced-motion: reduce)'). */
+@media (prefers-reduced-motion: reduce) {
+  .ltb-shell *,
+  .ltb-shell *::before,
+  .ltb-shell *::after {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  /* force end state for transform/opacity-driven entrances + grows */
+  .ltb-shell .ltb-panel { transform: none !important; }
+  .ltb-shell .ltb-bx-rail,
+  .ltb-shell .ltb-bx-tile,
+  .ltb-shell .ltb-bx-row { opacity: 1 !important; transform: none !important; }
+  .ltb-shell .ltb-bx-bar { transform: scaleY(1) !important; }
+  .ltb-shell .ltb-bx-prog-fill { width: var(--p) !important; }
+  .ltb-shell .ltb-chip-q { opacity: 1 !important; transform: none !important; }
+  /* kill the caret blink */
+  .ltb-shell .ltb-dp-caret { animation: none !important; }
+}

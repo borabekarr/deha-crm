@@ -1,0 +1,414 @@
+<!doctype html>
+<!-- @dsCard group="Brand" name="Workflow Nodes" subtitle="Trigger / Action / Output node cards for the workflow canvas" --><html><head><meta charset="utf-8"><link rel="stylesheet" href="_base.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  body { background: #F8FAFC; font-family: 'Montserrat', sans-serif; }
+  .card {
+    padding: 24px 30px 24px 24px;
+    background: #fff;
+    background-image: radial-gradient(circle at 1px 1px, #DDE3EA 1px, transparent 1px);
+    background-size: 16px 16px;
+  }
+  .wf-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 28px; }
+
+  /* ── Gray outer shell (like theme editor .te-outer) ── */
+  .wf-outer {
+    background: #D4DCE8;
+    border-radius: 24px;
+    padding: 10px;
+    box-shadow: 0 12px 40px rgba(15,23,42,0.10), 0 2px 8px rgba(15,23,42,0.06);
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  /* ── Hover toolbar — vertical column floating outside the node's right edge ── */
+  .wf-tools {
+    position: absolute; top: 50%; left: calc(100% + 4px); z-index: 25;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    opacity: 0; transform: translateY(-50%) translateX(-4px) scale(0.96);
+    pointer-events: none;
+    transition: opacity 150ms ease, transform 200ms cubic-bezier(.22,1,.36,1);
+  }
+  /* invisible bridge across the node↔toolbar gap so hover never drops out */
+  .wf-tools::after {
+    content: ''; position: absolute; top: 0; bottom: 0; left: -10px; width: 12px;
+  }
+  .wf-outer:hover .wf-tools,
+  .wf-tools:hover { opacity: 1; transform: translateY(-50%) translateX(0) scale(1); pointer-events: auto; }
+
+  .wf-tool {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 1px solid #E2E8F0; background: #fff;
+    display: grid; place-items: center; cursor: pointer;
+    color: #475569; padding: 0; position: relative;
+    box-shadow: 0 3px 8px rgba(15,23,42,0.14), inset 0 1px 0 rgba(255,255,255,0.85);
+    transition: background 140ms, color 140ms, border-color 140ms, transform 120ms cubic-bezier(.22,1,.36,1);
+  }
+  .wf-tool:hover  { transform: translateY(-1px); }
+  .wf-tool:active { transform: scale(0.92); }
+  .wf-tool .material-icons { font-size: 12px; line-height: 1; }
+
+  /* connect handle — a plain hollow circle, outline only */
+  .wf-tool.connect {
+    background: transparent; border: 1.5px solid #94A3B8; cursor: crosshair;
+    box-shadow: none;
+  }
+  .wf-tool.connect:hover { background: transparent; border-color: #475569; transform: translateY(-1px) scale(1.08); }
+  .wf-tool.add:hover  { color: #047857; background: #ECFDF5; border-color: #A7F3D0; }
+  .wf-tool.edit:hover { color: #0F172A; background: #F8FAFC; border-color: #CBD5E1; }
+  .wf-tool.del:hover  { color: #B91C1C; background: #FEF2F2; border-color: #FECACA; }
+
+  /* icon-only buttons → name appears as a tooltip on hover.
+     Toolbar sits on the node's right, so tooltips point LEFT (toward the
+     gap/node) — this keeps them inside the card instead of overflowing right. */
+  .wf-tool::after {
+    content: attr(data-tip);
+    position: absolute; top: 50%; right: calc(100% + 9px); left: auto; bottom: auto;
+    transform: translateY(-50%) translateX(4px);
+    background: #0F172A; color: #fff; white-space: nowrap;
+    font-family: 'Montserrat'; font-size: 10.5px; font-weight: 700; letter-spacing: 0.01em;
+    padding: 4px 8px; border-radius: 6px;
+    opacity: 0; pointer-events: none; z-index: 40;
+    box-shadow: 0 6px 16px rgba(15,23,42,0.22);
+    transition: opacity 130ms ease, transform 130ms cubic-bezier(.22,1,.36,1);
+  }
+  .wf-tool::before {
+    content: ''; position: absolute; top: 50%; right: calc(100% + 5px); left: auto; bottom: auto;
+    transform: translateY(-50%);
+    border: 4px solid transparent; border-left-color: #0F172A;
+    opacity: 0; pointer-events: none; z-index: 40; transition: opacity 130ms ease;
+  }
+  .wf-tool:hover::after  { opacity: 1; transform: translateY(-50%) translateX(0); }
+  .wf-tool:hover::before { opacity: 1; }
+
+  /* ── Tag (Deha semantic-pill style from semantic colors) ── */
+  .wf-tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 11px 5px 9px;
+    border-radius: 9999px; align-self: flex-start;
+    font-size: 11px; font-weight: 800; font-family: 'Montserrat';
+    letter-spacing: 0.01em;
+    margin-bottom: 8px;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.28);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.55),
+      inset 0 -2px 0 rgba(15,23,42,0.18),
+      inset 0 0 0 1px rgba(15,23,42,0.10);
+    background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+    background-size: 7px 7px;
+  }
+  .wf-tag .material-icons { font-size: 13px; }
+  .wf-tag.trigger { background-color: #FBBF24; }
+  .wf-tag.action  { background-color: #10B981; }
+  .wf-tag.output  { background-color: #F97316; }
+
+  /* ── Card (white inner, no outer shadow — handled by .wf-outer) ── */
+  .wf-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 -1px 0 rgba(15,23,42,0.03);
+    padding: 14px 14px 12px;
+  }
+  .wf-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .wf-title { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em; }
+  .wf-title .ic { font-size: 16px; color: #334155; }
+  .wf-title .brand-letter {
+    width: 18px; height: 18px; border-radius: 4px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 900; color: #fff;
+    letter-spacing: -0.02em;
+  }
+  .wf-menu {
+    background: none; border: none; cursor: pointer;
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    color: #94A3B8; border-radius: 6px;
+    padding: 0; flex-shrink: 0;
+  }
+  .wf-menu:hover { background: #F1F5F9; color: #475569; }
+  .wf-menu .material-icons { font-size: 18px; line-height: 1; display: block; }
+
+  /* ── Chip (inline data pill) ── */
+  .wf-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 11px;
+    background: #F8FAFC; border: 1px solid #E2E8F0;
+    border-radius: 10px;
+    font-size: 12px; font-weight: 600; color: #334155;
+    font-family: 'Montserrat';
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(15,23,42,0.03);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  .wf-chip.method { background: #F1F5F9; color: #64748B; font-weight: 800; padding: 6px 8px; font-size: 11px; letter-spacing: 0.04em; }
+  .wf-chip .ic { font-size: 14px; }
+  .wf-chip .ic.yt { color: #FF0000; }
+  .wf-row { display: flex; gap: 6px; align-items: center; flex-wrap: nowrap; }
+  .wf-url { flex: 1; min-width: 0; color: #64748B; font-weight: 500; }
+
+  /* ── Connect button ── */
+  .wf-connect {
+    width: 100%;
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-family: 'Montserrat'; font-size: 13px; font-weight: 700; color: #0F172A;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 -1px 0 rgba(15,23,42,0.04);
+    transition: background 150ms, transform 100ms cubic-bezier(.22,1,.36,1);
+  }
+  .wf-connect:hover { background: #F8FAFC; }
+  .wf-connect:active { transform: scale(0.985); }
+  .wf-connect .ic { font-size: 14px; color: #334155; }
+
+  /* ── Description ── */
+  .wf-desc { font-size: 12px; font-weight: 500; color: #64748B; line-height: 1.45; margin-bottom: 10px; }
+
+  /* ── Prompt preview ── */
+  .wf-prompt {
+    background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 12px; font-weight: 500; color: #475569; line-height: 1.5;
+    margin-bottom: 10px;
+  }
+  .wf-prompt .var {
+    display: inline-block;
+    background: rgba(16,185,129,0.12);
+    color: #047857;
+    padding: 1px 6px; border-radius: 6px;
+    font-weight: 700; font-family: 'Montserrat';
+  }
+
+  /* ── Footer ── */
+  .wf-foot { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 10px; }
+  .wf-meta {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; font-weight: 600; color: #94A3B8;
+  }
+  .wf-meta .ic { font-size: 12px; }
+  .wf-meta-group { display: flex; gap: 10px; align-items: center; }
+  .wf-warn {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; font-weight: 700; color: #B91C1C;
+    background: #FEF2F2; border: 1px solid #FECACA;
+    padding: 3px 9px; border-radius: 9999px;
+  }
+  .wf-warn .ic { font-size: 12px; }
+
+  /* ── Brand letter colors ── */
+  .bl-notion  { background: #000; }
+  .bl-stripe  { background: #635BFF; }
+  .bl-postmark{ background: #FFC600; color: #000; }
+  .bl-anthropic { background: #D97757; }
+  .bl-openai  { background: #10A37F; }
+</style>
+<link rel="stylesheet" href="_darkmode.css">
+</head><body>
+<div class="card" data-comment-anchor="7c04e25196-div">
+  <div class="wf-grid">
+
+    <!-- 1. Webhook trigger -->
+    <div class="wf-outer">
+      <div class="wf-tools">
+          <button class="wf-tool connect" data-tip="Connect to next" aria-label="Connect to next node"></button>
+          <button class="wf-tool add" data-tip="Add next" aria-label="Add next node"><span class="material-icons">add</span></button>
+          <button class="wf-tool edit" data-comment-anchor="ffeb72b822-span" data-tip="Rename" aria-label="Rename node"><span class="material-icons">edit</span></button>
+        <button class="wf-tool del tip-bottom" data-tip="Delete" aria-label="Delete node"><span class="material-icons">delete</span></button>
+      </div>
+      <div class="wf-tag trigger"><span class="material-icons">bolt</span>Trigger</div>
+      <div class="wf-card">
+        <div class="wf-head">
+          <div class="wf-title"><span class="material-icons ic">webhook</span>Incoming Webhook</div>
+          
+        </div>
+        <div class="wf-row">
+          <span class="wf-chip method">POST</span>
+          <span class="wf-chip wf-url">https://api.deha.io/hooks/7f8a9…</span>
+        </div>
+        <div class="wf-foot">
+          <span class="wf-meta"><span class="material-icons ic">schedule</span>0.0 sec</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Input URL trigger -->
+    <div class="wf-outer">
+      <div class="wf-tools">
+          <button class="wf-tool connect" data-tip="Connect to next" aria-label="Connect to next node"></button>
+          <button class="wf-tool add" data-tip="Add next" aria-label="Add next node"><span class="material-icons">add</span></button>
+          <button class="wf-tool edit" data-tip="Rename" aria-label="Rename node"><span class="material-icons">edit</span></button>
+        <button class="wf-tool del tip-bottom" data-tip="Delete" aria-label="Delete node"><span class="material-icons">delete</span></button>
+      </div>
+      <div class="wf-tag trigger"><span class="material-icons">bolt</span>Trigger</div>
+      <div class="wf-card">
+        <div class="wf-head">
+          <div class="wf-title"><span class="material-icons ic">link</span>Input URL</div>
+          
+        </div>
+        <div class="wf-row">
+          <span class="wf-chip"><span class="material-icons ic yt">play_circle</span></span>
+          <span class="wf-chip wf-url">https://youtube.com/watch?v=…</span>
+        </div>
+        <div class="wf-foot">
+          <span class="wf-meta"><span class="material-icons ic">schedule</span>0.0 sec</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Notion action (not connected) -->
+    <div class="wf-outer">
+      <div class="wf-tools">
+          <button class="wf-tool connect" data-tip="Connect to next" aria-label="Connect to next node"></button>
+          <button class="wf-tool add" data-tip="Add next" aria-label="Add next node"><span class="material-icons">add</span></button>
+          <button class="wf-tool edit" data-tip="Rename" aria-label="Rename node"><span class="material-icons">edit</span></button>
+        <button class="wf-tool del tip-bottom" data-tip="Delete" aria-label="Delete node"><span class="material-icons">delete</span></button>
+      </div>
+      <div class="wf-tag action"><span class="material-icons">play_circle</span>Action</div>
+      <div class="wf-card">
+        <div class="wf-head">
+          <div class="wf-title"><span class="brand-letter bl-notion">N</span>Write to Notion</div>
+          
+        </div>
+        <button class="wf-connect"><span class="material-icons ic">link</span>Connect Notion Account</button>
+        <div class="wf-foot">
+          <span class="wf-meta"><span class="material-icons ic">schedule</span>0.0 sec</span>
+          <span class="wf-warn"><span class="material-icons ic">error_outline</span>Account not connected</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Stripe action (not connected) -->
+    <div class="wf-outer">
+      <div class="wf-tools">
+          <button class="wf-tool connect" data-tip="Connect to next" aria-label="Connect to next node"></button>
+          <button class="wf-tool add" data-tip="Add next" aria-label="Add next node"><span class="material-icons">add</span></button>
+          <button class="wf-tool edit" data-tip="Rename" aria-label="Rename node"><span class="material-icons">edit</span></button>
+        <button class="wf-tool del tip-bottom" data-tip="Delete" aria-label="Delete node"><span class="material-icons">delete</span></button>
+      </div>
+      <div class="wf-tag action"><span class="material-icons">play_circle</span>Action</div>
+      <div class="wf-card">
+        <div class="wf-head">
+          <div class="wf-title"><span class="brand-letter bl-stripe">S</span>Create Customer</div>
+          
+        </div>
+        <button class="wf-connect"><span class="material-icons ic">link</span>Connect Stripe Account</button>
+        <div class="wf-foot">
+          <span class="wf-meta"><span class="material-icons ic">schedule</span>0.0 sec</span>
+          <span class="wf-warn"><span class="material-icons ic">error_outline</span>Account not connected</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Audio output -->
+    <div class="wf-outer">
+      <div class="wf-tools">
+          <button class="wf-tool connect" data-tip="Connect to next" aria-label="Connect to next node"></button>
+          <button class="wf-tool add" data-tip="Add next" aria-label="Add next node"><span class="material-icons">add</span></button>
+          <button class="wf-tool edit" data-tip="Rename" aria-label="Rename node"><span class="material-icons">edit</span></button>
+        <button class="wf-tool del tip-bottom" data-tip="Delete" aria-label="Delete node"><span class="material-icons">delete</span></button>
+      </div>
+      <div class="wf-tag output"><span class="material-icons">check_circle</span>Output</div>
+      <div class="wf-card">
+        <div class="wf-head">
+          <div class="wf-title"><span class="material-icons ic">graphic_eq</span>Audio Output</div>
+          
+        </div>
+        <div class="wf-row">
+          <span class="wf-chip"><span class="material-icons ic">pause</span>Eleven v3 (alpha)</span>
+          <span class="wf-chip"><span class="material-icons ic">graphic_eq</span>Sarah</span>
+        </div>
+        <div class="wf-foot">
+          <span class="wf-meta-group">
+            <span class="wf-meta"><span class="material-icons ic">schedule</span>0.0 sec</span>
+            <span class="wf-meta">382 Tokens</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Image output -->
+    <div class="wf-outer">
+      <div class="wf-tools">
+          <button class="wf-tool connect" data-tip="Connect to next" aria-label="Connect to next node"></button>
+          <button class="wf-tool add" data-tip="Add next" aria-label="Add next node"><span class="material-icons">add</span></button>
+          <button class="wf-tool edit" data-tip="Rename" aria-label="Rename node"><span class="material-icons">edit</span></button>
+        <button class="wf-tool del tip-bottom" data-tip="Delete" aria-label="Delete node"><span class="material-icons">delete</span></button>
+      </div>
+      <div class="wf-tag output"><span class="material-icons">check_circle</span>Output</div>
+      <div class="wf-card">
+        <div class="wf-head">
+          <div class="wf-title"><span class="material-icons ic">image</span>Image Output</div>
+          
+        </div>
+        <div class="wf-row">
+          <span class="wf-chip"><span class="brand-letter bl-openai" style="width:14px;height:14px;font-size:9px;">O</span>4o Image Generation</span>
+          <span class="wf-chip"><span class="material-icons ic">photo_size_select_large</span>1024 × 1024</span>
+        </div>
+        <div class="wf-foot">
+          <span class="wf-meta-group">
+            <span class="wf-meta"><span class="material-icons ic">schedule</span>0.0 sec</span>
+            <span class="wf-meta">382 Tokens</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. Send Email -->
+    <div class="wf-outer">
+      <div class="wf-tools">
+          <button class="wf-tool connect" data-tip="Connect to next" aria-label="Connect to next node"></button>
+          <button class="wf-tool add" data-tip="Add next" aria-label="Add next node"><span class="material-icons">add</span></button>
+          <button class="wf-tool edit" data-tip="Rename" aria-label="Rename node"><span class="material-icons">edit</span></button>
+        <button class="wf-tool del tip-bottom" data-tip="Delete" aria-label="Delete node"><span class="material-icons">delete</span></button>
+      </div>
+      <div class="wf-tag action"><span class="material-icons">play_circle</span>Action</div>
+      <div class="wf-card">
+        <div class="wf-head">
+          <div class="wf-title"><span class="material-icons ic">send</span>Send Email</div>
+          
+        </div>
+        <div class="wf-desc">Uses Postmark to send a quick, personalized reminder email.</div>
+        <div class="wf-prompt">Hello <span class="var">{First Name}</span>, I just wanted to follow up on our recent conversation and send you a quick reminder. If you have a…</div>
+        <div class="wf-row">
+          <span class="wf-chip"><span class="brand-letter bl-postmark">P</span>Postmark</span>
+        </div>
+        <div class="wf-foot">
+          <span class="wf-meta"><span class="material-icons ic">schedule</span>0.0 sec</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. Anthropic AI action -->
+    <div class="wf-outer">
+      <div class="wf-tools">
+          <button class="wf-tool connect" data-tip="Connect to next" aria-label="Connect to next node"></button>
+          <button class="wf-tool add" data-tip="Add next" aria-label="Add next node"><span class="material-icons">add</span></button>
+          <button class="wf-tool edit" data-tip="Rename" aria-label="Rename node"><span class="material-icons">edit</span></button>
+        <button class="wf-tool del tip-bottom" data-tip="Delete" aria-label="Delete node"><span class="material-icons">delete</span></button>
+      </div>
+      <div class="wf-tag action"><span class="material-icons">play_circle</span>Action</div>
+      <div class="wf-card">
+        <div class="wf-head">
+          <div class="wf-title"><span class="brand-letter bl-anthropic">A</span>Anthropic</div>
+          
+        </div>
+        <div class="wf-desc">Summarizes the conversation text received from the incoming webhook.</div>
+        <div class="wf-prompt">Summarize this conversation from the webhook: <span class="var">{Incoming Webhook}</span> Output 3–5 bullet points with main topic…</div>
+        <div class="wf-row">
+          <span class="wf-chip"><span class="brand-letter bl-anthropic">A</span>Claude-Opus-4</span>
+        </div>
+        <div class="wf-foot">
+          <span class="wf-meta-group">
+            <span class="wf-meta"><span class="material-icons ic">schedule</span>0.0 sec</span>
+            <span class="wf-meta">1,382 Tokens</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<script src="_darkmode.js"></script>
+</body></html>

@@ -1,0 +1,404 @@
+<!doctype html>
+<!-- @dsCard group="Components" name="Popover" subtitle="Anchored popover with directional caret · tap/long-press/double-tap · scale+fade from anchor" viewport="700x540" -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Popover — Deha Design System</title>
+  <link rel="stylesheet" href="_base.css">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+  <link rel="stylesheet" href="_controls.css">
+  <link rel="stylesheet" href="_darkmode.css">
+  <style>
+    body { background: #F8FAFC; font-family: var(--font-display); }
+    .card {
+      background: #F8FAFC;
+      background-image: radial-gradient(ellipse at top right,
+        rgba(16,185,129,0.07) 0%, #F8FAFC 55%);
+    }
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal; font-style: normal; line-height: 1;
+      letter-spacing: normal; text-transform: none; display: inline-block;
+      white-space: nowrap; word-wrap: normal; direction: ltr;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Stage inside the shared shell bezel ── */
+    .pop-stage {
+      background: var(--bg-card-solid);
+      border-radius: 22px;
+      padding: 18px 18px 0;
+      overflow: hidden;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,1),
+        inset 0 -1px 0 rgba(15,23,42,0.04),
+        inset 0 0 0 1px rgba(15,23,42,0.05);
+    }
+
+    /* ── Control bar ── */
+    .pop-controls {
+      display: flex; flex-wrap: wrap; align-items: flex-end;
+      justify-content: center; gap: 16px 18px;
+      padding-bottom: 18px;
+    }
+    .pop-ctl { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+    .pop-ctl .label { color: var(--fg4); }
+    .pop-anim {
+      display: flex; flex-direction: column; gap: 6px; align-items: flex-start;
+    }
+    .pop-anim .label { color: var(--fg4); }
+
+    /* ── Trigger stage ── */
+    .pop-canvas {
+      position: relative;
+      height: 300px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 18px 18px 0 0;
+      background-image: var(--bg-section-grid);
+      background-size: var(--bg-section-grid-size);
+      box-shadow: inset 0 1px 0 rgba(15,23,42,0.05);
+    }
+
+    /* ── Trigger: emerald primary surface ── */
+    .pop-trigger {
+      position: relative; z-index: 1;
+      display: inline-flex; align-items: center; gap: 8px;
+      border: none; cursor: pointer;
+      padding: 12px 18px; border-radius: var(--radius-pill);
+      font-family: var(--font-display); font-size: 13px; font-weight: 800;
+      color: #fff;
+      background-color: var(--brand-primary);
+      background-image:
+        linear-gradient(rgba(255,255,255,0.10) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.10) 1px, transparent 1px);
+      background-size: 7px 7px;
+      box-shadow:
+        0 10px 40px -10px rgba(16,185,129,0.5),
+        inset 0 1px 0 rgba(255,255,255,0.5),
+        inset 0 -2px 0 rgba(0,0,0,0.22),
+        inset 0 0 0 1px rgba(255,255,255,0.15);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.18);
+      transition: transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+      -webkit-user-select: none; user-select: none;
+    }
+    .pop-trigger .material-symbols-outlined { font-size: 18px; }
+    .pop-trigger:active { transform: scale(0.96); }
+
+    /* ── Popover panel ── */
+    .pop-pop {
+      position: absolute; top: 0; left: 0; z-index: 5;
+      opacity: 0; transform: scale(0.92); pointer-events: none;
+      transform-origin: bottom center;
+      transition:
+        opacity   calc(200ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
+        transform calc(220ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.64,1);
+    }
+    .pop-pop.open { opacity: 1; transform: scale(1); pointer-events: auto; }
+    .pop-pop.no-anim { transition-duration: 0s; }
+
+    .pop-body {
+      position: relative; z-index: 1;
+      min-width: 196px; max-width: 280px;
+      background: var(--bg-card-solid);
+      border-radius: var(--radius-xl);
+      padding: 8px;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,1),
+        inset 0 -1px 0 rgba(15,23,42,0.04),
+        inset 0 0 0 1px rgba(15,23,42,0.06),
+        0 16px 40px rgba(15,23,42,0.16);
+    }
+
+    /* ── Caret (rotated square) ── */
+    .pop-caret {
+      position: absolute; width: 13px; height: 13px;
+      background: var(--bg-card-solid);
+      box-shadow: inset 0 0 0 1px rgba(15,23,42,0.06);
+      transform: rotate(45deg);
+      z-index: 0;
+    }
+    .dir-up    .pop-caret { bottom: -5px; left: 50%; margin-left: -6.5px; }
+    .dir-down  .pop-caret { top: -5px;    left: 50%; margin-left: -6.5px; }
+    .dir-left  .pop-caret { right: -5px;  top: 50%;  margin-top: -6.5px; }
+    .dir-right .pop-caret { left: -5px;   top: 50%;  margin-top: -6.5px; }
+
+    .dir-up    { transform-origin: bottom center; }
+    .dir-down  { transform-origin: top center; }
+    .dir-left  { transform-origin: right center; }
+    .dir-right { transform-origin: left center; }
+
+    /* ── Quick-action menu ── */
+    .pa-row {
+      display: flex; align-items: center; gap: 11px;
+      padding: 9px 10px; border-radius: 12px; cursor: pointer;
+      transition: background calc(140ms * var(--anim-mult, 1));
+    }
+    .pa-row:hover { background: var(--bg-chip); }
+    .pa-row:active { transform: scale(0.985); }
+    .pa-icon {
+      flex-shrink: 0;
+      width: 32px; height: 32px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      background-color: var(--icon-c, var(--brand-primary));
+      background-image:
+        radial-gradient(ellipse at top right, rgba(255,255,255,0.25), transparent 55%),
+        radial-gradient(circle, rgba(255,255,255,0.22) 1px, transparent 1.5px);
+      background-size: cover, 7px 7px;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.55),
+        inset 0 -2px 0 rgba(15,23,42,0.18),
+        inset 0 0 0 1px rgba(15,23,42,0.10);
+    }
+    .pa-icon .material-symbols-outlined { font-size: 19px; }
+    .pa-label { font-size: 13px; font-weight: 700; color: var(--fg2); }
+
+    /* ── Info card body ── */
+    .pi-wrap { padding: 6px 8px 4px; }
+    .pi-title { font-size: var(--type-h4); font-weight: 800; color: var(--fg1); margin: 0 0 6px; }
+    .pi-body { font-size: var(--type-body); line-height: 1.5; color: var(--fg3); margin: 0 0 14px; }
+    .pi-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      border: none; cursor: pointer;
+      padding: 9px 16px; border-radius: var(--radius-pill);
+      font-family: var(--font-display); font-size: 12px; font-weight: 800;
+      color: #fff;
+      background-color: var(--brand-primary);
+      background-image:
+        linear-gradient(rgba(255,255,255,0.10) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.10) 1px, transparent 1px);
+      background-size: 7px 7px;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.5),
+        inset 0 -2px 0 rgba(0,0,0,0.22),
+        inset 0 0 0 1px rgba(255,255,255,0.15);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.18);
+      transition: transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+    }
+    .pi-btn:active { transform: scale(0.96); }
+
+    /* ── Dark refinements (System A — most surfaces token-driven) ── */
+    html.dark .pop-stage {
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.05),
+        inset 0 0 0 1px rgba(255,255,255,0.06);
+    }
+    html.dark .pop-body,
+    html.dark .pop-caret { box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08); }
+    html.dark .pop-body {
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.06),
+        inset 0 0 0 1px rgba(255,255,255,0.08),
+        0 18px 44px rgba(0,0,0,0.55);
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <!-- one SHARED .shell bezel (no .zoom — interactive multi-piece demo) -->
+    <div class="shell" data-screen-label="Popover">
+      <div class="pop-stage">
+
+        <!-- control bar -->
+        <div class="pop-controls">
+          <div class="pop-ctl">
+            <span class="label">Arrow direction</span>
+            <div class="seg compact" id="dirSeg">
+              <span class="seg-pill"></span>
+              <button class="active">Up</button><button>Down</button><button>Left</button><button>Right</button>
+            </div>
+          </div>
+          <div class="pop-ctl">
+            <span class="label">Trigger gesture</span>
+            <div class="seg compact" id="gestSeg">
+              <span class="seg-pill"></span>
+              <button class="active">Tap</button><button>Long-press</button><button>Double-tap</button>
+            </div>
+          </div>
+          <div class="pop-ctl">
+            <span class="label">Content</span>
+            <div class="seg compact" id="contentSeg">
+              <span class="seg-pill"></span>
+              <button class="active">Actions</button><button>Info</button>
+            </div>
+          </div>
+          <div class="pop-anim">
+            <span class="label">Animated</span>
+            <div class="sw-base sw-on" id="animSw"></div>
+          </div>
+        </div>
+
+        <!-- trigger anchor + popover -->
+        <div class="pop-canvas">
+          <button class="pop-trigger" id="trigger" aria-haspopup="dialog" aria-expanded="false">
+            Lead options <span class="material-symbols-outlined">more_horiz</span>
+          </button>
+          <div class="pop-pop dir-up" id="pop" role="dialog" aria-label="Lead options" aria-hidden="true">
+            <div class="pop-caret"></div>
+            <div class="pop-body" id="popBody"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="_controls.js"></script>
+  <script>
+  (function () {
+    var trigger = document.getElementById('trigger');
+    var pop     = document.getElementById('pop');
+    var popBody = document.getElementById('popBody');
+    var canvas  = trigger.parentElement;
+
+    /* ── Content templates ── */
+    var ACTIONS = [
+      { icon: 'call',      label: 'Call lead',  c: '#10B981' },
+      { icon: 'mail',      label: 'Email',      c: '#3B82F6' },
+      { icon: 'note_add',  label: 'Add note',   c: '#F97316' },
+      { icon: 'edit',      label: 'Edit lead',  c: '#64748B' }
+    ];
+    function actionsHtml() {
+      return ACTIONS.map(function (a) {
+        return '<div class="pa-row">' +
+          '<span class="pa-icon" style="--icon-c:' + a.c + '"><span class="material-symbols-outlined">' + a.icon + '</span></span>' +
+          '<span class="pa-label">' + a.label + '</span>' +
+        '</div>';
+      }).join('');
+    }
+    function infoHtml() {
+      return '<div class="pi-wrap">' +
+        '<p class="pi-title">Anchored popover</p>' +
+        '<p class="pi-body">Opens next to its trigger and grows out of the caret. Pick a direction, gesture, or animation above.</p>' +
+        '<button class="pi-btn"><span class="material-symbols-outlined" style="font-size:16px">check</span>Got it</button>' +
+      '</div>';
+    }
+    var contentKind = 'actions';
+    function renderContent() {
+      popBody.innerHTML = contentKind === 'actions' ? actionsHtml() : infoHtml();
+    }
+
+    /* ── Direction + positioning ── */
+    var dir = 'up';
+    var GAP = 14;
+    function applyDir() {
+      pop.classList.remove('dir-up', 'dir-down', 'dir-left', 'dir-right');
+      pop.classList.add('dir-' + dir);
+    }
+    function position() {
+      var tL = trigger.offsetLeft, tT = trigger.offsetTop;
+      var tW = trigger.offsetWidth, tH = trigger.offsetHeight;
+      var tCX = tL + tW / 2, tCY = tT + tH / 2;
+      var pW = pop.offsetWidth, pH = pop.offsetHeight;
+      var x, y;
+      if (dir === 'up')        { x = tCX - pW / 2; y = tT - pH - GAP; }
+      else if (dir === 'down') { x = tCX - pW / 2; y = tT + tH + GAP; }
+      else if (dir === 'left') { x = tL - pW - GAP; y = tCY - pH / 2; }
+      else                     { x = tL + tW + GAP; y = tCY - pH / 2; }
+      // clamp inside the canvas so the panel never clips
+      x = Math.max(8, Math.min(x, canvas.offsetWidth - pW - 8));
+      y = Math.max(8, Math.min(y, canvas.offsetHeight - pH - 8));
+      pop.style.left = x + 'px';
+      pop.style.top  = y + 'px';
+    }
+
+    /* ── Open / close ── */
+    var isOpen = false;
+    function open() {
+      applyDir();
+      position();
+      pop.classList.add('open');
+      pop.setAttribute('aria-hidden', 'false');
+      trigger.setAttribute('aria-expanded', 'true');
+      isOpen = true;
+    }
+    function close() {
+      pop.classList.remove('open');
+      pop.setAttribute('aria-hidden', 'true');
+      trigger.setAttribute('aria-expanded', 'false');
+      isOpen = false;
+    }
+    function toggle() { isOpen ? close() : open(); }
+
+    /* ── Gesture binding ── */
+    var gesture = 'tap';
+    var lpTimer = null;
+    function onTap()    { toggle(); }
+    function onDbl()    { toggle(); }
+    function onLpDown(e) {
+      if (e.button !== undefined && e.button !== 0) return;
+      lpTimer = setTimeout(function () { lpTimer = null; open(); }, 500);
+    }
+    function clearLp() { if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; } }
+    function bindGesture() {
+      trigger.removeEventListener('click', onTap);
+      trigger.removeEventListener('dblclick', onDbl);
+      trigger.removeEventListener('pointerdown', onLpDown);
+      trigger.removeEventListener('pointerup', clearLp);
+      trigger.removeEventListener('pointerleave', clearLp);
+      trigger.removeEventListener('pointercancel', clearLp);
+      if (gesture === 'tap') {
+        trigger.addEventListener('click', onTap);
+      } else if (gesture === 'double-tap') {
+        trigger.addEventListener('dblclick', onDbl);
+      } else { // long-press
+        trigger.addEventListener('pointerdown', onLpDown);
+        trigger.addEventListener('pointerup', clearLp);
+        trigger.addEventListener('pointerleave', clearLp);
+        trigger.addEventListener('pointercancel', clearLp);
+      }
+    }
+
+    /* ── Control wiring (reads selection on top of _controls.js) ── */
+    function segIndex(seg, btn) {
+      return Array.prototype.indexOf.call(seg.querySelectorAll('button'), btn);
+    }
+    document.getElementById('dirSeg').addEventListener('click', function (e) {
+      var btn = e.target.closest('button'); if (!btn) return;
+      dir = ['up', 'down', 'left', 'right'][segIndex(this, btn)];
+      applyDir();
+      if (isOpen) position();
+    });
+    document.getElementById('gestSeg').addEventListener('click', function (e) {
+      var btn = e.target.closest('button'); if (!btn) return;
+      gesture = ['tap', 'long-press', 'double-tap'][segIndex(this, btn)];
+      bindGesture();
+      close();
+    });
+    document.getElementById('contentSeg').addEventListener('click', function (e) {
+      var btn = e.target.closest('button'); if (!btn) return;
+      contentKind = segIndex(this, btn) === 0 ? 'actions' : 'info';
+      renderContent();
+      if (isOpen) position();
+    });
+    document.getElementById('animSw').addEventListener('click', function () {
+      // _controls.js already toggled sw-on/sw-off
+      pop.classList.toggle('no-anim', !this.classList.contains('sw-on'));
+    });
+
+    /* ── Outside dismiss (the demo control bar does not count as "outside",
+          so flipping direction/content/animated keeps the popover open) ── */
+    var controlBar = document.querySelector('.pop-controls');
+    document.addEventListener('pointerdown', function (e) {
+      if (!isOpen) return;
+      if (pop.contains(e.target) || trigger.contains(e.target)) return;
+      if (controlBar && controlBar.contains(e.target)) return;
+      close();
+    });
+    // close interactive rows / info button on activation inside the popover
+    popBody.addEventListener('click', function (e) {
+      if (e.target.closest('.pa-row') || e.target.closest('.pi-btn')) close();
+    });
+
+    window.addEventListener('resize', function () { if (isOpen) position(); });
+
+    /* ── Init ── */
+    renderContent();
+    applyDir();
+    bindGesture();
+  })();
+  </script>
+  <script src="_darkmode.js"></script>
+</body>
+</html>

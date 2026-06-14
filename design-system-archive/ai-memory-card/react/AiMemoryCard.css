@@ -1,0 +1,118 @@
+/* ── Gray outer shell ── */
+.mem-outer {
+  width: 100%;
+  background: #D4DCE8;
+  border-radius: 28px;
+  padding: 10px;
+  box-shadow: 0 16px 56px rgba(15,23,42,0.13), 0 3px 10px rgba(15,23,42,0.06);
+}
+
+/* ── White inner card ── */
+.mem-card {
+  background: #fff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 -1px 0 rgba(15,23,42,0.03);
+}
+.mem-card-body { padding: 18px 18px 0; }
+
+/* ── Header row (plain card header) ── */
+.mem-head { margin-bottom: 14px; }
+.mem-head-row { display: flex; align-items: center; gap: 10px; }
+/* Icon-only orange tag (Deha pill style) */
+.mem-head-icon-tag {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 9px; flex-shrink: 0;
+  background-color: #F97316;
+  background-image: radial-gradient(ellipse at top right, rgba(255,255,255,0.18) 0%, transparent 55%), linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+  background-size: cover, 7px 7px, 7px 7px;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.55),
+    inset 0 -2px 0 rgba(15,23,42,0.18),
+    inset 0 0 0 1px rgba(15,23,42,0.10);
+}
+.mem-head-icon-tag .material-icons { font-size: 16px; line-height: 1; display: block; }
+.mem-head-title { font-size: 16px; font-weight: 900; color: #0F172A; letter-spacing: -0.02em; }
+
+/* ── Memory content block ── */
+.mem-block { margin-bottom: 12px; }
+
+.mem-content {
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 12px 14px 14px;
+  box-shadow: inset 0 1px 3px rgba(15,23,42,0.04);
+}
+
+/* Tag + edit button row inside the grey block */
+.mem-content-top {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 10px;
+}
+
+/* Memory number tag (emerald semantic pill) — inside grey block */
+.mem-num-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background-color: #10B981;
+  background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+  background-size: 7px 7px;
+  color: #fff;
+  font-size: 11px; font-weight: 800; letter-spacing: 0.01em;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.55),
+    inset 0 -2px 0 rgba(15,23,42,0.18),
+    inset 0 0 0 1px rgba(15,23,42,0.10);
+}
+.mem-num-tag .material-icons { font-size: 12px; }
+
+/* Edit button — with icon + text */
+.mem-edit-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 10px;
+  background: #fff; border: 1px solid #E2E8F0; border-radius: 8px;
+  font-family: 'Montserrat'; font-size: 12px; font-weight: 700; color: #64748B;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(15,23,42,0.04);
+  transition: background 140ms, color 140ms, transform 100ms cubic-bezier(.22,1,.36,1);
+}
+.mem-edit-btn:hover { background: #F1F5F9; color: #475569; }
+.mem-edit-btn:active { transform: scale(0.95); }
+.mem-edit-btn .material-icons { font-size: 14px; line-height: 1; display: block; }
+
+.mem-text {
+  font-size: 13px; font-weight: 500; color: #475569;
+  line-height: 1.6;
+}
+
+/* ── Footer ── */
+.mem-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px;
+  border-top: 1px solid #F1F5F9;
+  cursor: pointer;
+  transition: background 140ms;
+}
+.mem-footer:hover { background: #FAFAFA; }
+.mem-footer:active { background: #F1F5F9; }
+.mem-footer-label { font-size: 13px; font-weight: 600; color: #94A3B8; }
+.mem-footer-arrow { font-size: 18px; color: #CBD5E1; line-height: 1; }
+
+/* ── Dark mode ── */
+[data-theme="dark"] .mem-outer { background: #334155; box-shadow: 0 16px 56px rgba(0,0,0,.5), 0 3px 10px rgba(0,0,0,.3); }
+[data-theme="dark"] .mem-card { background: #1E293B; box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 -1px 0 rgba(0,0,0,.2); }
+[data-theme="dark"] .mem-head-title { color: #F1F5F9; }
+[data-theme="dark"] .mem-content { background: #0F172A; border-color: #334155; box-shadow: inset 0 1px 3px rgba(0,0,0,.3); }
+[data-theme="dark"] .mem-edit-btn { background: #1E293B; border-color: #334155; color: #94A3B8; box-shadow: inset 0 1px 0 rgba(255,255,255,.05); }
+[data-theme="dark"] .mem-edit-btn:hover { background: #0F172A; color: #CBD5E1; }
+[data-theme="dark"] .mem-text { color: #CBD5E1; }
+[data-theme="dark"] .mem-footer { border-top-color: #334155; }
+[data-theme="dark"] .mem-footer:hover { background: rgba(255,255,255,.04); }
+[data-theme="dark"] .mem-footer:active { background: rgba(255,255,255,.07); }
+[data-theme="dark"] .mem-footer-label { color: #94A3B8; }
+[data-theme="dark"] .mem-footer-arrow { color: #64748B; }

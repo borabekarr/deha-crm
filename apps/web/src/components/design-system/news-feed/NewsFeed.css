@@ -1,0 +1,255 @@
+  .material-icons {
+    font-weight: normal; font-style: normal; line-height: 1;
+    letter-spacing: normal; text-transform: none; display: inline-block;
+    white-space: nowrap; word-wrap: normal; direction: ltr;
+    -webkit-font-feature-settings: 'liga'; font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Dark background scoped to this component only -- never paints body/html */
+  .card.nf-page { width: 500px; padding: 0; background: #0B1220; border-radius: 18px; overflow: hidden; }
+  .nf-page .frame {
+    padding: 30px 22px 26px;
+    background: #0B1220;
+    background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.10) 0%, #0F172A 52%, #0B1220 100%);
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     The two cards sit side by side, each in its own grey .shell bezel.
+     ───────────────────────────────────────────────────────────────────── */
+  .nf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     Each card owns a private --nf-* token set. Always dark surface.
+     Tone (.nf--bull / .nf--bear) only swaps hue, never structure.
+     ───────────────────────────────────────────────────────────────────── */
+  .nf-card {
+    --nf-radius:       18px;
+    --nf-surface:      #0C100E;
+    --nf-glow:         radial-gradient(125% 105% at 64% 124%, var(--nf-c-strong) 0%, var(--nf-c-soft) 38%, transparent 72%);
+    --nf-border:       rgba(255,255,255,0.07);
+    --nf-shadow:       0 16px 36px -16px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.06);
+    --nf-grid-line:    rgba(255,255,255,0.06);
+
+    --nf-kicker:       #FFFFFF;
+    --nf-sub:          rgba(255,255,255,0.46);
+    --nf-title:        #F4F7F5;
+    --nf-title-sh:     0 1px 1px rgba(0,0,0,0.45);
+    --nf-date:         rgba(255,255,255,0.52);
+
+    --nf-arrow-fg:     #FFFFFF;
+    --nf-arrow-bd:     rgba(255,255,255,0.22);
+    --nf-arrow-bg:     rgba(255,255,255,0.04);
+
+    --nf-bar-track:    rgba(255,255,255,0.16);
+    --nf-bar-fill:     #FFFFFF;
+    --nf-bar-glow:     rgba(255,255,255,0.8);
+
+    position: relative;
+    box-sizing: border-box;
+    height: 262px;
+    padding: 16px 16px 14px;
+    border-radius: var(--nf-radius);
+    background: var(--nf-surface);
+    border: 1px solid var(--nf-border);
+    box-shadow: var(--nf-shadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    isolation: isolate;
+    font-family: 'Montserrat', sans-serif;
+    cursor: pointer;
+    user-select: none;
+    transition: transform calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+    will-change: transform;
+  }
+
+  /* tone hues (dark surface — used in BOTH modes) */
+  .nf--bull { --nf-c-strong: rgba(20,180,108,0.92); --nf-c-soft: rgba(11,90,58,0.85); --nf-c-bar: #FFFFFF; }
+  .nf--bear { --nf-c-strong: rgba(176,52,52,0.95);  --nf-c-soft: rgba(74,26,26,0.85);  --nf-c-bar: #FFFFFF; --nf-title: #E7E3E3; }
+
+  /* (component renders dark in both light & dark modes — no theme split) */
+
+  /* glow layer — this is what the heartbeat pulse animates */
+  .nf-glow {
+    position: absolute; inset: 0; z-index: -1;
+    background: var(--nf-glow);
+    opacity: 0.92;
+    animation: nfPulse calc(2200ms * var(--anim-mult, 1)) ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes nfPulse {
+    0%, 100% { opacity: 0.80; filter: brightness(0.96) saturate(1); }
+    50%      { opacity: 1;    filter: brightness(1.12) saturate(1.08); }
+  }
+  /* faint vertical grid texture */
+  .nf-grid {
+    position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background-image: radial-gradient(var(--nf-grid-line) 1.2px, transparent 1.3px);
+    background-size: 15px 15px;
+    mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 100%);
+  }
+
+  /* hover lifts the whole grey/black shell (bezel + card) together */
+  .nf-shell { background: #020617; transition: transform calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
+  .nf-shell:hover { transform: translateY(-2px); }
+  .nf-shell:active { transform: scale(0.99); transition-duration: calc(120ms * var(--anim-mult, 1)); }
+  .nf-shell:hover .nf-card { box-shadow: var(--nf-shadow), 0 20px 44px -24px var(--nf-c-strong); }
+  .nf-shell:hover .nf-glow { animation-duration: calc(1100ms * var(--anim-mult, 1)); }
+  /* Bounce triggered when arrow is clicked -- FAB-style overshoot */
+  .nf-card.tap { animation: nfTap calc(460ms * var(--anim-mult, 1)) cubic-bezier(.34,1.2,.5,1); }
+  @keyframes nfTap {
+    0%   { transform: scale(0.98); }
+    55%  { transform: scale(1.006); }
+    100% { transform: scale(1); }
+  }
+
+  /* ── HEADER ── */
+  .nf-head { display: flex; align-items: flex-start; gap: 11px; }
+  .nf-head-ic { flex: none; display: grid; place-items: center; color: var(--nf-c-strong); }
+  .nf-head-ic .material-icons { font-size: 32px; filter: drop-shadow(0 0 8px var(--nf-c-strong)); }
+  .nf-head-txt { margin-right: auto; }
+  .nf-kicker { font-size: 13px; font-weight: 700; letter-spacing: 0.005em; color: var(--nf-kicker); }
+  .nf-sub { margin-top: 2px; font-size: 11px; font-weight: 500; color: var(--nf-sub); }
+  .nf-arrow {
+    flex: none;
+    width: 30px; height: 30px; border-radius: 999px;
+    display: grid; place-items: center;
+    background: var(--nf-arrow-bg);
+    border: 1.5px solid var(--nf-arrow-bd);
+    color: var(--nf-arrow-fg);
+    cursor: pointer;
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    transition: transform calc(200ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(220ms * var(--anim-mult, 1)), border-color calc(200ms * var(--anim-mult, 1));
+  }
+  .nf-arrow svg { width: 15px; height: 15px; }
+  .nf-arrow:hover { transform: scale(1.04); border-color: var(--nf-c-strong); box-shadow: 0 0 0 4px color-mix(in srgb, var(--nf-c-strong) 18%, transparent), 0 6px 18px -6px var(--nf-c-strong); }
+  .nf-arrow:active { transform: scale(0.92); }
+  .nf-arrow .material-icons { transition: transform calc(240ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1); }
+  .nf-arrow:hover .material-icons { transform: translate(2px, -2px); }
+
+  /* ── TITLE ── */
+  .nf-title-wrap { flex: 1; min-height: 0; display: flex; align-items: center; margin-top: 14px; }
+  .nf-title {
+    margin: 0;
+    font-size: clamp(11px, 1.4vw, 13px);
+    font-weight: 800;
+    line-height: 1.16;
+    letter-spacing: -0.018em;
+    color: var(--nf-title);
+    text-shadow: var(--nf-title-sh);
+    text-wrap: balance;
+  }
+
+  /* ── FOOTER ── */
+  .nf-date { font-size: 12px; font-weight: 500; color: var(--nf-date); margin-bottom: 10px; }
+  .nf-bar { display: flex; gap: 6px; height: 4px; position: relative; }
+  .nf-seg {
+    flex: 1; border-radius: 999px;
+    background: var(--nf-bar-track);
+  }
+  /* Single sliding indicator — one pill wide, translates by index */
+  .nf-ind {
+    position: absolute;
+    top: 0; left: 0;
+    width: calc((100% - 12px) / 3);
+    height: 100%;
+    border-radius: 999px;
+    background: #FFFFFF;
+    box-shadow: 0 0 10px var(--nf-bar-glow);
+    transform: translateX(calc(var(--nf-idx, 0) * (100% + 6px)));
+    transition: transform calc(400ms * var(--anim-mult, 1)) ease-out;
+    pointer-events: none;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     1. LOAD — cards spring + slide in from their side, content staggers
+     ───────────────────────────────────────────────────────────────────── */
+  .nf-card.anim-in { animation: nfCardIn calc(720ms * var(--anim-mult, 1)) cubic-bezier(.34,1.4,.5,1) both; }
+  .nf--bull.anim-in { --nf-from: -46px; }
+  .nf--bear.anim-in { --nf-from: 46px; }
+  @keyframes nfCardIn {
+    0%   { opacity: 0; transform: translateX(var(--nf-from, 0)) scale(0.85); }
+    60%  { opacity: 1; transform: translateX(0) scale(1.015); }
+    100% { opacity: 1; transform: translateX(0) scale(1); }
+  }
+  .anim-in .nf-kicker { animation: nfFade calc(480ms * var(--anim-mult, 1)) ease-out calc(200ms * var(--anim-mult, 1)) both; }
+  .anim-in .nf-sub    { animation: nfGlowFade calc(560ms * var(--anim-mult, 1)) ease-out calc(280ms * var(--anim-mult, 1)) both; }
+  .anim-in .nf-arrow  { animation: nfPopSm calc(560ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1) calc(340ms * var(--anim-mult, 1)) both; }
+  .anim-in .nf-title  { animation: nfTitlePop calc(520ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) calc(360ms * var(--anim-mult, 1)) both; }
+  .anim-in .nf-date   { animation: nfGlowFade calc(420ms * var(--anim-mult, 1)) ease-out calc(520ms * var(--anim-mult, 1)) both; }
+  .anim-in .nf-seg    { animation: nfFade calc(520ms * var(--anim-mult, 1)) ease-out both; animation-delay: calc(var(--i) * calc(70ms * var(--anim-mult, 1)) + calc(560ms * var(--anim-mult, 1))); }
+  @keyframes nfTitlePop {
+    0%   { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes nfPopSm {
+    0%   { opacity: 0; transform: scale(0.4); }
+    60%  { opacity: 1; transform: scale(1.12); }
+    100% { transform: scale(1); }
+  }
+  @keyframes nfFade { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes nfGlowFade {
+    0%   { opacity: 0; filter: blur(5px); transform: translateY(5px); }
+    100% { opacity: 1; filter: blur(0);   transform: translateY(0); }
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     2. TRANSITION -- flat horizontal ease-out slide, no rotation/tilt
+     ───────────────────────────────────────────────────────────────────── */
+  .nf-swap-out { animation: nfSwapOut calc(260ms * var(--anim-mult, 1)) ease-out forwards; }
+  .nf-swap-in  { animation: nfSwapIn  calc(400ms * var(--anim-mult, 1)) ease-out both; }
+  @keyframes nfSwapOut {
+    0%   { opacity: 1; transform: translateX(0); }
+    100% { opacity: 0; transform: translateX(var(--swap-dir, -38px)); }
+  }
+  @keyframes nfSwapIn {
+    0%   { opacity: 0; transform: translateX(calc(var(--swap-dir, 38px) * -1)); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
+
+  /* ── LOADING SKELETON ── */
+  .nf-card.is-loading .nf-real { visibility: hidden; }
+  .nf-skeleton { position: absolute; inset: 26px; display: none; flex-direction: column; z-index: 2; }
+  .nf-card.is-loading .nf-skeleton { display: flex; }
+  .sk { border-radius: 8px; background: var(--nf-bar-track); position: relative; overflow: hidden; }
+  .sk::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--nf-c-strong) 30%, transparent), transparent);
+    animation: nfShimmer calc(1200ms * var(--anim-mult, 1)) infinite; }
+  @keyframes nfShimmer { 100% { transform: translateX(100%); } }
+
+  /* ── EMPTY STATE ── */
+  .nf-card.is-empty .nf-real { display: none; }
+  .nf-empty { display: none; flex: 1; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 10px; color: var(--nf-sub); }
+  .nf-card.is-empty .nf-empty { display: flex; }
+  .nf-empty .material-icons { font-size: 38px; color: var(--nf-c-strong); }
+  .nf-empty-t { font-size: 15px; font-weight: 700; color: var(--nf-title); }
+  .nf-empty-s { font-size: 13px; font-weight: 500; }
+
+  /* ── demo chrome (outside the component) ── */
+  .nf-controls { display: flex; gap: 9px; margin-top: 26px; flex-wrap: wrap; justify-content: center; }
+  .nf-btn {
+    font-family: 'Montserrat'; font-size: 12px; font-weight: 700; letter-spacing: 0.01em;
+    padding: 9px 15px; border-radius: 13px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(30,41,59,0.7); color: #CBD5E1; border: 1px solid #334155;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+    transition: transform calc(140ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), background calc(160ms * var(--anim-mult, 1)), color calc(160ms * var(--anim-mult, 1)), border-color calc(160ms * var(--anim-mult, 1));
+  }
+  .nf-btn .material-icons { font-size: 16px; }
+  .nf-btn:hover { transform: translateY(-1px); color: #F1F5F9; border-color: #475569; background: rgba(39,52,73,0.8); }
+  .nf-btn:active { transform: scale(0.96); }
+
+  @media (max-width: 720px) {
+    .card.nf-page { width: 100%; }
+    .frame { padding: 28px 16px; }
+    .nf-row { grid-template-columns: 1fr; gap: 16px; }
+    .nf-card { height: 220px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nf-glow { animation: none !important; }
+    .nf-card.anim-in, .anim-in *, .nf-swap-out, .nf-swap-in, .nf-card.tap { animation: none !important; }
+    .nf-ind { transition: none !important; }
+  }

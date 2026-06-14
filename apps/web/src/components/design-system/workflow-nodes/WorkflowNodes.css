@@ -1,0 +1,499 @@
+/* WorkflowNodes.css
+   CSS verbatim from components-workflow-nodes.html with a wn- prefix added to
+   component-local classes to avoid collisions with global resets.
+   Dark-mode overrides mirror the html.dark .* blocks from _darkmode.css.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* ── Shell wrapper ───────────────────────────────────────────────────────── */
+.wn-shell {
+  position: relative;
+  /* The dot-grid card surface */
+  padding: 24px 30px 24px 24px;
+  background: #fff;
+  background-image: radial-gradient(circle at 1px 1px, #DDE3EA 1px, transparent 1px);
+  background-size: 16px 16px;
+  border-radius: 28px;
+  overflow: hidden;
+}
+
+/* SVG overlay for rubber-band connection lines */
+.wn-conn-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 30;
+}
+
+/* ── Node grid ────────────────────────────────────────────────────────────── */
+.wn-grid {
+  display: grid;
+  /* ~30% narrower columns: was minmax(0,1fr) filling full width;
+     200px cap ≈ 0.70× a typical 286px 1fr track */
+  grid-template-columns: repeat(2, minmax(0, 200px));
+  justify-content: center;
+  gap: 32px 28px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Gray outer shell ─────────────────────────────────────────────────────── */
+.wf-outer {
+  background: #D4DCE8;
+  border-radius: 24px;
+  /* ~30% taller: was 6px all-around; 10px top+bottom adds ~8px vertical,
+     and min-height 160px ensures cards never compress below ~1.3× content */
+  padding: 10px 6px;
+  min-height: 160px;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.06);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* ── Hover toolbar — vertical column floating outside the node's right edge ── */
+.wf-tools {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 4px);
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  transform: translateY(-50%) translateX(-4px) scale(0.96);
+  pointer-events: none;
+  transition: opacity calc(150ms * var(--anim-mult, 1)) ease, transform calc(200ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
+}
+
+/* Invisible bridge across the node-to-toolbar gap so hover never drops out */
+.wf-tools::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -10px;
+  width: 12px;
+}
+
+.wf-outer:hover .wf-tools,
+.wf-tools:hover {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0) scale(1);
+  pointer-events: auto;
+}
+
+/* ── Tool buttons ─────────────────────────────────────────────────────────── */
+.wf-tool {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #E2E8F0;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: #475569;
+  padding: 0;
+  position: relative;
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  transition: background calc(140ms * var(--anim-mult, 1)), color calc(140ms * var(--anim-mult, 1)), border-color calc(140ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
+}
+
+.wf-tool:hover  { transform: translateY(-1px); }
+.wf-tool:active { transform: scale(0.92); }
+
+.wf-tool .material-icons {
+  font-size: 12px;
+  line-height: 1;
+}
+
+/* Connect handle — hollow circle, outline only */
+.wf-tool.connect {
+  background: transparent;
+  border: 1.5px solid #94A3B8;
+  cursor: crosshair;
+  box-shadow: none;
+}
+
+.wf-tool.connect:hover { background: transparent; border-color: #475569; transform: translateY(-1px) scale(1.08); }
+.wf-tool.add:hover     { color: #047857; background: #ECFDF5; border-color: #A7F3D0; }
+.wf-tool.edit:hover    { color: #0F172A; background: #F8FAFC; border-color: #CBD5E1; }
+.wf-tool.del:hover     { color: #B91C1C; background: #FEF2F2; border-color: #FECACA; }
+
+/* Tooltip — appears to the LEFT of the toolbar (inside the canvas) */
+.wf-tool::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 9px);
+  left: auto;
+  bottom: auto;
+  transform: translateY(-50%) translateX(4px);
+  background: #0F172A;
+  color: #fff;
+  white-space: nowrap;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  padding: 4px 8px;
+  border-radius: 6px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 40;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.22);
+  transition: opacity calc(130ms * var(--anim-mult, 1)) ease, transform calc(130ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
+}
+
+.wf-tool::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 5px);
+  left: auto;
+  bottom: auto;
+  transform: translateY(-50%);
+  border: 4px solid transparent;
+  border-left-color: #0F172A;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 40;
+  transition: opacity calc(130ms * var(--anim-mult, 1)) ease;
+}
+
+.wf-tool:hover::after  { opacity: 1; transform: translateY(-50%) translateX(0); }
+.wf-tool:hover::before { opacity: 1; }
+
+/* ── Tag (semantic-pill: trigger / action / output) ──────────────────────── */
+.wf-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 10px 2px 8px;
+  border-radius: 9999px;
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 800;
+  font-family: 'Montserrat', sans-serif;
+  letter-spacing: 0.01em;
+  margin-bottom: 4px;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -2px 0 rgba(15, 23, 42, 0.18),
+    inset 0 0 0 1px rgba(15, 23, 42, 0.10);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.13) 1px, transparent 1px);
+  background-size: 7px 7px;
+}
+
+.wf-tag .material-icons { font-size: 13px; }
+.wf-tag.trigger { background-color: #FBBF24; }
+.wf-tag.action  { background-color: #10B981; }
+.wf-tag.output  { background-color: #F97316; }
+
+/* ── Card (white inner) ──────────────────────────────────────────────────── */
+.wf-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), inset 0 -1px 0 rgba(15, 23, 42, 0.03);
+  padding: 8px 12px 6px;
+}
+
+.wf-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.wf-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #0F172A;
+  letter-spacing: -0.01em;
+}
+
+.wf-title .ic {
+  font-size: 16px;
+  color: #334155;
+}
+
+.wf-title .brand-letter {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+}
+
+.wf-menu {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94A3B8;
+  border-radius: 6px;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.wf-menu:hover { background: #F1F5F9; color: #475569; }
+
+.wf-menu .material-icons {
+  font-size: 18px;
+  line-height: 1;
+  display: block;
+}
+
+/* ── Chip (inline data pill) ──────────────────────────────────────────────── */
+.wf-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  font-family: 'Montserrat', sans-serif;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -1px 0 rgba(15, 23, 42, 0.03);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.wf-chip.method {
+  background: #F1F5F9;
+  color: #64748B;
+  font-weight: 800;
+  padding: 4px 7px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.wf-chip .ic { font-size: 14px; }
+.wf-chip .ic.yt { color: #FF0000; }
+
+.wf-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.wf-url {
+  flex: 1;
+  min-width: 0;
+  color: #64748B;
+  font-weight: 500;
+}
+
+/* ── Connect account button ───────────────────────────────────────────────── */
+.wf-connect {
+  width: 100%;
+  background: #fff;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  padding: 5px 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0F172A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), inset 0 -1px 0 rgba(15, 23, 42, 0.04);
+  transition: background calc(150ms * var(--anim-mult, 1)), transform calc(100ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
+}
+
+.wf-connect:hover  { background: #F8FAFC; }
+.wf-connect:active { transform: scale(0.985); }
+.wf-connect .ic { font-size: 14px; color: #334155; }
+
+/* ── Description text ────────────────────────────────────────────────────── */
+.wf-desc {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748B;
+  line-height: 1.3;
+  margin-bottom: 4px;
+  /* Clamp to 1 line with ellipsis — no hard crop */
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Prompt preview ──────────────────────────────────────────────────────── */
+.wf-prompt {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  padding: 5px 10px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #475569;
+  line-height: 1.35;
+  margin-bottom: 4px;
+  /* Clamp to 2 lines with ellipsis — no hard crop */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.wf-prompt .var {
+  display: inline-block;
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+.wf-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 5px;
+}
+
+.wf-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #94A3B8;
+}
+
+.wf-meta .ic { font-size: 12px; }
+
+.wf-meta-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.wf-warn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #B91C1C;
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  padding: 3px 9px;
+  border-radius: 9999px;
+}
+
+.wf-warn .ic { font-size: 12px; }
+
+/* ── Brand letter colors ──────────────────────────────────────────────────── */
+.bl-notion   { background: #000; }
+.bl-stripe   { background: #635BFF; }
+.bl-postmark { background: #FFC600; color: #000 !important; }
+.bl-anthropic { background: #D97757; }
+.bl-openai   { background: #10A37F; }
+
+/* ── Dark mode overrides ──────────────────────────────────────────────────── */
+/* Mirror html.dark .* blocks from _darkmode.css verbatim */
+
+html.dark .wn-shell {
+  background: #0F172A !important;
+  background-image: radial-gradient(circle at 1px 1px, #334155 1px, transparent 1px) !important;
+  background-size: 16px 16px !important;
+}
+
+html.dark .wf-outer { background: #020617; }
+
+html.dark .wf-tool {
+  background: #1E293B;
+  border-color: #334155;
+  color: #CBD5E1;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+html.dark .wf-tool.connect { background: transparent; border-color: #64748B; }
+html.dark .wf-tool.connect:hover { border-color: #94A3B8; }
+
+html.dark .wf-tool.add:hover  { color: #6EE7B7; background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.40); }
+html.dark .wf-tool.edit:hover { color: #F1F5F9; background: #273449; border-color: #475569; }
+html.dark .wf-tool.del:hover  { color: #FCA5A5; background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.40); }
+
+html.dark .wf-card {
+  background: #1E293B;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.20);
+}
+
+html.dark .wf-title { color: #F1F5F9; }
+html.dark .wf-title .ic { color: #CBD5E1; }
+
+html.dark .wf-menu:hover { background: #273449; color: #CBD5E1; }
+
+html.dark .wf-chip {
+  background: #0F172A;
+  border-color: #334155;
+  color: #CBD5E1;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), inset 0 -1px 0 rgba(0, 0, 0, 0.20);
+}
+
+html.dark .wf-chip.method { background: #273449; color: #94A3B8; }
+html.dark .wf-url { color: #94A3B8; }
+
+html.dark .wf-connect {
+  background: #0F172A;
+  border-color: #334155;
+  color: #F1F5F9;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.20);
+}
+
+html.dark .wf-connect:hover { background: #273449; }
+html.dark .wf-connect .ic { color: #CBD5E1; }
+
+html.dark .wf-desc { color: #CBD5E1; }
+
+html.dark .wf-prompt {
+  background: #0F172A;
+  border-color: #334155;
+  color: #CBD5E1;
+}
+
+html.dark .wf-prompt .var {
+  background: rgba(16, 185, 129, 0.18);
+  color: #6EE7B7;
+}
+
+html.dark .wf-warn {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.40);
+  color: #FCA5A5;
+}

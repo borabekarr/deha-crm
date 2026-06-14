@@ -3,6 +3,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { getBySlug } from '@/lib/component-registry'
 import { GalleryLayout } from '@/components/library/GalleryLayout'
 import { PreviewFrame } from '@/components/library/PreviewFrame'
+import { ComponentErrorBoundary } from '@/components/library/ComponentErrorBoundary'
 
 export const Route = createFileRoute('/components/$slug')({
   component: ComponentPreviewPage,
@@ -24,7 +25,7 @@ function ComponentPreviewPage() {
             to="/"
             className="mt-2 rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
           >
-            ← Back to library
+            &larr; Back to library
           </Link>
         </div>
       </GalleryLayout>
@@ -36,15 +37,17 @@ function ComponentPreviewPage() {
   return (
     <GalleryLayout activeSlug={slug}>
       <PreviewFrame entry={entry}>
-        <Suspense
-          fallback={
-            <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
-              Loading component…
-            </div>
-          }
-        >
-          <Component />
-        </Suspense>
+        <ComponentErrorBoundary componentName={entry.name}>
+          <Suspense
+            fallback={
+              <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
+                Loading component...
+              </div>
+            }
+          >
+            <Component />
+          </Suspense>
+        </ComponentErrorBoundary>
       </PreviewFrame>
     </GalleryLayout>
   )

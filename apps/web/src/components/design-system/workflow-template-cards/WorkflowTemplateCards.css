@@ -1,0 +1,309 @@
+/* WorkflowTemplateCards.css
+   CSS verbatim from components-workflow-template-cards.html with a wtc- prefix
+   added to component-local classes to avoid collisions with shared global styles.
+   Dark-mode overrides mirror the html.dark .tmpl-* blocks from _darkmode.css.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* ── Shell wrapper ───────────────────────────────────────────────────────── */
+.wtc-shell {
+  padding: 0;
+  background: transparent;
+  background-image: none;
+}
+
+/* ── 2-column grid tray ──────────────────────────────────────────────────── */
+.wtc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding: 24px;
+}
+
+/* ── Gray outer shell — matches .wf-outer / .te-outer ───────────────────── */
+.wtc-outer {
+  background: #D4DCE8;
+  border-radius: 24px;
+  padding: 6px;
+  box-shadow:
+    0 12px 40px rgba(15,23,42,0.12),
+    0 2px 8px rgba(15,23,42,0.06);
+  cursor: pointer;
+}
+
+/* ── Inner white card ────────────────────────────────────────────────────── */
+.wtc-card {
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,1);
+}
+
+/* ── Preview area ────────────────────────────────────────────────────────── */
+.wtc-preview {
+  height: 158px;
+  background: #F1F5F9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  /* Bottom inner shadow */
+  box-shadow: inset 0 -14px 22px rgba(15,23,42,0.09);
+}
+
+/* ── Flow diagram ────────────────────────────────────────────────────────── */
+.wtc-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Node circles — DS badge polish ─────────────────────────────────────── */
+/* matches .badge.gci / .wf-tag style from Pills + Semantic Colors */
+.wtc-node {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.55),
+    inset 0 -2px 0 rgba(15,23,42,0.18),
+    inset 0 0 0 1px rgba(15,23,42,0.10);
+  background-image:
+    linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+  background-size: 7px 7px;
+}
+.wtc-node .material-icons {
+  color: #fff;
+  line-height: 1;
+  display: block;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.28);
+}
+.wtc-node-sm { width: 46px; height: 46px; }
+.wtc-node-sm .material-icons { font-size: 19px; }
+.wtc-node-lg { width: 62px; height: 62px; }
+.wtc-node-lg .material-icons { font-size: 26px; }
+
+/* ── Dashed connector ────────────────────────────────────────────────────── */
+.wtc-conn {
+  width: 28px;
+  height: 0;
+  border-top: 1.5px dashed #B4BFC9;
+  flex-shrink: 0;
+}
+
+/* ── "Use template" — hover only, bottom-right of preview ───────────────── */
+.wtc-use {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  padding: 6px 12px;
+  background: #0F172A;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  box-shadow:
+    0 2px 8px rgba(15,23,42,0.24),
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 -1px 0 rgba(0,0,0,0.18);
+  transition: opacity calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(120ms * var(--anim-mult, 1));
+}
+.wtc-outer:hover .wtc-use {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.wtc-use:hover {
+  box-shadow: 0 4px 12px rgba(15,23,42,0.32), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.wtc-use:active { transform: scale(0.96); }
+
+/* ── Info section ────────────────────────────────────────────────────────── */
+.wtc-info {
+  padding: 13px 15px 15px;
+  border-top: 1px solid #EEF2F7;
+  /* Bottom inner shadow */
+  box-shadow: inset 0 -10px 18px rgba(15,23,42,0.05);
+}
+.wtc-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+.wtc-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0F172A;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+/* ── DS-style badge pill — matches semantic pills / .wf-tag ─────────────── */
+.wtc-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.55),
+    inset 0 -2px 0 rgba(15,23,42,0.18),
+    inset 0 0 0 1px rgba(15,23,42,0.10);
+  background-image:
+    linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+  background-size: 7px 7px;
+  flex-shrink: 0;
+}
+.wtc-badge-pro { background-color: #334155; }
+.wtc-badge-new { background-color: #10B981; }
+
+.wtc-desc {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748B;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Dark mode overrides ─────────────────────────────────────────────────── */
+/* Mirror html.dark .tmpl-* blocks from _darkmode.css verbatim, prefixed to wtc- */
+
+/* Flat tray background in dark — transparent (shell bg removed) */
+html.dark .wtc-shell {
+  background: transparent !important;
+  background-image: none;
+}
+
+/* Dark outer bezel */
+html.dark .wtc-outer { background: #020617; }
+
+/* Inner card */
+html.dark .wtc-card { background: #1E293B; }
+html.dark .wtc-card { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
+
+/* Preview area */
+html.dark .wtc-preview { background: #0B1120; }
+
+/* Connector line */
+html.dark .wtc-conn { border-top-color: #475569; }
+
+/* "Use template" button inverts in dark */
+html.dark .wtc-use { background: #F1F5F9; color: #0F172A; }
+
+/* Info section */
+html.dark .wtc-info { border-top-color: #334155; }
+html.dark .wtc-title { color: #F1F5F9; }
+html.dark .wtc-desc { color: #CBD5E1; }
+
+/* PRO badge lightens slightly in dark */
+html.dark .wtc-badge-pro { background-color: #475569; }
+
+/* ── "Use template" visible when card is expanded ───────────────────────── */
+.wtc-outer.wtc-expanded .wtc-use {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* ── Expand detail panel ─────────────────────────────────────────────────── */
+.wtc-expand-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows calc(280ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+}
+.wtc-outer.wtc-expanded .wtc-expand-wrap {
+  grid-template-rows: 1fr;
+}
+.wtc-expand-inner {
+  overflow: hidden;
+}
+.wtc-expand-body {
+  padding: 12px 15px 14px;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    opacity calc(220ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) calc(60ms * var(--anim-mult, 1)),
+    transform calc(220ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) calc(60ms * var(--anim-mult, 1));
+}
+.wtc-outer.wtc-expanded .wtc-expand-body {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.wtc-expand-sep {
+  height: 1px;
+  background: #EEF2F7;
+  margin: 0 0 12px;
+}
+
+.wtc-expand-section + .wtc-expand-section {
+  border-top: 1px solid #EEF2F7;
+  padding-top: 10px;
+  margin-top: 10px;
+}
+
+.wtc-expand-section-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  color: #94A3B8;
+  text-transform: uppercase;
+  margin: 0 0 6px;
+}
+
+.wtc-expand-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.wtc-expand-list li {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: #475569;
+  line-height: 1.45;
+  padding-left: 10px;
+  position: relative;
+}
+.wtc-expand-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #CBD5E1;
+}
+
+/* Dark mode expand panel */
+html.dark .wtc-expand-sep { background: #334155; }
+html.dark .wtc-expand-section + .wtc-expand-section { border-top-color: #334155; }
+html.dark .wtc-expand-section-title { color: #64748B; }
+html.dark .wtc-expand-list li { color: #94A3B8; }
+html.dark .wtc-expand-list li::before { background: #475569; }
+

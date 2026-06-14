@@ -1,0 +1,189 @@
+/* Chart.css — verbatim from components-chart.html prototype */
+
+body { background: #F8FAFC; }
+.frame { padding: 22px; background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.10) 0%, rgba(248,250,252,1) 50%, #FFFFFF 100%); }
+.chart {
+  background: rgba(255,255,255,0.92);
+  border-radius: 24px;
+  padding: 20px 22px 18px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -2px 0 rgba(15,23,42,0.10),
+    inset 1px 0 0 rgba(15,23,42,0.07),
+    inset -1px 0 0 rgba(15,23,42,0.07);
+  font-family: 'Montserrat';
+}
+
+/* Header -- mirrors .exp-top/.exp-crumb from MetricCard */
+.ch-head { margin-bottom: 10px; }
+
+/* Eyebrow / breadcrumb row -- mirrors .exp-crumb */
+.ch-crumb {
+  font-size: 12px; font-weight: 600; color: #94A3B8;
+  display: flex; align-items: center; gap: 5px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #E2E8F0;
+}
+.ch-crumb-icon { font-size: 14px; color: #94A3B8; }
+.ch-crumb-sep  { color: #CBD5E1; margin: 0 1px; }
+/* Title portion promoted: larger, darker, bolder -- mirrors MetricCard .exp-crumb header treatment */
+.ch-crumb strong { font-size: 15px; font-weight: 800; color: #0F172A; line-height: 1; }
+
+/* Number row: left col = stacked number + stat-row; seg stays pinned right */
+.ch-num-row {
+  display: flex; align-items: center; gap: 16px;
+  margin-top: 12px;
+}
+/* Left column: number on top, delta+period underneath, left-aligned */
+.ch-num-col { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+/* min-width: sized for widest value "5,210" (5 digits + comma) so card never widens on D/W/M switch */
+.ch-num  { font-size: 32px; font-weight: 800; color: #0F172A; letter-spacing: -0.02em; line-height: 1; flex-shrink: 0; min-width: 6ch; font-variant-numeric: tabular-nums; }
+/* Stat row -- stacked below number, left-aligned */
+.ch-stat-row { display:flex; align-items:center; gap: 6px; }
+.ch-delta {
+  display:inline-flex; align-items:center; gap: 3px;
+  background: #10B981; color: #fff;
+  font-size: 11px; font-weight: 800;
+  padding: 3px 9px; border-radius: 9999px;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.35),
+    inset 0 -2px 0 rgba(0,0,0,0.22),
+    inset 0 0 0 1px rgba(255,255,255,0.12);
+}
+.ch-delta .material-icons { font-size: 12px; }
+.ch-period { font-size: 12px; font-weight: 600; color: #94A3B8; }
+/* Push seg to the right edge of the row */
+.ch-seg { margin-left: auto; }
+
+/* Legend */
+.ch-legend { display:flex; gap: 14px; margin-top: 20px; }
+.leg { display:inline-flex; align-items:center; gap: 6px; font-size: 11px; font-weight: 700; color: #475569; }
+.leg-dot { width: 10px; height: 10px; border-radius: 50%; }
+.leg-line { width: 14px; height: 2px; border-radius: 2px; background-image: linear-gradient(to right, #94A3B8 0 4px, transparent 4px 7px, #94A3B8 7px 11px, transparent 11px 14px); }
+
+/* Chart body */
+/*
+  gap: 4px aligns the y-axis-to-plot margin with the x-axis label padding-top (6px).
+  The x-axis labels already have 6px top space; using 4px here achieves near-equal visual rhythm.
+*/
+.chart-area { display: grid; grid-template-columns: 28px 1fr; gap: 4px; margin-top: 18px; align-items: start; }
+/* height matches svg 160px; space-between aligns label centers to y=0/45/90 gridlines */
+.y-axis { display:flex; flex-direction:column; justify-content:space-between; height: 160px; padding: 0; font-size: 9px; font-weight: 700; color: #94A3B8; text-align: right; padding-right: 4px; }
+.canvas-wrap { position: relative; cursor: crosshair; overflow: visible; }
+.canvas-wrap svg { display:block; width: 100%; height: 160px; overflow: visible; }
+.peak-dot {
+  position: absolute;
+  left: 50%;
+  top: calc(22.33 / 90 * 100%);
+  transform: translate(-50%, -50%);
+  width: 12px; height: 12px; border-radius: 50%;
+  background: #10B981;
+  box-shadow: 0 0 0 3px #fff, 0 2px 6px rgba(16,185,129,0.55);
+  transition: opacity calc(.15s * var(--anim-mult, 1)) ease;
+  pointer-events: none;
+}
+.x-axis { position: relative; height: 14px; font-size: 10px; font-weight: 600; color: #64748B; padding-top: 6px; border-top: 1px solid #E2E8F0; margin-top: 4px; }
+.x-lbl { position: absolute; top: 6px; transform: translateX(-50%); white-space: nowrap; }
+.x-lbl.peak { color: #10B981; font-weight: 800; }
+
+/* Tooltip -- continuous glide: left and transform both transition together */
+.ch-tooltip {
+  position: absolute;
+  left: 50%; top: 0;
+  transform: translate(-50%, calc(-100% - 26px));
+  background: #0F172A; color: #fff;
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 11px; font-weight: 700;
+  box-shadow:
+    0 6px 16px -6px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.15),
+    inset 0 -2px 0 rgba(0,0,0,0.35);
+  white-space: nowrap;
+  opacity: 0; pointer-events: none;
+  /*
+    Eased glide: left tracks cursor position, transform keeps vertical offset fixed.
+    opacity fades in/out; left+transform handle the horizontal follow with ease-out.
+    No pop-in: tooltip glides smoothly between days.
+  */
+  transition:
+    opacity calc(80ms * var(--anim-mult, 1)) ease,
+    left calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
+    top calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+}
+.ch-tooltip::after {
+  content:''; position:absolute; left: 50%; bottom: -4px;
+  width: 8px; height: 8px;
+  background: #0F172A;
+  transform: translateX(-50%) rotate(45deg);
+}
+.ch-tooltip .val { color: #34D399; }
+
+/* Hover guide + dot */
+.ch-guide {
+  position: absolute; top: 0; bottom: 0; left: 50%; width: 1px;
+  background: repeating-linear-gradient(to bottom, rgba(16,185,129,0.55) 0 3px, transparent 3px 6px);
+  transform: translateX(-0.5px); opacity: 0; pointer-events: none;
+  transition: opacity calc(.08s * var(--anim-mult, 1)) ease;
+}
+/* Footer stat strip */
+.ch-footer { display:grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid #F1F5F9; }
+.f-cell { display:flex; flex-direction:column; gap: 6px; align-items: start; }
+.f-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #475569; display:flex; align-items:center; gap: 8px; }
+.f-icon { width: 22px; height: 22px; border-radius: 7px; display:grid; place-items:center; }
+.f-icon .material-icons { font-size: 14px; }
+.f-icon.gold {
+  background: #FEF9C3;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    inset 0 -1px 0 rgba(202,138,4,0.22),
+    inset 0 0 0 1px rgba(202,138,4,0.22);
+}
+.f-icon.gold    .material-icons { color: #CA8A04; }
+.f-icon.slate {
+  background: #F1F5F9;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    inset 0 -1px 0 rgba(15,23,42,0.10),
+    inset 0 0 0 1px rgba(15,23,42,0.08);
+}
+.f-icon.slate   .material-icons { color: #475569; }
+.f-icon.emerald {
+  background: #ECFDF5;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    inset 0 -1px 0 rgba(16,185,129,0.22),
+    inset 0 0 0 1px rgba(16,185,129,0.25);
+}
+.f-icon.emerald .material-icons { color: #10B981; }
+.f-val { font-size: 15px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em; }
+.f-val.green { color: #10B981; }
+
+/* ── Chart-scoped seg override -- wider labels need more horizontal room ── */
+.ch-head .seg.compact button { padding-left: 10px; padding-right: 10px; }
+
+/* ── Dark mode (html.dark) ── */
+html.dark body { background:#0B1220; }
+html.dark .frame { background-image:radial-gradient(ellipse at top right, rgba(16,185,129,0.10) 0%, #0B1220 55%) !important; }
+html.dark .chart { background:#1E293B; box-shadow:inset 0 1px 0 rgba(255,255,255,.05), inset 0 -2px 0 rgba(0,0,0,.3), inset 1px 0 0 rgba(255,255,255,.04), inset -1px 0 0 rgba(255,255,255,.04); }
+html.dark .ch-crumb { color:#94A3B8; border-bottom-color:#334155; }
+html.dark .ch-crumb strong { color:#F1F5F9; }
+html.dark .ch-crumb-icon { color:#64748B; }
+html.dark .ch-num { color:#F1F5F9; }
+html.dark .seg { background:#0F172A; box-shadow:inset 0 2px 4px rgba(0,0,0,.4); }
+html.dark .seg-pill { background:#F1F5F9; }
+html.dark .seg button { color:#94A3B8; }
+html.dark .seg button.active { color:#0F172A; }
+html.dark .leg { color:#CBD5E1; }
+html.dark .canvas-wrap svg line { stroke:#334155 !important; }
+html.dark .peak-dot { box-shadow:0 0 0 3px #1E293B, 0 2px 6px rgba(16,185,129,.55); }
+html.dark .x-axis { border-top-color:#334155; }
+html.dark .ch-footer { border-top-color:#334155; }
+html.dark .f-label { color:#CBD5E1; }
+html.dark .f-icon.gold { background:rgba(234,179,8,.16); box-shadow:inset 0 0 0 1px rgba(234,179,8,.3); }
+html.dark .f-icon.gold .material-icons { color:#EAB308; }
+html.dark .f-icon.slate { background:#334155; box-shadow:inset 0 0 0 1px rgba(255,255,255,.08); }
+html.dark .f-icon.slate .material-icons { color:#CBD5E1; }
+html.dark .f-icon.emerald { background:rgba(16,185,129,.16); box-shadow:inset 0 0 0 1px rgba(16,185,129,.3); }
+html.dark .f-val { color:#F1F5F9; }

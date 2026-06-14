@@ -1,0 +1,320 @@
+/* FileFolder.css — verbatim inline styles from components-file-folder.html */
+
+body { background:#F8FAFC; }
+.card { display:flex; flex-direction:column; align-items:center; gap:6px; position:relative; }
+
+.material-symbols-outlined {
+  font-family:'Material Symbols Outlined'; font-weight:normal; font-style:normal; line-height:1;
+  letter-spacing:normal; text-transform:none; display:inline-block; white-space:nowrap; word-wrap:normal;
+  direction:ltr; -webkit-font-feature-settings:'liga'; font-feature-settings:'liga'; -webkit-font-smoothing:antialiased;
+}
+
+.ff-stage { display:flex; gap:26px; justify-content:center; align-items:flex-start; padding:16px 0 6px; }
+.ff-col   { display:flex; flex-direction:column; align-items:center; gap:12px; }
+.ff-cap   { display:inline-flex; align-items:center; gap:7px; font-size:10.5px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:var(--fg4); }
+.ff-cap .dot { width:7px; height:7px; border-radius:50%; }
+.ff-cap .dot.blue { background:#3B82F6; }
+.ff-cap .dot.red  { background:#FF3B30; box-shadow:0 0 8px rgba(255,59,48,0.7); }
+
+.ff-hint   { font-family: ui-monospace,"SF Mono",Menlo,monospace; font-size:10.5px; color:var(--fg4); margin-top:4px; }
+.ff-replay {
+  margin-top:2px; display:inline-flex; align-items:center; gap:6px;
+  font-family:'Montserrat'; font-size:11px; font-weight:800; letter-spacing:0.02em;
+  color:var(--fg3); background:#FFFFFF; border:1px solid var(--border-hairline);
+  padding:6px 12px; border-radius:9999px; cursor:pointer;
+  box-shadow:0 2px 6px rgba(15,23,42,0.07), inset 0 1px 0 rgba(255,255,255,0.9);
+  transition:transform calc(130ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), color calc(150ms * var(--anim-mult, 1));
+}
+.ff-replay:hover { transform:translateY(-1px); color:var(--fg1); }
+.ff-replay:active { transform:scale(0.95); }
+.ff-replay .material-symbols-outlined { font-size:14px; }
+
+/* ════════════════════ THE ICON ════════════════════ */
+.folder {
+  --size: 268px;
+  --rad: 32px;
+  --frame: 9px;          /* white external-background frame around the gradient */
+  --fy: 0px;             /* lift  */
+  --fsc: 1;              /* scale */
+  --glow: rgba(59,130,246,0.50);
+
+  /* light theme tokens (default = light mode) */
+  --ff-body: #FFFFFF;
+  --ff-border: rgba(15,23,42,0.10);
+  --ff-pocket: #FFFFFF;
+  --ff-pocket-edge: rgba(15,23,42,0.13);
+  --ff-pocket-shadow: rgba(15,23,42,0.18);
+  --ff-title: #0F172A;
+  --ff-title-glow: rgba(15,23,42,0);
+  --ff-sub: #64748B;
+  --ff-meta: #475569;
+  --ff-paper: #FFFFFF;
+  --ff-line: #DCE3EC;
+  --ff-paper-shadow: 0 10px 22px rgba(15,23,42,0.20), 0 1px 0 rgba(15,23,42,0.05);
+  --ff-gloss: rgba(255,255,255,0.5);
+  /* inner background panel that the labels sit on */
+  --ff-panel: linear-gradient(180deg, #FFFFFF 0%, #EFF3F9 100%);
+  --ff-panel-bd: rgba(15,23,42,0.07);
+  --ff-panel-hi: rgba(255,255,255,0.95);
+  --ff-panel-sh: rgba(15,23,42,0.07);
+
+  position: relative;
+  width: var(--size); height: var(--size);
+  border-radius: var(--rad);
+  background: var(--ff-body);
+  border: 1px solid #CBD5E1;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(15,23,42,0.04);
+  transform: translateY(var(--fy)) scale(var(--fsc));
+  transform-origin: center 62%;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform calc(600ms * var(--anim-mult, 1)) cubic-bezier(.34,1.5,.64,1), box-shadow calc(380ms * var(--anim-mult, 1)) ease, opacity calc(480ms * var(--anim-mult, 1)) ease;
+}
+.folder * { box-sizing: border-box; }
+
+/* clip layer so gradient / papers / pocket respect the squircle */
+.ff-clip { position:absolute; inset:0; border-radius:inherit; overflow:hidden; }
+
+/* gradient top — INSET inside the body so a thin bezel frames it ----- */
+.ff-grad {
+  position:absolute; top:var(--frame); left:var(--frame); right:var(--frame);
+  height:58%;
+  border-radius: 22px 22px 0 0;
+  transition: opacity calc(600ms * var(--anim-mult, 1)) ease;
+  background: radial-gradient(125% 125% at 22% 2%, #9AC8F6 0%, #5594F1 34%, #2C66E0 68%, #2150CB 100%);
+}
+.ff-grad::before {     /* faint house-style grid texture */
+  content:''; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 13px 13px;
+  -webkit-mask-image: linear-gradient(to bottom,#000 0%,#000 40%,transparent 66%);
+          mask-image: linear-gradient(to bottom,#000 0%,#000 40%,transparent 66%);
+}
+/* red hotspot ::after removed — was causing red glow / white-corner artifact */
+.folder.hot .ff-grad {
+  background: radial-gradient(130% 120% at 30% 10%, #FF2A2A 0%, #FF5247 30%, #FB6A82 62%, #EE89B4 100%);
+}
+
+/* paper sheets ------------------------------------------------ */
+.ff-papers { position:absolute; inset:0; }
+.ff-paper {
+  --rot:0deg; --tx:0px; --ty:0px; --sc:1;
+  position:absolute;
+  background: var(--ff-paper);
+  border-radius: 12px;
+  box-shadow: var(--ff-paper-shadow);
+  transform: translate(var(--tx),var(--ty)) rotate(var(--rot)) scale(var(--sc));
+  transition: transform calc(560ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1), opacity calc(440ms * var(--anim-mult, 1)) ease;
+  padding: 18px 16px;
+}
+.ff-paper .line { height:3px; border-radius:2px; background:var(--ff-line); margin-bottom:9px; }
+.ff-paper .line.w1 { width:72%; }
+.ff-paper .line.w2 { width:90%; }
+.ff-paper .line.w3 { width:58%; }
+.ff-paper .line.w4 { width:82%; }
+
+.ff-paper--back  { left:34px;  top:54px;  width:126px; height:122px; --rot:-10deg; z-index:1; }
+.ff-paper--mid   { left:68px;  top:38px;  width:134px; height:128px; --rot:-3deg;  z-index:3; }
+.ff-paper--front { left:110px; top:52px;  width:126px; height:122px; --rot:13deg;  z-index:2; }
+
+/* folder front pocket (SVG path: raised left tab → ogee notch → lower shelf) */
+.ff-pocket {
+  position:absolute; inset:0; z-index:4; pointer-events:none;
+  filter: drop-shadow(0 -3px 6px var(--ff-pocket-shadow)) drop-shadow(0 -1px 0 var(--ff-pocket-edge));
+}
+.ff-pocket path { fill: var(--ff-pocket); }
+
+/* labels ------------------------------------------------------ */
+.ff-text { position:absolute; inset:0; z-index:5; }
+.ff-text > * { user-select:text; }
+.ff-title {
+  position:absolute; left:26px; top:114px;
+  font-size:19px; font-weight:800; letter-spacing:-0.01em; color:var(--ff-title);
+  transform-origin:left center;
+  transition: transform calc(260ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), text-shadow calc(260ms * var(--anim-mult, 1)) ease;
+}
+.ff-sub {
+  position:absolute; left:26px; top:139px;
+  font-size:13px; font-weight:600; color:var(--ff-sub);
+}
+.ff-dots {
+  position:absolute; right:24px; top:140px;
+  color:var(--ff-sub); display:flex; gap:4px;
+}
+.ff-dots i { width:5px; height:5px; border-radius:50%; background:currentColor; display:block; }
+.ff-count {
+  position:absolute; left:26px; bottom:22px;
+  display:flex; align-items:center; gap:7px; white-space:nowrap;
+  font-size:12px; font-weight:600; color:var(--ff-meta);
+}
+.ff-count .material-symbols-outlined { font-size:15px; color:var(--ff-meta); }
+
+/* leading icon in folder title */
+.ff-title { display:flex; align-items:center; gap:7px; }
+.ff-title-ic {
+  font-size:17px; opacity:0.55; flex-shrink:0;
+  color:var(--ff-title);
+}
+
+
+/* ════════════════════ HOVER (reduced intensity) ════════════════════ */
+/* Lift softened from -5px to -3px; title scale removed to avoid over-animation */
+.folder:hover { --fy:-3px; }
+.folder:hover .ff-paper { --ty:-3px; }
+.folder:hover .ff-paper--mid   { --ty:-5px; }
+.folder:hover .ff-paper--front { --ty:-2px; }
+
+/* ════════════════════ TAP — micro spring + ripple ════════════════════ */
+.folder.tap { --fsc:0.97; }
+.folder.tap .ff-paper        { --ty:-11px; }
+.folder.tap .ff-paper--back  { --tx:-10px; --ty:-8px; }
+.folder.tap .ff-paper--front { --tx:12px;  --ty:-8px; }
+.folder.tap .ff-paper--mid   { --ty:-14px; }
+
+/* ════════════════════ ENTRANCE — visible base, gated on .play ════════════════════ */
+@media (prefers-reduced-motion: no-preference) {
+  .folder.play           { animation: ffIn calc(620ms * var(--anim-mult, 1)) cubic-bezier(.34,1.5,.64,1) backwards; }
+  .folder.play .ff-grad  { animation: ffFade calc(640ms * var(--anim-mult, 1)) ease backwards; }
+  .folder.play .ff-paper { animation: ffPaperIn calc(560ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1) backwards; }
+  .folder.play .ff-paper--back  { animation-delay: calc(150ms * var(--anim-mult, 1)); }
+  .folder.play .ff-paper--front { animation-delay: calc(240ms * var(--anim-mult, 1)); }
+  .folder.play .ff-paper--mid   { animation-delay: calc(330ms * var(--anim-mult, 1)); }
+  .folder.play .ff-title { animation: ffRise calc(500ms * var(--anim-mult, 1)) ease calc(420ms * var(--anim-mult, 1)) backwards; }
+  .folder.play .ff-sub   { animation: ffRise calc(500ms * var(--anim-mult, 1)) ease calc(470ms * var(--anim-mult, 1)) backwards; }
+  .folder.play .ff-dots  { animation: ffRise calc(500ms * var(--anim-mult, 1)) ease calc(510ms * var(--anim-mult, 1)) backwards; }
+  .folder.play .ff-count { animation: ffRise calc(500ms * var(--anim-mult, 1)) ease calc(540ms * var(--anim-mult, 1)) backwards; }
+
+  /* ffHotGlow removed — red folder uses same static shadow as blue */
+}
+
+@keyframes ffIn {
+  0%   { opacity:0; transform: translateY(var(--fy)) scale(0.86); }
+  100% { opacity:1; transform: translateY(var(--fy)) scale(var(--fsc)); }
+}
+@keyframes ffFade { 0% { opacity:0; } 100% { opacity:1; } }
+@keyframes ffPaperIn {
+  0%   { opacity:0; transform: translate(var(--tx), calc(var(--ty) + 26px)) rotate(var(--rot)) scale(0.9); }
+  100% { opacity:1; transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(var(--sc)); }
+}
+@keyframes ffRise { 0% { opacity:0; transform: translateY(10px); } 100% { opacity:1; transform: translateY(0); } }
+/* ════════════════════ FILE LIST POPOVER ════════════════════ */
+.ff-scrim {
+  position:absolute; inset:0; z-index:40; border-radius:inherit;
+  background:rgba(15,23,42,0.20); -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);
+  opacity:0; pointer-events:none; transition:opacity calc(220ms * var(--anim-mult, 1)) ease;
+}
+.ff-scrim.show { opacity:1; pointer-events:auto; }
+html.dark .ff-scrim { background:rgba(0,0,0,0.5); }
+
+/* Outer grey tray shell — carries positioning/animation */
+.ff-pop-shell {
+  position:absolute; z-index:50; width:320px; box-sizing:border-box;
+  background:#D4DCE8; border-radius:30px; padding:10px;
+  opacity:0; transform:scale(0.9) translateY(8px); transform-origin:top center; pointer-events:none;
+  transition: opacity calc(220ms * var(--anim-mult, 1)) ease,
+              transform calc(320ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1);
+}
+.ff-pop-shell.show { opacity:1; transform:scale(1) translateY(0); pointer-events:auto; }
+html.dark .ff-pop-shell { background:#1E293B; }
+
+/* Inner white card */
+.ff-pop {
+  --ff-pop-bg:#FFFFFF; --ff-pop-bd:rgba(15,23,42,0.08);
+  --ff-pop-fg:#0F172A; --ff-pop-fg3:#64748B;
+  --ff-row:#F6F8FC; --ff-row-bd:rgba(15,23,42,0.05); --ff-row-hover:#EEF2F9;
+  width:100%; box-sizing:border-box;
+  background:var(--ff-pop-bg); border-radius:20px;
+  border:1px solid #CBD5E1; border-top-color:rgba(255,255,255,0.9);
+  box-shadow:0 26px 64px -16px rgba(15,23,42,0.42),
+             inset 0 1px 0 rgba(255,255,255,1),
+             inset 0 0 0 1px rgba(15,23,42,0.04);
+  padding:15px 15px 14px; font-family:'Montserrat';
+}
+html.dark .ff-pop {
+  --ff-pop-bg:#1E293B; --ff-pop-bd:#334155;
+  --ff-pop-fg:#F1F5F9; --ff-pop-fg3:#94A3B8;
+  --ff-row:#0F172A; --ff-row-bd:rgba(255,255,255,0.05); --ff-row-hover:#273449;
+  border:1px solid #334155; border-top-color:rgba(255,255,255,0.22);
+  box-shadow:0 26px 64px -14px rgba(0,0,0,0.7),
+             inset 0 1px 0 rgba(255,255,255,.05),
+             inset 0 0 0 1px rgba(255,255,255,.04);
+}
+.ff-pop-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+.ff-pop-title { font-size:15px; font-weight:800; color:var(--ff-pop-fg); letter-spacing:-0.01em; }
+.ff-pop-sub { margin-top:2px; font-size:11.5px; font-weight:600; color:var(--ff-pop-fg3); }
+.ff-pop-close {
+  flex:none; width:26px; height:26px; border-radius:9999px; border:none; cursor:pointer;
+  display:grid; place-items:center; background:var(--ff-row); color:var(--ff-pop-fg3);
+  transition:background calc(140ms * var(--anim-mult, 1)), color calc(140ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1));
+}
+.ff-pop-close:hover { background:var(--ff-row-hover); color:var(--ff-pop-fg); }
+.ff-pop-close:active { transform:scale(0.9); }
+.ff-pop-close .material-symbols-outlined { font-size:17px; }
+.ff-pop-sep { margin-top:12px; border-top:1px solid var(--ff-pop-bd); }
+
+.ff-pop-body { margin-top:11px; max-height:236px; overflow:auto; display:flex; flex-direction:column; gap:6px; padding-right:2px; }
+.ff-file {
+  display:flex; align-items:center; gap:10px; padding:8px; border-radius:12px;
+  background:var(--ff-row); border:1px solid var(--ff-row-bd); cursor:pointer;
+  transition:background calc(140ms * var(--anim-mult, 1)) ease, transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+}
+.ff-file:hover { background:var(--ff-row-hover); transform:translateX(2px); }
+.ff-file:active { transform:scale(0.98); }
+.ff-file-ic {
+  flex:none; display:inline-flex; align-items:center;
+  padding:4px 9px; border-radius:9999px;
+  font-size:9px; font-weight:900; letter-spacing:0.05em; text-transform:uppercase; line-height:1;
+  color:#fff; background:#64748B;
+  text-shadow:0 1px 2px rgba(0,0,0,0.32), 0 1px 0 rgba(0,0,0,0.20);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), inset 0 -1.5px 0 rgba(0,0,0,0.18), inset 0 0 0 1px rgba(0,0,0,0.07);
+  white-space:nowrap;
+}
+/* per-type color mapping */
+.ff-file-ic.ff-ext-pdf     { background:#EF4444; }
+.ff-file-ic.ff-ext-doc     { background:#3B82F6; }
+.ff-file-ic.ff-ext-xls     { background:#10B981; }
+.ff-file-ic.ff-ext-img     { background:#F59E0B; }
+.ff-file-ic.ff-ext-default { background:#64748B; }
+.ff-file-meta { min-width:0; display:flex; flex-direction:column; gap:2px; }
+.ff-file-name { font-size:13px; font-weight:700; color:var(--ff-pop-fg); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ff-file-sub  { font-size:11px; font-weight:600; color:var(--ff-pop-fg3); }
+
+/* ════════════════════ DARK MODE (System A — the screenshot) ════════════════════ */
+html.dark .ff-replay { background:#1E293B; border-color:#334155; color:#CBD5E1; }
+
+html.dark .folder {
+  --ff-body: #1E293B;
+  --ff-border: #334155;
+  --ff-pocket: #1E293B;
+  --ff-pocket-edge: rgba(0,0,0,0.6);
+  --ff-pocket-shadow: rgba(0,0,0,0.55);
+  --ff-title: #F1F5F9;
+  --ff-title-glow: var(--glow);
+  --ff-sub: #94A3B8;
+  --ff-meta: #CBD5E1;
+  --ff-paper: #F1F5F9;
+  --ff-line: #D8DFE8;
+  --ff-paper-shadow: 0 14px 30px rgba(0,0,0,0.5), 0 1px 0 rgba(0,0,0,0.3);
+  --ff-gloss: rgba(255,255,255,0.10);
+  --ff-panel: linear-gradient(180deg, #1E293B 0%, #0F172A 100%);
+  --ff-panel-bd: #334155;
+  --ff-panel-hi: rgba(255,255,255,0.07);
+  --ff-panel-sh: rgba(0,0,0,0.45);
+  border-color: #334155;
+  border-top-color: rgba(255,255,255,0.22);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
+}
+
+/* responsive */
+@media (max-width: 640px) {
+  .folder { --size: 216px; --rad: 26px; --frame: 7px; }
+  .ff-stage { gap:16px; }
+  .ff-title { top:120px; left:20px; } .ff-sub { top:145px; left:20px; }
+  .ff-dots { top:126px; right:18px; } .ff-count { left:20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .folder.play, .folder.play * { animation:none !important; }
+}

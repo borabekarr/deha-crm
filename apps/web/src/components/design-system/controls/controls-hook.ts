@@ -33,6 +33,11 @@ export function segRef(el: HTMLDivElement | null): void {
   }
 
   reposition(false)
+  // Second silent placement after two rAF ticks lets the browser finish its
+  // first layout pass, fixing the "pill at 0,0 on initial mount" mis-measure.
+  let rafId = requestAnimationFrame(() => {
+    rafId = requestAnimationFrame(() => reposition(false))
+  })
   const resumeTimer = setTimeout(() => reposition(false), 60)
 
   function onResize(): void { reposition(false) }
@@ -49,6 +54,7 @@ export function segRef(el: HTMLDivElement | null): void {
 
   // Cleanup stored on the element so the ref can unwire on unmount
   ;(el as HTMLDivElement & { __segCleanup?: () => void }).__segCleanup = () => {
+    cancelAnimationFrame(rafId)
     clearTimeout(resumeTimer)
     window.removeEventListener('resize', onResize)
     el!.removeEventListener('click', onClick)
@@ -124,7 +130,7 @@ export function sliderRef(el: HTMLDivElement | null): void {
     if (!pressed) return
     pressed = false
     el!.classList.remove('dragging')
-    try { el!.releasePointerCapture(e.pointerId) } catch (_) { /* noop */ }
+    try { el!.releasePointerCapture(e.pointerId) } catch { /* noop */ }
   }
 
   el.addEventListener('pointerdown', onDown)

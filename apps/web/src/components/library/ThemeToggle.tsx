@@ -1,29 +1,26 @@
-import { useState } from 'react'
-
-function readInitialDark(): boolean {
-  if (typeof window === 'undefined') return false
-  const stored = localStorage.getItem('deha-theme')
-  if (stored !== null) return stored === 'dark'
-  return document.documentElement.classList.contains('dark')
-}
+import { useLocalStorage } from '@/lib/hooks'
 
 // Apply dark mode via both the .dark class and the data-theme attribute, so
 // the restored component CSS (which keys off html.dark and [data-theme]) renders
-// correctly in both light and dark.
-function applyTheme(dark: boolean) {
+// correctly in both light and dark. Storage is owned by the hook — no localStorage.setItem here.
+function applyThemeDom(dark: boolean) {
   const el = document.documentElement
   el.classList.toggle('dark', dark)
   el.setAttribute('data-theme', dark ? 'dark' : 'light')
-  localStorage.setItem('deha-theme', dark ? 'dark' : 'light')
 }
 
 export function ThemeToggle() {
-  const [isDark, setIsDark] = useState<boolean>(readInitialDark)
+  const [theme, setTheme] = useLocalStorage<'dark' | 'light'>(
+    'deha-theme',
+    () => (document.documentElement.classList.contains('dark') ? 'dark' : 'light'),
+    { serializer: (v) => v, deserializer: (v) => v as 'dark' | 'light' },
+  )
+  const isDark = theme === 'dark'
 
   function handleToggle() {
-    const next = !isDark
-    setIsDark(next)
-    applyTheme(next)
+    const next = isDark ? 'light' : 'dark'
+    setTheme(next)
+    applyThemeDom(next === 'dark')
   }
 
   return (
@@ -31,7 +28,7 @@ export function ThemeToggle() {
       type="button"
       onClick={handleToggle}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-      className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary-500)] focus-visible:ring-offset-2"
+      className="flex size-8 items-center justify-center rounded-md border border-border bg-background text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary-500)] focus-visible:ring-offset-2"
     >
       {isDark ? (
         // Sun icon

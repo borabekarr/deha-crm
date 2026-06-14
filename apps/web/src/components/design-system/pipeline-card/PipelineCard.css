@@ -1,0 +1,5 @@
+/* PipelineCard component-scoped overrides.
+ * The prototype has no inline <style> block — all styles live in the shared
+ * _base.css, _pipeline-card.css, and _darkmode.css files imported at the top
+ * of PipelineCard.tsx. This file is a placeholder for any future component-
+ * scoped additions. */

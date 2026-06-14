@@ -50,6 +50,52 @@ The Deha design system is authored in Claude Design as static `preview/component
 
 ---
 
+## Design lock during conversion
+
+Creating new converted components writes files under `apps/web/design-system/` and `apps/web/src/components/design-system/`. The `ds-design-lock` hook blocks writes to both paths by default to prevent accidental drift from the approved Claude Design source.
+
+Before running an authorized wave `/execute` that creates new ports, disable the lock:
+
+```bash
+scripts/ds-lock.sh off
+```
+
+After the wave completes and the component is approved, restore the lock:
+
+```bash
+scripts/ds-lock.sh on
+```
+
+The full protocol, including bypass options and the scope of what is guarded, is documented at `.claude-ext/references/frontend/design-lock-protocol.md` (slug: `design-lock-protocol`).
+
+**Caution:** This SOP file itself lives under `apps/web/design-system/`, so editing it also requires the `DS_DESIGN_EDIT=approved` bypass to be active in `.claude/settings.local.json`.
+
+---
+
+## Card backgrounds and color semantics (added 2026-06-11)
+
+This rule was introduced during a task-card feedback pass on 2026-06-11. It applies to new or newly-converted components going forward. Existing components are not to be retrofitted as part of this change.
+
+New card designs must follow three constraints:
+
+- **Flat backgrounds only.** Gradient fills on card surfaces are banned. Use a solid token color (typically `--shell-bg` or a neutral from `colors_and_type.css`).
+- **Green is reserved for genuine success semantics.** Neutral sections, tints, and decorative fills must default to grey, not green. The emerald `#10B981` token signals positive/success state and must not appear as a general-purpose background or accent.
+- **Reuse canonical patterns instead of bespoke treatments.** Prefer `.badge.success` for success chips, `.badge.col-tag` for task-board column tags (both in `Pills.css`), and the `--shell-bg` grey inner-card tray (the `MetricCard` `.exp-outer` to `.exp-card` nesting pattern) instead of inventing new gradient or green treatments per component.
+
+---
+
+## Surface external-line treatment (added 2026-06-11)
+
+All card, shell, popover, and nested-card surfaces carry a neutral hairline border (#E2E8F0 light / #334155 dark) plus a brighter top-rim (border-top-color rgba(255,255,255,0.85) light / rgba(255,255,255,0.22) dark), defined ONCE globally in apps/web/design-system/preview/_surfaces.css (imported last in src/styles/global.css).
+
+The rule uses only border + border-top-color (additive, never box-shadow, so existing shadows survive) with literal hex (design tokens are not reliable on the /components preview routes). border-top-color carries !important so component border shorthands cannot reset the top-rim.
+
+New or newly-converted components must ADD their outer-shell and card/popover surface classes to the grouped selector lists in _surfaces.css rather than reimplementing per component.
+
+Excluded surfaces: the preview page stage .card and .frame, the permanently-dark .nf-card, the prize-sheet phone chrome (.ps-device/.sheet), and the leaderboard .lb-outer/.lb/.row (the reference, which keeps its own border).
+
+---
+
 ## Definition of Done (per component)
 
 - Renders in the browser matching the static HTML prototype visually and behaviorally.

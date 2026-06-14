@@ -13,3 +13,11 @@
 @import "../../design-system/preview/_base.css";
 @import "../../design-system/preview/_controls.css";
 @import "../../design-system/preview/_darkmode.css";
+@import "../../design-system/preview/_surfaces.css";
+
+/* Slow-Down multiplier, defined eagerly in the entry stylesheet so every route
+ * (including statically-imported components like leads-table whose chunk did not
+ * pick up the deep _base -> colors_and_type :root) inherits it. Mirrors the
+ * definition in colors_and_type.css. */
+:root { --anim-mult: 1; }
+:root[data-anim-slow="true"] { --anim-mult: 4; }
