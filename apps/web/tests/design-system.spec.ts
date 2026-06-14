@@ -39,6 +39,20 @@ const SHOT_OPTS = STRICT
   ? { maxDiffPixels: 0, animations: 'disabled' as const }
   : { maxDiffPixelRatio: 0.05, animations: 'disabled' as const }
 
+// Deterministic rendering: seed Math.random (xorshift32, fixed seed) so
+// components that derive geometry from it — statistics-graph-card chart series
+// + gradient id — produce identical pixels on every load, locally and on CI.
+// addInitScript runs in the page before any app script.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    let s = 0x2545f491 >>> 0
+    Math.random = () => {
+      s ^= s << 13; s ^= s >>> 17; s ^= s << 5; s >>>= 0
+      return s / 0xffffffff
+    }
+  })
+})
+
 // ---------------------------------------------------------------------------
 // Slug list — mirrors registry order in component-registry.ts
 // ---------------------------------------------------------------------------
@@ -101,8 +115,21 @@ async function waitForPreview(page: import('@playwright/test').Page) {
   await page.waitForLoadState('networkidle')
   // Confirm the preview scrollable area is visible
   await page.locator('.overflow-auto').first().waitFor({ state: 'visible' })
-  // Give any CSS paint one additional frame
-  await page.waitForTimeout(200)
+  await page.evaluate(() => (document as { fonts?: { ready?: Promise<unknown> } }).fonts?.ready)
+  // rAF count-up / draw-in tweens are JS-driven (not CSS) so animations:'disabled'
+  // does not stop them; wait past the longest (~750ms) so the captured frame is final.
+  await page.waitForTimeout(900)
+}
+
+// Poll a locator's box until it stops moving — rAF-driven positioning settled.
+async function waitForStableBox(loc: import('@playwright/test').Locator) {
+  let prev: { x: number; y: number; width: number; height: number } | null = null
+  for (let i = 0; i < 30; i++) {
+    const b = await loc.boundingBox()
+    if (b && prev && b.x === prev.x && b.y === prev.y && b.width === prev.width && b.height === prev.height) return
+    prev = b
+    await loc.page().waitForTimeout(50)
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -180,8 +207,11 @@ test('design-system / workflow-add-elements', async ({ page }) => {
     // This is intentional — the panel-open state is still a meaningful baseline.
   }
 
-  // Allow layout to settle after flyout positioning rAF.
-  await page.waitForTimeout(300)
+  // Wait for the rAF-clamped panel (and flyout, if mounted) to stop moving.
+  await waitForStableBox(page.locator('.wae-ae-inner'))
+  const flyout = page.locator('.wae-pop-outer.visible').nth(1)
+  if (await flyout.count()) await waitForStableBox(flyout)
+  await page.waitForTimeout(150)
 
   await expect(page).toHaveScreenshot('workflow-add-elements.png', SHOT_OPTS)
 })
