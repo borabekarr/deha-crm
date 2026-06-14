@@ -37,8 +37,8 @@ export default function Controls() {
           }}
         >
           <span className="seg-pill" />
-          <button className="active">Leads</button>
-          <button>Qualified</button>
+          <button type="button" className="active">Leads</button>
+          <button type="button">Qualified</button>
         </div>
       </div>
 

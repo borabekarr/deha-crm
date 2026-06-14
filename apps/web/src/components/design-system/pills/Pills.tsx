@@ -31,6 +31,7 @@ export default function Pills() {
           <span className="pills-seg-pill" style={{ left: pos.left, width: pos.width }} />
           {SEG_OPTIONS.map((opt) => (
             <button
+              type="button"
               key={opt}
               className={seg === opt ? 'active' : ''}
               onClick={() => setSeg(opt)}

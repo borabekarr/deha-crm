@@ -1,0 +1,403 @@
+<!doctype html>
+<!-- @dsCard group="Brand" name="Multistep Onboarding" subtitle="Morphing emerald capsule indicator + ripple buttons" viewport="700x460" --><html><head><meta charset="utf-8"><link rel="stylesheet" href="_base.css">
+<style>
+  .card { display: flex; flex-direction: column; align-items: center; }
+
+  /* ── Surface ───────────────────────────────────────────────────── */
+  .ms-surface {
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--bg-card-solid);
+    border-radius: var(--radius-2xl);
+    padding: 30px 28px 26px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.6) inset,
+      0 10px 30px -12px rgba(15,23,42,0.22);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  /* Resting state is visible; mount animates FROM hidden (spring 0.85 -> 1.0). */
+  @keyframes ms-mount {
+    0%   { opacity: 0; transform: scale(0.85); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .ms-surface.mounted { animation: ms-mount 620ms cubic-bezier(.34,1.4,.5,1); }
+
+  .ms-eyebrow {
+    font-size: 10px; font-weight: 800; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--fg4);
+    margin-bottom: 18px;
+  }
+
+  /* ── Morphing step indicator ───────────────────────────────────── */
+  .ms-indicator { display: flex; justify-content: center; width: 100%; }
+  .ms-stage {
+    position: relative;
+    height: 38px;
+    transition: width 540ms cubic-bezier(.22,1,.36,1);
+  }
+  .ms-capsule {
+    position: absolute; left: 0; top: 0; height: 38px;
+    background: var(--brand-primary);
+    border-radius: 9999px;
+    box-shadow:
+      var(--shadow-emerald-glow-sm),
+      inset 0 1px 0 rgba(255,255,255,0.55),
+      inset 0 -2px 0 rgba(0,0,0,0.20),
+      inset 0 0 0 1px rgba(255,255,255,0.15);
+    background-image:
+      linear-gradient(to right,  rgba(255,255,255,0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,0.08) 1px, transparent 1px);
+    background-size: 7px 7px;
+    transition: width 540ms cubic-bezier(.22,1,.36,1), left 540ms cubic-bezier(.22,1,.36,1);
+  }
+  .ms-dot {
+    position: absolute; top: 50%;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    transition:
+      left 540ms cubic-bezier(.22,1,.36,1),
+      width 260ms cubic-bezier(.22,1,.36,1),
+      height 260ms cubic-bezier(.22,1,.36,1),
+      background 360ms ease,
+      box-shadow 300ms ease;
+  }
+  /* resting (upcoming) dot */
+  .ms-dot {
+    width: 13px; height: 13px;
+    background: var(--slate-300);
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.6);
+  }
+  /* dot that lives inside the emerald capsule */
+  .ms-dot.is-active {
+    width: 15px; height: 15px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.18);
+  }
+  .ms-dot:hover {
+    box-shadow: 0 0 0 5px rgba(16,185,129,0.16);
+  }
+  .ms-dot.is-active:hover {
+    box-shadow: 0 0 0 5px rgba(255,255,255,0.30), 0 1px 2px rgba(0,0,0,0.18);
+  }
+  @keyframes ms-pop {
+    0%   { transform: translate(-50%,-50%) scale(0.82); }
+    100% { transform: translate(-50%,-50%) scale(1); }
+  }
+  .ms-dot.pop { animation: ms-pop 320ms cubic-bezier(.22,1,.36,1); }
+  @keyframes ms-dot-in {
+    0%   { opacity: 0; transform: translate(-50%,-50%) scale(0.5); }
+    100% { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+  }
+  .ms-surface.mounted .ms-dot.intro { animation: ms-dot-in 460ms cubic-bezier(.22,1,.36,1); }
+
+  /* ── Step content (crossfades per step) ────────────────────────── */
+  .ms-content {
+    margin-top: 26px; margin-bottom: 26px;
+    min-height: 126px;
+    display: flex; flex-direction: column; align-items: center;
+    position: relative; width: 100%;
+  }
+  .ms-icon {
+    width: 56px; height: 56px; border-radius: var(--radius-lg);
+    display: grid; place-items: center;
+    background: var(--brand-primary-50);
+    color: var(--brand-primary-600);
+    margin-bottom: 16px;
+    box-shadow: inset 0 0 0 1px rgba(16,185,129,0.18), 0 6px 16px -10px rgba(16,185,129,0.5);
+  }
+  .ms-icon .material-symbols-outlined { font-size: 30px; }
+  .ms-title {
+    font-size: 22px; font-weight: 800; letter-spacing: -0.02em;
+    color: var(--fg1); line-height: 1.15;
+  }
+  .ms-desc {
+    margin-top: 8px; max-width: 360px;
+    font-size: 14px; font-weight: 500; line-height: 1.5;
+    color: var(--fg3); text-wrap: pretty;
+  }
+  .ms-pane { display: flex; flex-direction: column; align-items: center; }
+  .ms-pane.swap-out { animation: ms-out 240ms ease forwards; }
+  .ms-pane.swap-in  { animation: ms-in 420ms cubic-bezier(.34,1.4,.5,1) backwards; }
+  @keyframes ms-out { to { opacity: 0; transform: translateY(-10px) scale(0.97); } }
+  @keyframes ms-in  { from { opacity: 0; transform: translateY(14px) scale(0.97); } }
+
+  /* ── Buttons ───────────────────────────────────────────────────── */
+  .ms-actions { display: flex; gap: 12px; width: 100%; }
+  .ms-btn {
+    position: relative; overflow: hidden;
+    border: none; cursor: pointer;
+    font-family: var(--font-display); font-weight: 800; font-size: 16px;
+    height: 58px; border-radius: 9999px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    transition: transform 320ms cubic-bezier(.34,1.56,.64,1),
+                filter 200ms ease, box-shadow 320ms cubic-bezier(.34,1.56,.64,1),
+                width 480ms cubic-bezier(.34,1.4,.5,1), opacity 300ms ease, margin 480ms cubic-bezier(.34,1.4,.5,1);
+  }
+  .ms-btn:active { transform: translateY(2px) scale(0.985); }
+
+  .ms-btn--back {
+    width: 0; padding: 0; margin: 0; opacity: 0; flex: 0 0 auto;
+    background: var(--bg-chip); color: var(--fg2);
+    box-shadow: inset 0 0 0 1px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.7);
+    pointer-events: none;
+  }
+  .ms-btn--back.show {
+    width: 132px; opacity: 1; pointer-events: auto;
+  }
+  .ms-btn--back:hover { filter: brightness(0.97); transform: translateY(-5px); }
+  .ms-btn--back:active { transform: translateY(1px) scale(0.985); }
+
+  .ms-btn--primary {
+    flex: 1 1 auto;
+    background: var(--brand-primary); color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.18);
+    box-shadow:
+      var(--shadow-emerald-glow-sm),
+      inset 0 1px 0 rgba(255,255,255,0.5),
+      inset 0 -2px 0 rgba(0,0,0,0.22),
+      inset 0 0 0 1px rgba(255,255,255,0.15);
+    background-image:
+      linear-gradient(to right,  rgba(255,255,255,0.07) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,0.07) 1px, transparent 1px);
+    background-size: 14px 14px;
+  }
+  .ms-btn--primary:hover {
+    transform: translateY(-6px);
+    box-shadow:
+      0 18px 40px -12px rgba(16,185,129,0.7),
+      inset 0 1px 0 rgba(255,255,255,0.5),
+      inset 0 -2px 0 rgba(0,0,0,0.22),
+      inset 0 0 0 1px rgba(255,255,255,0.15);
+    filter: brightness(1.04);
+  }
+  .ms-btn--primary:active { transform: translateY(1px) scale(0.99); }
+  .ms-btn .material-symbols-outlined { font-size: 22px; }
+  .ms-check { display: none; }
+  .ms-btn--primary.is-finish .ms-check {
+    display: grid; place-items: center;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: #fff; color: var(--brand-primary-600);
+  }
+  .ms-btn--primary.is-finish .ms-check .material-symbols-outlined { font-size: 17px; font-variation-settings: 'FILL' 1, 'wght' 700; }
+
+  /* press ripple */
+  .ms-ripple {
+    position: absolute; border-radius: 50%; pointer-events: none;
+    background: radial-gradient(circle, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.18) 60%, transparent 72%);
+    transform: translate(-50%,-50%) scale(0);
+    animation: ms-ripple 620ms cubic-bezier(.22,1,.36,1) forwards;
+  }
+  .ms-btn--back .ms-ripple { background: radial-gradient(circle, rgba(15,23,42,0.14) 0%, rgba(15,23,42,0.05) 60%, transparent 72%); }
+  @keyframes ms-ripple {
+    0%   { transform: translate(-50%,-50%) scale(0); opacity: 1; }
+    100% { transform: translate(-50%,-50%) scale(1); opacity: 0; }
+  }
+
+  @keyframes ms-finish-pulse {
+    0%,100% { transform: translateY(0) scale(1); }
+    40%     { transform: translateY(0) scale(1.03); }
+  }
+  .ms-btn--primary.celebrate { animation: ms-finish-pulse 520ms cubic-bezier(.34,1.56,.64,1); }
+
+  /* ── Dark mode (System A — html.dark) ──────────────────────────── */
+  html.dark .ms-surface {
+    box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 12px 32px -14px rgba(0,0,0,0.7);
+  }
+  html.dark .ms-dot { background: var(--slate-600); box-shadow: none; }
+  html.dark .ms-dot.is-active { background: #fff; }
+  html.dark .ms-icon {
+    background: rgba(16,185,129,0.12); color: var(--brand-primary-300);
+    box-shadow: inset 0 0 0 1px rgba(16,185,129,0.28);
+  }
+  html.dark .ms-btn--back {
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.10), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  html.dark .ms-btn--primary.is-finish .ms-check { color: var(--brand-primary-700); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ms-surface, .ms-stage, .ms-capsule, .ms-dot, .ms-btn { transition: none !important; animation: none !important; }
+    .ms-surface { transform: none; opacity: 1; }
+  }
+
+  @media (max-width: 480px) {
+    .ms-surface { padding: 24px 18px 20px; }
+    .ms-title { font-size: 20px; }
+    .ms-btn { height: 54px; font-size: 15px; }
+    .ms-btn--back.show { width: 108px; }
+  }
+</style>
+<link rel="stylesheet" href="_darkmode.css">
+</head><body><div class="card">
+  <span class="label" style="align-self:flex-start;">Multistep · Onboarding</span>
+  <div class="shell" style="width:100%;box-sizing:border-box;margin-top:10px;">
+    <div class="ms-surface" id="msSurface">
+      <div class="ms-eyebrow">Steps</div>
+      <div class="ms-indicator" data-comment-anchor="dbbb42e1e7-div">
+        <div class="ms-stage" id="msStage">
+          <div class="ms-capsule" id="msCapsule"></div>
+        </div>
+      </div>
+      <div class="ms-content" id="msContent"></div>
+      <div class="ms-actions">
+        <button class="ms-btn ms-btn--back" id="msBack">Back</button>
+        <button class="ms-btn ms-btn--primary" id="msNext">
+          <span class="ms-check"><span class="material-symbols-outlined">check</span></span>
+          <span class="ms-next-label">Continue</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var STEPS = [
+    { icon: 'lightbulb',       title: 'Welcome aboard',  desc: "Let's get your workspace set up in three quick steps." },
+    { icon: 'tune',            title: 'Personalize it',  desc: 'Pick the defaults that match how your team likes to work.' },
+    { icon: 'rocket_launch',   title: "You're all set",  desc: 'Review everything, then finish to start using Deha.' }
+  ];
+
+  // Geometry (px)
+  var H = 38, PAD = H/2, S_IN = 24, GAP = 22, S_OUT = 28, REST = 13;
+  var N = STEPS.length;
+  var cur = 0, prev = 0;
+
+  var surface = document.getElementById('msSurface');
+  var stage   = document.getElementById('msStage');
+  var capsule = document.getElementById('msCapsule');
+  var content = document.getElementById('msContent');
+  var backBtn = document.getElementById('msBack');
+  var nextBtn = document.getElementById('msNext');
+  var nextLabel = nextBtn.querySelector('.ms-next-label');
+
+  // Build dots once
+  var dots = [];
+  for (var i = 0; i < N; i++) {
+    var d = document.createElement('div');
+    d.className = 'ms-dot';
+    d.dataset.i = i;
+    d.style.animationDelay = (i * 90) + 'ms';
+    (function(idx){ d.addEventListener('click', function(){ go(idx); }); })(i);
+    stage.appendChild(d);
+    dots.push(d);
+  }
+
+  function geometry(c){
+    var active = c + 1;                 // dots inside capsule
+    var capW = 2*PAD + c*S_IN;          // c gaps between active dots
+    var remaining = N - active;
+    var total = remaining > 0
+      ? capW + GAP + (remaining-1)*S_OUT + REST/2
+      : capW;
+    return { active: active, capW: capW, remaining: remaining, total: total };
+  }
+
+  function layout(c, animatePop){
+    var g = geometry(c);
+    stage.style.width = g.total + 'px';
+    capsule.style.width = g.capW + 'px';
+    for (var i = 0; i < N; i++){
+      var d = dots[i], x;
+      if (i <= c){
+        d.classList.add('is-active');
+        x = PAD + i*S_IN;
+      } else {
+        d.classList.remove('is-active');
+        var r = i - g.active;
+        x = g.capW + GAP + r*S_OUT;
+      }
+      d.style.left = x + 'px';
+    }
+    if (animatePop && c > prev){
+      // the dot just absorbed gets a pop
+      var frontier = dots[c];
+      frontier.classList.remove('pop'); void frontier.offsetWidth;
+      frontier.classList.add('pop');
+    }
+  }
+
+  function renderContent(c, dir){
+    var s = STEPS[c];
+    // clear any panes already animating out (guards against rapid clicks)
+    content.querySelectorAll('.ms-pane.swap-out').forEach(function(p){ p.remove(); });
+    var old = content.querySelector('.ms-pane');
+    if (old){
+      old.classList.add('swap-out');
+      setTimeout(function(){ if(old.parentNode) old.parentNode.removeChild(old); }, 240);
+    }
+    var pane = document.createElement('div');
+    pane.className = 'ms-pane swap-in';
+    pane.innerHTML =
+      '<div class="ms-icon"><span class="material-symbols-outlined">'+s.icon+'</span></div>' +
+      '<div class="ms-title">'+s.title+'</div>' +
+      '<div class="ms-desc">'+s.desc+'</div>';
+    content.appendChild(pane);
+  }
+
+  function syncButtons(){
+    if (cur > 0) backBtn.classList.add('show');
+    else backBtn.classList.remove('show');
+    var last = cur === N - 1;
+    nextBtn.classList.toggle('is-finish', last);
+    nextLabel.textContent = last ? 'Finish' : 'Continue';
+  }
+
+  function go(c){
+    c = Math.max(0, Math.min(N-1, c));
+    if (c === cur) return;
+    prev = cur; cur = c;
+    layout(cur, true);
+    renderContent(cur, cur > prev ? 1 : -1);
+    syncButtons();
+  }
+
+  // Ripple
+  function ripple(btn, ev){
+    var r = document.createElement('span');
+    r.className = 'ms-ripple';
+    var rect = btn.getBoundingClientRect();
+    var size = Math.max(rect.width, rect.height) * 1.15;
+    var px = (ev && ev.clientX) ? ev.clientX - rect.left : rect.width/2;
+    var py = (ev && ev.clientY) ? ev.clientY - rect.top  : rect.height/2;
+    r.style.width = r.style.height = size + 'px';
+    r.style.left = px + 'px';
+    r.style.top  = py + 'px';
+    btn.appendChild(r);
+    setTimeout(function(){ if(r.parentNode) r.parentNode.removeChild(r); }, 640);
+  }
+
+  nextBtn.addEventListener('pointerdown', function(e){ ripple(nextBtn, e); });
+  backBtn.addEventListener('pointerdown', function(e){ ripple(backBtn, e); });
+
+  nextBtn.addEventListener('click', function(){
+    if (cur < N - 1){ go(cur + 1); }
+    else {
+      nextBtn.classList.remove('celebrate'); void nextBtn.offsetWidth;
+      nextBtn.classList.add('celebrate');
+      capsule.style.boxShadow = '0 0 0 6px rgba(16,185,129,0.18), ' +
+        'var(--shadow-emerald-glow-sm), inset 0 1px 0 rgba(255,255,255,0.55), ' +
+        'inset 0 -2px 0 rgba(0,0,0,0.20), inset 0 0 0 1px rgba(255,255,255,0.15)';
+      setTimeout(function(){ capsule.style.boxShadow = ''; }, 560);
+    }
+  });
+  backBtn.addEventListener('click', function(){ go(cur - 1); });
+
+  // Initial paint (resting positions, no transition jump)
+  layout(cur, false);
+  renderContent(cur, 1);
+  syncButtons();
+
+  // Mount entrance
+  dots.forEach(function(d){ d.classList.add('intro'); });
+  function mount(){ surface.classList.add('mounted'); }
+  requestAnimationFrame(function(){ requestAnimationFrame(mount); });
+  setTimeout(mount, 80);
+  setTimeout(function(){ dots.forEach(function(d){ d.classList.remove('intro'); }); }, 1400);
+})();
+</script>
+<script src="_darkmode.js"></script>
+</body></html>

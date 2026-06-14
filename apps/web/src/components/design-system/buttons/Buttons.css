@@ -18,7 +18,7 @@
     linear-gradient(to bottom, rgba(255,255,255,0.07) 1px, transparent 1px);
   background-size: 14px 14px;
   cursor: pointer;
-  transition: transform 160ms cubic-bezier(.22,1,.36,1), box-shadow 160ms cubic-bezier(.22,1,.36,1);
+  transition: transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
 }
 .btn-primary:hover {
   transform: translateY(-1px);
@@ -41,7 +41,7 @@
     inset 0 1px 0 rgba(255,255,255,0.7),
     inset 0 -2px 0 rgba(15,23,42,0.14);
   cursor: pointer;
-  transition: transform 160ms cubic-bezier(.22,1,.36,1), box-shadow 160ms cubic-bezier(.22,1,.36,1);
+  transition: transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
 }
 .btn-inverse:hover {
   transform: translateY(-1px);
@@ -67,7 +67,7 @@
     inset 0 -2px 0 rgba(15,23,42,0.12);
   backdrop-filter: blur(20px);
   cursor: pointer;
-  transition: transform 160ms cubic-bezier(.22,1,.36,1), box-shadow 160ms cubic-bezier(.22,1,.36,1), background 160ms;
+  transition: transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), background calc(160ms * var(--anim-mult, 1));
 }
 .btn-glass:hover {
   transform: translateY(-1px);
@@ -87,7 +87,7 @@
   display:inline-flex; align-items:center; gap: 4px;
   padding: 6px 0;
   cursor: pointer;
-  transition: opacity 140ms;
+  transition: opacity calc(140ms * var(--anim-mult, 1));
 }
 .btn-text:hover { opacity: 0.75; }
 .btn-text:active { opacity: 0.55; }

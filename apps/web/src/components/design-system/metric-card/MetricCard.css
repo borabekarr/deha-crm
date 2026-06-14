@@ -14,11 +14,14 @@ body { background: #F8FAFC; }
   cursor: pointer;
   user-select: none;
   /* Press feedback transition - transform only, does not conflict with shell.zoom scale */
-  transition: transform calc(120ms * var(--anim-mult)) cubic-bezier(.22,1,.36,1);
+  transition: transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
 }
 /* Hover motion is handled by the wrapping .shell.zoom (grey + card move as one). */
-/* Tactile press: inner card squeezes slightly on click, composing with parent shell scale. */
-.metric:active { transform: scale(0.97); }
+/* Tactile press: shell takes primary squeeze so bezel + card move as one unit.
+   Inner card adds a tiny additional compress; composed total ≈ 0.98 × 0.99 ≈ 0.970,
+   matching the old inner-only feel while the grey bezel now moves with it. */
+.shell.zoom:active { transform: scale(0.98); transition: transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
+.metric:active { transform: scale(0.99); }
 
 .m-left { display:flex; flex-direction:column; gap: 12px; }
 .m-label { font-size: 14px; font-weight: 700; color: #475569; display:flex; align-items:center; gap: 6px; }
@@ -47,7 +50,7 @@ body { background: #F8FAFC; }
   display: flex; align-items: center; justify-content: center;
   z-index: 300;
   opacity: 0; pointer-events: none;
-  transition: opacity calc(220ms * var(--anim-mult));
+  transition: opacity calc(220ms * var(--anim-mult, 1));
 }
 .exp-overlay.open { opacity: 1; pointer-events: all; }
 
@@ -62,12 +65,12 @@ body { background: #F8FAFC; }
     0 6px 20px rgba(0,0,0,0.12);
   transform: translateY(16px) scale(0.95);
   /* Closed/exit: smooth ease-out, no overshoot (avoids jitter on the way out). */
-  transition: transform calc(260ms * var(--anim-mult)) cubic-bezier(.22,1,.36,1);
+  transition: transform calc(260ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
 }
 /* Open/enter: slight bounce + morph pop. */
 .exp-overlay.open .exp-outer {
   transform: translateY(0) scale(1);
-  transition: transform calc(360ms * var(--anim-mult)) cubic-bezier(.34,1.56,.64,1);
+  transition: transform calc(360ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1);
 }
 
 /* ── WHITE INNER CARD ── */
@@ -95,7 +98,7 @@ html.dark .exp-top { border-bottom-color: #334155; }
   width: 26px; height: 26px; border-radius: 50%;
   background: #F1F5F9; border: none; cursor: pointer;
   display: grid; place-items: center; color: #64748B;
-  transition: background calc(150ms * var(--anim-mult));
+  transition: background calc(150ms * var(--anim-mult, 1));
   flex-shrink: 0;
 }
 .exp-close:hover { background: #E2E8F0; }

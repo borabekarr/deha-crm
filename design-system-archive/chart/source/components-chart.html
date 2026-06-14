@@ -1,0 +1,405 @@
+<!doctype html>
+<!-- @dsCard group="Brand" name="Line/area chart" subtitle="Header KPI · dual-series · tooltip · axis labels · footer stats" viewport="700x420" --><html><head><meta charset="utf-8"><link rel="stylesheet" href="_base.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  body { background: #F8FAFC; }
+  .frame { padding: 22px; background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.10) 0%, rgba(248,250,252,1) 50%, #FFFFFF 100%); }
+  .chart {
+    background: rgba(255,255,255,0.92);
+    border-radius: 24px;
+    padding: 20px 22px 18px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,1),
+      inset 0 -2px 0 rgba(15,23,42,0.10),
+      inset 1px 0 0 rgba(15,23,42,0.07),
+      inset -1px 0 0 rgba(15,23,42,0.07);
+    font-family: 'Montserrat';
+  }
+
+  /* Header row */
+  .head { display:flex; justify-content:space-between; align-items:flex-start; gap: 12px; margin-bottom: 4px; }
+  .eyebrow { font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.1em; display:flex; align-items:center; gap: 8px; }
+  .eyebrow .icon-chip {
+    width: 24px; height: 24px; border-radius: 8px;
+    background: #ECFDF5;
+    display:grid; place-items:center;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.9),
+      inset 0 -1px 0 rgba(16,185,129,0.22),
+      inset 0 0 0 1px rgba(16,185,129,0.25);
+  }
+  .eyebrow .icon-chip .material-icons { font-size: 16px; color: #10B981; }
+  .stat { display:flex; flex-direction:column; gap: 14px; margin-top: 16px; }
+  .num  { font-size: 32px; font-weight: 800; color: #0F172A; letter-spacing: -0.02em; line-height: 1; }
+  .stat-row { display:flex; align-items:center; gap: 10px; }
+  .delta {
+    display:inline-flex; align-items:center; gap: 3px;
+    background: #10B981; color: #fff;
+    font-size: 11px; font-weight: 800;
+    padding: 3px 9px; border-radius: 9999px;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.18);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.35),
+      inset 0 -2px 0 rgba(0,0,0,0.22),
+      inset 0 0 0 1px rgba(255,255,255,0.12);
+  }
+  .delta .material-icons { font-size: 12px; }
+  .period { font-size: 12px; font-weight: 600; color: #94A3B8; }
+
+  /* Segmented control styles come from _controls.css (shared sliding pill) */
+
+  /* Legend */
+  .legend { display:flex; gap: 14px; margin-top: 20px; }
+  .leg { display:inline-flex; align-items:center; gap: 6px; font-size: 11px; font-weight: 700; color: #475569; }
+  .leg-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .leg-line { width: 14px; height: 2px; border-radius: 2px; background-image: linear-gradient(to right, #94A3B8 0 4px, transparent 4px 7px, #94A3B8 7px 11px, transparent 11px 14px); }
+
+  /* Chart body */
+  .chart-area { display: grid; grid-template-columns: 24px 1fr; gap: 8px; margin-top: 18px; }
+  .y-axis { display:flex; flex-direction:column; justify-content:space-between; padding: 4px 0 22px; font-size: 9px; font-weight: 700; color: #94A3B8; text-align: right; }
+  .canvas-wrap { position: relative; }
+  .canvas-wrap svg { display:block; width: 100%; height: 160px; overflow: visible; }
+  .peak-dot {
+    position: absolute;
+    left: 50%;
+    top: calc(22.33 / 90 * 100%);
+    transform: translate(-50%, -50%);
+    width: 12px; height: 12px; border-radius: 50%;
+    background: #10B981;
+    box-shadow: 0 0 0 3px #fff, 0 2px 6px rgba(16,185,129,0.55);
+  }
+  .x-axis { position: relative; height: 14px; font-size: 10px; font-weight: 600; color: #64748B; padding-top: 6px; border-top: 1px solid #E2E8F0; margin-top: 4px; }
+  .x-axis .x-lbl { position: absolute; top: 6px; transform: translateX(-50%); white-space: nowrap; }
+  .x-axis .x-lbl.peak { color: #10B981; font-weight: 800; }
+
+  /* Tooltip (JS-positioned above the hovered point) */
+  .tooltip {
+    position: absolute;
+    left: 50%; top: 0;
+    transform: translate(-50%, calc(-100% - 26px));
+    background: #0F172A; color: #fff;
+    padding: 6px 10px;
+    border-radius: 10px;
+    font-size: 11px; font-weight: 700;
+    box-shadow:
+      0 6px 16px -6px rgba(0,0,0,0.4),
+      inset 0 1px 0 rgba(255,255,255,0.15),
+      inset 0 -2px 0 rgba(0,0,0,0.35);
+    white-space: nowrap;
+    opacity: 0; pointer-events: none;
+    transition: opacity .15s ease, left .28s cubic-bezier(.22,1,.36,1), top .28s cubic-bezier(.22,1,.36,1);
+  }
+  .tooltip::after {
+    content:''; position:absolute; left: 50%; bottom: -4px;
+    width: 8px; height: 8px;
+    background: #0F172A;
+    transform: translateX(-50%) rotate(45deg);
+  }
+  .tooltip .val { color: #34D399; }
+
+  /* Hover guide + dot */
+  .ch-guide {
+    position: absolute; top: 0; bottom: 0; left: 50%; width: 1px;
+    background: repeating-linear-gradient(to bottom, rgba(16,185,129,0.55) 0 3px, transparent 3px 6px);
+    transform: translateX(-0.5px); opacity: 0; pointer-events: none;
+    transition: opacity .15s ease, left .28s cubic-bezier(.22,1,.36,1);
+  }
+  .ch-hover-dot {
+    position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; border-radius: 50%;
+    background: #10B981; box-shadow: 0 0 0 3px #fff, 0 2px 6px rgba(16,185,129,0.55);
+    transform: translate(-50%,-50%); opacity: 0; pointer-events: none;
+    transition: opacity .15s ease, left .28s cubic-bezier(.22,1,.36,1), top .28s cubic-bezier(.22,1,.36,1);
+  }
+  .peak-dot { transition: opacity .15s ease; }
+  .seg button { transition: color .2s ease, background .2s ease, box-shadow .2s ease; }
+  .canvas-wrap { cursor: crosshair; }
+
+  /* Footer stat strip */
+  .footer { display:grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid #F1F5F9; }
+  .f-cell { display:flex; flex-direction:column; gap: 6px; }
+  .f-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #475569; display:flex; align-items:center; gap: 8px; }
+  .f-icon { width: 22px; height: 22px; border-radius: 7px; display:grid; place-items:center; }
+  .f-icon .material-icons { font-size: 14px; }
+  .f-icon.gold {
+    background: #FEF9C3;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.9),
+      inset 0 -1px 0 rgba(202,138,4,0.22),
+      inset 0 0 0 1px rgba(202,138,4,0.22);
+  }
+  .f-icon.gold    .material-icons { color: #CA8A04; }
+  .f-icon.slate {
+    background: #F1F5F9;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.9),
+      inset 0 -1px 0 rgba(15,23,42,0.10),
+      inset 0 0 0 1px rgba(15,23,42,0.08);
+  }
+  .f-icon.slate   .material-icons { color: #475569; }
+  .f-icon.emerald {
+    background: #ECFDF5;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.9),
+      inset 0 -1px 0 rgba(16,185,129,0.22),
+      inset 0 0 0 1px rgba(16,185,129,0.25);
+  }
+  .f-icon.emerald .material-icons { color: #10B981; }
+  .f-val { font-size: 15px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em; }
+  .f-val.green { color: #10B981; }
+
+  /* ── Theme toggle ── */
+  #themeToggle{position:fixed;top:14px;right:14px;z-index:1000;display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 13px;border-radius:9999px;border:1px solid rgba(15,23,42,.14);background:rgba(255,255,255,.9);color:#0F172A;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;letter-spacing:.02em;cursor:pointer;box-shadow:0 4px 14px -6px rgba(15,23,42,.25);}
+  [data-theme="dark"] #themeToggle{border-color:rgba(255,255,255,.16);background:rgba(30,41,59,.92);color:#F1F5F9;}
+
+  /* ── Dark mode ── */
+  [data-theme="dark"] body{ background:#0B1220; }
+  [data-theme="dark"] .card{ background:#0B1220 !important; }
+  [data-theme="dark"] .frame{ background-image:radial-gradient(ellipse at top right, rgba(16,185,129,0.10) 0%, #0B1220 55%) !important; }
+  [data-theme="dark"] .chart{ background:#1E293B; box-shadow:inset 0 1px 0 rgba(255,255,255,.05), inset 0 -2px 0 rgba(0,0,0,.3), inset 1px 0 0 rgba(255,255,255,.04), inset -1px 0 0 rgba(255,255,255,.04); }
+  [data-theme="dark"] .eyebrow{ color:#CBD5E1; }
+  [data-theme="dark"] .eyebrow .icon-chip{ background:rgba(16,185,129,.16); box-shadow:inset 0 0 0 1px rgba(16,185,129,.3); }
+  [data-theme="dark"] .num{ color:#F1F5F9; }
+  [data-theme="dark"] .seg{ background:#0F172A; box-shadow:inset 0 2px 4px rgba(0,0,0,.4); }
+  [data-theme="dark"] .seg-pill{ background:#F1F5F9; }
+  [data-theme="dark"] .seg button{ color:#94A3B8; }
+  [data-theme="dark"] .seg button.active{ color:#0F172A; }
+  [data-theme="dark"] .leg{ color:#CBD5E1; }
+  [data-theme="dark"] .canvas-wrap svg line{ stroke:#334155 !important; }
+  [data-theme="dark"] .peak-dot{ box-shadow:0 0 0 3px #1E293B, 0 2px 6px rgba(16,185,129,.55); }
+  [data-theme="dark"] .ch-hover-dot{ box-shadow:0 0 0 3px #1E293B, 0 2px 6px rgba(16,185,129,.55); }
+  [data-theme="dark"] .x-axis{ border-top-color:#334155; }
+  [data-theme="dark"] .footer{ border-top-color:#334155; }
+  [data-theme="dark"] .f-label{ color:#CBD5E1; }
+  [data-theme="dark"] .f-icon.gold{ background:rgba(234,179,8,.16); box-shadow:inset 0 0 0 1px rgba(234,179,8,.3); }
+  [data-theme="dark"] .f-icon.gold .material-icons{ color:#EAB308; }
+  [data-theme="dark"] .f-icon.slate{ background:#334155; box-shadow:inset 0 0 0 1px rgba(255,255,255,.08); }
+  [data-theme="dark"] .f-icon.slate .material-icons{ color:#CBD5E1; }
+  [data-theme="dark"] .f-icon.emerald{ background:rgba(16,185,129,.16); box-shadow:inset 0 0 0 1px rgba(16,185,129,.3); }
+  [data-theme="dark"] .f-val{ color:#F1F5F9; }
+</style>
+<link rel="stylesheet" href="_controls.css">
+</head><body><div class="card" style="padding:0; background:#F8FAFC;">
+  <div class="frame">
+    <div class="shell">
+    <div class="chart" data-comment-anchor="c28bbeebc6-div">
+
+      <div class="head">
+        <div>
+          <div class="eyebrow"><span class="icon-chip"><span class="material-icons">show_chart</span></span>Queries and Appointments</div>
+          <div class="stat">
+            <div class="num" id="chNum">279</div>
+            <div class="stat-row">
+              <span class="delta" id="chDelta"><span class="material-icons">trending_up</span>+12%</span>
+              <span class="period" id="chPeriod">this week</span>
+            </div>
+          </div>
+        </div>
+        <div class="seg compact" id="chSeg" data-seg-managed>
+          <span class="seg-pill"></span>
+          <button data-k="D" class="active">D</button>
+          <button data-k="W">W</button>
+          <button data-k="M">M</button>
+        </div>
+      </div>
+
+      <div class="legend">
+        <span class="leg"><span class="leg-dot" style="background:#10B981"></span>Current</span>
+        <span class="leg"><span class="leg-line"></span>Previous</span>
+      </div>
+
+      <div class="chart-area">
+        <div class="y-axis">
+          <span>60</span>
+          <span>30</span>
+          <span>0</span>
+        </div>
+        <div class="canvas-wrap" id="chWrap">
+          <svg viewBox="0 0 100 90" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="areaGrad" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#10B981" stop-opacity="0.32"/>
+                <stop offset="100%" stop-color="#10B981" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+
+            <line x1="0" x2="100" y1="20" y2="20" stroke="#E2E8F0" stroke-width="0.4" stroke-dasharray="2 2" vector-effect="non-scaling-stroke"/>
+            <line x1="0" x2="100" y1="55" y2="55" stroke="#E2E8F0" stroke-width="0.4" stroke-dasharray="2 2" vector-effect="non-scaling-stroke"/>
+            <line x1="0" x2="100" y1="90" y2="90" stroke="#E2E8F0" stroke-width="0.5" vector-effect="non-scaling-stroke"/>
+
+            <path id="chPrev" d="" fill="none" stroke="#94A3B8" stroke-width="1.4" stroke-dasharray="3 3" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+            <path id="chArea" d="" fill="url(#areaGrad)" data-comment-anchor="a10d834a49-path"/>
+            <path id="chLine" d="" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+          </svg>
+          <div class="ch-guide" id="chGuide"></div>
+          <div class="peak-dot" id="chPeak" data-comment-anchor="a40d78a30f-div"></div>
+          <div class="ch-hover-dot" id="chDot"></div>
+          <div class="tooltip" id="chTip"><span id="chTipLabel">Thu</span> · <span class="val" id="chTipVal">58</span></div>
+        </div>
+      </div>
+
+      <div class="x-axis" id="chXAxis" style="margin-left: 32px;"></div>
+
+      <div class="footer">
+        <div class="f-cell"><span class="f-label"><span class="f-icon gold"><span class="material-icons">emoji_events</span></span>Peak day</span><span class="f-val" id="chPeakVal">Thu · 58</span></div>
+        <div class="f-cell"><span class="f-label"><span class="f-icon slate"><span class="material-icons">show_chart</span></span>Daily avg</span><span class="f-val" id="chAvg">40</span></div>
+        <div class="f-cell"><span class="f-label"><span class="f-icon emerald"><span class="material-icons">trending_up</span></span>Conversion</span><span class="f-val green" id="chConv">34%</span></div>
+      </div>
+
+    </div>
+    </div>
+  </div>
+</div>
+<button id="themeToggle" aria-label="Toggle dark mode"><span aria-hidden="true">◐</span><span class="tg-label">Dark</span></button>
+<script>(function(){var K='deha-theme';var R=document.documentElement;function apply(d){var st=document.createElement('style');st.textContent='*,*::before,*::after{transition:none!important;animation:none!important}';document.head.appendChild(st);if(d)R.setAttribute('data-theme','dark');else R.removeAttribute('data-theme');void R.offsetWidth;requestAnimationFrame(function(){requestAnimationFrame(function(){st.remove();});});}if(localStorage.getItem(K)==='dark')R.setAttribute('data-theme','dark');var b=document.getElementById('themeToggle');function s(){var d=R.getAttribute('data-theme')==='dark';b.querySelector('.tg-label').textContent=d?'Light':'Dark';}s();b.addEventListener('click',function(){var d=R.getAttribute('data-theme')==='dark';apply(!d);localStorage.setItem(K,d?'light':'dark');s();});})();</script>
+<script>
+(function(){
+  var DS = {
+    D: { labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+         cur:[28,34,31,58,40,33,46], prev:[24,30,28,42,36,26,38],
+         num:279, delta:12, period:'this week', peakI:3, avg:40, conv:34, peakWord:'Thu' },
+    W: { labels:['W1','W2','W3','W4','W5','W6','W7'],
+         cur:[32,40,36,52,44,48,50], prev:[28,34,33,40,38,42,45],
+         num:1184, delta:8, period:'this quarter', peakI:3, avg:43, conv:31, peakWord:'W4' },
+    M: { labels:['Feb','Mar','Apr','May','Jun','Jul','Aug'],
+         cur:[30,38,34,50,45,53,57], prev:[26,32,31,44,40,48,50],
+         num:5210, delta:15, period:'this year', peakI:6, avg:44, conv:38, peakWord:'Aug' }
+  };
+  var MAXV = 60;
+  var ease = function(t){ return 1 - Math.pow(1 - t, 3); };
+  function yOf(v){ return 90 * (1 - v / MAXV); }
+  function xOf(i, n){ var PAD = 6; return n <= 1 ? 50 : PAD + (i / (n - 1)) * (100 - 2 * PAD); }
+  function pts(vals){ var n = vals.length; return vals.map(function(v, i){ return { x: xOf(i, n), y: yOf(v) }; }); }
+  function smooth(p){
+    if(!p.length) return '';
+    var d = 'M' + p[0].x.toFixed(2) + ',' + p[0].y.toFixed(2);
+    for(var i = 0; i < p.length - 1; i++){
+      var p0 = p[i-1]||p[i], p1 = p[i], p2 = p[i+1], p3 = p[i+2]||p2;
+      var c1x = p1.x + (p2.x - p0.x)/6, c1y = p1.y + (p2.y - p0.y)/6;
+      var c2x = p2.x - (p3.x - p1.x)/6, c2y = p2.y - (p3.y - p1.y)/6;
+      d += ' C' + c1x.toFixed(2)+','+c1y.toFixed(2)+' '+c2x.toFixed(2)+','+c2y.toFixed(2)+' '+p2.x.toFixed(2)+','+p2.y.toFixed(2);
+    }
+    return d;
+  }
+  var $ = function(id){ return document.getElementById(id); };
+  var elLine=$('chLine'), elArea=$('chArea'), elPrev=$('chPrev'), elNum=$('chNum'), elDelta=$('chDelta'),
+      elPeriod=$('chPeriod'), elX=$('chXAxis'), elPeak=$('chPeak'), elPeakVal=$('chPeakVal'), elAvg=$('chAvg'),
+      elConv=$('chConv'), wrap=$('chWrap'), guide=$('chGuide'), dot=$('chDot'), tip=$('chTip'),
+      tipLabel=$('chTipLabel'), tipVal=$('chTipVal'), seg=$('chSeg');
+
+  var curKey = 'D';
+  var dispCur = DS.D.cur.slice(), dispPrev = DS.D.prev.slice();
+  var raf = null;
+
+  function renderPaths(cur, prev){
+    var pc = pts(cur);
+    elLine.setAttribute('d', smooth(pc));
+    elPrev.setAttribute('d', smooth(pts(prev)));
+    var fx = xOf(0, pc.length), lx = xOf(pc.length - 1, pc.length);
+    elArea.setAttribute('d', smooth(pc) + ' L' + lx.toFixed(2) + ',90 L' + fx.toFixed(2) + ',90 Z');
+  }
+  function renderXAxis(d){
+    var n = d.cur.length;
+    elX.innerHTML = d.labels.map(function(l, i){
+      return '<span class="x-lbl' + (i === d.peakI ? ' peak' : '') + '" style="left:' + xOf(i, n).toFixed(2) + '%">' + l + '</span>';
+    }).join('');
+  }
+  function placePeak(d){
+    var n = d.cur.length, ex = xOf(n - 1, n);
+    dotX = ex; dotTarget = ex; dotFrom = ex;
+    if(dotRaf){ cancelAnimationFrame(dotRaf); dotRaf = null; }
+    elPeak.style.left = ex + '%';
+    elPeak.style.top  = (yOf(d.cur[n - 1]) / 90 * 100) + '%';
+  }
+  function setHeadline(d){
+    elPeriod.textContent = d.period;
+    elDelta.innerHTML = '<span class="material-icons">trending_up</span>+' + d.delta + '%';
+    elPeakVal.textContent = d.peakWord + ' · ' + d.cur[d.peakI];
+    elAvg.textContent = d.avg;
+    elConv.textContent = d.conv + '%';
+  }
+  function animateNum(to){
+    var from = parseInt((elNum.textContent || '0').replace(/[^0-9]/g, '')) || 0;
+    var t0 = null, dur = 600;
+    function step(ts){
+      if(!t0) t0 = ts;
+      var p = Math.min(1, (ts - t0) / dur);
+      elNum.textContent = Math.round(from + (to - from) * ease(p)).toLocaleString('en-US');
+      if(p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  function morphTo(key){
+    var d = DS[key];
+    var fromCur = dispCur.slice(), fromPrev = dispPrev.slice(), t0 = null, dur = 600;
+    if(raf) cancelAnimationFrame(raf);
+    function step(ts){
+      if(!t0) t0 = ts;
+      var p = Math.min(1, (ts - t0) / dur), e = ease(p);
+      dispCur  = d.cur.map(function(v, i){ return fromCur[i] + (v - fromCur[i]) * e; });
+      dispPrev = d.prev.map(function(v, i){ return fromPrev[i] + (v - fromPrev[i]) * e; });
+      renderPaths(dispCur, dispPrev);
+      if(p < 1){ raf = requestAnimationFrame(step); }
+      else { dispCur = d.cur.slice(); dispPrev = d.prev.slice(); raf = null; }
+    }
+    raf = requestAnimationFrame(step);
+    placePeak(d); renderXAxis(d); setHeadline(d); animateNum(d.num);
+  }
+
+  // init
+  renderPaths(dispCur, dispPrev); renderXAxis(DS.D); placePeak(DS.D); setHeadline(DS.D);
+
+  seg.addEventListener('click', function(e){
+    var btn = e.target.closest('button'); if(!btn) return;
+    var k = btn.getAttribute('data-k'); if(k === curKey) return;
+    curKey = k;
+    [].forEach.call(seg.querySelectorAll('button'), function(b){ b.classList.toggle('active', b === btn); });
+    morphTo(k);
+  });
+
+  // find the exact point on the line path at a given user-space x (rides the curve fluently)
+  function pointAtX(path, tx){
+    var len = path.getTotalLength(); if(!len) return { x: tx, y: 45 };
+    var lo = 0, hi = len, p;
+    for(var k = 0; k < 24; k++){
+      var mid = (lo + hi) / 2; p = path.getPointAtLength(mid);
+      if(p.x < tx) lo = mid; else hi = mid;
+    }
+    return path.getPointAtLength((lo + hi) / 2);
+  }
+
+  // single always-visible dot that flows along the green line to the hovered column (eased)
+  var dotX = xOf(DS[curKey].cur.length - 1, DS[curKey].cur.length), dotTarget = dotX, dotFrom = dotX, dotT0 = 0, dotRaf = null;
+  var dotEase = function(t){ return 1 - Math.pow(1 - t, 3); };
+  function setDotAt(x){ var p = pointAtX(elLine, x); elPeak.style.left = x + '%'; elPeak.style.top = (p.y / 90 * 100) + '%'; }
+  function dotTick(ts){
+    if(!dotT0) dotT0 = ts;
+    var p = Math.min(1, (ts - dotT0) / 480);
+    dotX = dotFrom + (dotTarget - dotFrom) * dotEase(p);
+    setDotAt(dotX);
+    if(p < 1){ dotRaf = requestAnimationFrame(dotTick); } else { dotRaf = null; }
+  }
+  function moveDotTo(x){
+    if(Math.abs(x - dotTarget) < 0.01) return;
+    dotFrom = dotX; dotTarget = x; dotT0 = 0;
+    if(!dotRaf) dotRaf = requestAnimationFrame(dotTick);
+  }
+
+  wrap.addEventListener('pointermove', function(e){
+    var d = DS[curKey], n = d.cur.length, r = wrap.getBoundingClientRect();
+    var fx = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+    var i = Math.max(0, Math.min(n - 1, Math.round(fx * (n - 1))));
+    var lx = xOf(i, n), tp = yOf(d.cur[i]) / 90 * 100;
+    guide.style.left = lx + '%'; guide.style.opacity = '1';
+    tip.style.left = lx + '%'; tip.style.top = tp + '%'; tip.style.opacity = '1';
+    tipLabel.textContent = d.labels[i]; tipVal.textContent = d.cur[i];
+    moveDotTo(lx);
+  });
+  wrap.addEventListener('pointerleave', function(){
+    var n = DS[curKey].cur.length;
+    guide.style.opacity = '0'; tip.style.opacity = '0';
+    moveDotTo(xOf(n - 1, n));
+  });
+})();
+</script>
+<script src="_controls.js"></script>
+</body></html>

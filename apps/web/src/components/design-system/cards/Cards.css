@@ -20,7 +20,7 @@ html.dark .cards-outer { background: #0B1220 !important; }
     inset 0 0 0 1px rgba(255,255,255,0.15);
   position: relative; overflow:hidden;
   cursor: pointer;
-  transition: transform calc(220ms * var(--anim-mult)) cubic-bezier(.22,1,.36,1), box-shadow calc(220ms * var(--anim-mult)) cubic-bezier(.22,1,.36,1);
+  transition: transform calc(220ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(220ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
   font-family:'Montserrat';
   text-shadow: 0 1px 2px rgba(0,0,0,0.18);
   background-image:
@@ -48,6 +48,20 @@ html.dark .cards-outer { background: #0B1220 !important; }
 .card-desc-w { color: rgba(255,255,255,0.85); }
 .card-tag { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 9px; color: #94A3B8; margin-top: 8px; display:block; }
 .card-tag-w { color: rgba(255,255,255,0.7); }
+
+/* Light-mode zoom fixes — scoped to cards page only.
+   _surfaces.css gives .shell a flat #CBD5E1 border with no lifted top edge,
+   which looks broken on the white inner surface at zoom.
+   Mirror the dark-mode top-edge treatment (bright inset highlight) for light. */
+.cards-frame .shell {
+  border-top-color: rgba(255, 255, 255, 0.85) !important;
+}
+/* .card-inner in light gets _surfaces.css override to 1px #CBD5E1, but the
+   original Cards.css rule had a box-shadow inset top-highlight; restore the
+   top edge so it reads as a lifted surface inside the shell bezel. */
+.cards-frame .card-inner {
+  border-top-color: rgba(255, 255, 255, 0.9) !important;
+}
 
 /* Dark mode — html.dark convention */
 html.dark .cards-frame { background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.08) 0%, #0B1220 55%) !important; }

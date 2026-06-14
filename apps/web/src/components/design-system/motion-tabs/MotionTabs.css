@@ -1,0 +1,370 @@
+/* ── MotionTabs component styles ───────────────────────────────────────────
+   Redesign: consistent-width floating dock, CSS grid-rows height morph,
+   single gliding emerald indicator (no JS measurement), no blur on panels.
+   Port of apps/web/design-system/preview/components-motion-tabs.html
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* ── Frame ─────────────────────────────────────────────────────────────── */
+.mt-root ~ * + .hint,
+.frame .hint {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #94A3B8;
+}
+.frame .hint b { color: #10B981; font-weight: 800; }
+
+.frame {
+  padding: 28px;
+  padding-bottom: 48px; /* float dock off the shell floor */
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  background-image: radial-gradient(
+    ellipse at top right,
+    rgba(16,185,129,0.10) 0%,
+    rgba(248,250,252,1) 50%,
+    #FFFFFF 100%
+  );
+}
+html.dark .frame {
+  background-image: radial-gradient(
+    ellipse at top right,
+    rgba(16,185,129,0.10) 0%,
+    rgba(15,23,42,1) 55%,
+    #0F172A 100%
+  );
+}
+
+/* ── Root: positioning context ─────────────────────────────────────────── */
+.mt-root {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1;
+  min-height: 320px;
+  --ease: cubic-bezier(.22,1,.36,1);
+  --dur: calc(300ms * var(--anim-mult, 1));
+  --dur-fast: calc(220ms * var(--anim-mult, 1));
+  font-family: 'Montserrat', sans-serif;
+  user-select: none;
+}
+
+/* ── Overlay ───────────────────────────────────────────────────────────── */
+.mt-overlay {
+  position: absolute;
+  inset: -28px;
+  z-index: 0;
+  opacity: 0;
+  pointer-events: none;
+  background: rgba(15,23,42,0.04);
+  transition: opacity var(--dur) var(--ease);
+}
+.mt-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Dock: consistent-width floating glass card ─────────────────────────── */
+.mt-dock {
+  position: relative;
+  z-index: 1;
+  width: var(--dock-w, 360px);
+  box-sizing: border-box;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  -webkit-backdrop-filter: blur(var(--blur-glass, 20px));
+  backdrop-filter: blur(var(--blur-glass, 20px));
+  border-radius: 26px;
+  overflow: hidden;
+  border: 1px solid var(--border-glass, rgba(255,255,255,0.60));
+  box-shadow:
+    0 18px 50px -12px rgba(15,23,42,0.28),
+    0 2px 8px rgba(15,23,42,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.55);
+}
+html.dark .mt-dock {
+  border-color: rgba(255,255,255,0.08);
+  box-shadow:
+    0 24px 60px -12px rgba(0,0,0,0.7),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+/* ── Height morph via CSS grid-rows ─────────────────────────────────────── */
+.mt-panels-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows calc(320ms * var(--anim-mult, 1)) var(--ease);
+}
+.mt-dock.open .mt-panels-wrap {
+  grid-template-rows: 1fr;
+}
+.mt-panels {
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── Divider ───────────────────────────────────────────────────────────── */
+.mt-divider {
+  height: 1px;
+  margin: 4px 6px;
+  flex-shrink: 0;
+  background: var(--border-hairline, #E2E8F0);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease);
+}
+.mt-dock.open .mt-divider {
+  opacity: 1;
+}
+
+/* ── Panel stack ────────────────────────────────────────────────────────── */
+.mt-panel {
+  position: absolute;
+  inset: 0;
+  padding: 4px 6px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(calc(var(--dir, 0) * 20px)) translateY(10px);
+  transition:
+    opacity calc(220ms * var(--anim-mult, 1)) var(--ease),
+    transform calc(300ms * var(--anim-mult, 1)) var(--ease);
+}
+.mt-panel.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+
+/* Need relative context for absolute panels */
+.mt-panels {
+  position: relative;
+}
+
+/* Panel height: enough for 3 rows (approx 3 × 60px + padding) */
+.mt-panels::after {
+  content: '';
+  display: block;
+  height: 188px;
+}
+
+/* ── Panel rows ─────────────────────────────────────────────────────────── */
+.mt-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 10px;
+  border-radius: 14px;
+  cursor: pointer;
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  transition: background calc(220ms * var(--anim-mult, 1)) var(--ease);
+}
+.mt-row:hover { background: rgba(15,23,42,0.05); }
+html.dark .mt-row:hover { background: rgba(255,255,255,0.06); }
+
+.mt-row-ic {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  color: var(--fg2, #334155);
+  background: var(--bg-chip, #F1F5F9);
+  box-shadow: inset 0 0 0 1px rgba(15,23,42,0.05);
+}
+html.dark .mt-row-ic {
+  color: #CBD5E1;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+}
+.mt-row-ic .material-symbols-outlined { font-size: 20px; }
+
+.mt-row-tx { flex: 1; min-width: 0; }
+.mt-row-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--fg1, #0F172A);
+  letter-spacing: -0.01em;
+}
+.mt-row-sub {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--fg3, #64748B);
+  margin-top: 1px;
+}
+
+.mt-row-count {
+  margin-left: auto;
+  flex-shrink: 0;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  box-sizing: border-box;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 900;
+  color: #FFFFFF;
+  background: #10B981;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+  background-size: 7px 7px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.42),
+    inset 0 -2px 0 rgba(15,23,42,0.14),
+    inset 0 0 0 1px rgba(15,23,42,0.08);
+}
+
+.mt-row-chev {
+  margin-left: auto;
+  color: var(--fg4, #94A3B8);
+  font-size: 20px;
+}
+
+/* ── Toolbar ─────────────────────────────────────────────────────────────── */
+.mt-toolbar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+/* ── Single gliding emerald indicator ──────────────────────────────────── */
+.mt-ind {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  height: 48px;
+  border-radius: 9999px;
+  background: #10B981;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+  background-size: 7px 7px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.42),
+    inset 0 -2px 0 rgba(15,23,42,0.14),
+    inset 0 0 0 1px rgba(15,23,42,0.08),
+    0 6px 16px -6px rgba(16,185,129,0.55);
+  width: var(--ind-w, 48px);
+  transform: translateX(var(--ind-x, 0));
+  transition:
+    transform calc(300ms * var(--anim-mult, 1)) var(--ease),
+    width calc(300ms * var(--anim-mult, 1)) var(--ease);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Tabs (transparent buttons, sit above indicator) ────────────────────── */
+.mt-tab {
+  -webkit-tap-highlight-color: transparent;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  border-radius: 9999px;
+  /* Width transitions to expand/collapse with the active state */
+  width: 48px;
+  flex-shrink: 0;
+  overflow: hidden;
+  transition: width calc(300ms * var(--anim-mult, 1)) var(--ease);
+}
+.mt-tab.active {
+  width: calc(48px + var(--lw, 46px) + 14px);
+}
+
+/* hold-feedback circle */
+.mt-hold {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  background: rgba(15,23,42,0.10);
+  z-index: 0;
+  opacity: 0;
+  transform: scale(0.68);
+  transition:
+    opacity calc(220ms * var(--anim-mult, 1)) var(--ease),
+    transform calc(220ms * var(--anim-mult, 1)) var(--ease);
+}
+.mt-tab.active .mt-hold { background: rgba(255,255,255,0.22); }
+.mt-tab:active .mt-hold { opacity: 1; transform: scale(1); }
+
+/* icon box */
+.mt-iconbox {
+  position: relative;
+  z-index: 1;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  transition: transform calc(220ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.5,1);
+}
+.mt-tab:active .mt-iconbox {
+  transform: translateY(1.5px) scaleX(1.08) scaleY(0.76);
+}
+
+.mt-ic {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  transition: opacity calc(300ms * var(--anim-mult, 1)) var(--ease);
+}
+.mt-ic .material-symbols-outlined { font-size: 24px; }
+.mt-ic.off { color: var(--fg3, #64748B); opacity: 1; }
+.mt-ic.on  { color: #FFFFFF; opacity: 0; }
+.mt-tab.active .mt-ic.off { opacity: 0; }
+.mt-tab.active .mt-ic.on  { opacity: 1; }
+
+/* label */
+.mt-label {
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  width: 0;
+  opacity: 0;
+  transform: translateX(-8px);
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  transition:
+    width calc(300ms * var(--anim-mult, 1)) var(--ease),
+    opacity calc(300ms * var(--anim-mult, 1)) var(--ease),
+    transform calc(300ms * var(--anim-mult, 1)) var(--ease);
+}
+.mt-tab.active .mt-label {
+  width: calc(var(--lw, 46px) + 8px);
+  opacity: 1;
+  transform: translateX(0);
+}

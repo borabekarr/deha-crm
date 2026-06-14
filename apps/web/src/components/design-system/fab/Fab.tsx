@@ -16,7 +16,7 @@ export default function Fab() {
     if (!open) toggle(true)
   }
 
-  function onPickItem(e: React.MouseEvent, _label: string): void {
+  function onPickItem(e: React.MouseEvent): void {
     e.stopPropagation()
     toggle(false)
   }
@@ -99,6 +99,7 @@ export default function Fab() {
                       <div className="fab-head-sub">Add something to your workspace</div>
                     </div>
                     <button
+                      type="button"
                       className="fab-close"
                       onClick={(e) => { e.stopPropagation(); toggle(false) }}
                       aria-label="Close"
@@ -113,7 +114,7 @@ export default function Fab() {
                   <div
                     className="fab-item"
                     style={{ '--ic-bg': '#10B981' } as React.CSSProperties}
-                    onClick={(e) => onPickItem(e, 'New lead')}
+                    onClick={(e) => onPickItem(e)}
                   >
                     <div className="fab-item-ic">
                       <span className="material-symbols-outlined">person_add</span>
@@ -129,7 +130,7 @@ export default function Fab() {
                   <div
                     className="fab-item"
                     style={{ '--ic-bg': '#3B82F6' } as React.CSSProperties}
-                    onClick={(e) => onPickItem(e, 'Log activity')}
+                    onClick={(e) => onPickItem(e)}
                   >
                     <div className="fab-item-ic">
                       <span className="material-symbols-outlined">bolt</span>
@@ -145,7 +146,7 @@ export default function Fab() {
                   <div
                     className="fab-item"
                     style={{ '--ic-bg': '#8B5CF6' } as React.CSSProperties}
-                    onClick={(e) => onPickItem(e, 'Create task')}
+                    onClick={(e) => onPickItem(e)}
                   >
                     <div className="fab-item-ic">
                       <span className="material-symbols-outlined">check_circle</span>
@@ -161,7 +162,7 @@ export default function Fab() {
                   <div
                     className="fab-item"
                     style={{ '--ic-bg': '#F97316' } as React.CSSProperties}
-                    onClick={(e) => onPickItem(e, 'New deal')}
+                    onClick={(e) => onPickItem(e)}
                   >
                     <div className="fab-item-ic">
                       <span className="material-symbols-outlined">handshake</span>

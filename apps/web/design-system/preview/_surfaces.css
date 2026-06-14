@@ -1,0 +1,95 @@
+/* _surfaces.css
+ * Global card / popover "external line" treatment.
+ *
+ * Rule: every card or popover surface in the design system gets a neutral
+ * hairline border (1 px, uniform on all four edges) so the outline reads
+ * as a continuous lifted surface.
+ *
+ * HOW TO ADD A NEW SURFACE
+ *   Add its selector to BOTH grouped rules below (light + html.dark).
+ *   Do NOT reimplement border or border-top-color inside the component's own
+ *   CSS — let this file own them.
+ *
+ * WHAT THIS FILE DOES NOT TOUCH
+ *   • box-shadow  — left to each component so existing shadows are not clobbered
+ *   • border-radius — left to each component
+ *   • .card        — the /components preview page canvas (700 px stage)
+ *   • .frame       — wrapper frames
+ *   • .nf-card     — permanently-dark news-feed card
+ *   • prize-sheet (.ps-device, .sheet)
+ *   • leaderboard  (.lb-outer, .lb, .row) — already the visual reference,
+ *                   left untouched so it remains the canonical baseline
+ *
+ * CONVENTION
+ *   Literal hex values only — no var() tokens (tokens are unreliable on the
+ *   /components preview routes; matches _darkmode.css convention).
+ */
+
+/* ─── LIGHT ─────────────────────────────────────────────────────────────── */
+/* Outer shells / popover trays */
+.shell,
+.te-outer,
+.ms-outer,
+.exp-outer,
+.wf-outer,
+.wtc-outer,
+.wae-pop-outer,
+.mem-outer,
+.cal-outer,
+.pcx-outer,
+.tp-outer,
+.ldx-outer,
+/* Main / inner / popover / nested cards */
+.card-inner,
+.metric,
+.exp-card,
+.pcx-card,
+.tp-card,
+.ldx-card,
+.ms-panel,
+.te-panel,
+.wtc-card,
+.mem-card,
+.cal-panel,
+.tp-w,
+.wae-pop-inner,
+.streak,
+.fhc,
+.task,
+.todo {
+  border: 1px solid #CBD5E1;
+}
+
+/* ─── DARK ───────────────────────────────────────────────────────────────── */
+html.dark .shell,
+html.dark .te-outer,
+html.dark .ms-outer,
+html.dark .exp-outer,
+html.dark .wf-outer,
+html.dark .wtc-outer,
+html.dark .wae-pop-outer,
+html.dark .mem-outer,
+html.dark .cal-outer,
+html.dark .pcx-outer,
+html.dark .tp-outer,
+html.dark .ldx-outer,
+html.dark .card-inner,
+html.dark .metric,
+html.dark .exp-card,
+html.dark .pcx-card,
+html.dark .tp-card,
+html.dark .ldx-card,
+html.dark .ms-panel,
+html.dark .te-panel,
+html.dark .wtc-card,
+html.dark .mem-card,
+html.dark .cal-panel,
+html.dark .tp-w,
+html.dark .wae-pop-inner,
+html.dark .streak,
+html.dark .fhc,
+html.dark .task,
+html.dark .todo {
+  border: 1px solid #334155;
+  border-top-color: rgba(255, 255, 255, 0.22) !important;
+}

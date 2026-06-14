@@ -1,0 +1,283 @@
+/* FinancialHealthCard.css — verbatim CSS from components-financial-health-card.html */
+/* Class prefix: .fhc-* (already in prototype, no collision risk) */
+
+.fhc-frame {
+  padding: 40px 24px;
+  display: flex; flex-direction: column; align-items: center;
+  background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.10) 0%, rgba(248,250,252,1) 50%, #FFFFFF 100%);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   The card owns a private --fhc-* token set that flips under html.dark.
+   ───────────────────────────────────────────────────────────────────── */
+.fhc {
+  --fhc-surface:      linear-gradient(168deg, #FFFFFF 0%, #F5F8F8 100%);
+  --fhc-border:       rgba(15,23,42,0.07);
+  --fhc-shadow:       0 18px 44px -16px rgba(15,23,42,0.30), inset 0 1px 0 rgba(255,255,255,0.95);
+  --fhc-glow:         0 26px 66px -18px rgba(16,185,129,0.20), 0 0 0 1px rgba(16,185,129,0.08);
+  --fhc-fg1:          #0F172A;
+  --fhc-fg2:          #475569;
+  --fhc-fg3:          #94A3B8;
+  --fhc-label:        #64748B;
+  --fhc-inset:        linear-gradient(180deg, #FFFFFF 0%, #FBFCFD 100%);
+  --fhc-inset-border: rgba(15,23,42,0.08);
+  --fhc-inset-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 1px 2px rgba(15,23,42,0.04);
+  --fhc-divider:      rgba(15,23,42,0.08);
+  --fhc-track:        #E9EEF4;
+  --fhc-track-inset:  inset 0 0 0 1px rgba(15,23,42,0.05);
+  --fhc-num:          linear-gradient(180deg, #3A4658 0%, #0F172A 46%, #232F44 74%, #0F172A 100%);
+  --fhc-num-hi:       rgba(255,255,255,0.85);
+  --fhc-num-glow:     rgba(15,23,42,0.20);
+  --fhc-ghost:        rgba(15,23,42,0.05);
+  --fhc-glow-mul:     0.55;
+
+  --c-red:    #EF4444;  --g-red:    rgba(239,68,68,0.55);
+  --c-yellow: #EAB308;  --g-yellow: rgba(234,179,8,0.55);
+  --c-blue:   #3B82F6;  --g-blue:   rgba(59,130,246,0.55);
+  --c-green:  #10B981;  --g-green:  rgba(16,185,129,0.60);
+
+  width: 384px;
+  box-sizing: border-box;
+  padding: 22px 24px 24px;
+  border-radius: 34px;
+  background: var(--fhc-surface);
+  border: 1px solid var(--fhc-border);
+  box-shadow: var(--fhc-shadow);
+  font-family: 'Montserrat', sans-serif;
+  color: var(--fhc-fg1);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+  transition: transform calc(320ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(320ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  will-change: transform;
+}
+
+html.dark .fhc {
+  --fhc-surface:      radial-gradient(125% 120% at 28% -12%, #334155 0%, #1E293B 58%, #0F172A 100%);
+  --fhc-border:       rgba(255,255,255,0.07);
+  --fhc-shadow:       0 24px 56px -18px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 0 0 1px rgba(16,185,129,0.06);
+  --fhc-glow:         0 28px 76px -20px rgba(16,185,129,0.22), 0 0 46px -8px rgba(16,185,129,0.10), inset 0 0 0 1px rgba(16,185,129,0.10);
+  --fhc-fg1:          #F1F5F9;
+  --fhc-fg2:          #CBD5E1;
+  --fhc-fg3:          #94A3B8;
+  --fhc-label:        #94A3B8;
+  --fhc-inset:        linear-gradient(180deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.015) 100%);
+  --fhc-inset-border: rgba(255,255,255,0.07);
+  --fhc-inset-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 1px 2px rgba(0,0,0,0.35);
+  --fhc-divider:      rgba(255,255,255,0.08);
+  --fhc-track:        #334155;
+  --fhc-track-inset:  inset 0 0 0 1px rgba(255,255,255,0.05);
+  --fhc-num:          linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 42%, #B6C2CF 74%, #FFFFFF 100%);
+  --fhc-num-hi:       rgba(255,255,255,0.25);
+  --fhc-num-glow:     rgba(0,0,0,0.45);
+  --fhc-ghost:        rgba(255,255,255,0.045);
+  --fhc-glow-mul:     0.8;
+}
+
+/* hover: the whole SHELL lifts together with a neon glow */
+.fhc-shell { transition: transform calc(340ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(340ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); cursor: pointer; }
+.fhc-shell:hover { transform: translateY(-3px); box-shadow: 0 20px 50px -20px rgba(16,185,129,0.22), 0 10px 22px rgba(15,23,42,0.10), inset 0 1px 0 rgba(255,255,255,0.7); }
+html.dark .fhc-shell:hover { box-shadow: 0 22px 56px -20px rgba(16,185,129,0.30), 0 10px 22px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06); }
+.fhc-shell:hover .fhc { box-shadow: var(--fhc-shadow), var(--fhc-glow); }
+/* Springier MetricCard-style bounce: deeper press + stronger overshoot matching .34,1.56,.64,1 */
+.fhc.pop   { animation: fhcPop calc(400ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1); }
+@keyframes fhcPop { 0%{transform:scale(.90);} 50%{transform:scale(1.032);} 100%{transform:scale(1);} }
+
+/* ── HEADER ── */
+.fhc-eyebrow {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  margin: -22px -24px 24px;
+  padding: 15px 16px 16px;
+  font-size: 14.5px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase;
+  color: #fff;
+  background: #10B981;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px);
+  background-size: 15px 15px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.45),
+    inset 0 -2px 0 rgba(15,23,42,0.16),
+    0 5px 16px -3px rgba(16,185,129,0.55);
+}
+.fhc-eyebrow .material-symbols-outlined { font-size: 20px; color: #fff; background: none; border-radius: 0; padding: 0; box-shadow: none; text-shadow: 0 1px 2px rgba(0,0,0,0.30); font-variation-settings: 'FILL' 1, 'wght' 600; }
+html.dark .fhc-eyebrow .material-symbols-outlined { color: #fff; background: none; box-shadow: none; }
+html.dark .fhc-frame { background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.08) 0%, #0F172A 50%, #0F172A 100%); }
+
+/* ── SCORE ── */
+.fhc-score { position: relative; z-index: 1; display: flex; align-items: baseline; justify-content: center; gap: 5px; margin-top: 4px; }
+.fhc-num {
+  font-size: 44px; font-weight: 900; line-height: 0.9; letter-spacing: -0.04em;
+  padding: 0 0.07em;
+  background: var(--fhc-num);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 1px 0 var(--fhc-num-hi)) drop-shadow(0 10px 22px var(--fhc-num-glow));
+  display: inline-block; font-variant-numeric: tabular-nums;
+  transition: transform calc(220ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+}
+.fhc-shell:hover .fhc-num { transform: scale(1.04); }
+.fhc-outof { margin-top: 0; font-size: 16px; font-weight: 600; color: var(--fhc-fg3); letter-spacing: 0.01em; }
+
+/* ── HEALTH BAR ── */
+.fhc-bar-wrap { position: relative; z-index: 1; margin-top: 50px; }
+.fhc-bar {
+  position: relative; height: 20px; border-radius: 999px; overflow: hidden;
+  background-color: var(--c-red);
+  background-image:
+    linear-gradient(rgba(255,255,255,0.20) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.20) 1px, transparent 1px),
+    linear-gradient(90deg, var(--c-red) 0%, var(--c-yellow) 33%, var(--c-blue) 63%, var(--c-green) 100%);
+  background-size: 6px 6px, 6px 6px, cover;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.45),
+    inset 0 -2px 0 rgba(15,23,42,0.18),
+    inset 0 0 0 1px rgba(15,23,42,0.08);
+}
+
+/* ── PIN ── */
+.fhc-pin {
+  position: absolute; top: -30px; left: 0;
+  transform: translateX(-50%);
+  transition: left calc(620ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  z-index: 2;
+}
+.fhc-pin-badge {
+  position: relative;
+  display: grid; place-items: center;
+  min-width: 34px; height: 26px; padding: 0 7px;
+  border-radius: 9px;
+  font-size: 13px; font-weight: 800; color: #fff;
+  background: var(--pin-c);
+  background-image:
+    linear-gradient(rgba(255,255,255,0.18) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.18) 1px, transparent 1px);
+  background-size: 7px 7px;
+  text-shadow: 0 1px 1px rgba(15,23,42,0.30);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.55),
+    inset 0 -2px 0 rgba(15,23,42,0.22),
+    inset 0 0 0 1px rgba(15,23,42,0.10),
+    0 6px 16px -4px var(--pin-g),
+    0 0 0 4px var(--pin-halo);
+}
+.fhc-pin-badge::after {
+  content: ''; position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%) rotate(45deg);
+  width: 9px; height: 9px; border-radius: 2px;
+  background: var(--pin-c);
+  box-shadow: inset 0 -2px 0 rgba(15,23,42,0.18);
+}
+.fhc-pin.pulse .fhc-pin-badge { animation: fhcPinPulse calc(720ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1); }
+@keyframes fhcPinPulse {
+  0%{ transform: scale(1); }
+  30%{ transform: scale(1.18); box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 8px 22px -4px var(--pin-g), 0 0 0 8px var(--pin-halo); }
+  100%{ transform: scale(1); }
+}
+
+/* ── ZONE LABELS ── */
+.fhc-zones {
+  display: flex; justify-content: space-between;
+  margin-top: 13px; padding: 0 2px;
+  font-size: 12.5px; font-weight: 600; color: var(--fhc-fg3);
+}
+.fhc-zones span { transition: color calc(280ms * var(--anim-mult, 1)) ease, font-weight 0ms; }
+.fhc-zones span.on { color: var(--fhc-fg1); font-weight: 800; }
+
+/* ── WHY / RECOMMENDATION — collapsible ── */
+.fhc-info { position: relative; z-index: 1; margin-top: 18px; }
+.fhc-info-tab {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 12px 16px; border-radius: 16px; cursor: pointer; font-family: 'Montserrat';
+  background: var(--fhc-inset); border: 1px solid var(--fhc-inset-border); box-shadow: var(--fhc-inset-shadow);
+  color: var(--fhc-fg1); appearance: none; text-align: left;
+}
+.fhc-info-tab-l { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 800; }
+.fhc-info-tab-l .material-symbols-outlined { font-size: 18px; color: var(--c-green); }
+.fhc-info-chev { font-size: 20px; color: var(--fhc-fg3); transition: transform calc(380ms * var(--anim-mult, 1)) cubic-bezier(.34,1.2,.5,1); }
+.fhc.open .fhc-info-chev { transform: rotate(180deg); }
+/* Springier expand: upgrade to .34,1.56,.64,1 for clear bounce on panel open */
+.fhc-info-body { max-height: 0; overflow: hidden; transition: max-height calc(500ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1), margin-top calc(400ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1); }
+.fhc.open .fhc-info-body { max-height: 340px; margin-top: 10px; }
+.fhc-info-inner { padding: 18px 19px; border-radius: 20px; background: var(--fhc-inset); border: 1px solid var(--fhc-inset-border); box-shadow: var(--fhc-inset-shadow); }
+@keyframes fhcTabBounce {
+  0%   { transform: translateY(0); }
+  35%  { transform: translateY(-4px); }
+  65%  { transform: translateY(2px); }
+  100% { transform: translateY(0); }
+}
+.fhc-info-tab.tab-bounce { animation: fhcTabBounce calc(420ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1) both; }
+
+.fhc-sec-h {
+  font-size: 15px; font-weight: 800; color: var(--fhc-fg1);
+  display: flex; align-items: center; gap: 7px;
+}
+.fhc-sec-h .material-symbols-outlined { font-size: 18px; line-height: 1; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: var(--c-green); font-variation-settings: 'FILL' 1, 'wght' 400, 'opsz' 20; flex-shrink: 0; }
+.fhc-sec-p { margin-top: 7px; font-size: 13.5px; font-weight: 500; line-height: 1.55; color: var(--fhc-fg3); }
+.fhc-info-divider { height: 1px; background: var(--fhc-divider); margin: 16px 0; }
+
+/* ─────────────────────────────────────────────────────────────────────
+   LOAD ANIMATION (added via .anim-in once mounted)
+   ───────────────────────────────────────────────────────────────────── */
+.fhc.anim-in { animation: fhcCardIn calc(620ms * var(--anim-mult, 1)) cubic-bezier(.34,1.4,.5,1) both; }
+@keyframes fhcCardIn { 0%{ opacity:0; transform: scale(.85) translateY(10px); } 100%{ opacity:1; transform: scale(1) translateY(0); } }
+
+.anim-in .fhc-eyebrow { animation: fhcFade calc(460ms * var(--anim-mult, 1)) ease-out calc(120ms * var(--anim-mult, 1)) both; }
+.anim-in .fhc-num { animation: fhcNumPop calc(620ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1) calc(200ms * var(--anim-mult, 1)) both; }
+@keyframes fhcNumPop {
+  0%{ opacity:0; transform: scale(.8) translateY(8px); }
+  55%{ opacity:1; transform: scale(1.05); }
+  78%{ transform: scale(0.985); }
+  100%{ transform: scale(1); }
+}
+.anim-in .fhc-outof { animation: fhcFade calc(420ms * var(--anim-mult, 1)) ease-out calc(360ms * var(--anim-mult, 1)) both; }
+
+/* bar sweeps in from the left */
+.anim-in .fhc-bar { animation: fhcBarIn calc(560ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) calc(440ms * var(--anim-mult, 1)) both; transform-origin: left center; }
+@keyframes fhcBarIn { 0%{ opacity:0; transform: scaleX(0.04); } 100%{ opacity:1; transform: scaleX(1); } }
+.anim-in .fhc-pin { animation: fhcPinIn calc(520ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1) both; animation-delay: calc(560ms * var(--anim-mult, 1)); }
+@keyframes fhcPinIn {
+  0%{ opacity:0; transform: translateX(-50%) translateY(-10px) scale(.6); }
+  60%{ opacity:1; transform: translateX(-50%) translateY(2px) scale(1.12); }
+  100%{ transform: translateX(-50%) translateY(0) scale(1); }
+}
+.anim-in .fhc-zones { animation: fhcFade calc(460ms * var(--anim-mult, 1)) ease-out calc(640ms * var(--anim-mult, 1)) both; }
+/* Why + Recommendation slide in from below, staggered */
+.anim-in .fhc-sec { animation: fhcSecIn calc(520ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) both; animation-delay: calc(var(--s) * calc(120ms * var(--anim-mult, 1)) + calc(720ms * var(--anim-mult, 1))); }
+.anim-in .fhc-info-divider { animation: fhcFade calc(400ms * var(--anim-mult, 1)) ease-out calc(820ms * var(--anim-mult, 1)) both; }
+@keyframes fhcSecIn { 0%{ opacity:0; transform: translateY(14px); } 100%{ opacity:1; transform: translateY(0); } }
+@keyframes fhcFade { from{ opacity:0; transform: translateY(6px); } to{ opacity:1; transform: translateY(0); } }
+
+/* score-update elastic */
+.fhc-num.elastic { animation: fhcElastic calc(660ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1); }
+@keyframes fhcElastic { 0%{transform:scale(.92);} 35%{transform:scale(1.08);} 65%{transform:scale(.98);} 100%{transform:scale(1);} }
+
+/* ── demo controls (chrome — outside the component shell) ── */
+.fhc-controls { display: flex; gap: 9px; margin-top: 22px; flex-wrap: wrap; justify-content: center; }
+.fhc-btn {
+  font-family: 'Montserrat'; font-size: 12px; font-weight: 700; letter-spacing: 0.01em;
+  padding: 9px 15px; border-radius: 13px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.85); color: #475569;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 2px 8px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
+  transition: transform calc(140ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), background calc(160ms * var(--anim-mult, 1)), color calc(160ms * var(--anim-mult, 1)), border-color calc(160ms * var(--anim-mult, 1));
+}
+.fhc-btn .material-icons { font-size: 16px; }
+.fhc-btn:hover { transform: translateY(-1px); color: #0F172A; border-color: #CBD5E1; }
+.fhc-btn:active { transform: scale(0.96); }
+html.dark .fhc-btn { background: rgba(30,41,59,0.7); color: #CBD5E1; border-color: #334155; box-shadow: 0 2px 10px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05); }
+html.dark .fhc-btn:hover { color: #F1F5F9; border-color: #475569; background: rgba(39,52,73,0.8); }
+
+@media (max-width: 440px) {
+  .fhc-frame { padding: 28px 14px; }
+  .fhc { width: 100%; max-width: 348px; padding: 20px 18px 22px; }
+  .fhc-num { font-size: 40px; }
+  .fhc-bar { height: 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fhc.anim-in, .anim-in .fhc-eyebrow, .anim-in .fhc-num, .anim-in .fhc-outof,
+  .anim-in .fhc-bar, .anim-in .fhc-pin, .anim-in .fhc-zones, .anim-in .fhc-sec, .anim-in .fhc-info-divider { animation: none !important; }
+}

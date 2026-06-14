@@ -1,10 +1,51 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import { TanStackRouterVite } from '@tanstack/router-plugin/vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'node:path'
+import fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { visualizer } from 'rollup-plugin-visualizer'
+
+// Serve the embedded toastiva static bundle's index.html for the bare
+// `/toastiva/` directory request. Vite's SPA fallback otherwise hands that
+// path to the main app (TanStack "Not Found"), and the toastiva expo-router
+// app must be reached at `/toastiva/` (not `/toastiva/index.html`) so its
+// baseUrl-stripped route resolves to `/`. Exact asset files under
+// `/toastiva/_expo/...` are still served normally by Vite's public handler.
+function toastivaStaticSpa(): Plugin {
+  const indexHtmlPath = fileURLToPath(
+    new URL('./public/toastiva/index.html', import.meta.url),
+  )
+  const serve = (
+    req: { url?: string },
+    res: { setHeader: (k: string, v: string) => void; statusCode: number; end: (b: unknown) => void },
+    next: () => void,
+  ) => {
+    const url = (req.url || '').split('?')[0]
+    if (url === '/toastiva' || url === '/toastiva/') {
+      try {
+        const html = fs.readFileSync(indexHtmlPath)
+        res.setHeader('Content-Type', 'text/html')
+        res.statusCode = 200
+        res.end(html)
+        return
+      } catch {
+        // fall through to the default handler if the bundle is absent
+      }
+    }
+    next()
+  }
+  return {
+    name: 'toastiva-static-spa',
+    configureServer(server) {
+      server.middlewares.use(serve)
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use(serve)
+    },
+  }
+}
 
 export default defineConfig(() => ({
   server: {
@@ -53,6 +94,7 @@ export default defineConfig(() => ({
       : {}),
   },
   plugins: [
+    toastivaStaticSpa(),
     TanStackRouterVite({
       routesDirectory: './src/routes',
       generatedRouteTree: './src/routeTree.gen.ts',

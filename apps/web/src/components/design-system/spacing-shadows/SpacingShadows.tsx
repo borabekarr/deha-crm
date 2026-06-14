@@ -9,10 +9,6 @@ export default function SpacingShadows() {
           <div className="sh-name">shadow-inner ★ default</div>
           <div className="sh-meta">Cards, pills, badges<br />inset top 1px white · inset bottom –2px · inset ring 1px</div>
         </div>
-        <div className="sh-box sh-glass">
-          <div className="sh-name">shadow-glass</div>
-          <div className="sh-meta">Glass surface cards<br />4/6 + 2/4 + inset 1px</div>
-        </div>
         <div className="sh-box sh-recessed">
           <div className="sh-name">shadow-recessed</div>
           <div className="sh-meta">Pressed surfaces<br />inset 2/4</div>

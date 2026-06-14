@@ -81,14 +81,12 @@ export const SCHEMA: SchemaItem[] = [
   { id:'rage_click',     label:'Friction Detection',    icon:'touch_app',         pill:2, tier:1, span:1, ws:ALL },
   { id:'geo_shift',      label:'Geographic Shift',      icon:'travel_explore',    pill:2, tier:1, span:1, ws:['real_estate','general'] },
   { id:'buying_horizon', label:'Buying Horizon',        icon:'hourglass_top',     pill:2, tier:1, span:2, ws:ALL },
+  // PILL 1 - Pulse extras (moved from Qualification)
+  { id:'decision_power', label:'Decision Power',        icon:'gavel',             pill:1, tier:0, span:1, ws:ALL },
+  { id:'funding',        label:'Funding Confidence',    icon:'account_balance',   pill:1, tier:0, span:1, ws:ALL },
+  { id:'ltv_segment',    label:'Lifetime Value',        icon:'diamond',           pill:1, tier:0, span:1, ws:ALL },
+  { id:'price_ceiling',  label:'Price Elasticity',      icon:'sell',              pill:1, tier:0, span:1, ws:['real_estate','general'] },
   // PILL 3 - Qualification (tier 2)
-  { id:'decision_power', label:'Decision Power',        icon:'gavel',             pill:3, tier:2, span:1, ws:ALL },
-  { id:'persona',        label:'Comm. Persona',         icon:'psychology',        pill:3, tier:2, span:1, ws:ALL },
-  { id:'motivation',     label:'Core Motivation',       icon:'interests',         pill:3, tier:2, span:2, ws:ALL },
-  { id:'objection',      label:'Objection Profile',     icon:'shield',            pill:3, tier:2, span:2, ws:ALL },
-  { id:'funding',        label:'Funding Confidence',    icon:'account_balance',   pill:3, tier:2, span:1, ws:ALL },
-  { id:'ltv_segment',    label:'Lifetime Value',        icon:'diamond',           pill:3, tier:2, span:1, ws:ALL },
-  { id:'price_ceiling',  label:'Price Elasticity',      icon:'sell',              pill:3, tier:2, span:1, ws:['real_estate','general'] },
   { id:'dealbreaker',    label:'Unspoken Deal-Breaker', icon:'block',             pill:3, tier:2, span:2, ws:ALL },
   // healthcare injects (Pill 3)
   { id:'treat_urgency',  label:'Treatment Urgency',     icon:'emergency',         pill:3, tier:2, span:1, ws:['healthcare'] },
@@ -209,24 +207,6 @@ function heatDays(l: Lead): number[] {
   return days
 }
 
-function objectionsOf(l: Lead) {
-  const out: { t: string; icon: string; tone: string; fix: string }[] = []
-  ;(l.signals || []).forEach(s => {
-    if (s.type === 'neg' || s.type === 'warn') {
-      let icon = 'shield', fix = 'Address head-on before the next ask.'
-      const txt = s.text
-      if (/price|budget|installment|cost|fee/i.test(txt)) { icon = 'sell'; fix = 'Reframe on value + offer a staged payment plan.' }
-      else if (/quiet|no reply|dropped|skip/i.test(txt)) { icon = 'notifications_off'; fix = 'Switch channel - a short WhatsApp beats another email.' }
-      else if (/competitor|comparing/i.test(txt)) { icon = 'compare_arrows'; fix = 'Send a side-by-side that wins on your strengths.' }
-      else if (/family|partner|decision/i.test(txt)) { icon = 'groups'; fix = 'Get the second decision-maker into the room.' }
-      out.push({ t: txt, icon, tone: s.type === 'neg' ? 'r' : 'a', fix })
-    }
-  })
-  if (l.profile && /low/i.test(l.profile.budgetConf || ''))
-    out.push({ t:'Budget stated only vaguely', icon:'help', tone:'a', fix:'Pin the real number with an either/or question.' })
-  return out
-}
-
 function summaryBullets(l: Lead) {
   const first = l.name.split(' ')[0]
   const h = l.score >= 70 ? 'g' : l.score >= 45 ? 'a' : 'r'
@@ -265,7 +245,7 @@ export type MetricData = Record<string, unknown>
 export function buildLeadMetrics(l: Lead): MetricData {
   const m: MetricData = {}
   const r2 = seeded(l.id, 2), r3 = seeded(l.id, 3), r4 = seeded(l.id, 4), r5 = seeded(l.id, 5)
-  const score = l.score, sent = l.sentiment, eng = l.engagement, gapD = Math.round(l.last / 1440)
+  const score = l.score, eng = l.engagement, gapD = Math.round(l.last / 1440)
 
   // helper makers
   const stat  = (v: unknown, sub: string, note?: string) => ({ viz:'stat', v, sub, note })
@@ -352,34 +332,6 @@ export function buildLeadMetrics(l: Lead): MetricData {
   ;(m.decision_power as Record<string, unknown>).steps = [ decP >= 70
     ? { ic:'bolt', t:'Push for the decision directly - no need to wait on others.' }
     : { ic:'groups', t:'Identify the second decision-maker and get them in the next call.' } ]
-
-  const personaIco = (p: string) => p === 'Analytical' ? 'analytics' : p === 'Relational' ? 'favorite' : 'bolt'
-  const personaTone2 = (p: string) => p === 'Analytical' ? 'b' : p === 'Relational' ? 'v' : 'o'
-  const personaTalk = (p: string) => p === 'Analytical' ? 'Lead with numbers, comparables and a clear spec sheet.' : p === 'Relational' ? 'Open warm, build trust first, keep the data light.' : 'Be brief and direct - headline the bottom line, skip the preamble.'
-  const personas = score >= 70 ? ['Analytical','Direct'] : sent >= 60 ? ['Relational'] : ['Direct']
-  m.persona = playbook(
-    personas.map(p => ({ ic:personaIco(p), tone:personaTone2(p), t:p + ' communicator' })),
-    { steps: personas.map(p => ({ ic:'record_voice_over', t:personaTalk(p) })) })
-
-  const mot = (l.profile && l.profile.motivation) || ''
-  const motMap: Record<string, { ic: string }> = {
-    'Passive Income':{ ic:'savings' }, 'Prestige':{ ic:'workspace_premium' }, 'Lifestyle':{ ic:'beach_access' },
-    'Leisure':{ ic:'beach_access' }, 'Stability':{ ic:'foundation' }, 'Exploring':{ ic:'explore' },
-  }
-  const motTags = /investment/i.test(mot) ? ['Passive Income','Prestige'] : /holiday/i.test(mot) ? ['Lifestyle','Leisure'] : /primary/i.test(mot) ? ['Lifestyle','Stability'] : ['Exploring']
-  m.motivation = playbook(
-    motTags.map(tag => ({ ic:(motMap[tag] || {ic:'interests'}).ic, tone:'g', t:tag })),
-    { compare: cmp(/investment/i.test(mot) ? 34 : 18, /investment/i.test(mot) ? 'more investor-led than sector' : 'vs sector mix'),
-      steps: [{ ic:'auto_stories', t:'Lead the story with ' + motTags[0].toLowerCase() + ' - it is what actually drives the buy.' }],
-      tip: /investment/i.test(mot) ? 'Frame ROI, yield and resale liquidity - not lifestyle.' : 'Sell the feeling of the space first; justify with numbers second.' })
-
-  const objs = objectionsOf(l)
-  m.objection = objs.length
-    ? playbook(
-        objs.slice(0,3).map(o => ({ ic:o.icon, tone:o.tone, t:o.t })),
-        { steps: objs.slice(0,2).map(o => ({ ic:'arrow_forward', t:o.fix })),
-          tip: 'Tackle the top objection before your next ask - don\'t let it sit.' })
-    : { viz:'status', ok:true, text:'No objections detected', sub:'nothing blocking - keep momentum' }
 
   const fin = (l.profile && l.profile.financing) || ''
   const finP = /cash/i.test(fin) ? 95 : /mortgage/i.test(fin) ? 55 : 40
@@ -485,3 +437,140 @@ export function summaryFor(l: Lead): string {
   if (h === 'a') return 'Warm but undecided. ' + first + ' is interested yet hasn\'t committed - a concrete next step is what moves this forward.'
   return 'Cooling off. ' + first + ' has gone quiet and signals are weakening - re-qualify with one low-effort touch before investing more time.'
 }
+
+// ── Document / PDF view annotations (static demo dataset) ────────────────────
+// Hardcoded demo copy — NOT seeded per lead. Three overlay annotations for the
+// Document channel view. Each carries a stable id, a short label, a tone key
+// ('depth' emerald / 'interest' blue / 'friction' red), a CSS anchor hint for
+// later positioning, and a tooltip string revealed on hover.
+
+export type AnnotationTone = 'depth' | 'interest' | 'friction'
+
+export interface DocAnnotation {
+  id: string
+  label: string
+  tone: AnnotationTone
+  anchor: string   // CSS class hint, e.g. 'anchor-pricing' — for later layout
+  tooltip: string
+}
+
+export const DOC_ANNOTATIONS: DocAnnotation[] = [
+  {
+    id: 'dwell',
+    label: '8m 13s Deep-Dwell, +174% vs sector',
+    tone: 'depth',
+    anchor: 'anchor-pricing',
+    tooltip:
+      'Lead spent 8 minutes 13 seconds on the Pricing section — 174% above the sector median of 3m 0s. ' +
+      'Sustained dwell at this depth signals active cost-modelling rather than passive browsing. ' +
+      'Recommend leading the next call with a tailored payment-plan breakdown.',
+  },
+  {
+    id: 'scroll-depth',
+    label: '76% Scroll Depth, linger point Floor Plan',
+    tone: 'interest',
+    anchor: 'anchor-floor-plan',
+    tooltip:
+      'Lead scrolled to 76% of the document and paused longest on the Floor Plan section. ' +
+      'Scroll depth above 70% correlates with a 2.3× higher reply rate in comparable profiles. ' +
+      'The floor-plan linger suggests spatial fit is a key evaluation criterion.',
+  },
+  {
+    id: 'friction',
+    label: 'Rage-clicked Payment Terms 3x',
+    tone: 'friction',
+    anchor: 'anchor-payment-terms',
+    tooltip:
+      'Three rapid re-clicks on the Payment Terms block detected within a 4-second window — ' +
+      'a strong signal of confusion or distrust around the instalment structure. ' +
+      'Proactively clarify the payment schedule in the next message to remove this friction point.',
+  },
+]
+
+// ── Brain sections (Qualification-tab redesign) ───────────────────────────────
+// Demo data for the nine persona-insight panels rendered in the upcoming
+// Qualification tab brain layout.  No React wiring here - data only.
+
+export interface BrainSection {
+  id: string
+  label: string
+  icon: string
+  blurb: string
+  chips: string[]
+  color: string
+}
+
+export const BRAIN_SECTIONS: BrainSection[] = [
+  {
+    id: 'aspirations',
+    label: 'Aspirations',
+    icon: 'rocket_launch',
+    blurb: 'Driven by the goal of building lasting generational wealth through premium real-estate assets. Wants a property that signals success and opens doors to a broader investor network.',
+    chips: ['Generational wealth', 'Prestige address', 'Portfolio growth', 'Legacy asset', 'Social proof'],
+    color: '#fd5969',
+  },
+  {
+    id: 'challenges',
+    label: 'Challenges',
+    icon: 'sync_problem',
+    blurb: 'Navigating competing demands on capital while under time pressure from a narrowing window in the current market cycle. Needs clear ROI evidence before committing.',
+    chips: ['Capital allocation', 'Market timing', 'ROI uncertainty', 'Time pressure', 'Competing offers'],
+    color: '#fdd02c',
+  },
+  {
+    id: 'values',
+    label: 'Values',
+    icon: 'verified',
+    blurb: 'Places a high premium on transparency and long-term relationships with advisors. Expects a consultant who respects their time and delivers concise, evidence-backed recommendations.',
+    chips: ['Transparency', 'Reliability', 'Long-term view', 'Respect for time', 'Honest counsel'],
+    color: '#fe8a01',
+  },
+  {
+    id: 'fears',
+    label: 'Fears',
+    icon: 'crisis_alert',
+    blurb: 'Deeply concerned about overpaying in a softening micro-market and locking liquidity into an asset that proves hard to exit. Off-plan delays rank as a secondary anxiety.',
+    chips: ['Overpaying', 'Illiquidity', 'Off-plan delays', 'Hidden fees', 'Regret risk'],
+    color: '#b0e731',
+  },
+  {
+    id: 'preferences',
+    label: 'Preferences',
+    icon: 'tune',
+    blurb: 'Prefers concise WhatsApp summaries over long email chains and values a single point of contact rather than handoffs between agents. Likes to see data before the pitch.',
+    chips: ['WhatsApp', 'Single contact', 'Data-first', 'Brief updates', 'Sea-view units'],
+    color: '#35e895',
+  },
+  {
+    id: 'dislikes',
+    label: 'Dislikes',
+    icon: 'thumb_down',
+    blurb: 'Loses confidence quickly when agents push urgency without evidence or repeat information already shared. Cold-call outreach at off-hours registers as a hard negative.',
+    chips: ['False urgency', 'Repeat pitching', 'Off-hours calls', 'Vague timelines', 'Over-communication'],
+    color: '#14aafe',
+  },
+  {
+    id: 'influencers',
+    label: 'Key Influencers',
+    icon: 'groups',
+    blurb: 'Financial partner and spouse carry decisive weight; no major purchase moves without their alignment. A trusted accountant also shapes the final capital-allocation decision.',
+    chips: ['Spouse', 'Financial partner', 'Accountant', 'Peer investors', 'Online reviews'],
+    color: '#a437eb',
+  },
+  {
+    id: 'keywords',
+    label: 'Key Words & Phrases',
+    icon: 'label',
+    blurb: 'Repeatedly anchors on yield, resale liquidity, and handover timeline in both written and verbal exchanges. Reacts positively to "locked-in price" and "title-deed ready".',
+    chips: ['"Yield %"', '"Resale liquidity"', '"Handover timeline"', '"Locked-in price"', '"Title-deed ready"', '"No hidden fees"'],
+    color: '#fc6d99',
+  },
+  {
+    id: 'purchase_factors',
+    label: 'Purchase Decision Factors',
+    icon: 'fact_check',
+    blurb: 'Location quality and projected rental yield are the primary gatekeepers; developer track record and payment-plan flexibility are secondary but required. Brand prestige tips close decisions.',
+    chips: ['Location score', 'Rental yield', 'Developer track record', 'Payment plan', 'Brand prestige', 'Exit liquidity'],
+    color: '#4a65f2',
+  },
+]

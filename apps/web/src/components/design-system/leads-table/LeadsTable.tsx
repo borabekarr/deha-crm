@@ -201,6 +201,9 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
   const [toast, setToast]         = useState<string | null>(null)
   const toastRef                  = useRef<ReturnType<typeof setTimeout> | null>(null)
   const searchRef                 = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Resizable columns: null = use CSS defaults; non-null = px widths for all 8 columns
+  const [colWidths, setColWidths] = useState<number[] | null>(null)
+  const theadRef                  = useRef<HTMLDivElement | null>(null)
 
   // Data is synchronous -- no artificial loading skeleton needed.
   // The skeleton markup (SkeletonRows) is kept but never rendered.
@@ -299,6 +302,44 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
     setPage(1)
   }, [])
 
+  // ── Column resize handler (imperative, no useEffect) ───────────────────────
+
+  const handleResizePointerDown = useCallback((e: React.PointerEvent, colIndex: number) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const thead = theadRef.current
+    if (!thead) return
+
+    // Measure all 8 header cells at drag-start to initialize concrete px widths
+    const cells = Array.from(thead.querySelectorAll<HTMLElement>('.lt-th'))
+    const measuredWidths = cells.map(c => c.getBoundingClientRect().width)
+
+    // Initialize colWidths from measured values if not yet set (first drag)
+    setColWidths(measuredWidths)
+
+    const startX = e.clientX
+    const startW = measuredWidths[colIndex]
+
+    const onMove = (me: PointerEvent) => {
+      const newW = Math.max(72, startW + (me.clientX - startX))
+      setColWidths(prev => {
+        const base = prev ?? measuredWidths
+        const next = [...base]
+        next[colIndex] = newW
+        return next
+      })
+    }
+
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+    }
+
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+  }, [])
+
   // ── Pagination helpers ──────────────────────────────────────────────────────
 
   const pages = Math.max(1, Math.ceil(total / PER_PAGE))
@@ -328,6 +369,10 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
     return `lt-th sortable${sorted ? ' sorted' : ''}${sorted && sortDir === 'asc' ? ' desc' : ''}`
   }
 
+  // Derive CSS variable track string from colWidths state
+  const trackStr = colWidths ? colWidths.map(w => w + 'px').join(' ') : undefined
+  const tableStyle = trackStr ? { ['--lt-cols' as string]: trackStr } : undefined
+
   return (
     <div className={`lt-app${compact ? ' compact' : ''}`} data-screen-label="Leads table">
       <div className="lt-main">
@@ -336,7 +381,8 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
         <div className="lt-header">
           <div>
             <div className="lt-title">
-              Leads <span className="count">{LEADS.length}</span>
+              <span className="material-symbols-outlined">groups</span>
+              Leads
             </div>
             <div className="lt-subtitle">
               Your pipeline, scored and triaged by AI -- start where it matters today.
@@ -344,6 +390,7 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
           </div>
           <div className="lt-head-actions">
             <button
+              type="button"
               className="lt-iconbtn"
               aria-label="Row density"
               title="Row density"
@@ -352,6 +399,7 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
               <span className="material-symbols-outlined">density_medium</span>
             </button>
             <button
+              type="button"
               className="lt-iconbtn"
               aria-label="Columns"
               title="Configure columns"
@@ -377,12 +425,14 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
               />
             </div>
             <button
+              type="button"
               className="lt-btn"
               onClick={() => search ? showToast(`AI parsing: "${search}"...`) : document.getElementById('ltSearch')?.focus()}
             >
               <span className="material-symbols-outlined">filter_alt</span>Filter
             </button>
             <button
+              type="button"
               className="lt-btn lt-btn-ai"
               onClick={() => showToast('Running full pipeline analysis...')}
             >
@@ -392,6 +442,7 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
 
           <div className="lt-quick">
             <button
+              type="button"
               className={`lt-qf${qf === 'hot' ? ' on' : ''}`}
               data-qf="hot"
               style={{ '--qf-c': '#F97316' } as React.CSSProperties}
@@ -404,6 +455,7 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
               </span>
             </button>
             <button
+              type="button"
               className={`lt-qf${qf === 'value' ? ' on' : ''}`}
               data-qf="value"
               style={{ '--qf-c': '#10B981' } as React.CSSProperties}
@@ -416,6 +468,7 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
               </span>
             </button>
             <button
+              type="button"
               className={`lt-qf${qf === 'earn' ? ' on' : ''}`}
               data-qf="earn"
               style={{ '--qf-c': '#EAB308' } as React.CSSProperties}
@@ -428,6 +481,7 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
               </span>
             </button>
             <button
+              type="button"
               className={`lt-clear${showClear ? ' show' : ''}`}
               id="ltClear"
               onClick={clearAll}
@@ -443,10 +497,11 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
         </div>
 
         {/* Table */}
-        <div className="lt-table">
-          <div className="lt-thead lt-grid">
+        <div className="lt-table" style={tableStyle}>
+          <div className="lt-thead lt-grid" ref={theadRef}>
             <div className="lt-th">
               <span className="lt-th-ic material-symbols-outlined">person</span>Lead
+              <span className="lt-resize" onPointerDown={e => handleResizePointerDown(e, 0)} />
             </div>
             <div className={thClass('score')} data-sort="score" onClick={() => handleSort('score')}>
               <span className="lt-th-ic material-symbols-outlined">target</span>
@@ -454,6 +509,7 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
               <span className="lt-sort">
                 <span className="material-symbols-outlined">arrow_downward</span>
               </span>
+              <span className="lt-resize" onPointerDown={e => handleResizePointerDown(e, 1)} />
             </div>
             <div className={thClassReg('value')} data-sort="value" onClick={() => handleSort('value')}>
               <span className="lt-th-ic material-symbols-outlined">payments</span>
@@ -461,9 +517,11 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
               <span className="lt-sort">
                 <span className="material-symbols-outlined">arrow_downward</span>
               </span>
+              <span className="lt-resize" onPointerDown={e => handleResizePointerDown(e, 2)} />
             </div>
             <div className="lt-th">
               <span className="lt-th-ic material-symbols-outlined">flag</span>Stage
+              <span className="lt-resize" onPointerDown={e => handleResizePointerDown(e, 3)} />
             </div>
             <div className={thClass('sentiment')} data-sort="sentiment" onClick={() => handleSort('sentiment')}>
               <span className="lt-th-ic material-symbols-outlined">mood</span>
@@ -471,9 +529,11 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
               <span className="lt-sort">
                 <span className="material-symbols-outlined">arrow_downward</span>
               </span>
+              <span className="lt-resize" onPointerDown={e => handleResizePointerDown(e, 4)} />
             </div>
             <div className="lt-th">
               <span className="lt-th-ic material-symbols-outlined">hub</span>Source
+              <span className="lt-resize" onPointerDown={e => handleResizePointerDown(e, 5)} />
             </div>
             <div className={thClassReg('last')} data-sort="last" onClick={() => handleSort('last')}>
               <span className="lt-th-ic material-symbols-outlined">schedule</span>
@@ -481,6 +541,7 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
               <span className="lt-sort">
                 <span className="material-symbols-outlined">arrow_downward</span>
               </span>
+              <span className="lt-resize" onPointerDown={e => handleResizePointerDown(e, 6)} />
             </div>
             <div className="lt-th">
               <span className="lt-th-ic material-symbols-outlined">thermostat</span>Temp
@@ -499,10 +560,10 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
                   Try a different quick filter or clear your search to see the full pipeline.
                 </div>
                 <div className="lt-empty-btns">
-                  <button className="lt-btn" onClick={clearAll}>
+                  <button type="button" className="lt-btn" onClick={clearAll}>
                     <span className="material-symbols-outlined">filter_alt_off</span>Clear filters
                   </button>
-                  <button className="lt-btn lt-btn-ai" onClick={() => showToast('Asking AI to surface leads...')}>
+                  <button type="button" className="lt-btn lt-btn-ai" onClick={() => showToast('Asking AI to surface leads...')}>
                     <span className="material-symbols-outlined">bolt</span>Ask AI
                   </button>
                 </div>
@@ -523,7 +584,7 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
           {!filterActive && !expanded && total > INITIAL_VISIBLE && (
             <div className="lt-viewmore-wrap" id="ltViewMoreWrap">
               <div className="lt-fade" />
-              <button className="lt-viewmore" onClick={handleViewMore}>
+              <button type="button" className="lt-viewmore" onClick={handleViewMore}>
                 View more (<span id="ltViewMoreCount">{total - INITIAL_VISIBLE} of {total}</span>)
                 <span className="material-symbols-outlined">expand_more</span>
               </button>
@@ -544,6 +605,7 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
             {!filterActive && pages > 1 && (
               <div className="lt-pages" id="ltPages">
                 <button
+                  type="button"
                   className="lt-pg nav"
                   disabled={safePage === 1}
                   onClick={() => { if (safePage > 1) setPage(safePage - 1) }}
@@ -552,9 +614,10 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
                 </button>
                 {pageNums.map((p, i) =>
                   p === '...' ? (
-                    <button key={`ell-${i}`} className="lt-pg ell" disabled>...</button>
+                    <button key={'ell-before-' + String(pageNums[i + 1] ?? 'end')} type="button" className="lt-pg ell" disabled>...</button>
                   ) : (
                     <button
+                      type="button"
                       key={p}
                       className={`lt-pg${p === safePage ? ' cur' : ''}`}
                       onClick={() => { if (p !== safePage) { setPage(p as number); setOpenId(null) } }}
@@ -564,6 +627,7 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
                   )
                 )}
                 <button
+                  type="button"
                   className="lt-pg nav"
                   disabled={safePage === pages}
                   onClick={() => { if (safePage < pages) setPage(safePage + 1) }}
@@ -578,6 +642,7 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
         {/* CSV export button (source subtitle promises it) */}
         <div style={{ padding: '0 28px 16px', display: 'flex', gap: 10 }}>
           <button
+            type="button"
             className="lt-btn"
             onClick={() => { exportCSV(filteredRows); showToast(`Exporting ${filteredRows.length} leads to CSV...`) }}
           >
@@ -588,7 +653,7 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
 
       {/* Toast */}
       <div className={`lt-toast${toast ? ' show' : ''}`} id="ltToast">
-        <span className="material-symbols-outlined">auto_awesome</span>
+        <span className="material-symbols-outlined">neurology</span>
         <span id="ltToastMsg">{toast}</span>
       </div>
 

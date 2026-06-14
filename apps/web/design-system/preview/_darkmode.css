@@ -41,7 +41,10 @@ html.dark .te-outer,
 html.dark .wf-outer,
 html.dark .lb-outer,
 html.dark .tmpl-outer,
-html.dark .pop-outer { background: #020617; }
+html.dark .pop-outer,
+html.dark .mem-outer,
+html.dark .wp-bezel,
+html.dark .mb-shell { background: #020617; }
 
 /* ── Segmented control (controls + leaderboard) ─────────────────────── */
 html.dark .seg { background: #0F172A; }

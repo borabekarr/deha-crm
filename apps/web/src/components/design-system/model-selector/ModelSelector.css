@@ -1,0 +1,290 @@
+  body { background: #F8FAFC; font-family: 'Montserrat', sans-serif; }
+  .ms-card {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: flex-start; gap: 14px;
+    padding: 32px 24px;
+    background: #F8FAFC;
+    background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.07) 0%, #F8FAFC 55%);
+  }
+
+  /* ── Trigger pill ── */
+  .ms-trigger {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px;
+    background: rgba(255,255,255,0.92); backdrop-filter: blur(20px);
+    border: 1px solid #CBD5E1;
+    border-radius: 9999px;
+    cursor: pointer; user-select: none;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,1),
+      inset 0 -2px 4px rgba(15,23,42,0.06),
+      inset 0 0 0 1px rgba(15,23,42,0.04),
+      0 2px 8px rgba(15,23,42,0.07);
+    transition: box-shadow calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+    font-family: 'Montserrat';
+  }
+  .ms-trigger:hover { box-shadow: inset 0 1px 0 #fff, inset 0 -2px 4px rgba(15,23,42,0.08), 0 4px 16px rgba(15,23,42,0.10); }
+  .ms-trigger:active { transform: scale(0.97); }
+  /* Colorful mini icon tag in trigger — shrunk version of .ms-icon */
+  .ms-t-icon-tag {
+    width: 22px; height: 22px; border-radius: 6px;
+    display: grid; place-items: center; flex-shrink: 0;
+    background-color: var(--icon-c, #10B981);
+    background-image: radial-gradient(ellipse at top right, rgba(255,255,255,0.18) 0%, transparent 55%),
+                      linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+    background-size: cover, 5px 5px, 5px 5px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.55),
+      inset 0 -1px 0 rgba(15,23,42,0.20),
+      inset 0 0 0 1px rgba(15,23,42,0.12),
+      0 1px 4px rgba(0,0,0,0.12);
+    transition: background-color calc(200ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  }
+  .ms-t-icon-tag .material-icons,
+  .ms-t-icon-tag .material-symbols-outlined {
+    font-size: 13px; color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+    line-height: 1; display: block;
+  }
+  .ms-t-model   { font-size: 14px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em; }
+  .ms-t-sep     { width: 1px; height: 16px; background: #E2E8F0; }
+  .ms-t-label   { font-size: 13px; font-weight: 600; color: #94A3B8; }
+  .ms-t-chevron { font-size: 18px; color: #94A3B8; transition: transform calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
+  .ms-trigger.open .ms-t-chevron { transform: rotate(180deg); }
+
+  /* ── Panel open bounce (dynamic-island style) ── */
+  /* Mirrors WorkflowPublish wp-popIn: compress scaleX+scaleY then overshoot, anchored top center */
+  @keyframes msOpen {
+    0%   { opacity: 0; transform: scaleX(0.72) scaleY(0.56); }
+    35%  { opacity: 1; transform: scaleX(1.04) scaleY(1.03); }
+    55%  { transform: scaleX(0.98) scaleY(0.99); }
+    75%  { transform: scaleX(1.01) scaleY(1.005); }
+    100% { opacity: 1; transform: scaleX(1) scaleY(1); }
+  }
+  @keyframes msClose {
+    from { opacity: 1; transform: scaleX(1) scaleY(1); }
+    to   { opacity: 0; transform: scaleX(0.88) scaleY(0.80); }
+  }
+
+  /* ── Gray outer shell ── */
+  .ms-outer {
+    background: #D4DCE8;
+    border-radius: 30px;
+    padding: 10px;
+    box-shadow: 0 16px 56px rgba(15,23,42,0.13), 0 3px 10px rgba(15,23,42,0.06);
+    transform-origin: top center;
+  }
+  .ms-outer.open {
+    animation: msOpen calc(380ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.64,1) both;
+  }
+  .ms-outer.hidden {
+    animation: msClose calc(180ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) forwards;
+    pointer-events: none;
+  }
+
+  /* ── White inner panel ── */
+  .ms-panel {
+    background: #fff;
+    border-radius: 22px;
+    overflow: hidden;
+    position: relative; /* needed for .ms-sel-indicator absolute positioning */
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,1),
+      inset 0 -1px 0 rgba(15,23,42,0.04),
+      inset 0 0 0 1px rgba(15,23,42,0.04);
+    width: 420px;
+    /* Row height: icon 38px + padding 12px top + 12px bottom = 62px */
+    --ms-row-h: 62px;
+  }
+
+  /* ── Model rows ── */
+  .ms-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    cursor: pointer; user-select: none;
+    position: relative;
+    transition: background calc(140ms * var(--anim-mult, 1)), transform calc(100ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  }
+  .ms-row::after {
+    content: ''; position: absolute;
+    bottom: 0; left: 14px; right: 14px;
+    height: 1px; background: #F1F5F9;
+  }
+  .ms-row:last-of-type::after { display: none; }
+  .ms-row:hover { background: #F8FAFC; }
+  .ms-row:active { transform: scale(0.985); background: #F1F5F9; }
+  /* Selected: black bg, white text */
+  .ms-row.sel {
+    background: #0F172A;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -2px 0 rgba(0,0,0,0.25);
+  }
+  .ms-row.sel:hover { background: #1E293B; }
+  .ms-row.sel .ms-name { color: #fff; }
+  .ms-row.sel .ms-desc { color: rgba(255,255,255,0.55); }
+  .ms-row.sel::after { display: none; }
+  .ms-row:has(+ .ms-row.sel)::after { display: none; }
+
+  /* ── Sliding selection indicator (bounce, behind rows) ── */
+  /* Positioned via CSS transform using --sel-idx (set on .ms-panel) and --ms-row-h.
+     No JS measurement — uniform row height means index × height = exact offset. */
+  .ms-sel-indicator {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: var(--ms-row-h, 62px);
+    background: #0F172A;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -2px 0 rgba(0,0,0,0.25);
+    pointer-events: none;
+    z-index: 0;
+    /* Overshoot bounce on slide; cubic-bezier(.34,1.3,.64,1) matches seg-pill */
+    transform: translateY(calc(var(--sel-idx, 0) * var(--ms-row-h, 62px)));
+    transition: transform calc(300ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.64,1);
+  }
+
+  /* Make rows sit above indicator */
+  .ms-row {
+    z-index: 1;
+  }
+
+  /* With indicator active, remove background from .sel row (indicator provides it) */
+  .ms-panel:has(.ms-sel-indicator) .ms-row.sel {
+    background: transparent;
+    box-shadow: none;
+  }
+  .ms-panel:has(.ms-sel-indicator) .ms-row.sel:hover {
+    background: transparent;
+  }
+
+  /* ── Dark mode: card wrapper ── */
+  html.dark .ms-card {
+    background: #0F172A;
+    background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.07) 0%, #0F172A 55%);
+  }
+
+  /* ── Dark mode: selected row uses white/light fill ── */
+  html.dark .ms-row.sel {
+    background: #FFFFFF;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 -2px 0 rgba(0,0,0,0.06);
+  }
+  html.dark .ms-row.sel:hover { background: #F1F5F9; }
+  html.dark .ms-row.sel .ms-name { color: #0F172A; }
+  html.dark .ms-row.sel .ms-desc { color: #64748B; }
+  html.dark .ms-row.sel .ms-check { color: #0F172A; -webkit-text-stroke: 1px #0F172A; text-shadow: none; }
+  html.dark .ms-row.sel .ms-stat { color: #1E293B; }
+  html.dark .ms-row.sel .ms-stat .material-icons { color: #475569; }
+  /* Dark mode indicator also uses white */
+  html.dark .ms-sel-indicator {
+    background: #FFFFFF;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 -2px 0 rgba(0,0,0,0.06);
+  }
+
+  /* ── Icon square (Deha semantic-pill style) ── */
+  .ms-icon {
+    width: 38px; height: 38px; border-radius: 11px;
+    display: grid; place-items: center; flex-shrink: 0;
+    background-color: var(--icon-c, #10B981);
+    background-image: radial-gradient(ellipse at top right, rgba(255,255,255,0.18) 0%, transparent 55%), linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+    background-size: cover, 7px 7px, 7px 7px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.55),
+      inset 0 -2px 0 rgba(15,23,42,0.20),
+      inset 0 0 0 1px rgba(15,23,42,0.12),
+      0 2px 6px rgba(0,0,0,0.10);
+  }
+  .ms-icon .material-icons,
+  .ms-icon .material-symbols-outlined {
+    font-size: 20px; color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
+    line-height: 1; display: block;
+  }
+
+  /* ── Text ── */
+  .ms-text { flex: 1; min-width: 0; }
+  .ms-name-row { display: flex; align-items: center; gap: 7px; }
+  .ms-name { font-size: 15px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em; line-height: 1.2; }
+  .ms-desc { font-size: 12px; font-weight: 500; color: #94A3B8; margin-top: 2px; }
+
+  /* ── Meta column (right side) ── */
+  .ms-meta {
+    position: relative;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: flex-end;
+    height: 24px;
+    min-width: 152px; /* fixed width so all rows align on the same right edge */
+  }
+
+  /* Check */
+  .ms-check {
+    font-size: 20px; color: #fff;
+    font-weight: 900;
+    opacity: 0; transform: scale(0.6);
+    transition: opacity calc(200ms * var(--anim-mult, 1)), transform calc(200ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.45), 0 0 1px rgba(255,255,255,0.4);
+    -webkit-text-stroke: 1px #fff;
+  }
+
+  /* Stats — visible by default on all rows; animation handles selected state */
+  .ms-stats {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+  .ms-stat {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; font-weight: 800;
+    color: #64748B;            /* slate for white-bg non-selected rows */
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+  .ms-stat .material-icons {
+    font-size: 14px;
+    color: #94A3B8;
+  }
+  /* On selected (black bg): override to white */
+  .ms-row.sel .ms-stat { color: rgba(255,255,255,0.95); }
+  .ms-row.sel .ms-stat .material-icons { color: rgba(255,255,255,0.65); }
+
+  /* Check hidden for non-selected rows (no layout space reserved) */
+  .ms-row:not(.sel) .ms-check { display: none; }
+
+  /* Selected without stats (Auto): just show check, no animation */
+  .ms-row.sel .ms-check { opacity: 1; transform: scale(1); }
+
+  /* Selected WITH stats: remove display:flex override (already flex by default), animate both */
+  .ms-row.sel.has-stats .ms-check {
+    position: absolute; right: 0; top: 50%;
+    transform: translateY(-50%) scale(1);
+    animation: morphCheck calc(6s * var(--anim-mult, 1)) ease-in-out infinite;
+  }
+  .ms-row.sel.has-stats .ms-stats {
+    animation: morphStats calc(6s * var(--anim-mult, 1)) ease-in-out infinite;
+  }
+
+  @keyframes morphCheck {
+    0%, 42%   { opacity: 1; transform: translateY(-50%) scale(1) rotate(0); filter: blur(0); }
+    50%, 92%  { opacity: 0; transform: translateY(-50%) scale(0.5) rotate(-20deg); filter: blur(4px); }
+    100%      { opacity: 1; transform: translateY(-50%) scale(1) rotate(0); filter: blur(0); }
+  }
+  @keyframes morphStats {
+    0%, 42%   { opacity: 0; transform: scale(0.82) translateX(-5px); filter: blur(3px); }
+    50%, 92%  { opacity: 1; transform: scale(1) translateX(0); filter: blur(0); }
+    100%      { opacity: 0; transform: scale(0.82) translateX(10px); filter: blur(3px); }
+  }
+
+  /* Badge */
+  .ms-badge {
+    font-size: 10px; font-weight: 800; letter-spacing: 0.06em;
+    padding: 2px 7px; border-radius: 9999px; flex-shrink: 0;
+  }
+  .ms-badge.new {
+    background: #10B981; color: #fff;
+    background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+    background-size: 7px 7px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(15,23,42,0.18);
+  }
+  .ms-badge.pro {
+    background: linear-gradient(135deg, #F59E0B, #EF4444);
+    color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.15);
+  }

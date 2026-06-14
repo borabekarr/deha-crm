@@ -10,7 +10,7 @@ export default function Iconography() {
         <div className="ic-cell"><span className="material-icons">expand_more</span><span className="ic-name">expand_more</span></div>
         <div className="ic-cell"><span className="material-icons">arrow_forward</span><span className="ic-name">arrow_forward</span></div>
         <div className="ic-cell"><span className="material-icons">trending_up</span><span className="ic-name">trending_up</span></div>
-        <div className="ic-cell"><span className="material-icons" style={{ color: '#10B981' }}>auto_awesome</span><span className="ic-name">auto_awesome</span></div>
+        <div className="ic-cell"><span className="material-symbols-outlined" style={{ color: '#10B981' }}>neurology</span><span className="ic-name">neurology</span></div>
         <div className="ic-cell"><span className="material-icons" style={{ color: '#10B981' }}>leaderboard</span><span className="ic-name">leaderboard</span></div>
         <div className="ic-cell"><span className="material-icons" style={{ color: '#EAB308' }}>emoji_events</span><span className="ic-name">emoji_events</span></div>
         <div className="ic-cell"><span className="material-icons" style={{ color: '#EF4444' }}>schedule</span><span className="ic-name">schedule</span></div>

@@ -1,11 +1,10 @@
 .sh-card { padding: 0; background: #F8FAFC; }
-.sh-grid3 { display:grid; grid-template-columns: repeat(3, 1fr); gap: 24px; padding: 30px 24px 36px; }
+.sh-grid3 { display:grid; grid-template-columns: repeat(2, 1fr); gap: 24px; padding: 30px 24px 36px; }
 .sh-box { aspect-ratio: 1.2; background: #FFFFFF; border-radius: 20px; display:flex; flex-direction:column; justify-content:flex-end; padding: 14px; }
-.sh-emerald-glow-full { grid-column: 1 / 4; aspect-ratio: auto; height: 110px; }
+.sh-emerald-glow-full { grid-column: 1 / 3; aspect-ratio: auto; height: 110px; }
 .sh-name { font-size: 13px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em; }
 .sh-meta { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 9px; color: #64748B; margin-top: 3px; line-height: 1.4; }
 
-.sh-glass     { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); border: 1px solid rgba(255,255,255,0.6); }
 .sh-inner     { background: rgba(255,255,255,0.95); border: 1px solid #CBD5E1;
                box-shadow: inset 0 -2px 0 rgba(15,23,42,0.14), inset 0 0 0 1px rgba(15,23,42,0.07); }
 .sh-recessed  { background: #F1F5F9; box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.06); }

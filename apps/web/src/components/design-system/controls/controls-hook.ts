@@ -124,7 +124,7 @@ export function sliderRef(el: HTMLDivElement | null): void {
     if (!pressed) return
     pressed = false
     el!.classList.remove('dragging')
-    try { el!.releasePointerCapture(e.pointerId) } catch (_) { /* noop */ }
+    try { el!.releasePointerCapture(e.pointerId) } catch { /* noop */ }
   }
 
   el.addEventListener('pointerdown', onDown)

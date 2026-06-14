@@ -1,0 +1,83 @@
+/* ── AI caveat component CSS — verbatim from components-ai-caveat.html ──── */
+
+.card {
+  padding: 32px 24px;
+  display: flex; flex-direction: column; gap: 14px;
+  background: #F8FAFC;
+  background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.06) 0%, #F8FAFC 55%);
+}
+
+/* ── AI message bubble ── */
+.ai-bubble {
+  background: rgba(255,255,255,0.85); backdrop-filter: blur(40px);
+  border: 1px solid #E2E8F0;
+  border-radius: 20px;
+  padding: 22px 24px 16px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -1px 0 rgba(15,23,42,0.03),
+    0 2px 12px rgba(15,23,42,0.04);
+}
+.ai-text {
+  font-size: 14px; font-weight: 500; color: #334155;
+  line-height: 1.65;
+  margin-bottom: 20px;
+}
+.ai-text p + p { margin-top: 14px; }
+
+/* Action row */
+.ai-actions { display: flex; gap: 4px; align-items: center; }
+.ai-action-btn {
+  background: none; border: none; cursor: pointer;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px;
+  color: #CBD5E1;
+  transition: background 140ms, color 140ms, transform 100ms cubic-bezier(.22,1,.36,1);
+  padding: 0;
+}
+.ai-action-btn:hover { background: #F1F5F9; color: #64748B; }
+.ai-action-btn:active { transform: scale(0.9); }
+.ai-action-btn .material-icons { font-size: 20px; line-height: 1; display: block; }
+
+/* ── Caveat banner ── */
+.ai-caveat {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 20px;
+  background: rgba(249,115,22,0.04);
+  border: 2px solid #F97316;
+  border-radius: 18px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    inset 0 -1px 0 rgba(249,115,22,0.06),
+    0 2px 8px rgba(249,115,22,0.06);
+}
+.ai-caveat-icon {
+  font-size: 22px;
+  color: #F97316;
+  flex-shrink: 0;
+  line-height: 1;
+  filter: drop-shadow(0 1px 1px rgba(249,115,22,0.2));
+}
+.ai-caveat-text {
+  font-size: 14px; font-weight: 700; color: #F97316;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+.ai-caveat-link {
+  color: #F97316;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1.5px;
+  cursor: pointer;
+  transition: color 150ms;
+}
+.ai-caveat-link:hover { color: #EA580C; }
+
+/* ── Component label ── */
+.section-label {
+  font-size: 10px; font-weight: 700; color: #94A3B8;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  margin-bottom: -4px;
+}

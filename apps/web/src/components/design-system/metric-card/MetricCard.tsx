@@ -79,7 +79,7 @@ function ExpandedCard({ metricKey, onClose }: ExpandedCardProps) {
           Dashboard <span style={{ color: '#CBD5E1', margin: '0 1px' }}>/</span>{' '}
           <strong>{m.label}</strong>
         </div>
-        <button className="exp-close" onClick={onClose} aria-label="Close">
+        <button type="button" className="exp-close" onClick={onClose} aria-label="Close">
           <span className="material-icons">close</span>
         </button>
       </div>
@@ -96,6 +96,7 @@ function ExpandedCard({ metricKey, onClose }: ExpandedCardProps) {
           <span className="exp-period">{m.period}</span>
         </div>
         {/* dangerouslySetInnerHTML mirrors the prototype's innerHTML assignment for bold insight text */}
+        {/* eslint-disable-next-line no-restricted-syntax -- m.insight is trusted static showcase data, never user input; markup preserves the prototype's bold insight rendering */}
         <div className="exp-insight" dangerouslySetInnerHTML={{ __html: m.insight }} />
       </div>
       <div className="exp-chart-wrap">
