@@ -113,6 +113,14 @@ const DAY_TASKS: Record<number, Task[]> = {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
+// Escape user-supplied text before it is interpolated into an innerHTML string.
+// task.title / task.time originate from popover <input> values, so they must be
+// neutralized to prevent DOM-text-as-HTML injection (CodeQL js/xss-through-dom).
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+}
+
 export function badgeHTML(p: typeof PRIORITY[PriorityKey]): string {
   return '<span class="material-icons">' + (p.bi || 'label') + '</span>' + p.label
 }
@@ -333,14 +341,14 @@ export function makeRow(
       '<button class="tao-btn tao-del" aria-label="Delete task"><span class="material-icons">delete</span><span>Delete</span></button>' +
     '</div>' +
     '<div class="task" style="--tag:' + p.color + ';--tag-bg:' + p.bg + ';">' +
-      '<span class="t-ico"><span class="material-icons">' + task.icon + '</span></span>' +
+      '<span class="t-ico"><span class="material-icons">' + escapeHtml(task.icon) + '</span></span>' +
       '<div class="t-main">' +
-        '<div class="t-title">' + task.title + '</div>' +
+        '<div class="t-title">' + escapeHtml(task.title) + '</div>' +
         '<span class="t-badge">' + badgeHTML(p) + '</span>' +
       '</div>' +
       '<div class="t-right">' +
         '<span class="t-repeat"><span class="material-icons">repeat</span></span>' +
-        '<span class="t-time">' + task.time + '</span>' +
+        '<span class="t-time">' + escapeHtml(task.time) + '</span>' +
         '<button class="t-complete"><span class="material-icons">check</span>Complete</button>' +
       '</div>' +
     '</div>'
