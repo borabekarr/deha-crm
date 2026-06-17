@@ -50,6 +50,29 @@ test.beforeEach(async ({ page }) => {
       s ^= s << 13; s ^= s >>> 17; s ^= s << 5; s >>>= 0
       return s / 0xffffffff
     }
+    // Freeze the wall clock so components that render live time produce
+    // identical pixels every run. currency-converter shows nowHM() (HH:MM) in
+    // its default state — minute-granular, so it drifted between runs minutes
+    // apart and broke exact-match on CI. Pinned to the capture day
+    // (2026-06-17 UTC): day-granular renders (todo-list "today", calendar grid)
+    // are unchanged, only live clocks become deterministic. Argument forms
+    // (new Date(ms), new Date(y, m, d), parsing) keep their real behaviour, so
+    // date math in todo-list / dynamic-calendar is preserved.
+    const FIXED = new Date('2026-06-17T12:00:00Z').getTime()
+    const RealDate = Date
+    class FrozenDate extends RealDate {
+      constructor(...args: ConstructorParameters<typeof Date> | []) {
+        if (args.length === 0) {
+          super(FIXED)
+        } else {
+          super(...(args as ConstructorParameters<typeof Date>))
+        }
+      }
+      static now() {
+        return FIXED
+      }
+    }
+    globalThis.Date = FrozenDate as DateConstructor
   })
 })
 
@@ -198,7 +221,12 @@ test('design-system / workflow-add-elements', async ({ page }) => {
   await waitForPreview(page)
 
   // Right-click the canvas to open the Add Elements panel.
-  await page.locator('.wae-canvas').click({ button: 'right' })
+  // Pin the click to a fixed top-left coordinate (not the element centre):
+  // the panel anchors at the click point, and a centre click made it wide
+  // enough to hit the right-edge clamp, whose shift depends on the measured
+  // panel width — that produced a ~185px run-to-run horizontal drift. Anchored
+  // near the left, the panel fits without clamping, so aeLeft is deterministic.
+  await page.locator('.wae-canvas').click({ button: 'right', position: { x: 90, y: 90 } })
 
   // Wait for the Add Elements inner panel to appear.
   await page.locator('.wae-ae-inner').waitFor({ state: 'visible' })
