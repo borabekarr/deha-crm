@@ -114,7 +114,10 @@ const SLUGS = [
   'metric-circle',
   'statistics-graph-card',
   'streak-card',
-  'financial-health-card',
+  // financial-health-card is captured by a dedicated test below: its mount
+  // count-up (tweenScore -> .fhc-num) occasionally lands mid-tween at the
+  // 900ms mark, so the generic goto+shot flaked. The dedicated test waits for
+  // the counter to reach its final value before capturing.
   // Sheets & Cards
   'model-selector',
   'connect-modal',
@@ -192,6 +195,19 @@ for (const slug of SLUGS) {
 // KEEP IN SYNC with component-registry.ts.
 // ---------------------------------------------------------------------------
 
+test('design-system / financial-health-card', async ({ page }) => {
+  await page.goto('/components/financial-health-card')
+  await waitForPreview(page)
+
+  // The score counter animates from 0 up to INITIAL_SCORE (90) on mount via a
+  // JS rAF tween (tweenScore writes .fhc-num.textContent each frame). The
+  // generic 900ms settle occasionally captured a pre-final frame ("89"), so
+  // wait until the counter has reached its final value before the screenshot.
+  await expect(page.locator('.fhc-num')).toHaveText('90')
+
+  await expect(page).toHaveScreenshot('financial-health-card.png', SHOT_OPTS)
+})
+
 test('design-system / task-card', async ({ page }) => {
   await page.goto('/components/task-card')
   await waitForPreview(page)
@@ -256,6 +272,16 @@ test('design-system / workflow-add-elements', async ({ page }) => {
   await waitForStableBox(page.locator('.wae-ae-inner'))
   const flyout = page.locator('.wae-pop-outer.visible').nth(1)
   if (await flyout.count()) await waitForStableBox(flyout)
+
+  // Reset the preview scroll container before capturing. The right-click +
+  // hover above make Playwright scroll the target into view, and the resulting
+  // scrollTop varied run-to-run — shifting the WHOLE page in the screenshot
+  // (~0.06 diff). The panel/flyout are absolutely positioned inside the shell,
+  // so pinning scroll to the top yields a deterministic full-viewport capture.
+  await page.locator('.overflow-auto').first().evaluate((el) => {
+    el.scrollTop = 0
+    el.scrollLeft = 0
+  })
   await page.waitForTimeout(150)
 
   await expect(page).toHaveScreenshot('workflow-add-elements.png', SHOT_OPTS)
