@@ -32,6 +32,7 @@ body { background: var(--bg-app); }
 }
 .col-title { display:flex; align-items:center; gap: 9px; }
 .col-bar { width: 5px; height: 18px; border-radius: 3px; background: #3B82F6; box-shadow: 0 0 10px -1px #3B82F6; }
+.col-title-ic { font-size: 18px; color: rgba(255,255,255,0.85); line-height: 1; display: block; }
 .col-title h2 { margin:0; font-size: 15px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
 .col-actions { display:flex; gap: 6px; }
 .col-btn {
@@ -124,22 +125,21 @@ body { background: var(--bg-app); }
 .ent-sub { font-size: 10.5px; font-weight: 600; color: var(--fg4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
 
 /* ── Foot: Ask AI + dynamic date ──────────────────────────────────── */
-.task-foot { display:flex; justify-content:space-between; align-items:center; padding: 11px 4px 2px; }
+/* (1) date pinned to the card's bottom-left corner — zero left/bottom inset,
+   foot aligned to the very bottom edge */
+.task-foot { display:flex; justify-content:space-between; align-items:flex-end; padding: 11px 4px 0 0; }
+.task-foot .date { margin-left: 0; }
+/* Layout/shape only — color/bg/border supplied by .btn-green */
 .ask-ai {
-  display:inline-flex; align-items:center; gap: 5px;
-  padding: 5px 11px; border-radius: 9999px;
+  display:inline-flex; align-items:center; gap: 4px;
   font-size: 11px; font-weight: 800; font-family: var(--font-display);
-  color: #fff; cursor: pointer;
-  background: #0F172A;
-  border: 1px solid #0F172A;
-  background-image: linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px),
-                   linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px);
-  background-size: 7px 7px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), inset 0 -2px 0 rgba(0,0,0,0.3), 0 1px 2px rgba(15,23,42,0.18);
-  transition: background calc(180ms * var(--anim-mult, 1)), transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1);
+  cursor: pointer;
+  /* tighten btn-green defaults: no min-width dead space, snug padding */
+  height: 28px !important; min-width: 0 !important; padding: 0 10px !important; gap: 4px !important;
+  transition: transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1);
 }
-.ask-ai .material-icons { font-size: 14px; }
-.ask-ai:hover { background: #1E293B; }
+.ask-ai .material-icons,
+.ask-ai .material-symbols-outlined { font-size: 13px; }
 .ask-ai:active { transform: scale(.93); }
 
 .date { display:inline-flex; align-items:center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--fg4); font-variant-numeric: tabular-nums; }
@@ -397,12 +397,8 @@ html.dark .tp-w:hover { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 6px 
 .tp-w + .tp-w { border-top: 1px solid var(--border-hairline); }
 .tp-w:hover { background: color-mix(in srgb, var(--acc, var(--brand-primary)) 4%, transparent); }
 .tp-w.span2 { grid-column: auto; }
-/* Montserrat-Black heading with a flat tinted icon */
+/* Montserrat-Black heading with a glossy icon badge */
 .tp-w-head { display: flex; align-items: center; gap: 9px; margin-bottom: 13px; }
-.tp-w-ic { width: 25px; height: 25px; border-radius: 7px; flex-shrink: 0; display: grid; place-items: center;
-  background: color-mix(in srgb, var(--acc, var(--brand-primary)) 15%, transparent); color: var(--acc, var(--brand-primary));
-  box-shadow: 0 0 8px color-mix(in srgb, currentColor 45%, transparent); }
-.tp-w-ic .material-icons { font-size: 15px; }
 .tp-w-label { font-family: var(--font-display); font-weight: 900; font-size: 13px; letter-spacing: -0.01em; color: var(--fg1); text-transform: none; }
 
 /* highlighted next-step tip (+ optional inline CTA) */
@@ -464,10 +460,12 @@ html.dark .tp-w:hover { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 6px 
 /* focus cost — legible number + label */
 .tp-focus { display: flex; align-items: center; gap: 7px; }
 .tp-focus-n { font-size: 30px; font-weight: 900; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; }
-.tp-focus-tx { display: flex; flex-direction: column; gap: 2px; }
+/* (3) flex-start so the inline-flex focus-sub tag hugs its content and does
+   not stretch to the column width (which created dead space on the right) */
+.tp-focus-tx { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
 .tp-focus-main { font-size: 12.5px; font-weight: 700; color: var(--fg1); }
-/* (5) "High switching cost" tag — canonical chip treatment matching Pills/Chips/Badges (.badge.col-tag).
-   Solid fill + grid bg overlay + glossy inset + white ink + Montserrat 800. */
+/* (3/5) "High switching cost" tag — canonical chip treatment.
+   Left icon added; padding tightened so no dead right space. */
 .tp-focus-sub {
   display: inline-flex; align-items: center; gap: 4px;
   font-size: 10px; font-weight: 800; font-family: var(--font-display);
@@ -478,15 +476,23 @@ html.dark .tp-w:hover { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 6px 
     linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
   background-size: 7px 7px;
-  padding: 4px 10px 4px 8px; border-radius: 9999px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), inset 0 -1.5px 0 rgba(0,0,0,0.18), inset 0 0 0 1px rgba(0,0,0,0.06);
+  /* equal left/right padding — icon gap handles visual spacing */
+  padding: 4px 7px 4px 7px; border-radius: 9999px;
+  /* (3) hug content — never stretch to parent width (kills right dead space) */
+  align-self: flex-start; width: -moz-fit-content; width: fit-content; max-width: 100%;
+  /* (7) Glow tinted to --fc (the focus-cost tone color) */
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), inset 0 -1.5px 0 rgba(0,0,0,0.18), inset 0 0 0 1px rgba(0,0,0,0.06),
+    0 0 10px -2px var(--fc, #EF4444);
 }
+.tp-focus-sub .material-icons { font-size: 11px; line-height: 1; }
 
 /* column ageing — static chip + meter (no slider) */
 .tp-age { gap: 9px; }
 .tp-age-chips { display: flex; align-items: center; gap: 9px; }
+/* (7) Age chip — glow tinted to its accent color */
 .tp-age-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 800; color: #fff;
-  background: var(--ac, #3B82F6); padding: 4px 11px 4px 8px; border-radius: 9999px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.25); }
+  background: var(--ac, #3B82F6); padding: 4px 11px 4px 8px; border-radius: 9999px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 0 10px -2px var(--ac, #3B82F6); }
 .tp-age-chip .material-icons { font-size: 14px; }
 .tp-age-of { font-size: 11px; font-weight: 600; color: var(--fg4); }
 .tp-age-meter { height: 7px; border-radius: 9999px; background: var(--bg-chip); overflow: hidden; box-shadow: inset 0 1px 2px rgba(15,23,42,0.08); }
@@ -532,10 +538,11 @@ html.dark .tp-foot-btn.primary .material-icons { color: #04231a; }
   border-radius: 18px; padding: 9px; box-shadow: none;
 }
 html.dark .tp-list { border-color: rgba(255,255,255,0.06); }
+/* (5) Flat surface — no gradient on metric cards */
 .tp-w {
   display: block !important; min-height: 0; padding: 13px 14px !important;
   border: 1px solid var(--border-hairline); border-radius: 13px;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--acc, var(--brand-primary)) 8%, var(--bg-card-solid)) 0%, var(--bg-card-solid) 66%) !important;
+  background: var(--bg-card-solid) !important;
   box-shadow: 0 1px 2px rgba(15,23,42,0.05), inset 0 1px 0 rgba(255,255,255,0.65) !important;
   transform: none !important; transition: transform calc(180ms * var(--anim-mult, 1)) cubic-bezier(.34,1.4,.6,1), box-shadow calc(180ms * var(--anim-mult, 1));
 }
@@ -545,18 +552,8 @@ html.dark .tp-w { box-shadow: 0 1px 2px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,
   box-shadow: 0 14px 26px -16px color-mix(in srgb, var(--acc, #0f172a) 55%, rgba(15,23,42,0.35)), inset 0 1px 0 rgba(255,255,255,0.7) !important; }
 html.dark .tp-w:hover { box-shadow: 0 14px 26px -14px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06) !important; }
 
-/* section icon tags → AI-Model-Selector .ms-icon tile */
-.tp-w-ic {
-  width: 30px; height: 30px; border-radius: 9px; color: #fff;
-  background-color: var(--acc, var(--brand-primary));
-  background-image:
-    radial-gradient(ellipse at top right, rgba(255,255,255,0.20) 0%, transparent 55%),
-    linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
-  background-size: cover, 7px 7px, 7px 7px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(15,23,42,0.20), inset 0 0 0 1px rgba(15,23,42,0.12), 0 2px 6px rgba(0,0,0,0.10);
-}
-.tp-w-ic .material-icons { font-size: 16px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.35); filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15)); }
+/* (7) Section icon tags — visual from .icon-badge.icon-badge--glow; --icon-c set to --acc on the span */
+.tp-w-ic { flex-shrink: 0; }
 
 /* ═════════════════════════════════════════════════════════════════
    v7 — Bora: header matches card priority color, ms-icon tag badges,
@@ -621,17 +618,20 @@ html.dark .tp-w:hover { box-shadow: 0 14px 26px -14px rgba(0,0,0,0.6), inset 0 1
   text-transform: none !important; color: var(--fg1) !important; }
 .tp-w-head { margin-bottom: 14px !important; }
 
-/* footer buttons: text white, icon inherits --fbtn swatch color */
+/* footer buttons: all SOLID-filled in their OWN --fbtn color, WHITE icon + text
+   (item 2 — inner fill = the button's own color, not a light tint) */
 .tp-foot-btn {
   color: #fff;
-  border-color: color-mix(in srgb, var(--fbtn, var(--border-hairline)) 28%, var(--border-hairline));
-  background: color-mix(in srgb, var(--fbtn, transparent) 9%, var(--bg-chip));
+  background: var(--fbtn, #0F172A);
+  border-color: var(--fbtn, #0F172A);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1.5px 0 rgba(0,0,0,0.18), 0 0 10px -3px var(--fbtn, #0F172A);
 }
-.tp-foot-btn .material-icons { color: var(--fbtn, var(--fg4)); font-size: 16px; }
-.tp-foot-btn:hover { border-color: var(--fbtn, var(--brand-primary)); color: #fff; background: color-mix(in srgb, var(--fbtn, var(--brand-primary)) 12%, var(--bg-chip)); }
-.tp-foot-btn:hover .material-icons { color: var(--fbtn, var(--brand-primary)); }
-/* primary stays emerald but can accept --fbtn too */
-.tp-foot-btn.primary { background: var(--fbtn, var(--brand-primary)); border-color: var(--fbtn, var(--brand-primary)); color: #fff; }
+.tp-foot-btn .material-icons { color: #fff; font-size: 16px; }
+.tp-foot-btn:hover { background: var(--fbtn, var(--brand-primary)); border-color: var(--fbtn, var(--brand-primary)); color: #fff; filter: brightness(1.08); }
+.tp-foot-btn:hover .material-icons { color: #fff; }
+/* primary stays solid-filled (view-deal) */
+.tp-foot-btn.primary { background: var(--fbtn, var(--brand-primary)); border-color: var(--fbtn, var(--brand-primary)); color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1.5px 0 rgba(0,0,0,0.18), 0 0 10px -2px var(--fbtn, var(--brand-primary)); }
 .tp-foot-btn.primary .material-icons { color: #fff; }
 .tp-foot-btn.primary:hover { filter: brightness(1.08); color: #fff; }
 
@@ -641,10 +641,21 @@ html.dark .tp-w:hover { box-shadow: 0 14px 26px -14px rgba(0,0,0,0.6), inset 0 1
    SyncScore time table; SubSteps bigger; customer left+grey.
    ═════════════════════════════════════════════════════════════════ */
 
-/* column header: remove bar, theme blue */
+/* column header: remove bar, theme blue + grid bg + glow pulse */
 .col-bar { display: none !important; }
-.col-head { background: #2563EB !important; }
-html.dark .col-head { background: #1E40AF !important; }
+.col-head {
+  background-color: #2563EB !important;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px) !important;
+  background-size: 15px 15px !important;
+  animation: col-head-glow calc(2800ms * var(--anim-mult, 1)) ease-in-out infinite;
+}
+html.dark .col-head { background-color: #1E40AF !important; }
+@keyframes col-head-glow {
+  0%,100% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -2px 0 rgba(0,0,0,0.3), 0 4px 14px -6px rgba(37,99,235,0.4); }
+  50%      { box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -2px 0 rgba(0,0,0,0.3), 0 4px 22px -4px rgba(37,99,235,0.85); }
+}
 
 /* industry indicator removed */
 .t-ind { display: none !important; }
@@ -679,14 +690,16 @@ html.dark .tp-w-shell { border-color: rgba(255,255,255,0.06); }
 }
 
 /* alerts: always red theme + grey inner cards */
-.tp-alerts { background: #EF4444 !important; border: none !important;
+/* (1) Brighter red: #FF3B3B instead of #EF4444 so the strip reads as vivid alert */
+.tp-alerts { background: #FF3B3B !important; border: none !important;
   background-image: radial-gradient(ellipse at top right, rgba(255,255,255,0.20), transparent 55%),
     linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px) !important;
   background-size: cover, 20px 20px, 20px 20px !important; }
 /* item 20 / item 3: dark mode — same layout as light, only background gradient darkens */
+/* (1) Dark mode: 75% mix keeps it noticeably red (was 55%) */
 html.dark .tp-alerts {
-  background-color: color-mix(in srgb, #EF4444 55%, #0F172A) !important;
+  background-color: color-mix(in srgb, #FF3B3B 75%, #0F172A) !important;
   background-image:
     radial-gradient(ellipse at top right, rgba(255,255,255,0.12), transparent 55%),
     linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
@@ -784,9 +797,11 @@ html.dark .tp-cust-sub { color: var(--fg3) !important; }
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.40), inset 0 -1.5px 0 rgba(0,0,0,0.18), inset 0 0 0 1px rgba(15,23,42,0.10), 0 0 10px rgba(59,130,246,0.4);
 }
 .tp-chain-step.locked { color: var(--fg4); opacity: 0.85; }
-/* Icon visible: inherit parent color (white on colored chips, muted on grey) */
+/* (4) Icons: white on colored (done/active) chips — override inline style with important */
 .tp-chain-step-ic { display: grid; place-items: center; flex-shrink: 0; }
 .tp-chain-step-ic .material-icons { font-size: 14px; color: inherit; }
+.tp-chain-step.done .tp-chain-step-ic .material-icons,
+.tp-chain-step.active .tp-chain-step-ic .material-icons { color: #fff !important; }
 /* Label: Montserrat BLACK 900 */
 .tp-chain-step-lbl { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; }
 .tp-chain-conn { color: var(--fg4); display: flex; }
@@ -859,6 +874,7 @@ html.dark .tp-cust-ripple { background: rgba(255,255,255,0.11); }
   font-size: 11px !important;
   border-radius: 9999px !important;
 }
+.tp-cust-ask .material-symbols-outlined { font-size: 14px; }
 html.dark .tp-cust-ask {
   padding: 5px 11px !important;
   font-size: 11px !important;
@@ -873,15 +889,17 @@ html.dark .tp-cust-ask {
 .tp-cust-open-ic { font-size: 12px !important; color: var(--fg4); opacity: 0.7; flex-shrink: 0; }
 
 /* metric category headers + solid separation lines between categories */
-.tp-category-header { display: flex; align-items: center; gap: 8px; padding: 18px 2px 10px;
+.tp-category-header { display: flex; align-items: center; gap: 6px; padding: 14px 2px 8px;
   border-top: 1.5px solid var(--border-hairline); margin-top: 4px; }
 /* Progress & Flow is first — give it a separator too (sits below the AlertsStrip) */
-.tp-category-header.first { border-top: 1.5px solid var(--border-hairline); padding-top: 18px; margin-top: 4px; }
-.tp-category-header .material-icons { font-size: 27px; color: #0F172A; font-weight: 900; }
+.tp-category-header.first { border-top: 1.5px solid var(--border-hairline); padding-top: 14px; margin-top: 4px; }
+/* Icons matched to property-row header scale */
+.tp-category-header .material-icons { font-size: 16px; color: #0F172A; }
 html.dark .tp-category-header .material-icons { color: var(--fg1); }
-/* (3) Category label normalized to match .tp-head-title (19px/900) */
+/* (4) Category label font-size matched EXACTLY to the top "Property Viewing"
+   popover header (.tp-head-title = 19px, set in the v5 block). */
 .tp-category-label { font-family: var(--font-display); font-size: 19px; font-weight: 900;
-  letter-spacing: -0.015em; text-transform: none; color: #0F172A; }
+  letter-spacing: -0.01em; text-transform: none; color: #0F172A; }
 html.dark .tp-category-label { color: var(--fg1); }
 /* "updated just now" timestamp — top-right of the Progress & Flow header */
 .tp-category-ts { margin-left: auto; font-size: 10px; font-weight: 700; color: var(--brand-primary); }
@@ -907,9 +925,9 @@ html.dark .tp-card {
   background: #1E293B;
 }
 
-/* Metric list tray (the grey recessed area holding the .tp-w-shell items) */
+/* (6) Remove covering background layer — categories/metric cards sit directly on popover surface */
 html.dark .tp-list {
-  background: #0F172A !important;
+  background: none !important;
 }
 
 /* (2) Individual metric shell — canonical dark surface tokens matching the rest of the app.
@@ -920,26 +938,25 @@ html.dark .tp-w-shell {
   box-shadow: inset 0 1px 3px rgba(0,0,0,0.35);
 }
 
-/* Inner metric card surface */
+/* (5) Inner metric card surface — flat, no gradient */
 html.dark .tp-w-shell .tp-w {
-  background: linear-gradient(180deg,
-    color-mix(in srgb, var(--acc, var(--brand-primary)) 17%, #1E293B) 0%,
-    #1E293B 80%) !important;
+  background: #1E293B !important;
   border-color: #334155 !important;
   box-shadow: 0 1px 2px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05) !important;
 }
 
-/* Standalone .tp-w (outside .tp-w-shell, e.g. old layout fallback) */
+/* (5) Standalone .tp-w — flat, no gradient */
 html.dark .tp-w {
-  background: linear-gradient(180deg,
-    color-mix(in srgb, var(--acc, var(--brand-primary)) 17%, #1E293B) 0%,
-    #1E293B 80%) !important;
+  background: #1E293B !important;
   border-color: #334155 !important;
 }
 html.dark .tp-w:hover {
-  background: linear-gradient(180deg,
-    color-mix(in srgb, var(--acc, var(--brand-primary)) 20%, #273449) 0%,
-    #273449 80%) !important;
+  background: #273449 !important;
+}
+
+/* (8) Kanban column dashed border — dark mode to match light mode */
+html.dark .column {
+  border: 1px dashed rgba(255,255,255,0.14);
 }
 
 /* Kanban card outer bezel (task-wrap) */
@@ -989,14 +1006,14 @@ html.dark .tp-foot-btn {
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.07);
 }
 
-/* focus-sub tag (solid colored pill): fine as-is, just dim the inset highlight */
+/* focus-sub tag (solid colored pill): dim inset highlight + keep (7) colored glow */
 html.dark .tp-focus-sub {
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 0 10px -2px var(--fc, #EF4444);
 }
 
-/* age-chip: same — fine fill, soften inset */
+/* age-chip: dim inset highlight + keep (7) colored glow */
 html.dark .tp-age-chip {
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 0 10px -2px var(--ac, #3B82F6);
 }
 
 /* tip container: darken the fg1-mix bg slightly more */
@@ -1010,24 +1027,6 @@ html.dark .tp-tip {
 /* open_in_new icon in customer name row: visible but muted */
 html.dark .tp-cust-open-ic {
   color: var(--fg3);
-}
-
-/* ── Item 7: .ask-ai dark — white-themed + slightly bigger ──────── */
-html.dark .ask-ai {
-  background: #F1F5F9;
-  background-image: none;
-  border-color: #F1F5F9;
-  color: #0F172A;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), inset 0 -2px 0 rgba(15,23,42,0.12), 0 1px 3px rgba(0,0,0,0.3);
-  padding: 6px 13px;
-  font-size: 11.5px;
-}
-html.dark .ask-ai:hover {
-  background: #ffffff;
-  border-color: #ffffff;
-}
-html.dark .ask-ai .material-icons {
-  color: #0F172A;
 }
 
 /* ── Item 9: all-black CTAs → white-themed in dark ──────────────── */

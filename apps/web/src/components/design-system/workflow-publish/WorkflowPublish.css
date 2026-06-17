@@ -84,10 +84,10 @@
   display: none;
   position: static;
   width: 360px;
-  background: #fff;
-  border: 1px solid #CBD5E1;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-top-color: rgba(255,255,255,0.9);
-  border-radius: 20px;
+  border-radius: var(--card-radius);
   overflow: hidden;
   box-shadow:
     0 12px 40px rgba(15,23,42,0.12),
@@ -269,10 +269,7 @@ html.dark .wp-btn:hover { background: #E2E8F0; }
 html.dark .wp-bezel { background: #020617; border: 1px solid #020617; }
 
 html.dark .wp-popover {
-  background: #1E293B;
-  border-color: #334155;
   border-top-color: rgba(255,255,255,0.22);
-  border-radius: 20px;
   box-shadow: 0 12px 40px rgba(0,0,0,0.50), 0 4px 12px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
 }
 

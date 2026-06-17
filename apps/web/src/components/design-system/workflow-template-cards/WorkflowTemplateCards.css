@@ -32,8 +32,9 @@
 
 /* ── Inner white card ────────────────────────────────────────────────────── */
 .wtc-card {
-  background: #fff;
-  border-radius: 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
   overflow: hidden;
   box-shadow: inset 0 1px 0 rgba(255,255,255,1);
 }
@@ -197,7 +198,6 @@ html.dark .wtc-shell {
 html.dark .wtc-outer { background: #020617; }
 
 /* Inner card */
-html.dark .wtc-card { background: #1E293B; }
 html.dark .wtc-card { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
 
 /* Preview area */

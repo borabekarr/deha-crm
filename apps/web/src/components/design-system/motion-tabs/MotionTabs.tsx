@@ -35,28 +35,29 @@ interface PanelRow {
   title: string
   sub: string
   count?: number
+  color?: string
 }
 
 const PANEL_ROWS: Record<string, PanelRow[]> = {
   leads: [
-    { icon: 'local_fire_department', title: 'Hot leads',      sub: 'High intent, ready to call',   count: 12 },
-    { icon: 'fiber_new',             title: 'New today',      sub: 'Captured in the last 24h',     count: 5  },
-    { icon: 'assignment_ind',        title: 'Assigned to me', sub: 'Your active queue',            count: 8  },
+    { icon: 'local_fire_department', title: 'Hot leads',      sub: 'High intent, ready to call',   count: 12, color: '#EF4444' },
+    { icon: 'fiber_new',             title: 'New today',      sub: 'Captured in the last 24h',     count: 5,  color: '#3B82F6' },
+    { icon: 'assignment_ind',        title: 'Assigned to me', sub: 'Your active queue',            count: 8,  color: '#8B5CF6' },
   ],
   pipeline: [
-    { icon: 'tune',  title: 'Qualifying',    sub: 'Discovery in progress', count: 9 },
-    { icon: 'send',  title: 'Proposal sent', sub: 'Awaiting response',     count: 4 },
-    { icon: 'flag',  title: 'Closing',       sub: 'Final negotiation',     count: 3 },
+    { icon: 'tune',  title: 'Qualifying',    sub: 'Discovery in progress', count: 9, color: '#F59E0B' },
+    { icon: 'send',  title: 'Proposal sent', sub: 'Awaiting response',     count: 4, color: '#14B8A6' },
+    { icon: 'flag',  title: 'Closing',       sub: 'Final negotiation',     count: 3, color: '#10B981' },
   ],
   calls: [
-    { icon: 'today',       title: "Today's calls", sub: 'Scheduled for today',   count: 7 },
-    { icon: 'call_missed', title: 'Missed',        sub: 'Needs a callback',      count: 2 },
-    { icon: 'schedule',    title: 'Scheduled',     sub: 'Upcoming this week',    count: 5 },
+    { icon: 'today',       title: "Today's calls", sub: 'Scheduled for today',   count: 7, color: '#F97316' },
+    { icon: 'call_missed', title: 'Missed',        sub: 'Needs a callback',      count: 2, color: '#EF4444' },
+    { icon: 'schedule',    title: 'Scheduled',     sub: 'Upcoming this week',    count: 5, color: '#3B82F6' },
   ],
   profile: [
-    { icon: 'person',  title: 'Personal details', sub: 'Name, role, contact' },
-    { icon: 'palette', title: 'Appearance',        sub: 'Theme and density'   },
-    { icon: 'help',    title: 'Help',              sub: 'Guides and support'  },
+    { icon: 'person',  title: 'Personal details', sub: 'Name, role, contact', color: '#0F172A' },
+    { icon: 'palette', title: 'Appearance',        sub: 'Theme and density',   color: '#8B5CF6' },
+    { icon: 'help',    title: 'Help',              sub: 'Guides and support',  color: '#14B8A6' },
   ],
 }
 
@@ -86,8 +87,10 @@ export default function MotionTabs() {
   const activeIndex = TABS.findIndex((t) => t.key === active)
 
   // Width of each tab slot: base + label expansion for the active tab
+  // Active pill width must match CSS: .mt-tab.active = 14 + 24 + 6 + lw + 14 = 58 + lw.
+  // Collapsed tab = TAB_BASE (48). So active adds (58 + lw) - 48 = lw + 10.
   function tabSlotWidth(i: number): number {
-    return TAB_BASE + (i === activeIndex ? TABS[i].lw + 14 : 0)
+    return TAB_BASE + (i === activeIndex ? TABS[i].lw + 10 : 0)
   }
 
   // indX = sum of (slot widths + gap) for all tabs before active
@@ -116,13 +119,13 @@ export default function MotionTabs() {
               onClick={close}
             />
 
-            {/* Dock */}
+            {/* Dock — grey external wrapper around white inner card */}
             <div className={`mt-dock${isOpen ? ' open' : ''}`}>
+              <div className="mt-dock-inner">
 
               {/* Height-morph via grid-rows */}
               <div className="mt-panels-wrap">
                 <div className="mt-panels">
-                  <div className="mt-divider" />
 
                   {TABS.map((tab) => {
                     const rows = PANEL_ROWS[tab.key]
@@ -136,7 +139,10 @@ export default function MotionTabs() {
                       >
                         {rows.map((row) => (
                           <button type="button" key={row.title} className="mt-row">
-                            <div className="mt-row-ic">
+                            <div
+                              className="mt-row-ic"
+                              style={row.color ? ({ '--icon-c': row.color } as React.CSSProperties) : undefined}
+                            >
                               <span className="material-symbols-outlined">{row.icon}</span>
                             </div>
                             <div className="mt-row-tx">
@@ -156,16 +162,20 @@ export default function MotionTabs() {
                 </div>
               </div>
 
+              {/* Separator between panels and toolbar — visible when open */}
+              {isOpen && <div className="mt-divider" />}
+
               {/* Toolbar */}
-              <div
-                className="mt-toolbar"
-                style={
-                  {
-                    '--ind-x': `${indX}px`,
-                    '--ind-w': `${indW}px`,
-                  } as React.CSSProperties
-                }
-              >
+              <div className="mt-toolbar">
+                <div
+                  className="mt-tabwrap"
+                  style={
+                    {
+                      '--ind-x': `${indX}px`,
+                      '--ind-w': `${indW}px`,
+                    } as React.CSSProperties
+                  }
+                >
                 {/* Single gliding indicator */}
                 <div className="mt-ind" />
 
@@ -195,8 +205,10 @@ export default function MotionTabs() {
                     </button>
                   )
                 })}
+                </div>{/* /.mt-tabwrap */}
               </div>
 
+              </div>{/* /.mt-dock-inner */}
             </div>{/* /.mt-dock */}
           </div>{/* /.mt-root */}
         </div>{/* /.shell */}

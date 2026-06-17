@@ -1,39 +1,548 @@
-/* ── Live toastiva embed — device frame for the iframe ─────────────────── */
+/* Toast.css
+ * Pure-React morphing toast. Ported verbatim from the canonical prototype
+ * design-system/preview/components-toast.html, plus a live interactive region
+ * (trigger panel, enter/exit choreography, pointer-drag swipe-to-dismiss).
+ * Replaces the old react-native-web / Expo iframe build. Dark mode: html.dark.
+ * All classes are tst- prefixed. Tokens resolve from colors_and_type.css.
+ */
 
-.tst-live-wrap {
+.tst-demo {
+  padding: 28px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  background: #f8fafc;
+  background-image: radial-gradient(ellipse at top right, rgba(16, 185, 129, 0.06) 0%, #f8fafc 55%);
+  font-family: var(--font-display);
+  min-height: 100%;
+  box-sizing: border-box;
+}
+html.dark .tst-demo {
+  background: #0b1220;
+  background-image: radial-gradient(ellipse at top right, rgba(16, 185, 129, 0.08) 0%, #0b1220 55%);
+}
+
+/* ── section scaffolding ── */
+.tst-sec {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.tst-sec > .tst-label {
+  margin-left: 2px;
+  font-size: var(--type-meta);
+  font-weight: var(--weight-extrabold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg4);
+}
+.tst-bezel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+/* ── trigger panel (fires live toasts) ── */
+.tst-triggers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  align-items: center;
+  justify-content: center;
+}
+.tst-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-circle);
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: var(--type-body-sm);
+  font-weight: var(--weight-extrabold);
+  color: var(--fg2);
+  background: var(--bg-card-solid);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 6px -3px rgba(15, 23, 42, 0.18);
+  transition:
+    transform calc(140ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1),
+    filter calc(140ms * var(--anim-mult, 1));
+}
+.tst-trigger:hover {
+  filter: brightness(1.03);
+}
+.tst-trigger:active {
+  transform: scale(0.95);
+}
+.tst-trigger .material-icons {
+  font-size: 16px;
+  color: var(--acc, var(--fg3));
+}
+.tst-trigger.t-success {
+  --acc: var(--semantic-success);
+}
+.tst-trigger.t-error {
+  --acc: var(--semantic-danger);
+}
+.tst-trigger.t-warning {
+  --acc: var(--semantic-warning);
+}
+.tst-trigger.t-info {
+  --acc: #8b5cf6;
+}
+.tst-trigger.t-clear {
+  color: var(--fg4);
+}
+
+/* ── live region: newest on top, vertical stack ── */
+.tst-live {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  padding: 24px;
+  gap: 10px;
+  min-height: 96px;
+  padding: 6px 0 2px;
+}
+.tst-live:empty::after {
+  content: 'Tap a trigger above to fire a live toast.';
+  font-size: var(--type-body-sm);
+  font-weight: var(--weight-medium);
+  color: var(--fg4);
+  align-self: center;
+  margin: auto;
 }
 
-.tst-live-frame {
-  width: 480px;
-  height: 760px;
-  border: none;
-  border-radius: 28px;
-  background: #F2F2F7;
+/* ─────────────────────────────────────────────────────────
+   Toast surface — flat glass card, glossy top, dark bottom edge.
+   Accent flows through --acc / --acc-bg / --acc-bd per type.
+   ───────────────────────────────────────────────────────── */
+.tst {
+  --acc: var(--semantic-success);
+  --acc-bg: var(--semantic-success-bg);
+  --acc-bd: rgba(16, 185, 129, 0.3);
+  position: relative;
+  width: 340px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card-solid);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-xl);
+  padding: 13px 14px;
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.6) inset,
-    0 18px 50px -12px rgba(15, 23, 42, 0.30),
-    0 0 0 1px rgba(15, 23, 42, 0.08);
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -2px 0 rgba(15, 23, 42, 0.06),
+    0 6px 18px -6px rgba(15, 23, 42, 0.18),
+    0 2px 6px rgba(15, 23, 42, 0.05);
+  overflow: hidden;
+  transition:
+    width calc(260ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1),
+    border-radius calc(260ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1),
+    padding calc(260ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1),
+    transform calc(220ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1),
+    opacity calc(220ms * var(--anim-mult, 1));
+}
+/* hairline accent rail down the left edge */
+.tst::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--acc);
+  opacity: 0.85;
 }
 
-html.dark .tst-live-frame {
+.tst-head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+/* glossy accent icon tile — canonical .m-ic recipe (grid texture + gloss) */
+.tst-ic {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background-color: var(--acc);
+  background-image:
+    radial-gradient(ellipse at top right, rgba(255, 255, 255, 0.22) 0%, transparent 55%),
+    linear-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+  background-size: cover, 7px 7px, 7px 7px;
   box-shadow:
-    0 18px 50px -12px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(255, 255, 255, 0.08);
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -2px 0 rgba(15, 23, 42, 0.22),
+    inset 0 0 0 1px rgba(15, 23, 42, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.12);
+  transition: border-radius calc(260ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1);
+}
+.tst-ic .material-icons {
+  font-size: 18px;
+  color: #fff;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
-.tst-live-note {
-  max-width: 480px;
-  margin: 0;
-  text-align: center;
-  font-family: var(--font-display);
+.tst-copy {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.tst-title {
+  font-size: var(--type-h5);
+  font-weight: var(--weight-extrabold);
+  color: var(--fg1);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.tst-desc {
   font-size: var(--type-body-sm);
   font-weight: var(--weight-medium);
   color: var(--fg3);
-  line-height: 1.5;
+  line-height: 1.45;
 }
-.tst-live-note strong { color: var(--fg2); font-weight: var(--weight-bold); }
+
+/* close affordance (swipe / click to dismiss) */
+.tst-x {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  color: var(--fg4);
+  transition:
+    background calc(140ms * var(--anim-mult, 1)),
+    color calc(140ms * var(--anim-mult, 1)),
+    transform calc(100ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1);
+}
+.tst-x:hover {
+  background: var(--bg-chip);
+  color: var(--fg2);
+}
+.tst-x:active {
+  transform: scale(0.86);
+}
+.tst-x .material-icons {
+  font-size: 16px;
+}
+
+/* collapsed = pill: header only, full radius, no body */
+.tst.collapsed {
+  width: auto;
+  min-width: 200px;
+  padding: 9px 16px 9px 11px;
+  border-radius: var(--radius-circle);
+}
+.tst.collapsed::before {
+  display: none;
+}
+.tst.collapsed .tst-ic {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-circle);
+}
+.tst.collapsed .tst-ic .material-icons {
+  font-size: 16px;
+}
+.tst.collapsed .tst-title {
+  font-size: var(--type-body);
+}
+
+/* expanded body holds desc + (action | progress) */
+.tst-body {
+  padding-left: 41px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  margin-top: 8px;
+}
+
+/* progress bar — semi-transparent accent fill over a chip track, auto-drains */
+.tst-prog {
+  height: 4px;
+  border-radius: 9999px;
+  background: var(--bg-chip);
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+.tst-prog > i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: 9999px;
+  background: var(--acc);
+  opacity: 0.55;
+  transform-origin: left center;
+}
+.tst-prog > i.tst-drain {
+  animation: tst-drain linear forwards;
+}
+@keyframes tst-drain {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* inline action button — accent glossy mini, reuses btn-primary idiom */
+.tst-actrow {
+  display: flex;
+  gap: 8px;
+}
+.tst-act {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: var(--type-body-sm);
+  font-weight: var(--weight-extrabold);
+  color: #fff;
+  background: var(--acc);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 7px 7px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.2),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 2px 6px -2px var(--acc);
+  transition:
+    filter calc(160ms * var(--anim-mult, 1)),
+    transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1);
+}
+.tst-act:hover {
+  filter: brightness(1.05);
+}
+.tst-act:active {
+  transform: scale(0.96);
+}
+.tst-act .material-icons {
+  font-size: 16px;
+}
+.tst-act.ghost {
+  background: var(--bg-chip);
+  color: var(--fg2);
+  text-shadow: none;
+  background-image: none;
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.07);
+}
+
+/* loading spinner glyph — type-neutral (grey rail + badge) */
+.tst.loading {
+  --acc: var(--fg3);
+}
+.tst.loading .tst-ic {
+  background-color: var(--fg3);
+}
+.tst-spin {
+  animation: tst-spin calc(900ms * var(--anim-mult, 1)) linear infinite;
+}
+@keyframes tst-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── type accents ── */
+.tst.t-success {
+  --acc: var(--semantic-success);
+  --acc-bg: var(--semantic-success-bg);
+}
+.tst.t-error {
+  --acc: var(--semantic-danger);
+  --acc-bg: var(--semantic-danger-bg);
+}
+.tst.t-warning {
+  --acc: var(--semantic-warning);
+  --acc-bg: var(--semantic-warning-bg);
+}
+/* info — reuses the existing "Deep-Dwell" violet from the leads popover */
+.tst.t-info {
+  --acc: #8b5cf6;
+  --acc-bg: #f5f3ff;
+  --acc-bd: #ddd6fe;
+}
+
+/* ── promise transition: loading → resolved pair ── */
+.tst-promise {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.tst-arrow {
+  color: var(--fg4);
+  display: grid;
+  place-items: center;
+}
+.tst-arrow .material-icons {
+  font-size: 26px;
+}
+
+/* ── stacking demo: 3 toasts, downward peek offsets ── */
+.tst-stack {
+  position: relative;
+  width: 340px;
+  height: 132px;
+}
+.tst-stack .tst {
+  position: absolute;
+  left: 50%;
+  transition: none;
+}
+.tst-stack .s0 {
+  top: 0;
+  transform: translateX(-50%) scale(1);
+  z-index: 3;
+}
+.tst-stack .s1 {
+  top: 14px;
+  transform: translateX(-50%) scale(0.955);
+  z-index: 2;
+  filter: brightness(0.985);
+  opacity: 0.96;
+}
+.tst-stack .s2 {
+  top: 28px;
+  transform: translateX(-50%) scale(0.91);
+  z-index: 1;
+  filter: brightness(0.97);
+  opacity: 0.9;
+}
+.tst-stack-badge {
+  position: absolute;
+  top: 9px;
+  right: 12px;
+  z-index: 4;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--fg4);
+  background: var(--bg-chip);
+  border-radius: 9999px;
+  padding: 2px 8px;
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.06);
+}
+
+/* ── swipe-to-dismiss affordance ── */
+.tst.tst-draggable {
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+}
+.tst.tst-dragging {
+  cursor: grabbing;
+  transition: none;
+}
+.tst-swipe-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--type-meta);
+  font-weight: 700;
+  color: var(--fg4);
+  margin-top: 8px;
+}
+.tst-swipe-hint .material-icons {
+  font-size: 16px;
+}
+
+/* ── live enter / exit choreography ── */
+.tst.tst-enter {
+  animation: tst-in calc(280ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes tst-in {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.tst.tst-leaving {
+  pointer-events: none;
+  animation: tst-out calc(280ms * var(--anim-mult, 1)) cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+@keyframes tst-out {
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+    margin-bottom: -60px;
+  }
+}
+.tst.tst-leaving-left {
+  pointer-events: none;
+  animation: tst-out-left calc(280ms * var(--anim-mult, 1)) cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+@keyframes tst-out-left {
+  to {
+    opacity: 0;
+    transform: translateX(-420px) rotate(-3deg);
+    margin-bottom: -60px;
+  }
+}
+.tst.tst-leaving-right {
+  pointer-events: none;
+  animation: tst-out-right calc(280ms * var(--anim-mult, 1)) cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+@keyframes tst-out-right {
+  to {
+    opacity: 0;
+    transform: translateX(420px) rotate(3deg);
+    margin-bottom: -60px;
+  }
+}
+
+/* static "swipe me" preview (showcase section only) */
+.tst.swiping {
+  transform: translateX(54px) rotate(1.2deg);
+  opacity: 0.55;
+}
+
+/* ── dark-mode tuning (System A: .dark) ── */
+html.dark .tst {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.3),
+    0 8px 22px -8px rgba(0, 0, 0, 0.6),
+    0 2px 6px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+html.dark .tst.t-info {
+  --acc: #a78bfa;
+  --acc-bg: rgba(139, 92, 246, 0.16);
+  --acc-bd: rgba(139, 92, 246, 0.34);
+}
+html.dark .tst-stack-badge {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+html.dark .tst-trigger {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 2px 6px -3px rgba(0, 0, 0, 0.5);
+}

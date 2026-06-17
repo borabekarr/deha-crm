@@ -44,7 +44,7 @@ html.dark .ldx-outer { background: #020617; }
   transform: translateY(0) scale(1);
   transition: transform calc(360ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1);
 }
-.ldx-card { background: var(--surface); border-radius: 22px; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+.ldx-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--card-radius); overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
 
 /* ── sticky colored header — colored by lead health ───────────────────── */
 .ldx-head {
@@ -760,11 +760,9 @@ html.dark .ldx-w:hover { box-shadow: 0 14px 26px -14px rgba(0,0,0,0.6), inset 0 
 .ldx-edge { position: absolute; left: 0; right: 0; height: 30px; pointer-events: none; z-index: 6; opacity: 0; transition: opacity calc(220ms * var(--anim-mult, 1)); }
 .ldx-edge.top { top: 0;
   background: linear-gradient(to bottom, var(--surface) 0%, color-mix(in srgb, var(--surface) 35%, transparent) 58%, transparent 100%);
-  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
   -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 30%, transparent 100%); mask-image: linear-gradient(to bottom, #000 0%, #000 30%, transparent 100%); }
 .ldx-edge.bot { bottom: 0;
   background: linear-gradient(to top, var(--surface) 0%, color-mix(in srgb, var(--surface) 35%, transparent) 58%, transparent 100%);
-  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
   -webkit-mask-image: linear-gradient(to top, #000 0%, #000 30%, transparent 100%); mask-image: linear-gradient(to top, #000 0%, #000 30%, transparent 100%); }
 .ldx-bodywrap.fade-top .ldx-edge.top { opacity: 1; }
 .ldx-bodywrap.fade-bottom .ldx-edge.bot { opacity: 1; }
@@ -1092,9 +1090,16 @@ html.dark .ldx-heat-box.l4 { background: #059669 !important; }
   vertical-align: text-bottom; margin-left: 2px; animation: ldx-blink calc(900ms * var(--anim-mult, 1)) steps(1) infinite; }
 @keyframes ldx-blink { 50%{opacity:0;} }
 
-/* ── Body: subtle dot background ── */
-.ldx-body { background-image: radial-gradient(circle, color-mix(in srgb, var(--line) 80%, transparent) 1px, transparent 1.2px);
-  background-size: 18px 18px; }
+/* ── Dotted background: confined to the brain-pieces stage ONLY ──
+   Previously this lived on .ldx-body, which painted the dot grid across
+   EVERY pill tab (auto-signals, behavior, voice). The dots belong only on
+   the Qualification brain stage, so scope to .ldx-brain (the brain-pieces
+   area). .ldx-body itself stays a plain surface. */
+.ldx-body { background-image: none; }
+.ldx-brain {
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--line) 80%, transparent) 1px, transparent 1.2px);
+  background-size: 18px 18px;
+}
 
 /* =========================================================================
    Qualification Brain Stage — three-zone interactive brain widget.
@@ -1112,7 +1117,14 @@ html.dark .ldx-heat-box.l4 { background: #059669 !important; }
   grid-template-rows: 1fr;
   gap: 0;
   min-height: 380px;
-  perspective: 900px;
+  /* perspective removed: the image-piece brain is 2D (no CSS-3D rotation), and
+     a 3D rendering context here forced a top-edge re-rasterise / clip whenever
+     a bottom piece was hovered (the "top breaks on bottom hover" bug). */
+  /* overflow:hidden is needed to clip the collapsing filter column during the
+     grid-template-columns animation, but it must NOT clip a hovered piece's
+     glow/scale or a pushed-out label. clip-path:inset(0 round 14px) clips only
+     the horizontal grid-collapse; we give the brain itself headroom (see
+     .ldx-brain padding) so vertical hover growth never reaches this edge. */
   overflow: hidden;
   border-radius: 14px;
   border: 1px solid var(--line-strong);
@@ -1229,7 +1241,10 @@ html.dark .ldx-brain-filter {
   justify-content: center;
   padding: 18px 12px 22px;
   min-width: 0;
-  overflow: hidden;
+  /* overflow:hidden removed — it clipped a hovered top-row piece's outward
+     label/glow. The parent .ldx-brain-stage still clips the grid-collapse;
+     the canvas is centred with ample padding so nothing escapes the stage. */
+  overflow: visible;
 }
 
 /* The rotating element — 3D context; transform comes from JS */
@@ -1300,69 +1315,107 @@ html.dark .ldx-brain-filter {
     transform calc(200ms * var(--anim-mult, 1)) cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Dimmed: siblings STAY vivid — only a subtle desaturate/darken so the focused
-   piece reads as forward. Kept opaque so the base never bleeds through. */
+/* Siblings dim when any piece is hovered/active — real blur + opacity reduction. */
 .ldx-brain-piece.is-dimmed {
-  opacity: 1;
-  filter: saturate(0.82) brightness(0.94);
+  opacity: 0.45;
+  filter: blur(0.8px) brightness(0.85);
 }
 
-/* Hovered: lift the lobe off the brain — zoom + drop-shadow separation +
-   section-color rim (the orange-selected.png look). */
+/* Hovered: scale up slightly + section-colour glow. Transform uses spring curve
+   from the transition declaration above. Brightness 1.06 (not 1.12) avoids
+   blowing out light-fill regions; yellow piece (#fdd02c) needs softer treatment. */
 .ldx-brain-piece.is-hovered {
   opacity: 1;
   filter:
-    drop-shadow(0 6px 10px rgba(0, 0, 0, 0.28))
     drop-shadow(0 0 6px var(--sec-color))
-    brightness(1.05);
+    brightness(1.06);
   transform: scale(1.08);
   z-index: 4;
 }
 
-/* Active (selected): stays lifted with a stronger section-color ring/glow while
-   the right detail panel is open — NO hardcoded orange. */
+/* Yellow piece (challenges, #fdd02c) — drop-shadow at lower opacity + brightness
+   stays at 1.04 so the bright yellow fill does not blow out to white. */
+.ldx-brain-piece[data-section-id="challenges"].is-hovered {
+  filter:
+    drop-shadow(0 0 5px rgba(253, 208, 44, 0.65))
+    brightness(1.04);
+}
+.ldx-brain-piece[data-section-id="challenges"].is-active {
+  filter:
+    drop-shadow(0 0 8px rgba(253, 208, 44, 0.70))
+    brightness(1.05);
+}
+
+/* Active (selected): stronger section-colour glow while the detail panel is open. */
 .ldx-brain-piece.is-active {
   opacity: 1;
   filter:
-    drop-shadow(0 7px 12px rgba(0, 0, 0, 0.30))
-    drop-shadow(0 0 0 2px var(--sec-color))
-    drop-shadow(0 0 10px var(--sec-color))
-    brightness(1.07);
-  transform: scale(1.06);
+    drop-shadow(0 0 9px var(--sec-color))
+    brightness(1.08);
+  transform: scale(1.05);
   z-index: 5;
 }
 
-/* ── Brain piece label (HTML span, not SVG text) ─────────────────────── */
-.ldx-brain-piece-label {
-  font-size: 9px;
-  font-weight: 600;
-  color: var(--txt4);
+/* ── Leader line overlay (SVG) ────────────────────────────────────────────
+   Spans the whole canvas; viewBox 0 0 100 100 maps to the square brain space.
+   Sits ABOVE the pieces (z 6) and the hit overlay (z 10 is pointer-only) so
+   the connector + anchor are always visible. pointer-events:none keeps the
+   hit-tester underneath fully interactive. The line uses non-scaling-stroke
+   so it renders a constant 1.5px regardless of the SVG's CSS scale or DPI —
+   this is what kept the top-row / blue pieces' connectors from breaking. */
+.ldx-brain-leaders {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 6;
+  overflow: visible;
+  pointer-events: none;
+}
+.ldx-leader-line {
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  opacity: 0;
+  transition: opacity calc(150ms * var(--anim-mult, 1)) ease;
+}
+.ldx-leader-line.is-on { opacity: 0.9; }
+.ldx-leader-anchor {
+  vector-effect: non-scaling-stroke;
+  stroke: rgba(255, 255, 255, 0.85);
+  stroke-width: 0.6;
+}
+
+/* ── Leader label chip — black-background pill, pushed off the piece ──────
+   Absolutely positioned at the clamped chip anchor (NOT inside the scaled
+   piece wrapper), so it never inherits the piece's hover scale and never
+   collides with a neighbouring label. Only ONE renders at a time (the
+   component shows the hovered, else active, section). z-index above the line
+   and pieces. */
+.ldx-leader-chip {
+  z-index: 7;
+  font-size: 10px;
+  font-weight: 800;
+  color: #fff;
+  background: #0B0F1A;
+  padding: 3px 9px;
+  border-radius: 9999px;
   pointer-events: none;
   text-align: center;
   white-space: nowrap;
-  line-height: 1.3;
-  /* position is set inline (absolute, left 50%, top 100%, translateX -50%) */
-  transition:
-    color      calc(160ms * var(--anim-mult, 1)) ease,
-    font-weight calc(160ms * var(--anim-mult, 1)) ease;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.10);
+  opacity: 0;
+  /* transform set inline (translate(-50%,-50%)); add a settle scale via filter-free animation */
+  animation: ldx-leader-chip-in calc(180ms * var(--anim-mult, 1)) cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
-.ldx-brain-piece-label.is-hovered {
-  color: var(--txt2);
-  font-weight: 700;
+.ldx-leader-chip.is-on { opacity: 1; }
+@keyframes ldx-leader-chip-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
-.ldx-brain-piece-label.is-active {
-  color: var(--txt);
-  font-weight: 800;
-}
-html.dark .ldx-brain-piece-label {
-  color: var(--txt4);
-}
-html.dark .ldx-brain-piece-label.is-hovered {
-  color: var(--txt3);
-}
-html.dark .ldx-brain-piece-label.is-active {
-  color: var(--txt2);
-}
+html.dark .ldx-leader-chip { background: #000; box-shadow: 0 2px 10px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.14); }
 
 /* ── Filter column hover choreography (V4) ────────────────────────────── */
 
@@ -1418,26 +1471,26 @@ html.dark .ldx-brain-filter-item--on {
   background: color-mix(in srgb, var(--sec-color, var(--v)) 18%, rgba(255,255,255,0.03));
 }
 
-/* ── Detail panel surface — grey-bezel container mirroring pcx-outer ─────── */
+/* ── Detail panel surface — card-primitive inner card ─────────────────────── */
 .ldx-dp-bezel {
-  /* Grey-bezel container — .pcx-outer / .ldx-outer pipeline-card language */
-  background: var(--shell-bg, #D4DCE8);
-  border-radius: 12px;
-  padding: 8px;
+  /* Card-token surface — matches shared --card-bg / --card-border / --card-radius */
+  background: var(--card-bg, #FFFFFF);
+  border: 1px solid var(--card-border, #CBD5E1);
+  border-radius: var(--card-radius, 20px);
+  padding: 0;
   margin: 10px 10px 12px;
   display: flex;
   flex-direction: column;
   gap: 0;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.6),
-    0 2px 8px rgba(15,23,42,0.10);
+  box-shadow: 0 1px 4px rgba(15,23,42,0.06);
   flex: 1;
   min-height: 0;
   overflow: hidden;
 }
 html.dark .ldx-dp-bezel {
-  background: #020617;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 2px 8px rgba(0,0,0,0.3);
+  background: var(--card-bg, #1E293B);
+  border-color: var(--card-border, #334155);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.22);
 }
 
 /* ── Detail panel header — colored band using --sec-color ─────────────── */
@@ -1557,7 +1610,7 @@ html.dark .ldx-dp-tag {
   background: var(--surface);
   transition:
     opacity calc(280ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
-    width calc(420ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1);
+    width calc(380ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
 }
 html.dark .ldx-detail-panel {
   border-left-color: var(--line);

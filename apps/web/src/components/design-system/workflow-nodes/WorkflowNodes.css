@@ -8,12 +8,15 @@
 .wn-shell {
   position: relative;
   /* The dot-grid card surface */
-  padding: 24px 30px 24px 24px;
+  /* Extra right padding to give the tool buttons (28px wide + 8px gap) room to
+     appear outside the rightmost node column without being clipped. */
+  padding: 24px 80px 24px 24px;
   background: #fff;
   background-image: radial-gradient(circle at 1px 1px, #DDE3EA 1px, transparent 1px);
   background-size: 16px 16px;
   border-radius: 28px;
-  overflow: hidden;
+  /* overflow: visible so .wf-tools can appear to the right of right-column nodes */
+  overflow: visible;
 }
 
 /* SVG overlay for rubber-band connection lines */
@@ -29,9 +32,9 @@
 /* ── Node grid ────────────────────────────────────────────────────────────── */
 .wn-grid {
   display: grid;
-  /* ~30% narrower columns: was minmax(0,1fr) filling full width;
-     200px cap ≈ 0.70× a typical 286px 1fr track */
-  grid-template-columns: repeat(2, minmax(0, 200px));
+  /* Each column matches the 440px .wf-outer width (420px inner + 2x10px padding),
+     mirroring the model-selector open panel reference (.ms-outer = 440px effective) */
+  grid-template-columns: repeat(2, minmax(0, 440px));
   justify-content: center;
   gap: 32px 28px;
   position: relative;
@@ -41,44 +44,55 @@
 /* ── Gray outer shell ─────────────────────────────────────────────────────── */
 .wf-outer {
   background: #D4DCE8;
-  border-radius: 24px;
-  /* ~30% taller: was 6px all-around; 10px top+bottom adds ~8px vertical,
-     and min-height 160px ensures cards never compress below ~1.3× content */
-  padding: 10px 6px;
-  min-height: 160px;
+  /* Matched to inner .wf-card border-radius 16px; uniform 10px padding */
+  border-radius: 16px;
+  /* Uniform 10px on all sides so bottom spacing equals side spacing.
+     min-height removed: it forced extra grey dead space below content when
+     node content was shorter than 160px, making the bottom gutter larger
+     than the side gutters. */
+  padding: 10px;
   box-shadow: 0 12px 40px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.06);
   display: flex;
   flex-direction: column;
   position: relative;
 }
 
+/* ── Invisible triangular hover wedge on the right side of each node ───────
+   The wedge sits at left:100% of .wf-outer, spans the full node height plus
+   a small vertical overhang, and tapers from the node's right edge (full
+   width) to a point at the far right — forming a right-pointing triangle.
+   clip-path: polygon(left-top, left-bottom, right-center-point)
+   When :hover on .wf-hover-wedge (or .wf-tools:hover), .wf-tools reveals. */
+.wf-hover-wedge {
+  position: absolute;
+  top: -10px;                  /* overhang so wedge covers top/bottom edges */
+  left: 100%;
+  width: 64px;                 /* how far the wedge reaches to the right */
+  bottom: -10px;
+  clip-path: polygon(0% 0%, 0% 100%, 100% 50%);
+  background: transparent;     /* invisible — hit-test only */
+  z-index: 24;
+  cursor: default;
+}
+
 /* ── Hover toolbar — vertical column floating outside the node's right edge ── */
 .wf-tools {
   position: absolute;
   top: 50%;
-  left: calc(100% + 4px);
+  left: calc(100% + 8px);
   z-index: 25;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   opacity: 0;
   transform: translateY(-50%) translateX(-4px) scale(0.96);
   pointer-events: none;
   transition: opacity calc(150ms * var(--anim-mult, 1)) ease, transform calc(200ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
 }
 
-/* Invisible bridge across the node-to-toolbar gap so hover never drops out */
-.wf-tools::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -10px;
-  width: 12px;
-}
-
-.wf-outer:hover .wf-tools,
+/* Reveal when hovering the wedge zone OR when hovering the tools themselves */
+.wf-hover-wedge:hover ~ .wf-tools,
 .wf-tools:hover {
   opacity: 1;
   transform: translateY(-50%) translateX(0) scale(1);
@@ -87,8 +101,8 @@
 
 /* ── Tool buttons ─────────────────────────────────────────────────────────── */
 .wf-tool {
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   border: 1px solid #E2E8F0;
   background: #fff;
@@ -106,14 +120,14 @@
 .wf-tool:active { transform: scale(0.92); }
 
 .wf-tool .material-icons {
-  font-size: 12px;
+  font-size: 15px;
   line-height: 1;
 }
 
 /* Connect handle — hollow circle, outline only */
 .wf-tool.connect {
   background: transparent;
-  border: 1.5px solid #94A3B8;
+  border: 2px solid #94A3B8;
   cursor: crosshair;
   box-shadow: none;
 }
@@ -179,7 +193,7 @@
   font-weight: 800;
   font-family: 'Montserrat', sans-serif;
   letter-spacing: 0.01em;
-  margin-bottom: 4px;
+  margin-bottom: 10px;
   color: #fff;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
   box-shadow:
@@ -202,7 +216,10 @@
   background: #fff;
   border-radius: 16px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), inset 0 -1px 0 rgba(15, 23, 42, 0.03);
-  padding: 8px 12px 6px;
+  /* Bottom padding moved to .wf-foot margin-bottom so the footer/.wf-warn block
+     sits INSIDE the content box with a real bottom gap (equal to its top gap),
+     instead of being flush against the content-box inner bottom. */
+  padding: 14px 12px 0;
 }
 
 .wf-head {
@@ -382,7 +399,11 @@
   align-items: center;
   justify-content: space-between;
   gap: 6px;
-  margin-top: 5px;
+  /* Symmetric vertical gaps: top gap (preceding section -> footer) equals
+     bottom gap (footer -> card content-box inner bottom). Bottom uses
+     margin-bottom because .wf-card now has 0 bottom padding. */
+  margin-top: 12px;
+  margin-bottom: 12px;
 }
 
 .wf-meta {

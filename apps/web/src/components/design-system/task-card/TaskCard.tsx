@@ -712,6 +712,7 @@ function TaskDetailsPopover({
                 shell.appendChild(r)
                 r.addEventListener('animationend', () => r.remove(), { once: true })
               }}>
+              {/* eslint-disable-next-line jsx-a11y/prefer-tag-over-role -- wraps nested <button>s (Message / Ask AI); a native <button> cannot contain interactive children */}
               <div className="tp-customer tp-customer-link" role="button" tabIndex={0}
                 onClick={openLeadDetails}
                 onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') openLeadDetails() }}

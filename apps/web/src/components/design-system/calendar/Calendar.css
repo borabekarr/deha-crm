@@ -13,10 +13,10 @@ body { background: #E4E8ED; font-family: 'Montserrat', sans-serif; }
 
 /* ── White inner panel ── */
 .cal-panel {
-  background: #FFFFFF;
-  border: 1px solid #CBD5E1;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-top-color: rgba(255,255,255,0.9);
-  border-radius: 20px;
+  border-radius: var(--card-radius);
   box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(15,23,42,0.04);
   overflow: hidden;
 }
@@ -84,7 +84,7 @@ body { background: #E4E8ED; font-family: 'Montserrat', sans-serif; }
 /* ── Events ── */
 .cal-events { padding: 14px 12px 10px; }
 .cal-ev-label { font-size: 10px; font-weight: 700; color: #94A3B8; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
-.cal-ev-item { display: flex; align-items: center; padding: 10px 2px; border-bottom: 1px solid #F8FAFC; }
+.cal-ev-item { display: flex; align-items: center; width: 100%; padding: 10px 2px; border: 0; border-bottom: 1px solid #F8FAFC; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; appearance: none; }
 .cal-ev-item:last-of-type { border-bottom: none; }
 .cev-left { display: flex; align-items: center; gap: 8px; flex: 1; overflow: hidden; }
 .cev-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
@@ -113,7 +113,7 @@ body { background: #E4E8ED; font-family: 'Montserrat', sans-serif; }
 /* ── Dark mode — driven by app-global html.dark (FIX#3: converted from [data-theme="dark"]) ── */
 html.dark .card{ background:var(--slate-900); }
 html.dark .cal-outer{ background:var(--slate-700); box-shadow:0 16px 56px rgba(0,0,0,.5), 0 3px 10px rgba(0,0,0,.3); }
-html.dark .cal-panel{ background:#1E293B; border:1px solid #334155; border-top-color:rgba(255,255,255,0.22); box-shadow:inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04); }
+html.dark .cal-panel{ border-top-color:rgba(255,255,255,0.22); box-shadow:inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04); }
 html.dark .cal-header{ border-bottom-color:var(--slate-700); }
 html.dark .cal-month-yr{ color:var(--slate-100); }
 html.dark .cal-count{ background:var(--slate-700); color:var(--slate-300); }
@@ -166,8 +166,9 @@ html.dark .cal-ep-cust-act:hover { background: #273449; }
 @keyframes calPopBackdropIn { from { opacity: 0; } to { opacity: 1; } }
 
 .cal-popover {
-  background: var(--bg-card-solid, #fff);
-  border-radius: 20px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
   padding: 24px;
   width: 320px;
   box-shadow: 0 24px 80px rgba(15,23,42,0.22), 0 4px 16px rgba(15,23,42,0.08),
@@ -266,16 +267,16 @@ html.dark .cal-ep-outer { background: #0F172A; }
 /* Card surface */
 .cal-ep-card {
   --ep-color: #3B82F6;
-  background: #FFFFFF;
-  border: 1px solid #CBD5E1;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-top-color: rgba(255,255,255,0.9);
-  border-radius: 22px;
+  border-radius: var(--card-radius);
   box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(15,23,42,0.04);
   overflow: hidden;
   display: flex; flex-direction: column;
   min-height: 0;
 }
-html.dark .cal-ep-card { background: #1E293B; border: 1px solid #334155; border-top-color: rgba(255,255,255,0.22); box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04); }
+html.dark .cal-ep-card { border-top-color: rgba(255,255,255,0.22); box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04); }
 
 /* Coloured header — uses --ep-color set on .cal-ep-card */
 .cal-ep-head {
@@ -407,8 +408,10 @@ html.dark .cal-ep-cust-sub { color: var(--fg3) !important; }
 .cal-ep-cust-act:hover { background: var(--bg-card-solid); }
 .cal-ep-cust-act:active { transform: scale(0.93); }
 .cal-ep-cust-act .material-icons { font-size: 17px; }
+/* (9) Ask AI → .btn-green (global); pin layout only here. No local color/bg override that fights btn-green. */
 .cal-ep-cust-ask { flex-shrink: 0; padding: 5px 11px !important; font-size: 11px !important; border-radius: 9999px !important; }
-html.dark .cal-ep-cust-ask { padding: 5px 11px !important; font-size: 11px !important; border-radius: 9999px !important; }
+/* (9) Dark: do NOT override background/color — btn-green handles dark mode via global.css */
+.cal-ep-cust-ask .material-symbols-outlined { font-size: 14px; }
 /* Press ripple */
 .cal-ep-cust-ripple {
   position: absolute; border-radius: 50%; transform: scale(0);
@@ -420,9 +423,10 @@ html.dark .cal-ep-cust-ripple { background: rgba(255,255,255,0.11); }
 @keyframes cal-ep-cust-rip { to { transform: scale(3.4); opacity: 0; } }
 
 /* ── Alerts strip ──────────────────────────────────────────────────── */
+/* (1) Brighter red: #FF3B3B instead of #EF4444 so the strip reads as vivid alert */
 .cal-ep-alerts {
   margin-bottom: 15px; padding: 14px 14px; border-radius: 14px;
-  background: #EF4444 !important; border: none !important;
+  background: #FF3B3B !important; border: none !important;
   background-image:
     radial-gradient(ellipse at top right, rgba(255,255,255,0.20), transparent 55%),
     linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
@@ -430,13 +434,16 @@ html.dark .cal-ep-cust-ripple { background: rgba(255,255,255,0.11); }
   background-size: cover, 20px 20px, 20px 20px !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
 }
+/* (1) Dark mode: 75% mix keeps it noticeably red (was 55%) */
 html.dark .cal-ep-alerts {
-  background-color: color-mix(in srgb, #EF4444 55%, #0F172A) !important;
+  background-color: color-mix(in srgb, #FF3B3B 75%, #0F172A) !important;
   background-image:
     radial-gradient(ellipse at top right, rgba(255,255,255,0.12), transparent 55%),
     linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px) !important;
   background-size: cover, 20px 20px, 20px 20px !important;
+  border: none !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
 }
 .cal-ep-alerts-k { display: flex; align-items: center; gap: 6px; font-family: var(--font-display); font-size: 12px; font-weight: 900;
   letter-spacing: 0.05em; text-transform: uppercase; color: rgba(255,255,255,0.92) !important; margin-bottom: 10px; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
@@ -473,6 +480,8 @@ html.dark .cal-ep-alert-cta .material-icons { color: #0F172A !important; }
 
 /* ── Metric list (grey tray with individual shells) ────────────────── */
 .cal-ep-list { display: flex; flex-direction: column; gap: 11px; background: none !important; border: none !important; padding: 0 !important; }
+/* (6) Remove covering background layer in dark mode — metric cards sit directly on popover surface */
+html.dark .cal-ep-list { background: none !important; }
 .cal-ep-w-shell {
   background: #FFFFFF; border-radius: 18px; padding: 9px;
   border: 1px solid #CBD5E1;
@@ -483,11 +492,13 @@ html.dark .cal-ep-w-shell { background: #0F172A; border: 1px solid #334155; bord
 .cal-ep-w {
   display: block; min-height: 0; padding: 13px 14px;
   border: 1px solid var(--border-hairline); border-radius: 13px;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--acc, var(--brand-primary)) 8%, var(--bg-card-solid)) 0%, var(--bg-card-solid) 66%);
+  /* (5) Flat color — no gradient background */
+  background: var(--bg-card-solid) !important;
   box-shadow: 0 1px 2px rgba(15,23,42,0.05), inset 0 1px 0 rgba(255,255,255,0.65);
   transition: transform calc(180ms * var(--anim-mult, 1)) cubic-bezier(.34,1.4,.6,1), box-shadow calc(180ms * var(--anim-mult, 1));
 }
-html.dark .cal-ep-w { background: linear-gradient(180deg, color-mix(in srgb, var(--acc, var(--brand-primary)) 17%, #1E293B) 0%, #1E293B 80%); border-color: #334155; box-shadow: 0 1px 2px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05); }
+/* (5) Dark: flat, no gradient */
+html.dark .cal-ep-w { background: #1E293B !important; border-color: #334155 !important; box-shadow: 0 1px 2px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05) !important; }
 .cal-ep-w:hover { transform: translateY(-2px); box-shadow: 0 14px 26px -16px color-mix(in srgb, var(--acc, #0f172a) 55%, rgba(15,23,42,0.35)), inset 0 1px 0 rgba(255,255,255,0.7); }
 html.dark .cal-ep-w:hover { box-shadow: 0 14px 26px -14px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06); }
 
@@ -501,7 +512,9 @@ html.dark .cal-ep-w:hover { box-shadow: 0 14px 26px -14px rgba(0,0,0,0.6), inset
     linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
   background-size: cover, 7px 7px, 7px 7px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(15,23,42,0.20), inset 0 0 0 1px rgba(15,23,42,0.12), 0 2px 6px rgba(0,0,0,0.10);
+  /* (7) Colored glow tinted to --acc accent color */
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(15,23,42,0.20), inset 0 0 0 1px rgba(15,23,42,0.12), 0 2px 6px rgba(0,0,0,0.10),
+    0 0 10px -2px var(--acc, var(--brand-primary));
 }
 .cal-ep-w-ic .material-icons { font-size: 16px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.35); filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15)); }
 .cal-ep-w-label { font-family: var(--font-display); font-weight: 900; font-size: 14px !important; letter-spacing: -0.01em !important; color: var(--fg1) !important; text-transform: none !important; }
@@ -530,9 +543,11 @@ html.dark .cal-ep-tip-cta .material-icons { color: #0F172A !important; }
 .cal-ep-category-header { display: flex; align-items: center; gap: 8px; padding: 18px 2px 10px;
   border-top: 1.5px solid var(--border-hairline); margin-top: 4px; }
 .cal-ep-category-header.first { border-top: 1.5px solid var(--border-hairline); padding-top: 18px; margin-top: 4px; }
-.cal-ep-category-header .material-icons { font-size: 27px; color: #0F172A; font-weight: 900; }
+/* (2) Icon scaled proportionally with label: 31px ≈ 27 × (22/19) */
+.cal-ep-category-header .material-icons { font-size: 31px; color: #0F172A; font-weight: 900; }
 html.dark .cal-ep-category-header .material-icons { color: var(--fg1); }
-.cal-ep-category-label { font-family: var(--font-display); font-size: 19px; font-weight: 900;
+/* (2) Category label bumped to 22px to match task-card */
+.cal-ep-category-label { font-family: var(--font-display); font-size: 22px; font-weight: 900;
   letter-spacing: -0.015em; text-transform: none; color: #0F172A; }
 html.dark .cal-ep-category-label { color: var(--fg1); }
 .cal-ep-category-ts { margin-left: auto; font-size: 10px; font-weight: 700; color: var(--brand-primary); }
@@ -575,10 +590,15 @@ html.dark .cal-ep-category-label { color: var(--fg1); }
     linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
   background-size: 7px 7px;
-  padding: 4px 10px 4px 8px; border-radius: 9999px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), inset 0 -1.5px 0 rgba(0,0,0,0.18), inset 0 0 0 1px rgba(0,0,0,0.06);
+  /* (3) Symmetric padding — no dead right space; left icon (swap_horiz) provides left context */
+  padding: 4px 8px; border-radius: 9999px;
+  /* (7) Glow matches task-card .tp-focus-sub — literal RED so inherited --fc can't override */
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), inset 0 -1.5px 0 rgba(0,0,0,0.18), inset 0 0 0 1px rgba(0,0,0,0.06),
+    0 0 10px -2px #EF4444;
 }
-html.dark .cal-ep-focus-sub { box-shadow: inset 0 1px 0 rgba(255,255,255,0.15); }
+.cal-ep-focus-sub .material-icons { font-size: 11px; line-height: 1; }
+/* (7) Dark mode: keep the literal RED glow (dim inset highlight only) */
+html.dark .cal-ep-focus-sub { box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 0 10px -2px #EF4444; }
 
 /* ── Battery ───────────────────────────────────────────────────────── */
 .cal-ep-batt-row { display: flex; align-items: center; gap: 9px; }
@@ -593,10 +613,12 @@ html.dark .cal-ep-focus-sub { box-shadow: inset 0 1px 0 rgba(255,255,255,0.15); 
 /* ── Column ageing ─────────────────────────────────────────────────── */
 .cal-ep-age { display: flex; flex-direction: column; gap: 9px; }
 .cal-ep-age-chips { display: flex; align-items: center; gap: 9px; }
+/* (7) Age chip — glow matches task-card .tp-age-chip — literal BLUE so inherited --ac can't override */
 .cal-ep-age-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 800; color: #fff;
   background: var(--ac, #3B82F6); padding: 4px 11px 4px 8px; border-radius: 9999px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.25); }
-html.dark .cal-ep-age-chip { box-shadow: inset 0 1px 0 rgba(255,255,255,0.15); }
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 0 10px -2px #3B82F6; }
+/* (7) Dark: dim inset highlight + keep literal BLUE glow */
+html.dark .cal-ep-age-chip { box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 0 10px -2px #3B82F6; }
 .cal-ep-age-chip .material-icons { font-size: 14px; }
 .cal-ep-age-of { font-size: 11px; font-weight: 600; color: var(--fg4); }
 .cal-ep-age-meter { height: 7px; border-radius: 9999px; background: var(--bg-chip); overflow: hidden; box-shadow: inset 0 1px 2px rgba(15,23,42,0.08); }
@@ -644,6 +666,9 @@ html.dark .cal-ep-chain-step { box-shadow: inset 0 1px 0 rgba(255,255,255,0.07);
 .cal-ep-chain-step.locked { color: var(--fg4); opacity: 0.85; }
 .cal-ep-chain-step-ic { display: grid; place-items: center; flex-shrink: 0; }
 .cal-ep-chain-step-ic .material-icons { font-size: 14px; color: inherit; }
+/* (4) Icons: white on colored (done/active) chips */
+.cal-ep-chain-step.done .cal-ep-chain-step-ic .material-icons,
+.cal-ep-chain-step.active .cal-ep-chain-step-ic .material-icons { color: #fff !important; }
 .cal-ep-chain-step-lbl { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; }
 .cal-ep-chain-conn { color: var(--fg4); display: flex; }
 .cal-ep-chain-conn .material-icons { font-size: 16px; }

@@ -2,6 +2,7 @@ import '../../../../design-system/preview/_base.css'
 import './Calendar.css'
 
 import { useState, useCallback, useRef, Fragment } from 'react'
+import { iconClass } from '../../../lib/iconClass'
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
@@ -270,7 +271,9 @@ function CalFocusCost({ data }: { data: CalEventMetrics['context_switch'] }) {
       <span className="cal-ep-focus-n" style={{ color: tone }}>{n}</span>
       <div className="cal-ep-focus-tx">
         <span className="cal-ep-focus-main">{n === 1 ? 'event competes' : 'events compete'} for focus today</span>
-        <span className="cal-ep-focus-sub" style={{ '--fc': tone } as React.CSSProperties}>{lv} switching cost</span>
+        <span className="cal-ep-focus-sub" style={{ '--fc': tone } as React.CSSProperties}>
+          <span className="material-icons">swap_horiz</span>{lv} switching cost
+        </span>
       </div>
     </div>
   )
@@ -607,8 +610,8 @@ function CalEventPopoverCard({
               <button type="button" className="cal-ep-cust-act" aria-label="Message" onClick={e => { e.stopPropagation(); act('Message') }}>
                 <span className="material-icons">chat</span>
               </button>
-              <button type="button" className="cal-ep-cust-ask ask-ai" onClick={e => { e.stopPropagation(); act('Ask AI') }}>
-                <span className="material-icons">bolt</span>Ask AI
+              <button type="button" className="cal-ep-cust-ask ask-ai btn-green" onClick={e => { e.stopPropagation(); act('Ask AI') }}>
+                <span className={iconClass('neurology')}>neurology</span>Ask AI
               </button>
             </div>
           </div>
@@ -848,13 +851,12 @@ export default function Calendar() {
               {cnt > 0 ? (
                 <>
                   {events.map((item) => (
-                    <div
+                    <button
+                      type="button"
                       key={`${item.time}-${item.title}`}
                       className="cal-ev-item"
                       onClick={() => openEvPopover(item)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') openEvPopover(item) }}
+                      aria-label={`${item.time} ${item.title}`}
                     >
                       <div className="cev-left">
                         <div className="cev-dot" style={{ background: item.dot }} />
@@ -866,7 +868,7 @@ export default function Calendar() {
                         <span className="cev-title">{item.title}</span>
                       </div>
                       <span className="cev-chevron material-icons">chevron_right</span>
-                    </div>
+                    </button>
                   ))}
                   <div className="cal-add-row" onClick={openPopover}>
                     <div className="cal-add-icon">
@@ -893,6 +895,7 @@ export default function Calendar() {
       </div>
 
       {/* Event-detail popover — full TaskDetailsPopover structure re-mapped to .cal-ep-* */}
+      {/* eslint-disable-next-line jsx-a11y/prefer-tag-over-role -- custom controlled overlay; native <dialog> alters show/hide semantics */}
       <div
         ref={evPopOverlayRef}
         className={`cal-ep-overlay${evPopOpen ? ' open' : ''}`}
@@ -916,8 +919,10 @@ export default function Calendar() {
             <p className="cal-pop-title">New Event</p>
 
             <div className="cal-pop-field">
-              <label className="cal-pop-label">Title</label>
+              <label className="cal-pop-label" htmlFor="cal-new-title">Title</label>
               <input
+                id="cal-new-title"
+                aria-label="Title"
                 className="cal-pop-input"
                 type="text"
                 placeholder="Event title"
@@ -928,8 +933,10 @@ export default function Calendar() {
             </div>
 
             <div className="cal-pop-field">
-              <label className="cal-pop-label">Date</label>
+              <label className="cal-pop-label" htmlFor="cal-new-date">Date</label>
               <input
+                id="cal-new-date"
+                aria-label="Date"
                 className="cal-pop-input"
                 type="date"
                 value={newEvent.date}
@@ -938,8 +945,10 @@ export default function Calendar() {
             </div>
 
             <div className="cal-pop-field">
-              <label className="cal-pop-label">Time</label>
+              <label className="cal-pop-label" htmlFor="cal-new-time">Time</label>
               <input
+                id="cal-new-time"
+                aria-label="Time"
                 className="cal-pop-input"
                 type="time"
                 value={newEvent.time}

@@ -54,6 +54,8 @@ html.dark .frame {
   --dur-fast: calc(220ms * var(--anim-mult, 1));
   font-family: 'Montserrat', sans-serif;
   user-select: none;
+  /* Grid texture alpha — single source of truth for both green pill surfaces */
+  --mt-grid-alpha: 0.07;
 }
 
 /* ── Overlay ───────────────────────────────────────────────────────────── */
@@ -63,7 +65,7 @@ html.dark .frame {
   z-index: 0;
   opacity: 0;
   pointer-events: none;
-  background: rgba(15,23,42,0.04);
+  /* No background fill — overlay is purely a click-capture surface */
   transition: opacity var(--dur) var(--ease);
 }
 .mt-overlay.open {
@@ -71,31 +73,51 @@ html.dark .frame {
   pointer-events: auto;
 }
 
-/* ── Dock: consistent-width floating glass card ─────────────────────────── */
+/* ── Dock: grey external wrapper around a white inner card ───────────────── */
+/* Mirrors the .card-inner look: a white card (card tokens) sitting on a grey
+   surface. The grey EXTERNAL background is .mt-dock; the white card is
+   .mt-dock-inner. */
 .mt-dock {
   position: relative;
   z-index: 1;
   width: var(--dock-w, 360px);
   box-sizing: border-box;
+  /* Grey external surface — slate-100 in light, slate-900 in dark */
+  background: #F1F5F9;
+  border: 1px solid var(--card-border, #CBD5E1);
+  border-radius: calc(var(--card-radius, 20px) + 8px);
   padding: 8px;
-  display: flex;
-  flex-direction: column;
-  background: var(--bg-card);
-  -webkit-backdrop-filter: blur(var(--blur-glass, 20px));
-  backdrop-filter: blur(var(--blur-glass, 20px));
-  border-radius: 26px;
   overflow: hidden;
-  border: 1px solid var(--border-glass, rgba(255,255,255,0.60));
   box-shadow:
-    0 18px 50px -12px rgba(15,23,42,0.28),
-    0 2px 8px rgba(15,23,42,0.08),
-    inset 0 1px 0 rgba(255,255,255,0.55);
+    0 18px 50px -12px rgba(15,23,42,0.18),
+    0 2px 8px rgba(15,23,42,0.06);
 }
 html.dark .mt-dock {
-  border-color: rgba(255,255,255,0.08);
+  background: #0F172A;
+  border-color: var(--card-border, #334155);
   box-shadow:
-    0 24px 60px -12px rgba(0,0,0,0.7),
-    inset 0 1px 0 rgba(255,255,255,0.06);
+    0 24px 60px -12px rgba(0,0,0,0.50);
+}
+
+/* White inner card — consumes the shared card tokens exactly like .card-inner */
+.mt-dock-inner {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  background: var(--card-bg, #FFFFFF);
+  border: 1px solid var(--card-border, #CBD5E1);
+  border-radius: var(--card-radius, 20px);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(15,23,42,0.04);
+}
+html.dark .mt-dock-inner {
+  background: var(--card-bg, #1E293B);
+  border-color: var(--card-border, #334155);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    inset 0 0 0 1px rgba(255,255,255,0.04);
 }
 
 /* ── Height morph via CSS grid-rows ─────────────────────────────────────── */
@@ -112,17 +134,16 @@ html.dark .mt-dock {
   min-height: 0;
 }
 
-/* ── Divider ───────────────────────────────────────────────────────────── */
+/* ── Divider — separator between panels and toolbar ─────────────────────── */
 .mt-divider {
+  display: block;
   height: 1px;
-  margin: 4px 6px;
+  background: var(--card-border, #CBD5E1);
+  margin: 0 2px;
   flex-shrink: 0;
-  background: var(--border-hairline, #E2E8F0);
-  opacity: 0;
-  transition: opacity var(--dur-fast) var(--ease);
 }
-.mt-dock.open .mt-divider {
-  opacity: 1;
+html.dark .mt-divider {
+  background: var(--card-border, #334155);
 }
 
 /* ── Panel stack ────────────────────────────────────────────────────────── */
@@ -144,6 +165,8 @@ html.dark .mt-dock {
   opacity: 1;
   pointer-events: auto;
   transform: none;
+  /* Exit-then-enter: delay entering panel until exiting panel has faded out (≈220ms) */
+  transition-delay: calc(220ms * var(--anim-mult, 1));
 }
 
 /* Need relative context for absolute panels */
@@ -169,28 +192,45 @@ html.dark .mt-dock {
   width: 100%;
   background: none;
   border: none;
+  border-bottom: 1px solid var(--card-border, #CBD5E1);
   text-align: left;
   transition: background calc(220ms * var(--anim-mult, 1)) var(--ease);
 }
+.mt-row:last-child { border-bottom: none; }
+html.dark .mt-row { border-bottom-color: var(--card-border, #334155); }
+html.dark .mt-row:last-child { border-bottom: none; }
 .mt-row:hover { background: rgba(15,23,42,0.05); }
 html.dark .mt-row:hover { background: rgba(255,255,255,0.06); }
 
+/* ── Row icon badge — matches .ms-icon semantic-pill treatment ─────────── */
 .mt-row-ic {
   width: 38px;
   height: 38px;
-  border-radius: 12px;
+  border-radius: 11px;
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  color: var(--fg2, #334155);
-  background: var(--bg-chip, #F1F5F9);
-  box-shadow: inset 0 0 0 1px rgba(15,23,42,0.05);
+  /* Icon colour overridable via --icon-c; defaults to emerald */
+  background-color: var(--icon-c, #10B981);
+  background-image:
+    radial-gradient(ellipse at top right, rgba(255,255,255,0.18) 0%, transparent 55%),
+    linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+  background-size: cover, 7px 7px, 7px 7px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.55),
+    inset 0 -2px 0 rgba(15,23,42,0.20),
+    inset 0 0 0 1px rgba(15,23,42,0.12),
+    0 2px 6px rgba(0,0,0,0.10);
 }
-html.dark .mt-row-ic {
-  color: #CBD5E1;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+.mt-row-ic .material-symbols-outlined {
+  font-size: 20px;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
+  line-height: 1;
+  display: block;
 }
-.mt-row-ic .material-symbols-outlined { font-size: 20px; }
 
 .mt-row-tx { flex: 1; min-width: 0; }
 .mt-row-title {
@@ -222,8 +262,8 @@ html.dark .mt-row-ic {
   color: #FFFFFF;
   background: #10B981;
   background-image:
-    linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+    linear-gradient(rgba(255,255,255,var(--mt-grid-alpha,0.07)) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,var(--mt-grid-alpha,0.07)) 1px, transparent 1px);
   background-size: 7px 7px;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.42),
@@ -245,7 +285,16 @@ html.dark .mt-row-ic {
   justify-content: center;
   gap: 6px;
   flex-shrink: 0;
-  padding: 0;
+  padding: 0 10px;
+  /* Ensure tabs, icons and the gliding pill share the same vertical midline */
+  height: 48px;
+}
+
+.mt-tabwrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 /* ── Single gliding emerald indicator ──────────────────────────────────── */
@@ -256,16 +305,11 @@ html.dark .mt-row-ic {
   left: 0;
   height: 48px;
   border-radius: 9999px;
-  background: #10B981;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
-  background-size: 7px 7px;
+  /* Mirror the canonical .btn-green button: navy in light, emerald in dark, no grid texture */
+  background: #0F172A;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.42),
-    inset 0 -2px 0 rgba(15,23,42,0.14),
-    inset 0 0 0 1px rgba(15,23,42,0.08),
-    0 6px 16px -6px rgba(16,185,129,0.55);
+    inset 0 1px 0 rgba(255,255,255,0.14),
+    0 2px 6px rgba(15,23,42,0.28);
   width: var(--ind-w, 48px);
   transform: translateX(var(--ind-x, 0));
   transition:
@@ -273,6 +317,12 @@ html.dark .mt-row-ic {
     width calc(300ms * var(--anim-mult, 1)) var(--ease);
   pointer-events: none;
   z-index: 0;
+}
+html.dark .mt-ind {
+  background: #10B981;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.3),
+    0 2px 8px rgba(16,185,129,0.34);
 }
 
 /* ── Tabs (transparent buttons, sit above indicator) ────────────────────── */
@@ -292,10 +342,23 @@ html.dark .mt-row-ic {
   width: 48px;
   flex-shrink: 0;
   overflow: hidden;
-  transition: width calc(300ms * var(--anim-mult, 1)) var(--ease);
+  transition:
+    width calc(300ms * var(--anim-mult, 1)) var(--ease),
+    transform calc(180ms * var(--anim-mult, 1)) var(--ease);
 }
+/* Hover: grey rounded background (primary signal) + subtle lift — active press overrides to 0.96 */
+.mt-tab:hover {
+  transform: scale(1.03);
+}
+/* Grey rounded background appears on hover (the look formerly only seen while holding) */
+.mt-tab:hover .mt-hold { opacity: 1; transform: scale(1); }
+/* Active pill: symmetric inner horizontal padding, icon hugs the label.
+   Width = left pad (14) + icon (24) + icon↔text gap (6) + label (lw) + right pad (14). */
 .mt-tab.active {
-  width: calc(48px + var(--lw, 46px) + 14px);
+  width: calc(14px + 24px + 6px + var(--lw, 46px) + 14px);
+  padding: 0 14px;
+  justify-content: flex-start;
+  gap: 6px;
 }
 
 /* hold-feedback circle */
@@ -314,8 +377,9 @@ html.dark .mt-row-ic {
     opacity calc(220ms * var(--anim-mult, 1)) var(--ease),
     transform calc(220ms * var(--anim-mult, 1)) var(--ease);
 }
-.mt-tab.active .mt-hold { background: rgba(255,255,255,0.22); }
-.mt-tab:active .mt-hold { opacity: 1; transform: scale(1); }
+/* Active tab already shows the green pill — suppress the grey background there */
+.mt-tab.active .mt-hold { opacity: 0; }
+/* Press = clean scale only (no grey watermark); see .mt-tab:active below */
 
 /* icon box */
 .mt-iconbox {
@@ -326,10 +390,22 @@ html.dark .mt-row-ic {
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  transition: transform calc(220ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.5,1);
+  transition:
+    width calc(300ms * var(--anim-mult, 1)) var(--ease),
+    transform calc(220ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.5,1);
 }
+/* Active tab: shrink iconbox to glyph width so the label hugs the icon
+   (no more 48px centering gap). */
+.mt-tab.active .mt-iconbox {
+  width: 24px;
+}
+/* Press feedback on the whole tab button (canonical 0.96 scale, no icon squish) */
+.mt-tab:active {
+  transform: scale(0.96);
+}
+/* Icon box keeps constant size on press — transition retained for smoothness */
 .mt-tab:active .mt-iconbox {
-  transform: translateY(1.5px) scaleX(1.08) scaleY(0.76);
+  transform: none;
 }
 
 .mt-ic {
@@ -353,7 +429,7 @@ html.dark .mt-row-ic {
   overflow: hidden;
   width: 0;
   opacity: 0;
-  transform: translateX(-8px);
+  transform: translateX(-6px);
   color: #FFFFFF;
   font-size: 14px;
   font-weight: 800;
@@ -364,7 +440,7 @@ html.dark .mt-row-ic {
     transform calc(300ms * var(--anim-mult, 1)) var(--ease);
 }
 .mt-tab.active .mt-label {
-  width: calc(var(--lw, 46px) + 8px);
+  width: var(--lw, 46px);
   opacity: 1;
   transform: translateX(0);
 }

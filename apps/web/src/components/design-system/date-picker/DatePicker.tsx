@@ -17,7 +17,7 @@ export default function DatePicker() {
         >
 
           {/* Trigger button */}
-          <button type="button" className="dp-trigger" id="dp-open-btn">
+          <button type="button" className="dp-trigger btn-green" id="dp-open-btn">
             <span className="material-symbols-outlined">calendar_today</span>
             <span className="dp-trigger-label">12 June 2026</span>
           </button>
@@ -27,7 +27,10 @@ export default function DatePicker() {
 
             {/* Header */}
             <div className="dp-head">
-              <span className="dp-head-title">Select date</span>
+              <span className="dp-head-title">
+                <span className="material-symbols-outlined">calendar_today</span>
+                Select date
+              </span>
               <button type="button" className="dp-head-close" id="dp-close-btn">
                 <span className="material-symbols-outlined">close</span>
               </button>
@@ -60,7 +63,8 @@ export default function DatePicker() {
             </div>{/* /.dp-wheels */}
 
             {/* Confirm button */}
-            <button type="button" className="dp-confirm" id="dp-confirm-btn">
+            <button type="button" className="dp-confirm btn-green" id="dp-confirm-btn">
+              <span className="material-symbols-outlined">event_available</span>
               Confirm date
             </button>
 
