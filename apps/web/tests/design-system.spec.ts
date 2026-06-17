@@ -273,14 +273,21 @@ test('design-system / workflow-add-elements', async ({ page }) => {
   const flyout = page.locator('.wae-pop-outer.visible').nth(1)
   if (await flyout.count()) await waitForStableBox(flyout)
 
-  // Reset the preview scroll container before capturing. The right-click +
-  // hover above make Playwright scroll the target into view, and the resulting
-  // scrollTop varied run-to-run — shifting the WHOLE page in the screenshot
-  // (~0.06 diff). The panel/flyout are absolutely positioned inside the shell,
-  // so pinning scroll to the top yields a deterministic full-viewport capture.
-  await page.locator('.overflow-auto').first().evaluate((el) => {
-    el.scrollTop = 0
-    el.scrollLeft = 0
+  // Reset every scroll position before capturing. The right-click + hover above
+  // make Playwright scroll the target into view, and the resulting offset varied
+  // run-to-run — shifting the WHOLE page ~17px vertically in the screenshot
+  // (~0.06 diff). Targeting a single .overflow-auto missed the real scroll
+  // owner, so reset the window plus every scrolled element to the top. The
+  // panel/flyout are absolutely positioned inside the shell, so true scroll 0
+  // yields a deterministic full-viewport capture.
+  await page.evaluate(() => {
+    window.scrollTo(0, 0)
+    document.querySelectorAll('*').forEach((el) => {
+      if (el.scrollTop || el.scrollLeft) {
+        el.scrollTop = 0
+        el.scrollLeft = 0
+      }
+    })
   })
   await page.waitForTimeout(150)
 
