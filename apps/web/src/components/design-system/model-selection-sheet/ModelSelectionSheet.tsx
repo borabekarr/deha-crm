@@ -4,7 +4,7 @@ import './ModelSelectionSheet.css'
 // ---------------------------------------------------------------------------
 // ModelSelectionSheet — AI model selection mobile-style sheet
 // Faithful port of apps/web/design-system/preview/components-model-selection-sheet.html
-// DOM: .mss-card > .shell.sel-shell > .sheet > (.sh-head, .sh-body, .confetti)
+// DOM: .mss-card > .shell.sel-shell > .sheet > (.sh-head, .sh-body)
 // NO raw useEffect — all animation/interaction lives in model-selection-sheet-hook.ts
 // ---------------------------------------------------------------------------
 
@@ -41,7 +41,10 @@ export default function ModelSelectionSheet() {
               <span className="material-symbols-outlined">chevron_left</span>
             </button>
             <div className="sh-head-mid">
-              <div className="sh-title">Select Intelligence</div>
+              <div className="sh-title">
+              <span className="material-symbols-outlined sh-title-icon">psychology</span>
+              Select Intelligence
+            </div>
               <div className="dots">
                 {MODELS.map((m, i) => (
                   <span key={m.name} className={`dot${i === 0 ? ' on' : ''}`} />
@@ -154,7 +157,8 @@ export default function ModelSelectionSheet() {
             <div className="specs-wrap">
               <span className="specs-rule" />
               <button type="button" className="specs-btn" id="mss-specsBtn">
-                View Full Specs: {m0.name}
+                <span id="mss-specsText">View Full Specs: {m0.name}</span>
+                <span className="material-symbols-outlined specs-ext-icon">open_in_new</span>
               </button>
               <span className="specs-rule" />
             </div>
@@ -171,7 +175,6 @@ export default function ModelSelectionSheet() {
             </button>
           </div>
 
-          <canvas className="confetti" aria-hidden="true" />
         </div>
       </div>
 

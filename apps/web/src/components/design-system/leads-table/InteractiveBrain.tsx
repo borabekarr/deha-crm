@@ -12,7 +12,6 @@
      - className ldx-brain-piece      → base class for all region pieces
      - class is-active                → added when stage.activeId === id
      - class is-hovered               → added when stage.hoveredId === id
-     - class is-dimmed                → added when another region is hovered/active
      - --sec-color CSS custom prop    → used by Step 3 CSS glow/ring
 
    Labels appear centered below each piece as .ldx-brain-piece-label spans.
@@ -36,11 +35,41 @@ function hitTest(nx: number, ny: number): number {
   return ch === '.' ? -1 : Number(ch)
 }
 
+// ── Leader-line geometry (pure) ───────────────────────────────────────────────
+// For a given section, return the canvas-% coordinates of:
+//   anchor  — the piece centre (where the leader line starts, on the piece)
+//   chip    — the label position (where the line ends), pushed OUTWARD from the
+//             canvas centre and clamped inside [CHIP_MARGIN, 100-CHIP_MARGIN] so
+//             side-by-side pieces never collide and the chip never leaves stage.
+// Coordinates are percentages (0-100) of the square BRAIN_CANVAS so the SVG
+// (viewBox 0 0 100 100) and the absolutely-positioned chip share one space.
+const CHIP_PUSH = 26    // how far (in canvas %) to push the chip out from centre
+const CHIP_MARGIN = 3   // keep chip endpoint this far from the canvas edges
+function leaderGeom(sectionId: string) {
+  const box = BRAIN_REGION_BOXES[sectionId]
+  if (!box) return null
+  const ax = ((box.x + box.w / 2) / BRAIN_CANVAS) * 100
+  const ay = ((box.y + box.h / 2) / BRAIN_CANVAS) * 100
+  // direction away from canvas centre (50,50)
+  let dx = ax - 50, dy = ay - 50
+  const len = Math.hypot(dx, dy) || 1
+  dx /= len; dy /= len
+  let cx = ax + dx * CHIP_PUSH
+  let cy = ay + dy * CHIP_PUSH
+  // clamp so the chip stays on-stage (collision-free + never clipped)
+  cx = Math.max(CHIP_MARGIN, Math.min(100 - CHIP_MARGIN, cx))
+  cy = Math.max(CHIP_MARGIN, Math.min(100 - CHIP_MARGIN, cy))
+  return { ax, ay, cx, cy }
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export function InteractiveBrain({ stage }: { stage: BrainStageController }) {
-  // Determine if any region is focused (hovered or active) for dimming others
-  const focusedId = stage.hoveredId ?? stage.activeId
+  // Exactly ONE leader line + chip is shown at a time: the hovered piece wins,
+  // else the active (selected) piece. This is derived state — no effect.
+  const focusId = stage.hoveredId ?? stage.activeId
+  const focusSection = focusId ? BRAIN_SECTIONS.find(s => s.id === focusId) : undefined
+  const geom = focusId ? leaderGeom(focusId) : null
 
   return (
     <div className="ldx-brain">
@@ -62,19 +91,15 @@ export function InteractiveBrain({ stage }: { stage: BrainStageController }) {
 
           const isActive  = stage.activeId === section.id
           const isHovered = stage.hoveredId === section.id
-          const isDimmed  = focusedId !== null && focusedId !== section.id
 
+          // Hovered/active lobe gets focus; siblings get dimmed when any piece is hovered/active.
+          const anyFocused = stage.hoveredId !== null || stage.activeId !== null
+          const isDimmed = anyFocused && !isActive && !isHovered
           const pieceClass = [
             'ldx-brain-piece',
             isActive  ? 'is-active'  : '',
             isHovered ? 'is-hovered' : '',
             isDimmed  ? 'is-dimmed'  : '',
-          ].filter(Boolean).join(' ')
-
-          const labelClass = [
-            'ldx-brain-piece-label',
-            isActive  ? 'is-active'  : '',
-            isHovered ? 'is-hovered' : '',
           ].filter(Boolean).join(' ')
 
           // Positions as percentages of BRAIN_CANVAS
@@ -107,22 +132,52 @@ export function InteractiveBrain({ stage }: { stage: BrainStageController }) {
                   } as React.CSSProperties
                 }
               />
-              <span
-                className={labelClass}
-                style={{
-                  position: 'absolute',
-                  left: '50%',
-                  top: '100%',
-                  transform: 'translateX(-50%)',
-                  pointerEvents: 'none',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {section.label}
-              </span>
             </div>
           )
         })}
+
+        {/* ── Leader line + label chip — ONE at a time ──────────────────────
+            Both live OUTSIDE the per-piece wrapper, so the piece's hover
+            scale(1.08) never distorts the line stroke or the chip text. The
+            SVG spans the canvas (viewBox 0 0 100 100) and uses
+            non-scaling-stroke so the connector stays 1.5px crisp at any DPI /
+            canvas size. The chip is pushed outward + clamped on-stage so
+            side-by-side pieces never overlap their labels. */}
+        <svg
+          className="ldx-brain-leaders"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          {geom && focusSection && (
+            <>
+              <line
+                x1={geom.ax} y1={geom.ay} x2={geom.cx} y2={geom.cy}
+                className="ldx-leader-line is-on"
+                stroke={focusSection.color}
+              />
+              <circle
+                cx={geom.ax} cy={geom.ay} r={1.6}
+                className="ldx-leader-anchor"
+                fill={focusSection.color}
+              />
+            </>
+          )}
+        </svg>
+
+        {geom && focusSection && (
+          <span
+            className="ldx-leader-chip is-on"
+            style={{
+              position: 'absolute',
+              left: `${geom.cx}%`,
+              top: `${geom.cy}%`,
+              transform: 'translate(-50%, -50%)',
+            }}
+          >
+            {focusSection.label}
+          </span>
+        )}
 
         {/* Single overlay hit-tester — covers full canvas, dispatches to correct section */}
         <div
@@ -152,6 +207,7 @@ export function InteractiveBrain({ stage }: { stage: BrainStageController }) {
         {/* Screen-reader / keyboard a11y buttons — visually hidden, pointer-events none */}
         {BRAIN_SECTIONS.map(section => (
           <button
+            type="button"
             key={`sr-${section.id}`}
             className="ldx-brain-sr-btn"
             aria-label={section.label}

@@ -197,6 +197,7 @@ function TemplateCard({
   onToggle: () => void
 }): React.ReactElement {
   return (
+    // eslint-disable-next-line jsx-a11y/prefer-tag-over-role -- wraps a nested <button> (Use template); a native <button> cannot contain interactive children
     <div
       className={`wtc-outer${expanded ? ' wtc-expanded' : ''}`}
       onClick={onToggle}

@@ -1,0 +1,364 @@
+/* ===================================================================
+   GitHub Calendar — Deha Design System
+   Contribution heatmap: emerald ramp, glossy cells, hover tooltip,
+   diagonal pop-in wave, optional "city-lights" glow.
+   =================================================================== */
+
+/* ===== Stage / shell ===== */
+.gc-stage {
+  padding: 12px;
+  background: #D4DCE8;
+  border-radius: 34px;
+  max-width: 100%;
+  box-shadow:
+    0 18px 60px rgba(15, 23, 42, 0.16),
+    0 4px 12px rgba(15, 23, 42, 0.07);
+}
+
+html.dark .gc-stage {
+  background: #1E293B;
+  box-shadow:
+    0 18px 60px rgba(0, 0, 0, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.32);
+}
+
+/* ===== Card ===== */
+.gc-card {
+  --cell: 12px;
+  --gap: 2px;
+  position: relative;
+  width: max-content;
+  max-width: calc(100vw - 80px);
+  background: var(--bg-card-solid, #fff);
+  border-radius: 24px;
+  padding: 24px 26px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 0 0 1px rgba(15, 23, 42, 0.05);
+}
+
+html.dark .gc-card {
+  background: var(--bg-card-solid, #0F172A);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+/* ===== Header ===== */
+.gc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.gc-id {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.gc-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background-color: var(--brand-primary, #10B981);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.13) 1px, transparent 1px);
+  background-size: 7px 7px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.1),
+    0 4px 12px rgba(16, 185, 129, 0.35);
+}
+
+.gc-name {
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-weight: var(--weight-extrabold, 800);
+  font-size: 15px;
+  color: var(--fg1, #0F172A);
+  letter-spacing: -0.02em;
+}
+
+html.dark .gc-name {
+  color: var(--fg1-dark, #F1F5F9);
+}
+
+.gc-sub {
+  font-size: 12px;
+  color: var(--fg3, #64748B);
+  margin-top: 2px;
+}
+
+.gc-total {
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-size: 13px;
+  color: var(--fg2, #334155);
+  white-space: nowrap;
+}
+
+html.dark .gc-total {
+  color: var(--fg2-dark, #CBD5E1);
+}
+
+.gc-total b {
+  font-weight: var(--weight-extrabold, 800);
+  color: var(--fg1, #0F172A);
+}
+
+html.dark .gc-total b {
+  color: var(--fg1-dark, #F1F5F9);
+}
+
+/* ===== Scroller / grid ===== */
+.gc-scroller {
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: thin;
+}
+
+.gc-scroller::-webkit-scrollbar {
+  height: 4px;
+}
+
+.gc-scroller::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.gc-scroller::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.15);
+  border-radius: 2px;
+}
+
+html.dark .gc-scroller::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* month labels */
+.gc-months {
+  display: grid;
+  padding-left: calc(28px + var(--gap));
+  margin-bottom: var(--gap);
+  width: max-content;
+}
+
+.gc-months span {
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-size: 10px;
+  font-weight: var(--weight-semibold, 600);
+  color: var(--fg3, #64748B);
+  letter-spacing: 0.04em;
+}
+
+/* day-of-week + grid body */
+.gc-body {
+  display: flex;
+  gap: var(--gap);
+  width: max-content;
+}
+
+.gc-dow {
+  display: grid;
+  grid-template-rows: repeat(7, var(--cell));
+  gap: var(--gap);
+  padding-right: var(--gap);
+}
+
+.gc-dow span {
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-size: 9px;
+  font-weight: var(--weight-semibold, 600);
+  color: var(--fg3, #64748B);
+  display: grid;
+  align-items: center;
+  height: var(--cell);
+  letter-spacing: 0.04em;
+}
+
+/* main grid */
+.gc-grid {
+  display: grid;
+  grid-template-rows: repeat(7, var(--cell));
+  grid-auto-flow: column;
+  gap: var(--gap);
+  width: max-content;
+}
+
+/* ===== Cells ===== */
+.gc-cell {
+  width: var(--cell);
+  height: var(--cell);
+  border-radius: var(--cell-r, 3px);
+  background: var(--l0);
+}
+
+.gc-cell.gc-l1 { background: var(--l1); }
+.gc-cell.gc-l2 { background: var(--l2); }
+.gc-cell.gc-l3 { background: var(--l3); }
+.gc-cell.gc-l4 { background: var(--l4); }
+
+/* glossy inset highlight on filled cells */
+.gc-cell:not(.gc-l0):not(.gc-empty) {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+/* hover ring */
+.gc-cell:not(.gc-empty):hover {
+  outline: 2px solid rgba(15, 23, 42, 0.5);
+  outline-offset: 1px;
+  cursor: pointer;
+}
+
+html.dark .gc-cell:not(.gc-empty):hover {
+  outline-color: rgba(255, 255, 255, 0.6);
+}
+
+/* ===== Dark mode ramp override ===== */
+/* The component passes --dl0..--dl4 for the dark ramp; html.dark swaps them in */
+html.dark .gc-card {
+  --l0: var(--dl0);
+  --l1: var(--dl1);
+  --l2: var(--dl2);
+  --l3: var(--dl3);
+  --l4: var(--dl4);
+}
+
+/* ===== City-lights glow ===== */
+.gc-card[data-glow='on'] .gc-cell.gc-l2 {
+  box-shadow: 0 0 5px var(--glow), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.gc-card[data-glow='on'] .gc-cell.gc-l3,
+.gc-card[data-glow='on'] .gc-cell.gc-l4 {
+  box-shadow: 0 0 9px var(--glow), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+/* ===== Pop-in entrance animation ===== */
+@keyframes gcPop {
+  from { opacity: 0; transform: scale(0.25); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .gc-card[data-anim='in'] .gc-cell {
+    animation: gcPop calc(0.45s * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--d, 0ms) * var(--anim-mult, 1));
+  }
+}
+
+/* ===== Tooltip ===== */
+.gc-tip {
+  position: fixed;
+  transform: translate(-50%, calc(-100% - 9px));
+  background: #1E293B;
+  color: #fff;
+  padding: 7px 11px;
+  border-radius: 9px;
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 70;
+  display: flex;
+  gap: 5px;
+  align-items: baseline;
+  box-shadow: 0 10px 24px -8px rgba(15, 23, 42, 0.5);
+  animation: gcTip calc(0.14s * var(--anim-mult, 1)) ease;
+}
+
+html.dark .gc-tip {
+  background: #334155;
+}
+
+.gc-tip b {
+  font-weight: var(--weight-extrabold, 800);
+}
+
+.gc-tip span {
+  color: #94A3B8;
+}
+
+.gc-tip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #1E293B;
+}
+
+html.dark .gc-tip::after {
+  border-top-color: #334155;
+}
+
+@keyframes gcTip {
+  from { opacity: 0; transform: translate(-50%, calc(-100% - 3px)); }
+  to   { opacity: 1; transform: translate(-50%, calc(-100% - 9px)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gc-tip { animation: none !important; }
+}
+
+/* ===== Footer ===== */
+.gc-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.gc-streak {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-size: 13px;
+  color: var(--fg2, #334155);
+}
+
+html.dark .gc-streak {
+  color: var(--fg2-dark, #CBD5E1);
+}
+
+.gc-streak b {
+  font-weight: var(--weight-extrabold, 800);
+  color: var(--fg1, #0F172A);
+}
+
+html.dark .gc-streak b {
+  color: var(--fg1-dark, #F1F5F9);
+}
+
+.gc-flame {
+  color: #F97316;
+}
+
+/* legend */
+.gc-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-size: 11px;
+  color: var(--fg3, #64748B);
+}
+
+.gc-legend-cells {
+  display: flex;
+  gap: 3px;
+}
+
+.gc-legend-cell {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}

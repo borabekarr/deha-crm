@@ -1,6 +1,6 @@
 /**
  * model-selection-sheet-hook.ts — wires entrance animation, model navigation,
- * badge morphing, logo morph, text morph, and confetti burst.
+ * badge morphing, logo morph, text morph, and confirm done-state.
  *
  * NO raw useEffect anywhere in the model-selection-sheet folder.
  * All DOM mutation is coordinated via a callback ref on the .sheet element.
@@ -82,6 +82,20 @@ function paintBadge(badge: HTMLElement, col: string) {
   }
 }
 
+// ── Timing helpers — read shared CSS vars so JS and CSS never drift ────────
+
+/** Read --mss-exit-raw (ms) from the .sheet element at runtime. */
+function readExitMs(sheetEl: HTMLElement): number {
+  const raw = getComputedStyle(sheetEl).getPropertyValue('--mss-exit-raw').trim()
+  return parseFloat(raw) || 140
+}
+
+/** Read --mss-enter-raw (ms) from the .sheet element at runtime. */
+function readEnterMs(sheetEl: HTMLElement): number {
+  const raw = getComputedStyle(sheetEl).getPropertyValue('--mss-enter-raw').trim()
+  return parseFloat(raw) || 200
+}
+
 // ── Text morph helpers ─────────────────────────────────────────────────────
 
 function setMorphText(host: HTMLElement, text: string) {
@@ -95,7 +109,9 @@ function setMorphText(host: HTMLElement, text: string) {
   cur.textContent = text
 }
 
-function morphText(host: HTMLElement, text: string) {
+function morphText(host: HTMLElement, text: string, sheetEl: HTMLElement) {
+  const exitMs = readExitMs(sheetEl)
+  const enterMs = readEnterMs(sheetEl)
   let cur = host.querySelector<HTMLElement>('.morph-cur')
   if (!cur) { setMorphText(host, ''); cur = host.querySelector<HTMLElement>('.morph-cur')! }
   if (cur.textContent === text) return
@@ -107,8 +123,8 @@ function morphText(host: HTMLElement, text: string) {
     cur!.classList.remove('morph-out')
     void cur!.offsetWidth
     cur!.classList.add('morph-in')
-    setTimeout(() => { cur!.classList.remove('morph-in') }, 380)
-  }, 220)
+    setTimeout(() => { cur!.classList.remove('morph-in') }, enterMs)
+  }, exitMs)
   return timer
 }
 
@@ -117,6 +133,8 @@ function morphText(host: HTMLElement, text: string) {
 function render(el: HTMLElement, idx: number, animate: boolean): ReturnType<typeof setTimeout>[] {
   const m = MODELS[idx]
   const timers: ReturnType<typeof setTimeout>[] = []
+  const enterMs = readEnterMs(el)
+  const exitMs = readExitMs(el)
 
   // dots
   el.querySelectorAll<HTMLElement>('.dot').forEach((d, i) =>
@@ -128,23 +146,24 @@ function render(el: HTMLElement, idx: number, animate: boolean): ReturnType<type
   const mName = el.querySelector<HTMLElement>('.ident-name.morph-host')!
   const mVendor = el.querySelector<HTMLElement>('.ident-vendor.morph-host')!
   const logoGlyph = el.querySelector<HTMLElement>('.logo-glyph')!
-  const specsBtn = el.querySelector<HTMLElement>('.specs-btn')!
+  const specsText = el.querySelector<HTMLElement>('#mss-specsText')
 
   const applyMeta = () => {
     logoGlyph.textContent = m.glyph
     logo.style.setProperty('--accent', m.accent)
-    if (specsBtn) specsBtn.textContent = 'View Full Specs: ' + m.name
+    if (specsText) specsText.textContent = 'View Full Specs: ' + m.name
   }
 
   if (animate) {
-    const t1 = morphText(mName, m.name)
-    const t2 = morphText(mVendor, m.vendor)
+    const t1 = morphText(mName, m.name, el)
+    const t2 = morphText(mVendor, m.vendor, el)
     if (t1) timers.push(t1)
     if (t2) timers.push(t2)
     logo.classList.remove('pulsing')
     void logo.offsetWidth
     logo.classList.add('pulsing')
-    const t3 = setTimeout(applyMeta, 200)
+    // swap glyph/accent at midpoint of exit (half exit duration)
+    const t3 = setTimeout(applyMeta, exitMs / 2)
     timers.push(t3)
   } else {
     setMorphText(mName, m.name)
@@ -185,11 +204,12 @@ function render(el: HTMLElement, idx: number, animate: boolean): ReturnType<type
       void badge.offsetWidth
       badge.style.width = endW + 'px'
 
+      // keep ghost mounted through exit + enter, then clean up
       const t = setTimeout(() => {
         if (ghost.parentNode) ghost.remove()
         badge.classList.remove('morphing')
         badge.style.width = ''
-      }, 440)
+      }, exitMs + enterMs)
       timers.push(t)
 
       fill.style.setProperty('--w', (data.v * 100).toFixed(1) + '%')
@@ -206,84 +226,6 @@ function render(el: HTMLElement, idx: number, animate: boolean): ReturnType<type
   return timers
 }
 
-// ── Confetti ───────────────────────────────────────────────────────────────
-
-interface ConfettiParticle {
-  x: number; y: number; vx: number; vy: number
-  g: number; w: number; h: number; a: number
-  rot: number; vr: number; color: string
-  life: number; ttl: number
-}
-
-interface ConfettiInstance {
-  burst: () => void
-  size: () => void
-  destroy: () => void
-}
-
-function makeConfetti(canvas: HTMLCanvasElement): ConfettiInstance {
-  const ctx = canvas.getContext('2d')!
-  const dpr = Math.min(window.devicePixelRatio || 1, 2)
-  let parts: ConfettiParticle[] = []
-  let raf: number | null = null
-
-  function size() {
-    const r = canvas.getBoundingClientRect()
-    canvas.width = r.width * dpr
-    canvas.height = r.height * dpr
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-  }
-
-  function tick() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    for (let i = parts.length - 1; i >= 0; i--) {
-      const p = parts[i]
-      p.life++; p.vy += p.g; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.rot += p.vr
-      const fade = p.life > p.ttl - 22 ? Math.max(0, (p.ttl - p.life) / 22) : 1
-      ctx.save()
-      ctx.globalAlpha = fade * p.a
-      ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = p.color
-      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h)
-      ctx.restore()
-      if (p.life >= p.ttl) parts.splice(i, 1)
-    }
-    if (parts.length) {
-      raf = requestAnimationFrame(tick)
-    } else {
-      raf = null
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-    }
-  }
-
-  function burst() {
-    size()
-    const r = canvas.getBoundingClientRect()
-    const ox = r.width / 2, oy = r.height - 46
-    const COLORS = ['#FFFFFF', '#D1FAE5', '#A7F3D0', '#6EE7B7']
-    for (let i = 0; i < 34; i++) {
-      const ang = (-Math.PI / 2) + (Math.random() - 0.5) * Math.PI * 0.9
-      const sp = 3.4 + Math.random() * 4.2
-      parts.push({
-        x: ox + (Math.random() - 0.5) * 150, y: oy,
-        vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp - Math.random() * 2,
-        g: 0.13 + Math.random() * 0.05,
-        w: 3 + Math.random() * 4, h: 3 + Math.random() * 5, a: 0.9,
-        rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.5,
-        color: COLORS[Math.floor(Math.random() * COLORS.length)],
-        life: 0, ttl: 64 + Math.random() * 40,
-      })
-    }
-    if (!raf) raf = requestAnimationFrame(tick)
-  }
-
-  function destroy() {
-    if (raf) { cancelAnimationFrame(raf); raf = null }
-    parts = []
-  }
-
-  return { burst, size, destroy }
-}
-
 // ── Callback ref ────────────────────────────────────────────────────────────
 
 export function modelSelectionSheetRef(el: HTMLDivElement | null): void {
@@ -293,12 +235,6 @@ export function modelSelectionSheetRef(el: HTMLDivElement | null): void {
   let idx = 0
   const activeTimers: ReturnType<typeof setTimeout>[] = []
   let confirmTimer: ReturnType<typeof setTimeout> | null = null
-
-  const canvas = sheetEl.querySelector<HTMLCanvasElement>('.confetti')!
-  const cf = makeConfetti(canvas)
-
-  const onResize = () => cf.size()
-  window.addEventListener('resize', onResize)
 
   // initial render — populate resting state, then add .intro class once
   activeTimers.push(...render(sheetEl, idx, false))
@@ -327,17 +263,43 @@ export function modelSelectionSheetRef(el: HTMLDivElement | null): void {
   prevBtn.addEventListener('click', onPrev)
   nextBtn.addEventListener('click', onNext)
 
+  // Read --mss-confirm-morph-raw from the sheet element so CSS and JS stay in sync
+  function readConfirmMorphMs(): number {
+    const raw = getComputedStyle(sheetEl).getPropertyValue('--mss-confirm-morph-raw').trim()
+    return parseFloat(raw) || 220
+  }
+
   const onConfirm = () => {
-    confirmBtn.classList.remove('flash')
+    if (confirmBtn.classList.contains('is-morphing')) return
+    const morphMs = readConfirmMorphMs()
+    // entering green: compact → grow → done
+    confirmBtn.classList.remove('is-done')
     void confirmBtn.offsetWidth
-    confirmBtn.classList.add('flash')
-    cf.burst()
-    confirmText.textContent = 'Selected'
-    confirmIcon.textContent = 'check_circle'
+    confirmBtn.classList.add('is-morphing', 'is-compact')
+    const t1 = setTimeout(() => {
+      confirmBtn.classList.remove('is-compact')
+      confirmBtn.classList.add('is-done')
+      confirmText.textContent = 'Selected'
+      confirmIcon.textContent = 'check_circle'
+    }, morphMs)
+    const t2 = setTimeout(() => {
+      confirmBtn.classList.remove('is-morphing')
+    }, morphMs * 2)
+    activeTimers.push(t1, t2)
+
     if (confirmTimer) clearTimeout(confirmTimer)
     confirmTimer = setTimeout(() => {
-      confirmText.textContent = 'Confirm Selection'
-      confirmIcon.textContent = 'check'
+      // exiting green: compact → grow → normal (same morph duration, symmetric)
+      confirmBtn.classList.add('is-morphing', 'is-compact')
+      const t3 = setTimeout(() => {
+        confirmBtn.classList.remove('is-compact', 'is-done')
+        confirmText.textContent = 'Confirm Selection'
+        confirmIcon.textContent = 'check'
+      }, morphMs)
+      const t4 = setTimeout(() => {
+        confirmBtn.classList.remove('is-morphing')
+      }, morphMs * 2)
+      activeTimers.push(t3, t4)
     }, 1600)
   }
   confirmBtn.addEventListener('click', onConfirm)
@@ -355,8 +317,6 @@ export function modelSelectionSheetRef(el: HTMLDivElement | null): void {
     nextBtn.removeEventListener('click', onNext)
     confirmBtn.removeEventListener('click', onConfirm)
     specsBtn.removeEventListener('click', onSpecs)
-    window.removeEventListener('resize', onResize)
-    cf.destroy()
   }
 }
 

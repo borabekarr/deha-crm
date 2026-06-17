@@ -145,7 +145,7 @@ export function pickerRef(el: HTMLDivElement | null): void {
 
       items[i].style.transform = 'scale(' + scale + ')'
       items[i].style.opacity   = String(opacity)
-      items[i].classList.toggle('active', Math.round(dist) === 0)
+      // Active class is NOT toggled during scroll -- applied only on settle.
     }
   }
 
@@ -169,13 +169,39 @@ export function pickerRef(el: HTMLDivElement | null): void {
       allRafs.push(rafId)
     }
 
+    function applyActiveItem(): void {
+      const items = scrollEl.querySelectorAll<HTMLDivElement>('.dp-item')
+      if (!items.length) return
+      const idx = Math.round(scrollEl.scrollTop / ROW_H)
+      for (let i = 0; i < items.length; i++) {
+        items[i].classList.toggle('active', i === idx)
+      }
+    }
+
+    // Track whether we already cleared .active mid-scroll so we skip the DOM
+    // query on every subsequent scroll frame until the next settle.
+    let cleared = false
+
     function onSettle(): void {
       timerId = null
+      cleared = false
       const idx = Math.round(scrollEl.scrollTop / ROW_H)
       commitValue(unit, idx)
+      scrollEl.classList.remove('scrolling')
+      applyActiveItem()
     }
 
     function onScroll(): void {
+      scrollEl.classList.add('scrolling')
+      // On the first scroll event after a settle, strip .active from all items
+      // so the watermark is invisible while the wheel is moving.
+      if (!cleared) {
+        const active = scrollEl.querySelectorAll<HTMLDivElement>('.dp-item.active')
+        for (let i = 0; i < active.length; i++) {
+          active[i].classList.remove('active')
+        }
+        cleared = true
+      }
       scheduleFrame()
       if (timerId) clearTimeout(timerId)
       timerId = setTimeout(onSettle, 100)
@@ -186,7 +212,10 @@ export function pickerRef(el: HTMLDivElement | null): void {
 
     if ('onscrollend' in window) {
       scrollEl.addEventListener('scrollend', function () {
-        if (timerId) clearTimeout(timerId)
+        if (timerId) {
+          clearTimeout(timerId)
+          timerId = null
+        }
         onSettle()
       }, { passive: true })
     }

@@ -17,8 +17,6 @@
   padding: 10px;
   box-shadow: 0 16px 56px rgba(15,23,42,0.13), 0 3px 10px rgba(15,23,42,0.06);
   position: relative;
-  /* extra bottom padding so the close btn has room at bottom-left */
-  padding-bottom: 36px;
 }
 
 /* ── White inner card ── */
@@ -27,6 +25,7 @@
   border: 1px solid #CBD5E1;
   border-top-color: rgba(255,255,255,0.9);
   border-radius: 20px;
+  /* overflow: visible so the delete popover (absolute, positioned upward) is not clipped */
   overflow: visible;
   box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(15,23,42,0.04);
 }
@@ -34,7 +33,12 @@
 
 /* ── Header row (plain card header) ── */
 .mem-head { margin-bottom: 14px; }
-.mem-head-row { display: flex; align-items: center; gap: 10px; }
+/* Title row: icon-tag + title + close button all on same line */
+.mem-head-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 /* Icon-only orange tag (Deha pill style) */
 .mem-head-icon-tag {
   display: inline-flex; align-items: center; justify-content: center;
@@ -50,7 +54,10 @@
     inset 0 0 0 1px rgba(15,23,42,0.10);
 }
 .mem-head-icon-tag .material-icons { font-size: 16px; line-height: 1; display: block; }
-.mem-head-title { font-size: 16px; font-weight: 900; color: #0F172A; letter-spacing: -0.02em; }
+.mem-head-title {
+  font-size: 16px; font-weight: 900; color: #0F172A; letter-spacing: -0.02em;
+  flex: 1; /* push close button to right end of row */
+}
 
 /* ── Memory content block ── */
 .mem-block { margin-bottom: 12px; }
@@ -62,8 +69,10 @@
   padding: 12px 14px 14px;
   box-shadow: inset 0 1px 3px rgba(15,23,42,0.04);
   position: relative;
-  /* Animated entry when switching to edit mode */
-  transition: background calc(160ms * var(--anim-mult, 1)), border-color calc(160ms * var(--anim-mult, 1));
+  /* Phase 1 of edit animation: block expands (background signals edit mode) */
+  transition:
+    background calc(160ms * var(--anim-mult, 1)) ease,
+    border-color calc(160ms * var(--anim-mult, 1)) ease;
 }
 
 .mem-content--editing {
@@ -71,10 +80,15 @@
   border-color: #CBD5E1;
 }
 
-/* Tag + edit button row inside the grey block */
+/* Tag + edit/delete button row inside the grey block */
 .mem-content-top {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 10px;
+}
+
+/* Wrapper for edit + inline delete buttons */
+.mem-content-actions {
+  display: inline-flex; align-items: center; gap: 6px;
 }
 
 /* Memory number tag (emerald semantic pill) — inside grey block */
@@ -95,7 +109,7 @@
 }
 .mem-num-tag .material-icons { font-size: 12px; }
 
-/* (a) Edit button — black-themed light / white-themed dark */
+/* Edit button — black-themed light / white-themed dark */
 .mem-edit-btn {
   display: inline-flex; align-items: center; gap: 5px;
   padding: 5px 10px;
@@ -106,27 +120,109 @@
   color: var(--mem-edit-color-light);
   cursor: pointer;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -1px 0 rgba(0,0,0,0.2);
+  /* Phase 2 of edit animation: morph in AFTER block expands (delay = phase 1 duration) */
   transition:
-    background calc(140ms * var(--anim-mult, 1)),
-    color calc(140ms * var(--anim-mult, 1)),
-    transform calc(100ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+    background calc(140ms * var(--anim-mult, 1)) ease,
+    color calc(140ms * var(--anim-mult, 1)) ease,
+    opacity calc(160ms * var(--anim-mult, 1)) ease calc(120ms * var(--anim-mult, 1)),
+    transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) calc(120ms * var(--anim-mult, 1));
 }
 .mem-edit-btn:hover { background: #1E293B; }
 .mem-edit-btn:active { transform: scale(0.95); }
 .mem-edit-btn .material-icons { font-size: 14px; line-height: 1; display: block; }
 
+/* Edit button visible/hidden states (always mounted) */
+.mem-edit-btn--visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.mem-edit-btn--hidden {
+  opacity: 0;
+  transform: translateY(-3px);
+  pointer-events: none;
+  /* When hiding (going into edit mode), no delay — instant hide */
+  transition:
+    opacity calc(100ms * var(--anim-mult, 1)) ease,
+    transform calc(100ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+}
+
+/* Inline delete button — soft red pill, icon-only, matches delete-all tag */
+.mem-inline-delete-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px;
+  border-radius: 9999px;
+  background-color: rgba(239,68,68,0.10);
+  border: 1px solid rgba(239,68,68,0.22);
+  color: #B91C1C;
+  cursor: pointer;
+  transition:
+    background-color calc(140ms * var(--anim-mult, 1)),
+    transform calc(100ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+}
+.mem-inline-delete-btn:hover { background-color: rgba(239,68,68,0.16); }
+.mem-inline-delete-btn:active { transform: scale(0.95); }
+.mem-inline-delete-btn .material-icons { font-size: 14px; color: #B91C1C; }
+
+/* Committed text — always mounted, crossfades with edit zone */
 .mem-text {
   font-size: 13px; font-weight: 500; color: #475569;
   line-height: 1.6;
+  transition:
+    opacity calc(160ms * var(--anim-mult, 1)) ease,
+    transform calc(180ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+}
+.mem-text--visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.mem-text--hidden {
+  opacity: 0;
+  transform: translateY(-3px);
+  pointer-events: none;
+  overflow: hidden;
+  max-height: 0;
+  margin: 0;
 }
 
-/* ── Edit zone wrapper (animated entrance) ── */
-.mem-edit-zone {
-  animation: memEditSlideIn calc(180ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) both;
+/* Small "edited" badge shown after save */
+.mem-edited-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  background: rgba(249,115,22,0.12);
+  border: 1px solid rgba(249,115,22,0.22);
+  color: #EA580C;
+  font-size: 10px; font-weight: 800; letter-spacing: 0.02em;
+  vertical-align: middle;
 }
-@keyframes memEditSlideIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0); }
+
+/* ── Edit zone wrapper — always mounted, transitions in/out ── */
+.mem-edit-zone {
+  /* Phase 1: expand (max-height + opacity of container) */
+  transition:
+    opacity calc(180ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
+    transform calc(180ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
+    max-height calc(200ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+}
+.mem-edit-zone--open {
+  opacity: 1;
+  transform: translateY(0);
+  max-height: 600px;
+  pointer-events: auto;
+  /* Slight delay so the block background transition starts first (extend-then-fill) */
+  transition-delay: calc(80ms * var(--anim-mult, 1));
+}
+.mem-edit-zone--closed {
+  opacity: 0;
+  transform: translateY(-4px);
+  max-height: 0;
+  overflow: hidden;
+  pointer-events: none;
+  /* When closing (Cancel), collapse fast with no delay */
+  transition-delay: 0ms;
 }
 
 /* ── Footer ── */
@@ -138,23 +234,23 @@
   position: relative;
   gap: 8px;
   transition: background calc(140ms * var(--anim-mult, 1));
-  overflow: visible;
+  /* Rounded bottom corners: CSS backgrounds are always clipped to border-radius,
+     so hover bg stays within the rounded shape without overflow:hidden.
+     This leaves positioned children (popover) unclipped. */
+  border-radius: 0 0 20px 20px;
 }
 .mem-footer:hover { background: #FAFAFA; }
 .mem-footer:active { background: #F1F5F9; }
 .mem-footer-label { font-size: 13px; font-weight: 600; color: #94A3B8; }
 .mem-footer-arrow { font-size: 18px; color: #CBD5E1; line-height: 1; }
 
-/* (f) Close button repositioned: bottom-left, slightly inset */
+/* Close button — now inline in .mem-head-row (not absolutely positioned) */
 .mem-close-btn {
-  position: absolute;
-  bottom: 8px;
-  left: 16px;
-  z-index: 2;
   display: inline-flex; align-items: center; justify-content: center;
   width: 26px; height: 26px; border-radius: 8px;
   background: rgba(15,23,42,0.06); border: 1px solid rgba(15,23,42,0.08);
   color: #94A3B8; cursor: pointer;
+  flex-shrink: 0;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
   transition:
     background calc(140ms * var(--anim-mult, 1)),
@@ -165,7 +261,7 @@
 .mem-close-btn:active { transform: scale(0.92); }
 .mem-close-btn .material-icons { font-size: 15px; line-height: 1; display: block; }
 
-/* (c) Block-level close button — top-right of .mem-content when editing */
+/* Block-level close button — top-right of .mem-content, always mounted */
 .mem-block-close-btn {
   position: absolute;
   top: 8px; right: 10px;
@@ -178,18 +274,31 @@
   transition:
     background calc(140ms * var(--anim-mult, 1)),
     color calc(140ms * var(--anim-mult, 1)),
-    transform calc(100ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+    opacity calc(160ms * var(--anim-mult, 1)) ease,
+    transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
 }
 .mem-block-close-btn:hover { background: rgba(15,23,42,0.13); color: #475569; }
 .mem-block-close-btn:active { transform: scale(0.9); }
 .mem-block-close-btn .material-icons { font-size: 13px; line-height: 1; display: block; }
 
-/* (d) Edit textarea — no resize, auto-grow via scrollHeight + animated height */
+/* Visible/hidden states for always-mounted block close button */
+.mem-block-close-btn--visible {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+.mem-block-close-btn--hidden {
+  opacity: 0;
+  transform: scale(0.85);
+  pointer-events: none;
+}
+
+/* Edit textarea — no resize, auto-grow via scrollHeight */
 .mem-edit-textarea {
   width: 100%; box-sizing: border-box;
   min-height: 60px;
-  resize: none; /* remove manual resize handle */
-  overflow: hidden; /* hide scrollbar during auto-grow */
+  resize: none;
+  overflow: hidden;
   font-family: 'Montserrat'; font-size: 13px; font-weight: 500; color: #475569;
   line-height: 1.6;
   background: #fff; border: 1px solid #CBD5E1; border-radius: 8px;
@@ -232,25 +341,25 @@
 }
 .mem-action-btn--disabled:active { transform: none; }
 
-/* (b) Save — black-themed (active = full black; disabled = grey) */
+/* Save — emerald-themed (matches .mem-num-tag) */
 .mem-action-save {
-  background: var(--mem-edit-bg-light);
-  color: var(--mem-edit-color-light);
+  background: #10B981;
+  color: #fff;
   border-color: transparent;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -2px 0 rgba(0,0,0,0.2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), inset 0 -2px 0 rgba(0,0,0,0.15);
 }
-.mem-action-save:not(.mem-action-btn--disabled):hover { background: #1E293B; }
+.mem-action-save:not(.mem-action-btn--disabled):hover { background: #059669; }
 
-/* (b) Revert — black-themed (active = full black; disabled = grey) */
+/* Revert — orange-themed (matches .mem-head-icon-tag) */
 .mem-action-revert {
-  background: var(--mem-edit-bg-light);
-  color: var(--mem-edit-color-light);
+  background: #F97316;
+  color: #fff;
   border-color: transparent;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -2px 0 rgba(0,0,0,0.2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), inset 0 -2px 0 rgba(0,0,0,0.15);
 }
-.mem-action-revert:not(.mem-action-btn--disabled):hover { background: #1E293B; }
+.mem-action-revert:not(.mem-action-btn--disabled):hover { background: #EA580C; }
 
-/* (b) Clear all — uses clear_all icon, same black-button family */
+/* Clear all — same black-button family */
 .mem-action-clear {
   background: var(--mem-edit-bg-light);
   color: var(--mem-edit-color-light);
@@ -262,31 +371,25 @@
 /* ── Footer right zone (delete-all tag + popover anchor) ── */
 .mem-footer-right { margin-left: auto; position: relative; flex-shrink: 0; }
 
-/* (g) Red destructive "Delete all" tag — bigger and thicker than original */
+/* "Delete all" tag — soft light-red pill */
 .mem-delete-all-tag {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 5px 13px;
   border-radius: 9999px;
-  background-color: var(--mem-red);
-  background-image: linear-gradient(rgba(255,255,255,0.10) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.10) 1px, transparent 1px);
-  background-size: 7px 7px;
-  color: #fff;
+  background-color: rgba(239,68,68,0.10);
+  border: 1px solid rgba(239,68,68,0.22);
+  color: #B91C1C;
   font-family: 'Montserrat'; font-size: 12px; font-weight: 800; letter-spacing: 0.01em;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.28);
-  border: none; cursor: pointer;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.4),
-    inset 0 -2px 0 var(--mem-red-deep),
-    inset 0 0 0 1px rgba(15,23,42,0.10);
+  cursor: pointer;
   transition:
     background-color calc(140ms * var(--anim-mult, 1)),
     transform calc(100ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
 }
-.mem-delete-all-tag:hover { background-color: var(--mem-red-hover); }
+.mem-delete-all-tag:hover { background-color: rgba(239,68,68,0.16); }
 .mem-delete-all-tag:active { transform: scale(0.95); }
-.mem-delete-all-tag .material-icons { font-size: 14px; }
+.mem-delete-all-tag .material-icons { font-size: 14px; color: #B91C1C; }
 
-/* ── Confirm delete popover (inner-card style reusing .mem-card look) ── */
+/* ── Confirm delete popover ── */
 .mem-delete-popover {
   position: absolute; bottom: calc(100% + 8px); right: 0;
   z-index: 10;
@@ -309,7 +412,7 @@
   box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 -1px 0 rgba(15,23,42,0.03);
 }
 
-/* (g) Red warning tag with full warning text */
+/* Red warning tag with full warning text */
 .mem-delete-warning-tag {
   display: inline-flex; align-items: flex-start; gap: 6px;
   align-self: stretch;
@@ -327,7 +430,7 @@
   display: flex; gap: 6px; flex-wrap: wrap;
 }
 
-/* "Delete forever" red tag button — bigger/thicker, tag-stylized */
+/* "Delete forever" red tag button */
 .mem-delete-forever-tag {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 6px 14px;
@@ -370,7 +473,7 @@ html.dark .mem-head-title { color: #F1F5F9; }
 html.dark .mem-content { background: #0F172A; border-color: #334155; box-shadow: inset 0 1px 3px rgba(0,0,0,.3); }
 html.dark .mem-content--editing { background: #0F172A; border-color: #334155; }
 
-/* (a) dark: edit btn white-themed */
+/* dark: edit btn white-themed */
 html.dark .mem-edit-btn {
   background: var(--mem-edit-bg-dark);
   border-color: rgba(15,23,42,0.15);
@@ -389,27 +492,31 @@ html.dark .mem-footer-arrow { color: #64748B; }
 html.dark .mem-close-btn { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.08); color: #64748B; box-shadow: inset 0 1px 0 rgba(255,255,255,0.07); }
 html.dark .mem-close-btn:hover { background: rgba(255,255,255,0.13); color: #94A3B8; }
 
-html.dark .mem-block-close-btn { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.07); color: #64748B; }
+html.dark .mem-block-close-btn { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.07); color: #64748B; box-shadow: none; }
 html.dark .mem-block-close-btn:hover { background: rgba(255,255,255,0.12); color: #94A3B8; }
+
+html.dark .mem-inline-delete-btn { background-color: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.30); }
+html.dark .mem-inline-delete-btn:hover { background-color: rgba(239,68,68,0.22); }
+html.dark .mem-inline-delete-btn .material-icons { color: #FCA5A5; }
 
 html.dark .mem-edit-textarea { background: #1E293B; border-color: #334155; color: #CBD5E1; box-shadow: inset 0 1px 3px rgba(0,0,0,0.3); }
 html.dark .mem-edit-textarea:focus { border-color: #10B981; }
 
-/* (b) dark: revert/save/clear — white-themed active, grey disabled */
+/* dark: save — emerald; revert — orange */
 html.dark .mem-action-save {
-  background: var(--mem-edit-bg-dark);
-  color: var(--mem-edit-color-dark);
+  background: #10B981;
+  color: #fff;
   border-color: transparent;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), inset 0 -2px 0 rgba(15,23,42,0.06);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -2px 0 rgba(0,0,0,0.25);
 }
-html.dark .mem-action-save:not(.mem-action-btn--disabled):hover { background: #E2E8F0; }
+html.dark .mem-action-save:not(.mem-action-btn--disabled):hover { background: #059669; }
 html.dark .mem-action-revert {
-  background: var(--mem-edit-bg-dark);
-  color: var(--mem-edit-color-dark);
+  background: #F97316;
+  color: #fff;
   border-color: transparent;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), inset 0 -2px 0 rgba(15,23,42,0.06);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -2px 0 rgba(0,0,0,0.25);
 }
-html.dark .mem-action-revert:not(.mem-action-btn--disabled):hover { background: #E2E8F0; }
+html.dark .mem-action-revert:not(.mem-action-btn--disabled):hover { background: #EA580C; }
 html.dark .mem-action-clear {
   background: var(--mem-edit-bg-dark);
   color: var(--mem-edit-color-dark);
@@ -433,3 +540,8 @@ html.dark .mem-delete-popover-btns .mem-action-btn.mem-action-revert:hover {
 html.dark .mem-delete-popover { background: #334155; box-shadow: 0 16px 40px rgba(0,0,0,0.5), 0 3px 10px rgba(0,0,0,0.3); }
 html.dark .mem-delete-popover-inner { background: #1E293B; box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.2); }
 html.dark .mem-delete-warning-tag { background-color: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.30); color: #FCA5A5; }
+html.dark .mem-delete-all-tag { background-color: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.30); color: #FCA5A5; }
+html.dark .mem-delete-all-tag:hover { background-color: rgba(239,68,68,0.22); }
+html.dark .mem-delete-all-tag .material-icons { color: #FCA5A5; }
+
+html.dark .mem-edited-badge { background: rgba(249,115,22,0.18); border-color: rgba(249,115,22,0.35); color: #FB923C; }

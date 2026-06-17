@@ -98,10 +98,11 @@ interface MenuState {
   hoveredId: string | null
   activeTab: Tab
   search: string
+  /** Item 1+6: search results panel is mounted through exit animation. */
+  searchPanelMounted: boolean
+  /** Item 1: search results panel is playing exit animation (wae-search-leaving). */
+  searchPanelLeaving: boolean
 }
-
-// All categories across both tabs — used for cross-tab node search.
-const ALL_CATS = [...GENERAL_CATS, ...INTEGRATION_CATS]
 
 // Category ids whose brand color is near-black and becomes unreadable in dark mode.
 // These get wae-badge--ink so the dark-mode CSS can lighten the square.
@@ -125,6 +126,8 @@ const INITIAL: MenuState = {
   hoveredId: null,
   activeTab: 'general',
   search: '',
+  searchPanelMounted: false,
+  searchPanelLeaving: false,
 }
 
 // Coords-only reset — preserves last aeLeft/aeTop so the panel
@@ -136,6 +139,8 @@ function closedState(s: MenuState): MenuState {
     nodesVisible: false,
     hoveredId: null,
     search: '',
+    searchPanelMounted: false,
+    searchPanelLeaving: false,
   }
 }
 
@@ -154,6 +159,8 @@ export default function WorkflowAddElements() {
   const itemEls = useRef<Map<string, HTMLDivElement>>(new Map())
   // Timer for nodes hide delay
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Timer for search-panel exit animation before unmounting (Item 1)
+  const searchLeaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // ── Derived data ──────────────────────────────────────────────────────────
   const allCats = state.activeTab === 'general' ? GENERAL_CATS : INTEGRATION_CATS
@@ -162,33 +169,65 @@ export default function WorkflowAddElements() {
     ? allCats.filter((c) => c.name.toLowerCase().includes(filter))
     : allCats
 
-  // When search is active: collect every node from every category (both tabs)
-  // whose name matches the query, then dedupe by name. When search is empty:
-  // show only the hovered category's nodes (original hover-to-preview).
-  const activeNodes: NodeItem[] = filter
-    ? (() => {
-        const seen = new Set<string>()
-        const result: NodeItem[] = []
-        for (const cat of ALL_CATS) {
-          for (const node of (NODES[cat.id] ?? [])) {
-            if (!seen.has(node.name) && node.name.toLowerCase().includes(filter)) {
-              seen.add(node.name)
-              result.push(node)
-            }
-          }
-        }
-        return result
-      })()
-    : state.hoveredId != null ? (NODES[state.hoveredId] ?? []) : []
+  // When search is active: group matching nodes by their parent category,
+  // split into General vs Integrations columns for the two-column search view.
+  // When search is empty: show only the hovered category's nodes (hover-to-preview).
+  interface SearchGroup { cat: Category; nodes: NodeItem[] }
+  interface SearchGroups { general: SearchGroup[]; integrations: SearchGroup[] }
+
+  const searchGroups: SearchGroups = filter
+    ? {
+        general: GENERAL_CATS.reduce<SearchGroup[]>((acc, cat) => {
+          const matched = (NODES[cat.id] ?? []).filter((n) =>
+            n.name.toLowerCase().includes(filter)
+          )
+          if (matched.length > 0) acc.push({ cat, nodes: matched })
+          return acc
+        }, []),
+        integrations: INTEGRATION_CATS.reduce<SearchGroup[]>((acc, cat) => {
+          const matched = (NODES[cat.id] ?? []).filter((n) =>
+            n.name.toLowerCase().includes(filter)
+          )
+          if (matched.length > 0) acc.push({ cat, nodes: matched })
+          return acc
+        }, []),
+      }
+    : { general: [], integrations: [] }
+
+  const activeNodes: NodeItem[] =
+    !filter && state.hoveredId != null ? (NODES[state.hoveredId] ?? []) : []
 
   // ── Handlers ─────────────────────────────────────────────────────────────
 
   function closeAll() {
     if (hideTimer.current) clearTimeout(hideTimer.current)
+    if (searchLeaveTimer.current) clearTimeout(searchLeaveTimer.current)
     // Use closedState (not INITIAL) to preserve aeLeft/aeTop so the fade-out
     // stays in place instead of jumping to the viewport left edge.
     setState((s) => closedState(s))
   }
+
+  /** Item 1+6: clear search input and play reverse morph before unmounting panel. */
+  const handleSearchClear = useCallback(() => {
+    if (searchLeaveTimer.current) clearTimeout(searchLeaveTimer.current)
+    // Trigger exit animation
+    setState((s) => ({ ...s, search: '', searchPanelLeaving: true, hoveredId: null, nodesVisible: false }))
+    // Unmount panel after exit animation completes (220ms * anim-mult; use 300ms as safe upper bound)
+    searchLeaveTimer.current = setTimeout(() => {
+      setState((s) => ({ ...s, searchPanelMounted: false, searchPanelLeaving: false }))
+    }, 300)
+  }, [])
+
+  /** Item 1: search input change — mount panel and trigger enter morph when text is typed. */
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value
+    if (val) {
+      if (searchLeaveTimer.current) clearTimeout(searchLeaveTimer.current)
+      setState((s) => ({ ...s, search: val, hoveredId: null, nodesVisible: false, searchPanelMounted: true, searchPanelLeaving: false }))
+    } else {
+      handleSearchClear()
+    }
+  }, [handleSearchClear])
 
   function hideNodes() {
     if (hideTimer.current) clearTimeout(hideTimer.current)
@@ -318,26 +357,53 @@ export default function WorkflowAddElements() {
       el.style.left = `${pos.left}px`
       el.style.top = `${pos.top}px`
     } else if (state.search) {
-      // No hovered row — position to the right of the AE panel, top-aligned.
-      // All coords are shell-relative (position: absolute inside shell).
+      // No hovered row — Search Results always sit to the RIGHT of the AE card,
+      // top-aligned. All coords are shell-relative (position: absolute inside shell).
+      // Item 1 fix: ALWAYS write the best-known final position to el.style FIRST,
+      // before any setState/early-return. The old code returned early when the AE
+      // card needed to slide left, leaving the flyout at its stale inline-style
+      // coords (state.nodesLeft/Top, often 0 or a prior hover row) for a full
+      // render cycle — that is the "results appear at the bottom, then snap" jump
+      // on the very first typed letter. Now the flyout is correctly placed on the
+      // same frame; the AE shift is recomputed against the new aeLeft in a rAF.
+      const placeRight = () => {
+        const aeRect = aeOuter.getBoundingClientRect()
+        const shellRect = shell ? shell.getBoundingClientRect() : { left: 0, top: 0 }
+        const shInner = shell ? shell.offsetHeight : window.innerHeight
+        const nh = el.offsetHeight
+        let nx = (aeRect.right - shellRect.left) + 8
+        if (nx < 10) nx = 10
+        let ny = aeRect.top - shellRect.top
+        if (ny + nh > shInner - 10) ny = shInner - nh - 10
+        if (ny < 10) ny = 10
+        el.style.left = `${nx}px`
+        el.style.top = `${ny}px`
+      }
+
+      // Place the flyout at its final position on this frame (no jump).
+      placeRight()
+
+      // If the right-placed flyout overflows the shell, slide the AE card left so
+      // the flyout still fits to its right — never flip the flyout to the left.
       const aeRect = aeOuter.getBoundingClientRect()
       const shellRect = shell ? shell.getBoundingClientRect() : { left: 0, top: 0 }
       const sw = shell ? shell.offsetWidth : window.innerWidth
-      const sh = shell ? shell.offsetHeight : window.innerHeight
       const nw = el.offsetWidth
-      const nh = el.offsetHeight
-      // Shell-relative x: right of AE panel
-      let nx = (aeRect.right - shellRect.left) + 8
-      if (nx + nw > sw - 10) nx = (aeRect.left - shellRect.left) - nw - 8
-      if (nx < 10) nx = 10
-      // Shell-relative y: top-aligned with AE panel
-      let ny = aeRect.top - shellRect.top
-      if (ny + nh > sh - 10) ny = sh - nh - 10
-      if (ny < 10) ny = 10
-      el.style.left = `${nx}px`
-      el.style.top = `${ny}px`
+      const aeLeftShell = aeRect.left - shellRect.left
+      const nx0 = (aeRect.right - shellRect.left) + 8
+      const overflow = nx0 + nw - (sw - 10)
+      if (overflow > 0.5) {
+        const newAeLeft = Math.max(10, aeLeftShell - overflow)
+        if (Math.abs(newAeLeft - aeLeftShell) > 0.5) {
+          setState((s) => ({ ...s, aeLeft: newAeLeft }))
+          // Re-place the flyout against the shifted AE card next frame so it
+          // tracks the new right edge — the flyout never visibly jumps because
+          // placeRight() above already set a valid position for this frame.
+          requestAnimationFrame(placeRight)
+        }
+      }
     }
-  }, [state.nodesVisible, state.hoveredId, state.search])
+  }, [state.nodesVisible, state.hoveredId, state.search, state.searchPanelMounted])
 
   /** Callback ref for the segmented control — wires the sliding pill. */
   const segCallbackRef = useCallback((el: HTMLDivElement | null) => {
@@ -419,7 +485,7 @@ export default function WorkflowAddElements() {
             </div>
 
             {/* Search */}
-            <div className="wae-ae-search">
+            <div className="wae-ae-search" data-has-text={state.search ? 'true' : 'false'}>
               <span className="material-icons">search</span>
               <input
                 type="text"
@@ -427,15 +493,23 @@ export default function WorkflowAddElements() {
                 autoComplete="off"
                 aria-label="Search workflow elements"
                 value={state.search}
-                onChange={(e) =>
-                  setState((s) => ({ ...s, search: e.target.value, hoveredId: null, nodesVisible: false }))
-                }
+                onChange={handleSearchChange}
               />
+              {/* Item 6: clear button — visible only when text entered */}
+              <button
+                type="button"
+                className="wae-ae-search-clear"
+                aria-label="Clear search"
+                onClick={handleSearchClear}
+              >
+                <span className="material-icons">close</span>
+              </button>
             </div>
           </div>
 
-          {/* Category list */}
-          <div className="wae-ae-list">
+          {/* Category list — key={activeTab} remounts on tab switch so the whole
+              list morphs in as one unit (wae-list-morph-in) instead of rows spawning. */}
+          <div className="wae-ae-list" key={state.activeTab}>
             {visibleCats.map((cat) => (
               <div
                 key={cat.id}
@@ -461,40 +535,130 @@ export default function WorkflowAddElements() {
           {/* Footer */}
           <div className="wae-ae-sep" />
           <div className="wae-ae-footer">
-            <button type="button" className="wae-ae-ai-btn">✦ AI Recommendations</button>
+            <button type="button" className="btn-green">
+              <span className={iconClass('neurology')}>neurology</span>
+              AI Recommendations
+            </button>
           </div>
         </div>
       </div>
 
       {/* ── Nodes flyout panel ────────────────────────────────────────────── */}
-      {/* Show on hover (nodesVisible) OR when search query matches nodes */}
-      {(state.nodesVisible || (filter.length > 0 && activeNodes.length > 0)) && (
+      {/* Show on hover (nodesVisible) OR when search panel is mounted (includes leaving animation).
+          Item 1: searchPanelMounted = mounted-through-exit so reverse morph plays before unmount. */}
+      {(state.nodesVisible || state.searchPanelMounted) && (
         <div
           ref={nodesOuterCallbackRef}
-          className="wae-pop-outer visible"
+          className={[
+            'wae-pop-outer',
+            (state.nodesVisible || (state.searchPanelMounted && !state.searchPanelLeaving)) ? 'visible' : '',
+            filter && !state.searchPanelLeaving ? 'wae-search-entering' : '',
+            state.searchPanelLeaving ? 'wae-search-leaving' : '',
+          ].filter(Boolean).join(' ')}
           style={{ left: state.nodesLeft, top: state.nodesTop }}
           onMouseEnter={handleNodesMouseEnter}
           onMouseLeave={handleNodesMouseLeave}
         >
-          <div className="wae-pop-inner wae-nodes-inner">
-            <div className="wae-nodes-header">{filter ? 'Search Results' : 'Nodes'}</div>
-            <div className="wae-nodes-list">
-              {activeNodes.map((node, i) => (
-                // eslint-disable-next-line react/no-array-index-key
-                <div key={`${node.name}-${i}`} className="wae-node-item">
-                  <div
-                    className={`wae-badge-icon wae-badge-sm${isInkColor(node.color) ? ' wae-badge--ink' : ''}`}
-                    style={{ backgroundColor: node.color }}
-                  >
-                    <span className={iconClass(node.icon)}>{node.icon}</span>
-                  </div>
-                  <span className="wae-node-name">{node.name}</span>
-                  <div className="wae-node-add-btn">
-                    <span className="material-icons">add</span>
-                  </div>
-                </div>
-              ))}
+          <div className={`wae-pop-inner wae-nodes-inner${(filter || state.searchPanelMounted) ? ' wae-search-mode' : ''}`}>
+            <div className="wae-nodes-header">
+              <span className="material-icons">widgets</span>
+              {filter ? 'Search Results' : 'Nodes'}
             </div>
+
+            {filter ? (
+              /* Two-column grouped search view */
+              <div className="wae-search-cols">
+                {/* General column */}
+                <div className="wae-search-col">
+                  {searchGroups.general.map(({ cat, nodes }) => (
+                    <div key={cat.id} className="wae-search-cat-card">
+                      <div className="wae-search-cat-header">
+                        <div
+                          className={`wae-badge-icon wae-badge-lg${DARK_BADGE_IDS.has(cat.id) ? ' wae-badge--ink' : ''}`}
+                          style={{ backgroundColor: cat.color }}
+                        >
+                          <span className="material-icons">{cat.icon}</span>
+                        </div>
+                        <span className="wae-search-cat-name">{cat.name}</span>
+                      </div>
+                      <div className="wae-search-cat-nodes">
+                        {nodes.map((node, i) => (
+                          // eslint-disable-next-line react/no-array-index-key
+                          <div key={`${node.name}-${i}`} className="wae-node-item">
+                            <div
+                              className={`wae-badge-icon wae-badge-sm${isInkColor(node.color) ? ' wae-badge--ink' : ''}`}
+                              style={{ backgroundColor: node.color }}
+                            >
+                              <span className={iconClass(node.icon)}>{node.icon}</span>
+                            </div>
+                            <span className="wae-node-name">{node.name}</span>
+                            <div className="wae-node-add-btn">
+                              <span className="material-icons">add</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Vertical separator */}
+                <div className="wae-search-col-sep" aria-hidden="true" />
+
+                {/* Integrations column */}
+                <div className="wae-search-col">
+                  {searchGroups.integrations.map(({ cat, nodes }) => (
+                    <div key={cat.id} className="wae-search-cat-card">
+                      <div className="wae-search-cat-header">
+                        <div
+                          className={`wae-badge-icon wae-badge-lg${DARK_BADGE_IDS.has(cat.id) ? ' wae-badge--ink' : ''}`}
+                          style={{ backgroundColor: cat.color }}
+                        >
+                          <span className="material-icons">{cat.icon}</span>
+                        </div>
+                        <span className="wae-search-cat-name">{cat.name}</span>
+                      </div>
+                      <div className="wae-search-cat-nodes">
+                        {nodes.map((node, i) => (
+                          // eslint-disable-next-line react/no-array-index-key
+                          <div key={`${node.name}-${i}`} className="wae-node-item">
+                            <div
+                              className={`wae-badge-icon wae-badge-sm${isInkColor(node.color) ? ' wae-badge--ink' : ''}`}
+                              style={{ backgroundColor: node.color }}
+                            >
+                              <span className={iconClass(node.icon)}>{node.icon}</span>
+                            </div>
+                            <span className="wae-node-name">{node.name}</span>
+                            <div className="wae-node-add-btn">
+                              <span className="material-icons">add</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              /* Single-column hover-preview view (unchanged) */
+              <div className="wae-nodes-list">
+                {activeNodes.map((node, i) => (
+                  // eslint-disable-next-line react/no-array-index-key
+                  <div key={`${node.name}-${i}`} className="wae-node-item">
+                    <div
+                      className={`wae-badge-icon wae-badge-sm${isInkColor(node.color) ? ' wae-badge--ink' : ''}`}
+                      style={{ backgroundColor: node.color }}
+                    >
+                      <span className={iconClass(node.icon)}>{node.icon}</span>
+                    </div>
+                    <span className="wae-node-name">{node.name}</span>
+                    <div className="wae-node-add-btn">
+                      <span className="material-icons">add</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

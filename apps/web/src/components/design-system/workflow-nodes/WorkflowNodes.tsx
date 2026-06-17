@@ -27,7 +27,15 @@ import { mountCanvas } from './workflow-nodes-hook'
 // Small shared sub-components (no hooks — pure presentation)
 // ---------------------------------------------------------------------------
 
-/** Hover toolbar shown to the right of each node on hover. */
+/** Invisible triangular hover wedge on the right side of the node.
+ *  clip-path defines a right-pointing triangle: left edge is full height,
+ *  tapers to a point at the right-center. Hovering it reveals .wf-tools
+ *  via the CSS sibling combinator (.wf-hover-wedge:hover ~ .wf-tools). */
+function HoverWedge(): React.ReactElement {
+  return <div className="wf-hover-wedge" aria-hidden="true" />
+}
+
+/** Hover toolbar shown to the right of each node when hovering the wedge zone. */
 function NodeTools(): React.ReactElement {
   return (
     <div className="wf-tools">
@@ -302,6 +310,8 @@ function AnthropicNode(): React.ReactElement {
 function NodeCard({ children }: { children: React.ReactNode }): React.ReactElement {
   return (
     <div className="wf-outer">
+      {/* Wedge MUST precede NodeTools in DOM for the CSS ~ sibling selector to work */}
+      <HoverWedge />
       <NodeTools />
       {children}
     </div>

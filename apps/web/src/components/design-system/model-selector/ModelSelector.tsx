@@ -28,7 +28,7 @@ const MODELS: ModelOption[] = [
   {
     id: 'auto',
     name: 'Auto',
-    icon: 'smart_toy',
+    icon: 'auto_mode',
     iconColor: '#10B981',
     desc: 'Choose for me',
     hasStats: false,
@@ -102,7 +102,7 @@ export default function ModelSelector() {
       >
         {/* Colorful mini-icon tag matching the selected model's panel icon */}
         <div
-          className="ms-t-icon-tag"
+          className="ms-t-icon-tag icon-badge icon-badge--sm"
           style={{ '--icon-c': selected.iconColor } as React.CSSProperties}
         >
           <span className={iconClass(selected.icon)}>{selected.icon}</span>
@@ -114,7 +114,7 @@ export default function ModelSelector() {
       </div>
 
       {/* Gray outer shell wrapping the white panel */}
-      <div className={`ms-outer${open ? ' open' : ' hidden'}`}>
+      <div className={`ms-outer${open ? ' open' : ' ms-closing'}`}>
         {/* --sel-idx drives the CSS transform on .ms-sel-indicator — no JS measurement needed */}
         <div
           className="ms-panel"
@@ -138,7 +138,7 @@ export default function ModelSelector() {
               >
                 {/* Icon */}
                 <div
-                  className="ms-icon"
+                  className="ms-icon icon-badge icon-badge--lg"
                   style={{ '--icon-c': model.iconColor } as React.CSSProperties}
                 >
                   <span className={iconClass(model.icon)}>{model.icon}</span>

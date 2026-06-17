@@ -159,9 +159,27 @@ wait_for_200() {
 # ---------------------------------------------------------------------------
 
 cmd_start() {
-  local component="${1:-}"
-  local explicit_port="${2:-}"
+  # Parse --clear-cache / -c regardless of arg position
+  local clear_cache=0
+  local rest_args=()
+  for arg in "$@"; do
+    case "$arg" in
+      --clear-cache|-c) clear_cache=1 ;;
+      *) rest_args+=("$arg") ;;
+    esac
+  done
+
+  local component="${rest_args[0]:-}"
+  local explicit_port="${rest_args[1]:-}"
   [ -z "$component" ] && die "start requires <component>"
+
+  if [ "$clear_cache" = "1" ]; then
+    local vite_cache="$REPO_ROOT/apps/web/node_modules/.vite"
+    if [ -d "$vite_cache" ]; then
+      rm -rf "$vite_cache"
+    fi
+    echo "Vite optimize cache cleared"
+  fi
 
   # Resolve port
   local port=""
@@ -224,7 +242,20 @@ cmd_stop() {
 }
 
 cmd_restart() {
-  local target="${1:-}"
+  # If the dev server renders a blank root after adding new DS components,
+  # run with --clear-cache to drop the Vite optimize cache.
+
+  # Parse --clear-cache / -c regardless of arg position
+  local clear_cache=0
+  local rest_args=()
+  for arg in "$@"; do
+    case "$arg" in
+      --clear-cache|-c) clear_cache=1 ;;
+      *) rest_args+=("$arg") ;;
+    esac
+  done
+
+  local target="${rest_args[0]:-}"
   [ -z "$target" ] && die "restart requires <component|port>"
 
   local port=""
@@ -241,6 +272,15 @@ cmd_restart() {
   fi
 
   systemctl --user stop "deha-preview@${port}" 2>/dev/null || true
+
+  if [ "$clear_cache" = "1" ]; then
+    local vite_cache="$REPO_ROOT/apps/web/node_modules/.vite"
+    if [ -d "$vite_cache" ]; then
+      rm -rf "$vite_cache"
+    fi
+    echo "Vite optimize cache cleared"
+  fi
+
   cmd_start "$component" "$port"
 }
 
@@ -310,16 +350,23 @@ cmd_help() {
 dehaprev — Deha CRM preview-port manager
 
 USAGE:
-  dehaprev start <component> [port]   Start a vite preview for <component>
-  dehaprev stop <component|port>      Stop a running preview instance
-  dehaprev restart <component|port>   Restart a preview instance
-  dehaprev list                       List all active preview instances
-  dehaprev tunnel                     Print ssh tunnel command for all active ports
-  dehaprev help                       Show this help
+  dehaprev start <component> [port] [-c|--clear-cache]   Start a vite preview for <component>
+  dehaprev stop <component|port>                         Stop a running preview instance
+  dehaprev restart <component|port> [-c|--clear-cache]   Restart a preview instance
+  dehaprev list                                          List all active preview instances
+  dehaprev tunnel                                        Print ssh tunnel command for all active ports
+  dehaprev help                                          Show this help
+
+FLAGS:
+  -c, --clear-cache   Delete apps/web/node_modules/.vite before starting.
+                      Use this when the dev server renders a blank root after
+                      adding new design-system components.
 
 EXAMPLES:
   dehaprev start leads-table          # uses registry port/route or next free
   dehaprev start leads-table 5173     # explicit port
+  dehaprev restart leads-table --clear-cache
+  dehaprev restart --clear-cache 5173
   dehaprev stop leads-table
   dehaprev stop 5173
   dehaprev list

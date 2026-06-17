@@ -3,6 +3,7 @@ import '../../../../design-system/preview/_darkmode.css'
 import './TodoList.css'
 
 import { useRef, useState, useCallback } from 'react'
+import { iconClass } from '../../../lib/iconClass'
 import {
   type TodoRefs,
   type Task,
@@ -128,6 +129,8 @@ export default function TodoList() {
   const popDomRef = useRef<HTMLSelectElement | null>(null)
   const popSaveTxtRef = useRef<HTMLElement | null>(null)
   const popSaveIcRef = useRef<HTMLElement | null>(null)
+  const segRef = useRef<HTMLDivElement | null>(null)
+  const segPillRef = useRef<HTMLSpanElement | null>(null)
 
   const activeFilterRef = useRef({ current: 'all' })
 
@@ -217,29 +220,44 @@ export default function TodoList() {
     }, 200)
   }
 
+  // Move the selection WEEK-BY-WEEK (not day-by-day). The selected
+  // day-of-week is preserved across the jump; the week strip slides.
   function navBy(delta: number) {
-    const prevMon = weekDays.length ? startOfWeek(weekDays[0]).getTime() : null
-    curDate.setDate(curDate.getDate() + delta)
+    curDate.setDate(curDate.getDate() + delta * 7)
     setCurDate(new Date(curDate))
-    const mon = startOfWeek(curDate)
-    if (prevMon === null || mon.getTime() !== prevMon) {
-      slideWeek(delta > 0 ? 1 : -1)
-    } else {
-      const idx = (curDate.getDay() + 6) % 7
-      setActiveIdx(idx)
-      afterWeekUpdate()
-      if (listRef.current) {
-        const tasks = getTasksForDay(curDate)
-        changeDay(listRef.current, tasks, statDoneRef.current, statWaitRef.current, activeFilterRef.current, filtersRef.current, openTaskPopover)
-      }
-    }
+    slideWeek(delta > 0 ? 1 : -1)
   }
 
   // ── Popover helpers ───────────────────────────────────────────────────────
 
+  // Position the sliding black .seg-pill under the active repeat button.
+  // (_controls.js drives this on static pages; here we drive it ourselves so
+  //  the black active pill is actually visible — item 9.)
+  function moveSegPill(repeat: 'once' | 'repeat') {
+    const seg = segRef.current
+    const pill = segPillRef.current
+    if (!seg || !pill) return
+    const btn = seg.querySelector<HTMLElement>('[data-rep="' + repeat + '"]')
+    if (!btn) return
+    pill.style.width = btn.offsetWidth + 'px'
+    pill.style.left = btn.offsetLeft + 'px'
+  }
+
+  // Slide the frequency-selector pill under the active cadence chip.
+  function moveFreqPill() {
+    const wrap = popCadsRef.current
+    if (!wrap) return
+    const pill = wrap.querySelector<HTMLElement>('.td-freq-pill')
+    const active = wrap.querySelector<HTMLElement>('.td-freq-opt.on')
+    if (!pill || !active) return
+    pill.style.width = active.offsetWidth + 'px'
+    pill.style.left = active.offsetLeft + 'px'
+  }
+
   function syncScheduleDOM(st: typeof popState) {
     const rep = st.repeat === 'repeat'
-    if (popRepBoxRef.current) popRepBoxRef.current.hidden = !rep
+    // Container open/close is class-driven (item 16) — handled in JSX via
+    // popState.repeat; we only populate inner content when repeating.
     if (!rep) return
     const { cad, dow, dom } = st
     if (cad === 'daily') {
@@ -258,7 +276,7 @@ export default function TodoList() {
     // Render days
     if (popDaysRef.current) {
       popDaysRef.current.innerHTML = DOWS.map((d, i) =>
-        '<button class="td-pop-dow' + (i === dow ? ' on' : '') + '" data-dow="' + i + '">' + d + '</button>'
+        '<button type="button" class="td-pop-dow' + (i === dow ? ' on' : '') + '" data-dow="' + i + '">' + d + '</button>'
       ).join('')
       popDaysRef.current.querySelectorAll<HTMLElement>('[data-dow]').forEach(b => {
         b.addEventListener('click', () => {
@@ -271,22 +289,37 @@ export default function TodoList() {
         })
       })
     }
-    // Render cads
+    // Render the frequency selector (item 17) — segmented chips + sliding pill.
     if (popCadsRef.current) {
-      popCadsRef.current.innerHTML = CADS.map(c =>
-        '<button class="td-pop-cad' + (c === cad ? ' on' : '') + '" data-cad="' + c + '">' + CADLBL[c] + '</button>'
-      ).join('')
-      popCadsRef.current.querySelectorAll<HTMLElement>('[data-cad]').forEach(b => {
-        b.addEventListener('click', () => {
-          const newCad = b.dataset.cad!
-          setPopState(prev => {
-            const next = { ...prev, cad: newCad }
-            popCadsRef.current?.querySelectorAll('.td-pop-cad').forEach(x => x.classList.toggle('on', x === b))
-            syncScheduleDOM(next)
-            return next
+      const exists = popCadsRef.current.querySelector('.td-freq-track')
+      if (!exists) {
+        popCadsRef.current.innerHTML =
+          '<div class="td-freq-track">' +
+            '<span class="td-freq-pill"></span>' +
+            CADS.map(c =>
+              '<button type="button" class="td-freq-opt' + (c === cad ? ' on' : '') + '" data-cad="' + c + '">' +
+                '<span class="td-freq-lbl">' + CADLBL[c] + '</span>' +
+              '</button>'
+            ).join('') +
+          '</div>'
+        popCadsRef.current.querySelectorAll<HTMLElement>('[data-cad]').forEach(b => {
+          b.addEventListener('click', () => {
+            const newCad = b.dataset.cad!
+            popCadsRef.current?.querySelectorAll('.td-freq-opt').forEach(x => x.classList.toggle('on', x === b))
+            moveFreqPill()
+            setPopState(prev => {
+              const next = { ...prev, cad: newCad }
+              syncScheduleDOM(next)
+              return next
+            })
           })
         })
-      })
+      } else {
+        popCadsRef.current.querySelectorAll<HTMLElement>('.td-freq-opt').forEach(b => {
+          b.classList.toggle('on', b.dataset.cad === cad)
+        })
+      }
+      requestAnimationFrame(() => moveFreqPill())
     }
   }
 
@@ -350,6 +383,8 @@ export default function TodoList() {
     syncScheduleDOM(st)
     syncIconDOM(st.pri)
     setPopOpen(true)
+    // Position the segmented active pill once the popover is laid out.
+    requestAnimationFrame(() => requestAnimationFrame(() => moveSegPill(st.repeat)))
     if (mode === 'edit' || mode === 'add') {
       setTimeout(() => {
         popTitleRef.current?.focus()
@@ -447,10 +482,10 @@ export default function TodoList() {
                 <div className="td-day">{dayLabel}</div>
               </div>
               <div className="td-nav">
-                <button type="button" aria-label="Previous day" onClick={() => navBy(-1)}>
+                <button type="button" aria-label="Previous week" onClick={() => navBy(-1)}>
                   <span className="material-icons">chevron_left</span>
                 </button>
-                <button type="button" aria-label="Next day" onClick={() => navBy(1)}>
+                <button type="button" aria-label="Next week" onClick={() => navBy(1)}>
                   <span className="material-icons">chevron_right</span>
                 </button>
               </div>
@@ -543,7 +578,7 @@ export default function TodoList() {
                   <span className="material-icons">priority_high</span>
                 </span>
                 <div
-                  style={{ flex: 1, fontSize: '14px', fontWeight: 800, color: 'var(--fg1)' }}
+                  style={{ flex: 1, fontSize: '16px', fontWeight: 900, color: 'var(--fg1)', letterSpacing: '-0.01em' }}
                   ref={(el) => { popHdRef.current = el }}
                 >
                   Task details
@@ -566,15 +601,12 @@ export default function TodoList() {
                 <div className="td-pop-label">Schedule</div>
                 <div
                   className="seg fill"
-                  ref={(el) => {
-                    if (el && !(el as HTMLElement & { _segInit?: boolean })._segInit) {
-                      ;(el as HTMLElement & { _segInit?: boolean })._segInit = true
-                    }
-                  }}
+                  ref={segRef}
                   onClick={(e) => {
                     const b = (e.target as Element).closest<HTMLButtonElement>('[data-rep]')
                     if (!b) return
                     const newRep = b.dataset.rep as 'once' | 'repeat'
+                    moveSegPill(newRep)
                     setPopState(prev => {
                       const next = { ...prev, repeat: newRep }
                       syncScheduleDOM(next)
@@ -582,24 +614,33 @@ export default function TodoList() {
                     })
                   }}
                 >
-                  <span className="seg-pill" />
+                  <span className="seg-pill" ref={segPillRef} />
                   <button type="button" data-rep="once" className={popState.repeat === 'once' ? 'active' : ''}>One-time</button>
                   <button type="button" data-rep="repeat" className={popState.repeat === 'repeat' ? 'active' : ''}>Repeats</button>
                 </div>
-                <div ref={popRepBoxRef} hidden>
-                  <div className="td-pop-label">Repeat every</div>
-                  <div className="td-pop-cads" ref={(el) => { popCadsRef.current = el }} />
-                  <div ref={popOnBoxRef}>
-                    <div className="td-pop-label" ref={(el) => { popOnLblRef.current = el }}>On</div>
-                    <div className="td-pop-days" ref={(el) => { popDaysRef.current = el }} />
-                    <select
-                      className="td-pop-select"
-                      ref={popDomRef}
-                      hidden
-                      onChange={(e) => setPopState(prev => ({ ...prev, dom: +e.target.value }))}
-                    >
-                      {domOptions}
-                    </select>
+                {/* Repeat options: container EXTENDS first (grid-rows 0fr→1fr),
+                    then inner content morphs in — item 16. Mounted-through so the
+                    collapse transition can play. */}
+                <div
+                  ref={popRepBoxRef}
+                  className={'td-rep-box ' + (popState.repeat === 'repeat' ? 'td-rep-open' : 'td-rep-closed')}
+                >
+                  <div className="td-rep-inner">
+                    <div className="td-pop-label">Repeat every</div>
+                    {/* Frequency selector — segmented, sliding pill (item 17) */}
+                    <div className="td-pop-cads" ref={(el) => { popCadsRef.current = el }} />
+                    <div ref={popOnBoxRef}>
+                      <div className="td-pop-label" ref={(el) => { popOnLblRef.current = el }}>On</div>
+                      <div className="td-pop-days" ref={(el) => { popDaysRef.current = el }} />
+                      <select
+                        className="td-pop-select"
+                        ref={popDomRef}
+                        hidden
+                        onChange={(e) => setPopState(prev => ({ ...prev, dom: +e.target.value }))}
+                      >
+                        {domOptions}
+                      </select>
+                    </div>
                   </div>
                 </div>
                 <div className="td-pop-label">Time</div>
@@ -621,6 +662,12 @@ export default function TodoList() {
             {(() => {
               const t = taskDetailTask
               const p = t ? (PRIORITY[t.priority] || PRIORITY[DEFAULT_PRI]) : null
+              const scheduleLabel = t?.repeat === 'repeat'
+                ? ('Repeating · ' + (t.cad
+                    ? (t.cad.charAt(0).toUpperCase() + t.cad.slice(1))
+                    : 'Weekly'))
+                : 'One-time task'
+              const scheduleIcon = t?.repeat === 'repeat' ? 'repeat' : 'today'
               return (
                 <div
                   ref={tdpOverlayRef}
@@ -637,13 +684,17 @@ export default function TodoList() {
                     >
                       {t && p && (
                         <>
+                          {/* Header: icon tile + title + time + close */}
                           <div className="tdp-head">
                             <span className="tdp-ico">
-                              <span className="material-icons">{t.icon}</span>
+                              <span className={iconClass(t.icon)}>{t.icon}</span>
                             </span>
                             <div className="tdp-title-block">
                               <div className="tdp-title">{t.title}</div>
-                              <div className="tdp-time">{t.time}</div>
+                              <div className="tdp-time">
+                                <span className="material-icons" style={{ fontSize: '13px', verticalAlign: 'middle', marginRight: '3px', opacity: 0.7 }}>schedule</span>
+                                {t.time}
+                              </div>
                             </div>
                             <button
                               type="button"
@@ -654,9 +705,41 @@ export default function TodoList() {
                               <span className="material-icons">close</span>
                             </button>
                           </div>
-                          <span className="tdp-badge" style={{ '--tag': p.color } as React.CSSProperties}>
-                            <span className="material-icons">{p.bi}</span>{p.label}
-                          </span>
+
+                          {/* Task-board styled card preview (item 4 — mirrors
+                              the TaskBoard .tb-card: title, priority pill, footer
+                              hint). Texts adjusted to this task. */}
+                          <div className="tdp-tbcard">
+                            <div className="tdp-tbcard-title">{t.title}</div>
+                            <div className="tdp-tbcard-row">
+                              <span
+                                className="tdp-tbcard-pri"
+                                style={{ '--tag': p.color } as React.CSSProperties}
+                              >
+                                <span className="tdp-tbcard-dot" />
+                                {p.label}
+                              </span>
+                              <span className="tdp-tbcard-time">
+                                <span className="material-icons">schedule</span>{t.time}
+                              </span>
+                            </div>
+                            <div className="tdp-tbcard-foot">
+                              <span className="material-icons">{scheduleIcon}</span>
+                              {scheduleLabel}
+                            </div>
+                          </div>
+
+                          {/* Priority badge row */}
+                          <div className="tdp-tag-row">
+                            <span className="tdp-badge" style={{ '--tag': p.color } as React.CSSProperties}>
+                              <span className="material-icons">{p.bi}</span>{p.label}
+                            </span>
+                            <span className="tdp-sched-tag">
+                              <span className="material-icons">{scheduleIcon}</span>{scheduleLabel}
+                            </span>
+                          </div>
+
+                          {/* Edit mode: inline title input */}
                           {taskDetailEditMode ? (
                             <>
                               <input
@@ -668,17 +751,17 @@ export default function TodoList() {
                                 aria-label="Edit task title"
                                 autoFocus
                               />
-                              <div className="tdp-actions">
+                              <div className="tdp-footer-row">
                                 <button
                                   type="button"
-                                  className="tdp-action-btn tdp-btn-cancel"
+                                  className="btn-green tdp-btn-muted"
                                   onClick={() => setTaskDetailEditMode(false)}
                                 >
                                   <span className="material-icons">close</span>Cancel
                                 </button>
                                 <button
                                   type="button"
-                                  className="tdp-action-btn tdp-btn-save"
+                                  className="btn-green"
                                   onClick={saveTaskDetailEdit}
                                 >
                                   <span className="material-icons">check</span>Save
@@ -687,15 +770,18 @@ export default function TodoList() {
                             </>
                           ) : (
                             <>
+                              {/* Detail body: neurology-aware lifecycle note */}
                               <div className="tdp-body">
+                                <span className={iconClass('neurology')} style={{ fontSize: '14px', verticalAlign: 'middle', marginRight: '5px', color: '#8B5CF6' }}>neurology</span>
                                 {t.repeat === 'repeat'
-                                  ? 'Repeating task · ' + (t.cad || 'weekly')
-                                  : 'One-time task'}
+                                  ? 'AI tracks this recurring task and surfaces it at the optimal time in your schedule.'
+                                  : 'AI keeps this one-time task prioritized based on your focus patterns and deadline proximity.'}
                               </div>
-                              <div className="tdp-actions">
+                              {/* Action buttons — green, no gradient on the card */}
+                              <div className="tdp-footer-row">
                                 <button
                                   type="button"
-                                  className="tdp-action-btn tdp-btn-edit"
+                                  className="btn-green tdp-btn-muted"
                                   onClick={() => {
                                     setTaskDetailEditMode(true)
                                     setTimeout(() => {
@@ -707,7 +793,7 @@ export default function TodoList() {
                                 </button>
                                 <button
                                   type="button"
-                                  className="tdp-action-btn tdp-btn-complete"
+                                  className="btn-green"
                                   onClick={() => {
                                     closeTaskDetailPopover()
                                     const listEl = listRef.current

@@ -50,6 +50,29 @@ test.beforeEach(async ({ page }) => {
       s ^= s << 13; s ^= s >>> 17; s ^= s << 5; s >>>= 0
       return s / 0xffffffff
     }
+    // Freeze the wall clock so components that render live time produce
+    // identical pixels every run. currency-converter shows nowHM() (HH:MM) in
+    // its default state — minute-granular, so it drifted between runs minutes
+    // apart and broke exact-match on CI. Pinned to the capture day
+    // (2026-06-17 UTC): day-granular renders (todo-list "today", calendar grid)
+    // are unchanged, only live clocks become deterministic. Argument forms
+    // (new Date(ms), new Date(y, m, d), parsing) keep their real behaviour, so
+    // date math in todo-list / dynamic-calendar is preserved.
+    const FIXED = new Date('2026-06-17T12:00:00Z').getTime()
+    const RealDate = Date
+    class FrozenDate extends RealDate {
+      constructor(...args: ConstructorParameters<typeof Date> | []) {
+        if (args.length === 0) {
+          super(FIXED)
+        } else {
+          super(...(args as ConstructorParameters<typeof Date>))
+        }
+      }
+      static now() {
+        return FIXED
+      }
+    }
+    globalThis.Date = FrozenDate as DateConstructor
   })
 })
 
@@ -75,24 +98,44 @@ const SLUGS = [
   'cards',
   'controls',
   'fab',
+  'message-dropdown',
+  'delete-button',
+  'inline-edit',
   // Data
   'leads-table',
+  'adjust-timeframe',
+  'currency-converter',
+  'dynamic-calendar',
+  'github-calendar',
+  'stacked-list',
   // Metrics & Charts
   'chart',
   'metric-card',
   'metric-circle',
   'statistics-graph-card',
   'streak-card',
-  'financial-health-card',
+  // financial-health-card is captured by a dedicated test below: its mount
+  // count-up (tweenScore -> .fhc-num) occasionally lands mid-tween at the
+  // 900ms mark, so the generic goto+shot flaked. The dedicated test waits for
+  // the counter to reach its final value before capturing.
   // Sheets & Cards
   'model-selector',
+  'connect-modal',
+  'status-card',
+  // Workflow
+  'task-board',
+  'sprint-planner-core',
   // AI
   'ai-memory-card',
   'ai-caveat',
   'ai-message-box',
+  'ai-composer',
   // Misc
+  'delete-modal',
   'todo-list',
   'theme-editor',
+  'onboarding-completion',
+  'dynamic-island-reader',
 ] as const
 
 // ---------------------------------------------------------------------------
@@ -152,6 +195,19 @@ for (const slug of SLUGS) {
 // KEEP IN SYNC with component-registry.ts.
 // ---------------------------------------------------------------------------
 
+test('design-system / financial-health-card', async ({ page }) => {
+  await page.goto('/components/financial-health-card')
+  await waitForPreview(page)
+
+  // The score counter animates from 0 up to INITIAL_SCORE (90) on mount via a
+  // JS rAF tween (tweenScore writes .fhc-num.textContent each frame). The
+  // generic 900ms settle occasionally captured a pre-final frame ("89"), so
+  // wait until the counter has reached its final value before the screenshot.
+  await expect(page.locator('.fhc-num')).toHaveText('90')
+
+  await expect(page).toHaveScreenshot('financial-health-card.png', SHOT_OPTS)
+})
+
 test('design-system / task-card', async ({ page }) => {
   await page.goto('/components/task-card')
   await waitForPreview(page)
@@ -181,7 +237,12 @@ test('design-system / workflow-add-elements', async ({ page }) => {
   await waitForPreview(page)
 
   // Right-click the canvas to open the Add Elements panel.
-  await page.locator('.wae-canvas').click({ button: 'right' })
+  // Pin the click to a fixed top-left coordinate (not the element centre):
+  // the panel anchors at the click point, and a centre click made it wide
+  // enough to hit the right-edge clamp, whose shift depends on the measured
+  // panel width — that produced a ~185px run-to-run horizontal drift. Anchored
+  // near the left, the panel fits without clamping, so aeLeft is deterministic.
+  await page.locator('.wae-canvas').click({ button: 'right', position: { x: 90, y: 90 } })
 
   // Wait for the Add Elements inner panel to appear.
   await page.locator('.wae-ae-inner').waitFor({ state: 'visible' })
@@ -211,6 +272,23 @@ test('design-system / workflow-add-elements', async ({ page }) => {
   await waitForStableBox(page.locator('.wae-ae-inner'))
   const flyout = page.locator('.wae-pop-outer.visible').nth(1)
   if (await flyout.count()) await waitForStableBox(flyout)
+
+  // Reset every scroll position before capturing. The right-click + hover above
+  // make Playwright scroll the target into view, and the resulting offset varied
+  // run-to-run — shifting the WHOLE page ~17px vertically in the screenshot
+  // (~0.06 diff). Targeting a single .overflow-auto missed the real scroll
+  // owner, so reset the window plus every scrolled element to the top. The
+  // panel/flyout are absolutely positioned inside the shell, so true scroll 0
+  // yields a deterministic full-viewport capture.
+  await page.evaluate(() => {
+    window.scrollTo(0, 0)
+    document.querySelectorAll('*').forEach((el) => {
+      if (el.scrollTop || el.scrollLeft) {
+        el.scrollTop = 0
+        el.scrollLeft = 0
+      }
+    })
+  })
   await page.waitForTimeout(150)
 
   await expect(page).toHaveScreenshot('workflow-add-elements.png', SHOT_OPTS)

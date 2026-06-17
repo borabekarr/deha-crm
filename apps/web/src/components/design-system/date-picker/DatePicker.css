@@ -21,63 +21,19 @@
   flex-direction: column;
   align-items: center;
   gap: 20px;
-  background-image: radial-gradient(ellipse 80% 60% at 50% 110%, rgba(16,185,129,0.10) 0%, transparent 60%);
+  background-color: var(--slate-100);
 }
 
 /* ── Trigger button ───────────────────────────────────────────────────────── */
-.dp-trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 22px;
-  border-radius: var(--radius-lg);
-  border: none;
-  cursor: pointer;
-  font-family: var(--font-display);
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--fg-inverse);
-  user-select: none;
-
-  /* Emerald accent fill */
-  background-color: var(--brand-primary);
-  /* 7px grid texture — exact .sw-on / .seg.accent recipe */
-  background-image:
-    linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 55%),
-    linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
-  background-size: 100% 100%, 7px 7px, 7px 7px;
-
-  /* Glossy inset top highlight + dark bottom edge */
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.30),
-    0 2px 0 rgba(0,0,0,0.18),
-    0 4px 14px rgba(16,185,129,0.32);
-
-  transition: transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
-              box-shadow calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
-}
-
-.dp-trigger:hover {
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.30),
-    0 2px 0 rgba(0,0,0,0.22),
-    0 6px 20px rgba(16,185,129,0.40);
-  transform: translateY(-1px);
-}
-
-.dp-trigger:active {
-  transform: scale(0.96);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.20),
-    0 1px 0 rgba(0,0,0,0.18),
-    0 2px 8px rgba(16,185,129,0.24);
-}
-
+/* .btn-green handles all background/shadow/radius/sizing; keep only icon tweak */
 .dp-trigger .material-symbols-outlined {
   font-size: 18px;
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
 }
+
+/* ── Shell scoped reset (item 2) ──────────────────────────────────────────── */
+.shell:has(.dp-frame) { background: transparent; border: none; box-shadow: none; }
+html.dark .shell:has(.dp-frame) { background: transparent; border: none; box-shadow: none; }
 
 .dp-trigger-label {
   letter-spacing: 0.01em;
@@ -86,13 +42,10 @@
 /* ── Panel ────────────────────────────────────────────────────────────────── */
 .dp-panel {
   width: 380px;
-  border-radius: var(--radius-2xl);
-  background: var(--bg-app);
-  border: 1px solid rgba(15,23,42,0.07);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.95),
-    0 24px 60px -16px rgba(15,23,42,0.28),
-    0 8px 20px -8px rgba(15,23,42,0.12);
+  border-radius: var(--card-radius);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: inset 0 0 0 1px rgba(15,23,42,0.04);
   font-family: var(--font-display);
   overflow: hidden;
 }
@@ -107,11 +60,21 @@
 }
 
 .dp-head-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
+  font-weight: 900;
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--slate-700);
+}
+
+.dp-head-title .material-symbols-outlined {
+  font-size: 16px;
+  font-variation-settings: 'FILL' 1, 'wght' 700, 'GRAD' 0, 'opsz' 20;
+  color: #0F172A;
 }
 
 .dp-head-close {
@@ -158,9 +121,7 @@
   right: 20px;
   top: calc(22px + 91px); /* FIXED: label(18px) + gap(4px) + band-offset(91px) */
   height: 38px;
-  background: rgba(16,185,129,0.08);
-  border-top: 1px solid var(--slate-200);
-  border-bottom: 1px solid var(--slate-200);
+  background: rgba(16,185,129,0.03);
   pointer-events: none;
   border-radius: 4px;
   z-index: 1;
@@ -175,14 +136,16 @@
 }
 
 .dp-wheel-label {
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.14em;
+  font-size: 12px;
+  font-weight: 900;
+  font-family: var(--font-display);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--fg4);
+  color: var(--fg2);
   text-align: center;
   height: 18px;
   line-height: 18px;
+  margin-top: 4px;
   flex-shrink: 0;
 }
 
@@ -216,13 +179,13 @@
 
 .dp-wheel-scroll::before {
   top: 0;
-  background: linear-gradient(to bottom, var(--bg-app) 0%, rgba(255,255,255,0) 100%);
+  background: linear-gradient(to bottom, var(--card-bg) 0%, rgba(255,255,255,0) 100%);
   margin-bottom: -60px;
 }
 
 .dp-wheel-scroll::after {
   bottom: 0;
-  background: linear-gradient(to top, var(--bg-app) 0%, rgba(255,255,255,0) 100%);
+  background: linear-gradient(to top, var(--card-bg) 0%, rgba(255,255,255,0) 100%);
   margin-top: -60px;
 }
 
@@ -248,8 +211,10 @@
 }
 
 .dp-item.active {
-  color: var(--fg1);
+  color: #ffffff;
   font-weight: 700;
+  background: #0f172a;
+  border-radius: 8px;
 }
 
 .dp-item:hover:not(.active) {
@@ -257,53 +222,26 @@
 }
 
 /* ── Confirm button ───────────────────────────────────────────────────────── */
+/* .btn-green handles all background/shadow/radius/sizing; keep only layout + icon */
 .dp-confirm {
-  display: block;
-  width: calc(100% - 40px);
-  margin: 0 20px 18px;
-  padding: 12px;
-  border-radius: var(--radius-lg);
-  border: none;
-  cursor: pointer;
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  color: var(--fg-inverse);
-
-  background-color: var(--brand-primary);
-  background-image:
-    linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
-  background-size: 7px 7px;
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.25),
-    0 2px 0 rgba(0,0,0,0.16),
-    0 4px 12px rgba(16,185,129,0.28);
-
-  transition: transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  align-self: center;
+  margin: 0 0 18px;
 }
 
-.dp-confirm:hover { transform: translateY(-1px); }
-.dp-confirm:active { transform: scale(0.97); }
+.dp-confirm .material-symbols-outlined {
+  font-size: 16px;
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+}
 
 /* ── Dark mode overrides (System A: html.dark) ────────────────────────────── */
-html.dark .dp-trigger {
-  background-color: var(--brand-primary);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.22),
-    0 2px 0 rgba(0,0,0,0.30),
-    0 4px 14px rgba(16,185,129,0.25);
+html.dark .dp-frame {
+  background-color: #020617;
 }
 
 html.dark .dp-panel {
-  background: var(--slate-800);
-  border-color: var(--slate-700);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.06),
-    0 24px 60px -16px rgba(0,0,0,0.60),
-    0 8px 20px -8px rgba(0,0,0,0.30);
+    inset 0 1px 0 rgba(255,255,255,.05),
+    inset 0 0 0 1px rgba(255,255,255,.04);
 }
 
 html.dark .dp-head {
@@ -314,6 +252,10 @@ html.dark .dp-head-title {
   color: var(--slate-300);
 }
 
+html.dark .dp-head-title .material-symbols-outlined {
+  color: #ffffff;
+}
+
 html.dark .dp-head-close {
   background: var(--slate-700);
   color: var(--fg4);
@@ -322,9 +264,7 @@ html.dark .dp-head-close {
 html.dark .dp-head-close:hover { background: var(--slate-600); }
 
 html.dark .dp-band {
-  background: rgba(16,185,129,0.12);
-  border-top-color: var(--slate-700);
-  border-bottom-color: var(--slate-700);
+  background: rgba(16,185,129,0.04);
 }
 
 html.dark .dp-wheel + .dp-wheel {
@@ -332,33 +272,32 @@ html.dark .dp-wheel + .dp-wheel {
 }
 
 html.dark .dp-wheel-label {
-  color: var(--slate-600);
+  color: var(--slate-400);
 }
 
 html.dark .dp-wheel-scroll::before {
-  background: linear-gradient(to bottom, var(--slate-800) 0%, rgba(30,41,59,0) 100%);
+  background: linear-gradient(to bottom, var(--card-bg) 0%, rgba(30,41,59,0) 100%);
 }
 
 html.dark .dp-wheel-scroll::after {
-  background: linear-gradient(to top, var(--slate-800) 0%, rgba(30,41,59,0) 100%);
+  background: linear-gradient(to top, var(--card-bg) 0%, rgba(30,41,59,0) 100%);
 }
+
+/* Suppress per-item hover while wheel is scrolling (scrolling class added by hook) */
+.dp-wheel-scroll.scrolling .dp-item:hover { color: inherit; }
 
 html.dark .dp-item {
   color: var(--slate-600);
 }
 
 html.dark .dp-item.active {
-  color: var(--slate-100);
+  color: #0f172a;
+  background: #ffffff;
+  border-radius: 8px;
 }
 
 html.dark .dp-item:hover:not(.active) {
   color: var(--fg4);
 }
 
-html.dark .dp-confirm {
-  background-color: var(--brand-primary);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.18),
-    0 2px 0 rgba(0,0,0,0.28),
-    0 4px 12px rgba(16,185,129,0.20);
-}
+/* html.dark .dp-confirm -- .btn-green handles dark mode styling */

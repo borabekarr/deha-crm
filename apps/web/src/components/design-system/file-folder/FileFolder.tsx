@@ -166,12 +166,12 @@ export default function FileFolder() {
       />
 
       {/* File list popover — role="dialog" div so opacity/scale fade works (native <dialog> is display:none when closed) */}
-      {/* eslint-disable-next-line jsx-a11y/prefer-tag-over-role -- native <dialog> is display:none when closed, which kills the opacity/scale fade; an animated popover must stay a role="dialog" div */}
       <div
         className={`ff-pop-shell${popState.isOpen ? ' show' : ''}`}
         ref={popRef}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* eslint-disable-next-line jsx-a11y/prefer-tag-over-role -- native <dialog> is display:none when closed, which kills the opacity/scale fade; an animated popover must stay a role="dialog" div */}
         <div
           className="ff-pop"
           role="dialog"

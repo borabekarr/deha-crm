@@ -1,0 +1,284 @@
+/* ===================== Stage ===================== */
+.oc-stage {
+  --oc-accent: var(--brand-primary);
+  width: 384px; max-width: 100%;
+  display: flex; flex-direction: column; align-items: center; gap: 22px;
+  user-select: none; -webkit-user-select: none;
+}
+.oc-panel-wrap {
+  width: 100%; height: 462px;
+  padding: 10px;
+  background: var(--card-bg, #FFFFFF);
+  border: 1px solid var(--card-border, #CBD5E1);
+  border-radius: var(--card-radius, 20px);
+  box-shadow: 0 16px 56px rgba(15,23,42,.14), 0 3px 10px rgba(15,23,42,.07);
+  transition: height calc(460ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+}
+html.dark .oc-panel-wrap { box-shadow: 0 16px 56px rgba(0,0,0,.4), 0 3px 10px rgba(0,0,0,.3); }
+.oc-panel-wrap.is-compact { height: 92px; }
+
+/* ===================== Card shell ===================== */
+.oc-card {
+  position: relative; height: 100%;
+  display: flex; flex-direction: column;
+  background: var(--bg-card-solid);
+  border-radius: 22px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(15,23,42,.05);
+  overflow: hidden;
+  animation: ocCardIn calc(420ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+}
+html.dark .oc-card { box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 0 0 1px rgba(255,255,255,.06); }
+@keyframes ocCardIn { from { transform: translateY(8px) scale(.99); } to { transform: none; } }
+
+.oc-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; }
+.oc-head-l { display: flex; align-items: center; gap: 12px; }
+.oc-head-title { font-size: 18px; font-weight: var(--weight-bold); letter-spacing: -.02em; color: var(--fg1); }
+.oc-head-count { font-size: 14px; font-weight: var(--weight-semibold); color: var(--fg4); font-variant-numeric: tabular-nums; }
+.oc-divider { height: 1px; background: var(--border-hairline); }
+
+.oc-card-body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.oc-card-foot { padding: 14px 16px 16px; }
+
+/* ===================== Glyph tiles (AI Model Selector tag style) ===================== */
+.oc-glyph {
+  flex: none; display: grid; place-items: center;
+  border-radius: 11px; color: #fff;
+  background-color: var(--icon-c, #10B981);
+  background-image:
+    linear-gradient(rgba(255,255,255,.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.13) 1px, transparent 1px);
+  background-size: 7px 7px;
+  box-shadow:
+    0 4px 14px -4px color-mix(in srgb, var(--icon-c) 55%, rgba(0,0,0,0.3)),
+    inset 0 1px 0 rgba(255,255,255,.55),
+    inset 0 -2px 0 rgba(15,23,42,.20),
+    inset 0 0 0 1px rgba(15,23,42,.12);
+  transition: transform calc(300ms * var(--anim-mult, 1)) cubic-bezier(.34,1.4,.5,1), opacity calc(300ms * var(--anim-mult, 1)) ease;
+}
+.oc-glyph svg { filter: drop-shadow(0 1px 1px rgba(0,0,0,.18)); }
+.oc-glyph--md { width: 38px; height: 38px; }
+.oc-glyph--lg { width: 64px; height: 64px; border-radius: 18px; background-size: 9px 9px; }
+.oc-glyph.is-done { opacity: .88; transform: scale(.93); }
+
+/* ===================== Prompt ===================== */
+.oc-prompt {
+  position: relative; overflow: hidden;
+  width: 100%; height: 100%;
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 16px;
+  background: var(--bg-card-solid);
+  border: none;
+  border-radius: 22px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(15,23,42,.05);
+  cursor: pointer; text-align: left; font-family: inherit;
+  transition: background calc(180ms * var(--anim-mult, 1)) ease, transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.5,1);
+  animation: ocCardIn calc(420ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+}
+html.dark .oc-prompt { box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 0 0 1px rgba(255,255,255,.06); }
+.oc-prompt:hover { background: var(--slate-50); }
+html.dark .oc-prompt:hover { background: color-mix(in srgb, #fff 4%, var(--bg-card-solid)); }
+.oc-prompt:active { transform: scale(.992); }
+.oc-prompt:focus { outline: none; }
+.oc-prompt:focus-visible { outline: none; box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(15,23,42,.05), 0 0 0 3px color-mix(in srgb, var(--oc-accent) 32%, transparent); }
+.oc-prompt-title-row { display: flex; align-items: center; gap: 8px; }
+.oc-prompt-ico {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  width: 26px; height: 26px; border-radius: 8px; color: #fff;
+  background-color: var(--prompt-ico-c, var(--oc-accent));
+  background-image:
+    linear-gradient(rgba(255,255,255,.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.13) 1px, transparent 1px);
+  background-size: 6px 6px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -2px 0 rgba(15,23,42,.20), inset 0 0 0 1px rgba(15,23,42,.12);
+}
+.oc-prompt-ico svg { display: block; filter: drop-shadow(0 1px 1px rgba(0,0,0,.18)); }
+.oc-prompt-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; position: relative; z-index: 1; }
+.oc-prompt-title { font-size: 17px; font-weight: var(--weight-bold); letter-spacing: -.02em; color: var(--fg1); }
+.oc-prompt-sub { font-size: 14px; font-weight: var(--weight-medium); color: var(--fg4); }
+.oc-prompt.is-success { cursor: default; }
+.oc-prompt.is-success:hover { background: var(--bg-card-solid); }
+.oc-prompt-tick {
+  flex: none; width: 46px; height: 46px; border-radius: 50%;
+  display: grid; place-items: center; color: #fff; position: relative; z-index: 1;
+  background-color: var(--oc-accent);
+  background-image:
+    linear-gradient(rgba(255,255,255,.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.13) 1px, transparent 1px);
+  background-size: 7px 7px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.55),
+    inset 0 -2px 0 rgba(15,23,42,.22),
+    inset 0 0 0 1px rgba(15,23,42,.14);
+  animation: ocBadgePop .5s cubic-bezier(.34,1.56,.64,1) both;
+}
+.oc-icon-btn {
+  flex: none; width: 34px; height: 34px; border: none; background: transparent;
+  border-radius: 50%; display: grid; place-items: center; color: var(--slate-400);
+  cursor: pointer; transition: background calc(150ms * var(--anim-mult, 1)), color calc(150ms * var(--anim-mult, 1));
+}
+.oc-icon-btn:hover { background: var(--slate-100); color: var(--fg2); }
+
+/* ===================== Card focus ===================== */
+.oc-card-body { position: relative; }
+.oc-focus {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 18px 30px; gap: 14px; position: relative;
+  animation: ocFocusIn calc(440ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+}
+@keyframes ocFocusIn { from { transform: translateY(10px); } to { transform: none; } }
+.oc-focus-title { margin: 4px 0 0; font-size: 21px; font-weight: var(--weight-bold); letter-spacing: -.02em; color: var(--fg1); }
+.oc-focus-desc { margin: 0; font-size: 14.5px; line-height: 1.5; font-weight: var(--weight-medium); color: var(--fg3); max-width: 250px; text-wrap: pretty; }
+
+/* ===================== Checklist rows ===================== */
+.oc-list { padding: 14px 14px 4px; gap: 8px; display: flex; flex-direction: column; overflow: auto; }
+.oc-row {
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; gap: 13px;
+  padding: 11px 14px; width: 100%;
+  background: var(--slate-50);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  cursor: pointer; font-family: inherit; text-align: left;
+  transition: background calc(250ms * var(--anim-mult, 1)) ease, transform calc(140ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.5,1), border-color calc(200ms * var(--anim-mult, 1));
+}
+.oc-row > :not(.oc-row-ripple) { position: relative; z-index: 1; }
+.oc-row-ripple {
+  position: absolute; width: 16px; height: 16px; border-radius: 50%; z-index: 0;
+  transform: translate(-50%, -50%) scale(0); pointer-events: none;
+  animation: ocRowRipple calc(620ms * var(--anim-mult, 1)) ease-out forwards;
+}
+@keyframes ocRowRipple { to { transform: translate(-50%, -50%) scale(22); opacity: 0; } }
+.oc-row:hover:not(:disabled) { background: var(--slate-100); transform: translateX(2px); border-color: var(--border-hairline); }
+.oc-row:active:not(:disabled) { transform: scale(.985); }
+.oc-row:disabled { cursor: default; }
+html.dark .oc-row { background: color-mix(in srgb, #fff 5%, var(--bg-card-solid)); }
+html.dark .oc-row:hover:not(:disabled) { background: color-mix(in srgb, #fff 10%, var(--bg-card-solid)); border-color: color-mix(in srgb, #fff 12%, transparent); }
+html.dark .oc-row.is-done { background: color-mix(in srgb, var(--oc-accent) 17%, var(--bg-card-solid)); }
+.oc-row-title { flex: 1; min-width: 0; font-size: 16px; font-weight: var(--weight-semibold); color: var(--fg1); transition: color calc(300ms * var(--anim-mult, 1)); }
+.oc-row-end { flex: none; display: grid; place-items: center; width: 24px; height: 24px; }
+.oc-row.is-done { background: color-mix(in srgb, var(--oc-accent) 9%, var(--bg-card-solid)); }
+.oc-row.is-done .oc-row-title { color: color-mix(in srgb, var(--oc-accent) 55%, var(--fg4)); text-decoration: line-through; text-decoration-thickness: 1.5px; }
+.oc-row-check {
+  width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; color: #fff;
+  background: var(--oc-accent);
+  box-shadow: 0 2px 6px -2px color-mix(in srgb, var(--oc-accent) 60%, transparent);
+  animation: ocBadgePop calc(420ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1) both;
+}
+
+/* ===================== CTA (hero accent card style) ===================== */
+.oc-cta {
+  position: relative; overflow: hidden; width: 100%;
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 52px; border: none; border-radius: var(--radius-lg);
+  background-color: var(--oc-accent); color: #fff;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+  font-family: inherit; font-size: 16px; font-weight: var(--weight-extrabold); letter-spacing: -.01em;
+  cursor: pointer;
+  text-shadow: 0 1px 2px rgba(0,0,0,.18);
+  box-shadow:
+    0 12px 26px -10px rgba(15,23,42,.40),
+    inset 0 1px 0 rgba(255,255,255,.5),
+    inset 0 -2px 0 rgba(0,0,0,.22),
+    inset 0 0 0 1px rgba(255,255,255,.15);
+  transition: filter calc(180ms * var(--anim-mult, 1)) ease, transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.5,1), box-shadow calc(200ms * var(--anim-mult, 1));
+}
+.oc-cta::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse at top right, rgba(255,255,255,.14) 0%, transparent 55%);
+}
+.oc-cta:hover { filter: brightness(1.05); box-shadow: 0 16px 34px -10px rgba(15,23,42,.46), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -2px 0 rgba(0,0,0,.22), inset 0 0 0 1px rgba(255,255,255,.15); }
+.oc-cta:active { transform: scale(.98); }
+.oc-cta:disabled { cursor: default; filter: saturate(.9) brightness(.98); }
+.oc-cta-inner { display: inline-flex; align-items: center; gap: 9px; position: relative; z-index: 1; }
+.oc-cta-ico { display: inline-flex; align-items: center; }
+.oc-ripple {
+  position: absolute; width: 14px; height: 14px; border-radius: 50%;
+  background: rgba(255,255,255,.55); transform: translate(-50%, -50%) scale(0);
+  pointer-events: none; animation: ocRipple calc(600ms * var(--anim-mult, 1)) ease-out forwards;
+}
+@keyframes ocRipple { to { transform: translate(-50%, -50%) scale(26); opacity: 0; } }
+
+/* ===================== Success ===================== */
+.oc-success { position: relative; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+.oc-bloom {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(120% 90% at 50% 34%, color-mix(in srgb, var(--oc-accent) 20%, transparent) 0%, transparent 60%),
+    linear-gradient(180deg, color-mix(in srgb, var(--oc-accent) 8%, var(--bg-card-solid)) 0%, var(--bg-card-solid) 70%);
+  animation: ocBloom calc(700ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) both;
+  transform-origin: 50% 34%;
+}
+@keyframes ocBloom { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
+.oc-success-body {
+  flex: 1; position: relative; z-index: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 24px 34px; gap: 6px;
+}
+.oc-success-badge {
+  width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center;
+  color: #fff; margin-bottom: 12px;
+  background: var(--oc-accent);
+  box-shadow:
+    0 0 0 8px color-mix(in srgb, var(--oc-accent) 14%, transparent),
+    0 14px 30px -10px color-mix(in srgb, var(--oc-accent) 70%, transparent);
+  animation: ocBadgePop calc(600ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1) calc(80ms * var(--anim-mult, 1)) both;
+}
+.oc-success-title { margin: 4px 0 0; font-size: 24px; font-weight: var(--weight-black); letter-spacing: -.025em; color: var(--fg1); animation: ocFadeUp calc(500ms * var(--anim-mult, 1)) ease calc(200ms * var(--anim-mult, 1)) both; }
+.oc-success-desc { margin: 0; font-size: 15px; line-height: 1.5; font-weight: var(--weight-medium); color: var(--fg3); max-width: 250px; text-wrap: pretty; animation: ocFadeUp calc(500ms * var(--anim-mult, 1)) ease calc(300ms * var(--anim-mult, 1)) both; }
+.oc-success-foot { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; animation: ocFadeUp calc(500ms * var(--anim-mult, 1)) ease calc(400ms * var(--anim-mult, 1)) both; }
+.oc-replay { display: inline-flex; align-items: center; gap: 5px; border: none; background: transparent; color: var(--fg4); font-family: inherit; font-size: 13px; font-weight: var(--weight-semibold); cursor: pointer; padding: 5px 10px; border-radius: 8px; transition: color calc(150ms * var(--anim-mult, 1)), background calc(150ms * var(--anim-mult, 1)); }
+.oc-replay:hover { color: var(--fg2); background: var(--slate-100); }
+@keyframes ocFadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes ocBadgePop { 0% { opacity: 0; transform: scale(.4); } 60% { opacity: 1; transform: scale(1.08); } 100% { transform: scale(1); } }
+
+/* ===================== Confetti (fills the whole card, clipped) ===================== */
+.oc-confetti { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
+.oc-confetti span {
+  position: absolute; top: -8%; display: block;
+  opacity: 0; will-change: transform, opacity;
+  animation: ocConfettiFall calc(var(--dur-raw, 1300) * 1ms * var(--anim-mult, 1)) cubic-bezier(.3,.6,.5,1) calc(var(--delay-raw, 0) * 1ms * var(--anim-mult, 1)) forwards;
+}
+@keyframes ocConfettiFall {
+  0% { opacity: 0; transform: translateY(-12px) translateX(0) rotate(0); }
+  10% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(var(--fy)) translateX(var(--fx)) rotate(var(--cr)); }
+}
+
+/* ===================== Spinner / check draws ===================== */
+.oc-spin { animation: ocSpin calc(800ms * var(--anim-mult, 1)) linear infinite; }
+@keyframes ocSpin { to { transform: rotate(360deg); } }
+.oc-check-path { stroke-dasharray: 30; stroke-dashoffset: 30; }
+.oc-check-path.play { animation: ocDraw calc(450ms * var(--anim-mult, 1)) cubic-bezier(.65,0,.35,1) calc(40ms * var(--anim-mult, 1)) forwards; }
+@keyframes ocDraw { to { stroke-dashoffset: 0; } }
+
+.oc-ring { position: relative; display: grid; place-items: center; }
+.oc-ring-mid { position: absolute; inset: 0; display: grid; place-items: center; }
+
+/* ===================== Segmented switcher ===================== */
+.oc-seg {
+  position: relative; display: flex; align-items: center;
+  background: var(--slate-100); border-radius: 13px; padding: 3px;
+  box-shadow: var(--shadow-recessed);
+}
+.oc-seg-thumb {
+  position: absolute; top: 3px; bottom: 3px; width: calc((100% - 6px) / 3);
+  background: var(--bg-card-solid); border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(15,23,42,.14), 0 2px 6px -2px rgba(15,23,42,.18);
+  transition: left calc(260ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.5,1);
+}
+.oc-seg-btn {
+  position: relative; z-index: 1; appearance: none; border: none; background: transparent;
+  font-family: inherit; font-size: 14px; font-weight: var(--weight-semibold);
+  color: var(--fg3); padding: 9px 22px; border-radius: 10px; cursor: pointer;
+  transition: color calc(200ms * var(--anim-mult, 1)) ease;
+}
+.oc-seg-btn:hover { color: var(--fg2); }
+.oc-seg-btn.is-on { color: var(--fg1); font-weight: var(--weight-bold); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}

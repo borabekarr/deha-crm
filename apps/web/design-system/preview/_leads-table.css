@@ -25,8 +25,8 @@ html.dark body { background: radial-gradient(1100px 540px at 50% -10%, #0c1424 0
   --coral:#E11D48; --coral-l:#FB7185; --coral-bg:#FFF1F2; --coral-bd:#FECDD3;
   --orange:#EA580C; --orange-l:#F97316; --orange-bg:#FFF7ED; --orange-bd:#FED7AA;
   position: relative; display: flex; width: 1340px; max-width: 100%; box-sizing: border-box;
-  margin: 26px auto; border-radius: 28px; overflow: hidden; font-family: 'Montserrat';
-  background: var(--surface); color: var(--txt);
+  margin: 26px auto; border-radius: var(--card-radius); overflow: hidden; font-family: 'Montserrat';
+  background: var(--card-bg); border: 1px solid var(--card-border); color: var(--txt);
   box-shadow: 0 44px 88px -34px rgba(15,23,42,0.34), 0 14px 32px -16px rgba(15,23,42,0.14), inset 0 0 0 1px rgba(15,23,42,0.05), inset 0 1px 0 rgba(255,255,255,0.9);
 }
 html.dark .lt-app {

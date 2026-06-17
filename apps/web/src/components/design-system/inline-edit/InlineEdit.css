@@ -1,0 +1,263 @@
+/* ==========================================================================
+   InlineEdit — inline-editable handle field
+   Port of deha-claude-design-htmls/inline-edit/inline-edit.html
+   All animation durations wrapped in calc(... * var(--anim-mult, 1)).
+   ========================================================================== */
+
+/* ---------- outer wrapper ------------------------------------------------- */
+.ie-wrap {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+}
+
+/* ---------- label --------------------------------------------------------- */
+.ie-label {
+  align-self: start;
+  margin-left: 4px;
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg4, #94A3B8);
+}
+
+/* ---------- field container ---------------------------------------------- */
+.ie-field {
+  --ie-glow: var(--brand-primary-100, #D1FAE5);
+  --ie-rest: inset 0 1px 0 rgba(255,255,255,1), 0 1px 2px rgba(15,23,42,.05);
+
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 348px;
+  max-width: 100%;
+  height: 60px;
+  padding-left: 22px;
+  padding-right: 7px;
+  border-radius: 9999px;
+  background: var(--bg-card-solid, #fff);
+  border: 2px solid var(--border-hairline, #E2E8F0);
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0), var(--ie-rest);
+  transition:
+    border-color calc(.25s * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
+    box-shadow  calc(.25s * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  cursor: text;
+}
+
+html.dark .ie-field {
+  --ie-glow: rgba(16, 185, 129, .30);
+  --ie-rest: inset 0 1px 0 rgba(255,255,255,.06), 0 1px 2px rgba(0,0,0,.3);
+}
+
+.ie-field[data-editing="false"] { cursor: pointer; }
+
+.ie-field[data-editing="true"] {
+  border-color: var(--brand-primary, #10B981);
+  box-shadow: 0 0 0 4px var(--ie-glow), var(--ie-rest);
+}
+
+/* saved flash on the field ring */
+.ie-field[data-saved="true"] {
+  animation: ieSaved calc(.62s * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+}
+
+@keyframes ieSaved {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0), var(--ie-rest); }
+  28%      { box-shadow: 0 0 0 6px var(--ie-glow), var(--ie-rest); }
+}
+
+/* ---------- @ prefix ----------------------------------------------------- */
+.ie-prefix {
+  flex: none;
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--fg4, #94A3B8);
+  margin-right: 1px;
+  user-select: none;
+  transition: color calc(.2s * var(--anim-mult, 1));
+}
+
+.ie-field[data-editing="true"] .ie-prefix {
+  color: var(--brand-primary-600, #059669);
+}
+
+/* ---------- text input --------------------------------------------------- */
+.ie-input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  color: var(--fg3, #475569);
+  padding: 0;
+  transition: color calc(.2s * var(--anim-mult, 1));
+}
+
+.ie-field[data-editing="true"] .ie-input {
+  color: var(--fg1, #0F172A);
+}
+
+.ie-input::selection {
+  background: var(--brand-primary-200, #A7F3D0);
+}
+
+html.dark .ie-input::selection {
+  background: rgba(16, 185, 129, .4);
+}
+
+/* ---------- action button (pen <-> check morph) -------------------------- */
+.ie-act {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  border-radius: 9999px;
+  margin-left: 8px;
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent;
+  cursor: pointer;
+  overflow: hidden;
+  background: none;
+  transition:
+    background-color calc(.26s * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
+    color            calc(.26s * var(--anim-mult, 1)),
+    box-shadow       calc(.26s * var(--anim-mult, 1)),
+    border-color     calc(.26s * var(--anim-mult, 1)),
+    transform        calc(.12s * var(--anim-mult, 1)) ease;
+}
+
+.ie-act:active { transform: scale(.9); }
+
+/* pen state */
+.ie-act[data-mode="edit"] {
+  background: var(--bg-card-solid, #fff);
+  color: var(--fg3, #475569);
+  border-color: var(--border-hairline, #E2E8F0);
+  box-shadow: 0 1px 4px rgba(15,23,42,.08);
+}
+
+.ie-act[data-mode="edit"]:hover {
+  color: var(--fg1, #0F172A);
+  background: #F8FAFC;
+}
+
+html.dark .ie-act[data-mode="edit"] {
+  background: color-mix(in srgb, #fff 5%, var(--bg-card-solid, #1E293B));
+}
+
+html.dark .ie-act[data-mode="edit"]:hover {
+  background: color-mix(in srgb, #fff 10%, var(--bg-card-solid, #1E293B));
+}
+
+/* check / save state — mirrors .btn-green pill treatment */
+.ie-act[data-mode="save"] {
+  color: #fff;
+  background-color: var(--brand-primary, #10B981);
+  background-image:
+    linear-gradient(rgba(255,255,255,.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.12) 1px, transparent 1px);
+  background-size: 7px 7px;
+  box-shadow:
+    0 0 0 2px rgba(16,185,129,.25),
+    inset 0 1px 0 rgba(255,255,255,.5),
+    inset 0 -2px 0 rgba(0,0,0,.22),
+    inset 0 0 0 1px rgba(255,255,255,.15);
+}
+
+.ie-act[data-mode="save"]:hover {
+  filter: brightness(1.05);
+}
+
+/* ---------- icon glyph inside the button ---------------------------------- */
+.ie-ic {
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  line-height: 1;
+  font-variation-settings: 'wght' 500, 'opsz' 24;
+}
+
+/* entrance animation replays on key change (pen <-> check) */
+@media (prefers-reduced-motion: no-preference) {
+  .ie-ic {
+    animation: ieIcIn calc(.36s * var(--anim-mult, 1)) cubic-bezier(.34,1.4,.5,1);
+  }
+}
+
+@keyframes ieIcIn {
+  from { transform: translateX(26px); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
+
+/* ---------- footer caption / toast slot ---------------------------------- */
+.ie-foot {
+  height: 18px;
+  display: grid;
+  place-items: center;
+  align-self: stretch;
+}
+
+.ie-cap {
+  margin: 0;
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--fg4, #94A3B8);
+  letter-spacing: -.005em;
+  text-align: center;
+  transition: opacity calc(.2s * var(--anim-mult, 1));
+}
+
+.ie-toast {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--brand-primary-600, #059669);
+  letter-spacing: -.005em;
+}
+
+html.dark .ie-toast {
+  color: var(--brand-primary-300, #6EE7B7);
+}
+
+/* toast icon is smaller */
+.ie-toast .ie-ic {
+  font-size: 17px;
+  font-variation-settings: 'wght' 600, 'opsz' 20;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ie-toast {
+    animation: ieToast calc(.3s * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1);
+  }
+}
+
+@keyframes ieToast {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------- reduced-motion override --------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .ie-field,
+  .ie-act,
+  .ie-prefix,
+  .ie-input,
+  .ie-ic,
+  .ie-toast,
+  .ie-cap {
+    animation-duration: .001ms !important;
+    transition-duration: .001ms !important;
+  }
+}

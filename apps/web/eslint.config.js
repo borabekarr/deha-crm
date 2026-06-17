@@ -74,6 +74,14 @@ export default defineConfig([
           message: "auto_awesome is blacklisted — use 'neurology' instead.",
         },
       ],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
       'react/button-has-type': 'error',
       'react/no-array-index-key': 'error',
       'react/jsx-no-constructed-context-values': 'error',

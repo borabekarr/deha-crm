@@ -101,3 +101,97 @@ html.dark .btn-inverse:hover { background: #273449; box-shadow: inset 0 0 0 1px 
 html.dark .btn-glass { background: rgba(30,41,59,.7); color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), inset 0 1px 0 rgba(255,255,255,.08), inset 0 -2px 0 rgba(0,0,0,.3); }
 html.dark .btn-glass:hover { background: rgba(39,52,73,.85); box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), inset 0 1px 0 rgba(255,255,255,.08), inset 0 -2px 0 rgba(0,0,0,.3), 0 6px 18px -4px rgba(0,0,0,0.4); }
 html.dark .btn-text { color: #34D399; }
+
+/* ─────────────────────────────────────────────────────────────────
+   New variants (Step 3)
+   Tokens from _shared-feedback.css: --ease-spring, --ease-out,
+   --gap-icon-text, --font-display.
+   ───────────────────────────────────────────────────────────────── */
+
+/* Apply button — mirrors .pc-apply (pipeline-card source) */
+.btn-apply {
+  position: relative; overflow: hidden;
+  height: 36px; min-width: 104px; padding: 0 17px; gap: var(--gap-icon-text, 7px);
+  border-radius: 9999px; border: none; cursor: pointer;
+  background: #0F172A; color: #fff;
+  font-size: 12px; font-weight: 800; font-family: var(--font-display, 'Montserrat');
+  display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 2px 6px rgba(15,23,42,0.28);
+  transition:
+    background-color calc(180ms * var(--anim-mult, 1)),
+    transform calc(160ms * var(--anim-mult, 1)) var(--ease-spring, cubic-bezier(.34,1.56,.64,1)),
+    box-shadow calc(200ms * var(--anim-mult, 1)),
+    min-width calc(260ms * var(--anim-mult, 1)) var(--ease-out, cubic-bezier(.22,1,.36,1));
+}
+.btn-apply:hover { transform: scale(1.03); box-shadow: 0 8px 20px rgba(15,23,42,0.32), inset 0 1px 0 rgba(255,255,255,0.2); }
+.btn-apply:active { transform: scale(0.96); }
+.btn-apply:focus-visible { outline: 2px solid #10B981; outline-offset: 2px; }
+html.dark .btn-apply { background: #10B981; box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 8px rgba(16,185,129,0.34); }
+
+/* Discuss button — mirrors .pc-discuss-btn (pipeline-card source) */
+.btn-discuss {
+  height: 36px; padding: 0 15px; gap: var(--gap-icon-text, 6px);
+  border-radius: 9999px; cursor: pointer;
+  font-family: var(--font-display, 'Montserrat'); font-size: 12px; font-weight: 800;
+  display: inline-flex; align-items: center;
+  background: transparent; color: var(--r-text, #0F172A);
+  border: 1.5px solid var(--r-chip-bd, #CBD5E1);
+  transition:
+    border-color calc(160ms * var(--anim-mult, 1)),
+    background-color calc(160ms * var(--anim-mult, 1));
+}
+.btn-discuss:hover { background: var(--r-btn-hover, rgba(15,23,42,0.06)); border-color: var(--r-btn, #64748B); }
+.btn-discuss:active { transform: scale(0.97); }
+html.dark .btn-discuss { color: #F1F5F9; border-color: rgba(255,255,255,0.18); }
+html.dark .btn-discuss:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.35); }
+
+/* Delete button — mirrors three-state .db (delete-button source).
+   Rendered via <DeleteButton> in the specimen; these rules back the
+   standalone .btn-delete fallback for contexts that can't import the
+   component. */
+.btn-delete {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 40px; padding: 0 20px; gap: var(--gap-icon-text, 8px);
+  border-radius: 9999px; border: none; cursor: pointer;
+  font-family: var(--font-display, 'Montserrat'); font-size: 13px; font-weight: 800;
+  color: #fff; background: #EF4444;
+  box-shadow:
+    0 12px 30px -10px rgba(239,68,68,0.55),
+    inset 0 1px 0 rgba(255,255,255,0.45),
+    inset 0 -2px 0 rgba(0,0,0,0.22);
+  transition:
+    background-color calc(220ms * var(--anim-mult, 1)),
+    transform calc(120ms * var(--anim-mult, 1)) var(--ease-out, cubic-bezier(.22,1,.36,1)),
+    box-shadow calc(220ms * var(--anim-mult, 1));
+}
+.btn-delete:hover { filter: brightness(1.08); }
+.btn-delete:active { transform: scale(0.985); }
+html.dark .btn-delete {
+  background: #DC2626;
+  box-shadow:
+    0 12px 30px -10px rgba(220,38,38,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.18),
+    inset 0 -2px 0 rgba(0,0,0,0.3);
+}
+
+/* Task footer button — mirrors .tp-foot-btn driven by --fbtn (task-card source).
+   Caller sets --fbtn to the desired solid fill color; defaults to navy. */
+.btn-task {
+  flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+  gap: var(--gap-icon-text, 6px);
+  font-family: var(--font-display, 'Montserrat'); font-size: 11px; font-weight: 800;
+  color: #fff; background: var(--fbtn, #0F172A); border: 1px solid var(--fbtn, #0F172A);
+  padding: 6px 14px; border-radius: 9999px; cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    inset 0 -1.5px 0 rgba(0,0,0,0.18),
+    0 0 10px -3px var(--fbtn, #0F172A);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  transition:
+    border-color calc(150ms * var(--anim-mult, 1)),
+    color calc(150ms * var(--anim-mult, 1)),
+    background calc(150ms * var(--anim-mult, 1));
+}
+.btn-task:hover { filter: brightness(1.08); }
+.btn-task:active { transform: scale(0.98); }
+.btn-task .material-icons { color: #fff; font-size: 16px; }

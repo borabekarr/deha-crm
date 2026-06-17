@@ -48,6 +48,22 @@ function useTween(target, dur){
   }, [target, dur]);
   return v;
 }
+function useInterval(cb, delay){
+  const saved = useRef(cb);
+  saved.current = cb;
+  useEffect(()=>{
+    if (delay == null) return;
+    const t = setInterval(()=> saved.current(), delay);
+    return ()=> clearInterval(t);
+  }, [delay]);
+}
+function useUnmountEffect(cleanup){
+  const saved = useRef(cleanup); saved.current = cleanup;
+  useEffect(()=> ()=> saved.current(), []);
+}
+function useEdgeMeasure(ref, deps, run){
+  useEffect(()=>{ return run(ref.current); }, deps);   // run returns optional cleanup
+}
 let _gidN = 0; const gid = () => 'lg' + (++_gidN);
 
 /* ─────────────── animated viz primitives ─────────────── */
@@ -531,14 +547,20 @@ function SegPills({ pills, active, onSelect }){
     </div>
   );
 }
-function LeadDetailsPopover({ lead, open, onClose }){
+function LeadDetailsPopoverInner({ lead, open, onClose }){
   const [pill, setPill] = useState(1);
   const [ws, setWs] = useState('real_estate');
-  const [computed, setComputed] = useState(()=>new Set([1]));
+  const [computed, setComputed] = useState(()=>{
+    const init = new Set([1]);
+    if (LP.isActive(lead)) init.add(2);
+    return init;
+  });
   const [loading, setLoading] = useState(null);
   const [showMore, setShowMore] = useState({});
-  const [now, setNow] = useState(Date.now());
-  const deadline = useRef(null);
+  const [now, setNow] = useState(()=>Date.now());
+  const deadline = useRef(
+    (()=>{ const ch = LP.coldDropHours(lead); return ch!=null ? Date.now() + ch*3600000 : null; })()
+  );
   const timers = useRef([]);
   const bodyRef = useRef(null);
   const [scrolled, setScrolled] = useState(false);
@@ -550,48 +572,32 @@ function LeadDetailsPopover({ lead, open, onClose }){
     setEdges({ top: st > 6, bottom: st < max - 6 });
   }
 
-  // reset everything when a new lead opens
-  useEffect(()=>{
-    if (!lead) return;
-    setPill(1); setWs('real_estate'); setShowMore({}); setLoading(null);
-    const init = new Set([1]);
-    if (LP.isActive(lead)) init.add(2);   // tier-1 auto when lead is active
-    setComputed(init);
-    const ch = LP.coldDropHours(lead);
-    deadline.current = ch!=null ? Date.now() + ch*3600000 : null;
-    setNow(Date.now());
-    timers.current.forEach(clearTimeout); timers.current = [];
-  }, [lead]);
+  // clear timers on unmount (replaces reset-effect timer-clear responsibility)
+  useUnmountEffect(()=>{ timers.current.forEach(clearTimeout); });
 
-  // 1s tick for the countdown
-  useEffect(()=>{
-    if (!open || deadline.current==null) return;
-    const t = setInterval(()=> setNow(Date.now()), 1000);
-    return ()=> clearInterval(t);
-  }, [open, lead]);
+  // 1s tick for the countdown — only when open and deadline exists
+  useInterval(()=> setNow(Date.now()), (open && deadline.current != null) ? 1000 : null);
 
   // reset scroll only when switching pill/lead/workspace/open (NOT on recompute)
-  useEffect(()=>{
-    const el = bodyRef.current; if (!el) return;
+  useEdgeMeasure(bodyRef, [pill, ws, lead, open], (el)=>{
+    if (!el) return;
     el.scrollTop = 0; setScrolled(false);
     const id = setTimeout(()=>{
       const max = el.scrollHeight - el.clientHeight;
       setEdges({ top:false, bottom: max > 6 });
     }, 60);
     return ()=> clearTimeout(id);
-  }, [pill, ws, lead, open]);
+  });
 
   // re-check edges (preserve scroll position) when computed/loading/showMore changes
-  useEffect(()=>{
-    const el = bodyRef.current; if (!el) return;
+  useEdgeMeasure(bodyRef, [computed, loading, showMore], (el)=>{
+    if (!el) return;
     const id = setTimeout(()=>{
       const st = el.scrollTop, max = el.scrollHeight - el.clientHeight;
       setEdges({ top: st > 6, bottom: st < max - 6 });
     }, 80);
     return ()=> clearTimeout(id);
-  }, [computed, loading, showMore]);
-
-  if (!lead) return <div className="ldx-overlay" />;
+  });
 
   const metrics = LP.buildLeadMetrics(lead, ws);
   const h = healthOf(lead.score);
@@ -767,6 +773,12 @@ function LeadDetailsPopover({ lead, open, onClose }){
       </div>
     </div>
   );
+}
+
+/* thin wrapper: remounts inner on lead change (replaces reset-on-lead effect) */
+function LeadDetailsPopover({ lead, open, onClose }){
+  if (!lead) return <div className="ldx-overlay" />;
+  return <LeadDetailsPopoverInner key={lead.id} lead={lead} open={open} onClose={onClose} />;
 }
 
 /* embedded lead-context AI tools — mini chatbot interface */

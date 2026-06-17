@@ -23,8 +23,9 @@ body { background: #F1F5F9; }
 /* ── White inner panel ── */
 .te-panel {
   width: 340px;
-  background: #FFFFFF;
-  border-radius: 22px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
   overflow: hidden;
   box-shadow: inset 0 1px 0 rgba(255,255,255,1);
   font-family: 'Montserrat', sans-serif;

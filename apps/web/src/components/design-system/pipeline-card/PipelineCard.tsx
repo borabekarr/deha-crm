@@ -565,7 +565,7 @@ function EvidenceBlock({ evidence }: { evidence: Evidence }) {
   return (
     <div className="pcx-block">
       <p className="pcx-sec-title">
-        <span className="pcx-sec-icon" style={{ '--icon-c': '#0EA5E9' } as React.CSSProperties}>
+        <span className="pcx-sec-icon icon-badge icon-badge--sm" style={{ '--icon-c': '#0EA5E9' } as React.CSSProperties}>
           <span className="material-symbols-outlined">analytics</span>
         </span>
         {evidence.title}
@@ -586,7 +586,7 @@ function EntitiesBlock({ entities, onToast }: { entities: Entities; onToast: (ms
   return (
     <div className="pcx-block">
       <p className="pcx-sec-title">
-        <span className="pcx-sec-icon" style={{ '--icon-c': '#8B5CF6' } as React.CSSProperties}>
+        <span className="pcx-sec-icon icon-badge icon-badge--sm" style={{ '--icon-c': '#8B5CF6' } as React.CSSProperties}>
           <span className="material-symbols-outlined">group</span>
         </span>
         {entities.title}
@@ -642,7 +642,7 @@ function OutcomesBlock({ outcomes }: { outcomes: Outcomes }) {
   return (
     <div className="pcx-block">
       <p className="pcx-sec-title">
-        <span className="pcx-sec-icon" style={{ '--icon-c': '#10B981' } as React.CSSProperties}>
+        <span className="pcx-sec-icon icon-badge icon-badge--sm" style={{ '--icon-c': '#10B981' } as React.CSSProperties}>
           <span className="material-symbols-outlined">trending_up</span>
         </span>
         Expected outcome
@@ -693,7 +693,7 @@ function AskBlock({ d }: { d: CardData }) {
       <div className={`pcx-ask-prompt${asked ? ' asked' : ''}`} ref={askPromptRef}>
         <div className="pcx-ask-q">
           <div className="pcx-ask-label">
-          <span className="pcx-sec-icon" style={{ '--icon-c': '#EF4444' } as React.CSSProperties}>
+          <span className="pcx-sec-icon icon-badge icon-badge--sm" style={{ '--icon-c': '#EF4444' } as React.CSSProperties}>
             <span className="material-symbols-outlined">neurology</span>
           </span>
           AI insight
@@ -832,7 +832,7 @@ function DetailOverlay({ d, open, onClose, onClosed, onApply, onToast, onRemoveC
               {d.history && (
                 <div className="pcx-block">
                   <p className="pcx-sec-title">
-                    <span className="pcx-sec-icon" style={{ '--icon-c': '#F97316' } as React.CSSProperties}>
+                    <span className="pcx-sec-icon icon-badge icon-badge--sm" style={{ '--icon-c': '#F97316' } as React.CSSProperties}>
                       <span className="material-symbols-outlined">history</span>
                     </span>
                     Related history

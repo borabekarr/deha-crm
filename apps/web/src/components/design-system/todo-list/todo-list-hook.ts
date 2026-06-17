@@ -197,6 +197,121 @@ export function launchConfetti(row: HTMLElement): void {
   }
 }
 
+// ── Celebration overlay (prize-sheet-style complete sequence) ────────────────
+//
+// Mounts a fixed full-viewport canvas + check-pop badge + "Done!" label over
+// the completed row for ~1.4 s, then tears itself down. Inspired by the
+// PrizeSheet claimed state: canvas confetti, pop keyframe, cascading reveal.
+
+function launchListCelebration(row: HTMLElement, list: HTMLElement): void {
+  // Host the celebration inside the list's own scroll viewport so confetti,
+  // the green watermark and the done badge stay WITHIN the task list (item 5)
+  // and never spill over the whole component.
+  const host = list
+  const prevPos = getComputedStyle(host).position
+  if (prevPos === 'static') host.style.position = 'relative'
+
+  const overlay = document.createElement('div')
+  overlay.className = 'td-cel-layer'
+  // Clip to the list box; sit above rows but below the popovers.
+  overlay.style.cssText =
+    'position:absolute;inset:0;pointer-events:none;z-index:6;overflow:hidden;border-radius:inherit;'
+  host.appendChild(overlay)
+
+  const w = host.clientWidth
+  const h = host.clientHeight
+  // Burst origin = center of the completed row relative to the list viewport.
+  const rRect = row.getBoundingClientRect()
+  const lRect = host.getBoundingClientRect()
+  const cx = rRect.left - lRect.left + rRect.width / 2
+  const cy = rRect.top - lRect.top + rRect.height / 2
+
+  // -- green watermark wash --
+  const wash = document.createElement('div')
+  wash.style.cssText =
+    'position:absolute;inset:0;border-radius:inherit;' +
+    'background:radial-gradient(ellipse 70% 55% at 50% 50%, rgba(16,185,129,0.20) 0%, transparent 70%);' +
+    'opacity:0;animation:td-cel-wash calc(1100ms * var(--anim-mult,1)) ease both;'
+  overlay.appendChild(wash)
+
+  // -- canvas confetti, clipped to the list box --
+  const canvas = document.createElement('canvas')
+  canvas.width = Math.max(1, w)
+  canvas.height = Math.max(1, h)
+  canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;'
+  overlay.appendChild(canvas)
+  const ctx2d = canvas.getContext('2d')
+  if (ctx2d) {
+    const particles: { x: number; y: number; vx: number; vy: number; color: string; size: number; shape: string; life: number }[] = []
+    const palette = ['#10B981','#34D399','#6EE7B7','#BBF7D0','#059669','#A7F3D0','#FDE68A','#FCA5A5','#93C5FD','#fff']
+    const count2 = 56
+    for (let i = 0; i < count2; i++) {
+      const angle = (i / count2) * Math.PI * 2 - Math.PI / 2 + (Math.random() - 0.5)
+      const speed = 2.2 + Math.random() * 3.6
+      particles.push({
+        x: cx, y: cy,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 2.4,
+        color: palette[i % palette.length],
+        size: 2.5 + Math.random() * 4,
+        shape: Math.random() > 0.5 ? 'circle' : 'rect',
+        life: 1,
+      })
+    }
+    const t0 = performance.now()
+    const dur = 1100
+    const tick = (now: number) => {
+      if (!overlay.isConnected) return
+      const elapsed = now - t0
+      if (elapsed > dur) return
+      ctx2d.clearRect(0, 0, canvas.width, canvas.height)
+      const progress = elapsed / dur
+      particles.forEach(p => {
+        p.x += p.vx; p.y += p.vy; p.vy += 0.16; p.life = 1 - progress * 1.1
+        ctx2d.globalAlpha = Math.max(0, p.life)
+        ctx2d.fillStyle = p.color
+        if (p.shape === 'circle') {
+          ctx2d.beginPath(); ctx2d.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2); ctx2d.fill()
+        } else {
+          ctx2d.save(); ctx2d.translate(p.x, p.y); ctx2d.rotate(elapsed * 0.004 + p.vx)
+          ctx2d.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6); ctx2d.restore()
+        }
+      })
+      ctx2d.globalAlpha = 1
+      requestAnimationFrame(tick)
+    }
+    requestAnimationFrame(tick)
+  }
+
+  // -- pop check badge + "Done!" label, centered in the list --
+  const badge = document.createElement('div')
+  badge.style.cssText =
+    'position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);' +
+    'display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;'
+  badge.innerHTML =
+    '<div style="' +
+      'width:56px;height:56px;border-radius:50%;' +
+      'background:linear-gradient(160deg,#34D399 0%,#10B981 100%);' +
+      'box-shadow:0 14px 34px -6px rgba(16,185,129,0.7),inset 0 1px 0 rgba(255,255,255,0.5);' +
+      'display:grid;place-items:center;' +
+      'animation:td-cel-pop calc(560ms * var(--anim-mult,1)) cubic-bezier(.16,1.5,.3,1) both;' +
+    '">' +
+      '<span class="material-icons" style="color:#fff;font-size:32px;text-shadow:0 1px 2px rgba(0,40,30,.3);">check</span>' +
+    '</div>' +
+    '<span style="' +
+      'font-family:var(--font-display,Montserrat,sans-serif);font-size:14px;font-weight:900;' +
+      'color:#10B981;letter-spacing:-0.01em;' +
+      'text-shadow:0 1px 8px rgba(16,185,129,0.5);' +
+      'opacity:0;transform:translateY(6px);' +
+      'animation:td-cel-label calc(420ms * var(--anim-mult,1)) ease calc(180ms * var(--anim-mult,1)) forwards;' +
+    '">Done!</span>'
+  overlay.appendChild(badge)
+  setTimeout(() => {
+    overlay.remove()
+    if (prevPos === 'static') host.style.position = ''
+  }, 1400)
+}
+
 // ── Complete / uncomplete / remove ───────────────────────────────────────────
 
 export function completeRow(row: HTMLElement, list: HTMLElement, _fromDrag?: boolean): void {
@@ -206,7 +321,9 @@ export function completeRow(row: HTMLElement, list: HTMLElement, _fromDrag?: boo
     if (e.animationName === 'done-glow') { row.classList.remove('glow'); row.removeEventListener('animationend', clr) }
   }
   row.addEventListener('animationend', clr)
-  launchConfetti(row)
+  // Scope the celebration to the task-list area (item 5) — confetti, green
+  // watermark + done badge stay INSIDE the list, never over the whole card.
+  launchListCelebration(row, list)
   updateStats(list)
 }
 
@@ -240,9 +357,70 @@ export function removeRow(row: HTMLElement, list: HTMLElement): void {
   setTimeout(() => { if (row.parentNode) row.parentNode.removeChild(row); updateStats(list) }, 820)
 }
 
-// ── Stats update ─────────────────────────────────────────────────────────────
+// ── Delete confirmation modal (blur-overlay + card-inner styled) ─────────────
+//
+// Shows a full-viewport backdrop-filter blur overlay with a card-inner styled
+// confirmation card. Cancel/Escape/overlay-click dismisses; Confirm triggers
+// the existing removeRow animation.
 
-const BASE_DONE = 2
+function showDeleteConfirm(row: HTMLElement, list: HTMLElement, statsFn: () => void): void {
+  // Prevent duplicate
+  if (document.querySelector('.td-del-overlay')) return
+
+  const overlay = document.createElement('div')
+  overlay.className = 'td-del-overlay'
+  overlay.setAttribute('role', 'dialog')
+  overlay.setAttribute('aria-modal', 'true')
+  overlay.setAttribute('aria-label', 'Delete task confirmation')
+  overlay.innerHTML =
+    '<div class="td-del-card card-inner">' +
+      '<div class="td-del-icon"><span class="material-icons">delete_forever</span></div>' +
+      '<p class="td-del-title">Delete this task?</p>' +
+      '<p class="td-del-body">This action cannot be undone.</p>' +
+      '<div class="td-del-actions">' +
+        '<button class="td-del-cancel btn-green">Cancel</button>' +
+        '<button class="td-del-confirm">Delete</button>' +
+      '</div>' +
+    '</div>'
+
+  document.body.appendChild(overlay)
+
+  // Animate in
+  requestAnimationFrame(() => { overlay.classList.add('td-del-visible') })
+
+  function dismiss() {
+    overlay.classList.remove('td-del-visible')
+    overlay.classList.add('td-del-leaving')
+    setTimeout(() => { if (overlay.parentNode) overlay.parentNode.removeChild(overlay) }, 260)
+  }
+
+  function confirm() {
+    dismiss()
+    // Small delay so modal exits before row animates out
+    setTimeout(() => { removeRow(row, list); statsFn() }, 120)
+  }
+
+  const cancelBtn = overlay.querySelector<HTMLButtonElement>('.td-del-cancel')
+  const confirmBtn = overlay.querySelector<HTMLButtonElement>('.td-del-confirm')
+
+  if (cancelBtn) cancelBtn.addEventListener('click', (e) => { e.stopPropagation(); dismiss() })
+  if (confirmBtn) confirmBtn.addEventListener('click', (e) => { e.stopPropagation(); confirm() })
+
+  // Overlay click = cancel (card click stops propagation)
+  overlay.addEventListener('click', dismiss)
+  const card = overlay.querySelector<HTMLElement>('.td-del-card')
+  if (card) card.addEventListener('click', (e) => e.stopPropagation())
+
+  // Escape = cancel
+  const onKey = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') { dismiss(); document.removeEventListener('keydown', onKey) }
+  }
+  document.addEventListener('keydown', onKey)
+  // Cleanup key listener when overlay is removed naturally
+  overlay.addEventListener('td-del-dismiss', () => document.removeEventListener('keydown', onKey))
+}
+
+// ── Stats update ─────────────────────────────────────────────────────────────
 
 export function updateStats(
   list: HTMLElement,
@@ -250,12 +428,14 @@ export function updateStats(
   statWait?: HTMLElement | null,
   refreshFiltersFn?: () => void,
 ): void {
+  // Completed/waiting counts are derived ENTIRELY from the rows of the
+  // currently-selected day (item 7) — no hardcoded base offset.
   let done = 0, wait = 0
   list.querySelectorAll('.task-row').forEach(r => {
     if (r.classList.contains('is-done')) done++; else wait++
   })
   list.classList.toggle('empty', list.children.length === 0)
-  if (statDone) tween(statDone, +(statDone.textContent || '0'), BASE_DONE + done)
+  if (statDone) tween(statDone, +(statDone.textContent || '0'), done)
   if (statWait) tween(statWait, +(statWait.textContent || '0'), wait)
   refreshFiltersFn?.()
 }
@@ -336,9 +516,9 @@ export function makeRow(
 
   row.innerHTML =
     '<div class="task-action-overlay">' +
-      '<button class="tao-btn tao-details" aria-label="Open task details"><span class="material-icons">open_in_full</span><span>Details</span></button>' +
-      '<button class="tao-btn tao-complete" aria-label="Complete task"><span class="material-icons">check</span><span>Done</span></button>' +
-      '<button class="tao-btn tao-del" aria-label="Delete task"><span class="material-icons">delete</span><span>Delete</span></button>' +
+      '<button class="tao-btn btn-green tao-details" aria-label="Open task details"><span class="material-icons">open_in_full</span><span>Details</span></button>' +
+      '<button class="tao-btn btn-green tao-complete" aria-label="Complete task"><span class="material-icons">check</span><span>Done</span></button>' +
+      '<button class="tao-btn btn-green tao-del" aria-label="Delete task"><span class="material-icons">delete</span><span>Delete</span></button>' +
     '</div>' +
     '<div class="task" style="--tag:' + p.color + ';--tag-bg:' + p.bg + ';">' +
       '<span class="t-ico"><span class="material-icons">' + escapeHtml(task.icon) + '</span></span>' +
@@ -484,15 +664,13 @@ export function wireRow(
   if (taoDel) taoDel.addEventListener('click', (e) => {
     e.stopPropagation()
     closeReveal()
-    removeRow(row, list)
-    statsFn()
+    showDeleteConfirm(row, list, statsFn)
   })
   if (taoDetails) taoDetails.addEventListener('click', (e) => {
     e.stopPropagation()
     closeReveal()
     const task = (row as HTMLDivElement & { _task: Task })._task
     if (onOpenTaskPopover) onOpenTaskPopover(task)
-    // TODO: step10 — openTaskPopover(task) wires the actual popover
   })
 
   // Click to reveal/hide action buttons (only when not a drag)

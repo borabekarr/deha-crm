@@ -1,0 +1,188 @@
+/* =========================================================================
+   DeleteButton — Deha Design System
+   Morphing confirm-delete button: idle → confirming (countdown) → done → idle.
+   Uses global .btn-green for the done state pill. All animation durations
+   wrapped in calc(... * var(--anim-mult, 1)) for the global slow-down knob.
+   ========================================================================= */
+
+/* ---- outer button ------------------------------------------------ */
+.db {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  padding: 0;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  color: #fff;
+  overflow: hidden;
+  transition:
+    width calc(260ms * var(--anim-mult, 1)) cubic-bezier(0.34, 1.1, 0.64, 1),
+    background-color calc(220ms * var(--anim-mult, 1)) ease,
+    box-shadow calc(220ms * var(--anim-mult, 1)) ease,
+    transform calc(120ms * var(--anim-mult, 1)) ease;
+}
+
+.db:active {
+  transform: scale(0.985);
+}
+
+/* ---- idle state -------------------------------------------------- */
+.db[data-state='idle'] {
+  background: #EF4444;
+  box-shadow:
+    0 12px 30px -10px rgba(239, 68, 68, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1.5px rgba(239, 68, 68, 0.3);
+}
+
+/* ---- confirming state -------------------------------------------- */
+.db[data-state='confirming'] {
+  background: #1E293B;
+  box-shadow:
+    0 8px 24px -10px rgba(15, 23, 42, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.28),
+    inset 0 0 0 1.5px rgba(255, 255, 255, 0.08);
+}
+
+/* ---- done state -------------------------------------------------- */
+.db[data-state='done'] {
+  background: #D1FAE5;
+  color: #059669;
+  box-shadow:
+    inset 0 0 0 1.5px rgba(16, 185, 129, 0.32),
+    0 6px 18px -10px rgba(16, 185, 129, 0.4);
+}
+
+html.dark .db[data-state='done'] {
+  background: rgba(16, 185, 129, 0.16);
+  color: #6EE7B7;
+  box-shadow: inset 0 0 0 1.5px rgba(16, 185, 129, 0.42);
+}
+
+/* ---- inner flex row --------------------------------------------- */
+.db-inner {
+  display: flex;
+  align-items: center;
+  width: max-content;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .db-inner {
+    animation: dbFade calc(260ms * var(--anim-mult, 1)) ease calc(40ms * var(--anim-mult, 1));
+  }
+}
+
+@keyframes dbFade {
+  from { opacity: 0.4; }
+  to   { opacity: 1; }
+}
+
+/* padding per state */
+.db[data-state='idle'] .db-inner        { padding: 0 22px; gap: 10px; }
+.db[data-state='confirming'] .db-inner  { padding: 0 8px 0 14px; gap: 10px; }
+.db[data-state='done'] .db-inner        { padding: 0 26px; gap: 11px; }
+
+/* ---- icon wrapper ------------------------------------------------ */
+.db-ic {
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+
+/* ---- undo circle (confirming) ------------------------------------ */
+.db-undo {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex: none;
+  background: #EF4444;
+  color: #fff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1.5px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* ---- stagger text ------------------------------------------------ */
+.db-text {
+  display: inline-flex;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.005em;
+  white-space: pre;
+}
+
+.db-ch {
+  display: inline-block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .db-ch {
+    animation: dbCh calc(400ms * var(--anim-mult, 1)) cubic-bezier(0.785, 0.135, 0.15, 0.86);
+  }
+}
+
+@keyframes dbCh {
+  from { opacity: 0; transform: translateY(13px) scale(0.4); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---- countdown badge --------------------------------------------- */
+.db-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 42px;
+  height: 38px;
+  padding: 0 9px;
+  border-radius: 9999px;
+  flex: none;
+  background: #EF4444;
+  color: #fff;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1.5px 0 rgba(0, 0, 0, 0.2);
+}
+
+.db-num {
+  display: block;
+  font-size: 16px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .db-num {
+    animation: dbRoll calc(280ms * var(--anim-mult, 1)) cubic-bezier(0.33, 1, 0.68, 1) calc(50ms * var(--anim-mult, 1));
+  }
+}
+
+@keyframes dbRoll {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---- dark mode overrides ----------------------------------------- */
+html.dark .db[data-state='idle'] {
+  background: #DC2626;
+  box-shadow:
+    0 12px 30px -10px rgba(220, 38, 38, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1.5px rgba(239, 68, 68, 0.2);
+}
+
+html.dark .db[data-state='confirming'] {
+  background: #0F172A;
+  box-shadow:
+    0 8px 24px -10px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.4),
+    inset 0 0 0 1.5px rgba(255, 255, 255, 0.06);
+}
