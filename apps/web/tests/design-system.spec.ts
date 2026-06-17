@@ -75,16 +75,8 @@ const SLUGS = [
   'cards',
   'controls',
   'fab',
-  'message-dropdown',
-  'delete-button',
-  'inline-edit',
   // Data
   'leads-table',
-  'adjust-timeframe',
-  'currency-converter',
-  'dynamic-calendar',
-  'github-calendar',
-  'stacked-list',
   // Metrics & Charts
   'chart',
   'metric-card',
@@ -94,22 +86,13 @@ const SLUGS = [
   'financial-health-card',
   // Sheets & Cards
   'model-selector',
-  'connect-modal',
-  'status-card',
-  // Workflow
-  'task-board',
-  'sprint-planner-core',
   // AI
   'ai-memory-card',
   'ai-caveat',
   'ai-message-box',
-  'ai-composer',
   // Misc
-  'delete-modal',
   'todo-list',
   'theme-editor',
-  'onboarding-completion',
-  'dynamic-island-reader',
 ] as const
 
 // ---------------------------------------------------------------------------
