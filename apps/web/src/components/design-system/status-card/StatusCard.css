@@ -1,26 +1,24 @@
 /* ===================== Stage / grey shell ===================== */
 .sc-stage {
   --tone: var(--semantic-warning); width: 340px; max-width: 100%;
-  padding: 10px;
-  background: var(--shell-bg, #D4DCE8);
-  border-radius: 28px;
-  box-shadow: 0 10px 30px rgba(15,23,42,0.12), 0 2px 8px rgba(15,23,42,0.06);
-  transition: transform calc(200ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.5,1);
-  will-change: transform;
+  padding: 8px;
+  background: var(--card-border, #CBD5E1);
+  border-radius: calc(var(--card-radius, 20px) + 8px);
+  box-shadow: 0 16px 56px rgba(15,23,42,.14), 0 3px 10px rgba(15,23,42,.07);
 }
-html.dark .sc-stage { background: #020617; border: 1px solid var(--card-border, #334155); box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04), 0 10px 30px rgba(0,0,0,.42), 0 2px 8px rgba(0,0,0,.3); }
-.sc-stage:hover { transform: scale(1.006); }
-.sc-stage.is-pressed { transform: scale(.985); transition-duration: calc(90ms * var(--anim-mult, 1)); }
+html.dark .sc-stage { background: #1A2535; box-shadow: 0 16px 56px rgba(0,0,0,.42), 0 3px 10px rgba(0,0,0,.3); }
 
 .sc-card {
   position: relative;
   background: var(--card-bg, #FFFFFF);
   border: 1px solid var(--card-border, #CBD5E1);
   border-radius: var(--card-radius, 20px);
-  box-shadow: inset 0 0 0 1px rgba(15,23,42,.04);
+  box-shadow: inset 0 0 0 1px rgba(15,23,42,.05);
   overflow: hidden;
 }
-html.dark .sc-card { background: var(--card-bg, #1E293B); border-color: var(--card-border, #334155); border-top-color: rgba(255,255,255,.22); box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04); }
+html.dark .sc-card { background: var(--card-bg, #1E293B); border-color: var(--card-border, #334155); box-shadow: inset 0 0 0 1px rgba(255,255,255,.06); }
+.sc-header:hover { transform: scale(1.006); }
+.sc-card.is-pressed .sc-header { transform: scale(.985); transition-duration: calc(90ms * var(--anim-mult, 1)); }
 
 /* ---- header ---- */
 .sc-header {
@@ -29,20 +27,24 @@ html.dark .sc-card { background: var(--card-bg, #1E293B); border-color: var(--ca
   width: 100%; padding: 13px 14px;
   background: transparent; border: none; cursor: pointer;
   font-family: inherit; text-align: left;
+  transition: transform calc(200ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.5,1);
 }
-/* .sc-icon uses .icon-badge recipe from _shared-feedback.css — only layout + tone overrides here */
 .sc-icon {
-  flex: none;
-  --icon-c: var(--tone);
-  color: #fff;
+  flex: none; width: 32px; height: 32px; border-radius: 9px;
+  display: grid; place-items: center; color: var(--sc-icon-color, #fff);
+  background-color: var(--icon-c, var(--tone));
+  background-image:
+    linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
+  background-size: 14px 14px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.55),
+    inset 0 -2px 0 rgba(15,23,42,.20),
+    inset 0 0 0 1px rgba(15,23,42,.12);
 }
-/* warning/yellow variant: bright fill, black icon */
-.sc-icon.sc-icon--warning { --icon-c: #FDE047; color: #000; }
-/* SVG icons inside icon-badge--lg — match .material-icons --lg canonical 20px size */
-.sc-icon svg {
-  width: 20px; height: 20px;
-  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
-}
+/* warning/yellow: black icon (bg already #FDE047 via --tone or --icon-c) */
+.sc-icon.sc-icon--warning { --sc-icon-color: #000; }
+.sc-icon svg { filter: none; }
 .sc-title { flex: 1; min-width: 0; font-size: 14px; font-weight: var(--weight-bold); letter-spacing: -.02em; color: var(--fg1); }
 .sc-chev {
   flex: none; display: grid; place-items: center; color: var(--slate-400);
