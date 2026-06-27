@@ -19,14 +19,15 @@ export const METRICS: MetricDef[] = [
 export interface StageDef {
   name: string
   color: string
+  icon: string
 }
 
 export const STAGES: StageDef[] = [
-  { name: 'Prospect',      color: '#EF4444' },
-  { name: 'Qualification', color: '#F97316' },
-  { name: 'Onboarding',   color: '#EAB308' },
-  { name: 'Moderate',     color: '#84CC16' },
-  { name: 'Urgent',       color: '#10B981' },
+  { name: 'Prospect',      color: '#EF4444', icon: 'person_search'   },
+  { name: 'Qualification', color: '#F97316', icon: 'checklist'       },
+  { name: 'Onboarding',   color: '#EAB308', icon: 'handshake'       },
+  { name: 'Moderate',     color: '#84CC16', icon: 'trending_up'     },
+  { name: 'Urgent',       color: '#10B981', icon: 'bolt'            },
 ]
 
 export const N_BARS = 52
@@ -142,44 +143,63 @@ export function drawSpark(pathEl: SVGPathElement, m: MetricDef): void {
 }
 
 /**
- * Plays the entrance sequence for all bars as a clean left-to-right opacity reveal.
- * Each bar staggered by STAGGER_MS from the previous; fade duration is FADE_MS per bar.
- * Result: smooth ordered L→R opacity wipe, no sweep overlay.
+ * Plays the entrance/replay sequence for all bars as a left-to-right wave morph.
+ *
+ * ROOT CAUSE of the "collapse" bug (fixed here):
+ *   The previous impl snapped ALL 52 bars to scaleY(0.4) simultaneously with
+ *   transition:none, then staggered only the spring-back. The global snap caused
+ *   the entire bar group to visually collapse to 40% height before any animation
+ *   started — exactly the compact/zero effect the user reported.
+ *
+ * FIX: each bar runs its own independent squash → spring cycle, staggered per-bar.
+ *   At t = STAGGER_MS * i, bar[i] starts squashing (150ms ease-in).
+ *   At t = STAGGER_MS * i + SQUASH_MS, bar[i] springs back (340ms spring).
+ *   No global state change: at any moment most bars are at full height; only
+ *   the 1-2 bars currently in their squash phase are below full height.
+ *   The bar group NEVER collapses — only a travelling dimple passes through.
+ *
  * Called from event handler or callback ref. No useEffect.
  */
 export function playBars(barsEl: HTMLElement, _sweepEl: HTMLElement): void {
   const bars = barsEl.children as HTMLCollectionOf<HTMLElement>
-  const STAGGER_MS = 25 // ms between each successive bar starting
-  const FADE_MS    = 40 // per-bar fade duration
+  const STAGGER_MS = 18   // ms between each successive bar starting its cycle
+  const SQUASH_MS  = 120  // squash-down duration per bar (ease-in)
+  const SPRING_MS  = 320  // spring-back duration per bar (overshoot spring)
 
   // Read --anim-mult from the root so timing respects the slow-down toggle
   const animMult = parseFloat(
     getComputedStyle(document.documentElement).getPropertyValue('--anim-mult').trim() || '1'
   ) || 1
 
-  // Hide all bars instantly (no transition)
-  for (let i = 0; i < bars.length; i++) {
-    bars[i].style.transition = 'none'
-    bars[i].classList.add('hidden')
-  }
-  void barsEl.getBoundingClientRect()
+  const squashDur = Math.round(SQUASH_MS * animMult)
+  const springDur = Math.round(SPRING_MS * animMult)
 
-  // Reveal each bar left-to-right: bar i starts at STAGGER_MS * i
   for (let i = 0; i < bars.length; i++) {
-    const delay = Math.round(STAGGER_MS * i * animMult)
-    const dur   = Math.round(FADE_MS * animMult)
+    const startDelay = Math.round(STAGGER_MS * i * animMult)
+
+    // Phase 1: squash this single bar down
     setTimeout(() => {
-      bars[i].style.transition = `opacity ${dur}ms linear`
-      bars[i].classList.remove('hidden')
-    }, delay)
+      bars[i].style.transition = `transform ${squashDur}ms cubic-bezier(.4,0,1,1), opacity ${squashDur}ms ease-in`
+      bars[i].style.transform = 'scaleY(0.45)'
+      bars[i].style.opacity = '0.40'
+    }, startDelay)
+
+    // Phase 2: spring this bar back to full height
+    setTimeout(() => {
+      bars[i].style.transition = `transform ${springDur}ms cubic-bezier(.34,1.56,.64,1), opacity ${Math.round(springDur * 0.5)}ms ease-out`
+      bars[i].style.transform = 'scaleY(1)'
+      bars[i].style.opacity = '1'
+    }, startDelay + squashDur)
   }
 
-  // Hard-finalize: clear inline transitions after all bars finish
-  const total = Math.round(STAGGER_MS * bars.length * animMult) + Math.round(FADE_MS * animMult)
+  // Hard-finalize: clear all inline styles after last bar fully springs back
+  const lastBarStart   = Math.round(STAGGER_MS * (bars.length - 1) * animMult)
+  const totalDur       = lastBarStart + squashDur + springDur
   setTimeout(() => {
     for (let i = 0; i < bars.length; i++) {
       bars[i].style.transition = ''
-      bars[i].classList.remove('hidden')
+      bars[i].style.transform = ''
+      bars[i].style.opacity = ''
     }
-  }, total + 100)
+  }, totalDur + 60)
 }

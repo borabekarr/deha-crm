@@ -95,7 +95,10 @@ export default function Fab() {
                   {/* Header row: title + close aligned together, no dead space */}
                   <div className="fab-menu-hd">
                     <div className="fab-head">
-                      <div className="fab-head-title">Quick create</div>
+                      <div className="fab-head-title">
+                        <span className="material-symbols-outlined fab-head-icon">add_circle</span>
+                        Quick create
+                      </div>
                       <div className="fab-head-sub">Add something to your workspace</div>
                     </div>
                     <button

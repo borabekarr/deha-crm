@@ -5,6 +5,7 @@
 */
 
 :root {
+  --dur: calc(540ms * var(--anim-mult, 1));
   --cc-shell: #D4DCE8;
   --cc-panel: #FFFFFF;
   --cc-slot: #F8FAFC;
@@ -36,29 +37,48 @@ html.dark {
   --cc-inset-hi: rgba(255, 255, 255, 0.06);
 }
 
-/* Outer gray shell + inner white panel */
+
+/* Grey outer wrapper — canonical shell (#D4DCE8 light / #020617 dark) */
 .cc-outer {
-  background: var(--cc-shell);
-  border-radius: var(--card-radius, 20px);
-  padding: 4px;
-  box-shadow: 0 16px 56px rgba(15, 23, 42, 0.14), 0 3px 10px rgba(15, 23, 42, 0.07);
+  background: var(--shell-bg, #D4DCE8);
+  border-radius: 28px;
+  padding: 10px;
+  display: inline-block;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12), 0 2px 8px rgba(15, 23, 42, 0.06);
 }
 
 html.dark .cc-outer {
-  box-shadow: 0 16px 56px rgba(0, 0, 0, 0.5), 0 3px 10px rgba(0, 0, 0, 0.3);
+  background: #020617;
+  border: 1px solid var(--card-border, #334155);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, .05), inset 0 0 0 1px rgba(255, 255, 255, .04);
+}
+
+/* Footer hint — replaces the removed wrapper div */
+.cc-footer-hint {
+  display: block;
+  text-align: center;
+  padding: 12px 8px 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--cc-fg3);
+  letter-spacing: 0;
 }
 
 .cc-panel {
-  background: var(--cc-panel);
-  border-radius: 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
   overflow: hidden;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1);
-  width: 380px;
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.04);
+  width: 475px;
   max-width: calc(100vw - 80px);
 }
 
 html.dark .cc-panel {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05), inset 0 0 0 1px rgba(255, 255, 255, .04);
+  border-top-color: rgba(255, 255, 255, 0.22);
 }
 
 /* Inner recessed slate panel */
@@ -66,7 +86,7 @@ html.dark .cc-panel {
   background: var(--cc-slot);
   border: 1px solid var(--cc-slot-border);
   border-radius: 18px;
-  padding: 18px 18px 18px;
+  padding: 14px 14px 14px;
   box-shadow:
     inset 0 1px 2px rgba(15, 23, 42, 0.04),
     inset 0 -1px 0 rgba(15, 23, 42, 0.02);
@@ -150,71 +170,6 @@ html.dark .cc-panel {
   animation: flagMorphIn 540ms cubic-bezier(.22, 1, .36, 1) forwards;
 }
 
-/* Amount input */
-.cc-amount-input {
-  width: 100%;
-  background: transparent;
-  border: none;
-  outline: none;
-  text-align: right;
-  font-family: 'Montserrat';
-  font-weight: 900;
-  font-size: 28px;
-  color: var(--cc-fg1);
-  letter-spacing: 0.04em;
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-  padding: 0;
-  -moz-appearance: textfield;
-  caret-color: #10B981;
-}
-
-.cc-amount-input::-webkit-outer-spin-button,
-.cc-amount-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-/* Top amount field rendered as an editable text bubble (signals clickable input).
-   Only the TOP (You Send) slot uses this; the bottom stays plain text. */
-.cc-amount-bubble {
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-end;
-  min-width: 140px;
-  padding: 7px 12px;
-  cursor: text;
-  font-family: inherit;
-  font-weight: 900;
-  font-size: 28px;
-  letter-spacing: 0.04em;
-  line-height: 1;
-  color: var(--cc-fg1);
-  text-align: right;
-  background: var(--cc-panel);
-  border: 1px solid var(--cc-border);
-  border-radius: 12px;
-  box-shadow:
-    inset 0 1px 2px rgba(15, 23, 42, 0.06),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.6);
-  transition:
-    border-color calc(150ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
-    box-shadow calc(150ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
-}
-
-.cc-amount-bubble:hover {
-  border-color: #10B981;
-  box-shadow:
-    inset 0 1px 2px rgba(15, 23, 42, 0.06),
-    0 0 0 3px rgba(16, 185, 129, 0.12);
-}
-
-html.dark .cc-amount-bubble {
-  background: var(--cc-slot);
-  box-shadow:
-    inset 0 1px 2px rgba(0, 0, 0, 0.2),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.04);
-}
 
 /* Rolling digit */
 .digit-wrap {
@@ -224,6 +179,7 @@ html.dark .cc-amount-bubble {
   font-weight: 900;
   letter-spacing: 0.04em;
   font-variant-numeric: tabular-nums;
+  padding-right: 2px;
 }
 
 .digit-col {
@@ -258,6 +214,11 @@ html.dark .cc-amount-bubble {
   background: var(--cc-shell);
 }
 
+html.dark .cc-swap-shell {
+  border: 1px solid #334155;
+  border-top-color: rgba(255, 255, 255, .22);
+}
+
 /* Swap button */
 .cc-swap {
   width: 44px;
@@ -286,14 +247,13 @@ html.dark .cc-amount-bubble {
     0 8px 22px -6px rgba(16, 185, 129, 0.30);
 }
 
-.cc-swap.spinning {
-  animation: spinSwap 520ms cubic-bezier(.5, 0, .3, 1);
+.cc-swap:active {
+  transform: scale(0.88) !important;
 }
 
-@keyframes spinSwap {
-  0% { transform: rotate(0deg) scale(1); }
-  50% { transform: rotate(180deg) scale(0.92); }
-  100% { transform: rotate(360deg) scale(1); }
+/* Icon spin driven by inline transform+transition on .cc-swap-icon (state-based, cumulative) */
+.cc-swap-icon {
+  display: contents;
 }
 
 /* Live dot pulse */
@@ -317,7 +277,7 @@ html.dark .cc-amount-bubble {
   background: var(--cc-slot);
   border: 1px solid var(--cc-slot-border);
   border-radius: 18px;
-  padding: 18px 18px 18px;
+  padding: 14px 14px 14px;
   box-shadow:
     inset 0 1px 2px rgba(15, 23, 42, 0.04),
     inset 0 -1px 0 rgba(15, 23, 42, 0.02);
@@ -354,19 +314,23 @@ html.dark .cc-slot-top {
   100% { opacity: 1; transform: scale(1); filter: blur(0px); }
 }
 
-/* Grey outer shell — the CENTERED, positioned element. Mirrors .cc-outer
-   (inner-card look: grey external bg + thin padding). */
+/* Grey outer shell — canonical shell (#D4DCE8 light / #020617 dark).
+   Matches .cc-outer shell weight for visual consistency. */
 .cc-pop-shell {
-  background: var(--cc-shell);
-  border-radius: calc(var(--card-radius, 20px) + 4px);
-  padding: 4px;
+  background: var(--shell-bg, #D4DCE8);
+  border-radius: 28px;
+  padding: 10px;
   box-shadow: 0 30px 60px -20px rgba(15, 23, 42, 0.25), 0 12px 24px -12px rgba(15, 23, 42, 0.18);
   transform-origin: center center;
   animation: popMorphIn calc(240ms * var(--anim-mult, 1)) cubic-bezier(.34, 1.3, .5, 1) both;
 }
 
 html.dark .cc-pop-shell {
-  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.6), 0 12px 24px -12px rgba(0, 0, 0, 0.4);
+  background: #020617;
+  border: 1px solid var(--card-border, #334155);
+  box-shadow:
+    0 30px 60px -20px rgba(0, 0, 0, 0.6), 0 12px 24px -12px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, .05), inset 0 0 0 1px rgba(255, 255, 255, .04);
 }
 
 .cc-pop {
@@ -380,6 +344,7 @@ html.dark .cc-pop-shell {
 .cc-pop-list {
   max-height: 320px;
   overflow-y: auto;
+  overscroll-behavior: contain;
   /* Item 8: progressive blur — top + bottom fade mask on the scroll surface */
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%);
   mask-image: linear-gradient(to bottom, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%);

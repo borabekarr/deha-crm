@@ -1,33 +1,104 @@
   body { background: #F8FAFC; font-family: 'Montserrat', sans-serif; }
   .ms-card {
     display: flex; flex-direction: column; align-items: center;
-    justify-content: flex-start; gap: 14px;
+    justify-content: flex-start;
     padding: 32px 24px;
     background: #F8FAFC;
     background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.07) 0%, #F8FAFC 55%);
   }
 
-  /* ── Trigger pill ── */
-  .ms-trigger {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 10px 18px;
-    background: rgba(255,255,255,0.92); backdrop-filter: blur(20px);
-    border: 1px solid #CBD5E1;
-    border-radius: 9999px;
-    cursor: pointer; user-select: none;
+  /* ── Single morphing shell ──────────────────────────────────────────────── */
+  /*
+   * Replaces the old .ms-trigger + .ms-clip > .ms-outer two-element structure.
+   * Closed: scaleY(0.12) scaleX(0.65) — pill footprint (transform-origin: top center).
+   * Open:   scaleY(1) scaleX(1) — full card.
+   * NO translate/slide — scale only, matching md-panel-shell open pattern.
+   *
+   * Close easing:  cubic-bezier(.22,1,.36,1)  — smooth ease-out compact
+   * Open easing:   cubic-bezier(.55,1.35,.35,1) — spring bounce (overshoot past 1)
+   */
+  .ms-shell {
+    --ms-dur: calc(560ms * var(--anim-mult, 1));
+
+    position: relative;
+    display: flex; flex-direction: column; align-items: stretch;
+    gap: 8px;
+
+    /* Gray outer shell styling (replaces .ms-outer) */
+    background: #D4DCE8;
+    border-radius: 30px;
+    padding: 10px;
+    box-shadow: 0 16px 56px rgba(15,23,42,0.13), 0 3px 10px rgba(15,23,42,0.06);
+
+    /* ① CLOSED state — pill footprint, invisible but CLICKABLE (full bounding box) */
+    transform-origin: top center;
+    transform: scaleY(0.12) scaleX(0.65);
+    opacity: 0;
+    pointer-events: auto;   /* keep auto so the bounding box is a click target to reopen */
+    cursor: pointer;
+
+    /* ③ Close easing: smooth ease-out, no bounce */
+    transition:
+      transform var(--ms-dur) cubic-bezier(.22, 1, .36, 1),
+      opacity calc(200ms * var(--anim-mult, 1)) ease;
+  }
+
+  /* ② OPEN state — full card, spring bounce */
+  .ms-shell.open {
+    transform: scaleY(1) scaleX(1);
+    opacity: 1;
+    pointer-events: auto;
+    cursor: default;
+
+    /* ② Open easing: spring expand + bounce (cubic-bezier(.55,1.35,.35,1)) */
+    transition:
+      transform var(--ms-dur) cubic-bezier(.55, 1.35, .35, 1),
+      opacity calc(180ms * var(--anim-mult, 1)) ease;
+  }
+
+  /* ── Close button ── top-right corner of card, absolutely positioned */
+  .ms-close-btn {
+    position: absolute;
+    top: 12px; right: 12px;
+    display: flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px;
+    background: rgba(15,23,42,0.06);
+    border: 1px solid rgba(15,23,42,0.08);
+    border-radius: 50%;
+    cursor: pointer;
+    color: #64748B;
+    padding: 0;
+    transition: background calc(150ms * var(--anim-mult, 1)), color calc(150ms * var(--anim-mult, 1));
+    /* ① Button click animation */
+    transform: scale(1);
+  }
+  .ms-close-btn:hover {
+    background: rgba(15,23,42,0.10);
+    color: #0F172A;
+  }
+  .ms-close-btn:active { transform: scale(0.92); }
+  .ms-close-btn .material-icons { font-size: 16px; }
+
+  /* ── Header (trigger content lives here) ── */
+  .ms-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px;
+    background: var(--card-bg, rgba(255,255,255,0.92));
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border, #CBD5E1);
+    border-radius: 20px;
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,1),
       inset 0 -2px 4px rgba(15,23,42,0.06),
-      inset 0 0 0 1px rgba(15,23,42,0.04),
-      0 2px 8px rgba(15,23,42,0.07);
-    transition: box-shadow calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+      inset 0 0 0 1px rgba(15,23,42,0.04);
     font-family: 'Montserrat';
+    /* ① Click animation on the header when closed */
+    transition: box-shadow calc(150ms * var(--anim-mult, 1));
+    /* reserve space for close button when open */
+    padding-right: 46px;
   }
-  .ms-trigger:hover { box-shadow: inset 0 1px 0 #fff, inset 0 -2px 4px rgba(15,23,42,0.08), 0 4px 16px rgba(15,23,42,0.10); }
-  .ms-trigger:active { transform: scale(0.97); }
-  /* Colorful mini icon tag in trigger — extends .icon-badge.icon-badge--sm.
-     Local overrides: radial 0.18 (shared 0.20), 5px grid (shared 7px),
-     transition on background-color, and no drop-shadow filter on the icon. */
+
+  /* Colorful mini icon tag in header — extends .icon-badge.icon-badge--sm */
   .ms-t-icon-tag {
     background-image:
       radial-gradient(ellipse at top right, rgba(255,255,255,0.18) 0%, transparent 55%),
@@ -40,47 +111,30 @@
   .ms-t-icon-tag .material-symbols-outlined {
     filter: none;
   }
-  .ms-t-model   { font-size: 14px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em; }
-  .ms-t-sep     { width: 1px; height: 16px; background: #E2E8F0; }
+
+  /* ④ Text morph: label fades + scales in on mount (triggered by key prop change) */
+  .ms-t-model {
+    font-size: 14px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em;
+    animation: msLabelIn calc(280ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  }
+  @keyframes msLabelIn {
+    from { opacity: 0; transform: scale(0.82) translateY(3px); filter: blur(2px); }
+    to   { opacity: 1; transform: scale(1)    translateY(0);   filter: blur(0); }
+  }
+
+  .ms-t-sep     { width: 1px; height: 16px; background: #E2E8F0; flex-shrink: 0; }
   .ms-t-label   { font-size: 13px; font-weight: 600; color: #94A3B8; }
-  .ms-t-chevron { font-size: 18px; color: #94A3B8; transition: transform calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
-  .ms-trigger.open .ms-t-chevron { transform: rotate(180deg); }
-
-  /* ── Panel open bounce (dynamic-island style) ── */
-  /* Mirrors WorkflowPublish wp-popIn: compress scaleX+scaleY then overshoot, anchored top center */
-  @keyframes msOpen {
-    0%   { opacity: 0; transform: scaleX(0.72) scaleY(0.56); }
-    35%  { opacity: 1; transform: scaleX(1.02) scaleY(1.015); }
-    55%  { transform: scaleX(0.995) scaleY(0.997); }
-    75%  { transform: scaleX(1.005) scaleY(1.002); }
-    100% { opacity: 1; transform: scaleX(1) scaleY(1); }
-  }
-  /* Exit = reverse of msOpen: collapse back up into the trigger, smooth ease-in, no bounce */
-  @keyframes msClose {
-    from { opacity: 1; transform: scaleX(1) scaleY(1); }
-    to   { opacity: 0; transform: scaleX(0.72) scaleY(0.56); }
+  .ms-t-chevron {
+    font-size: 18px; color: #94A3B8; margin-left: auto; flex-shrink: 0;
+    transition: transform calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
   }
 
-  /* ── Gray outer shell ── */
-  .ms-outer {
-    background: #D4DCE8;
-    border-radius: 30px;
-    padding: 10px;
-    box-shadow: 0 16px 56px rgba(15,23,42,0.13), 0 3px 10px rgba(15,23,42,0.06);
-    transform-origin: top center;
-  }
-  .ms-outer.open {
-    animation: msOpen calc(380ms * var(--anim-mult, 1)) cubic-bezier(.34,1.12,.64,1) both;
-  }
-  /* Closed-state class is prefixed (ms-closing) to avoid Tailwind's `.hidden`
-     utility (display:none !important), which would remove the element and stop
-     the exit animation from ever playing. */
-  .ms-outer.ms-closing {
-    /* EQUAL duration to msOpen (380ms). Exit easing moves immediately
-       (ease-out, mirrors the entrance's instant response) so the close
-       reads as fast as the open instead of lingering at full size. */
-    animation: msClose calc(380ms * var(--anim-mult, 1)) cubic-bezier(.4, 0, .2, 1) forwards;
-    pointer-events: none;
+  /* ── Horizontal divider between header and panel ── */
+  .ms-divider {
+    height: 1px;
+    background: rgba(15,23,42,0.10);
+    border-radius: 1px;
+    margin: 0 2px;
   }
 
   /* ── White inner panel ── */
@@ -114,6 +168,7 @@
   }
   .ms-row:last-of-type::after { display: none; }
   .ms-row:hover { background: #F8FAFC; }
+  /* ① Row click animation */
   .ms-row:active { transform: scale(0.985); background: #F1F5F9; }
   /* Selected: black bg, white text */
   .ms-row.sel {
@@ -127,8 +182,6 @@
   .ms-row:has(+ .ms-row.sel)::after { display: none; }
 
   /* ── Sliding selection indicator (bounce, behind rows) ── */
-  /* Positioned via CSS transform using --sel-idx (set on .ms-panel) and --ms-row-h.
-     No JS measurement — uniform row height means index × height = exact offset. */
   .ms-sel-indicator {
     position: absolute;
     top: 0; left: 0; right: 0;
@@ -137,15 +190,12 @@
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -2px 0 rgba(0,0,0,0.25);
     pointer-events: none;
     z-index: 0;
-    /* Overshoot bounce on slide; cubic-bezier(.34,1.3,.64,1) matches seg-pill */
     transform: translateY(calc(var(--sel-idx, 0) * var(--ms-row-h, 62px)));
     transition: transform calc(300ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.64,1);
   }
 
   /* Make rows sit above indicator */
-  .ms-row {
-    z-index: 1;
-  }
+  .ms-row { z-index: 1; }
 
   /* With indicator active, remove background from .sel row (indicator provides it) */
   .ms-panel:has(.ms-sel-indicator) .ms-row.sel {
@@ -160,6 +210,38 @@
   html.dark .ms-card {
     background: #0F172A;
     background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.07) 0%, #0F172A 55%);
+  }
+
+  /* ── Dark mode: outer shell (ms-shell takes role of old ms-outer) ── */
+  html.dark .ms-shell {
+    background: #020617;
+    border: 1px solid var(--card-border, #334155);
+    box-shadow:
+      0 16px 56px rgba(0,0,0,0.5), 0 3px 10px rgba(0,0,0,0.3),
+      inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
+  }
+
+  /* ── Dark mode: header ── */
+  html.dark .ms-header {
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.05),
+      inset 0 -2px 4px rgba(0,0,0,0.25);
+  }
+
+  /* ── Dark mode: divider ── */
+  html.dark .ms-divider {
+    background: rgba(255,255,255,0.07);
+  }
+
+  /* ── Dark mode: close button ── */
+  html.dark .ms-close-btn {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.08);
+    color: #94A3B8;
+  }
+  html.dark .ms-close-btn:hover {
+    background: rgba(255,255,255,0.12);
+    color: #F1F5F9;
   }
 
   /* ── Dark mode: selected row uses white/light fill ── */
@@ -180,8 +262,6 @@
   }
 
   /* ── Icon square (Deha semantic-pill style) ── */
-  /* Extends .icon-badge.icon-badge--lg from _shared-feedback.css.
-     Only local override: radial highlight alpha 0.18 (shared is 0.20). */
   .ms-icon {
     background-image:
       radial-gradient(ellipse at top right, rgba(255,255,255,0.18) 0%, transparent 55%),
@@ -201,7 +281,7 @@
     flex-shrink: 0;
     display: flex; align-items: center; justify-content: flex-end;
     height: 24px;
-    min-width: 152px; /* fixed width so all rows align on the same right edge */
+    min-width: 152px;
   }
 
   /* Check */
@@ -214,7 +294,7 @@
     -webkit-text-stroke: 1px #fff;
   }
 
-  /* Stats — visible by default on all rows; animation handles selected state */
+  /* Stats — visible by default on all rows */
   .ms-stats {
     display: flex;
     align-items: center;
@@ -223,7 +303,7 @@
   .ms-stat {
     display: inline-flex; align-items: center; gap: 4px;
     font-size: 11px; font-weight: 800;
-    color: #64748B;            /* slate for white-bg non-selected rows */
+    color: #64748B;
     letter-spacing: -0.01em;
     line-height: 1;
   }
@@ -235,13 +315,13 @@
   .ms-row.sel .ms-stat { color: rgba(255,255,255,0.95); }
   .ms-row.sel .ms-stat .material-icons { color: rgba(255,255,255,0.65); }
 
-  /* Check hidden for non-selected rows (no layout space reserved) */
+  /* Check hidden for non-selected rows */
   .ms-row:not(.sel) .ms-check { display: none; }
 
-  /* Selected without stats (Auto): just show check, no animation */
+  /* Selected without stats (Auto): just show check */
   .ms-row.sel .ms-check { opacity: 1; transform: scale(1); }
 
-  /* Selected WITH stats: remove display:flex override (already flex by default), animate both */
+  /* Selected WITH stats: animate check/stats morph */
   .ms-row.sel.has-stats .ms-check {
     position: absolute; right: 0; top: 50%;
     transform: translateY(-50%) scale(1);

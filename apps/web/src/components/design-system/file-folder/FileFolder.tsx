@@ -29,14 +29,34 @@ interface FolderIconProps {
   isTapped: boolean
   folderRef: React.RefObject<HTMLDivElement | null>
   onClick: () => void
+  menuOpen: boolean
+  onDotsClick: () => void
+  onMenuAction: (action: string) => void
 }
 
-function FolderIcon({ id, hot, isPlaying, isTapped, folderRef, onClick }: FolderIconProps) {
+const FOLDER_MENU_ACTIONS: Array<{ id: string; label: string; icon: string; danger?: boolean }> = [
+  { id: 'rename', label: 'Rename', icon: 'edit' },
+  { id: 'share', label: 'Share', icon: 'ios_share' },
+  { id: 'delete', label: 'Delete', icon: 'delete', danger: true },
+]
+
+function FolderIcon({
+  id,
+  hot,
+  isPlaying,
+  isTapped,
+  folderRef,
+  onClick,
+  menuOpen,
+  onDotsClick,
+  onMenuAction,
+}: FolderIconProps) {
   const classes = [
     'folder',
     hot ? 'hot' : '',
     isPlaying ? 'play' : '',
     isTapped ? 'tap' : '',
+    menuOpen ? 'menu-open' : '',
   ]
     .filter(Boolean)
     .join(' ')
@@ -65,8 +85,40 @@ function FolderIcon({ id, hot, isPlaying, isTapped, folderRef, onClick }: Folder
           Work files
         </div>
         <div className="ff-sub">Notes &amp; More</div>
-        <div className="ff-dots">
+        <button
+          type="button"
+          className={`ff-dots${menuOpen ? ' open' : ''}`}
+          aria-label="Folder actions"
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+          onClick={(e) => {
+            e.stopPropagation()
+            onDotsClick()
+          }}
+        >
           <i /><i /><i />
+        </button>
+        <div
+          className={`ff-menu${menuOpen ? ' show' : ''}`}
+          role="menu"
+          aria-label="Folder actions"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {FOLDER_MENU_ACTIONS.map((a) => (
+            <button
+              key={a.id}
+              type="button"
+              role="menuitem"
+              className={`ff-menu-item${a.danger ? ' ff-menu-item--danger' : ''}`}
+              onClick={(e) => {
+                e.stopPropagation()
+                onMenuAction(a.id)
+              }}
+            >
+              <span className="material-symbols-outlined">{a.icon}</span>
+              {a.label}
+            </button>
+          ))}
         </div>
         <div className="ff-count">
           <span className="material-symbols-outlined">file_copy</span>
@@ -97,9 +149,9 @@ function extColorClass(ext: string): string {
 }
 
 /* ── File row / grid cell ─────────────────────────────────────────────────── */
-function FileRow({ file }: { file: (typeof FILES)[number] }) {
+function FileRow({ file, onClick }: { file: (typeof FILES)[number]; onClick: () => void }) {
   return (
-    <div className="ff-file">
+    <div className="ff-file" onClick={onClick}>
       <span className={`ff-file-ic ${extColorClass(file.ext)}`}>{file.ext}</span>
       <span className="ff-file-meta">
         <span className="ff-file-name">{file.name}</span>
@@ -115,14 +167,19 @@ export default function FileFolder() {
     blueState,
     redState,
     popState,
+    menuState,
     cardCallbackRef,
     blueFolderRef,
     redFolderRef,
     popRef,
     playAll,
     closePop,
+    handleFileClick,
     handleBlueClick,
     handleRedClick,
+    toggleMenu,
+    closeMenu,
+    handleMenuAction,
   } = useFileFolder()
 
   return (
@@ -136,6 +193,9 @@ export default function FileFolder() {
             isTapped={blueState.isTapped}
             folderRef={blueFolderRef}
             onClick={handleBlueClick}
+            menuOpen={menuState.isOpen && menuState.folderId === 'ff-blue'}
+            onDotsClick={() => toggleMenu('ff-blue')}
+            onMenuAction={handleMenuAction}
           />
         </div>
 
@@ -148,6 +208,9 @@ export default function FileFolder() {
             isTapped={redState.isTapped}
             folderRef={redFolderRef}
             onClick={handleRedClick}
+            menuOpen={menuState.isOpen && menuState.folderId === 'ff-red'}
+            onDotsClick={() => toggleMenu('ff-red')}
+            onMenuAction={handleMenuAction}
           />
         </div>
       </div>
@@ -165,9 +228,14 @@ export default function FileFolder() {
         onClick={closePop}
       />
 
+      {/* Invisible click-out catcher for the 3-dots dropdown */}
+      {menuState.isOpen && (
+        <div className="ff-menu-catch" onClick={closeMenu} aria-hidden="true" />
+      )}
+
       {/* File list popover — role="dialog" div so opacity/scale fade works (native <dialog> is display:none when closed) */}
       <div
-        className={`ff-pop-shell${popState.isOpen ? ' show' : ''}`}
+        className={`ff-pop-outer${popState.isOpen ? ' show' : ''}`}
         ref={popRef}
         onClick={(e) => e.stopPropagation()}
       >
@@ -196,7 +264,7 @@ export default function FileFolder() {
 
           <div className="ff-pop-body">
             {FILES.map((f) => (
-              <FileRow key={f.name} file={f} />
+              <FileRow key={f.name} file={f} onClick={handleFileClick} />
             ))}
           </div>
         </div>

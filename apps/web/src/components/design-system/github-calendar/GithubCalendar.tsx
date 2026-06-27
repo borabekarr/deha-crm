@@ -1,9 +1,11 @@
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
+import '../../../../design-system/preview/_shared-feedback.css'
 import './GithubCalendar.css'
 
 import { useMemo, useState } from 'react'
 import { gcCardRef, cleanupGcCard } from './github-calendar-hook'
+import { iconClass } from '../../../lib/iconClass'
 
 /* =========================================================================
    GitHub Calendar — Deha Design System
@@ -103,21 +105,6 @@ function buildData(): { weeks: DayCell[][]; total: number } {
   return { weeks, total }
 }
 
-function longestStreak(weeks: DayCell[][]): number {
-  let best = 0
-  let cur = 0
-  for (const week of weeks) {
-    for (const d of week) {
-      if (d && d.count > 0) {
-        cur++
-        best = Math.max(best, cur)
-      } else {
-        cur = 0
-      }
-    }
-  }
-  return best
-}
 
 interface MonthLabel { col: number; label: string }
 
@@ -155,18 +142,6 @@ function IcoPulse() {
   )
 }
 
-function IcoFlame() {
-  return (
-    <svg className="gc-flame" width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M12 3c.5 3-1.8 4.2-2.8 5.6C8 10.3 7.5 11.6 7.5 13a4.5 4.5 0 0 0 9 0c0-2-.9-3.4-1.8-4.5-.7.6-1.4.7-2 .4 1.1-2.2.3-4.6-.7-5.9Z"
-        stroke="currentColor"
-        strokeWidth="1.9"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
 
 /* ----------------------------- types ----------------------------- */
 type Scheme = 'emerald' | 'ocean' | 'violet' | 'amber' | 'slate'
@@ -191,11 +166,7 @@ export default function GithubCalendar({
   shape = 'rounded',
   glow = false,
 }: GithubCalendarProps) {
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const { weeks, total } = useMemo(() => buildData(), [])
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
-  const streak = useMemo(() => longestStreak(weeks), [weeks])
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const labels = useMemo(() => monthLabels(weeks), [weeks])
 
   const [tip, setTip] = useState<TipState | null>(null)
@@ -226,106 +197,106 @@ export default function GithubCalendar({
 
   const levelClass = ['gc-l0', 'gc-l1', 'gc-l2', 'gc-l3', 'gc-l4'] as const
 
-  return (
-    <div className="shell zoom">
-      <div className="gc-stage">
-        <article
-          className="gc-card"
-          ref={(el) => {
-            gcCardRef(el)
-            return () => cleanupGcCard(el)
-          }}
-          style={vars}
-          data-glow={glow ? 'on' : 'off'}
-          data-anim="off"
-          data-scheme={scheme}
-        >
-          {/* Header */}
-          <header className="gc-head">
-            <div className="gc-id">
-              <span className="gc-avatar"><IcoPulse /></span>
-              <div>
-                <div className="gc-name">@deha-labs</div>
-                <div className="gc-sub">Public contribution activity</div>
-              </div>
-            </div>
-            <div className="gc-total">
-              <b>{total.toLocaleString()}</b> contributions in the last year
-            </div>
-          </header>
+  const DOW_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-          {/* Graph */}
-          <div className="gc-scroller">
-            {/* Month labels */}
-            <div
-              className="gc-months"
-              style={{ gridTemplateColumns: `repeat(${weeks.length}, var(--cell))` }}
-            >
-              {labels.map((l) => (
-                <span key={l.col} style={{ gridColumnStart: l.col + 1 }}>
-                  {l.label}
-                </span>
+  return (
+    <>
+      <div className="gc-outer">
+      <article
+        className="gc-card"
+        ref={(el) => {
+          gcCardRef(el)
+          return () => cleanupGcCard(el)
+        }}
+        style={vars}
+        data-glow={glow ? 'on' : 'off'}
+        data-anim="off"
+        data-scheme={scheme}
+      >
+        {/* Header */}
+        <header className="gc-head">
+          <div className="gc-id">
+            <span className="gc-avatar"><IcoPulse /></span>
+            <div>
+              <div className="gc-name">@deha-labs</div>
+              <div className="gc-sub">Public contribution activity</div>
+            </div>
+          </div>
+          <div className="gc-total">
+            <b>{total.toLocaleString()}</b> contributions in the last year
+          </div>
+        </header>
+
+        {/* Graph */}
+        <div className="gc-scroller">
+          {/* Month labels */}
+          <div
+            className="gc-months"
+            style={{ gridTemplateColumns: `repeat(${weeks.length}, var(--cell))` }}
+          >
+            {labels.map((l) => (
+              <span key={l.col} style={{ gridColumnStart: l.col + 1 }}>
+                {l.label}
+              </span>
+            ))}
+          </div>
+
+          {/* DOW labels + grid */}
+          <div className="gc-body">
+            <div className="gc-dow">
+              {DOW_LABELS.map((label, i) => (
+                <span key={label} style={{ gridRow: i + 1 }}>{label}</span>
               ))}
             </div>
 
-            {/* DOW labels + grid */}
-            <div className="gc-body">
-              <div className="gc-dow">
-                <span style={{ gridRow: 2 }}>Mon</span>
-                <span style={{ gridRow: 4 }}>Wed</span>
-                <span style={{ gridRow: 6 }}>Fri</span>
-              </div>
-
-              <div className="gc-grid" onMouseLeave={() => setTip(null)}>
-                {weeks.map((week, wi) =>
-                  // eslint-disable-next-line react/no-array-index-key
-                  week.map((d, di) => {
-                    const delay = wi * 7 + di * 16
-                    if (!d) {
-                      return (
-                        <div
-                          key={`${wi}-${di}`} // eslint-disable-line react/no-array-index-key
-                          className="gc-cell gc-empty"
-                          style={{ '--d': `${delay}ms` } as React.CSSProperties}
-                        />
-                      )
-                    }
-                    return (
-                      <div
-                        key={`${wi}-${di}`} // eslint-disable-line react/no-array-index-key
-                        className={`gc-cell ${levelClass[d.level]}`}
-                        style={{ '--d': `${delay}ms` } as React.CSSProperties}
-                        aria-label={`${d.count} contributions on ${fmtDate(d.date)}`}
-                        onMouseEnter={(e) => handleCellEnter(e, d)}
-                      />
-                    )
-                  })
-                )}
-              </div>
+            <div className="gc-grid" onMouseLeave={() => setTip(null)}>
+              {weeks.map((week, wi) => {
+                // Find first real (non-null) cell to determine column row offset
+                const firstRealIdx = week.findIndex((d) => d !== null)
+                return week.map((d, di) => {
+                  if (!d) return null
+                  const delay = wi * 7 + di * 16
+                  // Pin the first real cell of each week-column to its weekday row
+                  // so partial columns (first/last week) align correctly without empty nodes
+                  const rowStart = di === firstRealIdx ? di + 1 : undefined
+                  return (
+                    <div
+                      key={`${wi}-${di}`} // eslint-disable-line react/no-array-index-key
+                      className={`gc-cell ${levelClass[d.level]}`}
+                      style={{
+                        '--d': `${delay}ms`,
+                        ...(rowStart !== undefined ? { gridRowStart: rowStart } : {}),
+                      } as React.CSSProperties}
+                      aria-label={`${d.count} contributions on ${fmtDate(d.date)}`}
+                      onMouseEnter={(e) => handleCellEnter(e, d)}
+                    />
+                  )
+                })
+              })}
             </div>
           </div>
+        </div>
 
-          {/* Footer */}
-          <footer className="gc-foot">
-            <div className="gc-streak">
-              <IcoFlame />
-              <b>{streak}</b> day streak
+        {/* Footer */}
+        <footer className="gc-foot">
+          <div className="gc-streak" style={{ backgroundColor: '#F97316' }}>
+            <span className={`${iconClass('local_fire_department')} gc-flame`} aria-hidden="true">local_fire_department</span>
+            <span className="gc-streak-label">7 Day Streak!</span>
+          </div>
+          <div className="gc-legend">
+            <span>Less</span>
+            <div className="gc-legend-cells">
+              {([0, 1, 2, 3, 4] as const).map((lvl) => (
+                <div
+                  key={lvl}
+                  className={`gc-legend-cell ${levelClass[lvl]}`}
+                />
+              ))}
             </div>
-            <div className="gc-legend">
-              <span>Less</span>
-              <div className="gc-legend-cells">
-                {([0, 1, 2, 3, 4] as const).map((lvl) => (
-                  <div
-                    key={lvl}
-                    className={`gc-legend-cell ${levelClass[lvl]}`}
-                    style={{ background: ramp[lvl] }}
-                  />
-                ))}
-              </div>
-              <span>More</span>
-            </div>
-          </footer>
-        </article>
+            <span>More</span>
+          </div>
+        </footer>
+      </article>
       </div>
 
       {/* Tooltip — rendered outside the card to avoid clipping */}
@@ -340,6 +311,6 @@ export default function GithubCalendar({
           <span>on {fmtDate(tip.date)}</span>
         </div>
       )}
-    </div>
+    </>
   )
 }

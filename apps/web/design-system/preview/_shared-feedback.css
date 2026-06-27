@@ -50,6 +50,46 @@ html.dark {
 .btn-green:focus-visible { outline: 2px solid #10B981; outline-offset: 2px; }
 html.dark .btn-green { background: #10B981; box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 8px rgba(16,185,129,0.34); }
 
+/* --------------------------------------------------------------------------
+ * .btn-yellow -- canonical yellow pill button (mirrors .btn-green structure)
+ * Amber fill in BOTH light and dark for distinct/colorful look
+ * -------------------------------------------------------------------------- */
+.btn-yellow {
+  position: relative; overflow: hidden; height: 36px; min-width: 104px; padding: 0 17px; gap: 7px;
+  border-radius: 9999px; border: none; cursor: pointer;
+  background: #F59E0B; color: #fff; font-size: 12px; font-weight: 800; font-family: 'Montserrat';
+  display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 2px 6px rgba(245,158,11,0.30);
+  transition:
+    background-color calc(180ms * var(--anim-mult, 1)),
+    transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
+    box-shadow calc(200ms * var(--anim-mult, 1));
+}
+.btn-yellow:hover { transform: scale(1.03); box-shadow: 0 8px 20px rgba(245,158,11,0.34), inset 0 1px 0 rgba(255,255,255,0.28); }
+.btn-yellow:active { transform: scale(0.96); }
+.btn-yellow:focus-visible { outline: 2px solid #F59E0B; outline-offset: 2px; }
+html.dark .btn-yellow { background: #F59E0B; box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 8px rgba(245,158,11,0.34); }
+
+/* --------------------------------------------------------------------------
+ * .btn-red -- canonical red pill button (mirrors .btn-green structure)
+ * Red fill in BOTH light and dark for distinct/colorful look
+ * -------------------------------------------------------------------------- */
+.btn-red {
+  position: relative; overflow: hidden; height: 36px; min-width: 104px; padding: 0 17px; gap: 7px;
+  border-radius: 9999px; border: none; cursor: pointer;
+  background: #EF4444; color: #fff; font-size: 12px; font-weight: 800; font-family: 'Montserrat';
+  display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 2px 6px rgba(239,68,68,0.30);
+  transition:
+    background-color calc(180ms * var(--anim-mult, 1)),
+    transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
+    box-shadow calc(200ms * var(--anim-mult, 1));
+}
+.btn-red:hover { transform: scale(1.03); box-shadow: 0 8px 20px rgba(239,68,68,0.34), inset 0 1px 0 rgba(255,255,255,0.28); }
+.btn-red:active { transform: scale(0.96); }
+.btn-red:focus-visible { outline: 2px solid #EF4444; outline-offset: 2px; }
+html.dark .btn-red { background: #EF4444; box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 8px rgba(239,68,68,0.34); }
+
 /* ==========================================================================
  * SHARED FOUNDATIONS — appended block; do NOT redefine tokens above this line.
  * ========================================================================== */
@@ -153,6 +193,7 @@ html.dark .sem.hot     { background: #2a1506 !important; color: #FDBA74 !importa
 
 .icon-badge--lg {
   width: 38px; height: 38px; border-radius: 11px;
+  background-size: cover, 4px 4px, 4px 4px;
 }
 .icon-badge--lg .material-icons,
 .icon-badge--lg .material-symbols-outlined { font-size: 20px; }
@@ -228,3 +269,4 @@ html.dark .sem.hot     { background: #2a1506 !important; color: #FDBA74 !importa
 .db-press    { animation: db-bounce    calc(360ms * var(--anim-mult, 1)) var(--ease-spring) both; }
 .db-slide-in  { animation: db-slide-in  calc(260ms * var(--anim-mult, 1)) var(--ease-out)    both; }
 .db-slide-out { animation: db-slide-out calc(200ms * var(--anim-mult, 1)) var(--ease-out)    both; }
+

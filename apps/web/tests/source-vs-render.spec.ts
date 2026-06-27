@@ -31,7 +31,6 @@ mkdirSync(FIDELITY_DIR, { recursive: true })
 // Wave-3 slugs
 // ---------------------------------------------------------------------------
 const SLUGS = [
-  'chart',
   'statistics-graph-card',
   'streak-card',
   'financial-health-card',

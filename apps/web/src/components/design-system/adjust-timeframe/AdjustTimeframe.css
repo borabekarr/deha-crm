@@ -1,23 +1,26 @@
 /* ===================== Shell + Card ===================== */
 /* Item 6: whole component trimmed ~50% (paddings, fonts, track height halved). */
-/* Item 3: shell = external grey backing; card itself consumes the inner-card tokens. */
+/* Item 3: shell = canonical grey outer shell; card floats as inner white card. */
 .tf-shell {
-  background: var(--card-border);
-  border-radius: 20px;
-  padding: 5px;
-  box-shadow: 0 8px 28px rgba(15,23,42,.14), 0 2px 5px rgba(15,23,42,.06);
+  background: var(--shell-bg, #d4dce8);
+  border-radius: 28px;
+  padding: 10px;
+  box-shadow: 0 10px 30px rgba(15,23,42,0.12), 0 2px 8px rgba(15,23,42,0.06);
+  max-width: 536px;
+  width: 100%;
+  margin: 0 auto;
 }
-html.dark .tf-shell { background: #0F172A; }
+html.dark .tf-shell {
+  background: #020617;
+  border: 1px solid var(--card-border);
+  border-top-color: rgba(255,255,255,.22) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
+}
 /* ---- dark-mode polish ---- */
-html.dark .tf-card {
-  border-color: var(--card-border);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 1px 2px rgba(0,0,0,.35);
-}
 html.dark .tf-pan:hover:not(:disabled) { background: color-mix(in srgb, #fff 10%, var(--card-bg)); color: var(--fg1); }
-html.dark .tf-presets { background: #0B1220; box-shadow: inset 0 2px 4px rgba(0,0,0,.4); }
-html.dark .tf-preset-glider { background: #10B981; box-shadow: 0 1px 2px rgba(0,0,0,.45), 0 3px 8px -3px rgba(16,185,129,.6); }
-html.dark .tf-preset.active { color: #fff; }
-html.dark .tf-preset.active:hover { color: #fff; }
+html.dark .tf-preset-glider { background: #F1F5F9; box-shadow: 0 1px 2px rgba(0,0,0,.30); }
+html.dark .tf-preset.active { color: #0F172A; }
+html.dark .tf-preset.active:hover { color: #0F172A; }
 html.dark .tf-month:hover { background: color-mix(in srgb, #fff 8%, var(--card-bg)); }
 html.dark .tf-ruler { background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.16) 0 1px, transparent 1px var(--ppd)); }
 html.dark .tf-monthtick { background: rgba(255,255,255,.26); }
@@ -27,18 +30,19 @@ html.dark .tf-monthtick { background: rgba(255,255,255,.26); }
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: var(--card-radius);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.9),
-    0 1px 2px rgba(15,23,42,.05);
+  box-shadow: inset 0 0 0 1px rgba(15,23,42,0.04);
   overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
+}
+html.dark .tf-card {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
 }
 
 /* ===================== Header ===================== */
 .tf-head {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 12px 14px;
+  padding: 14px 14px;
   /* fieldset reset */
   border: none; margin: 0; min-inline-size: unset;
 }
@@ -59,38 +63,35 @@ html.dark .tf-monthtick { background: rgba(255,255,255,.26); }
 .tf-range.bump .tf-seg { animation: tfBump calc(340ms * var(--anim-mult, 1)) cubic-bezier(.34,1.4,.5,1); }
 @keyframes tfBump { 0%{ transform: translateY(2px); opacity:.5; } 100%{ transform: translateY(0); opacity:1; } }
 
-/* ---- Item 1: segmented presets — canonical pills-seg look ---- */
+/* ---- Item 2: segmented presets — mirrors .seg.accent pattern exactly ---- */
 .tf-presets {
   position: relative; display: inline-flex; align-items: center;
   background: #F1F5F9;
-  border-radius: 9999px; padding: 2px;
+  border-radius: 9999px; padding: 3px;
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
   font-family: 'Montserrat', sans-serif;
   transition: opacity calc(200ms * var(--anim-mult, 1)) ease;
   /* fieldset reset */
   border: none; margin: 0; min-inline-size: unset;
 }
-html.dark .tf-presets { background: #0F172A; box-shadow: inset 0 2px 4px rgba(0,0,0,.2); }
+html.dark .tf-presets { background: #0B1220; box-shadow: inset 0 2px 4px rgba(0,0,0,.4); }
 .tf-card[data-dragging="true"] .tf-presets { opacity: .5; }
 
-/* Sliding glider pill — mirrors .pills-seg-pill */
+/* Sliding glider pill — mirrors .seg-pill (black light / white dark) */
 .tf-preset-glider {
-  position: absolute; top: 2px; bottom: 2px; z-index: 0; border-radius: 9999px;
-  background: #10B981;
-  background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
-  background-size: 7px 7px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 8px -1px rgba(16,185,129,0.6);
+  position: absolute; top: 3px; bottom: 3px; z-index: 0; border-radius: 9999px;
+  background: #0F172A;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.18);
   transition: left calc(300ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.64,1), width calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), opacity calc(160ms * var(--anim-mult, 1)) ease;
   pointer-events: none;
 }
-/* Item 4: glider hides only when NO pill is active (month select); it stays put
-   — and the active pill stays white — while the strip extends a picked range. */
+/* Glider hides only when NO pill is active (month select); stays put while strip extends */
 .tf-preset-glider[data-on="false"] { opacity: 0; }
 
 .tf-preset {
   position: relative; z-index: 1;
   appearance: none; border: none; background: transparent; cursor: pointer;
-  font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700;
+  font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 800;
   color: #64748B; padding: 6px 10px; border-radius: 9999px; line-height: 1;
   transition: color calc(240ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
   white-space: nowrap;
@@ -98,8 +99,9 @@ html.dark .tf-presets { background: #0F172A; box-shadow: inset 0 2px 4px rgba(0,
 html.dark .tf-preset { color: #94A3B8; }
 .tf-preset:hover { color: var(--fg2); }
 .tf-preset:active { transform: scale(.93); }
-.tf-preset.active { color: #fff; font-weight: 900; }
-html.dark .tf-preset.active { color: #fff; }
+/* white text on black pill (light) / dark text on white pill (dark) — mirrors .seg button.active */
+.tf-preset.active { color: #FFFFFF; font-weight: 900; }
+html.dark .tf-preset.active { color: #0F172A; }
 .tf-preset:focus-visible { outline: 2px solid var(--tf-accent); outline-offset: 2px; }
 
 .tf-divider { height: 1px; background: var(--card-border); }
@@ -107,13 +109,16 @@ html.dark .tf-preset.active { color: #fff; }
 /* ===================== Body / scrubber ===================== */
 /* Item 6: half-height body + smaller pan buttons. */
 .tf-body {
-  display: flex; align-items: center; gap: 4px;
-  padding: 13px 9px 11px;
+  display: flex; align-items: flex-start; gap: 4px;
+  padding: 18px 9px 14px;
 }
 .tf-pan {
   flex: none; width: 26px; height: 26px; border-radius: var(--radius-circle);
   display: grid; place-items: center; cursor: pointer;
   border: none; background: transparent; color: var(--slate-400);
+  /* Item 4: align button center to ruler centerline (ruler center ≈ 17.5px from track top).
+     Button is 26px tall; half = 13px. Offset = 17.5 - 13 = 4.5px → 5px */
+  margin-top: 5px; align-self: flex-start;
   transition: background calc(150ms * var(--anim-mult, 1)) ease, color calc(150ms * var(--anim-mult, 1)) ease, opacity calc(200ms * var(--anim-mult, 1)) ease, transform calc(120ms * var(--anim-mult, 1)) ease;
 }
 .tf-pan:hover:not(:disabled) { background: var(--slate-100); color: var(--fg2); }
@@ -123,7 +128,7 @@ html.dark .tf-preset.active { color: #fff; }
 
 .tf-track {
   position: relative; flex: 1; min-width: 0;
-  height: 52px; overflow: hidden; cursor: pointer;
+  height: 68px; overflow: hidden; cursor: pointer;
   touch-action: none;
 }
 .tf-strip { position: absolute; top: 0; left: 0; height: 100%; }
@@ -142,7 +147,7 @@ html.dark .tf-preset.active { color: #fff; }
 
 /* month labels (click to select the whole month) */
 .tf-month {
-  position: absolute; top: 32px; transform: translateX(-50%);
+  position: absolute; top: 38px; transform: translateX(-50%);
   appearance: none; border: none; background: transparent;
   font-family: var(--font-display);
   font-size: 11px; font-weight: var(--weight-semibold); color: var(--fg4);
@@ -155,16 +160,16 @@ html.dark .tf-preset.active { color: #fff; }
 .tf-month[data-in="true"] { color: var(--fg1); font-weight: var(--weight-bold); }
 .tf-month:focus-visible { outline: 2px solid var(--tf-accent); outline-offset: 1px; }
 
-/* ---- Items 2+3: selection lens — bubble sits BELOW the ruler, green sticks
-   attach to the bubble's TOP edge and extend up to the ruler.
-   Geometry within .tf-strip (track height 52px):
-     ruler:  10 → 25
-     bubble: 24 → 44  (.tf-sel top:24, height:20)  → clearly below the ruler
-     stick:  12 → 24  (top aligned to ruler, BOTTOM touches bubble top edge @24)
+/* ---- Items 2+3: selection lens — bubble straddles the ruler line.
+   Geometry within .tf-strip (track height 62px):
+     ruler:  10 → 25  (center 17.5px)
+     monthtick: 8 → 28  (center 18px)
+     bubble: 8 → 28   (.tf-sel top:8, height:20) → center 18px ≈ ruler center ✓
+     stick upward from bubble top: not needed when lens is ON the ruler.
    .tf-sel contains: .tf-lens (bubble), .tf-lens-hit (drag overlay), two .tf-handle inputs */
 .tf-sel {
   position: absolute;
-  top: 24px;
+  top: 8px;
   height: 20px;
 }
 .tf-sel[data-anim="true"] { transition: left calc(400ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), width calc(400ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
@@ -189,12 +194,20 @@ html.dark .tf-lens {
 }
 html.dark .tf-daycount { text-shadow: none; }
 
-/* Item 2: handles centered on the bubble side edges (left:0 / left:100%).
-   The stick (::before) is anchored to the TOP of the bubble and grows UPWARD,
-   so its bottom edge always touches the bubble's top edge. */
+/* Item 1: handles centered on the bubble side edges (left:0 / left:100%).
+   .tf-sel: top:8px, height:20px → lens center at 18px in track, 10px in .tf-sel.
+   Handle box 34px tall; top:50% (=10px in .tf-sel) + translateY(-50%) centers it.
+   Handle box spans -7px to 27px relative to .tf-sel.
+   Stick (::before) grows UPWARD from just above the bubble top (0px in .tf-sel).
+   Bubble top = 7px from handle box top = 27px from handle box bottom → bottom:27px. */
 .tf-handle {
-  position: absolute; top: 50%; width: 22px; height: 34px;
+  position: absolute;
+  /* Center precisely on .tf-sel midline (height 20px → midpoint 10px from top).
+     top:50% = 10px; translateY(-50%) pulls the 34px box up 17px → box spans -7 to 27px.
+     vertical-align:top prevents inline range-input baseline nudge in some browsers. */
+  top: 50%; width: 22px; height: 34px;
   transform: translate(-50%, -50%);
+  vertical-align: top;
   display: block; cursor: ew-resize; z-index: 3;
   background: transparent; border: none; padding: 0; margin: 0;
   touch-action: none;
@@ -209,24 +222,22 @@ html.dark .tf-daycount { text-shadow: none; }
 .tf-handle::-moz-range-thumb { width: 0; height: 0; border: none; background: transparent; }
 .tf-handle::-webkit-slider-runnable-track { background: transparent; height: 34px; }
 .tf-handle::-moz-range-track { background: transparent; height: 34px; }
-/* Stick bar: bottom touches bubble top edge (sel top = 24px within strip).
-   Handle box is 34px tall, vertically centered on bubble center (y=34 within strip),
-   so handle spans 17→51. Bubble top (y=24) sits 7px down from the handle top.
-   Stick: absolutely positioned, bottom:17px (bubble-top relative to handle box),
-   height 12px → spans handle-y 5→17 = strip-y 22→34? we want it to END at bubble top.
-   Use bottom:17px so the stick bottom lands exactly on the bubble top edge. */
+/* Stick bar centered on the lens-hit midline (18px from track top = 10px in .tf-sel).
+   Handle box: top=-7px in .tf-sel, height=34px, bottom=27px in .tf-sel.
+   bottom:12px → stick bottom at 34-12=22px in handle = -7+22=15px in .tf-sel = 23px track.
+   Stick top = 15-10=5px in .tf-sel = 13px track. Center = (13+23)/2=18px track. */
 .tf-handle::before {
   content: ""; position: absolute;
   left: 50%; transform: translateX(-50%);
-  bottom: 17px;             /* bubble top edge within the 34px handle box */
-  width: 4px; height: 12px; border-radius: 3px 3px 0 0;
+  bottom: 12px;             /* centers stick on lens-hit midline (18px from track top) */
+  width: 4px; height: 10px; border-radius: 2px;
   background: var(--tf-accent);
   box-shadow: 0 2px 6px -1px color-mix(in srgb, var(--tf-accent) 55%, transparent), inset 0 1px 0 rgba(255,255,255,.4);
   transition: height calc(180ms * var(--anim-mult, 1)) cubic-bezier(.34,1.4,.5,1), width calc(180ms * var(--anim-mult, 1)) ease, box-shadow calc(180ms * var(--anim-mult, 1)) ease;
   pointer-events: none;
 }
-.tf-handle:hover::before { height: 14px; width: 5px; }
-.tf-card[data-dragging="true"] .tf-handle[data-active="true"]::before { height: 15px; width: 5px; }
+.tf-handle:hover::before { height: 12px; width: 5px; }
+.tf-card[data-dragging="true"] .tf-handle[data-active="true"]::before { height: 13px; width: 5px; }
 .tf-handle:focus-visible { outline: none; }
 .tf-handle:focus-visible::before { box-shadow: 0 0 0 3px color-mix(in srgb, var(--tf-accent) 30%, transparent), 0 2px 6px -1px color-mix(in srgb, var(--tf-accent) 55%, transparent); height: 15px; }
 

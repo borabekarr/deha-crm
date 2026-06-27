@@ -19,10 +19,10 @@ interface TabDef {
 }
 
 const TABS: TabDef[] = [
-  { key: 'leads',    label: 'Leads',    icon: 'groups',          lw: 42 },
-  { key: 'pipeline', label: 'Pipeline', icon: 'account_tree',    lw: 62 },
-  { key: 'calls',    label: 'Calls',    icon: 'call',            lw: 34 },
-  { key: 'profile',  label: 'Profile',  icon: 'account_circle',  lw: 50 },
+  { key: 'leads',    label: 'Leads',    icon: 'groups',          lw: 50 },
+  { key: 'pipeline', label: 'Pipeline', icon: 'account_tree',    lw: 64 },
+  { key: 'calls',    label: 'Calls',    icon: 'call',            lw: 44 },
+  { key: 'profile',  label: 'Profile',  icon: 'account_circle',  lw: 56 },
 ]
 
 // Gap between tabs in px (matches CSS --tab-gap)
@@ -62,11 +62,14 @@ const PANEL_ROWS: Record<string, PanelRow[]> = {
 }
 
 export default function MotionTabs() {
-  const [active, setActive] = useState<string>('leads')
-  const [view, setView]     = useState<string>('default')
-  const [dir, setDir]       = useState<number>(0)
+  const [active, setActive]     = useState<string>('leads')
+  const [view, setView]         = useState<string>('default')
+  const [dir, setDir]           = useState<number>(0)
+  const [prevView, setPrevView] = useState<string>('default')
 
   function close(): void {
+    setPrevView('default')
+    setDir(0)
     setView('default')
   }
 
@@ -78,19 +81,37 @@ export default function MotionTabs() {
     const fromIdx = TABS.findIndex((t) => t.key === view)
     const toIdx   = TABS.findIndex((t) => t.key === key)
     const nextDir = view === 'default' ? 0 : Math.sign(toIdx - fromIdx)
+    setPrevView(view)
     setDir(nextDir)
     setActive(key)
     setView(key)
+  }
+
+  /** Determines enter/exit animation state for each panel.
+   *  dir > 0 = new tab is to the RIGHT of old tab.
+   *  entering panel slides in from the direction of the new tab.
+   *  exiting panel slides out in the OPPOSITE direction.
+   */
+  function panelState(tabKey: string): string {
+    if (view === tabKey) {
+      if (dir === 0) return 'active'
+      return dir > 0 ? 'entering-right' : 'entering-left'
+    }
+    if (prevView === tabKey && dir !== 0) {
+      return dir > 0 ? 'exiting-left' : 'exiting-right'
+    }
+    return 'idle'
   }
 
   // ── Derived indicator geometry (no DOM measurement) ──────────────────────
   const activeIndex = TABS.findIndex((t) => t.key === active)
 
   // Width of each tab slot: base + label expansion for the active tab
-  // Active pill width must match CSS: .mt-tab.active = 14 + 24 + 6 + lw + 14 = 58 + lw.
-  // Collapsed tab = TAB_BASE (48). So active adds (58 + lw) - 48 = lw + 10.
+  // Active pill width matches CSS: .mt-tab.active = 18 + 24 + 8 + lw + 10 = 60 + lw.
+  // Collapsed tab = TAB_BASE (48). So active adds (60 + lw) - 48 = lw + 12.
+  // lw values are generously padded to prevent right-edge clipping at any font render.
   function tabSlotWidth(i: number): number {
-    return TAB_BASE + (i === activeIndex ? TABS[i].lw + 10 : 0)
+    return TAB_BASE + (i === activeIndex ? TABS[i].lw + 12 : 0)
   }
 
   // indX = sum of (slot widths + gap) for all tabs before active
@@ -129,18 +150,17 @@ export default function MotionTabs() {
 
                   {TABS.map((tab) => {
                     const rows = PANEL_ROWS[tab.key]
-                    const isActive = view === tab.key
                     const isProfileTab = tab.key === 'profile'
                     return (
                       <div
                         key={tab.key}
-                        className={`mt-panel${isActive ? ' active' : ''}`}
-                        style={{ '--dir': dir } as React.CSSProperties}
+                        className="mt-panel"
+                        data-panel-state={panelState(tab.key)}
                       >
                         {rows.map((row) => (
                           <button type="button" key={row.title} className="mt-row">
                             <div
-                              className="mt-row-ic"
+                              className={`mt-row-ic${row.color === '#0F172A' ? ' mt-row-ic--black' : ''}`}
                               style={row.color ? ({ '--icon-c': row.color } as React.CSSProperties) : undefined}
                             >
                               <span className="material-symbols-outlined">{row.icon}</span>

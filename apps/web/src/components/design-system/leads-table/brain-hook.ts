@@ -7,7 +7,7 @@
    - Typewriter is imported from popover-hook.ts (not reimplemented).
    ========================================================================= */
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { useTypewriter, type TypewriterState } from './popover-hook'
 import type { BrainSection } from './leadMetrics'
 
@@ -38,6 +38,9 @@ export function useBrainStage(): BrainStageController {
   const [panelOpen, setPanelOpen] = useState(false)
   const [compact, setCompact]     = useState(false)
 
+  // --- exit-defer timer (mounted-through-exit: activeId lingers ~440ms after close) ---
+  const exitTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   // --- typewriter (re-used from popover-hook) ---
   const typewriter = useTypewriter<string>()
 
@@ -55,6 +58,8 @@ export function useBrainStage(): BrainStageController {
 
   const selectSection = useCallback(
     (id: string, section?: BrainSection) => {
+      // Cancel any pending deferred activeId clear from a previous close.
+      if (exitTimer.current) { clearTimeout(exitTimer.current); exitTimer.current = null }
       setActiveId(id)
       setCompact(true)
       setPanelOpen(true)
@@ -70,12 +75,26 @@ export function useBrainStage(): BrainStageController {
   )
 
   // ── clearSelection ───────────────────────────────────────────────────────────
+  // Decoupled close: panelOpen+compact go false immediately (CSS animates width/
+  // opacity to 0), but activeId lingers ~440ms so the section content fades out
+  // inside the collapsing panel (mounted-through-exit). After the defer, the
+  // empty state becomes the live render target (already hidden behind closed panel).
 
   const clearSelection = useCallback(() => {
-    setActiveId(null)
+    // Cancel any prior pending defer before scheduling a new one.
+    if (exitTimer.current) { clearTimeout(exitTimer.current); exitTimer.current = null }
     setPanelOpen(false)
     setCompact(false)
     typewriter.closeChat()
+    // Read the global slow-down multiplier so the defer respects --anim-mult.
+    const raw = getComputedStyle(document.documentElement).getPropertyValue('--anim-mult')
+    const mult = parseFloat(raw) || 1
+    // 440ms > 420ms grid-collapse; panel width transition is now also 420ms.
+    exitTimer.current = setTimeout(() => {
+      setActiveId(null)
+      exitTimer.current = null
+    }, 440 * mult)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [typewriter.closeChat])
 
   return {

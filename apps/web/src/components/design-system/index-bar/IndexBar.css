@@ -1,5 +1,20 @@
 /* IndexBar.css — verbatim inline styles from components-index-bar.html */
 
+/* ── fresh grey outer shell — canonical inner-card bezel pattern ── */
+.idx-outer {
+  background: var(--shell-bg, #F1F5F9);
+  padding: 10px;
+  border-radius: 30px; /* slightly larger than .idx-card's 24px */
+  box-shadow: 0 2px 8px rgba(15,23,42,0.06);
+  max-width: 64%;
+  margin: 0 auto;
+}
+html.dark .idx-outer {
+  background: #020617;
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+}
+
 .idx-badge { display:inline-flex; align-items:center; gap:3px; padding:2px 10px; border-radius:9999px; font-family:'Montserrat'; font-size:12px; font-weight:800; line-height:1; color:#fff; }
 .idx-badge .material-icons { font-size:14px; }
 .idx-badge.up   { background:#10B981; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.14), inset 0 -1px 0 rgba(255,255,255,0.15); }
@@ -97,7 +112,7 @@ html.dark .idx-funnel-stage { color:#64748B; }
   transform-origin:center;
   transition: box-shadow calc(300ms * var(--anim-mult, 1));
 }
-.idx-bar.hidden { opacity: 0; }
+/* .idx-bar.hidden removed — bars are always mounted and visible; replay uses scaleY morph */
 .idx-bar.active {
   height:36px; z-index:2;
   box-shadow: 0 0 0 2px rgba(16,185,129,0.10), 0 3px 10px rgba(16,185,129,0.30);
@@ -118,16 +133,36 @@ html.dark .idx-funnel-stage { color:#64748B; }
 @keyframes idx-sweep { 0% { transform:translateX(-100%); opacity:0; } 20% { opacity:1; } 80% { opacity:1; } 100% { transform:translateX(100%); opacity:0; } }
 
 /* stage tick labels */
-.idx-ticks { display:flex; margin-top:12px; }
-.idx-tick { flex:1 1 0; text-align:center; font-size:9.5px; font-weight:800; letter-spacing:0.05em; text-transform:uppercase; color:var(--slate-400,#94A3B8); }
+.idx-ticks { display:flex; justify-content:space-between; margin-top:10px; }
+.idx-tick {
+  flex:1 1 0; display:flex; flex-direction:column; align-items:center; gap:6px;
+  text-align:center; color:var(--slate-400,#94A3B8);
+}
 .idx-tick.on { color:#10B981; }
 html.dark .idx-tick { color:#475569; } html.dark .idx-tick.on { color:#34D399; }
+
+/* R3 — tick label: Montserrat 900 black, display scale, per-theme fg color */
+.idx-tick-label {
+  font-family:'Montserrat', sans-serif; font-size:11px; font-weight:900;
+  letter-spacing:-0.025em; text-transform:uppercase; line-height:1;
+  color:#0F172A;
+}
+html.dark .idx-tick-label { color:#F1F5F9; }
+/* active tick keeps the green accent on both label and icon */
+.idx-tick.on .idx-tick-label { color:inherit; }
+html.dark .idx-tick.on .idx-tick-label { color:inherit; }
+
+/* R5 — tick icon: placed below the label */
+.idx-tick-icon {
+  font-size:17px; line-height:1; color:inherit; display:block;
+  /* material-icons and material-symbols-outlined both use font-size for scale */
+}
 
 /* replay */
 .replay { display:flex; justify-content:center; margin-top:16px; }
 .replay button {
   display:inline-flex; align-items:center; gap:6px; font-family:'Montserrat'; font-size:11px; font-weight:800; letter-spacing:0.02em;
-  color:var(--fg3,#64748B); background:#fff; border:1px solid var(--border-hairline,#E2E8F0); padding:6px 12px; border-radius:9999px; cursor:pointer;
+  color:var(--fg3,#64748B); background:var(--card-bg,#FFFFFF); border:1px solid var(--card-border,#E2E8F0); padding:6px 12px; border-radius:9999px; cursor:pointer;
   box-shadow:0 2px 6px rgba(15,23,42,0.07), inset 0 1px 0 rgba(255,255,255,0.9); transition: transform calc(130ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), color calc(150ms * var(--anim-mult, 1));
 }
 html.dark .replay button { background:#1E293B; border-color:rgba(255,255,255,0.1); color:#94A3B8; }

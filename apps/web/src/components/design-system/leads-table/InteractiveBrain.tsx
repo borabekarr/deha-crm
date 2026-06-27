@@ -43,8 +43,7 @@ function hitTest(nx: number, ny: number): number {
 //             side-by-side pieces never collide and the chip never leaves stage.
 // Coordinates are percentages (0-100) of the square BRAIN_CANVAS so the SVG
 // (viewBox 0 0 100 100) and the absolutely-positioned chip share one space.
-const CHIP_PUSH = 26    // how far (in canvas %) to push the chip out from centre
-const CHIP_MARGIN = 3   // keep chip endpoint this far from the canvas edges
+const CHIP_PUSH = 38    // how far (in canvas %) to push the chip out from centre
 function leaderGeom(sectionId: string) {
   const box = BRAIN_REGION_BOXES[sectionId]
   if (!box) return null
@@ -56,9 +55,11 @@ function leaderGeom(sectionId: string) {
   dx /= len; dy /= len
   let cx = ax + dx * CHIP_PUSH
   let cy = ay + dy * CHIP_PUSH
-  // clamp so the chip stays on-stage (collision-free + never clipped)
-  cx = Math.max(CHIP_MARGIN, Math.min(100 - CHIP_MARGIN, cx))
-  cy = Math.max(CHIP_MARGIN, Math.min(100 - CHIP_MARGIN, cy))
+  // horizontal: keep chips within the brain column
+  cx = Math.max(2, Math.min(98, cx))
+  // vertical: allow chips to exit the canvas into stage margin above/below
+  // negative cy = above canvas (center-top chip), cy>100 = below canvas (center-bottom)
+  cy = Math.max(-14, Math.min(114, cy))
   return { ax, ay, cx, cy }
 }
 

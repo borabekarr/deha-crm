@@ -3,6 +3,7 @@ import '../../../../design-system/preview/_darkmode.css'
 import './IndexBar.css'
 
 import { useCallback, useRef } from 'react'
+import { iconClass } from '../../../lib/iconClass'
 import {
   METRICS,
   STAGES,
@@ -113,7 +114,7 @@ export default function IndexBar() {
     return (
       <div
         key={i}
-        className={`idx-bar${isActive ? ' active' : ''} hidden`}
+        className={`idx-bar${isActive ? ' active' : ''}`}
         style={{
           background: bg,
           backgroundImage: gridImage,
@@ -124,53 +125,54 @@ export default function IndexBar() {
   })
 
   return (
-    <div className="card" style={{ background: '#F8FAFC', backgroundImage: 'radial-gradient(ellipse at top right, rgba(16,185,129,0.10) 0%, rgba(248,250,252,1) 55%, #FFFFFF 100%)', padding: '26px 22px 30px' }}>
+    <>
       <p className="sec">Pipeline Index Bar — dashboard overview</p>
       <p className="sec-sub">
         Three live pipeline metrics over a color-graded stage index. The bars draw in, numbers count up, and the current stage glows.
       </p>
 
-      <div className="shell zoom">
-        <div className="idx">
-          {/* WHITE SURFACE */}
-          <div className="idx-card">
-            <div className="idx-metrics">
-              {METRICS.map((m, i) => (
-                <MetricCard key={m.title} index={i} onPlay={registerPlayer(i)} />
-              ))}
-            </div>
-
-            <div className="idx-funnel">
-              <div className="idx-funnel-head">
-                <span className="idx-funnel-title">Pipeline Stage Funnel</span>
-                <span className="idx-funnel-stage">
-                  Current · <b>Moderate Priority</b>
-                </span>
-              </div>
-              <div className="idx-bars-wrap">
-                <div className="idx-bars" ref={barsCallbackRef}>
-                  {bars}
-                </div>
-              </div>
-              <div className="idx-ticks">
-                {STAGES.map((s) => (
-                  <div
-                    key={s.name}
-                    className={`idx-tick${s.name === 'Moderate' ? ' on' : ''}`}
-                  >
-                    {s.name}
-                  </div>
+      <div className="idx-outer">
+        <div className="idx zoom">
+            {/* WHITE SURFACE */}
+            <div className="idx-card">
+              <div className="idx-metrics">
+                {METRICS.map((m, i) => (
+                  <MetricCard key={m.title} index={i} onPlay={registerPlayer(i)} />
                 ))}
               </div>
-            </div>
-          </div>
 
-          {/* DRAWER FOOTER */}
-          <div className="idx-drawer">
-            <span className="idx-foot-txt">
-              Pipeline is <b>projected to increase</b>.
-            </span>
-          </div>
+              <div className="idx-funnel">
+                <div className="idx-funnel-head">
+                  <span className="idx-funnel-title">Pipeline Stage Funnel</span>
+                  <span className="idx-funnel-stage">
+                    Current · <b>Moderate Priority</b>
+                  </span>
+                </div>
+                <div className="idx-bars-wrap">
+                  <div className="idx-bars" ref={barsCallbackRef}>
+                    {bars}
+                  </div>
+                </div>
+                <div className="idx-ticks">
+                  {STAGES.map((s) => (
+                    <div
+                      key={s.name}
+                      className={`idx-tick${s.name === 'Moderate' ? ' on' : ''}`}
+                    >
+                      <span className="idx-tick-label">{s.name}</span>
+                      <span className={`idx-tick-icon ${iconClass(s.icon)}`}>{s.icon}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* DRAWER FOOTER */}
+            <div className="idx-drawer">
+              <span className="idx-foot-txt">
+                Pipeline is <b>projected to increase</b>.
+              </span>
+            </div>
         </div>
       </div>
 
@@ -180,6 +182,6 @@ export default function IndexBar() {
           Replay
         </button>
       </div>
-    </div>
+    </>
   )
 }

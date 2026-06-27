@@ -90,7 +90,6 @@ const SLUGS = [
   'spacing-radii',
   'spacing-shadows',
   'iconography',
-  'brand-logo',
   'background-gradient',
   // Primitives
   'buttons',
@@ -109,7 +108,6 @@ const SLUGS = [
   'github-calendar',
   'stacked-list',
   // Metrics & Charts
-  'chart',
   'metric-card',
   'metric-circle',
   'statistics-graph-card',
@@ -129,7 +127,6 @@ const SLUGS = [
   'ai-memory-card',
   'ai-caveat',
   'ai-message-box',
-  'ai-composer',
   // Misc
   'delete-modal',
   'todo-list',

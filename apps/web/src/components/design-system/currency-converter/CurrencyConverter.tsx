@@ -1,5 +1,6 @@
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
+import '../../../../design-system/preview/_shared-feedback.css'
 import './CurrencyConverter.css'
 
 import { useState, useRef, useCallback } from 'react'
@@ -291,98 +292,28 @@ function CurrencyPill({ currency, onClick }: { currency: Currency; onClick: () =
 }
 
 // ---------------------------------------------------------------------------
-// Editable amount field
-// autoFocus handled via callback-ref (replaces mount side-effect).
+// Amount display (static, output-only — rolling digit animation via Roll)
 // ---------------------------------------------------------------------------
 function EditableAmount({
   value,
   currency,
-  onChange,
-  autoFocus,
-  asBubble,
 }: {
   value: number
   currency: Currency
-  onChange: (v: number) => void
-  autoFocus?: boolean
-  asBubble?: boolean
 }) {
-  const [editing, setEditing] = useState(false)
-  const [draft, setDraft] = useState('')
-
-  // Callback-ref for autoFocus
-  const inputRef = useCallback(
-    (node: HTMLInputElement | null) => {
-      if (!node) return
-      if (autoFocus) node.focus()
-    },
-    [autoFocus]
-  )
-
-  const display = editing ? draft : formatAmount(value, currency)
-
-  const placeCaretBeforeDecimal = (input: HTMLInputElement, str: string) => {
-    const dotIdx = str.indexOf('.')
-    const pos = dotIdx === -1 ? str.length : dotIdx
-    try { input.setSelectionRange(pos, pos) } catch { /* noop */ }
-  }
-
-  const startEdit = () => {
-    const initial = value.toFixed(currency.code === 'JPY' ? 0 : 2)
-    setEditing(true)
-    setDraft(initial)
-  }
-
-  const onBlur = () => {
-    setEditing(false)
-    const n = parseFloat(draft)
-    if (isFinite(n) && n >= 0) onChange(n)
-    else onChange(value)
-  }
-
-  const onInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const v = e.target.value.replace(/[^\d.]/g, '')
-    setDraft(v)
-    const n = parseFloat(v)
-    if (isFinite(n) && n >= 0) onChange(n)
-  }
+  const display = formatAmount(value, currency)
 
   return (
-    <div style={{ position: 'relative', display: 'flex', justifyContent: 'flex-end' }}>
-      {!editing ? (
-        <button
-          type="button"
-          onClick={startEdit}
-          className={asBubble ? 'cc-amount-bubble' : undefined}
-          style={
-            asBubble
-              ? undefined
-              : {
-                  background: 'transparent', border: 'none', cursor: 'text',
-                  padding: 0, textAlign: 'right', fontFamily: 'inherit',
-                  fontWeight: 900, fontSize: 28, letterSpacing: '0.04em',
-                  color: 'var(--cc-fg1)', lineHeight: 1,
-                }
-          }
-          aria-label="Edit amount"
-        >
-          <Roll value={display} />
-        </button>
-      ) : (
-        <input
-          ref={inputRef}
-          className="cc-amount-input"
-          type="text"
-          inputMode="decimal"
-          value={draft}
-          onChange={onInput}
-          onBlur={onBlur}
-          onFocus={(e) => placeCaretBeforeDecimal(e.target, draft)}
-          onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur() }}
-          aria-label="Amount"
-        />
-      )}
-    </div>
+    <span
+      style={{
+        display: 'block', textAlign: 'right',
+        fontWeight: 900, fontSize: 28, letterSpacing: '0.04em',
+        color: 'var(--cc-fg1)', lineHeight: 1,
+        fontFamily: 'Montserrat',
+      }}
+    >
+      <Roll value={display} />
+    </span>
   )
 }
 
@@ -458,6 +389,8 @@ function CurrencyPicker({
         onClick={(e) => {
           if ((e.target as HTMLElement).classList.contains('cc-pop-backdrop')) onClose()
         }}
+        onWheel={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
       >
         <div className="cc-pop-wrap" style={wrapStyle}>
         <div className="cc-pop-shell">
@@ -565,9 +498,8 @@ export default function CurrencyConverter() {
   const [sourceAmt, setSourceAmt] = useState(920)
   const [pickerFor, setPickerFor] = useState<'source' | 'target' | null>(null)
   const [pickerAnchor, setPickerAnchor] = useState<{ centerX: number; centerY: number } | null>(null)
-  const [swapping, setSwapping] = useState(false)
+  const [rotation, setRotation] = useState(0)
   const [now, setNow] = useState(nowHM)
-  const swapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const converterRef = useRef<HTMLDivElement | null>(null)
 
   // Clock tick: callback-ref on root element (replaces setInterval mount side-effect)
@@ -578,9 +510,6 @@ export default function CurrencyConverter() {
     (node: HTMLDivElement | null) => {
       converterRef.current = node
       clockRef(node)
-      if (!node && swapTimerRef.current) {
-        clearTimeout(swapTimerRef.current)
-      }
     },
     [clockRef]
   )
@@ -591,52 +520,51 @@ export default function CurrencyConverter() {
 
   // Currency selection
   const onPickSource = (c: Currency) => {
-    if (c.code === source.code) { setPickerFor(null); return }
+    if (c.code === source.code) { closePicker(); return }
     if (c.code === target.code) setTarget(source)
     setSource(c)
-    setPickerFor(null)
+    closePicker()
   }
 
   const onPickTarget = (c: Currency) => {
-    if (c.code === target.code) { setPickerFor(null); return }
+    if (c.code === target.code) { closePicker(); return }
     if (c.code === source.code) setSource(target)
     setTarget(c)
-    setPickerFor(null)
+    closePicker()
   }
 
   // Swap currencies + amounts
   const onSwap = () => {
-    setSwapping(true)
+    setRotation(r => r + 180)
     const newSource = target
     const newTarget = source
     const newSourceAmt = targetAmt
     setSource(newSource)
     setTarget(newTarget)
     setSourceAmt(newSourceAmt)
-    if (swapTimerRef.current) clearTimeout(swapTimerRef.current)
-    swapTimerRef.current = setTimeout(() => {
-      swapTimerRef.current = null
-      setSwapping(false)
-    }, 540)
   }
-
-  // Two-way editing — both sides update sourceAmt (targetAmt is derived)
-  const onEditTarget = (newTargetAmt: number) => {
-    if (rate > 0) setSourceAmt(newTargetAmt / rate)
-  }
-  const onEditSource = (v: number) => setSourceAmt(v)
 
   const openPicker = (side: 'source' | 'target') => {
     if (converterRef.current) {
       const r = converterRef.current.getBoundingClientRect()
       setPickerAnchor({ centerX: r.left + r.width / 2, centerY: r.top + r.height / 2 })
     }
+    // Scroll-lock: prevent page scroll while picker is open (no useEffect — plain handler)
+    document.body.style.overflow = 'hidden'
+    document.documentElement.style.overflow = 'hidden'
     setPickerFor(side)
   }
 
+  const closePicker = () => {
+    document.body.style.overflow = ''
+    document.documentElement.style.overflow = ''
+    setPickerFor(null)
+  }
+
   return (
-    <div ref={rootRef} className="cc-outer">
-      <div className="cc-panel" style={{ padding: '22px 22px 18px' }}>
+    <>
+      <div className="cc-outer">
+      <div ref={rootRef} className="cc-panel" style={{ padding: '22px 22px 18px' }}>
 
         {/* Header */}
         <div style={{
@@ -644,10 +572,10 @@ export default function CurrencyConverter() {
           marginBottom: 16, gap: 10,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <h1 style={{ margin: 0, display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 18, fontWeight: 900, letterSpacing: '-0.025em', color: 'var(--cc-fg1)' }}>
+            <h1 style={{ margin: 0, display: 'inline-flex', alignItems: 'center', gap: 13, fontSize: 18, fontWeight: 900, letterSpacing: '-0.025em', color: 'var(--cc-fg1)' }}>
               <span
-                className={iconClass('currency_exchange')}
-                style={{ fontSize: 20, color: '#10B981', fontVariationSettings: '"opsz" 24, "wght" 600' }}
+                className="material-symbols-outlined"
+                style={{ fontSize: 27, color: 'var(--cc-fg1)', fontVariationSettings: '"FILL" 1, "wght" 700, "GRAD" 0, "opsz" 24' }}
                 aria-hidden="true"
               >
                 currency_exchange
@@ -686,7 +614,7 @@ export default function CurrencyConverter() {
                 }}>
                   You Send
                 </div>
-                <EditableAmount value={sourceAmt} currency={source} onChange={onEditSource} asBubble />
+                <EditableAmount value={sourceAmt} currency={source} />
               </div>
             </div>
           </div>
@@ -700,14 +628,23 @@ export default function CurrencyConverter() {
             <div className="cc-swap-shell">
               <button
                 type="button"
-                className={`cc-swap${swapping ? ' spinning' : ''}`}
+                className="cc-swap"
                 onClick={onSwap}
                 aria-label="Swap currencies"
               >
-                <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-                  <path d="M3 6.5 H13 M11 4.5 L13 6.5 L11 8.5" fill="none" stroke="#0F172A" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M15 11.5 H5 M7 9.5 L5 11.5 L7 13.5" fill="none" stroke="#0F172A" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                <span
+                  className="cc-swap-icon"
+                  style={{
+                    display: 'block',
+                    transform: `rotate(${rotation}deg)`,
+                    transition: 'transform var(--dur) cubic-bezier(.5,0,.3,1)',
+                  }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+                    <path d="M3 6.5 H13 M11 4.5 L13 6.5 L11 8.5" fill="none" stroke="#0F172A" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M15 11.5 H5 M7 9.5 L5 11.5 L7 13.5" fill="none" stroke="#0F172A" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
               </button>
             </div>
           </div>
@@ -726,38 +663,26 @@ export default function CurrencyConverter() {
               }}>
                 They Get
               </div>
-              <EditableAmount value={targetAmt} currency={target} onChange={onEditTarget} />
+              <EditableAmount value={targetAmt} currency={target} />
             </div>
           </div>
         </div>
 
-        {/* Fee line */}
-        <div style={{
-          marginTop: 18, paddingTop: 14,
-          borderTop: '1px dashed var(--cc-border)',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--cc-fg3)', letterSpacing: '-0.005em' }}>Fee</span>
-          <span className="cc-mono" style={{ fontSize: 12, fontWeight: 500, color: 'var(--cc-fg3)', letterSpacing: '0' }}>
-            <span style={{ color: 'var(--cc-fg1)', fontWeight: 600 }}>$0.00</span> · No hidden fees
-          </span>
-        </div>
       </div>
 
-      {/* Footer hint, outside the white panel, on the gray shell */}
-      <div style={{ textAlign: 'center', padding: '12px 8px 4px' }}>
-        <span className="cc-mono" style={{ fontSize: 11, fontWeight: 500, color: 'var(--cc-fg3)', letterSpacing: '0' }}>
-          Tap a currency to switch · use the arrow to swap
-        </span>
+      {/* Footer hint, inside the outer grey wrapper */}
+      <span className="cc-footer-hint cc-mono">
+        Tap a currency to switch · use the arrow to swap
+      </span>
       </div>
 
       <CurrencyPicker
         open={pickerFor !== null}
         exclude={pickerFor === 'source' ? target.code : source.code}
         onPick={pickerFor === 'source' ? onPickSource : onPickTarget}
-        onClose={() => setPickerFor(null)}
+        onClose={closePicker}
         anchor={pickerAnchor}
       />
-    </div>
+    </>
   )
 }

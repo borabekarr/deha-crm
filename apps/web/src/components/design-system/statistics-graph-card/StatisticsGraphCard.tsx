@@ -94,6 +94,32 @@ const CAPS: string[] = [
 ]
 
 // ---------------------------------------------------------------------------
+// rangeIcon helpers — shared between rangepop buttons and the head chip slot.
+// The hook's rangeIconHTML() mirrors these exactly for imperative chip updates.
+// ---------------------------------------------------------------------------
+
+function RangeIconSvgWeekly() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+      <rect x="1.5" y="3.5" width="15" height="13" rx="2" stroke="currentColor" strokeWidth="1.6" fill="none"/>
+      <path d="M1.5 7.5h15" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+      <path d="M5.5 1.5v4M12.5 1.5v4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+      <text x="9" y="14.5" textAnchor="middle" fill="currentColor" fontSize="5.8" fontWeight="900" fontFamily="Montserrat,sans-serif">7</text>
+    </svg>
+  )
+}
+
+function RangeIconSvgQuarterly() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+      <circle cx="9" cy="9" r="7.5" stroke="currentColor" strokeWidth="1.4" fill="none" opacity="0.3"/>
+      <path d="M9 1.5A7.5 7.5 0 0 1 16.5 9L13.5 9A4.5 4.5 0 0 0 9 4.5Z" fill="currentColor"/>
+      <circle cx="9" cy="9" r="4.5" stroke="currentColor" strokeWidth="1.4" fill="none" opacity="0.3"/>
+    </svg>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // renderCap — converts "<b>foo</b> bar" strings to JSX without innerHTML
 // ---------------------------------------------------------------------------
 
@@ -141,59 +167,66 @@ function CardItem({ data, cap }: CardItemProps) {
             }
           }}
         >
-          {/* chart layer */}
-          <div className="sg-chart" />
-          <div className="sg-dot" />
-          <div className="sg-flash" />
-
-          {/* content layer */}
+          {/* inner card: white surface with chart + content stacked inside */}
           <div className="sg-inner">
-            <div className="sg-head">
-              <div className="sg-id">
-                <div className="sg-avatar">{avatarInner}</div>
-                <div style={{ minWidth: 0 }}>
-                  <div className="sg-name">{d.name}</div>
+            {/* chart layer (z-index 0) and dot/flash (z-index 1) behind .sg-content */}
+            <div className="sg-chart" />
+            <div className="sg-dot" />
+            <div className="sg-flash" />
+
+            {/* flex content (z-index 3) renders above chart and dots */}
+            <div className="sg-content">
+              <div className="sg-head">
+                <div className="sg-id">
+                  <div className="sg-avatar">{avatarInner}</div>
+                  <div style={{ minWidth: 0 }}>
+                    <div className="sg-name">{d.name}</div>
+                  </div>
+                </div>
+                <div className="sg-sync-col">
+                  <button type="button" className="sg-sync" data-sync aria-label="Sync data">
+                    <span className="material-symbols-outlined">sync</span>
+                    <span className="sg-upd">2h ago</span>
+                  </button>
+                  <button type="button" className="sg-rangechip" data-rangechip aria-label="Change trend range">
+                    {/* icon slot — hook replaces innerHTML on range change via rangeIconHTML() */}
+                    <span className="sg-rangechip-icon-slot">
+                      <span className="material-symbols-outlined sg-rangechip-icon">calendar_month</span>
+                    </span>
+                    <span className="sg-rangechip-label">Monthly</span>
+                    <span className="material-symbols-outlined">expand_more</span>
+                  </button>
                 </div>
               </div>
-              <div className="sg-sync-col">
-                <button type="button" className="sg-sync" data-sync aria-label="Sync data">
-                  <span className="material-symbols-outlined">sync</span>
-                  <span className="sg-upd">2h ago</span>
+
+              <div className="sg-spacer" />
+
+              <div className="sg-vlabel">
+                {d.vlabel}
+              </div>
+              <div className="sg-value" data-value />
+
+              <div className="sg-sub2">
+                <span className="sg-delta-pill" />
+                <span className="sg-period" />
+              </div>
+
+              <div className="sg-meter">
+                <div className="sg-meter-top">
+                  <span className="sg-meter-label">{d.likeLabel}</span>
+                  <span className="sg-meter-val">0%</span>
+                </div>
+                <div className="sg-meter-track">
+                  <div className="sg-meter-fill" />
+                </div>
+              </div>
+
+              <div className="sg-actions">
+                <button type="button" className="sg-cta" data-cta>
+                  <span className="material-symbols-outlined">insights</span>
+                  Get Optimization Report
                 </button>
-                <button type="button" className="sg-rangechip" data-rangechip aria-label="Change trend range">
-                  Monthly
-                  <span className="material-symbols-outlined">expand_more</span>
-                </button>
               </div>
-            </div>
-
-            <div className="sg-spacer" />
-
-            <div className="sg-vlabel">
-              {d.vlabel}
-            </div>
-            <div className="sg-value" data-value />
-
-            <div className="sg-sub2">
-              <span className="sg-delta-pill" />
-              <span className="sg-period" />
-            </div>
-
-            <div className="sg-meter">
-              <div className="sg-meter-top">
-                <span className="sg-meter-label">{d.likeLabel}</span>
-                <span className="sg-meter-val">0%</span>
-              </div>
-              <div className="sg-meter-track">
-                <div className="sg-meter-fill" />
-              </div>
-            </div>
-
-            <div className="sg-actions">
-              <button type="button" className="sg-cta" data-cta>
-                <span className="material-symbols-outlined">insights</span>
-                Get Optimization Report
-              </button>
             </div>
           </div>
 
@@ -210,23 +243,14 @@ function CardItem({ data, cap }: CardItemProps) {
                 <span className="material-symbols-outlined">today</span>Today
               </button>
               <button type="button" data-r="Weekly">
-                <svg width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-                  <rect x="1.5" y="3.5" width="15" height="13" rx="2" stroke="currentColor" strokeWidth="1.6" fill="none"/>
-                  <path d="M1.5 7.5h15" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
-                  <path d="M5.5 1.5v4M12.5 1.5v4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
-                  <text x="9" y="14.5" textAnchor="middle" fill="currentColor" fontSize="5.8" fontWeight="900" fontFamily="Montserrat,sans-serif">7</text>
-                </svg>
+                <RangeIconSvgWeekly />
                 Weekly
               </button>
               <button type="button" className="active" data-r="Monthly">
                 <span className="material-symbols-outlined">calendar_month</span>Monthly
               </button>
               <button type="button" data-r="Quarterly">
-                <svg width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-                  <circle cx="9" cy="9" r="7.5" stroke="currentColor" strokeWidth="1.4" fill="none" opacity="0.3"/>
-                  <path d="M9 1.5A7.5 7.5 0 0 1 16.5 9L13.5 9A4.5 4.5 0 0 0 9 4.5Z" fill="currentColor"/>
-                  <circle cx="9" cy="9" r="4.5" stroke="currentColor" strokeWidth="1.4" fill="none" opacity="0.3"/>
-                </svg>
+                <RangeIconSvgQuarterly />
                 Quarterly
               </button>
               <button type="button" data-r="Yearly">

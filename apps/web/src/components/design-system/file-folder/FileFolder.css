@@ -1,7 +1,14 @@
 /* FileFolder.css — verbatim inline styles from components-file-folder.html */
 
 body { background:#F8FAFC; }
-.card { display:flex; flex-direction:column; align-items:center; gap:6px; position:relative; }
+/* R2: strip preview background — show only the folder components, no grey card surface.
+   Scoped to :has(.folder) so this bare-.card rule cannot leak across the shared global
+   stylesheet onto other pages (e.g. the card-primitives .card.cards-outer shell). */
+.card:has(.folder) { display:flex; flex-direction:column; align-items:center; gap:6px; position:relative; background:transparent; }
+/* Dark `.card` is forced #0F172A + emerald gradient by global _darkmode.css with !important;
+   re-scope to THIS component only (.card holding .folder) so the preview surface is stripped
+   in dark too, without regressing other components' dark cards. */
+html.dark .card:has(.folder) { background:transparent !important; background-image:none !important; }
 
 .material-symbols-outlined {
   font-family:'Material Symbols Outlined'; font-weight:normal; font-style:normal; line-height:1;
@@ -140,10 +147,56 @@ body { background:#F8FAFC; }
   font-size:13px; font-weight:600; color:var(--ff-sub);
 }
 .ff-dots {
-  position:absolute; right:24px; top:140px;
-  color:var(--ff-sub); display:flex; gap:4px;
+  position:absolute; right:18px; top:134px; z-index:6;
+  color:var(--ff-sub); display:flex; align-items:center; gap:4px;
+  padding:6px; margin:0; border:none; border-radius:9999px; background:transparent;
+  cursor:pointer; -webkit-tap-highlight-color:transparent;
+  transition:background calc(140ms * var(--anim-mult, 1)) ease, color calc(140ms * var(--anim-mult, 1)) ease, transform calc(120ms * var(--anim-mult, 1)) ease;
 }
+.ff-dots:hover { background:rgba(15,23,42,0.06); color:var(--ff-title); }
+html.dark .ff-dots:hover { background:rgba(255,255,255,0.08); }
+.ff-dots:active { transform:scale(0.92); }
+.ff-dots.open { background:rgba(15,23,42,0.08); color:var(--ff-title); }
+html.dark .ff-dots.open { background:rgba(255,255,255,0.10); }
+.ff-dots:focus-visible { outline:2px solid #5594F1; outline-offset:2px; }
 .ff-dots i { width:5px; height:5px; border-radius:50%; background:currentColor; display:block; }
+
+/* ── 3-dots actionable dropdown ─────────────────────────────────────────── */
+.ff-menu {
+  position:absolute; right:18px; top:158px; z-index:60; min-width:152px;
+  display:flex; flex-direction:column; gap:2px; padding:6px;
+  background:var(--card-bg); border:1px solid var(--card-border); border-radius:14px;
+  box-shadow:0 18px 44px -12px rgba(15,23,42,0.40), inset 0 0 0 1px rgba(15,23,42,0.04);
+  font-family:'Montserrat';
+  opacity:0; transform:scale(0.94) translateY(-6px); transform-origin:top right; pointer-events:none;
+  transition:opacity calc(160ms * var(--anim-mult, 1)) ease,
+             transform calc(220ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1);
+}
+.ff-menu.show { opacity:1; transform:scale(1) translateY(0); pointer-events:auto; }
+html.dark .ff-menu {
+  box-shadow:0 18px 44px -10px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
+}
+.ff-menu-item {
+  display:flex; align-items:center; gap:9px; width:100%;
+  padding:8px 10px; margin:0; border:none; border-radius:9px; background:transparent;
+  font-family:'Montserrat'; font-size:12.5px; font-weight:700; letter-spacing:-0.005em;
+  color:var(--ff-title); text-align:left; cursor:pointer;
+  transition:background calc(130ms * var(--anim-mult, 1)) ease;
+}
+.ff-menu-item:hover { background:rgba(15,23,42,0.06); }
+html.dark .ff-menu-item { color:#F1F5F9; }
+html.dark .ff-menu-item:hover { background:rgba(255,255,255,0.07); }
+.ff-menu-item .material-symbols-outlined { font-size:17px; color:var(--ff-sub); }
+.ff-menu-item--danger { color:#EF4444; }
+.ff-menu-item--danger .material-symbols-outlined { color:#EF4444; }
+.ff-menu-item--danger:hover { background:rgba(239,68,68,0.10); }
+html.dark .ff-menu-item--danger { color:#FB7185; }
+html.dark .ff-menu-item--danger .material-symbols-outlined { color:#FB7185; }
+
+/* invisible full-card catcher to dismiss the dropdown on outside click */
+.ff-menu-catch { position:absolute; inset:0; z-index:55; background:transparent; }
+/* lift the folder (and its z-60 menu) above the z-55 catcher while its menu is open */
+.folder.menu-open { z-index:70; }
 .ff-count {
   position:absolute; left:26px; bottom:22px;
   display:flex; align-items:center; gap:7px; white-space:nowrap;
@@ -208,28 +261,26 @@ body { background:#F8FAFC; }
 .ff-scrim.show { opacity:1; pointer-events:auto; }
 html.dark .ff-scrim { background:rgba(0,0,0,0.5); }
 
-/* Outer grey tray shell — carries positioning/animation */
-.ff-pop-shell {
+/* Grey outer shell — carries absolute positioning, width, and entrance animation */
+.ff-pop-outer {
   position:absolute; z-index:50; width:320px; box-sizing:border-box;
-  background:#D4DCE8; border-radius:30px; padding:10px;
+  background:var(--shell-bg); border-radius:24px; padding:9px;
   opacity:0; transform:scale(0.9) translateY(8px); transform-origin:top center; pointer-events:none;
   transition: opacity calc(220ms * var(--anim-mult, 1)) ease,
               transform calc(320ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1);
 }
-.ff-pop-shell.show { opacity:1; transform:scale(1) translateY(0); pointer-events:auto; }
-html.dark .ff-pop-shell { background:#1E293B; }
+.ff-pop-outer.show { opacity:1; transform:scale(1) translateY(0); pointer-events:auto; }
+html.dark .ff-pop-outer { border:1px solid #334155; }
 
-/* Inner white card */
+/* Canonical inner card */
 .ff-pop {
   --ff-pop-bg:#FFFFFF; --ff-pop-bd:rgba(15,23,42,0.08);
   --ff-pop-fg:#0F172A; --ff-pop-fg3:#64748B;
   --ff-row:#F6F8FC; --ff-row-bd:rgba(15,23,42,0.05); --ff-row-hover:#EEF2F9;
   width:100%; box-sizing:border-box;
   background:var(--ff-pop-bg); border-radius:20px;
-  border:1px solid #CBD5E1; border-top-color:rgba(255,255,255,0.9);
-  box-shadow:0 26px 64px -16px rgba(15,23,42,0.42),
-             inset 0 1px 0 rgba(255,255,255,1),
-             inset 0 0 0 1px rgba(15,23,42,0.04);
+  border:1px solid #CBD5E1;
+  box-shadow:inset 0 0 0 1px rgba(15,23,42,0.04);
   padding:15px 15px 14px; font-family:'Montserrat';
 }
 html.dark .ff-pop {
@@ -237,8 +288,7 @@ html.dark .ff-pop {
   --ff-pop-fg:#F1F5F9; --ff-pop-fg3:#94A3B8;
   --ff-row:#0F172A; --ff-row-bd:rgba(255,255,255,0.05); --ff-row-hover:#273449;
   border:1px solid #334155; border-top-color:rgba(255,255,255,0.22);
-  box-shadow:0 26px 64px -14px rgba(0,0,0,0.7),
-             inset 0 1px 0 rgba(255,255,255,.05),
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),
              inset 0 0 0 1px rgba(255,255,255,.04);
 }
 .ff-pop-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
@@ -258,6 +308,7 @@ html.dark .ff-pop {
 .ff-file {
   display:flex; align-items:center; gap:10px; padding:8px; border-radius:12px;
   background:var(--ff-row); border:1px solid var(--ff-row-bd); cursor:pointer;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -1px 0 rgba(15,23,42,0.06);
   transition:background calc(140ms * var(--anim-mult, 1)) ease, transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
 }
 .ff-file:hover { background:var(--ff-row-hover); transform:translateX(2px); }

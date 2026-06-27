@@ -23,6 +23,8 @@ import { iconClass } from '../../../lib/iconClass'
 import { useCardRef, useTimerRef, useOverlayRef } from './delete-modal-hook'
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
+import '../../../../design-system/preview/_shared-feedback.css'
+import '../buttons/Buttons.css'
 import './DeleteModal.css'
 
 // ---------------------------------------------------------------------------
@@ -40,10 +42,10 @@ export interface DeleteModalProps {
 }
 
 // ---------------------------------------------------------------------------
-// Component
+// Component (named export — for direct controlled usage)
 // ---------------------------------------------------------------------------
-export default function DeleteModal({
-  open = true,
+export function DeleteModal({
+  open = false,
   onClose,
   onConfirm,
   title = 'Delete Project',
@@ -172,7 +174,6 @@ export default function DeleteModal({
       }}
     >
       <div className="dm-shell">
-        {/* eslint-disable-next-line jsx-a11y/prefer-tag-over-role */}
         <div
           ref={cardRef}
           className={`dm-card${shake ? ' dm-confirming' : ''}`}
@@ -194,9 +195,13 @@ export default function DeleteModal({
             </span>
           </button>
 
-          <div className="dm-badge" data-done={isDone}>
+          <div
+            className={`dm-badge icon-badge icon-badge--lg${isDone ? ' dm-badge--done' : ''}`}
+            style={{ '--icon-c': isDone ? '#10B981' : '#EF4444' } as React.CSSProperties}
+            data-done={isDone}
+          >
             <span className="material-symbols-outlined" aria-hidden="true">
-              {isDone ? 'check' : 'warning'}
+              {isDone ? 'check_circle' : 'delete'}
             </span>
           </div>
 
@@ -212,18 +217,26 @@ export default function DeleteModal({
             <div className="dm-actions">
               <button
                 type="button"
-                className="dm-btn dm-btn--keep"
+                className="dm-btn btn-discuss"
                 disabled={phase !== 'idle'}
                 onClick={() => phase === 'idle' && onClose?.()}
               >
+                <span className={iconClass('arrow_back')} aria-hidden="true">
+                  arrow_back
+                </span>
                 {cancelLabel}
               </button>
               <button
                 type="button"
-                className="dm-btn dm-btn--delete"
+                className="dm-btn btn-delete"
                 disabled={phase !== 'idle'}
                 onClick={handleConfirm}
               >
+                {phase === 'idle' && (
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    delete
+                  </span>
+                )}
                 {confirmContent}
               </button>
             </div>
@@ -233,3 +246,32 @@ export default function DeleteModal({
     </div>
   )
 }
+
+// ---------------------------------------------------------------------------
+// Preview wrapper — default export used by the design-system registry.
+// Holds local open state; renders a trigger button + the controlled modal.
+// No useEffect.
+// ---------------------------------------------------------------------------
+function DeleteModalPreview() {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <div className="dm-preview-trigger">
+        <button
+          type="button"
+          className="btn-delete dm-preview-btn"
+          onClick={() => setOpen(true)}
+        >
+          <span className="material-symbols-outlined" aria-hidden="true">
+            delete
+          </span>
+          Delete account
+        </button>
+      </div>
+      <DeleteModal open={open} onClose={() => setOpen(false)} />
+    </>
+  )
+}
+
+export default DeleteModalPreview

@@ -136,6 +136,8 @@ interface StatusCardProps {
   alerts?: number
   time?: string
   loading?: boolean
+  /** Override badge background via --icon-c (e.g. '#EF4444'). Falls back to --tone. */
+  iconColor?: string
 }
 
 function StatusCardInner({
@@ -146,6 +148,7 @@ function StatusCardInner({
   alerts = 3,
   time = '1 min',
   loading = false,
+  iconColor,
 }: StatusCardProps) {
   const [open, setOpen] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -201,12 +204,17 @@ function StatusCardInner({
     })
   }, [issueId])
 
+  const stageVars = {
+    '--tone': T.color,
+    ...(iconColor ? { '--icon-c': iconColor } : {}),
+  } as React.CSSProperties
+
   if (loading) {
-    return <div className="sc-stage" style={{ '--tone': T.color } as React.CSSProperties}><Skeleton /></div>
+    return <div className="sc-stage" style={stageVars}><Skeleton /></div>
   }
 
   return (
-    <div className="sc-stage" style={{ '--tone': T.color } as React.CSSProperties}>
+    <div className="sc-stage" style={stageVars}>
       <article
         className={'sc-card' + (pressed ? ' is-pressed' : '')}
         data-open={open ? 'true' : 'false'}
@@ -262,7 +270,52 @@ function StatusCardInner({
   )
 }
 
-/* ---- default export with demo defaults ---- */
+/* ---- default export — five variants on one page ---- */
 export default function StatusCard(props: StatusCardProps = {}) {
-  return <StatusCardInner {...props} />
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center', padding: '24px 0' }}>
+      {/* original — warning/yellow */}
+      <StatusCardInner {...props} />
+      {/* red */}
+      <StatusCardInner
+        tone="danger"
+        title="Payment gateway error"
+        body="Three consecutive payment attempts failed on the enterprise account. Stripe webhook timeout suspected."
+        issueId="PAY-07"
+        alerts={5}
+        time="3 min"
+        iconColor="#EF4444"
+      />
+      {/* orange */}
+      <StatusCardInner
+        tone="warning"
+        title="Budget threshold reached"
+        body="Monthly cloud spend has reached 90% of the allocated budget. Usage spike detected in EU-West region."
+        issueId="BDG-03"
+        alerts={2}
+        time="8 min"
+        iconColor="#F97316"
+      />
+      {/* blue */}
+      <StatusCardInner
+        tone="info"
+        title="Scheduled maintenance"
+        body="Database cluster will undergo rolling restarts tonight between 02:00 and 04:00 UTC. No downtime expected."
+        issueId="SYS-19"
+        alerts={1}
+        time="15 min"
+        iconColor="#2A6FDB"
+      />
+      {/* green */}
+      <StatusCardInner
+        tone="success"
+        title="Data import complete"
+        body="All 14,382 contact records were imported successfully. Duplicate detection removed 47 redundant entries."
+        issueId="IMP-04"
+        alerts={0}
+        time="22 min"
+        iconColor="#10B981"
+      />
+    </div>
+  )
 }

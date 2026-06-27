@@ -48,6 +48,28 @@ const RANGE_PTS: Record<string, number> = {
   Yearly: 12,
 }
 
+// Material Symbols icon name for ranges that use a glyph (not a custom SVG)
+const RANGE_ICONS: Record<string, string> = {
+  Today: 'today',
+  Monthly: 'calendar_month',
+  Yearly: 'event_repeat',
+}
+
+/**
+ * Returns the HTML string for the head-chip icon slot for the given range.
+ * Mirrors the RangeIconSvgWeekly / RangeIconSvgQuarterly JSX in StatisticsGraphCard.tsx
+ * exactly so chip and rangepop always show the same glyph.
+ */
+function rangeIconHTML(range: string): string {
+  if (range === 'Weekly') {
+    return `<svg class="sg-rangechip-icon" width="13" height="13" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><rect x="1.5" y="3.5" width="15" height="13" rx="2" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M1.5 7.5h15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M5.5 1.5v4M12.5 1.5v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><text x="9" y="14.5" text-anchor="middle" fill="currentColor" font-size="5.8" font-weight="900" font-family="Montserrat,sans-serif">7</text></svg>`
+  }
+  if (range === 'Quarterly') {
+    return `<svg class="sg-rangechip-icon" width="13" height="13" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><circle cx="9" cy="9" r="7.5" stroke="currentColor" stroke-width="1.4" fill="none" opacity="0.3"/><path d="M9 1.5A7.5 7.5 0 0 1 16.5 9L13.5 9A4.5 4.5 0 0 0 9 4.5Z" fill="currentColor"/><circle cx="9" cy="9" r="4.5" stroke="currentColor" stroke-width="1.4" fill="none" opacity="0.3"/></svg>`
+  }
+  return `<span class="material-symbols-outlined sg-rangechip-icon">${RANGE_ICONS[range] ?? 'calendar_month'}</span>`
+}
+
 function qs<T extends Element>(sel: string, root: Element): T | null {
   return root.querySelector<T>(sel)
 }
@@ -288,14 +310,26 @@ export function sgcCardRef(elOrNull: HTMLElement | null, d: SgCardData): void {
     b.classList.add('just-picked')
     const label = (b.dataset as { r?: string }).r ?? 'Monthly'
     pop?.classList.add('loading')
+    // Capture previous value for tween
+    const prevValue = d.value
     setTimeout(() => {
-      pop?.classList.remove('loading')
-      if (chip?.firstChild) (chip.firstChild as Text).textContent = label
+      // Update chip label + icon — .loading stays on until after the fade (height stable)
+      const labelSpan = chip?.querySelector<HTMLElement>('.sg-rangechip-label')
+      if (labelSpan) labelSpan.textContent = label
+      const iconSlot = chip?.querySelector<HTMLElement>('.sg-rangechip-icon-slot')
+      if (iconSlot) iconSlot.innerHTML = rangeIconHTML(label)
       d._rangeLabel = label
       d._series = genSeries(RANGE_PTS[label] ?? 26, d.dir === 'up' ? 1 : -1)
+      // Derive a new display value from the series so the number visibly changes
+      const s = d._series
+      const rawMean = s.reduce((a, v) => a + v, 0) / s.length
+      // Scale mean (0-100 range) to ±15% of the base card value
+      d.value = Math.round(prevValue * (0.85 + (rawMean / 100) * 0.30))
       buildChart(el, d)
+      tweenValue(el, prevValue, d)
+      pop?.classList.remove('loading')
       closeFilters()
-    }, 760)
+    }, 450)
   }
 
   function onChipClick(e: MouseEvent): void { e.stopPropagation(); toggleFilters() }
@@ -321,6 +355,10 @@ export function sgcCardRef(elOrNull: HTMLElement | null, d: SgCardData): void {
   function onCardClick(e: MouseEvent): void {
     const target = e.target as HTMLElement
     if (target.closest('[data-rangepop],[data-rangechip],[data-cta],[data-sync]')) return
+    el.classList.remove('tap')
+    void el.offsetWidth
+    el.classList.add('tap')
+    setTimeout(() => el.classList.remove('tap'), 140)
     toggleFilters()
   }
 

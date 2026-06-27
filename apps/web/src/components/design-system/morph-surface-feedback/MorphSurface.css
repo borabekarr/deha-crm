@@ -1,0 +1,317 @@
+/* =========================================================================
+   MorphSurface.css — .ms2-* prefix (distinct from model-selector .ms-)
+   All durations wrapped in calc(Xms * var(--anim-mult,1)) for global
+   slow-down support. Dark mode via html.dark .ms2-*.
+   ========================================================================= */
+
+/* ── Stage: reserves room for the expanded footprint ─────────────────────── */
+.ms2-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  --ms2-ease: cubic-bezier(0.32, 1.22, 0.4, 1);
+  --ms2-surface-bg: var(--card-bg, var(--bg-card-solid, #ffffff));
+}
+
+/* ── Morphing surface ─────────────────────────────────────────────────────── */
+.ms2-surface {
+  position: relative;
+  overflow: hidden;
+  /* collapsed defaults — overridden by inline styles for the actual values */
+  width: 360px;
+  height: 44px;
+  border-radius: 9999px;
+  background: var(--ms2-surface-bg);
+  box-shadow:
+    0 1px 1px rgba(15, 23, 42, 0.05),
+    inset 0 1px 1px rgba(255, 255, 255, 0.55),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 10px 28px -14px rgba(15, 23, 42, 0.22);
+  cursor: pointer;
+  transition:
+    width calc(440ms * var(--anim-mult, 1)) var(--ms2-ease),
+    height calc(440ms * var(--anim-mult, 1)) var(--ms2-ease),
+    border-radius calc(380ms * var(--anim-mult, 1)) var(--ms2-ease),
+    box-shadow calc(320ms * var(--anim-mult, 1)) ease;
+}
+
+.ms2-surface:not(.ms2-open):hover {
+  filter: brightness(1.03);
+}
+
+.ms2-surface.ms2-open {
+  border-radius: 14px;
+  cursor: default;
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 26px 60px -18px rgba(15, 23, 42, 0.32),
+    0 6px 16px -10px rgba(15, 23, 42, 0.2);
+}
+
+/* ── Morphing brand dot — anchored to the fixed BOTTOM edge ──────────────── */
+.ms2-dot {
+  position: absolute;
+  left: 16px;
+  bottom: 13px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background-color: #10b981;
+  background-image:
+    radial-gradient(ellipse at top right, rgba(255, 255, 255, 0.22) 0%, transparent 60%),
+    linear-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+  background-size: cover, 6px 6px, 6px 6px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(15, 23, 42, 0.1),
+    0 1px 3px rgba(16, 185, 129, 0.45);
+  z-index: 3;
+  transition:
+    bottom calc(440ms * var(--anim-mult, 1)) var(--ms2-ease),
+    left calc(440ms * var(--anim-mult, 1)) var(--ms2-ease),
+    width calc(440ms * var(--anim-mult, 1)) var(--ms2-ease),
+    height calc(440ms * var(--anim-mult, 1)) var(--ms2-ease),
+    background-size calc(440ms * var(--anim-mult, 1)) var(--ms2-ease);
+}
+
+/* dot glides up to form top-left when open */
+.ms2-surface.ms2-open .ms2-dot {
+  bottom: 173px;
+  left: 16px;
+  width: 8px;
+  height: 8px;
+  background-size: cover, 4px 4px, 4px 4px;
+}
+
+/* success check inside dot */
+.ms2-check {
+  width: 13px;
+  height: 13px;
+  opacity: 0;
+  transform: scale(0.4);
+  transition:
+    opacity calc(180ms * var(--anim-mult, 1)) ease,
+    transform calc(280ms * var(--anim-mult, 1)) cubic-bezier(0.32, 1.5, 0.5, 1);
+}
+
+.ms2-dot.ms2-success .ms2-check {
+  opacity: 1;
+  transform: scale(1);
+  transition-delay: calc(260ms * var(--anim-mult, 1));
+}
+
+/* ── Collapsed bar (label + trigger button) ───────────────────────────────── */
+.ms2-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 44px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px 0 42px;
+  opacity: 1;
+  transition: opacity calc(200ms * var(--anim-mult, 1)) ease;
+}
+
+.ms2-surface.ms2-open .ms2-bar {
+  opacity: 0;
+  pointer-events: none;
+  transition-duration: calc(120ms * var(--anim-mult, 1));
+}
+
+.ms2-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fg2, #475569);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ms2-trigger {
+  flex-shrink: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--fg3, #64748b);
+  padding: 6px 12px;
+  border-radius: 9999px;
+  transition:
+    color calc(160ms * var(--anim-mult, 1)) ease,
+    background calc(160ms * var(--anim-mult, 1)) ease;
+}
+
+.ms2-trigger:hover {
+  color: var(--fg1, #0f172a);
+  background: var(--bg-chip, rgba(15, 23, 42, 0.06));
+}
+
+/* ── Expanded feedback form ───────────────────────────────────────────────── */
+.ms2-form {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity calc(180ms * var(--anim-mult, 1)) ease,
+    pointer-events 0ms calc(180ms * var(--anim-mult, 1));
+}
+
+.ms2-surface.ms2-open .ms2-form {
+  opacity: 1;
+  pointer-events: auto;
+  transition:
+    opacity calc(180ms * var(--anim-mult, 1)) ease calc(90ms * var(--anim-mult, 1));
+}
+
+.ms2-form-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 4px 7px 0;
+}
+
+.ms2-form-title {
+  margin-left: 32px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--fg3, #64748b);
+  letter-spacing: -0.01em;
+}
+
+.ms2-submit {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.ms2-submit kbd {
+  height: 22px;
+  min-width: 22px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--fg3, #64748b);
+  background: var(--bg-chip, rgba(15, 23, 42, 0.06));
+  border-radius: 7px;
+  box-shadow: inset 0 0 0 1px var(--border-hairline, rgba(15, 23, 42, 0.12));
+  transition:
+    color calc(140ms * var(--anim-mult, 1)) ease,
+    background calc(140ms * var(--anim-mult, 1)) ease;
+}
+
+.ms2-submit:hover kbd {
+  color: var(--fg1, #0f172a);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.ms2-textarea {
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+  resize: none;
+  border: none;
+  outline: none;
+  padding: 12px 14px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--fg1, #0f172a);
+  background: var(--bg-chip, rgba(15, 23, 42, 0.04));
+  border-radius: 10px;
+  box-shadow: var(--shadow-recessed, inset 0 2px 4px rgba(15, 23, 42, 0.06));
+  caret-color: #10b981;
+}
+
+.ms2-textarea::placeholder {
+  color: var(--fg4, #94a3b8);
+  font-weight: 500;
+}
+
+/* ── Dark mode ────────────────────────────────────────────────────────────── */
+html.dark .ms2-wrap {
+  --ms2-surface-bg: #1e293b;
+}
+
+html.dark .ms2-surface {
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 10px 28px -14px rgba(0, 0, 0, 0.4);
+}
+
+html.dark .ms2-surface.ms2-open {
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.06),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 26px 60px -18px rgba(0, 0, 0, 0.5),
+    0 6px 16px -10px rgba(0, 0, 0, 0.3);
+}
+
+html.dark .ms2-label {
+  color: var(--fg2, #94a3b8);
+}
+
+html.dark .ms2-trigger {
+  color: var(--fg3, #64748b);
+}
+
+html.dark .ms2-trigger:hover {
+  color: var(--fg1, #f1f5f9);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+html.dark .ms2-form-title {
+  color: var(--fg3, #64748b);
+}
+
+html.dark .ms2-submit kbd {
+  color: var(--fg3, #64748b);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+html.dark .ms2-submit:hover kbd {
+  background: rgba(16, 185, 129, 0.14);
+  color: #6ee7b7;
+}
+
+html.dark .ms2-textarea {
+  color: var(--fg1, #f1f5f9);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+html.dark .ms2-textarea::placeholder {
+  color: var(--fg4, #475569);
+}

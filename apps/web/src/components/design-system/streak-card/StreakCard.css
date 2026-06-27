@@ -20,8 +20,9 @@
 .stk-root .frame {
   padding: 40px 24px;
   display: flex; flex-direction: column; align-items: center;
-  background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.10) 0%, rgba(248,250,252,1) 50%, #FFFFFF 100%);
+  background: #F8FAFC; background-image: none;
 }
+html.dark .stk-root .frame { background: #0B1220; background-image: none; }
 
 /* ─────────────────────────────────────────────────────────────────────
    The card owns a private --sc-* token set that flips under html.dark.

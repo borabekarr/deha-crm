@@ -116,7 +116,6 @@ export default function Multisteps() {
       // stage is a DOM element with augmented properties — the assignment is
       // to a mutable DOM property, not a React-managed value. Cast to bypass
       // the immutability lint which fires on values accessed through refs.
-      // eslint-disable-next-line react-hooks/immutability
       stage.__msPrev = cur
       stage.__msLayout(clamped, true)
     }

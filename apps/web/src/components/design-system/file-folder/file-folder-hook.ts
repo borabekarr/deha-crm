@@ -30,6 +30,11 @@ export interface PopState {
   subtitle: string
 }
 
+export interface MenuState {
+  isOpen: boolean
+  folderId: string | null
+}
+
 export function useFileFolder() {
   const [blueState, setBlueState] = useState<FolderState>({ isPlaying: false, isTapped: false })
   const [redState, setRedState] = useState<FolderState>({ isPlaying: false, isTapped: false })
@@ -38,6 +43,7 @@ export function useFileFolder() {
     title: 'Work files',
     subtitle: '2,386 files · Notes & More',
   })
+  const [menuState, setMenuState] = useState<MenuState>({ isOpen: false, folderId: null })
 
   const cardRef = useRef<HTMLDivElement>(null)
   const blueFolderRef = useRef<HTMLDivElement>(null)
@@ -89,6 +95,29 @@ export function useFileFolder() {
     setPopState(s => ({ ...s, isOpen: false }))
   }, [])
 
+  // Item 3: clicking a file row inside the popover body closes the popover.
+  const handleFileClick = useCallback(() => {
+    setPopState(s => ({ ...s, isOpen: false }))
+  }, [])
+
+  // Item 4: 3-dots opens its own actionable menu and must NOT open the folder popover.
+  const toggleMenu = useCallback((folderId: string) => {
+    setMenuState(s =>
+      s.isOpen && s.folderId === folderId
+        ? { isOpen: false, folderId: null }
+        : { isOpen: true, folderId },
+    )
+  }, [])
+
+  const closeMenu = useCallback(() => {
+    setMenuState({ isOpen: false, folderId: null })
+  }, [])
+
+  // Menu action stub (rename / delete). Closes the menu after acting.
+  const handleMenuAction = useCallback((_action: string) => {
+    setMenuState({ isOpen: false, folderId: null })
+  }, [])
+
   const handleFolderClick = useCallback((
     isHot: boolean,
     folderEl: HTMLDivElement | null,
@@ -126,6 +155,7 @@ export function useFileFolder() {
     blueState,
     redState,
     popState,
+    menuState,
     cardRef,
     cardCallbackRef,
     blueFolderRef,
@@ -133,7 +163,11 @@ export function useFileFolder() {
     popRef,
     playAll,
     closePop,
+    handleFileClick,
     handleBlueClick,
     handleRedClick,
+    toggleMenu,
+    closeMenu,
+    handleMenuAction,
   }
 }

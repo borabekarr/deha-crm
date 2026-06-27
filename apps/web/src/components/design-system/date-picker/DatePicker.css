@@ -14,14 +14,29 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── Frame ────────────────────────────────────────────────────────────────── */
-.dp-frame {
-  padding: 40px 24px 48px;
+/* ── .dp-shell -- flex-column wrapper (no background; was full-bleed grey shell) */
+.dp-shell {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
-  background-color: var(--slate-100);
+  gap: 10px;
+}
+
+/* ── .dp-outer -- grey card wrapping white .dp-panel (inner-card pattern) */
+.dp-outer {
+  padding: 10px;
+  background: var(--shell-bg, #d4dce8);
+  border-radius: 28px;
+  box-shadow:
+    0 10px 30px rgba(15,23,42,0.12),
+    0 2px 8px rgba(15,23,42,0.06);
+}
+
+/* Dark: canonical dark shell + external line (top rim: translucent white) */
+html.dark .dp-outer {
+  background: #020617;
+  border: 1px solid #334155;
+  border-top-color: rgba(255,255,255,.22) !important;
 }
 
 /* ── Trigger button ───────────────────────────────────────────────────────── */
@@ -31,23 +46,65 @@
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
 }
 
-/* ── Shell scoped reset (item 2) ──────────────────────────────────────────── */
-.shell:has(.dp-frame) { background: transparent; border: none; box-shadow: none; }
-html.dark .shell:has(.dp-frame) { background: transparent; border: none; box-shadow: none; }
-
 .dp-trigger-label {
   letter-spacing: 0.01em;
 }
 
-/* ── Panel ────────────────────────────────────────────────────────────────── */
+/* ── Panel enter/exit ─────────────────────────────────────────────────────── */
+/* Enter: translateY(-16px) scale(.95) → 0/1 — panel slides in from top downward */
+/* Exit: same shape in reverse, 260ms ease-out (no bounce -- animation:none cancels spring) */
+@keyframes dp-panel-enter {
+  0%   { transform: translateY(-16px) scale(0.95); opacity: 0; }
+  100% { transform: translateY(0)     scale(1);    opacity: 1; }
+}
+
+/* Base state: hidden */
 .dp-panel {
   width: 380px;
-  border-radius: var(--card-radius);
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--card-radius, 20px);
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  box-shadow: inset 0 0 0 1px rgba(15,23,42,0.04);
+  box-shadow:
+    inset 0 0 0 1px rgba(15,23,42,0.04),
+    0 4px 16px rgba(15,23,42,0.08);
   font-family: var(--font-display);
   overflow: hidden;
+  position: relative;
+  /* Closed state */
+  transform: translateY(-16px) scale(0.95);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform calc(260ms * var(--anim-mult, 1)) ease-out,
+    opacity   calc(200ms * var(--anim-mult, 1)) ease-out;
+}
+
+/* Fully-hidden state — pointer events off */
+.dp-panel.dp-panel--hidden {
+  transform: translateY(-16px) scale(0.95);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Open state — prize-sheet bounce enter */
+.dp-panel.dp-panel--open {
+  animation: dp-panel-enter calc(360ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1) both;
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Closing state — reverse to base */
+.dp-panel.dp-panel--closing {
+  transform: translateY(-16px) scale(0.95);
+  opacity: 0;
+  pointer-events: none;
+  animation: none;
+  transition:
+    transform calc(260ms * var(--anim-mult, 1)) ease-out,
+    opacity   calc(200ms * var(--anim-mult, 1)) ease-out;
 }
 
 /* ── Panel header ─────────────────────────────────────────────────────────── */
@@ -103,28 +160,8 @@ html.dark .shell:has(.dp-frame) { background: transparent; border: none; box-sha
 .dp-wheels {
   position: relative;
   display: flex;
-  padding: 0 20px 20px;
+  padding: 0 20px 68px;
   gap: 0;
-}
-
-/* ── Selection band ───────────────────────────────────────────────────────── */
-/*
- * FIX: .dp-band top centering.
- * The wheel scroll area begins label(18px) + gap(4px) = 22px below .dp-wheels top.
- * Band offset within the 220px viewport = (220 - 38) / 2 = 91px.
- * Correct top: calc(22px + 91px) — NOT calc(26px + 91px).
- * The original used 26px which placed the band ~4px too low.
- */
-.dp-band {
-  position: absolute;
-  left: 20px;
-  right: 20px;
-  top: calc(22px + 91px); /* FIXED: label(18px) + gap(4px) + band-offset(91px) */
-  height: 38px;
-  background: rgba(16,185,129,0.03);
-  pointer-events: none;
-  border-radius: 4px;
-  z-index: 1;
 }
 
 /* ── Individual wheel column ──────────────────────────────────────────────── */
@@ -133,6 +170,12 @@ html.dark .shell:has(.dp-frame) { background: transparent; border: none; box-sha
   display: flex;
   flex-direction: column;
   gap: 4px;
+  position: relative; /* anchor for .dp-center-pill absolute positioning */
+}
+
+/* Month column wider so full month names fit comfortably */
+.dp-wheel[data-unit="month"] {
+  flex: 1.7;
 }
 
 .dp-wheel-label {
@@ -145,8 +188,27 @@ html.dark .shell:has(.dp-frame) { background: transparent; border: none; box-sha
   text-align: center;
   height: 18px;
   line-height: 18px;
-  margin-top: 4px;
+  margin-top: 20px;
   flex-shrink: 0;
+}
+
+/* ── Item 3: Static center pill overlay ───────────────────────────────────── */
+/* Positioned absolute inside .dp-wheel so it stays fixed while values scroll. */
+/* top = margin-top(20) + label-height(18) + gap(4) + scroll-center(110) - row-half(19) = 133px */
+.dp-center-pill {
+  position: absolute;
+  top: 133px;
+  left: 8px;
+  right: 8px;
+  height: 38px;
+  background: #0f172a;
+  border-radius: 9999px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+html.dark .dp-center-pill {
+  background: #ffffff;
 }
 
 .dp-wheel-scroll {
@@ -154,7 +216,7 @@ html.dark .shell:has(.dp-frame) { background: transparent; border: none; box-sha
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;
-  z-index: 2;
+  z-index: 2; /* above .dp-center-pill(z-index:1); scroll bg is transparent so pill shows through */
   scroll-snap-type: y mandatory;
   -webkit-overflow-scrolling: touch;
   /* Hide scrollbar */
@@ -174,18 +236,18 @@ html.dark .shell:has(.dp-frame) { background: transparent; border: none; box-sha
   right: 0;
   height: 60px;
   pointer-events: none;
-  z-index: 3;
+  z-index: 4;
 }
 
 .dp-wheel-scroll::before {
   top: 0;
-  background: linear-gradient(to bottom, var(--card-bg) 0%, rgba(255,255,255,0) 100%);
+  background: linear-gradient(to bottom, var(--card-bg) 0%, transparent 100%);
   margin-bottom: -60px;
 }
 
 .dp-wheel-scroll::after {
   bottom: 0;
-  background: linear-gradient(to top, var(--card-bg) 0%, rgba(255,255,255,0) 100%);
+  background: linear-gradient(to top, var(--card-bg) 0%, transparent 100%);
   margin-top: -60px;
 }
 
@@ -202,19 +264,36 @@ html.dark .shell:has(.dp-frame) { background: transparent; border: none; box-sha
   justify-content: center;
   font-family: var(--font-display);
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 900;
   color: var(--fg4);
   user-select: none;
   cursor: pointer;
   scroll-snap-align: center;
-  transition: color calc(150ms * var(--anim-mult, 1)), font-weight calc(150ms * var(--anim-mult, 1));
+  transform: translateY(4px);
+  /* Fix (3): slide transition for click-to-value — ease-out scroll feel */
+  transition:
+    transform calc(220ms * var(--anim-mult, 1)) ease-out;
+  /* color/font-weight intentionally NOT in transition — they snap instantly */
 }
 
 .dp-item.active {
+  /* Item 3: background removed -- static .dp-center-pill provides the pill shape */
+  /* Only color differs from inactive; font-weight stays 900 */
   color: #ffffff;
-  font-weight: 700;
-  background: #0f172a;
-  border-radius: 8px;
+  transform: translateY(0);
+  transition: transform calc(220ms * var(--anim-mult, 1)) ease-out;
+}
+
+/* Fix (2): while scrolling, freeze ALL transitions on items so active highlight
+   stays stable — no white-flash + second re-glow */
+.dp-wheel-scroll.scrolling .dp-item {
+  transition: none;
+}
+
+/* Keep active text locked during scroll -- pill background is static, no change needed */
+.dp-wheel-scroll.scrolling .dp-item.active {
+  color: #ffffff;
+  /* font-weight stays 900 (inherited from .dp-item) */
 }
 
 .dp-item:hover:not(.active) {
@@ -222,10 +301,16 @@ html.dark .shell:has(.dp-frame) { background: transparent; border: none; box-sha
 }
 
 /* ── Confirm button ───────────────────────────────────────────────────────── */
-/* .btn-green handles all background/shadow/radius/sizing; keep only layout + icon */
+/* .btn-green handles background/shadow/radius/sizing; only layout here */
+/* Item 5: centered horizontally, ~50% panel width */
 .dp-confirm {
-  align-self: center;
-  margin: 0 0 18px;
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 45%;
+  min-width: 140px;
+  justify-content: center;
 }
 
 .dp-confirm .material-symbols-outlined {
@@ -233,15 +318,37 @@ html.dark .shell:has(.dp-frame) { background: transparent; border: none; box-sha
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
 }
 
-/* ── Dark mode overrides (System A: html.dark) ────────────────────────────── */
-html.dark .dp-frame {
-  background-color: #020617;
+/* ── Active-value morph (d): old value morphs out, new morphs in on active change */
+@keyframes dp-morph-out {
+  from { opacity: 1; transform: scale(1)    translateY(0);   }
+  to   { opacity: 0; transform: scale(0.75) translateY(-6px); }
 }
 
+@keyframes dp-morph-in {
+  from { opacity: 0; transform: scale(0.75) translateY(6px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0);   }
+}
+
+.dp-item.dp-morph-out {
+  animation: dp-morph-out calc(150ms * var(--anim-mult, 1)) ease-out forwards;
+}
+
+.dp-item.dp-morph-in {
+  animation: dp-morph-in calc(200ms * var(--anim-mult, 1)) ease-out both;
+}
+
+/* Suppress morph animations while wheel is scrolling (wheel scroll provides motion) */
+.dp-wheel-scroll.scrolling .dp-item.dp-morph-out,
+.dp-wheel-scroll.scrolling .dp-item.dp-morph-in {
+  animation: none;
+}
+
+/* ── Dark mode overrides (System A: html.dark) ────────────────────────────── */
 html.dark .dp-panel {
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.05),
-    inset 0 0 0 1px rgba(255,255,255,.04);
+    inset 0 0 0 1px rgba(255,255,255,.04),
+    0 4px 16px rgba(0,0,0,0.3);
 }
 
 html.dark .dp-head {
@@ -263,10 +370,6 @@ html.dark .dp-head-close {
 
 html.dark .dp-head-close:hover { background: var(--slate-600); }
 
-html.dark .dp-band {
-  background: rgba(16,185,129,0.04);
-}
-
 html.dark .dp-wheel + .dp-wheel {
   border-left-color: var(--slate-700);
 }
@@ -276,24 +379,30 @@ html.dark .dp-wheel-label {
 }
 
 html.dark .dp-wheel-scroll::before {
-  background: linear-gradient(to bottom, var(--card-bg) 0%, rgba(30,41,59,0) 100%);
+  background: linear-gradient(to bottom, var(--card-bg) 0%, transparent 100%);
 }
 
 html.dark .dp-wheel-scroll::after {
-  background: linear-gradient(to top, var(--card-bg) 0%, rgba(30,41,59,0) 100%);
+  background: linear-gradient(to top, var(--card-bg) 0%, transparent 100%);
 }
 
-/* Suppress per-item hover while wheel is scrolling (scrolling class added by hook) */
+/* Suppress per-item hover while wheel is scrolling */
 .dp-wheel-scroll.scrolling .dp-item:hover { color: inherit; }
+
+/* Dark: keep active text locked during scroll -- pill background is static */
+html.dark .dp-wheel-scroll.scrolling .dp-item.active {
+  color: #0f172a;
+}
 
 html.dark .dp-item {
   color: var(--slate-600);
 }
 
 html.dark .dp-item.active {
+  /* Item 3: background removed -- static .dp-center-pill provides white pill in dark */
+  /* Only color differs; font-weight stays 900 */
   color: #0f172a;
-  background: #ffffff;
-  border-radius: 8px;
+  transition: transform calc(220ms * var(--anim-mult, 1)) ease-out;
 }
 
 html.dark .dp-item:hover:not(.active) {

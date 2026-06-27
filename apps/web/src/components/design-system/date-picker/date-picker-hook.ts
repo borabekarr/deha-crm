@@ -23,8 +23,15 @@ const MONTHS = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ]
 
+// Static day list 1–31 (item 2: built once, never re-rendered)
+const DAY_VALUES: number[] = []
+for (let d = 1; d <= 31; d++) DAY_VALUES.push(d)
+
 const SCALE_TABLE   = [1,    0.92, 0.85, 0.78, 0.70]
 const OPACITY_TABLE = [1,    0.60, 0.35, 0.15, 0.05]
+
+// Animation duration for panel close timeout (item 4); enter is CSS-driven
+const PANEL_EXIT_MS  = 300
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -36,7 +43,7 @@ function clamp(v: number, lo: number, hi: number): number {
   return v < lo ? lo : v > hi ? hi : v
 }
 
-function formatLabel(d: number, m: number, y: number): string {
+export function formatLabel(d: number, m: number, y: number): string {
   return d + ' ' + MONTHS[m] + ' ' + y
 }
 
@@ -50,9 +57,19 @@ function makeSpacer(): HTMLDivElement {
 
 // ── Callback ref ─────────────────────────────────────────────────────────────
 
-/** Callback ref for the .dp-frame element. Wires all wheel picker behavior. */
+/** Callback ref for the .dp-shell element. Wires all wheel picker behavior. */
 export function pickerRef(el: HTMLDivElement | null): void {
   if (!el) return
+
+  // Guard: if a previous pickerRef wired this same element (e.g. React StrictMode
+  // double-invoke or ref detach/reattach), tear it down first so its scroll
+  // listeners don't interfere with the new instance's aligning window.
+  cleanupPicker(el)
+
+  // Item 1: read --anim-mult so JS timers stay in sync with 4x CSS slowdown.
+  // Fallback to 1 if the property is absent or non-numeric.
+  const rawMult = getComputedStyle(document.documentElement).getPropertyValue('--anim-mult')
+  const animMult = parseFloat(rawMult) || 1
 
   // ── DOM refs ──────────────────────────────────────────────────────────────
   const scrollDay   = el.querySelector<HTMLDivElement>('#dp-scroll-day')
@@ -75,8 +92,13 @@ export function pickerRef(el: HTMLDivElement | null): void {
   const $panel = panel
   const $label = triggerLabel
 
-  // ── Selected state (default: 12 June 2026) ────────────────────────────────
-  const sel = { day: 12, month: 5, year: 2026 } // month is 0-based
+  // ── Selected state (item 5: default to today) ─────────────────────────────
+  const today = new Date()
+  const sel = {
+    day:   today.getDate(),
+    month: today.getMonth(),   // 0-based
+    year:  today.getFullYear(),
+  }
 
   // ── Render helpers ────────────────────────────────────────────────────────
 
@@ -88,6 +110,7 @@ export function pickerRef(el: HTMLDivElement | null): void {
       const item = document.createElement('div')
       item.className = 'dp-item'
       item.textContent = String(values[i])
+      item.dataset.idx = String(i)
       if (values[i] == selectedValue) {
         item.classList.add('active')
       }
@@ -97,13 +120,6 @@ export function pickerRef(el: HTMLDivElement | null): void {
     scrollEl.appendChild(makeSpacer())
   }
 
-  function getDayValues(): number[] {
-    const n = daysInMonth(sel.month, sel.year)
-    const arr: number[] = []
-    for (let i = 1; i <= n; i++) arr.push(i)
-    return arr
-  }
-
   function getYearValues(): number[] {
     const arr: number[] = []
     for (let y = 2000; y <= 2050; y++) arr.push(y)
@@ -111,8 +127,9 @@ export function pickerRef(el: HTMLDivElement | null): void {
   }
 
   function renderAll(): void {
-    renderColumn($day,   getDayValues(),  sel.day)
-    renderColumn($month, MONTHS,          MONTHS[sel.month])
+    // Item 2: day wheel uses static DAY_VALUES (1–31) — rendered once, never rebuilt
+    renderColumn($day,   DAY_VALUES, sel.day)
+    renderColumn($month, MONTHS,     MONTHS[sel.month])
     renderColumn($year,  getYearValues(), sel.year)
   }
 
@@ -120,16 +137,79 @@ export function pickerRef(el: HTMLDivElement | null): void {
     scrollEl.scrollTop = index * ROW_H
   }
 
+  // True while alignAll is programmatically positioning the wheels. The settle
+  // handler must NOT commit scroll-derived values during this window, otherwise
+  // an early settle (fired while scrollTop is still 0, before/while we snap)
+  // overwrites sel with index-0 values → the "1 January 2000" default-label race.
+  let aligning = false
+
+  function setActiveIndex(scrollEl: HTMLDivElement, idx: number): void {
+    const items = scrollEl.querySelectorAll<HTMLDivElement>('.dp-item')
+    for (let i = 0; i < items.length; i++) items[i].classList.toggle('active', i === idx)
+  }
+
+  // (d) Active-value morph — old center value morphs out, new morphs in.
+  // Only fires on actual index change; keeps callback-ref pattern (no useEffect).
+  function morphActiveItem(scrollEl: HTMLDivElement, newIdx: number): void {
+    const items = scrollEl.querySelectorAll<HTMLDivElement>('.dp-item')
+    if (!items.length) return
+
+    // Find the currently active item
+    let oldIdx = -1
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].classList.contains('active')) { oldIdx = i; break }
+    }
+
+    if (oldIdx === newIdx) return // no change — skip animation
+
+    // Morph out the old active item
+    if (oldIdx >= 0) {
+      const oldItem = items[oldIdx]
+      oldItem.classList.remove('active', 'dp-morph-in')
+      oldItem.classList.add('dp-morph-out')
+      const t1 = setTimeout(() => { oldItem.classList.remove('dp-morph-out') }, Math.round(160 * animMult))
+      allTimers.push(t1)
+    }
+
+    // Morph in the new active item and all others
+    for (let i = 0; i < items.length; i++) {
+      if (i === newIdx) {
+        items[i].classList.remove('dp-morph-out')
+        items[i].classList.add('active', 'dp-morph-in')
+        const t2 = setTimeout(() => { items[i].classList.remove('dp-morph-in') }, Math.round(210 * animMult))
+        allTimers.push(t2)
+      } else if (i !== oldIdx) {
+        items[i].classList.remove('active')
+      }
+    }
+  }
+
+  // Programmatic snap that defeats CSS scroll-snap (mandatory) snapping the
+  // target scrollTop back to 0: disable snap, set scrollTop, restore next frame.
+  function snapNoSnap(scrollEl: HTMLDivElement, index: number): void {
+    const prev = scrollEl.style.scrollSnapType
+    scrollEl.style.scrollSnapType = 'none'
+    scrollEl.scrollTop = index * ROW_H
+    const r = requestAnimationFrame(() => { scrollEl.style.scrollSnapType = prev })
+    allRafs.push(r)
+  }
+
   function alignAll(): void {
-    snapTo($day,   sel.day - 1)      // days are 1-based
-    snapTo($month, sel.month)
-    snapTo($year,  sel.year - 2000)
+    aligning = true
+    snapNoSnap($day,   sel.day - 1)   // days are 1-based; index = day - 1
+    snapNoSnap($month, sel.month)
+    snapNoSnap($year,  sel.year - 2000)
+    // Authoritatively reflect sel (today, by default) — do not wait on settle.
+    setActiveIndex($day,   sel.day - 1)
+    setActiveIndex($month, sel.month)
+    setActiveIndex($year,  sel.year - 2000)
+    updateLabel()
+    const t = setTimeout(() => { aligning = false }, Math.round(220 * animMult)) // > 100ms settle window
+    allTimers.push(t)
   }
 
   // ── Depth-fade pass ───────────────────────────────────────────────────────
   // FIX: centerIndex = scrollTop / ROW_H (NOT (scrollTop + PADDING) / ROW_H)
-  // The original HTML used (scrollTop + PADDING) / ROW_H which was off by
-  // PADDING/ROW_H ≈ 2.4 rows, causing the active item to sit above the band.
   function fadePass(scrollEl: HTMLDivElement): void {
     const items = scrollEl.querySelectorAll<HTMLDivElement>('.dp-item')
     if (!items.length) return
@@ -173,18 +253,15 @@ export function pickerRef(el: HTMLDivElement | null): void {
       const items = scrollEl.querySelectorAll<HTMLDivElement>('.dp-item')
       if (!items.length) return
       const idx = Math.round(scrollEl.scrollTop / ROW_H)
-      for (let i = 0; i < items.length; i++) {
-        items[i].classList.toggle('active', i === idx)
-      }
+      // (d) morph the active center value on settle
+      morphActiveItem(scrollEl, idx)
     }
-
-    // Track whether we already cleared .active mid-scroll so we skip the DOM
-    // query on every subsequent scroll frame until the next settle.
-    let cleared = false
 
     function onSettle(): void {
       timerId = null
-      cleared = false
+      // Skip scroll-derived commits while alignAll is positioning the wheels —
+      // sel/label are already authoritative (see alignAll).
+      if (aligning) { scrollEl.classList.remove('scrolling'); return }
       const idx = Math.round(scrollEl.scrollTop / ROW_H)
       commitValue(unit, idx)
       scrollEl.classList.remove('scrolling')
@@ -193,18 +270,11 @@ export function pickerRef(el: HTMLDivElement | null): void {
 
     function onScroll(): void {
       scrollEl.classList.add('scrolling')
-      // On the first scroll event after a settle, strip .active from all items
-      // so the watermark is invisible while the wheel is moving.
-      if (!cleared) {
-        const active = scrollEl.querySelectorAll<HTMLDivElement>('.dp-item.active')
-        for (let i = 0; i < active.length; i++) {
-          active[i].classList.remove('active')
-        }
-        cleared = true
-      }
+      // Do NOT strip .active during scroll -- the band is a static visual indicator
+      // and the active item highlight must remain visible while the wheel is moving.
       scheduleFrame()
       if (timerId) clearTimeout(timerId)
-      timerId = setTimeout(onSettle, 100)
+      timerId = setTimeout(onSettle, Math.round(100 * animMult))
       allTimers.push(timerId)
     }
 
@@ -223,14 +293,19 @@ export function pickerRef(el: HTMLDivElement | null): void {
 
   // ── Commit a settled value ────────────────────────────────────────────────
 
-  function recomputeDayColumn(): void {
+  // Item 2: recomputeDayColumn no longer rebuilds DOM — only clamps sel.day and re-snaps.
+  function clampDayToMonth(): void {
     const maxDay = daysInMonth(sel.month, sel.year)
     if (sel.day > maxDay) {
       sel.day = maxDay
+      snapTo($day, sel.day - 1)
+      fadePass($day)
+      // Re-apply active class to the clamped item
+      const items = $day.querySelectorAll<HTMLDivElement>('.dp-item')
+      for (let i = 0; i < items.length; i++) {
+        items[i].classList.toggle('active', i === sel.day - 1)
+      }
     }
-    renderColumn($day, getDayValues(), sel.day)
-    snapTo($day, sel.day - 1)
-    fadePass($day)
   }
 
   function updateLabel(): void {
@@ -240,10 +315,10 @@ export function pickerRef(el: HTMLDivElement | null): void {
   function commitValue(unit: 'day' | 'month' | 'year', idx: number): void {
     if (unit === 'month') {
       sel.month = clamp(idx, 0, 11)
-      recomputeDayColumn()
+      clampDayToMonth()  // Item 2: no DOM rebuild, only clamp+snap if needed
     } else if (unit === 'year') {
       sel.year = clamp(idx + 2000, 2000, 2050)
-      recomputeDayColumn()
+      clampDayToMonth()  // Item 2: no DOM rebuild, only clamp+snap if needed
     } else if (unit === 'day') {
       const maxDay = daysInMonth(sel.month, sel.year)
       sel.day = clamp(idx + 1, 1, maxDay)
@@ -251,12 +326,31 @@ export function pickerRef(el: HTMLDivElement | null): void {
     updateLabel()
   }
 
-  // ── Panel open / close ────────────────────────────────────────────────────
-  // The user explicitly chose: panel starts OPEN by default on mount (no click).
-  // A hidden element can't be measured/scrolled, so the panel stays visible and
-  // the initial align + fade pass runs via rAF below once layout is ready.
+  // ── Click-to-select (item 3) ──────────────────────────────────────────────
+  // Attach to a wheel scroll container; on item click → smooth-snap + commit.
+  function wireClickToSelect(scrollEl: HTMLDivElement, unit: 'day' | 'month' | 'year'): void {
+    scrollEl.addEventListener('click', function (e: MouseEvent) {
+      const target = (e.target as HTMLElement).closest<HTMLDivElement>('.dp-item')
+      if (!target) return
+      const idx = parseInt(target.dataset.idx ?? '-1', 10)
+      if (idx < 0) return
+      // Smooth-scroll to the clicked item position
+      scrollEl.scrollTo({ top: idx * ROW_H, behavior: 'smooth' })
+      // Commit the value immediately (the settle handler will re-commit on
+      // scrollend as well, but committing here gives instant label update)
+      commitValue(unit, idx)
+      // (d) morph active value for instant visual feedback on click
+      morphActiveItem(scrollEl, idx)
+    })
+  }
+
+  // ── Panel open / close (item 4) ───────────────────────────────────────────
+  // Mounted-through-exit: panel stays in DOM. Classes drive the animation.
+  // .dp-panel-closing added on close → CSS exit transition → then hidden class.
+  // Mirrors PrizeSheet .ps-modal-shell pattern (scale + opacity spring).
 
   let panelOpen = true
+  let closingTimer: ReturnType<typeof setTimeout> | null = null
 
   function alignAndFade(): void {
     alignAll()
@@ -266,14 +360,36 @@ export function pickerRef(el: HTMLDivElement | null): void {
   }
 
   function openPanel(): void {
-    $panel.style.display = ''
+    // Remove hidden/closing states and add open
+    if (closingTimer) {
+      clearTimeout(closingTimer)
+      closingTimer = null
+    }
+    $panel.classList.remove('dp-panel--hidden', 'dp-panel--closing')
+    // Trigger reflow so the open class transition fires from the base state
+    void $panel.offsetHeight
+    $panel.classList.add('dp-panel--open')
     panelOpen = true
-    requestAnimationFrame(alignAndFade)
+    // Two-rAF settle (preserved from original) so wheels are scrollable
+    const r1 = requestAnimationFrame(() => {
+      const r2 = requestAnimationFrame(alignAndFade)
+      allRafs.push(r2)
+    })
+    allRafs.push(r1)
   }
 
   function closePanel(): void {
-    $panel.style.display = 'none'
     panelOpen = false
+    $panel.classList.remove('dp-panel--open')
+    $panel.classList.add('dp-panel--closing')
+    // After exit transition completes, hide the panel
+    const exitDuration = Math.round(PANEL_EXIT_MS * animMult * 1.1) // slight buffer, scaled by --anim-mult
+    closingTimer = setTimeout(() => {
+      closingTimer = null
+      $panel.classList.remove('dp-panel--closing')
+      $panel.classList.add('dp-panel--hidden')
+    }, exitDuration)
+    allTimers.push(closingTimer)
   }
 
   function onOpenClick(): void {
@@ -291,21 +407,34 @@ export function pickerRef(el: HTMLDivElement | null): void {
   closeBtn.addEventListener('click', onCloseClick)
   confirmBtn.addEventListener('click', onConfirmClick)
 
-  // ── Wire settle handlers ──────────────────────────────────────────────────
+  // ── Wire click-to-select on all three wheels (item 3) ────────────────────
 
-  makeSettleHandler(scrollDay,   'day')
-  makeSettleHandler(scrollMonth, 'month')
-  makeSettleHandler(scrollYear,  'year')
+  wireClickToSelect($day,   'day')
+  wireClickToSelect($month, 'month')
+  wireClickToSelect($year,  'year')
 
   // ── Initial render ────────────────────────────────────────────────────────
+
+  // Block scroll-settle commits during init: populating scroll containers with
+  // DOM items (renderAll) and the subsequent CSS snap alignment can fire scroll
+  // and scrollend events before alignAll runs, overwriting sel with index-0
+  // values ("1 January 2000"). Set aligning=true early to suppress those commits.
+  aligning = true
 
   renderAll()
   updateLabel()
 
-  // Panel is OPEN on mount. Defer two rAF ticks so the browser finishes its
-  // first layout pass (the scroll viewports must be measurable/scrollable)
-  // before we set scrollTop and run the depth-fade — guarantees the active
-  // item in each wheel is dead-centered on the .dp-band without any click.
+  // Panel is OPEN on mount (add open class without transition to avoid flash).
+  $panel.classList.add('dp-panel--open')
+
+  // Wire settle handlers AFTER the initial DOM is in place so they don't
+  // fire on DOM-insertion scroll events. (click-to-select is already wired above.)
+  makeSettleHandler(scrollDay,   'day')
+  makeSettleHandler(scrollMonth, 'month')
+  makeSettleHandler(scrollYear,  'year')
+
+  // Defer two rAF ticks so the browser finishes its first layout pass before
+  // setting scrollTop and running the depth-fade.
   let initRaf = requestAnimationFrame(() => {
     initRaf = requestAnimationFrame(alignAndFade)
     allRafs.push(initRaf)
@@ -317,6 +446,7 @@ export function pickerRef(el: HTMLDivElement | null): void {
   ;(el as PickerEl).__pickerCleanup = () => {
     allTimers.forEach(clearTimeout)
     allRafs.forEach(cancelAnimationFrame)
+    if (closingTimer) clearTimeout(closingTimer)
     openBtn!.removeEventListener('click', onOpenClick)
     closeBtn!.removeEventListener('click', onCloseClick)
     confirmBtn!.removeEventListener('click', onConfirmClick)

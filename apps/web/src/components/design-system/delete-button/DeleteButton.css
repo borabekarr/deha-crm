@@ -1,7 +1,7 @@
 /* =========================================================================
    DeleteButton — Deha Design System
    Morphing confirm-delete button: idle → confirming (countdown) → done → idle.
-   Uses global .btn-green for the done state pill. All animation durations
+   Vertical slide morph replaces per-char stagger. All animation durations
    wrapped in calc(... * var(--anim-mult, 1)) for the global slow-down knob.
    ========================================================================= */
 
@@ -16,10 +16,9 @@
   border-radius: 9999px;
   cursor: pointer;
   font-family: 'Montserrat', sans-serif;
-  color: #fff;
   overflow: hidden;
   transition:
-    width calc(260ms * var(--anim-mult, 1)) cubic-bezier(0.34, 1.1, 0.64, 1),
+    width calc(260ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1),
     background-color calc(220ms * var(--anim-mult, 1)) ease,
     box-shadow calc(220ms * var(--anim-mult, 1)) ease,
     transform calc(120ms * var(--anim-mult, 1)) ease;
@@ -29,69 +28,136 @@
   transform: scale(0.985);
 }
 
-/* ---- idle state -------------------------------------------------- */
+/* ---- idle state — light red fill, red text ----------------------- */
 .db[data-state='idle'] {
-  background: #EF4444;
+  background: #FEE2E2;
+  color: #EF4444;
   box-shadow:
-    0 12px 30px -10px rgba(239, 68, 68, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.45),
-    inset 0 -2px 0 rgba(0, 0, 0, 0.22),
-    inset 0 0 0 1.5px rgba(239, 68, 68, 0.3);
+    0 4px 16px -6px rgba(239, 68, 68, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 0 0 1.5px rgba(239, 68, 68, 0.25);
 }
 
-/* ---- confirming state -------------------------------------------- */
+html.dark .db[data-state='idle'] {
+  background: rgba(239, 68, 68, 0.15);
+  color: #EF4444;
+  box-shadow:
+    0 4px 16px -6px rgba(239, 68, 68, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 0 0 1.5px rgba(239, 68, 68, 0.2);
+}
+
+/* ---- confirming state — light red fill, red text (cancel phase) -- */
 .db[data-state='confirming'] {
-  background: #1E293B;
+  background: #FEE2E2;
+  color: #EF4444;
   box-shadow:
-    0 8px 24px -10px rgba(15, 23, 42, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    inset 0 -2px 0 rgba(0, 0, 0, 0.28),
-    inset 0 0 0 1.5px rgba(255, 255, 255, 0.08);
+    0 4px 16px -6px rgba(239, 68, 68, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 0 0 1.5px rgba(239, 68, 68, 0.25);
 }
 
-/* ---- done state -------------------------------------------------- */
-.db[data-state='done'] {
-  background: #D1FAE5;
-  color: #059669;
+html.dark .db[data-state='confirming'] {
+  background: rgba(239, 68, 68, 0.15);
+  color: #EF4444;
   box-shadow:
-    inset 0 0 0 1.5px rgba(16, 185, 129, 0.32),
-    0 6px 18px -10px rgba(16, 185, 129, 0.4);
+    0 4px 16px -6px rgba(239, 68, 68, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 0 0 1.5px rgba(239, 68, 68, 0.2);
+}
+
+/* ---- done state — solid green fill, white text ------------------- */
+.db[data-state='done'] {
+  background: #10B981;
+  color: #fff;
+  cursor: default;
+  box-shadow:
+    0 6px 18px -8px rgba(16, 185, 129, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 0 0 1.5px rgba(16, 185, 129, 0.3);
 }
 
 html.dark .db[data-state='done'] {
-  background: rgba(16, 185, 129, 0.16);
-  color: #6EE7B7;
-  box-shadow: inset 0 0 0 1.5px rgba(16, 185, 129, 0.42);
+  background: #059669;
+  color: #fff;
+  box-shadow:
+    0 6px 18px -8px rgba(5, 150, 105, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 0 0 1.5px rgba(16, 185, 129, 0.25);
 }
 
-/* ---- inner flex row --------------------------------------------- */
+/* ---- inner container — clip mask + position context for morph slots */
 .db-inner {
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
-  width: max-content;
+  height: 100%;
 }
 
+/* ---- morph slot — entering slot lays out in normal flow ---------- */
+/* Padding + gap live on the slot itself so measurement is correct.  */
+.db-morph-slot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+/* Per-state padding on the entering (in-flow) slot */
+.db[data-state='idle'] .db-slide-in        { padding: 0 22px; }
+.db[data-state='confirming'] .db-slide-in  { padding: 0 8px 0 14px; }
+.db[data-state='done'] .db-slide-in        { padding: 0 26px; }
+
+/* Exiting slot: absolutely overlaid so it doesn't shift the entering slot */
+.db-slide-out {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-start;
+  padding-left: 14px; /* generous fallback; visually masked by clip */
+}
+
+/* ---- morph keyframes (crossfade + subtle scale/blur) ------------- */
+@keyframes dbMorphIn {
+  from { opacity: 0; transform: scale(0.92); filter: blur(3px); }
+  to   { opacity: 1; transform: scale(1);    filter: blur(0px); }
+}
+
+@keyframes dbMorphOut {
+  from { opacity: 1; transform: scale(1);    filter: blur(0px); }
+  to   { opacity: 0; transform: scale(0.92); filter: blur(3px); }
+}
+
+/* ---- morph-in (entering content) --------------------------------- */
 @media (prefers-reduced-motion: no-preference) {
-  .db-inner {
-    animation: dbFade calc(260ms * var(--anim-mult, 1)) ease calc(40ms * var(--anim-mult, 1));
+  .db-slide-in {
+    animation: dbMorphIn calc(240ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1);
   }
 }
 
-@keyframes dbFade {
-  from { opacity: 0.4; }
-  to   { opacity: 1; }
+/* ---- morph-out (exiting content, mounted-through-exit) ----------- */
+@media (prefers-reduced-motion: no-preference) {
+  .db-slide-out {
+    animation: dbMorphOut calc(200ms * var(--anim-mult, 1)) cubic-bezier(0.55, 0, 1, 0.45);
+    animation-fill-mode: forwards;
+  }
 }
-
-/* padding per state */
-.db[data-state='idle'] .db-inner        { padding: 0 22px; gap: 10px; }
-.db[data-state='confirming'] .db-inner  { padding: 0 8px 0 14px; gap: 10px; }
-.db[data-state='done'] .db-inner        { padding: 0 26px; gap: 11px; }
 
 /* ---- icon wrapper ------------------------------------------------ */
 .db-ic {
   display: grid;
   place-items: center;
   flex: none;
+}
+
+/* icon color follows button text color (currentColor on SVG strokes) */
+.db[data-state='idle'] .db-ic svg *,
+.db[data-state='confirming'] .db-ic svg *,
+.db[data-state='confirming'] .db-undo svg * {
+  stroke: currentColor;
 }
 
 /* ---- undo circle (confirming) ------------------------------------ */
@@ -109,28 +175,22 @@ html.dark .db[data-state='done'] {
     inset 0 -1.5px 0 rgba(0, 0, 0, 0.2);
 }
 
-/* ---- stagger text ------------------------------------------------ */
+html.dark .db-undo {
+  background: #DC2626;
+}
+
+/* undo icon strokes white (inside the red circle) */
+.db-undo svg * {
+  stroke: #fff !important;
+}
+
+/* ---- label text -------------------------------------------------- */
 .db-text {
   display: inline-flex;
   font-size: 15px;
   font-weight: 800;
   letter-spacing: 0.005em;
   white-space: pre;
-}
-
-.db-ch {
-  display: inline-block;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .db-ch {
-    animation: dbCh calc(400ms * var(--anim-mult, 1)) cubic-bezier(0.785, 0.135, 0.15, 0.86);
-  }
-}
-
-@keyframes dbCh {
-  from { opacity: 0; transform: translateY(13px) scale(0.4); }
-  to   { opacity: 1; transform: none; }
 }
 
 /* ---- countdown badge --------------------------------------------- */
@@ -146,43 +206,26 @@ html.dark .db[data-state='done'] {
   color: #fff;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
-  overflow: hidden;
+  /* overflow visible so the number morph animation is not clipped */
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.35),
     inset 0 -1.5px 0 rgba(0, 0, 0, 0.2);
 }
 
+html.dark .db-badge {
+  background: #DC2626;
+}
+
 .db-num {
   display: block;
-  font-size: 16px;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
 }
 
+/* badge number uses crossfade morph */
 @media (prefers-reduced-motion: no-preference) {
   .db-num {
-    animation: dbRoll calc(280ms * var(--anim-mult, 1)) cubic-bezier(0.33, 1, 0.68, 1) calc(50ms * var(--anim-mult, 1));
+    animation: dbMorphIn calc(240ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1);
   }
-}
-
-@keyframes dbRoll {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: none; }
-}
-
-/* ---- dark mode overrides ----------------------------------------- */
-html.dark .db[data-state='idle'] {
-  background: #DC2626;
-  box-shadow:
-    0 12px 30px -10px rgba(220, 38, 38, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    inset 0 -2px 0 rgba(0, 0, 0, 0.3),
-    inset 0 0 0 1.5px rgba(239, 68, 68, 0.2);
-}
-
-html.dark .db[data-state='confirming'] {
-  background: #0F172A;
-  box-shadow:
-    0 8px 24px -10px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    inset 0 -2px 0 rgba(0, 0, 0, 0.4),
-    inset 0 0 0 1.5px rgba(255, 255, 255, 0.06);
 }
