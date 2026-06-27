@@ -1,0 +1,346 @@
+/* =========================================================================
+   PinnedList — Deha Design System
+   All classes prefixed .pl- / .pinlist.
+   Card surfaces use var(--card-bg) / var(--card-border) / var(--card-radius).
+   Durations wrapped in calc(* var(--anim-mult, 1)).
+   Dark mode via html.dark selectors.
+   ========================================================================= */
+
+/* ── List surface ─────────────────────────────────────────────────────── */
+.pinlist {
+  --pl-surface:       linear-gradient(168deg, var(--card-bg, #FFFFFF) 0%, #F6F8FB 100%);
+  --pl-card:          var(--card-bg, #FFFFFF);
+  --pl-card-bd:       var(--card-border, rgba(15,23,42,0.07));
+  --pl-ico-bg:        #F1F5F9;
+  --pl-ico-fg:        #64748B;
+  --pl-shadow:
+    0 30px 70px -22px rgba(15,23,42,0.34),
+    0 8px 20px -10px rgba(15,23,42,0.16),
+    inset 0 1px 0 rgba(255,255,255,0.95);
+  --pl-cardshadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -2px 0 rgba(15,23,42,0.05),
+    0 4px 12px -6px rgba(15,23,42,0.14);
+
+  position: relative;
+  width: 392px;
+  box-sizing: border-box;
+  padding: var(--space-6, 24px) var(--space-5, 20px) var(--space-5, 20px);
+  border-radius: 36px;
+  background: var(--pl-surface);
+  border: 1px solid rgba(15,23,42,0.05);
+  box-shadow: var(--pl-shadow);
+  font-family: var(--font-display);
+  color: var(--fg1);
+  user-select: none;
+  overflow: hidden;
+}
+
+/* ── Surface header ───────────────────────────────────────────────────── */
+.pl-top {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: var(--space-4, 16px);
+}
+
+.pl-top-ic {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background-color: #0F172A;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px);
+  background-size: 7px 7px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.18),
+    inset 0 -2px 0 rgba(0,0,0,0.35),
+    0 4px 12px -4px rgba(15,23,42,0.5);
+}
+
+.pl-top-ic span { font-size: 20px; }
+
+.pl-top-tt {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--fg1);
+  line-height: 1;
+  font-family: var(--font-display);
+}
+
+.pl-top-sb {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--fg4);
+  margin-top: var(--space-1, 4px);
+}
+
+/* ── Section ──────────────────────────────────────────────────────────── */
+.pl-sec {
+  display: flex;
+  flex-direction: column;
+}
+
+.pl-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 4px 9px;
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg4);
+  font-family: var(--font-display);
+}
+
+.pl-head span.pl-head-icon { font-size: 14px; color: var(--brand-primary); }
+
+.pl-head .pl-count {
+  margin-left: 2px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--fg4);
+  background: var(--bg-chip);
+  border-radius: 9999px;
+  padding: 2px 7px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* pinned-section header collapses + fades when empty */
+.pl-sec.pinned .pl-head {
+  overflow: hidden;
+  opacity: 1;
+  max-height: 30px;
+  transition:
+    opacity calc(240ms * var(--anim-mult, 1)) ease,
+    max-height calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
+    padding calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
+    margin calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+}
+
+.pl-sec.pinned.empty .pl-head {
+  opacity: 0;
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-top: 0;
+}
+
+.pl-sec.all .pl-head { margin-top: var(--space-3, 12px); }
+.pl-sec.all.solo .pl-head {
+  margin-top: var(--space-1, 4px);
+  transition: margin calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+}
+
+.pl-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 8px);
+}
+
+/* ── Item card ────────────────────────────────────────────────────────── */
+.pl-item {
+  position: relative; /* enables z-index for unpin slide-under staging */
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 11px 12px;
+  border-radius: 19px;
+  background: var(--pl-card);
+  border: 1px solid var(--pl-card-bd);
+  box-shadow: var(--pl-cardshadow);
+  will-change: transform;
+}
+
+/* entrance animation helpers (applied programmatically by hook) */
+.pl-item.pl-preanim { opacity: 0; transform: translateY(-7px) scale(0.96); }
+.pl-item.pl-anim {
+  transition:
+    opacity calc(360ms * var(--anim-mult, 1)) ease,
+    transform calc(420ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.38,1);
+}
+
+/* pinned look */
+.pl-item.is-pinned {
+  background: color-mix(in srgb, var(--brand-primary) 9%, var(--pl-card));
+  border-color: color-mix(in srgb, var(--brand-primary) 30%, transparent);
+}
+
+/* ── Icon badge ───────────────────────────────────────────────────────── */
+.pl-ico {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  background: var(--pl-ico-bg);
+  color: var(--pl-ico-fg);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    inset 0 0 0 1px rgba(15,23,42,0.04);
+  transition:
+    background calc(260ms * var(--anim-mult, 1)) ease,
+    color calc(260ms * var(--anim-mult, 1)) ease;
+}
+
+.pl-ico span { font-size: 21px; }
+
+.pl-item.is-pinned .pl-ico {
+  background: var(--brand-primary);
+  color: #fff;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+  background-size: 7px 7px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.5),
+    inset 0 -2px 0 rgba(15,23,42,0.18),
+    inset 0 0 0 1px rgba(15,23,42,0.08);
+}
+
+/* ── Text ─────────────────────────────────────────────────────────────── */
+.pl-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.pl-name {
+  font-size: 14.5px;
+  font-weight: 800;
+  letter-spacing: -0.012em;
+  color: var(--fg1);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--font-display);
+}
+
+.pl-sub {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fg3);
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Pin button ───────────────────────────────────────────────────────── */
+.pl-pin {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: var(--bg-chip);
+  color: var(--fg4);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.7),
+    inset 0 0 0 1px rgba(15,23,42,0.04);
+  transition:
+    background calc(200ms * var(--anim-mult, 1)) ease,
+    color calc(200ms * var(--anim-mult, 1)) ease,
+    box-shadow calc(200ms * var(--anim-mult, 1)) ease;
+}
+
+.pl-pin span {
+  font-size: 18px;
+  transition: transform calc(280ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1);
+}
+
+.pl-pin:hover { color: var(--fg2); }
+.pl-pin:active { transform: scale(0.88); }
+
+.pl-item.is-pinned .pl-pin {
+  background: var(--brand-primary);
+  color: #fff;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+  background-size: 7px 7px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.45),
+    inset 0 -2px 0 rgba(0,0,0,0.2);
+}
+
+.pl-item.is-pinned .pl-pin:hover {
+  filter: brightness(1.06);
+}
+
+.pl-item.is-pinned .pl-pin span { transform: rotate(-45deg); }
+
+/* ── Empty "all" state ────────────────────────────────────────────────── */
+.pl-empty {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1, 4px);
+  padding: 22px 0 12px;
+  text-align: center;
+  color: var(--fg4);
+}
+
+.pl-sec.all.no-items .pl-empty { display: flex; }
+
+.pl-empty .pl-empty-icon { font-size: 26px; color: var(--brand-primary); opacity: 0.85; }
+
+.pl-empty .pl-empty-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--fg3);
+}
+
+/* ── Dark mode ────────────────────────────────────────────────────────── */
+html.dark .pinlist {
+  --pl-surface:     linear-gradient(168deg, var(--card-bg, #1E293B) 0%, #172033 100%);
+  --pl-card:        #243449;
+  --pl-card-bd:     var(--card-border, rgba(255,255,255,0.07));
+  --pl-ico-bg:      #0F172A;
+  --pl-ico-fg:      #94A3B8;
+  --pl-shadow:
+    0 30px 70px -22px rgba(0,0,0,0.7),
+    0 8px 20px -10px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  --pl-cardshadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 -2px 0 rgba(0,0,0,0.3),
+    0 4px 12px -6px rgba(0,0,0,0.4);
+  border-color: rgba(255,255,255,0.06);
+}
+
+html.dark .pl-top-ic { background-color: #060B16; }
+
+html.dark .pl-ico {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    inset 0 0 0 1px rgba(255,255,255,0.04);
+}
+
+html.dark .pl-pin {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    inset 0 0 0 1px rgba(255,255,255,0.05);
+}
+
+html.dark .pl-pin:hover { background: var(--slate-700, #334155); }
+html.dark .pl-head .pl-count { color: var(--fg3); }
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+@media (max-width: 460px) {
+  .pinlist { width: 100%; max-width: 392px; }
+}
