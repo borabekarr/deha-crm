@@ -18,10 +18,14 @@ import { BRAIN_SECTIONS } from './leadMetrics'
 export function DetailPanel({ stage }: { stage: BrainStageController }) {
   const section = BRAIN_SECTIONS.find(s => s.id === stage.activeId)
 
+  // --active drives width/opacity transition; driven by panelOpen so the panel
+  // animates shut BEFORE activeId clears (mounted-through-exit pattern).
+  const cls = 'ldx-detail-panel' + (stage.panelOpen ? ' ldx-detail-panel--active' : '')
+
   // ── Empty state ──────────────────────────────────────────────────────────────
   if (!section) {
     return (
-      <div className="ldx-detail-panel">
+      <div className={cls}>
         <div className="ldx-dp-bezel">
           <div className="ldx-detail-empty">
             <span className="material-symbols-outlined">psychology</span>
@@ -36,7 +40,7 @@ export function DetailPanel({ stage }: { stage: BrainStageController }) {
   const { thinking, typed } = stage.typewriter
 
   return (
-    <div className="ldx-detail-panel ldx-detail-panel--active">
+    <div className={cls}>
       {/* Back arrow — outside the bezel so CSS can pin it at panel top-left */}
       <button
         type="button"

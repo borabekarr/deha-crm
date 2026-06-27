@@ -7,10 +7,10 @@ import { iconClass } from '../../../lib/iconClass'
 
 // ---------------------------------------------------------------------------
 // ModelSelector — AI chatbot model picker
-// Faithful port of apps/web/design-system/preview/components-model-selector.html
-// DOM: .ms-card > .ms-trigger + .ms-outer > .ms-panel > .ms-row[]
-// Interaction: togglePanel opens/closes panel; pick() selects a row.
-// Search/selection via derived state + event handlers — NO raw useEffect.
+// DOM: single .ms-shell morphs from compressed pill-footprint (closed) to
+// full card (open). No separate trigger + card — the shell IS both.
+// Animation: scaleY/scaleX spring (transform-origin: top center). No slide.
+// Interaction: togglePanel opens/closes; pick() selects. No useEffect.
 // ---------------------------------------------------------------------------
 
 interface ModelOption {
@@ -80,7 +80,7 @@ export default function ModelSelector() {
   const [open, setOpen] = useState(true)
   const [selectedId, setSelectedId] = useState<string>('auto')
 
-  // Derived: selected model data + index for trigger display and indicator positioning
+  // Derived: selected model data + index
   const selectedIndex = MODELS.findIndex((m) => m.id === selectedId)
   const selected = selectedIndex >= 0 ? MODELS[selectedIndex] : MODELS[0]
 
@@ -95,27 +95,58 @@ export default function ModelSelector() {
   return (
     <div className="ms-card">
 
-      {/* Trigger */}
+      {/*
+        Single shell: closed = scaleY(0.12) scaleX(0.65) opacity(0) — pill footprint.
+        Open = scaleY(1) scaleX(1) opacity(1) — full card.
+        transform-origin: top center → grows downward, no slide.
+        Click on closed shell (full bounding box is target) → opens.
+      */}
       <div
-        className={`ms-trigger${open ? ' open' : ''}`}
-        onClick={togglePanel}
+        className={`ms-shell${open ? ' open' : ''}`}
+        onClick={!open ? togglePanel : undefined}
+        role={!open ? 'button' : undefined}
+        aria-expanded={open}
+        aria-label={!open ? `Select model: ${selected.name}` : undefined}
       >
-        {/* Colorful mini-icon tag matching the selected model's panel icon */}
-        <div
-          className="ms-t-icon-tag icon-badge icon-badge--sm"
-          style={{ '--icon-c': selected.iconColor } as React.CSSProperties}
-        >
-          <span className={iconClass(selected.icon)}>{selected.icon}</span>
-        </div>
-        <span className="ms-t-model">{selected.name}</span>
-        <span className="ms-t-sep" />
-        <span className="ms-t-label">Select Model</span>
-        <span className="material-icons ms-t-chevron">expand_more</span>
-      </div>
 
-      {/* Gray outer shell wrapping the white panel */}
-      <div className={`ms-outer${open ? ' open' : ' ms-closing'}`}>
-        {/* --sel-idx drives the CSS transform on .ms-sel-indicator — no JS measurement needed */}
+        {/* Close button — top-right corner, absolutely positioned within shell */}
+        {open && (
+          <button
+            type="button"
+            className="ms-close-btn"
+            onClick={(e) => { e.stopPropagation(); togglePanel(); }}
+            aria-label="Close model selector"
+          >
+            <span className="material-icons">close</span>
+          </button>
+        )}
+
+        {/* Header — trigger content now lives inside the card */}
+        <div className="ms-header">
+          {/* Icon tag: background-color transition handles color change on selection */}
+          <div
+            className="ms-t-icon-tag icon-badge icon-badge--sm"
+            style={{ '--icon-c': selected.iconColor } as React.CSSProperties}
+          >
+            <span className={iconClass(selected.icon)}>{selected.icon}</span>
+          </div>
+          {/* Model name: key drives crossfade+scale morph animation on change */}
+          <span className="ms-t-model" key={`name-${selectedId}`}>{selected.name}</span>
+          <span className="ms-t-sep" />
+          <span className="ms-t-label">Select Model</span>
+          <span
+            className="material-icons ms-t-chevron"
+            style={{ transform: open ? 'rotate(180deg)' : undefined }}
+          >
+            expand_more
+          </span>
+        </div>
+
+        {/* Horizontal divider between header and rows */}
+        <div className="ms-divider" />
+
+        {/* Model rows panel — sits directly inside the gray shell */}
+        {/* --sel-idx drives the CSS transform on .ms-sel-indicator — no JS measurement */}
         <div
           className="ms-panel"
           style={{ '--sel-idx': selectedIndex } as React.CSSProperties}
@@ -134,7 +165,7 @@ export default function ModelSelector() {
               <div
                 key={model.id}
                 className={rowCls}
-                onClick={() => pick(model.id)}
+                onClick={(e) => { e.stopPropagation(); pick(model.id); }}
               >
                 {/* Icon */}
                 <div
@@ -174,6 +205,7 @@ export default function ModelSelector() {
           })}
 
         </div>
+
       </div>
 
     </div>

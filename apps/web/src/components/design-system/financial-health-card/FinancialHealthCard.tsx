@@ -94,14 +94,18 @@ export default function FinancialHealthCard() {
   }
 
   // ── card click: toggle open + micro-pop ───────────────────────────────────
+  // Double rAF defers retriggerClass until after React commits the new
+  // className (fhc / fhc open), so the added 'pop' class is not overwritten.
   function handleCardClick() {
     setIsOpen(prev => !prev)
-    if (cardRef.current) {
-      retriggerClass(cardRef.current, 'pop')
-    }
-    if (pinRef.current) {
-      retriggerClass(pinRef.current, 'pulse')
-    }
+    const card = cardRef.current
+    const pin  = pinRef.current
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (card) retriggerClass(card, 'pop')
+        if (pin)  retriggerClass(pin, 'pulse')
+      })
+    })
   }
 
   return (
@@ -169,7 +173,7 @@ export default function FinancialHealthCard() {
                 <div className="fhc-info-divider" />
                 <div className="fhc-sec" style={{ '--s': 1 } as React.CSSProperties}>
                   <div className="fhc-sec-h">
-                    <span className="material-symbols-outlined">task_alt</span>
+                    <span className="material-symbols-outlined">check_circle</span>
                     Recommendation:
                   </div>
                   <div className="fhc-sec-p">{INITIAL_REC}</div>

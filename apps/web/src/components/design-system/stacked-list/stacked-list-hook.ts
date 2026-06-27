@@ -8,23 +8,6 @@
  */
 
 /**
- * Callback ref for the active-panel search input.
- * Auto-focuses when the element mounts.
- */
-export function activeSearchRef(el: HTMLInputElement | null): void {
-  if (!el) return
-  // Store cleanup noop (focus has no teardown)
-  ;(el as HTMLInputElement & { __slCleanup?: () => void }).__slCleanup = () => { /* noop */ }
-}
-
-export function cleanupActiveSearch(el: HTMLInputElement | null): void {
-  if (!el) return
-  const e = el as HTMLInputElement & { __slCleanup?: () => void }
-  e.__slCleanup?.()
-  delete e.__slCleanup
-}
-
-/**
  * Callback ref for the directory search input inside the expanded dock.
  * Auto-focuses when the dock expands and the input mounts.
  */

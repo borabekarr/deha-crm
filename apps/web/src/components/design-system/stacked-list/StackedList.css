@@ -29,7 +29,7 @@ html.dark .sl-panel {
 }
 .sl-title {
   display: flex; align-items: center; gap: 9px;
-  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-family: var(--font-display);
   font-size: 18px; font-weight: 700; letter-spacing: -.02em; color: var(--fg1);
 }
 .sl-count {
@@ -65,7 +65,7 @@ html.dark .sl-add:hover { background: rgba(255,255,255,.06); border-color: rgba(
   width: 100%; height: 46px; padding: 0 16px 0 44px;
   border: none; border-radius: 15px;
   background: var(--sl-field, var(--slate-100)); color: var(--fg1);
-  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-family: var(--font-display);
   font-size: 14.5px; font-weight: 600;
   outline: none; box-shadow: inset 0 0 0 1px transparent;
   transition:
@@ -103,7 +103,7 @@ html.dark .sl-list::-webkit-scrollbar-thumb { background: var(--slate-700); }
 .sl-empty {
   padding: 36px 8px; text-align: center;
   color: var(--fg4); font-size: 13.5px; font-weight: 600;
-  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-family: var(--font-display);
 }
 .sl-empty .material-symbols-outlined { display: block; font-size: 30px; margin: 0 auto 8px; opacity: .7; }
 
@@ -121,7 +121,7 @@ html.dark .sl-list::-webkit-scrollbar-thumb { background: var(--slate-700); }
   width: 48px; height: 48px; border-radius: 50%;
   display: grid; place-items: center;
   color: #fff; font-weight: 900; font-size: 15px; letter-spacing: -.01em;
-  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-family: var(--font-display);
   text-shadow: 0 1px 1px rgba(0,0,0,.28);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.5),
@@ -151,7 +151,7 @@ html.dark .sl-online { background: var(--card-bg, #1E293B); }
 
 .sl-meta { flex: 1; min-width: 0; }
 .sl-name {
-  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-family: var(--font-display);
   font-size: 15px; font-weight: 700; letter-spacing: -.01em;
   color: var(--fg1); line-height: 1.1; margin-bottom: 5px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -159,7 +159,7 @@ html.dark .sl-online { background: var(--card-bg, #1E293B); }
 .sl-status { display: flex; align-items: center; gap: 6px; }
 .sl-status .dot { width: 6px; height: 6px; border-radius: 50%; background: #10B981; flex: none; }
 .sl-status span {
-  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-family: var(--font-display);
   font-size: 13px; font-weight: 600; line-height: 1;
 }
 .sl-status.is-online span { color: #059669; }
@@ -172,7 +172,7 @@ html.dark .sl-status.is-online span { color: #6EE7B7; }
   display: inline-flex; align-items: center; gap: 6px;
   padding: 5px 11px 5px 9px; border-radius: 9999px;
   border: 1px solid; font-size: 11px; font-weight: 700;
-  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-family: var(--font-display);
   letter-spacing: .02em; text-transform: uppercase; white-space: nowrap;
 }
 .sl-badge .material-symbols-outlined { font-size: 14px; font-variation-settings: 'wght' 500; }
@@ -244,15 +244,27 @@ html.dark .sl-bar:not(.is-expanded):hover {
   background: color-mix(in srgb, #fff 5%, var(--card-bg, #1E293B));
 }
 
-/* dock header row */
+/* dock header row — styled as .card-inner */
 .sl-bar-head {
   flex: none; height: 66px;
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 13px;
-  transition: border-color calc(.3s * var(--anim-mult,1));
+  background: var(--card-bg, #FFFFFF);
+  border-radius: var(--card-radius, 20px);
+  box-shadow: inset 0 0 0 1px rgba(15,23,42,0.04);
+  transition:
+    border-color calc(.3s * var(--anim-mult,1)),
+    border-radius calc(.52s * var(--anim-mult,1)) cubic-bezier(.32,1.12,.4,1);
   border-bottom: 1px solid transparent;
 }
-.sl-bar.is-expanded .sl-bar-head { border-bottom-color: var(--card-border, #CBD5E1); }
+html.dark .sl-bar-head {
+  background: var(--card-bg, #1E293B);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
+}
+.sl-bar.is-expanded .sl-bar-head {
+  border-radius: 0;
+  border-bottom-color: var(--card-border, #CBD5E1);
+}
 .sl-bar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .sl-bar-icon {
   flex: none; width: 44px; height: 44px; border-radius: 13px;
@@ -269,13 +281,13 @@ html.dark .sl-bar-icon { background: rgba(255,255,255,.04); border-color: rgba(2
 .sl-bar-titles { min-width: 0; }
 .sl-bar-titles h4 {
   margin: 0;
-  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-family: var(--font-display);
   font-size: 15px; font-weight: 700; letter-spacing: -.01em;
   color: var(--fg1); line-height: 1.1;
 }
 .sl-bar-titles p {
   margin: 4px 0 0;
-  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-family: var(--font-display);
   font-size: 12px; font-weight: 600; color: var(--fg4); line-height: 1;
 }
 
@@ -298,7 +310,7 @@ html.dark .sl-stack .sl-more {
 .sl-stack .sl-mini:first-child { margin-left: 0; }
 .sl-mini {
   display: grid; place-items: center; color: #fff;
-  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-family: var(--font-display);
   font-weight: 900; font-size: 13px;
   text-shadow: 0 1px 1px rgba(0,0,0,.28);
   background-image:
@@ -309,7 +321,7 @@ html.dark .sl-stack .sl-more {
 .sl-more {
   display: grid; place-items: center;
   background: var(--bg-chip); color: var(--fg3);
-  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-family: var(--font-display);
   font-size: 12px; font-weight: 700;
 }
 
@@ -347,15 +359,6 @@ html.dark .sl-close:hover { background: rgba(255,255,255,.12); color: var(--fg1)
 .sl-bar-list { scrollbar-width: thin; scrollbar-color: var(--slate-300) transparent; }
 html.dark .sl-bar-list { scrollbar-color: var(--slate-700) transparent; }
 html.dark .sl-bar-list::-webkit-scrollbar-thumb { background: var(--slate-700); }
-
-/* ===================== Reveal animation ===================== */
-@keyframes slSweep {
-  from { opacity: 0; transform: translate(11px, 16px) rotate(1.2deg); }
-  to   { opacity: 1; transform: none; }
-}
-.sl-sweep {
-  animation: slSweep calc(.46s * var(--anim-mult,1)) cubic-bezier(.34,1.16,.42,1) backwards;
-}
 
 @media (prefers-reduced-motion: reduce) {
   .sl-panel *,

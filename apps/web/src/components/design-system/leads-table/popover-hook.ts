@@ -184,7 +184,6 @@ export function useChannelSwitcher(initial: ChannelId = 'doc'): ChannelSwitcherS
   // Pre-paint measure on active change, then one delayed re-measure to catch
   // font/open reflow — both scheduled inside a single layout effect so no plain
   // useEffect is needed (project hard-rule: zero useEffect).
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useLayoutEffect(() => {
     measure()
     const t = setTimeout(measure, 140)

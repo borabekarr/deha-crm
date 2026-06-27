@@ -25,7 +25,15 @@ interface DbTimerStore {
 
 /**
  * Callback ref for the .db-inner span.
- * Reads offsetWidth immediately and calls setWidth so the outer button morphs.
+ * Reads scrollWidth (the natural content width, including any content that
+ * overflows the clip box) and calls setWidth so the outer button morphs to fit.
+ *
+ * NOTE: .db-inner has overflow:hidden and its laid-out width is driven by the
+ * button's inline width, so offsetWidth would just echo the current (possibly
+ * too-narrow) width and never grow to fit the entering confirming content
+ * (the countdown badge). scrollWidth reflects the in-flow .db-slide-in slot's
+ * full natural width even when it overflows the clip box, so the button grows
+ * to contain the badge instead of clipping it.
  */
 export function dbInnerRef(
   el: HTMLElement | null,
@@ -35,7 +43,7 @@ export function dbInnerRef(
     setWidth(null)
     return
   }
-  setWidth(el.offsetWidth)
+  setWidth(el.scrollWidth)
 }
 
 /**

@@ -92,7 +92,6 @@ export default function TodoList() {
     // Store cleanup on the element for GC safety (component is long-lived)
     ;(el as HTMLDivElement & { _tdpCleanup?: () => void })._tdpCleanup?.()
     ;(el as HTMLDivElement & { _tdpCleanup?: () => void })._tdpCleanup = () => el.removeEventListener('keydown', handler)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Popover state
@@ -153,7 +152,6 @@ export default function TodoList() {
       todoCleanupRef(el)
     }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // ── Week pill positioning (called after week DOM is ready) ───────────────

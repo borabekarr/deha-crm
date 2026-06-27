@@ -49,14 +49,13 @@ export function useTween(target: number, dur: number): number {
   // that reads it and the value is not used for rendering.
   // eslint-disable-next-line react-hooks/refs
   if (!startedRef.current) {
-    // eslint-disable-next-line react-hooks/refs
     startedRef.current = true
     // Capture start time once at first render — not recomputed on re-renders.
     // eslint-disable-next-line react-hooks/purity, local/no-nondeterministic-render
     const T = typeof performance !== 'undefined' ? performance.now() : Date.now()
 
     const tick = () => {
-      // eslint-disable-next-line react-hooks/purity, local/no-nondeterministic-render
+      // eslint-disable-next-line react-hooks/purity
       const now = typeof performance !== 'undefined' ? performance.now() : Date.now()
       const p = Math.min(1, (now - T) / (dur || 760))
       const eased = targetRef.current * (1 - Math.pow(1 - p, 3))

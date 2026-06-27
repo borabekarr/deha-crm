@@ -1,5 +1,5 @@
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
-import { getGrouped } from '@/lib/component-registry'
+import { getGroupedByStatus } from '@/lib/component-registry'
 import { GalleryLayout } from '@/components/library/GalleryLayout'
 
 const PREVIEW_ROUTE = import.meta.env.VITE_PREVIEW_ROUTE as string | undefined
@@ -13,10 +13,13 @@ export const Route = createFileRoute('/')({
   component: ShowcasePage,
 })
 
-const grouped = getGrouped()
+const grouped = getGroupedByStatus()
 
 function ShowcasePage() {
-  const total = [...grouped.values()].reduce((n, entries) => n + entries.length, 0)
+  const total = [...grouped.values()].reduce(
+    (n, sub) => n + [...sub.values()].reduce((m, entries) => m + entries.length, 0),
+    0,
+  )
 
   return (
     <GalleryLayout>
@@ -26,7 +29,7 @@ function ShowcasePage() {
           <header className="mb-10">
             <h1 className="text-2xl font-bold tracking-tight text-foreground">Deha UI Library</h1>
             <p className="mt-1.5 text-sm text-muted-foreground">
-              {total} components across {grouped.size} categories. Click any card to open its live preview.
+              {total} components across {grouped.size} stages. Click any card to open its live preview.
             </p>
           </header>
 
@@ -53,36 +56,41 @@ function ShowcasePage() {
             </div>
           </section>
 
-          {/* Registry components grouped by category */}
-          {[...grouped.entries()].map(([category, entries]) =>
-            entries.length === 0 ? null : (
-              <section key={category} className="mb-10">
-                <h2 className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                  {category}
-                </h2>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {entries.map((entry) => (
-                    <Link
-                      key={entry.slug}
-                      to="/components/$slug"
-                      params={{ slug: entry.slug }}
-                      className="group flex flex-col rounded-lg border border-border bg-card p-4 transition-colors hover:border-foreground/20 hover:bg-muted"
-                    >
-                      <span className="flex items-center justify-between text-sm font-semibold text-foreground">
-                        {entry.name}
-                        <svg className="size-3.5 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </span>
-                      <span className="mt-1 line-clamp-2 text-xs text-muted-foreground">
-                        {entry.subtitle}
-                      </span>
-                    </Link>
-                  ))}
+          {/* Registry components grouped by status → subcategory */}
+          {[...grouped.entries()].map(([status, sub]) => (
+            <section key={status} className="mb-12">
+              <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-foreground">
+                {status}
+              </h2>
+              {[...sub.entries()].map(([category, entries]) => (
+                <div key={category} className="mb-8">
+                  <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    {category}
+                  </h3>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {entries.map((entry) => (
+                      <Link
+                        key={entry.slug}
+                        to="/components/$slug"
+                        params={{ slug: entry.slug }}
+                        className="group flex flex-col rounded-lg border border-border bg-card p-4 transition-colors hover:border-foreground/20 hover:bg-muted"
+                      >
+                        <span className="flex items-center justify-between text-sm font-semibold text-foreground">
+                          {entry.name}
+                          <svg className="size-3.5 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </span>
+                        <span className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                          {entry.subtitle}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-              </section>
-            ),
-          )}
+              ))}
+            </section>
+          ))}
         </div>
       </div>
     </GalleryLayout>

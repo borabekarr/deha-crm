@@ -75,8 +75,8 @@ function ExpandedCard({ metricKey, onClose }: ExpandedCardProps) {
     <>
       <div className="exp-top">
         <div className="exp-crumb">
-          <span className="material-symbols-outlined">{m.icon}</span>
           Dashboard <span style={{ color: '#CBD5E1', margin: '0 1px' }}>/</span>{' '}
+          <span className="material-symbols-outlined">{m.icon}</span>
           <strong>{m.label}</strong>
         </div>
         <button type="button" className="exp-close" onClick={onClose} aria-label="Close">
@@ -84,10 +84,8 @@ function ExpandedCard({ metricKey, onClose }: ExpandedCardProps) {
         </button>
       </div>
       <div className="exp-body">
-        <div className="exp-num-row">
-          <div className="exp-num">{m.num}</div>
-          <div className="exp-goal">{m.goal}</div>
-        </div>
+        <div className="exp-goal">{m.goal}</div>
+        <div className="exp-num">{m.num}</div>
         <div className="exp-badge-row">
           <span className={`exp-badge ${m.dir}`}>
             <span className="material-icons">{arrowIcon}</span>
@@ -116,9 +114,16 @@ function ExpandedCard({ metricKey, onClose }: ExpandedCardProps) {
             <path d={m.dashArea} fill={`url(#${m.gradId}D)`} />
             <path d={m.solidLine} fill="none" stroke={m.color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
             <path d={m.dashLine} fill="none" stroke={m.color} strokeWidth="2" strokeDasharray="5,4" strokeLinecap="round" strokeOpacity="0.6" />
-            <circle cx={m.dotX} cy={m.dotY} r="8" fill={m.color} fillOpacity="0.18" />
-            <circle cx={m.dotX} cy={m.dotY} r="4.5" fill={m.color} stroke="#fff" strokeWidth="2" />
           </svg>
+          {/* End-dot as HTML overlay — decoupled from non-uniform SVG scaling so it stays a true circle */}
+          <div
+            className="exp-chart-dot"
+            style={{
+              left: `${(m.dotX / 300) * 100}%`,
+              top:  `${(m.dotY / 120) * 100}%`,
+              '--dot-color': m.color,
+            } as React.CSSProperties}
+          />
         </div>
         <div className="exp-axis">
           {m.axes.map((a) => <span key={a}>{a}</span>)}
@@ -153,7 +158,7 @@ export default function MetricCard() {
 
   return (
     <div className="card" style={{ padding: 0, background: '#F8FAFC' }}>
-      <div className="frame">
+      <div className="frame mc-frame">
         <div className="grid">
 
           {/* New Leads card */}

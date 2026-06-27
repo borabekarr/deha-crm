@@ -492,7 +492,7 @@ export default function OnboardingCompletion() {
       style={{ '--oc-accent': accent } as React.CSSProperties}
       ref={setRootRef}
     >
-      {/* eslint-disable-next-line react/no-danger, no-restricted-syntax -- OC_OVERRIDES is a static component-authored CSS constant (no interpolation, no external/user input); injected as a late <style> for cascade precedence over the imported stylesheet */}
+      {/* eslint-disable-next-line no-restricted-syntax -- OC_OVERRIDES is a static component-authored CSS constant (no interpolation, no external/user input); injected as a late <style> for cascade precedence over the imported stylesheet */}
       <style dangerouslySetInnerHTML={{ __html: OC_OVERRIDES }} />
       <div className={`oc-panel-wrap${compact ? ' is-compact' : ''}`}>
 

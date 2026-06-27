@@ -1,5 +1,6 @@
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
+import '../../../../design-system/preview/_shared-feedback.css'
 import './StatusCard.css'
 
 import { useState, useRef, useCallback } from 'react'
@@ -206,9 +207,9 @@ function StatusCardInner({
   }
 
   return (
-    <div className="sc-stage" style={{ '--tone': T.color } as React.CSSProperties}>
+    <div className={'sc-stage' + (pressed ? ' is-pressed' : '')} style={{ '--tone': T.color } as React.CSSProperties}>
       <article
-        className={'sc-card' + (pressed ? ' is-pressed' : '')}
+        className="sc-card"
         data-open={open ? 'true' : 'false'}
       >
         <button
@@ -223,7 +224,7 @@ function StatusCardInner({
           {ripples.map((rp) => (
             <span key={rp.id} className="sc-ripple" style={{ left: rp.x, top: rp.y }} />
           ))}
-          <span className={'sc-icon' + (tone === 'warning' ? ' sc-icon--warning' : '')}><Glyph s={16} /></span>
+          <span className={'icon-badge icon-badge--lg sc-icon' + (tone === 'warning' ? ' sc-icon--warning' : '')}><Glyph s={20} /></span>
           <span className="sc-title">{title}</span>
           <span className="sc-chev"><IcoChev /></span>
         </button>

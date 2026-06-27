@@ -51,19 +51,16 @@ export default function AdjustTimeframe() {
   const todayIdx  = clamp(diffDays(domainStart, today), 0, totalDays)
   const months    = buildMonths(domainStart, totalDays)
 
-  const monthStartIdx = diffDays(
-    domainStart,
-    new Date(today.getFullYear(), today.getMonth(), 1),
-  )
   const presets = [
-    { id: 'month', label: 'This month', start: Math.max(0, Math.min(monthStartIdx, todayIdx - MIN_SPAN)), end: todayIdx },
-    { id: 'last7', label: 'Last 7D',    start: Math.max(0, todayIdx - 6),  end: todayIdx },
-    { id: 'd30',   label: '30D',         start: Math.max(0, todayIdx - 29), end: todayIdx },
-    { id: 'd90',   label: '90D',         start: Math.max(0, todayIdx - 89), end: todayIdx },
+    { id: 'last7', label: 'Last 7D', start: Math.max(0, todayIdx - 6),  end: todayIdx },
+    { id: 'd30',   label: '30D',     start: Math.max(0, todayIdx - 29), end: todayIdx },
+    { id: 'd90',   label: '90D',     start: Math.max(0, todayIdx - 89), end: todayIdx },
   ]
 
   /* ── State ───────────────────────────────────────────────────────────── */
-  const [startIdx,    setStartIdx]    = useState(() => clamp(presets[0].start, 0, todayIdx))
+  /* Default preset: "30D" (index 1). */
+  const defaultPreset = presets[1]
+  const [startIdx,    setStartIdx]    = useState(() => clamp(defaultPreset.start, 0, todayIdx))
   const [endIdx,      setEndIdx]      = useState(todayIdx)
   const [trackW,      setTrackW]      = useState(0)
   const [daysVisible, setDaysVisible] = useState(() => clamp(105, MIN_DAYS, totalDays))
@@ -72,9 +69,9 @@ export default function AdjustTimeframe() {
   const [drag,        setDrag]        = useState<'start' | 'end' | 'move' | null>(null)
   /* bump key: incremented by preset / month / key actions to trigger the pop animation */
   const [bumpKey,     setBumpKey]     = useState(0)
-  /* Item 4: the pill the user last picked. Stays "active" (white text) even after
+  /* The pill the user last picked. Stays "active" (white text) even after
      the range is extended via the strip, so the active pill never turns grey. */
-  const [pickedPreset, setPickedPreset] = useState<string | null>(presets[0].id)
+  const [pickedPreset, setPickedPreset] = useState<string | null>(defaultPreset.id)
 
   /* ── Derived display values ──────────────────────────────────────────── */
   const ppd     = trackW > 0 ? trackW / clamp(daysVisible, MIN_DAYS, totalDays) : 6
@@ -111,10 +108,15 @@ export default function AdjustTimeframe() {
   const presetsRef   = useRef<HTMLFieldSetElement | null>(null)
   const [gliderStyle, setGliderStyle] = useState<{ left: number; width: number }>({ left: 3, width: 0 })
 
-  const measureGlider = useCallback(() => {
+  /* targetId: when passed (e.g. a drag that lands exactly on a preset), measure
+     THAT pill directly via [data-id] — bypasses the stale `.active` DOM read that
+     has not committed yet. No arg → read the currently-active pill (click path). */
+  const measureGlider = useCallback((targetId?: string) => {
     const root = presetsRef.current
     if (!root) return
-    const btn = root.querySelector<HTMLElement>('button.active')
+    const btn = targetId
+      ? root.querySelector<HTMLElement>(`button[data-id="${targetId}"]`)
+      : root.querySelector<HTMLElement>('button.active')
     if (!btn) return
     const nextLeft  = btn.offsetLeft
     const nextWidth = btn.offsetWidth
@@ -130,7 +132,7 @@ export default function AdjustTimeframe() {
     presetsRef.current = el
     if (el) {
       /* rAF so the browser has painted the buttons at their final size */
-      requestAnimationFrame(measureGlider)
+      requestAnimationFrame(() => measureGlider())
     }
   }, [measureGlider])
 
@@ -160,7 +162,7 @@ export default function AdjustTimeframe() {
       lastTrackW.current = w
       setTrackW(w)
       setScrollLive(clamp(
-        ((presets[0].start + todayIdx) / 2) * nppd - w / 2,
+        ((defaultPreset.start + todayIdx) / 2) * nppd - w / 2,
         -EDGE_PAD,
         nMaxScroll,
       ))
@@ -228,6 +230,21 @@ export default function AdjustTimeframe() {
         setStartIdx(ns)
         setEndIdx(ne)
         ensureVisible(focusIdx, scrollRef.current, snapPpd, snapTrackW)
+        // Item 3: slide glider when drag lands exactly on a preset. Pass the matched
+        // id so measureGlider reads THAT pill directly — the `.active` class has not
+        // committed yet, so a bare measure would read the stale (old) active pill.
+        const hit = presets.find((p) => p.start === ns && p.end === ne)
+        if (hit) {
+          const hitId = hit.id
+          setPickedPreset(hitId)
+          requestAnimationFrame(() => measureGlider(hitId))
+        }
+        // Item 4: auto zoom-out whenever focal point is off-screen (edge condition),
+        // regardless of whether scroll moved — drive off focal check alone.
+        const focalPx = focusIdx * snapPpd - scrollRef.current
+        if (focalPx < 26 || focalPx > snapTrackW - 26) {
+          setDaysVisible((prev) => clamp(Math.round(prev * 1.5), MIN_DAYS, totalDays))
+        }
       },
       onUp: () => {
         setDrag(null)
@@ -266,8 +283,10 @@ export default function AdjustTimeframe() {
     setPickedPreset(p.id)
     setScrollLive(maxScroll)
     setBumpKey((k) => k + 1)
-    /* re-measure glider after state settles */
-    requestAnimationFrame(measureGlider)
+    /* re-measure glider after state settles — pass the picked id so we never depend
+       on the not-yet-committed `.active` class */
+    const pid = p.id
+    requestAnimationFrame(() => measureGlider(pid))
   }
 
   /* Item 5: zoom centers on the current lens midpoint */
@@ -356,6 +375,7 @@ export default function AdjustTimeframe() {
               <button
                 key={p.id}
                 type="button"
+                data-id={p.id}
                 className={`tf-preset${activeId === p.id ? ' active' : ''}`}
                 aria-pressed={activeId === p.id ? 'true' : 'false'}
                 onClick={() => applyPreset(p)}
@@ -486,7 +506,7 @@ export default function AdjustTimeframe() {
             className="tf-pan"
             aria-label="Zoom in"
             title="Zoom in"
-            disabled={daysVisible <= MIN_DAYS}
+            disabled={daysVisible <= MIN_DAYS || (endIdx - startIdx + 1) >= Math.max(Math.round(daysVisible / 1.5), MIN_DAYS)}
             onClick={() => zoom(1)}
           >
             <span className="material-symbols-outlined">keyboard_double_arrow_right</span>

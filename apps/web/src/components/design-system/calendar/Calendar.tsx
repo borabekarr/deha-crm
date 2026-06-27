@@ -16,6 +16,7 @@ interface EventInfo {
   color: string
   titles: string[]
   times: string[]
+  descriptions?: string[]
 }
 
 const INFO: Record<string, EventInfo> = {
@@ -25,6 +26,15 @@ const INFO: Record<string, EventInfo> = {
     color: '#3B82F6',
     titles: ['Team standup', 'Client call', 'Weekly sync', 'Strategy review', 'Product meeting', 'Investor call', 'Sprint planning'],
     times: ['9:00', '9:30', '10:00', '11:00', '14:00', '15:00', '16:30'],
+    descriptions: [
+      'Daily sync to surface blockers and align the team on today\'s priorities.',
+      'Review project deliverables and confirm next steps with the client.',
+      'Align on weekly goals, surface blockers, and update the sprint board.',
+      'Deep-dive into Q3 strategy to lock in priorities and owner assignments.',
+      'Product team check-in covering roadmap, backlog grooming, and release dates.',
+      'Investor update covering traction, pipeline, and 90-day milestones.',
+      'Plan the upcoming sprint, estimate stories, and assign ownership.',
+    ],
   },
   [O]: {
     badge: 'Review',
@@ -44,7 +54,7 @@ const INFO: Record<string, EventInfo> = {
 
 // May 2026 predefined dot data
 const MAY_DOTS: Record<number, string[]> = {
-  1: [B, B, P], 2: [P], 3: [P], 4: [B, O, P], 5: [B, O], 6: [B, O], 7: [B, B, O], 8: [B, O], 9: [O],
+  1: [B, B, P], 2: [P], 3: [P], 4: [B, O, P, B, O], 5: [B, O], 6: [B, O], 7: [B, B, O], 8: [B, O], 9: [O],
   10: [P], 11: [B, O, P], 12: [B, O, P], 13: [O, B], 14: [B, B, O], 15: [B, O, O], 16: [P],
   17: [P], 18: [B, O], 19: [B, P], 20: [P, O, B], 21: [B, B, O], 22: [P], 23: [P],
   24: [P], 25: [B, O], 26: [B, B, P], 27: [O, B], 28: [O, B, B], 29: [B, P, O], 30: [P], 31: [P],
@@ -89,6 +99,7 @@ interface CalEvent {
   badge: string
   icon: string
   color: string
+  description?: string
 }
 
 function getEvents(year: number, month: number, day: number): CalEvent[] {
@@ -97,13 +108,16 @@ function getEvents(year: number, month: number, day: number): CalEvent[] {
     .map((color, i) => {
       const info = INFO[color]
       if (!info) return null
+      const titleIdx = (day + i * 4) % info.titles.length
+      const desc = info.descriptions ? info.descriptions[titleIdx % info.descriptions.length] : undefined
       return {
         time: info.times[(day * 2 + i * 3) % info.times.length],
-        title: info.titles[(day + i * 4) % info.titles.length],
+        title: info.titles[titleIdx],
         dot: color,
         badge: info.badge,
         icon: info.icon,
         color: info.color,
+        ...(desc !== undefined ? { description: desc } : {}),
       }
     })
     .filter((x): x is CalEvent => x !== null)
@@ -574,6 +588,9 @@ function CalEventPopoverCard({
             <span className="material-icons">close</span>
           </button>
         </div>
+        {event.description && (
+          <p className="cal-ep-desc">{event.description}</p>
+        )}
 
         <div className="cal-ep-htags">
           <span className="cal-ep-badge-tag" style={{ backgroundColor: event.color }}>
@@ -590,32 +607,32 @@ function CalEventPopoverCard({
           </span>
         </div>
 
-        {/* Organiser shell (mirrors tp-cust-shell) */}
-        <div className="cal-ep-cust-shell" onClick={addRipple}>
-          <div className="cal-ep-customer">
-            <span className="cal-ep-cust-av" style={{ background: orgColor }}>
-              <span className="material-icons">{orgInit}</span>
-            </span>
-            <div className="cal-ep-cust-meta">
-              <div className="cal-ep-cust-k">Organiser</div>
-              <div className="cal-ep-cust-name-row">
-                <span className="cal-ep-cust-name">{orgName}</span>
-              </div>
-              <div className="cal-ep-cust-sub">
-                <span className="material-icons" style={{ fontSize: '13px', verticalAlign: 'middle', marginRight: '4px', opacity: 0.85 }}>info</span>
-                {orgSub}
-              </div>
+        {/* Organiser card — grey shell wrapping the canonical inner-card */}
+        <div className="cal-ep-customer-outer">
+        <div className="cal-ep-customer" onClick={addRipple}>
+          <span className="cal-ep-cust-av icon-badge" style={{ '--icon-c': orgColor } as React.CSSProperties}>
+            <span className="material-icons">{orgInit}</span>
+          </span>
+          <div className="cal-ep-cust-meta">
+            <div className="cal-ep-cust-k">Organiser</div>
+            <div className="cal-ep-cust-name-row">
+              <span className="cal-ep-cust-name">{orgName}</span>
             </div>
-            <div className="cal-ep-cust-actions">
-              <button type="button" className="cal-ep-cust-act" aria-label="Message" onClick={e => { e.stopPropagation(); act('Message') }}>
-                <span className="material-icons">chat</span>
-              </button>
-              <button type="button" className="cal-ep-cust-ask ask-ai btn-green" onClick={e => { e.stopPropagation(); act('Ask AI') }}>
-                <span className={iconClass('neurology')}>neurology</span>Ask AI
-              </button>
+            <div className="cal-ep-cust-sub">
+              <span className="material-icons" style={{ fontSize: '13px', verticalAlign: 'middle', marginRight: '4px', opacity: 0.85 }}>info</span>
+              {orgSub}
             </div>
           </div>
+          <div className="cal-ep-cust-actions">
+            <button type="button" className="cal-ep-cust-act" aria-label="Message" onClick={e => { e.stopPropagation(); act('Message') }}>
+              <span className="material-icons">chat</span>
+            </button>
+            <button type="button" className="cal-ep-cust-ask ask-ai btn-green" onClick={e => { e.stopPropagation(); act('Ask AI') }}>
+              <span className={iconClass('neurology')}>neurology</span>Ask AI
+            </button>
+          </div>
         </div>
+        </div>{/* /cal-ep-customer-outer */}
       </div>
 
       {/* Body — alerts strip + metric groups */}
@@ -631,7 +648,9 @@ function CalEventPopoverCard({
                 {gi === 0 && <span className="cal-ep-category-ts">updated just now</span>}
               </div>
               {group.ids.map(id => (
-                <CalMetricCard key={id} id={id} metrics={metrics} act={act} />
+                <div key={id} className="cal-ep-w-tray">
+                  <CalMetricCard id={id} metrics={metrics} act={act} />
+                </div>
               ))}
             </Fragment>
           ))}
@@ -669,6 +688,37 @@ export default function Calendar() {
   // Event-detail popover state
   const [selectedEvent, setSelectedEvent] = useState<CalEvent | null>(null)
   const [evPopOpen, setEvPopOpen] = useState(false)
+
+  // Events scroll — callback ref + scroll handler, NO useEffect
+  const [evScrollState, setEvScrollState] = useState<'none' | 'top' | 'mid' | 'bottom'>('none')
+  const evScrollCleanupRef = useRef<(() => void) | null>(null)
+  const evScrollThumbRef = useRef<HTMLDivElement | null>(null)
+
+  const evScrollRef = useCallback((el: HTMLDivElement | null) => {
+    if (evScrollCleanupRef.current) {
+      evScrollCleanupRef.current()
+      evScrollCleanupRef.current = null
+    }
+    if (!el) return
+    const update = () => {
+      const { scrollTop, scrollHeight, clientHeight } = el
+      const noScroll = scrollHeight <= clientHeight + 4
+      const atTop = scrollTop < 4
+      const atBottom = scrollTop + clientHeight >= scrollHeight - 4
+      setEvScrollState(noScroll ? 'none' : atTop ? 'top' : atBottom ? 'bottom' : 'mid')
+      if (evScrollThumbRef.current) {
+        const ratio = clientHeight / scrollHeight
+        const thumbH = Math.max(20, Math.round(ratio * clientHeight))
+        const maxOffset = clientHeight - thumbH
+        const offset = noScroll ? 0 : Math.round((scrollTop / (scrollHeight - clientHeight)) * maxOffset)
+        evScrollThumbRef.current.style.height = thumbH + 'px'
+        evScrollThumbRef.current.style.top = offset + 'px'
+      }
+    }
+    el.addEventListener('scroll', update, { passive: true })
+    update()
+    evScrollCleanupRef.current = () => el.removeEventListener('scroll', update)
+  }, [])
 
   // Callback ref: Escape key wired without useEffect
   const evPopEscCleanupRef = useRef<(() => void) | null>(null)
@@ -774,9 +824,8 @@ export default function Calendar() {
     (cnt === 1 ? ' EVENT' : ' EVENTS')
 
   return (
-    <div className="card">
-      <div className="cal-outer">
-        <div className="cal-panel">
+    <div className="card cal-shell">
+      <div className="cal-panel">
 
           {/* Header */}
           <div className="cal-header">
@@ -833,9 +882,15 @@ export default function Calendar() {
                 >
                   <div className="cal-date-num">{cell.d}</div>
                   <div className="cal-dots">
-                    {dots.map((clr) => (
-                      <div key={clr} className="cal-dot" style={{ background: clr }} />
-                    ))}
+                    {(() => {
+                      const shown = dots.length > 3 ? dots.slice(0, 3) : dots
+                      const seen: Record<string, number> = {}
+                      return shown.map((clr) => {
+                        seen[clr] = (seen[clr] ?? 0) + 1
+                        return <div key={`${clr}-${seen[clr]}`} className="cal-dot" style={{ background: clr }} />
+                      })
+                    })()}
+                    {dots.length > 3 && <span className="cal-dot-more">+</span>}
                   </div>
                 </div>
               )
@@ -844,55 +899,61 @@ export default function Calendar() {
 
           <div className="cal-divider" />
 
-          {/* Events panel — key on sel+month+year so children remount and replay CSS animations */}
-          <div className="cal-events">
-            <div className="cal-events-container" key={`${curYear}-${curMonth}-${sel}`}>
-              <div className="cal-ev-label">{label}</div>
-              {cnt > 0 ? (
-                <>
-                  {events.map((item) => (
-                    <button
-                      type="button"
-                      key={`${item.time}-${item.title}`}
-                      className="cal-ev-item"
-                      onClick={() => openEvPopover(item)}
-                      aria-label={`${item.time} ${item.title}`}
-                    >
-                      <div className="cev-left">
-                        <div className="cev-dot" style={{ background: item.dot }} />
-                        <span className="cev-time">{item.time}</span>
-                        <span className="cev-badge" style={{ backgroundColor: item.color }}>
-                          <span className="material-icons">{item.icon}</span>
-                          {item.badge}
-                        </span>
-                        <span className="cev-title">{item.title}</span>
+          {/* Events panel — scroll key remounts the scroll div so position resets and animations replay */}
+          <div className="cal-events" data-scroll={evScrollState}>
+            <div className="cal-ev-scroll-wrap">
+              <div className="cal-ev-scroll" key={selKey} ref={evScrollRef}>
+                <div className="cal-events-container">
+                  <div className="cal-ev-label">{label}</div>
+                  {cnt > 0 ? (
+                    <>
+                      {events.map((item) => (
+                        <button
+                          type="button"
+                          key={`${item.time}-${item.title}`}
+                          className="cal-ev-item"
+                          onClick={() => openEvPopover(item)}
+                          aria-label={`${item.time} ${item.title}`}
+                        >
+                          <div className="cev-left">
+                            <div className="cev-dot" style={{ background: item.dot }} />
+                            <span className="cev-time">{item.time}</span>
+                            <span className="cev-badge" style={{ backgroundColor: item.color }}>
+                              <span className="material-icons">{item.icon}</span>
+                              {item.badge}
+                            </span>
+                            <span className="cev-title">{item.title}</span>
+                          </div>
+                          <span className="cev-chevron material-icons">chevron_right</span>
+                        </button>
+                      ))}
+                      <div className="cal-add-row" onClick={openPopover}>
+                        <div className="cal-add-icon">
+                          <span className="material-icons">add</span>
+                        </div>
+                        <span className="cal-add-text">Add event</span>
                       </div>
-                      <span className="cev-chevron material-icons">chevron_right</span>
-                    </button>
-                  ))}
-                  <div className="cal-add-row" onClick={openPopover}>
-                    <div className="cal-add-icon">
-                      <span className="material-icons">add</span>
-                    </div>
-                    <span className="cal-add-text">Add event</span>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="cal-no-events">No events scheduled.</div>
-                  <div className="cal-add-row" onClick={openPopover}>
-                    <div className="cal-add-icon">
-                      <span className="material-icons">add</span>
-                    </div>
-                    <span className="cal-add-text">Add event</span>
-                  </div>
-                </>
-              )}
+                    </>
+                  ) : (
+                    <>
+                      <div className="cal-no-events">No events scheduled.</div>
+                      <div className="cal-add-row" onClick={openPopover}>
+                        <div className="cal-add-icon">
+                          <span className="material-icons">add</span>
+                        </div>
+                        <span className="cal-add-text">Add event</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="cal-ev-scrollbar" aria-hidden="true">
+              <div className="cal-ev-scrollbar-thumb" ref={evScrollThumbRef} />
             </div>
           </div>
 
         </div>
-      </div>
 
       {/* Event-detail popover — full TaskDetailsPopover structure re-mapped to .cal-ep-* */}
       {/* eslint-disable-next-line jsx-a11y/prefer-tag-over-role -- custom controlled overlay; native <dialog> alters show/hide semantics */}

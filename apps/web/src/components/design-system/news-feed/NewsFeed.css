@@ -7,11 +7,15 @@
   }
 
   /* Dark background scoped to this component only -- never paints body/html */
-  .card.nf-page { width: 500px; padding: 0; background: #0B1220; border-radius: 18px; overflow: hidden; }
+  .card.nf-page { width: auto; padding: 0; background: transparent; }
   .nf-page .frame {
     padding: 30px 22px 26px;
-    background: #0B1220;
-    background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.10) 0%, #0F172A 52%, #0B1220 100%);
+    background: transparent;
+    background-image: none;
+  }
+  html.dark .nf-page .frame {
+    background: transparent !important;
+    background-image: none !important;
   }
 
   /* ─────────────────────────────────────────────────────────────────────
@@ -32,7 +36,6 @@
     --nf-grid-line:    rgba(255,255,255,0.06);
 
     --nf-kicker:       #FFFFFF;
-    --nf-sub:          rgba(255,255,255,0.46);
     --nf-title:        #F4F7F5;
     --nf-title-sh:     0 1px 1px rgba(0,0,0,0.45);
     --nf-date:         rgba(255,255,255,0.52);
@@ -66,7 +69,7 @@
 
   /* tone hues (dark surface — used in BOTH modes) */
   .nf--bull { --nf-c-strong: rgba(20,180,108,0.92); --nf-c-soft: rgba(11,90,58,0.85); --nf-c-bar: #FFFFFF; }
-  .nf--bear { --nf-c-strong: rgba(176,52,52,0.95);  --nf-c-soft: rgba(74,26,26,0.85);  --nf-c-bar: #FFFFFF; --nf-title: #E7E3E3; }
+  .nf--bear { --nf-c-strong: rgba(239,68,68,0.95);  --nf-c-soft: rgba(120,30,30,0.85);  --nf-c-bar: #FFFFFF; --nf-title: #E7E3E3; }
 
   /* (component renders dark in both light & dark modes — no theme split) */
 
@@ -97,11 +100,10 @@
   .nf-shell:active { transform: scale(0.99); transition-duration: calc(120ms * var(--anim-mult, 1)); }
   .nf-shell:hover .nf-card { box-shadow: var(--nf-shadow), 0 20px 44px -24px var(--nf-c-strong); }
   .nf-shell:hover .nf-glow { animation-duration: calc(1100ms * var(--anim-mult, 1)); }
-  /* Bounce triggered when arrow is clicked -- FAB-style overshoot */
-  .nf-card.tap { animation: nfTap calc(460ms * var(--anim-mult, 1)) cubic-bezier(.34,1.2,.5,1); }
+  /* Subtle press confirmation on arrow click -- no overshoot */
+  .nf-card.tap { animation: nfTap calc(300ms * var(--anim-mult, 1)) ease-out; }
   @keyframes nfTap {
-    0%   { transform: scale(0.98); }
-    55%  { transform: scale(1.006); }
+    0%   { transform: scale(0.99); }
     100% { transform: scale(1); }
   }
 
@@ -111,7 +113,6 @@
   .nf-head-ic .material-icons { font-size: 32px; filter: drop-shadow(0 0 8px var(--nf-c-strong)); }
   .nf-head-txt { margin-right: auto; }
   .nf-kicker { font-size: 13px; font-weight: 700; letter-spacing: 0.005em; color: var(--nf-kicker); }
-  .nf-sub { margin-top: 2px; font-size: 11px; font-weight: 500; color: var(--nf-sub); }
   .nf-arrow {
     flex: none;
     width: 30px; height: 30px; border-radius: 999px;
@@ -149,7 +150,7 @@
     flex: 1; border-radius: 999px;
     background: var(--nf-bar-track);
   }
-  /* Single sliding indicator — one pill wide, translates by index */
+  /* Primary sliding indicator — one pill wide, translates by index */
   .nf-ind {
     position: absolute;
     top: 0; left: 0;
@@ -159,8 +160,41 @@
     background: #FFFFFF;
     box-shadow: 0 0 10px var(--nf-bar-glow);
     transform: translateX(calc(var(--nf-idx, 0) * (100% + 6px)));
-    transition: transform calc(400ms * var(--anim-mult, 1)) ease-out;
+    transition: transform calc(300ms * var(--anim-mult, 1)) ease-out;
     pointer-events: none;
+  }
+
+  /* Ghost indicator — hidden by default, only visible during wrap animation */
+  .nf-ind-ghost {
+    transform: translateX(calc(var(--nf-ghost-idx, 0) * (100% + 6px)));
+    opacity: 0;
+    transition: transform calc(300ms * var(--anim-mult, 1)) ease-out;
+  }
+
+  /* Wrap animation: primary exits right */
+  .nf-ind--exit-right {
+    animation: nfIndExitRight calc(300ms * var(--anim-mult, 1)) ease-out forwards;
+    transition: none !important;
+  }
+  @keyframes nfIndExitRight {
+    0%   { transform: translateX(calc(2 * (100% + 6px))); opacity: 1; }
+    100% { transform: translateX(calc(3 * (100% + 6px))); opacity: 0; }
+  }
+
+  /* Wrap animation: ghost enters from left */
+  .nf-ind--enter-left {
+    animation: nfIndEnterLeft calc(300ms * var(--anim-mult, 1)) ease-out forwards;
+    transition: none !important;
+  }
+  @keyframes nfIndEnterLeft {
+    0%   { transform: translateX(calc(-1 * (100% + 6px))); opacity: 1; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
+
+  /* Snap ghost position without transition */
+  .nf-ind--no-transition {
+    transition: none !important;
+    animation: none !important;
   }
 
   /* ─────────────────────────────────────────────────────────────────────
@@ -175,7 +209,6 @@
     100% { opacity: 1; transform: translateX(0) scale(1); }
   }
   .anim-in .nf-kicker { animation: nfFade calc(480ms * var(--anim-mult, 1)) ease-out calc(200ms * var(--anim-mult, 1)) both; }
-  .anim-in .nf-sub    { animation: nfGlowFade calc(560ms * var(--anim-mult, 1)) ease-out calc(280ms * var(--anim-mult, 1)) both; }
   .anim-in .nf-arrow  { animation: nfPopSm calc(560ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1) calc(340ms * var(--anim-mult, 1)) both; }
   .anim-in .nf-title  { animation: nfTitlePop calc(520ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) calc(360ms * var(--anim-mult, 1)) both; }
   .anim-in .nf-date   { animation: nfGlowFade calc(420ms * var(--anim-mult, 1)) ease-out calc(520ms * var(--anim-mult, 1)) both; }
@@ -198,8 +231,8 @@
   /* ─────────────────────────────────────────────────────────────────────
      2. TRANSITION -- flat horizontal ease-out slide, no rotation/tilt
      ───────────────────────────────────────────────────────────────────── */
-  .nf-swap-out { animation: nfSwapOut calc(260ms * var(--anim-mult, 1)) ease-out forwards; }
-  .nf-swap-in  { animation: nfSwapIn  calc(400ms * var(--anim-mult, 1)) ease-out both; }
+  .nf-swap-out { animation: nfSwapOut calc(180ms * var(--anim-mult, 1)) ease-out forwards; }
+  .nf-swap-in  { animation: nfSwapIn  calc(260ms * var(--anim-mult, 1)) ease-out both; }
   @keyframes nfSwapOut {
     0%   { opacity: 1; transform: translateX(0); }
     100% { opacity: 0; transform: translateX(var(--swap-dir, -38px)); }
@@ -251,5 +284,6 @@
   @media (prefers-reduced-motion: reduce) {
     .nf-glow { animation: none !important; }
     .nf-card.anim-in, .anim-in *, .nf-swap-out, .nf-swap-in, .nf-card.tap { animation: none !important; }
-    .nf-ind { transition: none !important; }
+    .nf-ind, .nf-ind-ghost { transition: none !important; }
+    .nf-ind--exit-right, .nf-ind--enter-left { animation: none !important; }
   }

@@ -4,8 +4,9 @@
  * NO raw useEffect in this folder. Timers and FLIP live in leaderboard-hook.ts,
  * wired via callback refs and useLayoutEffect.
  */
-import { useState, useRef, useLayoutEffect, useCallback } from 'react'
+import React, { useState, useRef, useLayoutEffect, useCallback } from 'react'
 import './Leaderboard.css'
+import { iconClass } from '../../../lib/iconClass'
 import {
   AGENTS,
   type Metric,
@@ -35,7 +36,11 @@ function initDisplay(): Record<string, number> {
 
 export default function Leaderboard() {
   const [metric, setMetric] = useState<Metric>('revenue')
+  const [dir, setDir] = useState(0)
   const [display, setDisplay] = useState<Record<string, number>>(initDisplay)
+  // 'rows-in' / '' — drives the CSS animation class on the .rows container
+  const [rowsAnim, setRowsAnim] = useState<'rows-in' | ''>('')
+  const rowsRef = useRef<HTMLDivElement | null>(null)
 
   // Refs for FLIP
   const rowEls = useRef<Record<string, HTMLElement | null>>({})
@@ -102,6 +107,25 @@ export default function Leaderboard() {
   }, [metric])
 
   // ---------------------------------------------------------------------------
+  // Rows enter animation: fires on mount (initial entrance) and after each metric
+  // change. setRowsAnim inside useLayoutEffect flushes synchronously before paint,
+  // so there is no intermediate flash of the unclassed element.
+  // ---------------------------------------------------------------------------
+  useLayoutEffect(() => {
+    setRowsAnim('rows-in')
+  }, [metric])
+
+  // ---------------------------------------------------------------------------
+  // Metric switch: immediately updates direction and metric; useLayoutEffect([metric])
+  // above sets 'rows-in' so the directional enter animation plays automatically.
+  // ---------------------------------------------------------------------------
+  function switchMetric(newMetric: Metric, newDir: number) {
+    if (newMetric === metric) return
+    setDir(newDir)
+    setMetric(newMetric)
+  }
+
+  // ---------------------------------------------------------------------------
   // Derived state
   // ---------------------------------------------------------------------------
   const ordered = AGENTS.slice().sort((a, b) => b[metric] - a[metric])
@@ -121,7 +145,7 @@ export default function Leaderboard() {
         <div className="lb">
           <div className="head">
             <div className="h-title">
-              <span className="material-icons">leaderboard</span>
+              <span className="material-symbols-outlined h-title-icon">leaderboard</span>
               Leaderboard
             </div>
             <div
@@ -132,15 +156,17 @@ export default function Leaderboard() {
               <button
                 type="button"
                 className={metric === 'revenue' ? 'active' : ''}
-                onClick={() => setMetric('revenue')}
+                onClick={() => switchMetric('revenue', metric === 'growth' ? -1 : 0)}
               >
+                <span className={iconClass('payments')}>payments</span>
                 Revenue
               </button>
               <button
                 type="button"
                 className={metric === 'growth' ? 'active' : ''}
-                onClick={() => setMetric('growth')}
+                onClick={() => switchMetric('growth', metric === 'revenue' ? 1 : 0)}
               >
+                <span className={iconClass('trending_up')}>trending_up</span>
                 Growth %
               </button>
             </div>
@@ -158,7 +184,11 @@ export default function Leaderboard() {
           {/* Stable anchor for tween (no-op in DOM, just a mount point) */}
           <div ref={tweenAnchorRef} style={{ display: 'none' }} />
 
-          <div className="rows">
+          <div
+            className={rowsAnim ? `rows ${rowsAnim}` : 'rows'}
+            ref={rowsRef}
+            style={{'--dir': dir} as React.CSSProperties}
+          >
             {ordered.map((agent, i) => {
               const rank = i + 1
               const leader = rank === 1

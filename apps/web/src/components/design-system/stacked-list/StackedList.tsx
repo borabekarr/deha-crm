@@ -48,16 +48,11 @@ function RoleBadge({ role }: { role: RoleKey }) {
 
 interface MemberItemProps {
   m: Member
-  sweep?: boolean
-  delay?: number
 }
 
-function MemberItem({ m, sweep = false, delay = 0 }: MemberItemProps) {
+function MemberItem({ m }: MemberItemProps) {
   return (
-    <div
-      className={'sl-item' + (sweep ? ' sl-sweep' : '')}
-      style={sweep ? { animationDelay: `calc(${delay}ms * var(--anim-mult,1))` } : undefined}
-    >
+    <div className="sl-item">
       <div className="sl-ava-wrap">
         <div className="sl-ava" style={{ backgroundColor: m.color }}>{m.initials}</div>
         {m.online && <span className="sl-online" />}
@@ -87,8 +82,6 @@ function EmptyState({ label }: { label: string }) {
 export interface StackedListProps {
   /** Start with the directory dock open. Prop is initial state only — no ongoing sync. */
   startOpen?: boolean
-  /** Show only online members in the top panel. */
-  onlineOnly?: boolean
   /** Render role badges in monochrome style. */
   mono?: boolean
 }
@@ -101,31 +94,17 @@ function matches(m: Member, q: string): boolean {
 
 export default function StackedList({
   startOpen = false,
-  onlineOnly = true,
   mono = false,
 }: StackedListProps) {
-  // useEffect #1 replacement: startOpen is initial state only; no prop-sync effect needed.
-  // In a real consumer the parent re-mounts with a key prop if it needs to reset.
+  // useEffect replacement: startOpen is initial state only; no prop-sync effect needed.
   const [expanded, setExpanded] = useState(startOpen)
 
-  // Search queries — driven by input change handlers (no debounce useEffect needed;
-  // useMemo filtering is cheap on 7 members so we update synchronously).
-  const [activeQuery, setActiveQuery] = useState('')
+  // Search query for the directory dock — driven by input change handler (no debounce
+  // useEffect needed; useMemo filtering is cheap on 7 members so we update synchronously).
   const [dirQuery, setDirQuery] = useState('')
 
-  // useEffect #2 & #3 replacement: search debounce via change handler + ref-held timer.
-  // Timers are stored in refs so they survive renders without causing re-renders.
-  const activeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // useEffect replacement: search debounce via change handler + ref-held timer.
   const dirTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  function handleActiveSearch(e: React.ChangeEvent<HTMLInputElement>): void {
-    const value = e.target.value
-    if (activeTimer.current !== null) clearTimeout(activeTimer.current)
-    activeTimer.current = setTimeout(() => {
-      setActiveQuery(value)
-      activeTimer.current = null
-    }, 120)
-  }
 
   function handleDirSearch(e: React.ChangeEvent<HTMLInputElement>): void {
     const value = e.target.value
@@ -137,14 +116,6 @@ export default function StackedList({
   }
 
   /* useMemo filtering — allowed by the no-use-effect rule */
-  const activeBase = useMemo(
-    () => (onlineOnly ? MEMBERS.filter((m) => m.online) : MEMBERS),
-    [onlineOnly],
-  )
-  const activeList = useMemo(
-    () => activeBase.filter((m) => matches(m, activeQuery)),
-    [activeBase, activeQuery],
-  )
   const dirList = useMemo(
     () => MEMBERS.filter((m) => matches(m, dirQuery)),
     [dirQuery],
@@ -155,35 +126,6 @@ export default function StackedList({
 
   return (
     <div className={'sl-panel' + (mono ? ' is-mono' : '')}>
-
-      {/* ---------- base view: active members ---------- */}
-      <div className="sl-active">
-        <div className="sl-active-head">
-          <div className="sl-top">
-            <div className="sl-title">
-              {onlineOnly ? 'Active Members' : 'All Members'}
-              <span className="sl-count">{activeBase.length}</span>
-            </div>
-            <button type="button" className="sl-add" aria-label="Add member">
-              <span className="material-symbols-outlined">add</span>
-            </button>
-          </div>
-          <div className="sl-search">
-            <span className="material-symbols-outlined">search</span>
-            <input
-              aria-label="Search teammates"
-              placeholder="Search teammates…"
-              defaultValue=""
-              onChange={handleActiveSearch}
-            />
-          </div>
-        </div>
-        <div className="sl-list">
-          {activeList.length > 0
-            ? activeList.map((m) => <MemberItem key={'a-' + m.id} m={m} />)
-            : <EmptyState label={activeQuery} />}
-        </div>
-      </div>
 
       {/* ---------- floating directory dock ---------- */}
       <div
@@ -239,8 +181,8 @@ export default function StackedList({
           </div>
           <div className="sl-bar-list">
             {expanded && (dirList.length > 0
-              ? dirList.map((m, i) => (
-                  <MemberItem key={'d-' + m.id} m={m} sweep delay={i * 45} />
+              ? dirList.map((m) => (
+                  <MemberItem key={'d-' + m.id} m={m} />
                 ))
               : <EmptyState label={dirQuery} />)}
           </div>

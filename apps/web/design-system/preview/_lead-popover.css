@@ -433,8 +433,8 @@ html.dark .ldx-chip { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
 
 /* single AI/freshness section caption (replaces per-card AUTO badges + orphan tier row) */
 .ldx-scope { gap: 9px; margin-bottom: 13px; padding-bottom: 11px; border-bottom: 1px solid var(--line); }
-.ldx-scope-lb { display: inline-flex; align-items: center; gap: 5px; font-size: 13.5px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; color: var(--txt3); }
-.ldx-scope-lb .material-symbols-outlined { font-size: 16px; }
+.ldx-scope-lb { font-family: 'Montserrat'; display: inline-flex; align-items: center; gap: 5px; font-size: 13.5px; font-weight: 900; letter-spacing: 0.02em; text-transform: uppercase; color: var(--txt3); }
+.ldx-scope-lb .material-symbols-outlined { font-size: 18px; font-variation-settings: 'wght' 600; }
 .ldx-scope-meta { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; font-weight: 700; color: var(--v); }
 .ldx-scope-meta .material-symbols-outlined { font-size: 13px; }
 
@@ -1116,7 +1116,7 @@ html.dark .ldx-heat-box.l4 { background: #059669 !important; }
   grid-template-columns: 160px 1fr 0px;
   grid-template-rows: 1fr;
   gap: 0;
-  min-height: 380px;
+  min-height: 408px;  /* extra 28px gives headroom for off-canvas top/bottom chips */
   /* perspective removed: the image-piece brain is 2D (no CSS-3D rotation), and
      a 3D rendering context here forced a top-edge re-rasterise / clip whenever
      a bottom piece was hovered (the "top breaks on bottom hover" bug). */
@@ -1610,7 +1610,7 @@ html.dark .ldx-dp-tag {
   background: var(--surface);
   transition:
     opacity calc(280ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
-    width calc(380ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+    width calc(420ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
 }
 html.dark .ldx-detail-panel {
   border-left-color: var(--line);

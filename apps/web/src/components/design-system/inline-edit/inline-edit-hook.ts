@@ -34,9 +34,13 @@ export function ieRootRef(el: HTMLElement | null): void {
 
 export function cleanupIeRoot(el: HTMLElement | null): void {
   if (!el) return
-  const typed = el as SavedTimerEl
+  const typed = el as SavedTimerEl & { __ieConfirmCleanup?: () => void; __ieOutsideCleanup?: () => void }
   typed.__ieCleanup?.()
   delete typed.__ieCleanup
+  typed.__ieConfirmCleanup?.()
+  delete typed.__ieConfirmCleanup
+  typed.__ieOutsideCleanup?.()
+  delete typed.__ieOutsideCleanup
 }
 
 /**
@@ -66,20 +70,106 @@ export function registerSavedTimer(
   return id
 }
 
+type ConfirmTimerEl = HTMLElement & { __ieConfirmCleanup?: () => void }
+
+/**
+ * Register a short confirm-animation timer against the root element so the
+ * save commit fires AFTER the button press animation completes (~200ms).
+ *
+ * Call from inside the save-button mousedown handler (event-driven, not an
+ * effect). Cleared on unmount by cleanupIeRoot() via the shared __ieCleanup
+ * path, and separately cancellable by calling the returned cleanup fn.
+ *
+ * @returns a cleanup function to cancel the pending commit.
+ */
+export function registerConfirmTimer(
+  el: HTMLElement | null,
+  onCommit: () => void,
+  ms: number,
+): () => void {
+  // Cancel any in-flight confirm timer for this element.
+  const typed = el as ConfirmTimerEl | null
+  typed?.__ieConfirmCleanup?.()
+
+  const id = setTimeout(onCommit, ms)
+  const cleanup = () => clearTimeout(id)
+
+  if (typed) {
+    typed.__ieConfirmCleanup = cleanup
+  }
+
+  return cleanup
+}
+
+type OutsideListenerEl = HTMLElement & { __ieOutsideCleanup?: () => void }
+
+/**
+ * Attach a document pointerdown listener that calls onOutside() when the event
+ * target is outside el. Cleanup is stored on the element so cleanupIeRoot()
+ * (called on unmount via the root callback ref) removes it automatically.
+ *
+ * Call from inside the startEdit handler (event-driven, not an effect).
+ */
+export function registerOutsideListener(
+  el: HTMLElement | null,
+  onOutside: () => void,
+): void {
+  if (!el) return
+  const typed = el as OutsideListenerEl
+  // Remove any previously attached listener before registering a new one.
+  typed.__ieOutsideCleanup?.()
+
+  const handler = (e: PointerEvent) => {
+    if (!el.contains(e.target as Node)) {
+      onOutside()
+    }
+  }
+  document.addEventListener('pointerdown', handler)
+  typed.__ieOutsideCleanup = () => {
+    document.removeEventListener('pointerdown', handler)
+    delete (el as OutsideListenerEl).__ieOutsideCleanup
+  }
+}
+
+/**
+ * Remove the document outside-listener for el (call from commit / cancel handlers).
+ */
+export function cleanupOutsideListener(el: HTMLElement | null): void {
+  if (!el) return
+  const typed = el as OutsideListenerEl
+  typed.__ieOutsideCleanup?.()
+}
+
+type FocusedEl = HTMLInputElement & { __ieFocused?: boolean }
+
 /**
  * Callback ref for the <input> element.
- * When `editing` is true: focuses the input and selects all text.
- * When false (input leaving DOM or editing turned off): no-op.
+ * When `editing` is true: focuses the input and selects all text — ONCE,
+ * on the first render after edit mode begins. Subsequent renders while
+ * editing is still true are no-ops so typed characters are not clobbered.
+ * When `editing` is false: clears the once-guard so the next edit entry
+ * triggers focus+select again.
+ *
+ * Guard stored as `__ieFocused` directly on the element node (no useEffect).
  *
  * Usage in TSX:
  *   <input ref={(el) => ieInputRef(el, editing)} ... />
  */
 export function ieInputRef(el: HTMLInputElement | null, editing: boolean): void {
-  if (!el || !editing) return
+  const typed = el as FocusedEl | null
+  if (!typed) return
+  if (!editing) {
+    // Leaving edit mode — clear guard so next entry fires focus+select.
+    delete typed.__ieFocused
+    return
+  }
+  if (typed.__ieFocused) return  // already focused this edit session
+  typed.__ieFocused = true
   // Defer by one microtask so the browser has painted the editable state
   // before focus (avoids the rare "focus without visible caret" glitch).
   Promise.resolve().then(() => {
-    el.focus()
-    el.setSelectionRange(0, el.value.length)
+    typed.focus()
+    const len = typed.value.length
+    typed.setSelectionRange(len, len)
   })
 }

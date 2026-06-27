@@ -105,7 +105,8 @@ html.dark .mt-dock {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 8px;
+  /* Asymmetric padding: less top, more bottom — optically lifts the toolbar */
+  padding: 4px 8px 12px;
   background: var(--card-bg, #FFFFFF);
   border: 1px solid var(--card-border, #CBD5E1);
   border-radius: var(--card-radius, 20px);
@@ -139,11 +140,38 @@ html.dark .mt-dock-inner {
   display: block;
   height: 1px;
   background: var(--card-border, #CBD5E1);
-  margin: 0 2px;
+  /* Extend to inner card edges: dock-inner has 8px padding, negate it */
+  margin: 0 -8px;
   flex-shrink: 0;
 }
 html.dark .mt-divider {
   background: var(--card-border, #334155);
+}
+
+/* ── Panel enter/exit keyframes ─────────────────────────────────────────── */
+/* SPEC: dir > 0 = new tab is RIGHT of old tab → BOTH panels travel
+   left→right (+x). dir < 0 = new tab LEFT of old → BOTH travel right→left (-x).
+   Keyframe names describe the DIRECTION OF TRAVEL (the +x/-x motion),
+   not which side the panel comes from. Each panel gets an independent
+   data-panel-state so enter and exit map to the matched travel direction
+   without a shared --dir var collision.
+   travel-right (+x): enter comes from the left edge → 0; exit leaves to the right.
+   travel-left  (-x): enter comes from the right edge → 0; exit leaves to the left. */
+@keyframes mt-enter-travel-right {
+  from { opacity: 0; transform: translateX(-22px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes mt-enter-travel-left {
+  from { opacity: 0; transform: translateX(22px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes mt-exit-travel-right {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(22px); }
+}
+@keyframes mt-exit-travel-left {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(-22px); }
 }
 
 /* ── Panel stack ────────────────────────────────────────────────────────── */
@@ -154,19 +182,49 @@ html.dark .mt-divider {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  /* Default hidden state — no transform so idle panels don't offset */
   opacity: 0;
   pointer-events: none;
-  transform: translateX(calc(var(--dir, 0) * 20px)) translateY(10px);
-  transition:
-    opacity calc(220ms * var(--anim-mult, 1)) var(--ease),
-    transform calc(300ms * var(--anim-mult, 1)) var(--ease);
 }
-.mt-panel.active {
+.mt-panel[data-panel-state="active"] {
   opacity: 1;
   pointer-events: auto;
-  transform: none;
-  /* Exit-then-enter: delay entering panel until exiting panel has faded out (≈220ms) */
-  transition-delay: calc(220ms * var(--anim-mult, 1));
+}
+/* Entering panels: slide in after the pill glide begins.
+   dir>0 (entering-right state) → panels travel RIGHTWARD (+x). */
+.mt-panel[data-panel-state="entering-right"] {
+  pointer-events: auto;
+  animation:
+    mt-enter-travel-right
+    calc(300ms * var(--anim-mult, 1))
+    var(--ease)
+    calc(160ms * var(--anim-mult, 1))
+    both;
+}
+.mt-panel[data-panel-state="entering-left"] {
+  pointer-events: auto;
+  animation:
+    mt-enter-travel-left
+    calc(300ms * var(--anim-mult, 1))
+    var(--ease)
+    calc(160ms * var(--anim-mult, 1))
+    both;
+}
+/* Exiting panels: slide out immediately, faster than enter.
+   Same travel direction as the entering panel so both move together. */
+.mt-panel[data-panel-state="exiting-left"] {
+  animation:
+    mt-exit-travel-right
+    calc(220ms * var(--anim-mult, 1))
+    var(--ease)
+    both;
+}
+.mt-panel[data-panel-state="exiting-right"] {
+  animation:
+    mt-exit-travel-left
+    calc(220ms * var(--anim-mult, 1))
+    var(--ease)
+    both;
 }
 
 /* Need relative context for absolute panels */
@@ -186,19 +244,21 @@ html.dark .mt-divider {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 9px 10px;
-  border-radius: 14px;
+  /* Even vertical padding per row; no border-radius so dividers stay full-width */
+  padding: 10px 10px;
+  border-radius: 0;
   cursor: pointer;
   width: 100%;
   background: none;
   border: none;
-  border-bottom: 1px solid var(--card-border, #CBD5E1);
   text-align: left;
   transition: background calc(220ms * var(--anim-mult, 1)) var(--ease);
 }
-.mt-row:last-child { border-bottom: none; }
-html.dark .mt-row { border-bottom-color: var(--card-border, #334155); }
-html.dark .mt-row:last-child { border-bottom: none; }
+/* Flat horizontal divider between rows: full-width, no gap artifacts */
+.mt-row + .mt-row {
+  border-top: 1px solid var(--card-border, #CBD5E1);
+}
+html.dark .mt-row + .mt-row { border-top-color: var(--card-border, #334155); }
 .mt-row:hover { background: rgba(15,23,42,0.05); }
 html.dark .mt-row:hover { background: rgba(255,255,255,0.06); }
 
@@ -230,6 +290,25 @@ html.dark .mt-row:hover { background: rgba(255,255,255,0.06); }
   filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
   line-height: 1;
   display: block;
+}
+/* Dark: colored badges keep their EXACT light-mode appearance.
+   Only the black badge (--icon-c: #0F172A) gets a white fill so it stays legible. */
+html.dark .mt-row-ic--black {
+  background-color: #F8FAFC;
+  background-image:
+    radial-gradient(ellipse at top right, rgba(255,255,255,0.40) 0%, transparent 55%),
+    linear-gradient(rgba(0,0,0,0.10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.10) 1px, transparent 1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.80),
+    inset 0 -1px 0 rgba(0,0,0,0.06),
+    inset 0 0 0 1px rgba(0,0,0,0.08),
+    0 2px 6px rgba(0,0,0,0.06);
+}
+html.dark .mt-row-ic--black .material-symbols-outlined {
+  color: #0F172A;
+  text-shadow: none;
+  filter: none;
 }
 
 .mt-row-tx { flex: 1; min-width: 0; }
@@ -319,11 +398,15 @@ html.dark .mt-row:hover { background: rgba(255,255,255,0.06); }
   z-index: 0;
 }
 html.dark .mt-ind {
-  background: #10B981;
+  background: #F1F5F9;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.3),
-    0 2px 8px rgba(16,185,129,0.34);
+    inset 0 1px 0 rgba(255,255,255,0.80),
+    inset 0 -1px 0 rgba(15,23,42,0.08),
+    0 2px 8px rgba(0,0,0,0.30);
 }
+/* Dark: active icon and label become black to read on the light pill */
+html.dark .mt-ic.on  { color: #0F172A; }
+html.dark .mt-label  { color: #0F172A; }
 
 /* ── Tabs (transparent buttons, sit above indicator) ────────────────────── */
 .mt-tab {
@@ -352,13 +435,13 @@ html.dark .mt-ind {
 }
 /* Grey rounded background appears on hover (the look formerly only seen while holding) */
 .mt-tab:hover .mt-hold { opacity: 1; transform: scale(1); }
-/* Active pill: symmetric inner horizontal padding, icon hugs the label.
-   Width = left pad (14) + icon (24) + icon↔text gap (6) + label (lw) + right pad (14). */
+/* Active pill: asymmetric padding to nudge icon+text group rightward for optical center.
+   Width = left pad (18) + icon (24) + icon↔text gap (8) + label (lw) + right pad (10). */
 .mt-tab.active {
-  width: calc(14px + 24px + 6px + var(--lw, 46px) + 14px);
-  padding: 0 14px;
+  width: calc(18px + 24px + 8px + var(--lw, 46px) + 10px);
+  padding: 0 10px 0 18px;
   justify-content: flex-start;
-  gap: 6px;
+  gap: 8px;
 }
 
 /* hold-feedback circle */

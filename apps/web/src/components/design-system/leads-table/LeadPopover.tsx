@@ -758,7 +758,18 @@ export default function LeadPopover({ lead, onClose }: LeadPopoverProps) {
   function onBodyScroll() {
     const el = bodyRef.current; if (!el) return
     const st = el.scrollTop, max = el.scrollHeight - el.clientHeight
-    setScrolled(st > 50)
+    const COLLAPSE_AT = 64, EXPAND_AT = 24
+    setScrolled(prev => {
+      if (prev) return st > EXPAND_AT  // stay collapsed until scrolled back near the top
+      // expanded: only collapse if doing so leaves the body still scrollable.
+      // The verdict + head-foot collapse to 0; measure their current (expanded)
+      // height as the delta the body will gain.
+      const card = el.closest('.ldx-card')
+      const v = card?.querySelector('.ldx-verdict') as HTMLElement | null
+      const hf = card?.querySelector('.ldx-head-foot') as HTMLElement | null
+      const collapseDelta = (v?.offsetHeight || 0) + (hf?.offsetHeight || 0)
+      return st > COLLAPSE_AT && (max - collapseDelta) > EXPAND_AT + 16
+    })
     setEdges({ top: st > 6, bottom: st < max - 6 })
   }
 

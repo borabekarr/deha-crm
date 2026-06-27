@@ -59,12 +59,13 @@
   }
 }
 
-/* ── Outer shell (grey bezel, mirrors connect-modal / theme-editor) ──────── */
+/* ── Outer shell — canonical grey field (#D4DCE8 light / #020617 dark) ── */
 .dm-shell {
-  width: min(360px, 100%);
-  background: #d4dce8;
-  border-radius: 34px;
+  width: min(400px, 100%);
+  background: #D4DCE8;
+  border-radius: 28px;
   padding: 10px;
+  border: 1px solid var(--card-border, #cbd5e1);
   box-shadow:
     0 16px 56px rgba(15, 23, 42, 0.16),
     0 3px 10px rgba(15, 23, 42, 0.07);
@@ -73,7 +74,12 @@
 }
 
 html.dark .dm-shell {
-  background: #334155;
+  background: #020617;
+  border: 1px solid var(--card-border, #334155);
+  box-shadow:
+    0 16px 56px rgba(0, 0, 0, 0.45),
+    0 3px 10px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .dm-overlay.dm-anim .dm-shell {
@@ -98,19 +104,19 @@ html.dark .dm-shell {
   }
 }
 
-/* ── Inner card ──────────────────────────────────────────────────────────── */
+/* ── Inner card — aligned with .card-inner token recipe ─────────────────── */
 .dm-card {
   position: relative;
   background: var(--card-bg, #ffffff);
   border: 1px solid var(--card-border, #cbd5e1);
-  border-radius: var(--card-radius, 24px);
+  border-radius: var(--card-radius, 20px);
   padding: 32px 28px 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
     inset 0 0 0 1px rgba(15, 23, 42, 0.04);
 }
 
@@ -123,8 +129,8 @@ html.dark .dm-card {
   background: var(--card-bg, #1e293b);
   border-color: var(--card-border, #334155);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 6px 16px -10px rgba(0, 0, 0, 0.55);
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
 /* Shake when delete is armed */
@@ -152,77 +158,66 @@ html.dark .dm-card {
   }
 }
 
-/* ── Close button ────────────────────────────────────────────────────────── */
+/* ── Close button — default: light-grey bg + dark icon; hover: dark bg + white icon ── */
 .dm-close {
   position: absolute;
   top: 12px;
   right: 12px;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border: none;
   border-radius: 50%;
-  background: transparent;
+  background: rgba(15, 23, 42, 0.08);
   cursor: pointer;
   display: grid;
   place-items: center;
-  color: #64748b;
-  transition: background calc(0.15s * var(--anim-mult, 1)) ease;
+  color: #0f172a;
+  transition:
+    background calc(0.15s * var(--anim-mult, 1)) ease,
+    color calc(0.15s * var(--anim-mult, 1)) ease,
+    transform calc(0.12s * var(--anim-mult, 1)) ease;
 }
 
 .dm-close:hover {
-  background: rgba(100, 116, 139, 0.12);
+  background: rgba(15, 23, 42, 0.88);
+  color: #ffffff;
+  transform: scale(1.08);
 }
 
-.dm-close .material-symbols-outlined {
-  font-size: 18px;
+.dm-close:active {
+  transform: scale(0.94);
+}
+
+.dm-close .material-symbols-outlined,
+.dm-close .material-icons {
+  font-size: 13px;
 }
 
 html.dark .dm-close {
-  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
 }
 
 html.dark .dm-close:hover {
-  background: rgba(148, 163, 184, 0.12);
+  background: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  transform: scale(1.08);
 }
 
-/* ── Warning / done badge ─────────────────────────────────────────────────── */
+/* ── Warning / done badge — uses .icon-badge utility (--icon-c set inline) ── */
+/* .dm-badge extends .icon-badge .icon-badge--lg; local size overrides only.   */
 .dm-badge {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
   margin-bottom: 16px;
-  background: #fef3c7;
-  border: 2px solid #fcd34d;
-  transition:
-    background calc(0.3s * var(--anim-mult, 1)) ease,
-    border-color calc(0.3s * var(--anim-mult, 1)) ease;
-}
-
-.dm-badge[data-done='true'] {
-  background: #d1fae5;
-  border-color: #6ee7b7;
+  /* LOCAL size override: bigger than icon-badge--lg (38px) */
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 16px !important;
+  /* Smooth --icon-c color transition when phase flips to done */
+  transition: background-color calc(0.3s * var(--anim-mult, 1)) ease;
 }
 
 .dm-badge .material-symbols-outlined {
-  font-size: 28px;
-  color: #d97706;
-  transition: color calc(0.3s * var(--anim-mult, 1)) ease;
-}
-
-.dm-badge[data-done='true'] .material-symbols-outlined {
-  color: #10b981;
-}
-
-html.dark .dm-badge {
-  background: rgba(253, 243, 199, 0.1);
-  border-color: rgba(252, 211, 77, 0.35);
-}
-
-html.dark .dm-badge[data-done='true'] {
-  background: rgba(16, 185, 129, 0.12);
-  border-color: rgba(110, 231, 183, 0.35);
+  font-size: 28px !important;
 }
 
 /* ── Entrance animations (transform-only, opacity always 1) ──────────────── */
@@ -316,84 +311,140 @@ html.dark .dm-body b {
 /* ── Actions ─────────────────────────────────────────────────────────────── */
 .dm-actions {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
 }
 
+/* .dm-btn stretches canonical global buttons (btn-discuss / btn-delete) to
+   fill the action row equally. Scoped height/padding unify the two buttons. */
 .dm-btn {
   flex: 1;
-  height: 42px;
-  border: none;
-  border-radius: 9999px;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 700;
-  font-size: 13px;
-  cursor: pointer;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+  /* Unified height + sizing — scoped, does not affect global .btn-discuss/.btn-delete */
+  height: 44px !important;
+  padding: 0 18px !important;
+  gap: 7px !important;
   transition:
-    filter calc(0.15s * var(--anim-mult, 1)) ease,
-    transform calc(0.12s * var(--anim-mult, 1)) ease;
+    background calc(0.16s * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
+    transform calc(0.16s * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
+    box-shadow calc(0.16s * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
 }
 
 .dm-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  pointer-events: none;
 }
 
-.dm-btn:not(:disabled):active {
-  transform: scale(0.97);
+/* ── Button icon size + weight ────────────────────────────────────────────── */
+.dm-btn .material-icons,
+.dm-btn .material-symbols-outlined {
+  font-size: 16px;
+  font-variation-settings: 'wght' 700;
 }
 
-/* Keep button — soft neutral */
-.dm-btn--keep {
-  background: #e2e8f0;
-  color: #334155;
+/* ── Cancel button lift+glow ──────────────────────────────────────────────── */
+.dm-card .dm-btn.btn-discuss:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 6px 18px -4px rgba(15, 23, 42, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -1px 0 rgba(15, 23, 42, 0.08);
 }
 
-.dm-btn--keep:not(:disabled):hover {
-  filter: brightness(0.95);
+html.dark .dm-card .dm-btn.btn-discuss:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 6px 18px -4px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-html.dark .dm-btn--keep {
-  background: #334155;
-  color: #cbd5e1;
+/* ── Confirm button: soft destructive style (light-red fill, red text) ── */
+/* Scoped under .dm-card so preview trigger .btn-delete stays solid red */
+.dm-card .dm-btn.btn-delete {
+  background: #FEE2E2;
+  color: #EF4444;
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  box-shadow:
+    0 4px 14px -4px rgba(239, 68, 68, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -1px 0 rgba(239, 68, 68, 0.12);
 }
 
-html.dark .dm-btn--keep:not(:disabled):hover {
-  filter: brightness(1.1);
+.dm-card .dm-btn.btn-delete .material-symbols-outlined {
+  color: #EF4444;
 }
 
-/* Delete button — red with grid texture */
-.dm-btn--delete {
-  background: #ef4444;
-  color: #fff;
+.dm-card .dm-btn.btn-delete:hover {
+  background: #FECACA;
+  filter: none;
+  transform: translateY(-1px);
+  box-shadow:
+    0 6px 18px -4px rgba(239, 68, 68, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -1px 0 rgba(239, 68, 68, 0.12);
+}
+
+.dm-card .dm-btn.btn-delete:active {
+  transform: scale(0.985);
+}
+
+html.dark .dm-card .dm-btn.btn-delete {
+  background: #FEE2E2;
+  color: #EF4444;
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  box-shadow:
+    0 4px 14px -4px rgba(239, 68, 68, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -1px 0 rgba(239, 68, 68, 0.12);
+}
+
+html.dark .dm-card .dm-btn.btn-delete .material-symbols-outlined {
+  color: #EF4444;
+}
+
+html.dark .dm-card .dm-btn.btn-delete:hover {
+  background: #FECACA;
+  filter: none;
+  transform: translateY(-1px);
+  box-shadow:
+    0 6px 18px -4px rgba(239, 68, 68, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -1px 0 rgba(239, 68, 68, 0.12);
+}
+
+/* Spinner tinted to red so it's visible on light-red fill */
+.dm-card .dm-btn.btn-delete .dm-spinner {
+  border-color: rgba(239, 68, 68, 0.25);
+  border-top-color: #EF4444;
+}
+
+html.dark .dm-card .dm-btn.btn-delete .dm-spinner {
+  border-color: rgba(248, 113, 113, 0.25);
+  border-top-color: #F87171;
+}
+
+/* Checkmark SVG tinted to red on light fill */
+.dm-card .dm-btn.btn-delete .dm-ok {
+  stroke: #EF4444;
+}
+
+html.dark .dm-card .dm-btn.btn-delete .dm-ok {
+  stroke: #F87171;
+}
+
+/* Preview trigger centering */
+.dm-preview-trigger {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  /* 7px grid texture on the danger button */
-  background-image:
-    repeating-linear-gradient(
-      0deg,
-      rgba(0, 0, 0, var(--grid-alpha, 0.07)) 0px,
-      rgba(0, 0, 0, var(--grid-alpha, 0.07)) 1px,
-      transparent 1px,
-      transparent 7px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      rgba(0, 0, 0, var(--grid-alpha, 0.07)) 0px,
-      rgba(0, 0, 0, var(--grid-alpha, 0.07)) 1px,
-      transparent 1px,
-      transparent 7px
-    );
+  padding: 40px;
 }
 
-.dm-btn--delete:not(:disabled):hover {
-  filter: brightness(1.08);
-}
-
-html.dark .dm-btn--delete {
-  background-color: #dc2626;
+.dm-preview-btn {
+  gap: 8px;
 }
 
 /* ── Loading spinner ──────────────────────────────────────────────────────── */

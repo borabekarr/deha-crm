@@ -1018,11 +1018,6 @@ export default function PipelineCard() {
   const [toast, setToast] = useState({ msg: 'Done', visible: false })
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Header stats
-  const total = cards.reduce((a, x) => a + (x.potential || 0), 0)
-  const critCount = cards.filter((x) => x.priority === 'high').length
-  const n = cards.length
-
   function showToast(msg: string) {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
     setToast({ msg, visible: true })
@@ -1064,31 +1059,6 @@ export default function PipelineCard() {
   return (
     <div className="card" style={{ padding: 0 }} onKeyDown={handleKeyDown} tabIndex={-1}>
       <div className="frame">
-        {/* Daily summary header */}
-        <div className="brief-head">
-          <span className="brief-sun"><span className="material-symbols-outlined">wb_twilight</span></span>
-          <div className="brief-head-txt">
-            <span className="brief-eyebrow">Good morning · Tue 3 Jun</span>
-            <span className="brief-title">Your daily briefing</span>
-          </div>
-          <div className="brief-stats">
-            <button type="button" className="brief-stat" onClick={() => showToast('Showing all actions')}>
-              <span className="brief-stat-n">{n}</span>
-              <span className="brief-stat-l">{n === 1 ? 'action' : 'actions'}</span>
-            </button>
-            <button type="button" className="brief-stat" onClick={() => showToast('Sorting by potential value')}>
-              <span className="brief-stat-n">{fmt(total)}</span>
-              <span className="brief-stat-l">in play</span>
-            </button>
-            <button type="button" className="brief-stat" onClick={() => showToast('Filtering to critical actions')}>
-              <span className="brief-stat-n crit">{critCount}</span>
-              <span className="brief-stat-l">critical</span>
-            </button>
-          </div>
-        </div>
-
-        <p className="sec">AI-ranked — most critical action first</p>
-
         <div className="stack">
           {cards.length === 0 ? (
             <EmptyState />
