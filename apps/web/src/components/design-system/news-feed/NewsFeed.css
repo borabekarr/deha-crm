@@ -97,11 +97,12 @@
   /* hover lifts the whole grey/black shell (bezel + card) together */
   .nf-shell { background: #020617; transition: transform calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
   .nf-shell:hover { transform: translateY(-2px); }
-  .nf-shell:active { transform: scale(0.99); transition-duration: calc(120ms * var(--anim-mult, 1)); }
+  /* arrow press must not bounce the shell — :has guard isolates the arrows */
+  .nf-shell:active:not(:has(.nf-arrow:active)) { transform: scale(0.99); transition-duration: calc(120ms * var(--anim-mult, 1)); }
   .nf-shell:hover .nf-card { box-shadow: var(--nf-shadow), 0 20px 44px -24px var(--nf-c-strong); }
   .nf-shell:hover .nf-glow { animation-duration: calc(1100ms * var(--anim-mult, 1)); }
-  /* Subtle press confirmation on arrow click -- no overshoot */
-  .nf-card.tap { animation: nfTap calc(300ms * var(--anim-mult, 1)) ease-out; }
+  /* genuine card-body click presses shell + card together (hook toggles .nf-shell.tap) */
+  .nf-shell.tap { animation: nfTap calc(300ms * var(--anim-mult, 1)) ease-out; }
   @keyframes nfTap {
     0%   { transform: scale(0.99); }
     100% { transform: scale(1); }
