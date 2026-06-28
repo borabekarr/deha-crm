@@ -35,7 +35,7 @@ Transferring the prototype is exactly how the first attempt shipped an old versi
 | Field | Value |
 |---|---|
 | Name | Deha Design System |
-| projectId | `019e20c5-e924-7a08-8c5f-c6f6f6a87d66` |
+| projectId | `019e20c5-e924-7a08-8c5f-c6f6f6a87d66` | <!-- example: non-secret DesignSync project identifier (UUIDv7), not a credential -->
 
 Confirm with `DesignSync list_projects` (writable projects only). The first call may prompt to
 grant design-system access to the claude.ai login.
