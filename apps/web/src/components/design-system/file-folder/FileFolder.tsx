@@ -247,7 +247,10 @@ export default function FileFolder() {
         >
           <div className="ff-pop-head">
             <div>
-              <div className="ff-pop-title">{popState.title}</div>
+              <div className="ff-pop-title">
+                <span className="material-symbols-outlined ff-pop-title-ic">description</span>
+                {popState.title}
+              </div>
               <div className="ff-pop-sub">{popState.subtitle}</div>
             </div>
             <button

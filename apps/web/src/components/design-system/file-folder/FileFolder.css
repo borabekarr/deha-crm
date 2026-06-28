@@ -292,7 +292,8 @@ html.dark .ff-pop {
              inset 0 0 0 1px rgba(255,255,255,.04);
 }
 .ff-pop-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
-.ff-pop-title { font-size:15px; font-weight:800; color:var(--ff-pop-fg); letter-spacing:-0.01em; }
+.ff-pop-title { display:flex; align-items:center; gap:8px; font-size:15px; font-weight:800; color:var(--ff-pop-fg); letter-spacing:-0.01em; }
+.ff-pop-title .ff-pop-title-ic { flex:none; font-size:18px; line-height:1; color:var(--ff-pop-fg2, var(--ff-pop-fg)); }
 .ff-pop-sub { margin-top:2px; font-size:11.5px; font-weight:600; color:var(--ff-pop-fg3); }
 .ff-pop-close {
   flex:none; width:26px; height:26px; border-radius:9999px; border:none; cursor:pointer;
@@ -313,6 +314,11 @@ html.dark .ff-pop {
 }
 .ff-file:hover { background:var(--ff-row-hover); transform:translateX(2px); }
 .ff-file:active { transform:scale(0.98); }
+/* dark: inner shadow on the bottom edge, darker than the --ff-row (#0F172A) fill */
+html.dark .ff-file {
+  box-shadow: inset 0 -2px 4px rgba(0,0,0,0.38),
+              inset 0 1px 0 rgba(255,255,255,0.04);
+}
 .ff-file-ic {
   flex:none; display:inline-flex; align-items:center;
   padding:4px 9px; border-radius:9999px;

@@ -1,0 +1,39 @@
+name: React Doctor
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write   # sticky summary comment + inline review comments
+  issues: write          # sticky comment creation
+  statuses: write        # commit status with score
+
+concurrency:
+  group: react-doctor-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  react-doctor:
+    name: Scan React changes
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # SHA-pinned (not floating tags) for this third-party PR-writing action,
+      # per supply-chain policy. Bump deliberately; update the trailing comment.
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 0   # baseline diff for scope:changed needs full history
+
+      - uses: millionco/react-doctor@a3c1df77ff50a8d71034acbba7211c1c27b4f7cc # v2.2.2 (2026-06-28)
+        with:
+          scope: changed
+          blocking: none           # advisory only — comment, never fail CI
+          comment: true
+          review-comments: true
+          commit-status: true
+          version: "0.5.8"         # pin npm pkg too — Action otherwise runs npx ...@latest in the runner
+        env:
+          DO_NOT_TRACK: "1"        # best-effort telemetry opt-out (industry-standard var)
