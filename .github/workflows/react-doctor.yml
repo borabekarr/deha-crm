@@ -27,7 +27,7 @@ jobs:
         with:
           fetch-depth: 0   # baseline diff for scope:changed needs full history
 
-      - uses: millionco/react-doctor@a3c1df77ff50a8d71034acbba7211c1c27b4f7cc # v2.2.2 (2026-06-28)
+      - uses: millionco/react-doctor@0b4f4f4bd248a154e64eb508a48347f71154b3f3 # v2.2.2 (2026-06-28)
         with:
           scope: changed
           blocking: none           # advisory only — comment, never fail CI
