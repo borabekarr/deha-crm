@@ -79,3 +79,6 @@ design-system-dist/
 
 # Self-monitor session reports
 reports/
+
+# DesignSync staging mirror of the live claude.ai/design project (local-only, never committed)
+apps/web/design-system/claude-design/

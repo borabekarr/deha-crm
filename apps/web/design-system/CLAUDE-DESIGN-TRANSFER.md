@@ -39,7 +39,7 @@ Transferring the prototype is exactly how the first attempt shipped an old versi
 | Name | Deha Design System (Bora) |
 | projectId | `9684cda3-7f54-4e07-b933-c216065cad53` | <!-- non-secret DesignSync project identifier (UUIDv4), not a credential; example/placeholder-style public id -->
 
-Staged from the in-repo mirror `apps/web/design-system/claude-design/` (remote layout, one folder per convention below).
+Staged from the local mirror `apps/web/design-system/claude-design/` (remote layout, one folder per convention below). The mirror is local-only and gitignored as of 2026-07-07: it stays on disk as the DesignSync staging source but is never committed to the repo.
 
 **Legacy (Jeru-owned, June 2026 pipeline-card pilot — do not push new work here):**
 
@@ -221,7 +221,7 @@ project (`9684cda3-7f54-4e07-b933-c216065cad53` <!-- non-secret DesignSync proje
 the 2026-07-07 bulk push of 74 files (23 components). See
 `memory/project_claude-design-system-push.md` for the full record of that push.
 
-1. **Staging source in this repo:** `apps/web/design-system/claude-design/` mirrors the remote
+1. **Staging source (local-only, gitignored since 2026-07-07):** `apps/web/design-system/claude-design/` mirrors the remote
    layout exactly (`colors_and_type.css` at its root, `preview/_base.css`,
    `preview/_darkmode.css`, `preview/_darkmode.js`, `preview/_shared-feedback.css`,
    `preview/done/jsx/`, `preview/done/html/`). Treat it as the diffable staging mirror, not the
