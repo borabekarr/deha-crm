@@ -179,12 +179,11 @@ export default function PipelineView() {
     <div className="pipeline-view" ref={rootRef}>
       <div className="pv-shell">
         <div className="pv-group-header">Pipeline</div>
-        <div className="pv-inset" role="list">
+        <ul className="pv-inset">
           {DEMO_STAGES.map((stage, i) => {
             const isOpen = openKey === stage.key
             return (
-              <div
-                role="listitem"
+              <li
                 key={stage.key}
                 className={`pv-item${isOpen ? ' is-open' : ''}`}
               >
@@ -197,10 +196,10 @@ export default function PipelineView() {
                   }
                 />
                 <StagePopover stage={stage} isOpen={isOpen} />
-              </div>
+              </li>
             )
           })}
-        </div>
+        </ul>
       </div>
     </div>
   )

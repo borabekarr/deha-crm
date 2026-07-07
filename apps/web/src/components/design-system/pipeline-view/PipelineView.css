@@ -79,6 +79,10 @@
 
 /* ── Inset section — the grouped white card ───────────────────────────────── */
 .pipeline-view .pv-inset {
+  /* semantic <ul> reset — keeps the card pixel-identical to the div version */
+  margin: 0;
+  padding: 0;
+  list-style: none;
   background: var(--pv-card);
   border: 1px solid var(--pv-card-border);
   border-radius: var(--card-radius, 20px);
@@ -91,17 +95,17 @@
 }
 
 /* Concentric corners — keep row hover/press fill inside the rounded card. */
-.pipeline-view .pv-inset > [role='listitem']:first-child .pv-row {
+.pipeline-view .pv-inset > .pv-item:first-child .pv-row {
   border-top-left-radius: 19px;
   border-top-right-radius: 19px;
 }
-.pipeline-view .pv-inset > [role='listitem']:last-child .pv-row {
+.pipeline-view .pv-inset > .pv-item:last-child .pv-row {
   border-bottom-left-radius: 19px;
   border-bottom-right-radius: 19px;
 }
 
 /* Hairline separators — 1px, never a heavy border. First row has none. */
-.pipeline-view .pv-inset > [role='listitem'] + [role='listitem'] .pv-row {
+.pipeline-view .pv-inset > .pv-item + .pv-item .pv-row {
   border-top: 1px solid var(--pv-edge);
 }
 
