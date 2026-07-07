@@ -48,16 +48,19 @@ html.dark{
   --tb-wash-rev:#2A2410;  --tb-wash-rev2:#2D2612;
 }
 
-/* Outer gray shell + inner white panel (theme-editor pattern) */
+/* Outer gray shell + inner white panel (canonical inner-card shell pattern) */
 .tb-outer {
   background: var(--tb-shell);
   border-radius: 28px;
   padding: 10px;
-  box-shadow: 0 16px 56px rgba(15,23,42,0.14), 0 3px 10px rgba(15,23,42,0.07);
+  box-shadow: 0 16px 56px rgba(15,23,42,0.14), 0 3px 10px rgba(15,23,42,0.07),
+              inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
 }
-html.dark .tb-outer { box-shadow: 0 16px 56px rgba(0,0,0,0.5), 0 3px 10px rgba(0,0,0,0.3); }
+html.dark .tb-outer { box-shadow: 0 16px 56px rgba(0,0,0,0.5), 0 3px 10px rgba(0,0,0,0.3),
+                                  inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04); }
 .tb-panel {
   background: var(--tb-panel);
+  border: 1px solid var(--tb-card-border);
   border-radius: 20px;
   overflow: hidden;
   box-shadow: inset 0 1px 0 rgba(255,255,255,1);
@@ -261,28 +264,15 @@ html.dark .tb-card:not(.success-done):not(.success-progress):not(.success-review
 }
 .tb-column-scroll::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
 
-/* ---- Sync button animations (same semantic palette as cards) ---- */
-@keyframes btnFlashProgress {
-  0%   { background: #F1F5F9; color: #94A3B8; box-shadow: inset 0 0 0 0 transparent; }
-  14%  { background: #FFF7ED; color: #C2410C; box-shadow: inset 0 0 0 2px rgba(249,115,22,0.50), inset 0 0 14px 0 rgba(249,115,22,0.30); }
-  72%  { background: #FFF7ED; color: #C2410C; box-shadow: inset 0 0 0 1px rgba(249,115,22,0.25); }
-  100% { background: #F1F5F9; color: #94A3B8; box-shadow: inset 0 0 0 0 transparent; }
+/* ---- Sync button morph: bounce replays on each phase change (key={phase} remount) ---- */
+@keyframes syncMorphBounce {
+  0%   { transform: scale(0.88); opacity: 0.7; }
+  55%  { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1);    opacity: 1; }
 }
-@keyframes btnFlashReview {
-  0%   { background: #F1F5F9; color: #94A3B8; box-shadow: inset 0 0 0 0 transparent; }
-  14%  { background: #FEFCE8; color: #92400E; box-shadow: inset 0 0 0 2px rgba(251,191,36,0.55), inset 0 0 14px 0 rgba(251,191,36,0.35); }
-  72%  { background: #FEFCE8; color: #92400E; box-shadow: inset 0 0 0 1px rgba(251,191,36,0.30); }
-  100% { background: #F1F5F9; color: #94A3B8; box-shadow: inset 0 0 0 0 transparent; }
-}
-@keyframes btnFlashDone {
-  0%   { background: #F1F5F9; color: #94A3B8; box-shadow: inset 0 0 0 0 transparent; }
-  14%  { background: #ECFDF5; color: #047857; box-shadow: inset 0 0 0 2px rgba(16,185,129,0.50), inset 0 0 14px 0 rgba(16,185,129,0.30); }
-  72%  { background: #F0FDF9; color: #047857; box-shadow: inset 0 0 0 1px rgba(16,185,129,0.25); }
-  100% { background: #F1F5F9; color: #94A3B8; box-shadow: inset 0 0 0 0 transparent; }
-}
-.sync-btn.btn-flash-progress { animation: btnFlashProgress 1900ms cubic-bezier(.22,1,.36,1) forwards; }
-.sync-btn.btn-flash-review   { animation: btnFlashReview   1900ms cubic-bezier(.22,1,.36,1) forwards; }
-.sync-btn.btn-flash-done     { animation: btnFlashDone     1900ms cubic-bezier(.22,1,.36,1) forwards; }
+.sync-btn { animation: syncMorphBounce 460ms cubic-bezier(.34,1.7,.46,1) both; }
+.sync-btn:hover:not([disabled]) { filter: brightness(1.10); }
+.sync-btn:active:not([disabled]) { transform: scale(0.97) !important; }
 
 /* ===== Dark mode (class-based surfaces) ===== */
 html.dark .tb-column.drop-target[data-col="todo"]     { background:#172033 !important; outline-color: rgba(148,163,184,0.5); }
@@ -297,6 +287,11 @@ html.dark .tb-column-scroll::-webkit-scrollbar-thumb:hover{ background:#475569; 
 @keyframes itemIn {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+/* Feed item bounce variant (animated-list pattern) */
+@keyframes itemBounce {
+  from { opacity: 0; transform: translateY(-20px) scale(0.8); }
+  to   { opacity: 1; transform: translateY(0)     scale(1); }
 }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @keyframes checkPop {

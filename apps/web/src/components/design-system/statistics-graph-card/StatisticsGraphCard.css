@@ -258,8 +258,8 @@ html.dark .sg-rangechip:hover { filter: brightness(0.92); }
 
 .sg-spacer { flex: 1 1 auto; min-height: 30px; }
 
-/* ITEM 2+7 — Montserrat 900 for both labels */
-.sg-vlabel { display: flex; align-items: center; font-family: var(--font-display); font-size: 10px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg4, #94A3B8); margin-bottom: 5px; }
+/* ITEM 2+7 — Montserrat 900 for both labels; vlabel is now a black pill */
+.sg-vlabel { display: inline-flex; align-items: center; font-family: 'Montserrat', var(--font-display); font-size: 10px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; color: #ffffff; background: #0F172A; border-radius: 9999px; padding: 3px 9px; margin-bottom: 5px; }
 .sg-value { font-size: 34px; font-weight: 800; letter-spacing: -0.025em; line-height: 1; color: var(--fg1, #0F172A); font-variant-numeric: tabular-nums; }
 
 /* delta pill — matches metric-card .m-delta exactly (white text on solid color = AA-safe) */

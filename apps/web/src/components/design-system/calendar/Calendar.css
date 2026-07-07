@@ -311,7 +311,7 @@ html.dark .cal-ep-card { background: #1E293B; }
 
 .cal-ep-head-top {
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 3px;
 }
 
 /* Badge pill (same style as cev-badge, scoped) */
@@ -361,7 +361,7 @@ html.dark .cal-ep-card { background: #1E293B; }
 .cal-ep-htags { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-top: 12px; }
 /* Event description — muted subtitle rendered below head title, above tags */
 .cal-ep-desc {
-  margin: 3px 0 0; font-size: 11.5px; font-weight: 500;
+  margin: 1px 0 0; font-size: 11.5px; font-weight: 500;
   color: rgba(255,255,255,0.74); line-height: 1.45; text-wrap: pretty;
   text-shadow: 0 1px 2px rgba(0,0,0,0.12);
 }
@@ -385,16 +385,16 @@ html.dark .cal-ep-card { background: #1E293B; }
 }
 .cal-ep-time-tag .material-icons, .cal-ep-date-tag .material-icons { font-size: 14px; }
 
-/* ── Organiser card — grey outer shell wrapping the canonical inner-card ── */
+/* ── Organiser card — canonical outer shell wrapping the canonical inner-card ── */
 .cal-ep-customer-outer {
   margin-top: 13px;
   background: var(--shell-bg, #F1F5F9);
-  border-radius: calc(var(--card-radius) + 4px);
-  padding: 4px;
+  border-radius: 28px;
+  padding: 10px;
 }
 html.dark .cal-ep-customer-outer {
   background: #020617;
-  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
 }
 .cal-ep-customer {
   display: flex; align-items: center; gap: 10px;
@@ -514,15 +514,15 @@ html.dark .cal-ep-alert-cta .material-icons { color: #0F172A !important; }
 .cal-ep-list { display: flex; flex-direction: column; gap: 11px; background: none !important; border: none !important; padding: 0 !important; }
 /* (6) Remove covering background layer in dark mode — metric cards sit directly on popover surface */
 html.dark .cal-ep-list { background: none !important; }
-/* Grey outer tray (thinner pad than customer-outer) wrapping each metric card */
+/* Grey outer tray — canonical outer shell wrapping each metric card */
 .cal-ep-w-tray {
   background: var(--shell-bg, #F1F5F9);
-  border-radius: calc(var(--card-radius) + 3px);
-  padding: 3px;
+  border-radius: 28px;
+  padding: 10px;
 }
 html.dark .cal-ep-w-tray {
   background: #020617;
-  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
 }
 /* Metric card — canonical .card-inner; .cal-ep-w is transparent content area */
 .cal-ep-w-shell {

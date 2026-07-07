@@ -6,16 +6,18 @@
    username field.
    ========================================================================= */
 
-/* ── Card (grey outer shell) ── */
+/* ── Card (grey outer shell — canonical pattern: 28px radius, 10px padding) ── */
 .ap-card {
   width: 100%;
   max-width: 400px;
   margin: 0 auto;
-  border-radius: 24px;
+  border-radius: 28px;
+  padding: 10px;
   background: var(--shell-bg, #f1f5f9);
   /* Outer drop shadow only — no border on shell */
   box-shadow: 0 18px 50px -20px rgba(15, 23, 42, 0.20);
   font-family: var(--font-display);
+  box-sizing: border-box;
 }
 
 /* ── Inner white card (canonical card-inner pattern) ── */
@@ -42,7 +44,7 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
 }
 
 .ap-header-icon {
@@ -158,14 +160,16 @@
 
 /* ── Thumbnail strip: transform-driven carousel ── */
 /*
- * Visible window = 4 full thumbs (4×54=216px) + 3 gaps (3×10=30px)
- * + 1 gap (10px) + 11px sliver of 5th avatar = 267px content.
- * Padding 8px all sides: creates buffer zone for the 6px outline ring,
- * so ring of first/last visible thumb never clips on any edge.
- * Box width = 267 + 16 = 283px ≈ 284px.
+ * ap-strip-outer: full-width position:relative context — arrows anchor here.
+ * ap-strip-wrap: 284px clip window (4 full thumbs + 11px 5th-avatar peek),
+ *   centered inside ap-strip-outer; padding 8px guards the selected ring.
  */
-.ap-strip-wrap {
+.ap-strip-outer {
   position: relative;
+  width: 100%;
+}
+
+.ap-strip-wrap {
   width: 284px;
   max-width: 100%;
   margin: 0 auto;
@@ -177,8 +181,8 @@
 /*
  * .ap-track: the full 8-avatar flex row.
  * Translated by --ap-page × 235px (exactly 4 thumbs + 4 gaps ahead of peek):
- *   page 0 → translateX(0): avatars 1-4 visible, avatar 5 peeks 11px right
- *   page 1 → translateX(-235px): avatars 5-8 visible, avatar 4 peeks 11px left
+ *   page 0 → translateX(0): avatars 1-4 visible, avatar 5 peeks ~12px right
+ *   page 1 → translateX(-235px): avatars 5-8 visible, avatar 4 peeks ~12px left
  */
 .ap-track {
   display: flex;
@@ -188,27 +192,26 @@
   will-change: transform;
 }
 
-/* ── Peek-avatar blur + mask (heavy progressive fade, ~80% covered) ── */
-/* Page 0: avatar 5 (right peek) — blur + fade out from its left edge */
-.ap-strip-wrap[data-page="0"] .ap-track .ap-thumb:nth-child(5) {
-  filter: blur(5px);
-  mask-image: linear-gradient(to right, rgba(0, 0, 0, 0.28) 0%, transparent 35%);
+/* ── Peek-avatar blur + mask (~80% covered) ── */
+/* Page 0: avatar 5 (right peek) — 80% opacity-masked + blur from its left edge */
+.ap-strip-outer[data-page="0"] .ap-track .ap-thumb:nth-child(5) {
+  filter: blur(7px);
+  mask-image: linear-gradient(to right, rgba(0, 0, 0, 0.18) 0%, transparent 55%);
   pointer-events: none;
 }
 
-/* Page 1: avatar 4 (left peek) — blur + fade out from its right edge */
-.ap-strip-wrap[data-page="1"] .ap-track .ap-thumb:nth-child(4) {
-  filter: blur(5px);
-  mask-image: linear-gradient(to left, rgba(0, 0, 0, 0.28) 0%, transparent 35%);
+/* Page 1: avatar 4 (left peek) — 80% opacity-masked + blur from its right edge */
+.ap-strip-outer[data-page="1"] .ap-track .ap-thumb:nth-child(4) {
+  filter: blur(7px);
+  mask-image: linear-gradient(to left, rgba(0, 0, 0, 0.18) 0%, transparent 55%);
   pointer-events: none;
 }
 
-/* ── Edge affordance: progressive blur + arrow ── */
+/* ── Edge arrow buttons — float at component left/right edges ── */
 .ap-edge {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 52px;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   z-index: 2;
@@ -224,24 +227,10 @@
 
 .ap-edge--left {
   left: 0;
-  justify-content: flex-start;
-  background: linear-gradient(
-    to right,
-    var(--card-bg, #ffffff) 0%,
-    rgba(255, 255, 255, 0.85) 45%,
-    transparent 100%
-  );
 }
 
 .ap-edge--right {
   right: 0;
-  justify-content: flex-end;
-  background: linear-gradient(
-    to left,
-    var(--card-bg, #ffffff) 0%,
-    rgba(255, 255, 255, 0.85) 45%,
-    transparent 100%
-  );
 }
 
 .ap-edge-btn {
@@ -262,10 +251,6 @@
   flex-shrink: 0;
 }
 
-/* Push buttons toward the card edges */
-.ap-edge--left .ap-edge-btn { margin-left: 0; }
-.ap-edge--right .ap-edge-btn { margin-right: 0; }
-
 .ap-edge-btn:hover {
   transform: scale(1.1);
   box-shadow: 0 4px 10px rgba(15, 23, 42, 0.18);
@@ -284,11 +269,9 @@
 
 /*
  * Optical centering: Material Symbols arrow_back_ios / arrow_forward_ios have
- * an asymmetric side-bearing (the glyph sits off-center in its em-square).
- * Nudge each to align the visual centroid with the button circle center.
+ * an asymmetric side-bearing. Nudge each icon to align visually.
  */
-/* arrow_back_ios glyph has built-in left bias — nudge right for optical center */
-.ap-edge--left .ap-edge-btn .material-symbols-outlined { margin-left: 2px; margin-right: 0; }
+.ap-edge--left .ap-edge-btn .material-symbols-outlined { margin-left: 2px; }
 .ap-edge--right .ap-edge-btn .material-symbols-outlined { margin-left: -2px; }
 
 /* ── Thumbnail buttons ── */
@@ -520,25 +503,6 @@ html.dark .ap-thumb--on {
 
 html.dark .ap-header-icon {
   color: var(--fg1, #f1f5f9);
-}
-
-html.dark .ap-edge--left {
-  /* Fade from inner-card bg (#1e293b), NOT shell bg */
-  background: linear-gradient(
-    to right,
-    #1e293b 0%,
-    rgba(30, 41, 59, 0.85) 45%,
-    transparent 100%
-  );
-}
-
-html.dark .ap-edge--right {
-  background: linear-gradient(
-    to left,
-    #1e293b 0%,
-    rgba(30, 41, 59, 0.85) 45%,
-    transparent 100%
-  );
 }
 
 html.dark .ap-edge-btn {

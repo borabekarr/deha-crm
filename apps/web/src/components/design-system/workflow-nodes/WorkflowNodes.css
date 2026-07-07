@@ -11,7 +11,7 @@
   /* Extra right padding to give the tool buttons (28px wide + 8px gap) room to
      appear outside the rightmost node column without being clipped. */
   padding: 24px 80px 24px 24px;
-  background: #fff;
+  background: var(--card-bg, #FFFFFF);
   background-image: radial-gradient(circle at 1px 1px, #DDE3EA 1px, transparent 1px);
   background-size: 16px 16px;
   border-radius: 28px;
@@ -41,20 +41,47 @@
   z-index: 1;
 }
 
-/* ── Gray outer shell ─────────────────────────────────────────────────────── */
+/* ── Gray outer shell (canonical: 28px radius, 10px pad, drop shadow) ────── */
 .wf-outer {
-  background: #D4DCE8;
-  /* Matched to inner .wf-card border-radius 16px; uniform 10px padding */
-  border-radius: 16px;
-  /* Uniform 10px on all sides so bottom spacing equals side spacing.
-     min-height removed: it forced extra grey dead space below content when
-     node content was shorter than 160px, making the bottom gutter larger
-     than the side gutters. */
+  background: var(--shell-bg, #D4DCE8);
+  /* Canonical shell border-radius: 28px; uniform 10px padding so inner card
+     sits with equal gaps on all sides (canonical: padding = 10px). */
+  border-radius: 28px;
   padding: 10px;
   box-shadow: 0 12px 40px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.06);
   display: flex;
   flex-direction: column;
   position: relative;
+}
+
+/* ── Hover-expand: shell grows RIGHTWARD to cover the toolbar on hover ────── */
+/* ::after extends from the shell's centre to its right edge at rest (same bg,
+   invisible). On hover, `right` goes negative to encompass the toolbar:
+     8px gap + 28px toolbar buttons + 10px right gap = 46px.
+   The 10px right gap mirrors the shell's 10px left pad → symmetric gaps. */
+.wf-outer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* Start well inside the shell so we seamlessly cover the right rounded corner */
+  left: 50%;
+  /* At rest: stays within the shell bounds (same bg, invisible) */
+  right: 0;
+  background: var(--shell-bg, #D4DCE8);
+  border-radius: 0 28px 28px 0;
+  /* Behind toolbar (z-index 25) but above grid content (z-index 1) */
+  z-index: 10;
+  pointer-events: none;
+  transition:
+    right calc(200ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
+}
+
+/* Trigger expansion via :has() — same hover conditions as the toolbar reveal */
+.wf-outer:has(.wf-hover-wedge:hover)::after,
+.wf-outer:has(.wf-tools:hover)::after {
+  /* 8px gap to toolbar + 28px button column + 10px right gap = 46px */
+  right: -46px;
 }
 
 /* ── Invisible triangular hover wedge on the right side of each node ───────
@@ -105,7 +132,7 @@
   height: 28px;
   border-radius: 50%;
   border: 1px solid #E2E8F0;
-  background: #fff;
+  background: var(--card-bg, #FFFFFF);
   display: grid;
   place-items: center;
   cursor: pointer;
@@ -211,10 +238,11 @@
 .wf-tag.action  { background-color: #10B981; }
 .wf-tag.output  { background-color: #F97316; }
 
-/* ── Card (white inner) ──────────────────────────────────────────────────── */
+/* ── Card (white inner — canonical tokens) ───────────────────────────────── */
 .wf-card {
-  background: #fff;
-  border-radius: 16px;
+  background: var(--card-bg, #FFFFFF);
+  border: 1px solid var(--card-border, #CBD5E1);
+  border-radius: var(--card-radius, 20px);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), inset 0 -1px 0 rgba(15, 23, 42, 0.03);
   /* Bottom padding moved to .wf-foot margin-bottom so the footer/.wf-warn block
      sits INSIDE the content box with a real bottom gap (equal to its top gap),
@@ -330,7 +358,7 @@
 /* ── Connect account button ───────────────────────────────────────────────── */
 .wf-connect {
   width: 100%;
-  background: #fff;
+  background: var(--card-bg, #FFFFFF);
   border: 1px solid #E2E8F0;
   border-radius: 10px;
   padding: 5px 12px;
@@ -454,7 +482,18 @@ html.dark .wn-shell {
   background-size: 16px 16px !important;
 }
 
-html.dark .wf-outer { background: #020617; }
+html.dark .wf-outer {
+  background: #020617;
+  /* Canonical dark rim on outer shell (external line visible against dark canvas) */
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.30),
+    0 2px 8px rgba(0, 0, 0, 0.20),
+    inset 0 1px 0 rgba(255, 255, 255, .05),
+    inset 0 0 0 1px rgba(255, 255, 255, .04);
+}
+
+/* Hover-expand shell extension — dark mode background */
+html.dark .wf-outer::after { background: #020617; }
 
 html.dark .wf-tool {
   background: #1E293B;
@@ -472,6 +511,7 @@ html.dark .wf-tool.del:hover  { color: #FCA5A5; background: rgba(239, 68, 68, 0.
 
 html.dark .wf-card {
   background: #1E293B;
+  border-color: #334155;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.20);
 }
 

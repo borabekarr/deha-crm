@@ -52,6 +52,16 @@ const MOVE_CONFIG: Record<string, { bg: string; icon: string; label: string }> =
   'success-review':   { bg: '#FBBF24', icon: 'visibility', label: 'Review' },
 };
 
+// Phase-specific config for the single morphing sync button
+const SYNC_BTN_PHASE: Record<string, { bg: string; color: string; icon: string; label: string; spin: boolean }> = {
+  idle:       { bg: 'var(--tb-syncbtn)', color: '#fff',    icon: 'autorenew', label: 'Sync with Agent', spin: false },
+  connecting: { bg: '#64748B',           color: '#fff',    icon: 'sync',      label: 'Connecting…',     spin: true  },
+  slack:      { bg: '#F97316',           color: '#fff',    icon: 'autorenew', label: 'Reading Slack…',  spin: true  },
+  github:     { bg: '#FBBF24',           color: '#451A03', icon: 'autorenew', label: 'Reading GitHub…', spin: true  },
+  notion:     { bg: '#10B981',           color: '#fff',    icon: 'autorenew', label: 'Reading Notion…', spin: true  },
+  done:       { bg: '#10B981',           color: '#fff',    icon: 'task_alt',  label: 'Synced!',         spin: false },
+};
+
 const COL_TAG: Record<string, { bg: string; fg: string; icon: string; label: string }> = {
   todo:     { bg: '#64748B', fg: '#FFFFFF', icon: 'inbox',      label: 'Todo' },
   progress: { bg: '#F97316', fg: '#FFFFFF', icon: 'bolt',       label: 'In Progress' },
@@ -404,7 +414,28 @@ function Column({
       className={`tb-column ${over ? 'drop-target' : ''}`}
       onDragOver={(e) => { e.preventDefault(); if (!over) setOver(true); }}
       onDragLeave={() => setOver(false)}
-      onDrop={(e) => { e.preventDefault(); setOver(false); onDrop(col.id); }}
+      onDrop={(e) => {
+        e.preventDefault();
+        setOver(false);
+        const dragId = draggingId;   // capture before onDrop clears draggingId
+        onDrop(col.id);
+        // After React commits the new card into this column's DOM, scroll it fully
+        // into view so it's never hidden under the progressive bottom blur.
+        // Double-rAF waits for React's commit + paint before reading layout.
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          const el = scrollRef.current;
+          if (!el || !dragId) return;
+          const card = el.querySelector(`[data-flip-id="${dragId}"]`);
+          if (!card) return;
+          const blurClearance = 60;   // bottom blur height (52px) + margin
+          const cardRect = card.getBoundingClientRect();
+          const elRect   = el.getBoundingClientRect();
+          const cardBottom = cardRect.bottom - elRect.top;
+          if (cardBottom > el.clientHeight - blurClearance) {
+            el.scrollBy({ top: cardBottom - (el.clientHeight - blurClearance) + 4, behavior: 'smooth' });
+          }
+        }));
+      }}
       style={{
         background: 'var(--tb-col-bg)',
         border: '1px solid var(--tb-col-border)',
@@ -493,25 +524,31 @@ function Column({
 // ---------------------------------------------------------------------------
 function Header({ total }: { total: number }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 20px 14px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <h1 style={{ margin: 0, fontSize: 19, fontWeight: 800, color: 'var(--tb-fg1)', letterSpacing: '-0.025em', fontFamily: "'Montserrat', sans-serif" }}>
-          Task Board
-        </h1>
-        <span style={{
-          display: 'inline-flex', alignItems: 'center', gap: 4,
-          padding: '2px 10px 2px 7px',
-          borderRadius: 9999,
-          background: 'var(--tb-chip-bg)',
-          border: '1px solid var(--tb-col-border)',
-          fontSize: 12, fontWeight: 700, color: 'var(--tb-chip-fg)',
-          letterSpacing: '-0.01em',
-        }}>
-          <span className={iconClass('assignment')} style={{ fontSize: 13 }}>assignment</span>
-          {total} tasks
-        </span>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    // Flat flex row — inner container div removed (feedback #6)
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '18px 20px 14px' }}>
+      <h1 style={{
+        margin: 0, display: 'inline-flex', alignItems: 'center', gap: 7,
+        fontSize: 19, fontWeight: 800, color: 'var(--tb-fg1)',
+        letterSpacing: '-0.025em', fontFamily: "'Montserrat', sans-serif",
+      }}>
+        {/* leading view_kanban glyph (item 5) */}
+        <span className={iconClass('view_kanban')} aria-hidden style={{ fontSize: 20, lineHeight: 1, fontVariationSettings: '"opsz" 24, "wght" 500' }}>view_kanban</span>
+        Task Board
+      </h1>
+      <span style={{
+        display: 'inline-flex', alignItems: 'center', gap: 4,
+        padding: '2px 10px 2px 7px',
+        borderRadius: 9999,
+        background: 'var(--tb-chip-bg)',
+        border: '1px solid var(--tb-col-border)',
+        fontSize: 12, fontWeight: 700, color: 'var(--tb-chip-fg)',
+        letterSpacing: '-0.01em',
+      }}>
+        <span className={iconClass('assignment')} style={{ fontSize: 13 }}>assignment</span>
+        {total} tasks
+      </span>
+      {/* AI Sync pushed to right with marginLeft: auto */}
+      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
         <SymIcon name="neurology" size={18} style={{ color: '#10B981' }} />
         <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--tb-fg3)', letterSpacing: '-0.01em' }}>
           AI Sync
@@ -576,7 +613,7 @@ function UpdateItem({ item }: { item: FeedItem }) {
       display: 'flex', alignItems: 'flex-start', gap: 12,
       padding: '11px 16px',
       borderBottom: '1px dashed var(--tb-col-border)',
-      animation: `itemIn 320ms cubic-bezier(.22,1,.36,1) both`,
+      animation: `itemBounce 380ms cubic-bezier(.34,1.7,.46,1) both`,
     }}>
       <span style={{
         marginTop: 6, width: 7, height: 7, borderRadius: '50%',
@@ -632,7 +669,7 @@ function StatusBar({
   phase,
   onSync,
   syncedCount,
-  syncBtnAnim,
+  syncBtnAnim: _syncBtnAnim,   // kept for API compat; morph uses key={phase} instead
 }: {
   sourceStates: { slack: string; github: string; notion: string };
   statusText: string;
@@ -642,13 +679,10 @@ function StatusBar({
   syncBtnAnim: string | null;
 }) {
   const isDone = phase === 'done';
-  const isWorking = phase !== 'idle' && phase !== 'done';
-  const phaseColor =
-    phase === 'slack'  ? '#F97316' :
-    phase === 'github' ? '#FBBF24' :
-    phase === 'notion' ? '#10B981' :
-    '#64748B';
-  const phaseDarkText = phase === 'github';
+  const isClickable = phase === 'idle' || phase === 'done';
+
+  // Morphing button config — color/text/icon morph on each phase change
+  const btnCfg = SYNC_BTN_PHASE[phase] ?? SYNC_BTN_PHASE.idle;
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px 12px', gap: 16 }}>
@@ -686,57 +720,36 @@ function StatusBar({
         </span>
       </div>
 
-      {isWorking ? (
-        <button
-          type="button"
-          disabled
-          key="syncing"
+      {/* Single morphing button — key={phase} remounts on each phase change,
+          replaying the syncMorphBounce animation for the spring entrance.
+          Color/text/icon morph from SYNC_BTN_PHASE config. */}
+      <button
+        key={phase}
+        type="button"
+        onClick={isClickable ? onSync : undefined}
+        disabled={!isClickable}
+        className="sync-btn"
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          padding: '9px 18px', borderRadius: 999,
+          background: btnCfg.bg, color: btnCfg.color,
+          border: 'none',
+          fontSize: 12.5, fontWeight: 700, letterSpacing: '-0.005em',
+          cursor: isClickable ? 'pointer' : 'not-allowed',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.22), inset 0 0 0 1px rgba(0,0,0,0.12), 0 6px 16px -6px rgba(15,23,42,0.45)',
+        }}
+        onMouseDown={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(0.97)'; }}
+        onMouseUp={(e)   => { (e.currentTarget as HTMLButtonElement).style.transform = ''; }}
+      >
+        <span
+          className={iconClass(btnCfg.icon)}
           style={{
-            display: 'inline-flex', alignItems: 'center', gap: 7,
-            padding: '7px 14px', borderRadius: 9999,
-            background: phaseColor,
-            backgroundImage: 'linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px)',
-            backgroundSize: '7px 7px',
-            color: phaseDarkText ? '#451A03' : '#fff',
-            border: 'none',
-            fontSize: 11.5, fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase',
-            textShadow: phaseDarkText ? 'none' : '0 1px 2px rgba(0,0,0,0.35), 0 1px 0 rgba(0,0,0,0.22)',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.30), inset 0 -1.5px 0 rgba(0,0,0,0.18), inset 0 0 0 1px rgba(0,0,0,0.06)',
-            cursor: 'not-allowed',
+            fontSize: 16, lineHeight: 1,
+            animation: btnCfg.spin ? 'spin 800ms linear infinite' : 'none',
           }}
-        >
-          <span style={{
-            width: 11, height: 11, borderRadius: '50%',
-            border: '1.8px solid currentColor', borderTopColor: 'transparent',
-            animation: 'spin 800ms linear infinite',
-            opacity: 0.7,
-          }} />
-          Syncing…
-        </button>
-      ) : (
-        <button
-          type="button"
-          onClick={onSync}
-          className={`sync-btn ${syncBtnAnim ?? ''}`}
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            padding: '9px 18px', borderRadius: 999,
-            background: 'var(--tb-syncbtn)', color: '#fff',
-            border: 'none',
-            fontSize: 12.5, fontWeight: 700, letterSpacing: '-0.005em',
-            cursor: 'pointer',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.22), inset 0 0 0 1px rgba(0,0,0,0.12), 0 6px 16px -6px rgba(15,23,42,0.45)',
-            transition: 'transform 130ms cubic-bezier(.22,1,.36,1), background 150ms',
-          }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--tb-syncbtn-hover)'; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--tb-syncbtn)'; }}
-          onMouseDown={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(0.97)'; }}
-          onMouseUp={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)'; }}
-        >
-          <span className={iconClass('autorenew')} style={{ fontSize: 16 }}>autorenew</span>
-          Sync with Agent
-        </button>
-      )}
+        >{btnCfg.icon}</span>
+        {btnCfg.label}
+      </button>
     </div>
   );
 }

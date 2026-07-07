@@ -91,7 +91,9 @@ export function mountCard(el: CardElement): (() => void) | void {
 
   function paintBar(prevIdx: number) {
     const lastIdx = feed.length - 1
-    const isWrap = prevIdx === lastIdx && idx === 0
+    const isWrap        = prevIdx === lastIdx && idx === 0
+    // Edge reversal: clicking PREV at first item wraps to last — mirror the animation direction
+    const isReverseWrap = prevIdx === 0 && idx === lastIdx
 
     if (isWrap) {
       const primary = bar.querySelector<HTMLElement>('.nf-ind:not(.nf-ind-ghost)')
@@ -123,6 +125,34 @@ export function mountCard(el: CardElement): (() => void) | void {
         ghost.classList.remove('nf-ind--enter-left')
         bar.style.setProperty('--nf-idx', '0')
         bar.style.setProperty('--nf-ghost-idx', '0')
+      }, dur + 20)
+    } else if (isReverseWrap) {
+      const primary = bar.querySelector<HTMLElement>('.nf-ind:not(.nf-ind-ghost)')
+      const ghost   = bar.querySelector<HTMLElement>('.nf-ind-ghost')
+      if (!primary || !ghost) {
+        bar.style.setProperty('--nf-idx', String(idx))
+        return
+      }
+
+      // Phase 1: primary at position 0 exits to the LEFT (reversed direction)
+      primary.classList.add('nf-ind--exit-left')
+
+      // Phase 2: ghost snaps to lastIdx (no transition) then enters from the RIGHT
+      ghost.classList.add('nf-ind--no-transition')
+      bar.style.setProperty('--nf-ghost-idx', String(lastIdx))
+      void ghost.offsetWidth
+      ghost.classList.remove('nf-ind--no-transition')
+      ghost.classList.add('nf-ind--enter-right')
+
+      // After animation completes: reset primary to lastIdx, remove animation classes
+      const dur = 300 * (parseFloat(
+        getComputedStyle(bar).getPropertyValue('--anim-mult') || '1'
+      ) || 1)
+      later(() => {
+        primary.classList.remove('nf-ind--exit-left')
+        ghost.classList.remove('nf-ind--enter-right')
+        bar.style.setProperty('--nf-idx', String(lastIdx))
+        bar.style.setProperty('--nf-ghost-idx', String(lastIdx))
       }, dur + 20)
     } else {
       bar.style.setProperty('--nf-idx', String(idx))

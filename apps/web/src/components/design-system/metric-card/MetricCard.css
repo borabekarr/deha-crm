@@ -85,7 +85,7 @@ html.dark .frame.mc-frame { background-image: none; }
 
 .exp-top {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 16px 16px 12px;
+  padding: 16px 16px 16px;
   border-bottom: 1px solid #E2E8F0;
 }
 html.dark .exp-top { border-bottom-color: #334155; }
@@ -105,9 +105,9 @@ html.dark .exp-top { border-bottom-color: #334155; }
 .exp-close:hover { background: #E2E8F0; }
 .exp-close .material-icons { font-size: 15px; }
 
-.exp-body { padding: 14px 16px 0; }
+.exp-body { padding: 16px 16px 0; }
 /* Stacked layout: goal (small, top) → number (big) → badge-row (tag). No side-by-side row. */
-.exp-goal { font-size: 12px; font-weight: 600; color: #94A3B8; line-height: 1; margin-bottom: 14px; }
+.exp-goal { font-size: 12px; font-weight: 600; color: #94A3B8; line-height: 1; margin-bottom: 8px; }
 .exp-num { font-size: 44px; font-weight: 900; color: #0F172A; letter-spacing: -0.03em; line-height: 1; }
 
 .exp-badge-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }

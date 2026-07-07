@@ -76,3 +76,6 @@ plans/archive/rit3zh-refs/*/*.lock
 
 # Static gallery snapshot (build artifact)
 design-system-dist/
+
+# Self-monitor session reports
+reports/

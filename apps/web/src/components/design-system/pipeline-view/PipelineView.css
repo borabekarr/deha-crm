@@ -1,0 +1,393 @@
+/* ==========================================================================
+   PipelineView.css — iOS grouped inset list mapped to Deha tokens.
+   Local chrome vars are flipped wholesale under html.dark (dtw pattern).
+   Every selector is scoped under .pipeline-view so nothing leaks into the
+   shared global stylesheet. Emerald accents are the canonical #10B981
+   (== oklch(0.696 0.149 162.5)); danger is #EF4444. Hairlines, not borders.
+   ========================================================================== */
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Root — local chrome vars (light) ─────────────────────────────────────── */
+.pipeline-view {
+  /* bezel + inset surfaces */
+  --pv-bezel: #D4DCE8;
+  --pv-bezel-border: #CBD5E1;
+  --pv-card: #FFFFFF;
+  --pv-card-border: #CBD5E1;
+  --pv-edge: #E2E8F0;        /* hairline separator */
+  /* text */
+  --pv-fg1: #0F172A;
+  --pv-fg3: #64748B;
+  --pv-fg4: #94A3B8;
+  --pv-header-fg: #64748B;
+  /* accents */
+  --pv-emerald: #10B981;
+  --pv-danger: #EF4444;
+  --pv-muted-fg: #64748B;
+  --pv-row-hover: rgba(15, 23, 42, 0.03);
+  /* Dynamic-island popover chrome (flipped wholesale under html.dark) */
+  --pv-pop-bg: #0F172A;
+  --pv-pop-border: rgba(255, 255, 255, 0.08);
+  --pv-pop-fg1: #F8FAFC;
+  --pv-pop-fg3: #94A3B8;
+  --pv-pop-hair: rgba(255, 255, 255, 0.08);
+  --pv-pop-emerald: #34D399;
+  --pv-pop-danger: #EF4444;
+
+  display: flex;
+  justify-content: center;
+  font-family: var(--font-display);
+  color: var(--pv-fg1);
+}
+
+/* ── Grey bezel ───────────────────────────────────────────────────────────── */
+.pipeline-view .pv-shell {
+  width: min(420px, 100%);
+  box-sizing: border-box;
+  background: var(--pv-bezel);
+  border: 1px solid var(--pv-bezel-border);
+  border-radius: 28px;
+  /* Concentric bezel↔inset: gap = bezel radius − inset radius = 28 − 20 = 8px on
+     the three edges the inset touches; top keeps 14px to seat the group header. */
+  padding: 14px 8px 8px;
+  box-shadow:
+    0 16px 44px rgba(15, 23, 42, 0.13),
+    0 3px 9px rgba(15, 23, 42, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* ── Group header — iOS small-caps eyebrow ────────────────────────────────── */
+.pipeline-view .pv-group-header {
+  padding: 2px 8px 9px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--pv-header-fg);
+}
+
+/* ── Inset section — the grouped white card ───────────────────────────────── */
+.pipeline-view .pv-inset {
+  background: var(--pv-card);
+  border: 1px solid var(--pv-card-border);
+  border-radius: var(--card-radius, 20px);
+  /* overflow VISIBLE so a row's anchored popover escapes the card; corner
+     rounding is preserved by rounding the first/last rows below. */
+  overflow: visible;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+/* Concentric corners — keep row hover/press fill inside the rounded card. */
+.pipeline-view .pv-inset > [role='listitem']:first-child .pv-row {
+  border-top-left-radius: 19px;
+  border-top-right-radius: 19px;
+}
+.pipeline-view .pv-inset > [role='listitem']:last-child .pv-row {
+  border-bottom-left-radius: 19px;
+  border-bottom-right-radius: 19px;
+}
+
+/* Hairline separators — 1px, never a heavy border. First row has none. */
+.pipeline-view .pv-inset > [role='listitem'] + [role='listitem'] .pv-row {
+  border-top: 1px solid var(--pv-edge);
+}
+
+/* ── Row — 44px-class iOS rhythm (now a full-width button) ─────────────────── */
+.pipeline-view .pv-row {
+  /* button reset */
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px 15px;
+  background: transparent;
+  transition:
+    background calc(150ms * var(--anim-mult, 1)) ease,
+    transform calc(120ms * var(--anim-mult, 1)) ease;
+
+  /* Entrance: staggered rise + fade (funnel-chart approach). `backwards` fill
+     hides each row through its own delay, then reverts to base styles so the
+     :active press transform below is never clobbered by a forwards fill. */
+  animation: pvRowIn calc(0.5s * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 60ms * var(--anim-mult, 1));
+}
+.pipeline-view .pv-row:hover { background: var(--pv-row-hover); }
+.pipeline-view .pv-row.is-open { background: var(--pv-row-hover); }
+.pipeline-view .pv-row:active { transform: scale(0.96); }
+/* Branded keyboard focus — replaces the harsh UA outline; inset offset keeps the
+   ring inside the row so it follows the card's rounded first/last corners. */
+.pipeline-view .pv-row:focus-visible {
+  outline: 2px solid var(--pv-emerald);
+  outline-offset: -2px;
+}
+
+/* Listitem is the popover's positioned anchor; raised while its row is open. */
+.pipeline-view .pv-item { position: relative; }
+.pipeline-view .pv-item.is-open { z-index: 40; }
+
+@keyframes pvRowIn {
+  from { opacity: 0; transform: translateY(9px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Reduced motion — collapse the rise+stagger to a plain fade. */
+@media (prefers-reduced-motion: reduce) {
+  .pipeline-view .pv-row {
+    animation-name: pvRowFade;
+    animation-delay: 0s;
+  }
+  .pipeline-view .pv-row:active { transform: none; }
+  @keyframes pvRowFade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+}
+
+/* Stage color dot with a soft matching glow */
+.pipeline-view .pv-dot {
+  flex: 0 0 auto;
+  width: 11px;
+  height: 11px;
+  border-radius: 9999px;
+  background: var(--pv-stage, var(--pv-emerald));
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--pv-stage, var(--pv-emerald)) 16%, transparent),
+    0 0 8px -1px color-mix(in srgb, var(--pv-stage, var(--pv-emerald)) 70%, transparent);
+}
+
+/* Left column — name + conversion caption */
+.pipeline-view .pv-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pipeline-view .pv-name {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--pv-fg1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pipeline-view .pv-conv {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--pv-fg4);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pipeline-view .pv-conv-pct {
+  font-weight: 800;
+  color: var(--pv-fg3);
+}
+
+/* Right column — count · value, then trend */
+.pipeline-view .pv-right {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+.pipeline-view .pv-value {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--pv-fg1);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+.pipeline-view .pv-sep { color: var(--pv-fg4); font-weight: 700; }
+.pipeline-view .pv-money { color: var(--pv-fg1); }
+
+.pipeline-view .pv-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+}
+.pipeline-view .pv-trend-ic {
+  font-size: 13px;
+  line-height: 1;
+}
+.pipeline-view .pv-trend--up { color: var(--pv-emerald); }
+.pipeline-view .pv-trend--down { color: var(--pv-danger); }
+
+/* ── Terminal muted (Lost) row — desaturated slate, subtle red trend ──────── */
+.pipeline-view .pv-row--muted .pv-name { color: var(--pv-muted-fg); }
+.pipeline-view .pv-row--muted .pv-dot { box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.14); }
+.pipeline-view .pv-row--muted .pv-value,
+.pipeline-view .pv-row--muted .pv-money { color: var(--pv-muted-fg); }
+.pipeline-view .pv-trend--muted { color: color-mix(in srgb, var(--pv-danger) 78%, var(--pv-muted-fg)); }
+
+/* ── Stage deep-dive popover (dynamic-island) ─────────────────────────────────
+   Always mounted; open/closed is a pure state class. Closed = invisible +
+   non-interactive, but the node STAYS in the DOM (visibility, never display or
+   unmount) so the exit transition plays. Anchored to the row, dropping just
+   below and expanding from its top edge. Emerald == the row's own stage color
+   accent on the header dot. */
+.pipeline-view .pv-pop {
+  position: absolute;
+  top: calc(100% - 8px);
+  right: 10px;
+  z-index: 50;
+  width: min(272px, calc(100% - 20px));
+  box-sizing: border-box;
+  padding: 12px 13px 13px;
+  background: var(--pv-pop-bg);
+  border: 1px solid var(--pv-pop-border);
+  border-radius: 16px;
+  box-shadow:
+    0 18px 44px rgba(2, 6, 23, 0.34),
+    0 4px 12px rgba(2, 6, 23, 0.22);
+  color: var(--pv-pop-fg1);
+  text-align: left;
+
+  /* closed state — kept mounted, non-interactive, exit transition intact */
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-6px) scale(0.96);
+  transform-origin: top right;
+  transition:
+    opacity calc(200ms * var(--anim-mult, 1)) ease,
+    transform calc(240ms * var(--anim-mult, 1)) cubic-bezier(0.34, 1.56, 0.64, 1),
+    visibility 0s linear calc(240ms * var(--anim-mult, 1));
+}
+.pipeline-view .pv-pop.is-open {
+  visibility: visible;
+  opacity: 1;
+  /* Purely informational static text — stays non-interactive so a click over an
+     open popover passes THROUGH to the covered row below and switches popovers
+     naturally (the row owns the toggle). Never pointer-events:auto. */
+  pointer-events: none;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity calc(200ms * var(--anim-mult, 1)) ease,
+    transform calc(240ms * var(--anim-mult, 1)) cubic-bezier(0.34, 1.56, 0.64, 1),
+    visibility 0s;
+}
+
+.pipeline-view .pv-pop-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding-bottom: 9px;
+  margin-bottom: 9px;
+  border-bottom: 1px solid var(--pv-pop-hair);
+}
+.pipeline-view .pv-pop-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--pv-stage, var(--pv-pop-emerald));
+  box-shadow: 0 0 8px -1px color-mix(in srgb, var(--pv-stage, var(--pv-pop-emerald)) 75%, transparent);
+}
+.pipeline-view .pv-pop-title {
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--pv-pop-fg1);
+}
+.pipeline-view .pv-pop-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pipeline-view .pv-pop-stat {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.pipeline-view .pv-pop-k {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--pv-pop-fg3);
+}
+.pipeline-view .pv-pop-v {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--pv-pop-fg1);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  text-align: right;
+}
+.pipeline-view .pv-pop-trend--up { color: var(--pv-pop-emerald); }
+.pipeline-view .pv-pop-trend--down { color: var(--pv-pop-danger); }
+
+/* Lost row popover — muted header dot, same stats surface. */
+.pipeline-view .pv-pop--muted .pv-pop-dot {
+  box-shadow: 0 0 8px -2px rgba(148, 163, 184, 0.5);
+}
+.pipeline-view .pv-pop--muted .pv-pop-title { color: var(--pv-pop-fg3); }
+
+/* ── Dark mode — flip local vars only (html.dark, literal hex) ────────────── */
+html.dark .pipeline-view {
+  --pv-bezel: #020617;
+  --pv-bezel-border: #334155;
+  --pv-card: #1E293B;
+  --pv-card-border: #334155;
+  --pv-edge: #334155;
+  --pv-fg1: #F1F5F9;
+  --pv-fg3: #94A3B8;
+  --pv-fg4: #64748B;
+  --pv-header-fg: #94A3B8;
+  --pv-muted-fg: #64748B;
+  --pv-row-hover: rgba(255, 255, 255, 0.04);
+  /* Popover lifts above the dark card as a raised slate surface. */
+  --pv-pop-bg: #334155;
+  --pv-pop-border: rgba(255, 255, 255, 0.1);
+  --pv-pop-fg1: #F8FAFC;
+  --pv-pop-fg3: #CBD5E1;
+  --pv-pop-hair: rgba(255, 255, 255, 0.1);
+  --pv-pop-emerald: #34D399;
+  --pv-pop-danger: #EF4444;
+}
+html.dark .pipeline-view .pv-shell {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 16px 44px rgba(0, 0, 0, 0.45);
+}
+html.dark .pipeline-view .pv-inset {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 1px 2px rgba(0, 0, 0, 0.3);
+}

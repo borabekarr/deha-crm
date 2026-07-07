@@ -107,13 +107,13 @@ export default function AvatarPicker({ onComplete }: AvatarPickerProps) {
           {/* key remount re-triggers apFade keyframe on every selection */}
           <span className="ap-avatar-name" key={'n' + selected.id}>{selected.alt}</span>
 
-          {/* Transform-driven thumbnail strip with edge arrows */}
+          {/* Thumbnail strip — arrows float at component edges, strip clips center */}
           <div
-            className="ap-strip-wrap"
+            className="ap-strip-outer"
             data-page={page}
             style={{ '--ap-page': page } as React.CSSProperties}
           >
-            {/* Left edge: only mounted when on page 1 (can scroll back) */}
+            {/* Left edge arrow: at component left edge, only when on page 1 */}
             {canScrollLeft && (
               <div className="ap-edge ap-edge--left ap-edge--visible" aria-hidden="true">
                 <button
@@ -127,34 +127,37 @@ export default function AvatarPicker({ onComplete }: AvatarPickerProps) {
               </div>
             )}
 
-            {/* Transform-driven track — all 8 avatars in a flex row */}
-            <div className="ap-track">
-              {AVATARS.map((a) => {
-                const on = a.id === selected.id
-                return (
-                  <button
-                    key={a.id}
-                    type="button"
-                    className={'ap-thumb' + (on ? ' ap-thumb--on' : '')}
-                    style={on ? {
-                      '--ap-ring-rgb': a.ring,
-                    } as React.CSSProperties : undefined}
-                    aria-label={'Select ' + a.alt}
-                    aria-pressed={on}
-                    onClick={() => setSelected(a)}
-                  >
-                    <img
-                      className="ap-thumb-img"
-                      src={a.src}
-                      alt={a.alt}
-                      draggable={false}
-                    />
-                  </button>
-                )
-              })}
-            </div>{/* end .ap-track */}
+            {/* Clipping wrapper — 4 full thumbs + 5th peek, centered */}
+            <div className="ap-strip-wrap">
+              {/* Transform-driven track — all 8 avatars in a flex row */}
+              <div className="ap-track">
+                {AVATARS.map((a) => {
+                  const on = a.id === selected.id
+                  return (
+                    <button
+                      key={a.id}
+                      type="button"
+                      className={'ap-thumb' + (on ? ' ap-thumb--on' : '')}
+                      style={on ? {
+                        '--ap-ring-rgb': a.ring,
+                      } as React.CSSProperties : undefined}
+                      aria-label={'Select ' + a.alt}
+                      aria-pressed={on}
+                      onClick={() => setSelected(a)}
+                    >
+                      <img
+                        className="ap-thumb-img"
+                        src={a.src}
+                        alt={a.alt}
+                        draggable={false}
+                      />
+                    </button>
+                  )
+                })}
+              </div>{/* end .ap-track */}
+            </div>{/* end .ap-strip-wrap */}
 
-            {/* Right edge: only mounted when on page 0 (can scroll forward) */}
+            {/* Right edge arrow: at component right edge, only when on page 0 */}
             {canScrollRight && (
               <div className="ap-edge ap-edge--right ap-edge--visible" aria-hidden="true">
                 <button
@@ -167,7 +170,7 @@ export default function AvatarPicker({ onComplete }: AvatarPickerProps) {
                 </button>
               </div>
             )}
-          </div>
+          </div>{/* end .ap-strip-outer */}
         </div>
 
         {/* Username field */}

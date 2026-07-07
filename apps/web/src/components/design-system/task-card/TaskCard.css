@@ -9,14 +9,17 @@ body { background: var(--bg-app); }
 #tabSeg .seg-pill { right: auto; }
 .frame { padding: 22px; display: flex; justify-content: center; }
 
-/* ── Kanban column = ONE comprehensive grey background ────────────── */
+/* ── Kanban column — canonical grey outer shell (matches card view) ── */
 .column {
   width: 336px;
-  background: var(--bg-card-solid);
-  border: 1px dashed rgba(15,23,42,0.18);
-  border-radius: 22px;
-  padding: 12px;
-  box-shadow: 0 16px 56px rgba(15,23,42,0.14), 0 3px 10px rgba(15,23,42,0.07);
+  background: var(--shell-bg);
+  border-radius: 28px;
+  padding: 10px;
+  box-shadow:
+    0 16px 56px rgba(15,23,42,0.14),
+    0 3px 10px rgba(15,23,42,0.07),
+    inset 0 1px 0 rgba(255,255,255,.05),
+    inset 0 0 0 1px rgba(255,255,255,.04);
 }
 .col-head {
   display:flex; align-items:center; justify-content:space-between;
@@ -125,10 +128,9 @@ body { background: var(--bg-app); }
 .ent-sub { font-size: 10.5px; font-weight: 600; color: var(--fg4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
 
 /* ── Foot: Ask AI + dynamic date ──────────────────────────────────── */
-/* (1) date pinned to the card's bottom-left corner — zero left/bottom inset,
-   foot aligned to the very bottom edge */
+/* date nudged up + right so it sits farther from the card's bottom-left corner */
 .task-foot { display:flex; justify-content:space-between; align-items:flex-end; padding: 11px 4px 0 0; }
-.task-foot .date { margin-left: 0; }
+.task-foot .date { margin-left: 8px; margin-bottom: 4px; }
 /* Layout/shape only — color/bg/border supplied by .btn-green */
 .ask-ai {
   display:inline-flex; align-items:center; gap: 4px;

@@ -6,6 +6,12 @@
 /* Tailwind v4 base */
 @import "tailwindcss";
 
+/* Motion tokens (duration scale + easing set) -- must load before any
+ * component stylesheet that consumes the --duration- and --ease- custom
+ * properties. See styles/motion-tokens.css for the source-of-truth
+ * commentary and the migration notes for step-8 (motion-token extraction). */
+@import "./motion-tokens.css";
+
 /* Deha Design System foundation (verbatim, in dependency order):
  *   _base.css itself @imports ../colors_and_type.css -- Vite resolves that
  *   relative to _base.css, so tokens load automatically.

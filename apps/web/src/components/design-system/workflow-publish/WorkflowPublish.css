@@ -4,21 +4,6 @@
    Dark-mode overrides mirror the html.dark .pb-* blocks from _darkmode.css.
    ─────────────────────────────────────────────────────────────────────────── */
 
-/* ── Shell wrapper ───────────────────────────────────────────────────────── */
-/* overflow: visible ensures the absolutely-positioned bezel+popover can paint
-   outside the shell's border-radius boundary without being clipped. */
-.wp-shell {
-  position: relative;
-  padding: 32px 24px 80px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  background: #F8FAFC;
-  background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.06) 0%, #F8FAFC 55%);
-  border-radius: 20px;
-  overflow: visible;
-}
-
 /* ── Button anchor — gives popover its positioning context ───────────────── */
 /* overflow: visible is explicit so the absolutely-positioned bezel + popover
    are never clipped by this container (border-radius alone does not clip, but
@@ -63,61 +48,63 @@
 .wp-btn .material-icons { font-size: 17px; }
 
 /* ── Grey bezel — outer ring wrapping the white popover card ─────────────── */
-/* Matches .wf-outer / .wtc-outer / .tp-outer pattern across the design system */
-/* right: 0 right-aligns the bezel to the button edge so the 360px popover    */
-/* stays fully within the viewport when the button is near the right margin.   */
-/* overflow: visible on both .wp-shell and .wp-btn-anchor ensures no clipping. */
+/* Canonical inner-card outer shell: --shell-bg + 28px radius + 10px pad +
+   dark rim box-shadow for subtle definition in both light and dark modes.
+   right: 0 right-aligns the bezel to the button edge so the 360px popover
+   stays fully within the viewport when the button is near the right margin.
+   Animation lives here so the white card and grey outer move as one rigid unit. */
 .wp-bezel {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
   z-index: 50;
-  background: #D4DCE8;
-  border-radius: 24px;
+  background: var(--shell-bg, #D4DCE8);
+  border-radius: 28px;
   padding: 10px;
+  overflow: visible;
+  /* Subtle dark rim lines — canonical outer-shell treatment */
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    inset 0 0 0 1px rgba(255,255,255,.04);
+  /* Enter animation — same easing as exit, no bounce overshoot */
+  transform-origin: top right;
+  animation: wp-popIn calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) forwards;
+}
+/* Exit animation — identical easing/timing curve reversed */
+.wp-bezel.closing {
+  animation: wp-popOut calc(220ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) forwards;
 }
 
-/* ── Popover ─────────────────────────────────────────────────────────────── */
+/* ── Enter + exit keyframes — rigid, no bounce ───────────────────────────── */
+/* Both use the same cubic-bezier so outer + inner contract/expand identically */
+@keyframes wp-popIn {
+  0%   { opacity: 0; transform: scaleX(0.88) scaleY(0.82); }
+  100% { opacity: 1; transform: scaleX(1) scaleY(1); }
+}
+
+@keyframes wp-popOut {
+  from { opacity: 1; transform: scaleX(1) scaleY(1); }
+  to   { opacity: 0; transform: scaleX(0.88) scaleY(0.82); }
+}
+
+/* ── Popover (inner card) ─────────────────────────────────────────────────── */
 /* position: static overrides <dialog>'s native absolute/fixed positioning so
-   it flows in-place inside .wp-bezel rather than floating to viewport centre. */
+   it flows in-place inside .wp-bezel rather than floating to viewport centre.
+   No separate animation — the bezel carries both outer + inner as one unit. */
 .wp-popover {
-  display: none;
+  display: block;
   position: static;
   width: 360px;
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
+  background: var(--card-bg, #FFFFFF);
+  border: 1px solid var(--card-border, #CBD5E1);
   border-top-color: rgba(255,255,255,0.9);
-  border-radius: var(--card-radius);
+  border-radius: var(--card-radius, 20px);
   overflow: hidden;
   box-shadow:
     0 12px 40px rgba(15,23,42,0.12),
     0 4px 12px rgba(15,23,42,0.06),
     inset 0 1px 0 rgba(255,255,255,1),
     inset 0 0 0 1px rgba(15,23,42,0.04);
-}
-.wp-popover.open {
-  display: block;
-  transform-origin: top center;
-  animation: wp-popIn calc(340ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.64,1) forwards;
-}
-.wp-popover.open.closing {
-  transform-origin: top center;
-  animation: wp-popOut calc(220ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) forwards;
-}
-
-/* Open: dynamic-island bounce — compress then overshoot settle, anchored top-right */
-@keyframes wp-popIn {
-  0%   { opacity: 0; transform: scaleX(0.72) scaleY(0.60); }
-  35%  { opacity: 1; transform: scaleX(1.04) scaleY(1.02); }
-  55%  { transform: scaleX(0.98) scaleY(0.99); }
-  75%  { transform: scaleX(1.01) scaleY(1.005); }
-  100% { opacity: 1; transform: scaleX(1) scaleY(1); }
-}
-
-/* Close: reverse — shrink + fade out */
-@keyframes wp-popOut {
-  from { opacity: 1; transform: scaleX(1) scaleY(1); }
-  to   { opacity: 0; transform: scaleX(0.88) scaleY(0.82); }
 }
 
 /* Header */
@@ -128,10 +115,18 @@
   padding: 18px 18px 14px;
 }
 .wp-pop-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 15px;
   font-weight: 900;
   color: #0F172A;
   letter-spacing: -0.02em;
+}
+.wp-pop-title .material-icons,
+.wp-pop-title .material-symbols-outlined {
+  font-size: 17px;
+  color: #64748B;
 }
 .wp-version {
   font-size: 11px;
@@ -211,7 +206,12 @@
   cursor: pointer;
   transition: background calc(140ms * var(--anim-mult, 1));
 }
-.wp-action:hover { background: #F8FAFC; }
+/* Grey watermark hover — subtle dot-grid texture over the light hover fill */
+.wp-action:hover {
+  background-color: #F8FAFC;
+  background-image: radial-gradient(circle, rgba(0,0,0,0.045) 1px, transparent 1px);
+  background-size: 10px 10px;
+}
 .wp-action:active { background: #F1F5F9; }
 .wp-action:last-child { margin-bottom: 6px; }
 
@@ -257,16 +257,10 @@
 /* ── Dark mode overrides ──────────────────────────────────────────────────── */
 /* Mirror html.dark .pb-* blocks from _darkmode.css verbatim, prefixed to wp- */
 
-html.dark .wp-shell {
-  background: #0F172A !important;
-  background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.08) 0%, rgba(15,23,42,1) 55%, #0F172A 100%);
-  color: #F1F5F9;
-}
-
 html.dark .wp-btn { background: #F1F5F9; color: #0F172A; }
 html.dark .wp-btn:hover { background: #E2E8F0; }
 
-html.dark .wp-bezel { background: #020617; border: 1px solid #020617; }
+html.dark .wp-bezel { background: #020617; }
 
 html.dark .wp-popover {
   border-top-color: rgba(255,255,255,0.22);
@@ -274,6 +268,8 @@ html.dark .wp-popover {
 }
 
 html.dark .wp-pop-title { color: #F1F5F9; }
+html.dark .wp-pop-title .material-icons,
+html.dark .wp-pop-title .material-symbols-outlined { color: #94A3B8; }
 
 html.dark .wp-version {
   color: #CBD5E1;
@@ -292,7 +288,12 @@ html.dark .wp-edited .wp-arrow { color: #475569; }
 
 html.dark .wp-div { background: #334155; }
 
-html.dark .wp-action:hover { background: #273449; }
+/* Dark watermark hover — lighter dot-grid on the dark hover fill */
+html.dark .wp-action:hover {
+  background-color: #273449;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 10px 10px;
+}
 html.dark .wp-action:active { background: #334155; }
 html.dark .wp-action-label { color: #F1F5F9; }
 html.dark .wp-action .wp-arrow { color: #475569; }
