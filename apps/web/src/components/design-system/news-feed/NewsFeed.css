@@ -192,6 +192,26 @@
     100% { transform: translateX(0); opacity: 1; }
   }
 
+  /* Reverse-wrap animation: primary at position 0 exits to the left */
+  .nf-ind--exit-left {
+    animation: nfIndExitLeft calc(300ms * var(--anim-mult, 1)) ease-out forwards;
+    transition: none !important;
+  }
+  @keyframes nfIndExitLeft {
+    0%   { transform: translateX(0); opacity: 1; }
+    100% { transform: translateX(calc(-1 * (100% + 6px))); opacity: 0; }
+  }
+
+  /* Reverse-wrap animation: ghost enters from right to last position (index 2) */
+  .nf-ind--enter-right {
+    animation: nfIndEnterRight calc(300ms * var(--anim-mult, 1)) ease-out forwards;
+    transition: none !important;
+  }
+  @keyframes nfIndEnterRight {
+    0%   { transform: translateX(calc(3 * (100% + 6px))); opacity: 1; }
+    100% { transform: translateX(calc(2 * (100% + 6px))); opacity: 1; }
+  }
+
   /* Snap ghost position without transition */
   .nf-ind--no-transition {
     transition: none !important;
@@ -286,5 +306,5 @@
     .nf-glow { animation: none !important; }
     .nf-card.anim-in, .anim-in *, .nf-swap-out, .nf-swap-in, .nf-card.tap { animation: none !important; }
     .nf-ind, .nf-ind-ghost { transition: none !important; }
-    .nf-ind--exit-right, .nf-ind--enter-left { animation: none !important; }
+    .nf-ind--exit-right, .nf-ind--enter-left, .nf-ind--exit-left, .nf-ind--enter-right { animation: none !important; }
   }

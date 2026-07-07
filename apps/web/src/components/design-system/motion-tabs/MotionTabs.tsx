@@ -107,11 +107,11 @@ export default function MotionTabs() {
   const activeIndex = TABS.findIndex((t) => t.key === active)
 
   // Width of each tab slot: base + label expansion for the active tab
-  // Active pill width matches CSS: .mt-tab.active = 18 + 24 + 8 + lw + 10 = 60 + lw.
-  // Collapsed tab = TAB_BASE (48). So active adds (60 + lw) - 48 = lw + 12.
+  // Active pill width matches CSS: .mt-tab.active = 20 + 24 + 8 + lw + 14 = 66 + lw.
+  // Collapsed tab = TAB_BASE (48). So active adds (66 + lw) - 48 = lw + 18.
   // lw values are generously padded to prevent right-edge clipping at any font render.
   function tabSlotWidth(i: number): number {
-    return TAB_BASE + (i === activeIndex ? TABS[i].lw + 12 : 0)
+    return TAB_BASE + (i === activeIndex ? TABS[i].lw + 18 : 0)
   }
 
   // indX = sum of (slot widths + gap) for all tabs before active

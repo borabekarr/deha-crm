@@ -18,7 +18,7 @@
     linear-gradient(to bottom, rgba(255,255,255,0.07) 1px, transparent 1px);
   background-size: 14px 14px;
   cursor: pointer;
-  transition: transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out);
 }
 .btn-primary:hover {
   transform: translateY(-1px);
@@ -41,7 +41,7 @@
     inset 0 1px 0 rgba(255,255,255,0.7),
     inset 0 -2px 0 rgba(15,23,42,0.14);
   cursor: pointer;
-  transition: transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out);
 }
 .btn-inverse:hover {
   transform: translateY(-1px);
@@ -67,7 +67,7 @@
     inset 0 -2px 0 rgba(15,23,42,0.12);
   backdrop-filter: blur(20px);
   cursor: pointer;
-  transition: transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), background calc(160ms * var(--anim-mult, 1));
+  transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-base) * var(--anim-mult, 1));
 }
 .btn-glass:hover {
   transform: translateY(-1px);
@@ -89,8 +89,8 @@
   cursor: pointer;
   transition:
     opacity calc(140ms * var(--anim-mult, 1)),
-    transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
-    box-shadow calc(160ms * var(--anim-mult, 1));
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
+    box-shadow calc(var(--duration-base) * var(--anim-mult, 1));
 }
 .btn-text:hover { opacity: 0.8; transform: translateY(-1px); box-shadow: 0 4px 12px -4px rgba(16,185,129,0.4); }
 .btn-text:active { opacity: 0.55; transform: translateY(0); }
@@ -126,11 +126,11 @@ html.dark .btn-text { color: #34D399; }
   --color-4: 195 100% 63%;
   --color-5: 90 100% 63%;
   transition:
-    width    calc(340ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
-    padding  calc(340ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
-    background-color calc(220ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
-    transform calc(240ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
-    box-shadow calc(240ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+    width    calc(340ms * var(--anim-mult, 1)) var(--ease-spring),
+    padding  calc(340ms * var(--anim-mult, 1)) var(--ease-spring),
+    background-color calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring),
+    transform calc(240ms * var(--anim-mult, 1)) var(--ease-out),
+    box-shadow calc(240ms * var(--anim-mult, 1)) var(--ease-out);
 }
 
 @keyframes btn-rainbow-scroll {
@@ -192,8 +192,8 @@ html.dark .btn-text { color: #34D399; }
 .btn-apply .btn-apply-label {
   display: inline-flex; align-items: center; gap: 7px;
   transition:
-    opacity   calc(200ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
-    transform calc(220ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1);
+    opacity   calc(200ms * var(--anim-mult, 1)) var(--ease-spring),
+    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring);
 }
 .btn-apply.is-loading .btn-apply-label,
 .btn-apply.is-done    .btn-apply-label {
@@ -227,8 +227,8 @@ html.dark .btn-text { color: #34D399; }
   transform: scale(0.82);
   pointer-events: none;
   transition:
-    opacity   calc(200ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
-    transform calc(220ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1);
+    opacity   calc(200ms * var(--anim-mult, 1)) var(--ease-spring),
+    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring);
 }
 .btn-apply.is-loading .btn-apply-spinner { opacity: 1; transform: scale(1); }
 
@@ -268,8 +268,8 @@ html.dark .btn-text { color: #34D399; }
   pointer-events: none;
   /* Shared spring timing — morph in + out symmetrically */
   transition:
-    opacity   calc(200ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
-    transform calc(260ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1);
+    opacity   calc(200ms * var(--anim-mult, 1)) var(--ease-spring),
+    transform calc(260ms * var(--anim-mult, 1)) var(--ease-spring);
 }
 .btn-apply-check-ic {
   font-size: 22px;
@@ -305,10 +305,10 @@ html.dark .btn-apply.is-done .btn-apply-check-ic { color: #10B981; }
   background: transparent; color: var(--r-text, #0F172A);
   border: 1.5px solid var(--r-chip-bd, #CBD5E1);
   transition:
-    border-color calc(160ms * var(--anim-mult, 1)),
-    background-color calc(160ms * var(--anim-mult, 1)),
-    transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
-    box-shadow calc(160ms * var(--anim-mult, 1));
+    border-color calc(var(--duration-base) * var(--anim-mult, 1)),
+    background-color calc(var(--duration-base) * var(--anim-mult, 1)),
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
+    box-shadow calc(var(--duration-base) * var(--anim-mult, 1));
 }
 .btn-discuss:hover {
   background: var(--r-btn-hover, rgba(15,23,42,0.06));
@@ -335,9 +335,9 @@ html.dark .btn-discuss:hover { background: rgba(255,255,255,0.07); border-color:
     inset 0 1px 0 rgba(255,255,255,0.45),
     inset 0 -2px 0 rgba(0,0,0,0.22);
   transition:
-    background-color calc(220ms * var(--anim-mult, 1)),
-    transform calc(120ms * var(--anim-mult, 1)) var(--ease-out, cubic-bezier(.22,1,.36,1)),
-    box-shadow calc(220ms * var(--anim-mult, 1));
+    background-color calc(var(--duration-slow) * var(--anim-mult, 1)),
+    transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out),
+    box-shadow calc(var(--duration-slow) * var(--anim-mult, 1));
 }
 .btn-delete:hover {
   filter: brightness(1.08);
@@ -373,8 +373,8 @@ html.dark .btn-delete {
     border-color calc(150ms * var(--anim-mult, 1)),
     color calc(150ms * var(--anim-mult, 1)),
     background calc(150ms * var(--anim-mult, 1)),
-    transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
-    box-shadow calc(160ms * var(--anim-mult, 1));
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
+    box-shadow calc(var(--duration-base) * var(--anim-mult, 1));
 }
 .btn-task:hover {
   filter: brightness(1.08);
@@ -426,7 +426,7 @@ html.dark .btn-delete {
     inset 0 0 0 1px rgba(255,255,255,0.14);
   transition:
     filter calc(200ms * var(--anim-mult, 1)),
-    transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring),
     box-shadow calc(200ms * var(--anim-mult, 1));
 }
 .btn-cta:hover {

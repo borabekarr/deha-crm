@@ -306,6 +306,25 @@ html.dark .ff-pop {
 .ff-pop-sep { margin-top:12px; border-top:1px solid var(--ff-pop-bd); }
 
 .ff-pop-body { margin-top:11px; max-height:236px; overflow:auto; display:flex; flex-direction:column; gap:6px; padding-right:2px; }
+
+/* ── Scroll-aware progressive blur edges ──────────────────────────────────
+   data-scroll toggled by popBodyCallbackRef (mount) + handlePopBodyScroll (onScroll).
+   mask-image fades content at top / bottom / both edges based on scroll position.
+   top    → blur bottom edge only
+   mid    → blur both edges
+   bottom → blur top edge only                                              */
+.ff-pop-body[data-scroll="top"] {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 78%, transparent 100%);
+          mask-image: linear-gradient(to bottom, #000 0%, #000 78%, transparent 100%);
+}
+.ff-pop-body[data-scroll="mid"] {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 12%, #000 88%, transparent 100%);
+          mask-image: linear-gradient(to bottom, transparent 0%, #000 12%, #000 88%, transparent 100%);
+}
+.ff-pop-body[data-scroll="bottom"] {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 100%);
+          mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 100%);
+}
 .ff-file {
   display:flex; align-items:center; gap:10px; padding:8px; border-radius:12px;
   background:var(--ff-row); border:1px solid var(--ff-row-bd); cursor:pointer;

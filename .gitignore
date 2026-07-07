@@ -76,3 +76,9 @@ plans/archive/rit3zh-refs/*/*.lock
 
 # Static gallery snapshot (build artifact)
 design-system-dist/
+
+# Self-monitor session reports
+reports/
+
+# DesignSync staging mirror of the live claude.ai/design project (local-only, never committed)
+apps/web/design-system/claude-design/

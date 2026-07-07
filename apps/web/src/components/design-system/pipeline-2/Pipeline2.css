@@ -1,0 +1,410 @@
+/* ==========================================================================
+   Pipeline2.css — iOS grouped inset list mapped to Deha tokens.
+   Local chrome vars are flipped wholesale under html.dark (dtw pattern).
+   Every selector is scoped under .pipeline-2 so nothing leaks into the
+   shared global stylesheet. Emerald accents are the canonical #10B981
+   (== oklch(0.696 0.149 162.5)); danger is #EF4444. Hairlines, not borders.
+   Entrance: staggered rise+fade with EXPLICIT per-item delays (nth-child) —
+   sidesteps the unregistered calc(var(--i)*1ms)==0s gotcha entirely.
+   Popover: always mounted; open/closed via visibility+opacity+transform
+   state classes, never display:none, never unmount.
+   ========================================================================== */
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Root — local chrome vars (light) ─────────────────────────────────────── */
+.pipeline-2 {
+  /* bezel + inset surfaces */
+  --p2-bezel: #D4DCE8;
+  --p2-bezel-border: #CBD5E1;
+  --p2-card: #FFFFFF;
+  --p2-card-border: #CBD5E1;
+  --p2-edge: #E2E8F0;        /* hairline separator */
+  /* text */
+  --p2-fg1: #0F172A;
+  --p2-fg3: #64748B;
+  --p2-fg4: #94A3B8;
+  --p2-header-fg: #64748B;
+  /* accents */
+  --p2-emerald: #10B981;
+  --p2-danger: #EF4444;
+  --p2-muted-fg: #64748B;
+  --p2-row-hover: rgba(15, 23, 42, 0.03);
+  /* Dynamic-island popover chrome (flipped wholesale under html.dark) */
+  --p2-pop-bg: #0F172A;
+  --p2-pop-border: rgba(255, 255, 255, 0.08);
+  --p2-pop-fg1: #F8FAFC;
+  --p2-pop-fg3: #94A3B8;
+  --p2-pop-hair: rgba(255, 255, 255, 0.08);
+  --p2-pop-emerald: #34D399;
+  --p2-pop-danger: #EF4444;
+
+  display: flex;
+  justify-content: center;
+  font-family: var(--font-display);
+  color: var(--p2-fg1);
+}
+
+/* ── Grey bezel ───────────────────────────────────────────────────────────── */
+.pipeline-2 .p2-shell {
+  width: min(420px, 100%);
+  box-sizing: border-box;
+  background: var(--p2-bezel);
+  border: 1px solid var(--p2-bezel-border);
+  border-radius: 28px;
+  /* Concentric bezel↔inset: gap = bezel radius − inset radius = 28 − 20 = 8px
+     on the three edges the inset touches; top keeps 14px for the header. */
+  padding: 14px 8px 8px;
+  box-shadow:
+    0 16px 44px rgba(15, 23, 42, 0.13),
+    0 3px 9px rgba(15, 23, 42, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* ── Group header — iOS small-caps eyebrow ────────────────────────────────── */
+.pipeline-2 .p2-group-header {
+  padding: 2px 8px 9px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--p2-header-fg);
+}
+
+/* ── Inset section — the grouped white card ───────────────────────────────── */
+.pipeline-2 .p2-inset {
+  /* semantic <ul> — strip UA list chrome */
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--p2-card);
+  border: 1px solid var(--p2-card-border);
+  border-radius: var(--card-radius, 20px);
+  /* overflow VISIBLE so a row's anchored popover escapes the card; corner
+     rounding is preserved by rounding the first/last rows below. */
+  overflow: visible;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+/* Concentric corners — keep row hover/press fill inside the rounded card. */
+.pipeline-2 .p2-inset > .p2-item:first-child .p2-row {
+  border-top-left-radius: 19px;
+  border-top-right-radius: 19px;
+}
+.pipeline-2 .p2-inset > .p2-item:last-child .p2-row {
+  border-bottom-left-radius: 19px;
+  border-bottom-right-radius: 19px;
+}
+
+/* Hairline separators — 1px, never a heavy border. First row has none. */
+.pipeline-2 .p2-inset > .p2-item + .p2-item .p2-row {
+  border-top: 1px solid var(--p2-edge);
+}
+
+/* Listitem is the popover's positioned anchor; raised while its row is open. */
+.pipeline-2 .p2-item { position: relative; }
+.pipeline-2 .p2-item.is-open { z-index: 40; }
+
+/* ── Row — 44px-class iOS rhythm (full-width button) ──────────────────────── */
+.pipeline-2 .p2-row {
+  /* button reset */
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  box-sizing: border-box;
+  padding: 8px 15px;
+  background: transparent;
+  transition:
+    background calc(150ms * var(--anim-mult, 1)) ease,
+    transform calc(120ms * var(--anim-mult, 1)) ease;
+
+  /* Entrance: staggered rise + fade (funnel-chart approach). `backwards` fill
+     hides each row through its own delay, then reverts to base styles so the
+     :active press transform below is never clobbered by a forwards fill. */
+  animation: p2RowIn calc(500ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+/* Explicit per-row entrance delays — monotonic 60ms stagger, no --i calc. */
+.pipeline-2 .p2-item:nth-child(1) .p2-row { animation-delay: calc(30ms * var(--anim-mult, 1)); }
+.pipeline-2 .p2-item:nth-child(2) .p2-row { animation-delay: calc(90ms * var(--anim-mult, 1)); }
+.pipeline-2 .p2-item:nth-child(3) .p2-row { animation-delay: calc(150ms * var(--anim-mult, 1)); }
+.pipeline-2 .p2-item:nth-child(4) .p2-row { animation-delay: calc(210ms * var(--anim-mult, 1)); }
+.pipeline-2 .p2-item:nth-child(5) .p2-row { animation-delay: calc(270ms * var(--anim-mult, 1)); }
+.pipeline-2 .p2-item:nth-child(6) .p2-row { animation-delay: calc(330ms * var(--anim-mult, 1)); }
+
+.pipeline-2 .p2-row:hover { background: var(--p2-row-hover); }
+.pipeline-2 .p2-row.is-open { background: var(--p2-row-hover); }
+.pipeline-2 .p2-row:active { transform: scale(0.96); }
+/* Branded keyboard focus — inset offset keeps the ring inside the row so it
+   follows the card's rounded first/last corners. */
+.pipeline-2 .p2-row:focus-visible {
+  outline: 2px solid var(--p2-emerald);
+  outline-offset: -2px;
+}
+
+@keyframes p2RowIn {
+  from { opacity: 0; transform: translateY(9px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Reduced motion — collapse the rise+stagger to a plain fade. */
+@media (prefers-reduced-motion: reduce) {
+  .pipeline-2 .p2-row,
+  .pipeline-2 .p2-item:nth-child(n) .p2-row {
+    animation-name: p2RowFade;
+    animation-delay: 0s;
+  }
+  .pipeline-2 .p2-row:active { transform: none; }
+  @keyframes p2RowFade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+}
+
+/* Stage color dot with a soft matching glow (sanctioned recipe) */
+.pipeline-2 .p2-dot {
+  flex: 0 0 auto;
+  width: 11px;
+  height: 11px;
+  border-radius: 9999px;
+  background: var(--p2-stage, var(--p2-emerald));
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--p2-stage, var(--p2-emerald)) 16%, transparent),
+    0 0 8px -1px color-mix(in srgb, var(--p2-stage, var(--p2-emerald)) 70%, transparent);
+}
+
+/* Left column — name + conversion caption */
+.pipeline-2 .p2-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pipeline-2 .p2-name {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--p2-fg1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pipeline-2 .p2-conv {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--p2-fg4);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pipeline-2 .p2-conv-pct {
+  font-weight: 800;
+  color: var(--p2-fg3);
+}
+
+/* Right column — count · value, then trend */
+.pipeline-2 .p2-right {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+.pipeline-2 .p2-value {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--p2-fg1);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+.pipeline-2 .p2-sep { color: var(--p2-fg4); font-weight: 700; }
+.pipeline-2 .p2-money { color: var(--p2-fg1); }
+
+.pipeline-2 .p2-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+}
+.pipeline-2 .p2-trend-ic {
+  font-size: 13px;
+  line-height: 1;
+}
+.pipeline-2 .p2-trend--up { color: var(--p2-emerald); }
+.pipeline-2 .p2-trend--down { color: var(--p2-danger); }
+
+/* ── Terminal muted (Lost) row — desaturated slate, subtle red trend ──────── */
+.pipeline-2 .p2-row--muted .p2-name { color: var(--p2-muted-fg); }
+.pipeline-2 .p2-row--muted .p2-dot { box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.14); }
+.pipeline-2 .p2-row--muted .p2-value,
+.pipeline-2 .p2-row--muted .p2-money { color: var(--p2-muted-fg); }
+.pipeline-2 .p2-trend--muted { color: color-mix(in srgb, var(--p2-danger) 78%, var(--p2-muted-fg)); }
+
+/* ── Stage deep-dive popover (dynamic-island) ─────────────────────────────────
+   Always mounted; open/closed is a pure state class. Closed = invisible +
+   non-interactive, but the node STAYS in the DOM (visibility, never display or
+   unmount) so the exit transition plays. Anchored to the row, dropping just
+   below and expanding from its top edge. */
+.pipeline-2 .p2-pop {
+  position: absolute;
+  top: calc(100% - 8px);
+  right: 10px;
+  z-index: 50;
+  width: min(272px, calc(100% - 20px));
+  box-sizing: border-box;
+  padding: 12px 13px 13px;
+  background: var(--p2-pop-bg);
+  border: 1px solid var(--p2-pop-border);
+  border-radius: 16px;
+  box-shadow:
+    0 18px 44px rgba(2, 6, 23, 0.34),
+    0 4px 12px rgba(2, 6, 23, 0.22);
+  color: var(--p2-pop-fg1);
+  text-align: left;
+
+  /* closed state — kept mounted, non-interactive, exit transition intact */
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-6px) scale(0.96);
+  transform-origin: top right;
+  transition:
+    opacity calc(200ms * var(--anim-mult, 1)) ease,
+    transform calc(240ms * var(--anim-mult, 1)) cubic-bezier(0.34, 1.56, 0.64, 1),
+    visibility 0s linear calc(240ms * var(--anim-mult, 1));
+}
+.pipeline-2 .p2-pop.is-open {
+  visibility: visible;
+  opacity: 1;
+  /* Purely informational static text — stays non-interactive so a click over
+     an open popover passes THROUGH to the covered row below and switches
+     popovers naturally (the row owns the toggle). Never pointer-events:auto. */
+  pointer-events: none;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity calc(200ms * var(--anim-mult, 1)) ease,
+    transform calc(240ms * var(--anim-mult, 1)) cubic-bezier(0.34, 1.56, 0.64, 1),
+    visibility 0s;
+}
+
+.pipeline-2 .p2-pop-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding-bottom: 9px;
+  margin-bottom: 9px;
+  border-bottom: 1px solid var(--p2-pop-hair);
+}
+.pipeline-2 .p2-pop-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--p2-stage, var(--p2-pop-emerald));
+  box-shadow: 0 0 8px -1px color-mix(in srgb, var(--p2-stage, var(--p2-pop-emerald)) 75%, transparent);
+}
+.pipeline-2 .p2-pop-title {
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--p2-pop-fg1);
+}
+.pipeline-2 .p2-pop-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pipeline-2 .p2-pop-stat {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.pipeline-2 .p2-pop-k {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--p2-pop-fg3);
+}
+.pipeline-2 .p2-pop-v {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--p2-pop-fg1);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  text-align: right;
+}
+.pipeline-2 .p2-pop-trend--up { color: var(--p2-pop-emerald); }
+.pipeline-2 .p2-pop-trend--down { color: var(--p2-pop-danger); }
+
+/* Lost row popover — muted header dot, same stats surface. */
+.pipeline-2 .p2-pop--muted .p2-pop-dot {
+  box-shadow: 0 0 8px -2px rgba(148, 163, 184, 0.5);
+}
+.pipeline-2 .p2-pop--muted .p2-pop-title { color: var(--p2-pop-fg3); }
+
+/* ── Dark mode — flip local vars only (html.dark, literal hex) ────────────── */
+html.dark .pipeline-2 {
+  --p2-bezel: #020617;
+  --p2-bezel-border: #334155;
+  --p2-card: #1E293B;
+  --p2-card-border: #334155;
+  --p2-edge: #334155;
+  --p2-fg1: #F1F5F9;
+  --p2-fg3: #94A3B8;
+  --p2-fg4: #64748B;
+  --p2-header-fg: #94A3B8;
+  --p2-muted-fg: #64748B;
+  --p2-row-hover: rgba(255, 255, 255, 0.04);
+  /* Popover lifts above the dark card as a raised slate surface. */
+  --p2-pop-bg: #334155;
+  --p2-pop-border: rgba(255, 255, 255, 0.1);
+  --p2-pop-fg1: #F8FAFC;
+  --p2-pop-fg3: #CBD5E1;
+  --p2-pop-hair: rgba(255, 255, 255, 0.1);
+  --p2-pop-emerald: #34D399;
+  --p2-pop-danger: #EF4444;
+}
+html.dark .pipeline-2 .p2-shell {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 16px 44px rgba(0, 0, 0, 0.45);
+}
+html.dark .pipeline-2 .p2-inset {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 1px 2px rgba(0, 0, 0, 0.3);
+}

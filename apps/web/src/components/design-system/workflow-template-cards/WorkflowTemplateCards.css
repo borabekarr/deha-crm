@@ -4,26 +4,11 @@
    Dark-mode overrides mirror the html.dark .tmpl-* blocks from _darkmode.css.
    ─────────────────────────────────────────────────────────────────────────── */
 
-/* ── Shell wrapper ───────────────────────────────────────────────────────── */
-.wtc-shell {
-  padding: 0;
-  background: transparent;
-  background-image: none;
-}
-
-/* ── 2-column grid tray ──────────────────────────────────────────────────── */
-.wtc-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  padding: 24px;
-}
-
-/* ── Gray outer shell — matches .wf-outer / .te-outer ───────────────────── */
+/* ── Outer shell — canonical .shell geometry (token-driven, adapts light+dark) */
 .wtc-outer {
-  background: #D4DCE8;
-  border-radius: 24px;
-  padding: 6px;
+  background: var(--shell-bg);
+  border-radius: 28px;
+  padding: 10px;
   box-shadow:
     0 12px 40px rgba(15,23,42,0.12),
     0 2px 8px rgba(15,23,42,0.06);
@@ -188,14 +173,14 @@
 /* ── Dark mode overrides ─────────────────────────────────────────────────── */
 /* Mirror html.dark .tmpl-* blocks from _darkmode.css verbatim, prefixed to wtc- */
 
-/* Flat tray background in dark — transparent (shell bg removed) */
-html.dark .wtc-shell {
-  background: transparent !important;
-  background-image: none;
+/* Dark outer bezel — shell-bg token handles the fill; add inset rim */
+html.dark .wtc-outer {
+  box-shadow:
+    0 12px 40px rgba(15,23,42,0.12),
+    0 2px 8px rgba(15,23,42,0.06),
+    inset 0 1px 0 rgba(255,255,255,.05),
+    inset 0 0 0 1px rgba(255,255,255,.04);
 }
-
-/* Dark outer bezel */
-html.dark .wtc-outer { background: #020617; }
 
 /* Inner card */
 html.dark .wtc-card { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }

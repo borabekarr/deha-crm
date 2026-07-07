@@ -258,18 +258,15 @@ export default function WorkflowTemplateCards(): React.ReactElement {
   const [expandedId, setExpandedId] = useState<number | null>(null)
 
   return (
-    // Single-component shell; .zoom for 1:1 viewport preview
-    <div className="wtc-shell shell zoom">
-      <div className="wtc-grid">
-        {TEMPLATES.map((card) => (
-          <TemplateCard
-            key={card.id}
-            card={card}
-            expanded={expandedId === card.id}
-            onToggle={() => setExpandedId((prev) => (prev === card.id ? null : card.id))}
-          />
-        ))}
-      </div>
-    </div>
+    <>
+      {TEMPLATES.map((card) => (
+        <TemplateCard
+          key={card.id}
+          card={card}
+          expanded={expandedId === card.id}
+          onToggle={() => setExpandedId((prev) => (prev === card.id ? null : card.id))}
+        />
+      ))}
+    </>
   )
 }

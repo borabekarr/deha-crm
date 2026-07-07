@@ -331,6 +331,16 @@ export const registry: RegistryEntry[] = [
     Component: lazy(() => import('@/components/design-system/date-picker/DatePicker')),
   },
   {
+    slug: 'datetime-wheel-picker',
+    name: 'Datetime Wheel Picker',
+    status: 'Proceeding',
+    category: 'Auxiliary Elements',
+    subtitle: 'iOS five-wheel date + time bottom sheet — 44px grid, hairline band',
+    viewport: { width: 700, height: 700 },
+    sourceHtml: '/design-system/preview/components-date-picker.html',
+    Component: lazy(() => import('@/components/design-system/datetime-wheel-picker/DatetimeWheelPicker')),
+  },
+  {
     slug: 'github-calendar',
     name: 'GitHub Calendar',
     status: 'Proceeding',
@@ -699,6 +709,26 @@ export const registry: RegistryEntry[] = [
     viewport: { width: 520, height: 940 },
     sourceHtml: '/design-system/preview/brand-dynamic-island-reader.html',
     Component: lazy(() => import('@/components/design-system/dynamic-island-reader/DynamicIslandReader')),
+  },
+  {
+    slug: 'pipeline-view',
+    name: 'Pipeline View',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Vertical iOS grouped-list pipeline — 6 stages with counts, values & conversion, tap for deal detail popover',
+    viewport: { width: 480, height: 760 },
+    sourceHtml: '',
+    Component: lazy(() => import('@/components/design-system/pipeline-view/PipelineView')),
+  },
+  {
+    slug: 'pipeline-2',
+    name: 'Pipeline 2',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Vertical iOS grouped-list pipeline — 6 stages with counts, values & conversion, tap for deal detail popover',
+    viewport: { width: 480, height: 760 },
+    sourceHtml: '',
+    Component: lazy(() => import('@/components/design-system/pipeline-2/Pipeline2')),
   },
 
   // ══ Waiting ═══════════════════════════════════════════════════════════════

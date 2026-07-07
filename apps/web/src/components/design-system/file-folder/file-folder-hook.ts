@@ -49,6 +49,7 @@ export function useFileFolder() {
   const blueFolderRef = useRef<HTMLDivElement>(null)
   const redFolderRef = useRef<HTMLDivElement>(null)
   const popRef = useRef<HTMLDivElement>(null)
+  const popBodyRef = useRef<HTMLDivElement | null>(null)
   const playTimerBlue = useRef<ReturnType<typeof setTimeout> | null>(null)
   const playTimerRed = useRef<ReturnType<typeof setTimeout> | null>(null)
   const tapTimerBlue = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -88,6 +89,11 @@ export function useFileFolder() {
   const openPop = useCallback((isHot: boolean, folderEl: HTMLDivElement | null) => {
     const subtitle = (isHot ? 'Active · ' : '') + '2,386 files · Notes & More'
     setPopState(s => ({ ...s, isOpen: true, title: 'Work files', subtitle }))
+    // Reset scroll position and blur-edge to top each time the popover opens
+    if (popBodyRef.current) {
+      popBodyRef.current.scrollTop = 0
+      popBodyRef.current.setAttribute('data-scroll', 'top')
+    }
     requestAnimationFrame(() => positionPop(folderEl))
   }, [positionPop])
 
@@ -140,6 +146,22 @@ export function useFileFolder() {
     handleFolderClick(true, redFolderRef.current, setRedState, tapTimerRed)
   }, [handleFolderClick])
 
+  // Callback ref for .ff-pop-body — sets initial data-scroll="top" without useEffect
+  const popBodyCallbackRef = useCallback((node: HTMLDivElement | null) => {
+    popBodyRef.current = node
+    if (node) {
+      node.setAttribute('data-scroll', 'top')
+    }
+  }, [])
+
+  // onScroll handler for .ff-pop-body — updates data-scroll attribute to drive blur edges
+  const handlePopBodyScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget
+    const atTop = el.scrollTop <= 0
+    const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1
+    el.setAttribute('data-scroll', atBottom ? 'bottom' : atTop ? 'top' : 'mid')
+  }, [])
+
   // Entrance play on mount — via callback ref on card
   const cardCallbackRef = useCallback((node: HTMLDivElement | null) => {
     (cardRef as React.MutableRefObject<HTMLDivElement | null>).current = node
@@ -161,6 +183,8 @@ export function useFileFolder() {
     blueFolderRef,
     redFolderRef,
     popRef,
+    popBodyCallbackRef,
+    handlePopBodyScroll,
     playAll,
     closePop,
     handleFileClick,

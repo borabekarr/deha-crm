@@ -45,19 +45,22 @@
   width: 56px; height: 56px;
   border-radius: 50%;
   background: #0F172A;
-  border: 1px solid var(--card-border, #CBD5E1);
+  /* Fix (1): closed border matches trigger bg (#0F172A) — invisible, no grey ring seam.
+     border-color snaps to card-border deferred via transition (same gate as background-color). */
+  border: 1px solid #0F172A;
   box-shadow: none;
   opacity: 1;
   visibility: visible;
   z-index: 1;
   pointer-events: none;
-  /* Closed (exit): shape morphs back to circle; colour snaps to trigger at ~55% of close */
+  /* Closed (exit): shape morphs back to circle; colour + border snaps to trigger at ~55% of close */
   transition:
     width  calc(var(--md-dur) * 0.85) cubic-bezier(.22, 1, .36, 1) 0s,
     height calc(var(--md-dur) * 0.85) cubic-bezier(.22, 1, .36, 1) 0s,
     top    calc(var(--md-dur) * 0.85) cubic-bezier(.22, 1, .36, 1) 0s,
     border-radius calc(var(--md-dur) * 0.85) cubic-bezier(.22, 1, .36, 1) 0s,
     background-color 1ms ease calc(var(--md-dur) * 0.55),
+    border-color 1ms ease calc(var(--md-dur) * 0.55),
     box-shadow calc(220ms * var(--anim-mult, 1)) ease 0s;
 }
 .md-root.open .md-panel-shell {
@@ -66,6 +69,8 @@
   top: 70px;
   border-radius: var(--card-radius, 20px);
   background: #D4DCE8;
+  /* Fix (1): restore card-border on the expanded shell; deferred via transition. */
+  border-color: var(--card-border, #CBD5E1);
   box-shadow:
     0 16px 56px rgba(15,23,42,0.14),
     0 3px 10px rgba(15,23,42,0.07),
@@ -73,13 +78,14 @@
     inset 0 0 0 1px rgba(15,23,42,0.04);
   pointer-events: auto;
   z-index: 3; /* above goo-wrap (z-index:2), below dialog (z-index:9000) — rim is hit-testable */
-  /* Open (enter): bouncy morph; colour and shadow deferred until shape expanded */
+  /* Open (enter): bouncy morph; colour, border and shadow deferred until shape expanded */
   transition:
     width  var(--md-dur) cubic-bezier(.55, 1.35, .35, 1) 0s,
     height var(--md-dur) cubic-bezier(.55, 1.35, .35, 1) 0s,
     top    var(--md-dur) cubic-bezier(.55, 1.35, .35, 1) 0s,
     border-radius var(--md-dur) cubic-bezier(.55, 1.35, .35, 1) 0s,
     background-color calc(200ms * var(--anim-mult, 1)) ease calc(var(--md-dur) * 0.82),
+    border-color 1ms ease calc(var(--md-dur) * 0.82),
     box-shadow calc(200ms * var(--anim-mult, 1)) ease calc(var(--md-dur) * 0.82);
 }
 
@@ -389,7 +395,9 @@ dialog.md-panel-content {
   transition:
     border-color calc(150ms * var(--anim-mult, 1)),
     color calc(150ms * var(--anim-mult, 1)),
-    background calc(150ms * var(--anim-mult, 1));
+    background calc(150ms * var(--anim-mult, 1)),
+    transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
+    box-shadow calc(160ms * var(--anim-mult, 1));
 }
 .md-footer button .md-btn-label {
   line-height: 1;
@@ -404,7 +412,15 @@ dialog.md-panel-content {
   line-height: 1;
   color: #fff;
 }
-.md-footer button:hover { filter: brightness(1.08); }
+/* Fix (6): canonical .btn-task hover — brightness + lift + elevated glow (matches .btn-task:hover). */
+.md-footer button:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    inset 0 -1.5px 0 rgba(0,0,0,0.18),
+    0 8px 20px -4px var(--md-fbtn);
+}
 .md-footer button:active { transform: scale(0.98); }
 /* Mark-all-as-read gets emerald fill to distinguish from the navy View button */
 .md-footer .md-mark-read {
@@ -519,18 +535,20 @@ html.dark .md-card {
 html.dark .md-panel-shell {
   /* Collapsed state in dark: trigger colour = #FFFFFF so the circle blends
      with the white trigger. Box-shadow suppressed (no glow on tiny circle).
-     Colour gating: deferred background-color flips are inherited from the
-     base .md-panel-shell and .md-root.open .md-panel-shell transition rules. */
+     Fix (1) dark: border-color matches #FFFFFF trigger bg — invisible, no dark ring seam.
+     Colour gating: deferred background-color / border-color flips are inherited from base transitions. */
   background: #FFFFFF;
-  border-color: var(--card-border, #334155);
+  border-color: #FFFFFF;
   box-shadow: none;
 }
 html.dark .md-root.open .md-panel-shell {
   /* Open state in dark: shell surface sits between card (#0F172A) and panel (#1E293B).
      Mirror light mode's relationship: darker than panel, lighter than card.
+     Fix (1) dark open: restore card-border for the expanded shell frame.
      Fix (5): dark canonical inner-card border + inset highlight.
      Fix (5b): brighter top hairline lifts the shell off the dark background. */
   background: #172230;
+  border-color: var(--card-border, #334155);
   border-top-color: rgba(255,255,255,0.22) !important; /* beats border-color shorthand */
   box-shadow:
     0 16px 56px rgba(0,0,0,0.5),

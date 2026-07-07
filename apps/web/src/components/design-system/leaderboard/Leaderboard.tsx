@@ -38,8 +38,12 @@ export default function Leaderboard() {
   const [metric, setMetric] = useState<Metric>('revenue')
   const [dir, setDir] = useState(0)
   const [display, setDisplay] = useState<Record<string, number>>(initDisplay)
-  // 'rows-in' / '' — drives the CSS animation class on the .rows container
-  const [rowsAnim, setRowsAnim] = useState<'rows-in' | ''>('')
+  // Direction-aware animation state on the .rows container.
+  // 'lb-entering-*'  → entering panel slides in from the direction of the new metric.
+  // 'lb-exiting-*'   → current panel exits in the travel direction before content switches.
+  // 'lb-entering'    → neutral fade (initial mount, no direction).
+  type RowsAnim = 'lb-entering' | 'lb-entering-right' | 'lb-entering-left' | 'lb-exiting-left' | 'lb-exiting-right' | ''
+  const [rowsAnim, setRowsAnim] = useState<RowsAnim>('')
   const rowsRef = useRef<HTMLDivElement | null>(null)
 
   // Refs for FLIP
@@ -48,6 +52,10 @@ export default function Leaderboard() {
 
   // Ref for tween cleanup
   const tweenState = useRef<TweenState>({ timerId: null, start: {}, t0: 0 })
+  // Timer that sequences exit animation → content switch → enter animation
+  const switchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Enter class to apply after content switches (set in switchMetric, read in useLayoutEffect)
+  const pendingEnterClassRef = useRef<RowsAnim>('lb-entering')
   // Keep a ref to current display values for tween start point.
   // Sync during render — safe: displayRef is only read inside the tween callback,
   // never used to compute rendered output.
@@ -107,22 +115,50 @@ export default function Leaderboard() {
   }, [metric])
 
   // ---------------------------------------------------------------------------
-  // Rows enter animation: fires on mount (initial entrance) and after each metric
-  // change. setRowsAnim inside useLayoutEffect flushes synchronously before paint,
-  // so there is no intermediate flash of the unclassed element.
+  // Rows enter animation: fires on mount and after each content switch.
+  // Reads pendingEnterClassRef set by switchMetric so the correct direction class
+  // is applied without having to add dir to the dep array.
   // ---------------------------------------------------------------------------
   useLayoutEffect(() => {
-    setRowsAnim('rows-in')
+    setRowsAnim(pendingEnterClassRef.current)
   }, [metric])
 
   // ---------------------------------------------------------------------------
-  // Metric switch: immediately updates direction and metric; useLayoutEffect([metric])
-  // above sets 'rows-in' so the directional enter animation plays automatically.
+  // Metric switch: play exit animation on current rows, then switch content and
+  // trigger the direction-aware enter animation.
+  //
+  // dir > 0  (revenue → growth):  rows travel left  → exit lb-exiting-left,  enter lb-entering-right
+  // dir < 0  (growth → revenue):  rows travel right → exit lb-exiting-right, enter lb-entering-left
+  //
+  // The 200ms timer matches the lb-exiting-* CSS duration; content switches only
+  // after the exit completes so the old rows are fully gone before new ones appear.
   // ---------------------------------------------------------------------------
   function switchMetric(newMetric: Metric, newDir: number) {
     if (newMetric === metric) return
-    setDir(newDir)
-    setMetric(newMetric)
+
+    // Cancel any in-flight switch timer
+    if (switchTimerRef.current !== null) {
+      clearTimeout(switchTimerRef.current)
+      switchTimerRef.current = null
+    }
+
+    if (newDir !== 0) {
+      const exitClass: RowsAnim  = newDir > 0 ? 'lb-exiting-left'    : 'lb-exiting-right'
+      const enterClass: RowsAnim = newDir > 0 ? 'lb-entering-right'   : 'lb-entering-left'
+      // Stash enter class so useLayoutEffect([metric]) picks it up after the switch
+      pendingEnterClassRef.current = enterClass
+      setDir(newDir)
+      setRowsAnim(exitClass)
+      // Switch content after the exit animation completes (200ms CSS duration)
+      switchTimerRef.current = setTimeout(() => {
+        switchTimerRef.current = null
+        setMetric(newMetric)
+      }, 200)
+    } else {
+      pendingEnterClassRef.current = 'lb-entering'
+      setDir(0)
+      setMetric(newMetric)
+    }
   }
 
   // ---------------------------------------------------------------------------

@@ -85,9 +85,69 @@ html.dark .h-title .h-title-icon { color: #FFFFFF; }
 @keyframes cmIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
 
 .rows { display:flex; flex-direction:column; gap: 6px; }
-/* Enter: slides in from the dir side (positive dir = from right, negative = from left) */
-.rows.rows-in  { animation: rowsIn  calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
-@keyframes rowsIn  { from { opacity: 0.65; transform: translateX(calc(var(--dir, 0) *  22px)); } to { opacity: 1; transform: none; } }
+
+/* ── Direction-aware enter/exit keyframes ───────────────────────────────────
+   SPEC: dir > 0 (revenue→growth) → rows travel LEFT  (+→ exiting-left, ←→ entering-right).
+         dir < 0 (growth→revenue) → rows travel RIGHT (←→ exiting-right, →→ entering-left).
+   Keyframe names describe the DIRECTION OF TRAVEL (matches MotionTabs convention).
+   travel-left  (−x): exit goes left, entering panel arrives from the right.
+   travel-right (+x): exit goes right, entering panel arrives from the left. */
+@keyframes lb-enter-from-left {
+  from { opacity: 0; transform: translateX(-22px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes lb-enter-from-right {
+  from { opacity: 0; transform: translateX(22px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes lb-enter-neutral {
+  from { opacity: 0.65; }
+  to   { opacity: 1; }
+}
+@keyframes lb-exit-travel-left {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: translateX(-22px); }
+}
+@keyframes lb-exit-travel-right {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: translateX(22px); }
+}
+
+/* ── Entering states: rows slide in with per-row stagger (~160ms across 4 rows) */
+/* Neutral enter (initial mount, no direction) — simple opacity fade */
+.rows.lb-entering {
+  animation: lb-enter-neutral calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) both;
+}
+/* dir > 0 → rows arrive from the left (travel right) */
+.rows.lb-entering-right .row {
+  animation: lb-enter-from-left calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) both;
+}
+/* dir < 0 → rows arrive from the right (travel left) */
+.rows.lb-entering-left .row {
+  animation: lb-enter-from-right calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) both;
+}
+/* Per-row stagger: each successive row enters 40ms after the previous.
+   4 rows × 40ms = ~160ms total stagger. */
+.rows.lb-entering-right .row:nth-child(1),
+.rows.lb-entering-left .row:nth-child(1)  { animation-delay: calc(0ms   * var(--anim-mult, 1)); }
+.rows.lb-entering-right .row:nth-child(2),
+.rows.lb-entering-left .row:nth-child(2)  { animation-delay: calc(40ms  * var(--anim-mult, 1)); }
+.rows.lb-entering-right .row:nth-child(3),
+.rows.lb-entering-left .row:nth-child(3)  { animation-delay: calc(80ms  * var(--anim-mult, 1)); }
+.rows.lb-entering-right .row:nth-child(4),
+.rows.lb-entering-left .row:nth-child(4)  { animation-delay: calc(120ms * var(--anim-mult, 1)); }
+/* Safety net for any additional rows beyond 4 */
+.rows.lb-entering-right .row:nth-child(n+5),
+.rows.lb-entering-left .row:nth-child(n+5) { animation-delay: calc(160ms * var(--anim-mult, 1)); }
+
+/* ── Exiting states: faster container-level exit (200ms, no stagger) ───────
+   Plays BEFORE content switches so old rows animate out cleanly. */
+.rows.lb-exiting-left {
+  animation: lb-exit-travel-left calc(200ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) both;
+}
+.rows.lb-exiting-right {
+  animation: lb-exit-travel-right calc(200ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) both;
+}
 .row {
   display:flex; align-items:center; justify-content:space-between;
   padding: 10px 14px; border-radius: 16px; gap: 10px;

@@ -178,10 +178,10 @@ html.dark .mt-divider {
 .mt-panel {
   position: absolute;
   inset: 0;
-  padding: 4px 6px 6px;
+  padding: 8px 6px 6px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0;
   /* Default hidden state — no transform so idle panels don't offset */
   opacity: 0;
   pointer-events: none;
@@ -357,6 +357,11 @@ html.dark .mt-row-ic--black .material-symbols-outlined {
 }
 
 /* ── Toolbar ─────────────────────────────────────────────────────────────── */
+/* Symmetric spacing: when divider is present (open state), push toolbar top
+   spacing from flex gap(8px) to 12px — matching dock-inner padding-bottom (12px). */
+.mt-divider + .mt-toolbar {
+  margin-top: 4px;
+}
 .mt-toolbar {
   position: relative;
   display: flex;
@@ -435,11 +440,16 @@ html.dark .mt-label  { color: #0F172A; }
 }
 /* Grey rounded background appears on hover (the look formerly only seen while holding) */
 .mt-tab:hover .mt-hold { opacity: 1; transform: scale(1); }
-/* Active pill: asymmetric padding to nudge icon+text group rightward for optical center.
-   Width = left pad (18) + icon (24) + icon↔text gap (8) + label (lw) + right pad (10). */
+/* Active pill hover: scale the WHOLE pill (indicator + button content) together.
+   Uses :has() so the sibling .mt-ind scales in sync with the button content. */
+.mt-tabwrap:has(.mt-tab.active:hover) .mt-ind {
+  transform: translateX(var(--ind-x, 0)) scale(1.03);
+}
+/* Active pill: increased edge padding so icon+text have breathing room inside the pill.
+   Width = left pad (20) + icon (24) + icon↔text gap (8) + label (lw) + right pad (14). */
 .mt-tab.active {
-  width: calc(18px + 24px + 8px + var(--lw, 46px) + 10px);
-  padding: 0 10px 0 18px;
+  width: calc(20px + 24px + 8px + var(--lw, 46px) + 14px);
+  padding: 0 14px 0 20px;
   justify-content: flex-start;
   gap: 8px;
 }

@@ -1,0 +1,43 @@
+/* motion-tokens.css
+ * Motion system source of truth: duration scale + easing curves shared
+ * across design-system components.
+ *
+ * --anim-mult convention (pre-existing, defined below global.css after this
+ * import): a global animation-speed multiplier, default 1, flipped to 4 via
+ * :root[data-anim-slow="true"] for the debug Slow-Down mode. Consumers wrap
+ * every duration as calc(var(--duration-*) * var(--anim-mult, 1)) so the
+ * multiplier keeps applying -- this file only owns the base duration/easing
+ * values, not the multiplier itself.
+ *
+ * Duration scale -- extracted verbatim from the literal ms values present in
+ * components/design-system/buttons/Buttons.css (step-8 motion-token
+ * extraction, plan: sonnet-executor-guardrails). Only 120ms / 160ms / 220ms
+ * had an exact, unambiguous match to a 4-tier scale; those are canonicalized
+ * here. The remaining literals found in Buttons.css (140, 150, 200, 240, 260,
+ * 340, 800, 3000ms) do NOT collapse onto this scale without changing the
+ * rendered timing, so per "extraction not redesign" they were left as
+ * literals in Buttons.css -- see the step-8 executor report for the full
+ * before/after migration table.
+ */
+:root {
+  --duration-instant: 100ms; /* reserved -- no current Buttons.css consumer at this tier; completes the scale for future use */
+  --duration-fast: 120ms;    /* .btn-delete transform */
+  --duration-base: 160ms;    /* most common transform/box-shadow transition duration in Buttons.css */
+  --duration-slow: 220ms;    /* .btn-cta / .btn-delete / .btn-apply / .btn-apply-label background-color & filter transitions */
+
+  /* Easing.
+   * --ease-spring and --ease-out are ALREADY canonically defined in
+   * ../../design-system/preview/_shared-feedback.css (lines 215-216) with
+   * these exact values, and that file is @imported globally ahead of every
+   * component stylesheet (see styles/global.css load order). To avoid a
+   * conflicting double-definition they are NOT redeclared here -- this file
+   * only adds the one easing token missing from that set. Buttons.css
+   * previously guarded one usage with a literal fallback,
+   * `var(--ease-out, cubic-bezier(.22,1,.36,1))`, for the theoretical case
+   * where --ease-out was not yet resolvable; since the running app always
+   * loads global.css (and therefore _shared-feedback.css) before any
+   * component mounts, that fallback was redundant and has been removed as
+   * part of this migration.
+   */
+  --ease-in-out: cubic-bezier(0.42, 0, 0.58, 1); /* standard ease-in-out; no literal instance existed in Buttons.css to extract from -- added to complete the easing set requested for this step, currently unused by Buttons.css */
+}

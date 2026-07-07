@@ -823,6 +823,7 @@ export default function TaskCard() {
           <div className="col-head">
             <div className="col-title">
               <span className="col-bar" />
+              <span className={`${iconClass('person_search')} col-title-ic`} aria-hidden>person_search</span>
               <h2>Prospect</h2>
             </div>
             <div className="col-actions">

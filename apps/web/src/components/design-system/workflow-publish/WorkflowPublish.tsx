@@ -14,10 +14,11 @@
  *
  * NO raw useEffect in this file.
  * The toggle is pure React state — no imperative DOM required.
- * Close animation driven by onAnimationEnd on the dialog element.
+ * Close animation driven by onAnimationEnd on the bezel wrapper.
  */
 
 import { useState } from 'react'
+import { iconClass } from '../../../lib/iconClass'
 import './WorkflowPublish.css'
 
 // ---------------------------------------------------------------------------
@@ -53,91 +54,90 @@ export default function WorkflowPublish(): React.ReactElement {
     }
   }
 
-  function handleAnimationEnd(e: React.AnimationEvent<HTMLDialogElement>): void {
+  function handleAnimationEnd(e: React.AnimationEvent<HTMLDivElement>): void {
     if (e.animationName === 'wp-popOut') {
       setOpen(false)
       setClosing(false)
     }
   }
 
-  const popoverClass = [
-    'wp-popover',
-    open ? 'open' : '',
+  const bezelClass = [
+    'wp-bezel',
     closing ? 'closing' : '',
   ].filter(Boolean).join(' ')
 
   return (
-    <div className="wp-shell shell zoom">
-      {/* Anchor wrapper gives .wp-popover its absolute positioning context */}
-      <div className="wp-btn-anchor">
-        {/* Publish trigger button */}
-        <button
-          type="button"
-          className={`wp-btn${open ? ' open' : ''}`}
-          aria-expanded={open}
-          aria-haspopup="true"
-          onClick={handleToggle}
-        >
-          <span className="material-icons">rocket_launch</span>
-          Publish
-          <span className="material-icons wp-chevron">expand_more</span>
-        </button>
+    /* wp-btn-anchor is the positioning context for the absolutely-placed bezel */
+    <div className="wp-btn-anchor">
+      {/* Publish trigger button */}
+      <button
+        type="button"
+        className={`wp-btn${open ? ' open' : ''}`}
+        aria-expanded={open}
+        aria-haspopup="true"
+        onClick={handleToggle}
+      >
+        <span className="material-icons">rocket_launch</span>
+        Publish
+        <span className="material-icons wp-chevron">expand_more</span>
+      </button>
 
-        {/* Grey bezel wrapper — white popover card inside grey outer ring */}
-        {open && (
-          <div className="wp-bezel">
-            {/* Dropdown popover — animated via wp-popIn / wp-popOut */}
-            <dialog
-              className={popoverClass}
-              aria-label="Publish workflow options"
-              style={{ margin: 0, maxWidth: 'none', maxHeight: 'none' }}
-              onAnimationEnd={handleAnimationEnd}
-            >
-              {/* Header: workflow name + version badge */}
-              <div className="wp-pop-head">
-                <span className="wp-pop-title">Customer Support Agent</span>
-                <span className="wp-version">V1.2</span>
+      {/* Grey bezel (outer shell) + white popover card animate as one rigid unit */}
+      {open && (
+        <div className={bezelClass} onAnimationEnd={handleAnimationEnd}>
+          {/* Dropdown popover — animated via wp-popIn / wp-popOut on the bezel */}
+          <dialog
+            className="wp-popover"
+            aria-label="Publish workflow options"
+            style={{ margin: 0, maxWidth: 'none', maxHeight: 'none' }}
+          >
+            {/* Header: workflow name + version badge */}
+            <div className="wp-pop-head">
+              <span className="wp-pop-title">
+                <span className={iconClass('publish')} aria-hidden>publish</span>
+                Customer Support Agent
+              </span>
+              <span className="wp-version">V1.2</span>
+            </div>
+
+            {/* Primary CTA: Update Workflow */}
+            <button type="button" className="wp-update-btn">
+              <span className="material-icons">sync</span>
+              Update Workflow
+            </button>
+
+            {/* Last-edited attribution row */}
+            <button type="button" className="wp-edited" style={{ width: '100%', textAlign: 'left', font: 'inherit', color: 'inherit', background: 'none', border: 0, cursor: 'pointer' }}>
+              <div className="wp-edited-left">
+                <span className="material-icons">schedule</span>
+                12m ago by Ethan Walker
               </div>
+              <span className="material-icons wp-arrow">chevron_right</span>
+            </button>
 
-              {/* Primary CTA: Update Workflow */}
-              <button type="button" className="wp-update-btn">
-                <span className="material-icons">sync</span>
-                Update Workflow
-              </button>
+            {/* Divider */}
+            <hr className="wp-div" style={{ margin: '4px 0', border: 0 }} />
 
-              {/* Last-edited attribution row */}
-              <button type="button" className="wp-edited" style={{ width: '100%', textAlign: 'left', font: 'inherit', color: 'inherit', background: 'none', border: 0, cursor: 'pointer' }}>
-                <div className="wp-edited-left">
-                  <span className="material-icons">schedule</span>
-                  12m ago by Ethan Walker
+            {/* Action rows */}
+            {ACTIONS.map((action) => (
+              <button key={action.label} type="button" className="wp-action" style={{ width: '100%', textAlign: 'left', font: 'inherit', color: 'inherit', background: 'none', border: 0, cursor: 'pointer' }}>
+                <div className="wp-action-left">
+                  {/* Colored semantic-pill icon square with Deha gloss treatment */}
+                  <div
+                    className="wp-icon"
+                    style={{ backgroundColor: action.color }}
+                    aria-hidden="true"
+                  >
+                    <span className="material-icons">{action.icon}</span>
+                  </div>
+                  <span className="wp-action-label">{action.label}</span>
                 </div>
                 <span className="material-icons wp-arrow">chevron_right</span>
               </button>
-
-              {/* Divider */}
-              <hr className="wp-div" style={{ margin: '4px 0', border: 0 }} />
-
-              {/* Action rows */}
-              {ACTIONS.map((action) => (
-                <button key={action.label} type="button" className="wp-action" style={{ width: '100%', textAlign: 'left', font: 'inherit', color: 'inherit', background: 'none', border: 0, cursor: 'pointer' }}>
-                  <div className="wp-action-left">
-                    {/* Colored semantic-pill icon square with Deha gloss treatment */}
-                    <div
-                      className="wp-icon"
-                      style={{ backgroundColor: action.color }}
-                      aria-hidden="true"
-                    >
-                      <span className="material-icons">{action.icon}</span>
-                    </div>
-                    <span className="wp-action-label">{action.label}</span>
-                  </div>
-                  <span className="material-icons wp-arrow">chevron_right</span>
-                </button>
-              ))}
-            </dialog>
-          </div>
-        )}
-      </div>
+            ))}
+          </dialog>
+        </div>
+      )}
     </div>
   )
 }

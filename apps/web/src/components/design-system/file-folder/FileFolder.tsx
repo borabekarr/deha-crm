@@ -172,6 +172,8 @@ export default function FileFolder() {
     blueFolderRef,
     redFolderRef,
     popRef,
+    popBodyCallbackRef,
+    handlePopBodyScroll,
     playAll,
     closePop,
     handleFileClick,
@@ -265,7 +267,11 @@ export default function FileFolder() {
 
           <div className="ff-pop-sep" />
 
-          <div className="ff-pop-body">
+          <div
+            className="ff-pop-body"
+            ref={popBodyCallbackRef}
+            onScroll={handlePopBodyScroll}
+          >
             {FILES.map((f) => (
               <FileRow key={f.name} file={f} onClick={handleFileClick} />
             ))}
