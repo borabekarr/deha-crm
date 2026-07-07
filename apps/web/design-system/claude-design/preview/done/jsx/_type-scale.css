@@ -1,0 +1,12 @@
+.ts-rows { display: grid; gap: 14px; }
+.ts-r { display:grid; grid-template-columns: 60px 1fr 110px; align-items:baseline; gap: 16px; padding-bottom: 12px; border-bottom: 1px dashed #E2E8F0; }
+.ts-r:last-child { border-bottom: 0; padding-bottom: 0; }
+.ts-px { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11px; color: #64748B; font-weight: 600; }
+.ts-sample { color: #0F172A; }
+.ts-role { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #94A3B8; text-align: right; }
+
+/* Dark mode — chrome adapts, type specimens stay */
+html.dark .card { background: #1E293B; background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.08) 0%, rgba(30,41,59,1) 50%, #1E293B 100%); }
+html.dark .ts-r { border-bottom-color: #334155; }
+html.dark .ts-px { color: #94A3B8; }
+html.dark .ts-sample { color: #F1F5F9; }
