@@ -522,15 +522,17 @@ function Column({
 // ---------------------------------------------------------------------------
 // Header
 // ---------------------------------------------------------------------------
+const headerTitleStyle: React.CSSProperties = {
+  margin: 0, display: 'inline-flex', alignItems: 'center', gap: 7,
+  fontSize: 19, fontWeight: 800, color: 'var(--tb-fg1)',
+  letterSpacing: '-0.025em', fontFamily: "'Montserrat', sans-serif",
+};
+
 function Header({ total }: { total: number }) {
   return (
     // Flat flex row — inner container div removed (feedback #6)
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '18px 20px 14px' }}>
-      <h1 style={{
-        margin: 0, display: 'inline-flex', alignItems: 'center', gap: 7,
-        fontSize: 19, fontWeight: 800, color: 'var(--tb-fg1)',
-        letterSpacing: '-0.025em', fontFamily: "'Montserrat', sans-serif",
-      }}>
+      <h1 style={headerTitleStyle}>
         {/* leading view_kanban glyph (item 5) */}
         <span className={iconClass('view_kanban')} aria-hidden style={{ fontSize: 20, lineHeight: 1, fontVariationSettings: '"opsz" 24, "wght" 500' }}>view_kanban</span>
         Task Board
@@ -650,7 +652,7 @@ function SyncFeed({ items, visible }: { items: FeedItem[]; visible: boolean }) {
       <div style={{
         borderTop: '1px solid var(--tb-col-border)',
         background: 'var(--tb-feed-bg)',
-        animation: 'panelIn 360ms cubic-bezier(.22,1,.36,1)',
+        animation: 'panelIn 360ms var(--ease-out)',
       }}>
         {items.map((it) => (
           <UpdateItem key={it.id} item={it} />

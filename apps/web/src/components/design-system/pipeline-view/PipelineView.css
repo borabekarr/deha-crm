@@ -136,7 +136,7 @@
   /* Entrance: staggered rise + fade (funnel-chart approach). `backwards` fill
      hides each row through its own delay, then reverts to base styles so the
      :active press transform below is never clobbered by a forwards fill. */
-  animation: pvRowIn calc(0.5s * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation: pvRowIn calc(0.5s * var(--anim-mult, 1)) var(--ease-out) backwards;
   animation-delay: calc(var(--i, 0) * 60ms * var(--anim-mult, 1));
 }
 .pipeline-view .pv-row:hover { background: var(--pv-row-hover); }
