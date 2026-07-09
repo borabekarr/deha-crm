@@ -1,0 +1,180 @@
+/* ThemePaletteLab.css — static comparison page. All palette literals below
+   are scoped --tpl-* custom props, not global tokens. They exist as palette
+   SPECIMENS (the point of this page is to display these exact swatch
+   fills side by side), not as replacements for the live design system. */
+
+.tpl-root {
+  /* ---- New palette (bookmarked spec) — dark ---- */
+  --tpl-new-dark-bg:            #111111;
+  --tpl-new-dark-surface:       #1C1C1C;
+  --tpl-new-dark-menu:          #232323;
+  --tpl-new-dark-text:          #EDEDED;
+  --tpl-new-dark-muted:         #A1A1A1;
+  --tpl-new-dark-selected-fg:   #FFFFFF;
+  --tpl-new-dark-selected-bg:   #0A0A0A;
+
+  /* ---- New palette (bookmarked spec) — light ---- */
+  --tpl-new-light-bg:           #FFFFFF;
+  --tpl-new-light-surface:      #ECECEC;
+  --tpl-new-light-menu:         #FFFFFF;
+  --tpl-new-light-text:         #0A0A0A;
+  --tpl-new-light-muted:        #6B6B6B;
+  --tpl-new-light-selected-fg:  #0A0A0A;
+  --tpl-new-light-selected-bg:  #FFFFFF;
+
+  /* ---- Current stack, pulled from colors_and_type.css — light ---- */
+  --tpl-cur-light-bg-app:            #FFFFFF; /* --bg-app (light) */
+  --tpl-cur-light-bg-card-solid:     #FFFFFF; /* --bg-card-solid (light) */
+  --tpl-cur-light-fg1:               #0F172A; /* --fg1 (light) */
+  --tpl-cur-light-fg3:               #64748B; /* --fg3 (light) */
+  --tpl-cur-light-border-hairline:   #E2E8F0; /* --border-hairline (light) */
+
+  /* ---- Current stack, pulled from colors_and_type.css — dark ---- */
+  --tpl-cur-dark-bg-app:             #0F172A; /* --bg-app (dark) */
+  --tpl-cur-dark-bg-card-solid:      #1E293B; /* --bg-card-solid (dark) */
+  --tpl-cur-dark-fg1:                #F1F5F9; /* --fg1 (dark) */
+  --tpl-cur-dark-fg3:                #94A3B8; /* --fg3 (dark) */
+  --tpl-cur-dark-border-hairline:    #334155; /* --border-hairline (dark) */
+
+  --tpl-radius-pill: 9999px;
+  --tpl-radius-menu: 18px;
+  --tpl-radius-row: 11px;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8, 32px);
+  padding: var(--space-8, 32px);
+  color: var(--fg1);
+  background: var(--bg-app);
+  font-family: var(--font-display);
+}
+
+.tpl-title {
+  font-size: var(--type-h1, 28px);
+  font-weight: var(--weight-black, 900);
+  margin: 0 0 var(--space-2, 8px);
+}
+
+.tpl-subtitle {
+  font-size: var(--type-body, 14px);
+  color: var(--fg3);
+  max-width: 64ch;
+  margin: 0;
+}
+
+.tpl-panel {
+  border-radius: var(--radius-2xl, 24px);
+  border: 1px solid var(--border-hairline);
+  padding: var(--space-6, 24px);
+}
+
+.tpl-panel-title {
+  font-size: var(--type-h4, 16px);
+  font-weight: var(--weight-bold, 700);
+  margin: 0 0 var(--space-4, 16px);
+}
+
+/* Local wrapper panels — light/dark shown side by side, independent of the
+   app's global data-theme so this page always displays both at once. */
+.tpl-panel--new-dark,
+.tpl-panel--cur-dark {
+  background: #111111;
+  color: #EDEDED;
+}
+.tpl-panel--new-light,
+.tpl-panel--cur-light {
+  background: #FFFFFF;
+  color: #0A0A0A;
+}
+
+.tpl-swatch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-4, 16px);
+}
+
+.tpl-swatch {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 8px);
+}
+
+.tpl-swatch-chip {
+  display: block;
+  width: 100%;
+  height: 56px;
+  border-radius: var(--radius-lg, 16px);
+  border: 1px solid rgba(128, 128, 128, 0.25);
+  transition: transform var(--duration-fast, 150ms) var(--ease-out, cubic-bezier(.22,1,.36,1));
+}
+.tpl-swatch-chip:hover {
+  transform: scale(1.03);
+}
+
+.tpl-swatch-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--type-meta, 12px);
+}
+.tpl-swatch-role { font-weight: var(--weight-semibold, 600); text-transform: capitalize; }
+.tpl-swatch-hex { opacity: 0.8; }
+.tpl-swatch-oklch { opacity: 0.6; font-size: var(--type-mini, 10px); }
+
+.tpl-radius-demo {
+  margin-top: var(--space-6, 24px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3, 12px);
+}
+
+.tpl-chip-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 16px;
+  border-radius: var(--tpl-radius-pill);
+  background: rgba(128, 128, 128, 0.25);
+  font-size: var(--type-meta, 12px);
+}
+
+.tpl-menu-mock {
+  width: 220px;
+  border-radius: var(--tpl-radius-menu);
+  background: rgba(128, 128, 128, 0.15);
+  padding: var(--space-2, 8px);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tpl-menu-row {
+  border-radius: var(--tpl-radius-row);
+  padding: 8px 12px;
+  font-size: var(--type-body-sm, 13px);
+}
+
+.tpl-menu-row--selected {
+  background: rgba(128, 128, 128, 0.3);
+  font-weight: var(--weight-semibold, 600);
+}
+
+.tpl-radius-caption {
+  font-size: var(--type-mini, 10px);
+  opacity: 0.6;
+}
+
+.tpl-notes {
+  border-radius: var(--radius-2xl, 24px);
+  border: 1px dashed var(--border-hairline);
+  padding: var(--space-6, 24px);
+  background: var(--bg-chip);
+}
+
+.tpl-notes ul {
+  margin: var(--space-2, 8px) 0 0;
+  padding-left: 1.25em;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 8px);
+}

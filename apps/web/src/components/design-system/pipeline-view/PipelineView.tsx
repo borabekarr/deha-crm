@@ -124,6 +124,7 @@ function PipelineRow({
       style={{ '--i': index, '--pv-stage': stage.color } as React.CSSProperties}
       onClick={onToggle}
       aria-expanded={isOpen}
+      aria-label={`${stage.label} stage details`}
     >
       <span className="pv-dot" aria-hidden="true" />
       <span className="pv-label">

@@ -10,3 +10,6 @@ export {
   useTimeout,
   useIsMounted,
 } from 'usehooks-ts';
+
+export { useAutoHeight } from './use-auto-height';
+export type { UseAutoHeightOptions, UseAutoHeightResult } from './use-auto-height';

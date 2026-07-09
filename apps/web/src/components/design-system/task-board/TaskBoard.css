@@ -311,22 +311,19 @@ html.dark .tb-column-scroll::-webkit-scrollbar-thumb:hover{ background:#475569; 
 @keyframes tbFadeTopIn { from { transform: translateY(-9px); } to { transform: translateY(0); } }
 @keyframes tbFadeBotIn { from { transform: translateY(9px); } to { transform: translateY(0); } }
 
-/* SyncFeed visibility — stays mounted, toggled via visibility+opacity */
+/* SyncFeed visibility — outer wrapper toggles opacity+visibility only; the
+   inner content div carries the useAutoHeight-driven measured height. */
 .tb-sync-feed {
   overflow: hidden;
-  max-height: 0;
   opacity: 0;
   visibility: hidden;
-  transition: max-height 340ms cubic-bezier(.22,1,.36,1),
-              opacity 280ms cubic-bezier(.22,1,.36,1),
+  transition: opacity 280ms var(--ease-out),
               visibility 0ms linear 280ms;
 }
 .tb-sync-feed.tb-sync-feed--visible {
-  max-height: 260px;
   opacity: 1;
   visibility: visible;
-  transition: max-height 340ms cubic-bezier(.22,1,.36,1),
-              opacity 280ms cubic-bezier(.22,1,.36,1),
+  transition: opacity 280ms var(--ease-out),
               visibility 0ms linear 0ms;
 }
 

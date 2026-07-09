@@ -27,6 +27,7 @@
  */
 
 import { test, expect } from '@playwright/test'
+import { installDeterminism } from './helpers/determinism'
 
 // ---------------------------------------------------------------------------
 // Comparison options: exact on CI, small-ratio tolerance locally.
@@ -42,38 +43,9 @@ const SHOT_OPTS = STRICT
 // Deterministic rendering: seed Math.random (xorshift32, fixed seed) so
 // components that derive geometry from it — statistics-graph-card chart series
 // + gradient id — produce identical pixels on every load, locally and on CI.
-// addInitScript runs in the page before any app script.
+// See tests/helpers/determinism.ts for the addInitScript body.
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => {
-    let s = 0x2545f491 >>> 0
-    Math.random = () => {
-      s ^= s << 13; s ^= s >>> 17; s ^= s << 5; s >>>= 0
-      return s / 0xffffffff
-    }
-    // Freeze the wall clock so components that render live time produce
-    // identical pixels every run. currency-converter shows nowHM() (HH:MM) in
-    // its default state — minute-granular, so it drifted between runs minutes
-    // apart and broke exact-match on CI. Pinned to the capture day
-    // (2026-06-17 UTC): day-granular renders (todo-list "today", calendar grid)
-    // are unchanged, only live clocks become deterministic. Argument forms
-    // (new Date(ms), new Date(y, m, d), parsing) keep their real behaviour, so
-    // date math in todo-list / dynamic-calendar is preserved.
-    const FIXED = new Date('2026-06-17T12:00:00Z').getTime()
-    const RealDate = Date
-    class FrozenDate extends RealDate {
-      constructor(...args: ConstructorParameters<typeof Date> | []) {
-        if (args.length === 0) {
-          super(FIXED)
-        } else {
-          super(...(args as ConstructorParameters<typeof Date>))
-        }
-      }
-      static now() {
-        return FIXED
-      }
-    }
-    globalThis.Date = FrozenDate as DateConstructor
-  })
+  await installDeterminism(page)
 })
 
 // ---------------------------------------------------------------------------
@@ -116,6 +88,7 @@ const SLUGS = [
   // count-up (tweenScore -> .fhc-num) occasionally lands mid-tween at the
   // 900ms mark, so the generic goto+shot flaked. The dedicated test waits for
   // the counter to reach its final value before capturing.
+  'number-flow',
   // Sheets & Cards
   'model-selector',
   'connect-modal',

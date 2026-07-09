@@ -19,6 +19,9 @@ import { lazy, type ComponentType } from 'react'
 // Types
 // ---------------------------------------------------------------------------
 
+// Gate: marking an entry Finished when it has an expandable interaction
+// requires a SPAM_TARGETS entry in apps/web/tests/animation-spam-manifest.ts
+// with the spam spec passing.
 export type ComponentStatus = 'Finished' | 'Proceeding' | 'Waiting'
 
 export type Subcategory =
@@ -187,6 +190,16 @@ export const registry: RegistryEntry[] = [
     viewport: { width: 700, height: 560 },
     sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/animated-list',
     Component: lazy(() => import('@/components/design-system/animated-list/AnimatedList')),
+  },
+  {
+    slug: 'number-flow',
+    name: 'Number Flow',
+    status: 'Finished',
+    category: 'Animations',
+    subtitle: 'Animated number transitions in Montserrat Black, currency/compact/percent formats',
+    viewport: { width: 700, height: 560 },
+    sourceHtml: 'https://number-flow.barvian.me/',
+    Component: lazy(() => import('@/components/design-system/number-flow/NumberFlowDemo')),
   },
   {
     slug: 'prize-sheet',
@@ -729,6 +742,16 @@ export const registry: RegistryEntry[] = [
     viewport: { width: 480, height: 760 },
     sourceHtml: '',
     Component: lazy(() => import('@/components/design-system/pipeline-2/Pipeline2')),
+  },
+
+  {
+    slug: 'theme-palette-lab',
+    name: 'Theme Palette Lab',
+    status: 'Proceeding',
+    category: 'Foundations',
+    subtitle: 'Live theme token palette explorer',
+    sourceHtml: '',
+    Component: lazy(() => import('@/components/design-system/theme-palette-lab/ThemePaletteLab')),
   },
 
   // ══ Waiting ═══════════════════════════════════════════════════════════════

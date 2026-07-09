@@ -199,30 +199,23 @@
   vertical-align: middle;
 }
 
-/* ── Edit zone wrapper — always mounted, transitions in/out ── */
+/* ── Edit zone wrapper — always mounted, transitions in/out ──
+   Height/overflow are owned by useAutoHeight (inline styles); this rule only
+   drives the opacity/transform crossfade. */
 .mem-edit-zone {
-  /* Phase 1: expand (max-height + opacity of container) */
   transition:
     opacity calc(180ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
-    transform calc(180ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
-    max-height calc(200ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+    transform calc(180ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
 }
 .mem-edit-zone--open {
   opacity: 1;
   transform: translateY(0);
-  max-height: 600px;
   pointer-events: auto;
-  /* Slight delay so the block background transition starts first (extend-then-fill) */
-  transition-delay: calc(80ms * var(--anim-mult, 1));
 }
 .mem-edit-zone--closed {
   opacity: 0;
   transform: translateY(-4px);
-  max-height: 0;
-  overflow: hidden;
   pointer-events: none;
-  /* When closing (Cancel), collapse fast with no delay */
-  transition-delay: 0ms;
 }
 
 /* ── Footer ── */
