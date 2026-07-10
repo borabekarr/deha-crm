@@ -187,7 +187,7 @@
   transition: transform calc(220ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
   -webkit-tap-highlight-color: transparent;
 }
-.md-trigger:hover { transform: translateX(-50%) scale(1.04); }
+.md-root:has(.md-trigger:hover) .md-trigger { transform: translateX(-50%) scale(1.04); }
 .md-trigger:active { transform: translateX(-50%) scale(0.94); }
 .md-trigger:focus-visible {
   outline: 2px solid #10B981;

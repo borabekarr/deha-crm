@@ -403,7 +403,7 @@ export default function WorkflowAddElements() {
         }
       }
     }
-  }, [state.nodesVisible, state.hoveredId, state.search, state.searchPanelMounted])
+  }, [state.hoveredId, state.search])
 
   /** Callback ref for the segmented control — wires the sliding pill. */
   const segCallbackRef = useCallback((el: HTMLDivElement | null) => {

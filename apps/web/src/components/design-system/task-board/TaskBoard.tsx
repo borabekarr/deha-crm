@@ -3,6 +3,7 @@ import '../../../../design-system/preview/_base.css';
 import '../../../../design-system/preview/_darkmode.css';
 import './TaskBoard.css';
 import { iconClass } from '@/lib/iconClass';
+import { useAutoHeight } from '@/lib/hooks/use-auto-height';
 import { makeTaskBoardTimers, type SyncPhase, type TaskBoardTimers } from './task-board-hook';
 
 // ---------------------------------------------------------------------------
@@ -647,9 +648,16 @@ function UpdateItem({ item }: { item: FeedItem }) {
 // Sync feed (stays mounted; toggled via CSS visibility/opacity)
 // ---------------------------------------------------------------------------
 function SyncFeed({ items, visible }: { items: FeedItem[]; visible: boolean }) {
+  // Outer div toggles opacity+visibility (CSS class); the ref goes on the
+  // inner content div, whose measured height useAutoHeight animates.
+  const { ref } = useAutoHeight<HTMLDivElement>({
+    open: visible,
+    duration: 340,
+    easing: 'cubic-bezier(.22,1,.36,1)',
+  });
   return (
     <div className={`tb-sync-feed ${visible ? 'tb-sync-feed--visible' : ''}`}>
-      <div style={{
+      <div ref={ref} style={{
         borderTop: '1px solid var(--tb-col-border)',
         background: 'var(--tb-feed-bg)',
         animation: 'panelIn 360ms var(--ease-out)',

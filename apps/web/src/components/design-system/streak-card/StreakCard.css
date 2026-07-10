@@ -82,9 +82,9 @@ html.dark .stk-root .streak {
 
 /* hover: the whole grey shell (bezel + card) lifts together with the glow */
 .stk-root .sc-shell { transition: transform calc(320ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(320ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
-.stk-root .sc-shell:hover { transform: translateY(-3px); box-shadow: 0 20px 44px -20px rgba(16,185,129,0.22), 0 8px 20px rgba(15,23,42,0.10); }
-html.dark .stk-root .sc-shell:hover { box-shadow: 0 22px 50px -20px rgba(16,185,129,0.30), 0 10px 22px rgba(0,0,0,0.5); }
-.stk-root .sc-shell:hover .streak { box-shadow: var(--sc-shadow), var(--sc-glow); }
+.stk-root .frame:hover .sc-shell { transform: translateY(-3px); box-shadow: 0 20px 44px -20px rgba(16,185,129,0.22), 0 8px 20px rgba(15,23,42,0.10); }
+html.dark .stk-root .frame:hover .sc-shell { box-shadow: 0 22px 50px -20px rgba(16,185,129,0.30), 0 10px 22px rgba(0,0,0,0.5); }
+.stk-root .frame:hover .streak { box-shadow: var(--sc-shadow), var(--sc-glow); }
 .stk-root .sc-shell.pop   { animation: scPop calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
 @keyframes scPop { 0%{ transform: scale(.99);} 55%{ transform: scale(1.004);} 100%{ transform: scale(1);} }
 
@@ -116,7 +116,7 @@ html.dark .stk-root .sc-shell:hover { box-shadow: 0 22px 50px -20px rgba(16,185,
 .stk-root .sc-foot .material-symbols-outlined {
   font-size: 18px; font-variation-settings: 'FILL' 1, 'wght' 500, 'opsz' 24;
 }
-.stk-root .sc-shell:hover .sc-foot { color: var(--sc-fg2); }
+.stk-root .frame:hover .sc-foot { color: var(--sc-fg2); }
 
 .stk-root .sc-divider { height: 1px; background: var(--sc-divider); margin: 13px 0 12px; }
 

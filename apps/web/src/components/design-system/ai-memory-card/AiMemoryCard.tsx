@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react'
+import { useAutoHeight } from '../../../lib/hooks/use-auto-height'
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './AiMemoryCard.css'
@@ -55,6 +56,7 @@ function MemoryBlock({ label, text, onDelete }: MemoryBlockProps) {
   const [hasSavedEdit, setHasSavedEdit] = useState(false)
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+  const { ref: editZoneRef } = useAutoHeight<HTMLDivElement>({ open: editing })
 
   // Callback ref: auto-grow on mount + whenever editing opens
   const textareaCallbackRef = useCallback((el: HTMLTextAreaElement | null) => {
@@ -160,7 +162,10 @@ function MemoryBlock({ label, text, onDelete }: MemoryBlockProps) {
           )}
         </p>
         {/* Edit zone — always mounted, reveals when editing */}
-        <div className={`mem-edit-zone${editing ? ' mem-edit-zone--open' : ' mem-edit-zone--closed'}`}>
+        <div
+          ref={editZoneRef}
+          className={`mem-edit-zone${editing ? ' mem-edit-zone--open' : ' mem-edit-zone--closed'}`}
+        >
           <textarea
             ref={textareaCallbackRef}
             className="mem-edit-textarea"

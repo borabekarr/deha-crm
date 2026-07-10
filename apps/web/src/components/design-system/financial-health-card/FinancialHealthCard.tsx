@@ -3,6 +3,7 @@ import '../../../../design-system/preview/_darkmode.css'
 import './FinancialHealthCard.css'
 
 import { useRef, useState, useCallback } from 'react'
+import { useAutoHeight } from '@/lib/hooks/use-auto-height'
 import {
   ZONES,
   type FhcRefs,
@@ -35,6 +36,13 @@ export default function FinancialHealthCard() {
   const tabRef    = useRef<HTMLButtonElement | null>(null)
 
   const scoreRef = useRef(INITIAL_SCORE)   // tracks current score for tween origin
+
+  // measured-height spam-proof expand/collapse for the why/recommendation panel
+  const { ref: infoBodyRef } = useAutoHeight<HTMLDivElement>({
+    open: isOpen,
+    duration: 500,
+    easing: 'cubic-bezier(.34,1.56,.64,1)',
+  })
 
   function getRefs(): FhcRefs {
     return {
@@ -161,7 +169,7 @@ export default function FinancialHealthCard() {
               <span className="material-symbols-outlined fhc-info-chev">expand_more</span>
             </button>
 
-            <div className="fhc-info-body">
+            <div ref={infoBodyRef} className="fhc-info-body">
               <div className="fhc-info-inner">
                 <div className="fhc-sec" style={{ '--s': 0 } as React.CSSProperties}>
                   <div className="fhc-sec-h">

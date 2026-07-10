@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deha CRM — Date+Time Wheel Picker (arm-dept-v2 preview)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<style>
+  html, body { margin: 0; min-height: 100vh; }
+  body {
+    padding: 40px 24px;
+    background: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    transition: background 200ms ease-out;
+  }
+  html.dark body { background: #0b0b0c; }
+  @media (prefers-color-scheme: dark) { body { background: #0b0b0c; } }
+  #root { width: 100%; max-width: 440px; display: flex; justify-content: center; }
+  #theme-toggle {
+    position: fixed; top: 16px; right: 16px; z-index: 10;
+    font: 600 13px/1 'Montserrat', system-ui, sans-serif;
+    padding: 10px 16px; border-radius: 999px; border: 1px solid rgba(128,128,140,.35);
+    background: rgba(128,128,140,.12); color: inherit; cursor: pointer;
+  }
+  html.dark #theme-toggle, body.dark-scheme #theme-toggle { color: #eee; }
+</style>
+</head>
+<body>
+<button id="theme-toggle" type="button">🌙 dark</button>
+<div id="root"></div>
+<script src="react.js"></script>
+<script src="react-dom.js"></script>
+<script src="component.js"></script>
+<script>
+(function () {
+  var root = document.getElementById('root');
+  var C = window.DateTimeWheelPicker;
+  if (!C) { root.setAttribute('data-mount', 'no-global'); return; }
+  try {
+    ReactDOM.createRoot(root).render(React.createElement(C));
+    root.setAttribute('data-mount', 'ok');
+  } catch (e) {
+    root.setAttribute('data-mount', 'err:' + String(e).slice(0, 80));
+  }
+
+  var btn = document.getElementById('theme-toggle');
+  function sync() {
+    var dark = document.documentElement.classList.contains('dark');
+    btn.textContent = dark ? '☀️ light' : '🌙 dark';
+    btn.style.color = dark ? '#eee' : '#222';
+  }
+  btn.addEventListener('click', function () {
+    document.documentElement.classList.toggle('dark');
+    sync();
+  });
+  sync();
+})();
+</script>
+</body>
+</html>

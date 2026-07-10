@@ -14,6 +14,7 @@
 
 import { useState, useCallback, useRef } from 'react'
 import { iconClass } from '../../../lib/iconClass'
+import { useAutoHeight } from '../../../lib/hooks/use-auto-height'
 import { useEntranceRef, useFLIPRefs } from './pinned-list-hook'
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
@@ -222,6 +223,12 @@ export default function PinnedList({ items: initialItems = DEFAULT_ITEMS }: Pinn
   // Easing to use for the current FLIP pass (pin vs unpin)
   const flipEaseRef = useRef('cubic-bezier(.22,1,.36,1)')
 
+  // Pinned-section header collapses to 0 when the pinned group is empty --
+  // measured height instead of a fixed max-height cap.
+  const { ref: pinnedHeadRef } = useAutoHeight<HTMLDivElement>({
+    open: state.pinnedOrder.length > 0,
+  })
+
   function toggle(id: string) {
     const target = state.items.find((it) => it.id === id)
     if (!target) return
@@ -326,7 +333,7 @@ export default function PinnedList({ items: initialItems = DEFAULT_ITEMS }: Pinn
 
       {/* Pinned section */}
       <div className={'pl-sec pinned' + (np === 0 ? ' empty' : '')}>
-        <div className="pl-head">
+        <div className="pl-head" ref={pinnedHeadRef}>
           <span className={`pl-head-icon ${iconClass('push_pin')}`}>push_pin</span>
           Pinned
           <span className="pl-count">{np}</span>

@@ -1,0 +1,377 @@
+// Render-safe: no import / no export. React 18.3 UMD global.
+const { useState, useRef } = React;
+
+// ─── layout constants ────────────────────────────────────────────────────────
+const ROW_H  = 38;
+const VH     = 220;
+const SPACER = (VH - ROW_H) / 2; // 91 px — top/bottom padding so first/last row can center
+
+// ─── data ────────────────────────────────────────────────────────────────────
+const MONTHS      = ['January','February','March','April','May','June',
+                     'July','August','September','October','November','December'];
+const MONTH_SHORT = ['Jan','Feb','Mar','Apr','May','Jun',
+                     'Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAY_NAMES   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const YEARS       = Array.from({length: 86}, (_, i) => 1950 + i);   // 1950-2035
+const HOURS       = Array.from({length: 12}, (_, i) => i + 1);      // 1-12
+const MINUTES     = Array.from({length: 60}, (_, i) => i);           // 0-59
+const AMPM        = ['AM', 'PM'];
+
+// ─── helpers ─────────────────────────────────────────────────────────────────
+function daysInMonth(m: number, y: number): number {
+  return new Date(y, m + 1, 0).getDate();
+}
+function pad2(n: number): string { return String(n).padStart(2, '0'); }
+function weekday(d: number, m: number, y: number): string {
+  return DAY_NAMES[new Date(y, m, d).getDay()];
+}
+
+// Default: Saturday 14 Jun 2025, 2:30 PM
+// YEARS[75]=2025, MONTHS[5]=June, day idx 13 = 14th, HOURS[1]=2, min 30, AMPM[1]=PM
+const DEF = { d: 13, mo: 5, y: 75, h: 1, mi: 30, ap: 1 };
+
+// ─── depth-effect engine (pure DOM, no re-render) ────────────────────────────
+function applyDepth(container: HTMLElement): void {
+  const ci  = container.scrollTop / ROW_H;
+  const els = container.querySelectorAll<HTMLElement>('.dt-item');
+  for (let i = 0; i < els.length; i++) {
+    const dist    = Math.abs(i - ci);
+    const d       = Math.min(dist, 3.8);
+    const scale   = (1 - d * 0.083).toFixed(3);
+    const opacity = Math.max(0.06, 1 - d * 0.265).toFixed(3);
+    const el      = els[i];
+    el.style.transform    = `scale(${scale})`;
+    el.style.opacity      = opacity;
+    el.style.fontWeight   = dist < 0.55 ? '700' : dist < 1.4 ? '500' : '400';
+    el.style.letterSpacing = dist < 0.55 ? '-0.3px' : '0px';
+  }
+}
+
+// ─── inline CSS ──────────────────────────────────────────────────────────────
+const CSS = `
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+.dt-root{
+  display:flex;justify-content:center;align-items:center;
+  min-height:100vh;padding:24px;
+  font-family:'Montserrat',system-ui,sans-serif;
+  background:#F1F5F9;
+}
+@media(prefers-color-scheme:dark){.dt-root{background:#0F172A}}
+
+.dt-card{
+  background:#FFFFFF;border-radius:20px;
+  border:1px solid #E2E8F0;
+  box-shadow:0 2px 8px rgba(0,0,0,0.05),0 8px 32px rgba(0,0,0,0.07);
+  padding:24px 20px 20px;width:340px;max-width:100%;
+  transition:box-shadow .3s ease;
+}
+@media(prefers-color-scheme:dark){
+  .dt-card{
+    background:#1E293B;border-color:#334155;
+    box-shadow:0 4px 32px rgba(0,0,0,0.5);
+  }
+}
+.dt-flash{
+  box-shadow:0 0 0 2.5px #10B981,0 4px 28px rgba(16,185,129,0.22) !important;
+}
+
+.dt-header{
+  display:flex;align-items:center;gap:8px;
+  padding-bottom:16px;
+  border-bottom:1px solid #E2E8F0;
+  margin-bottom:12px;
+}
+@media(prefers-color-scheme:dark){.dt-header{border-bottom-color:#334155}}
+
+.dt-dot{
+  width:8px;height:8px;border-radius:50%;flex-shrink:0;
+  transition:background .4s ease;
+}
+.dt-header-text{
+  font-size:13px;font-weight:700;letter-spacing:-0.2px;
+  color:#1E293B;line-height:1.4;
+}
+@media(prefers-color-scheme:dark){.dt-header-text{color:#F1F5F9}}
+
+.dt-section{
+  font-size:9.5px;font-weight:700;letter-spacing:1.4px;
+  color:#94A3B8;text-transform:uppercase;
+  margin-bottom:2px;padding-left:6px;
+}
+
+.dt-row{display:flex;gap:2px;position:relative}
+.dt-sep{height:1px;background:#F1F5F9;margin:10px 0 8px}
+@media(prefers-color-scheme:dark){.dt-sep{background:#0F172A}}
+
+/* per-column wrapper — holds pill + scroll container */
+.dt-col{flex:1;position:relative}
+.dt-col-wide{flex:1.9}
+
+.dt-pill{
+  position:absolute;
+  top:50%;left:3px;right:3px;
+  height:${ROW_H}px;
+  transform:translateY(-50%);
+  background:rgba(148,163,184,0.16);
+  border:1px solid rgba(148,163,184,0.28);
+  border-radius:10px;
+  pointer-events:none;z-index:2;
+}
+@media(prefers-color-scheme:dark){
+  .dt-pill{background:rgba(51,65,85,0.6);border-color:rgba(100,116,139,0.32)}
+}
+
+.dt-wheel{
+  height:${VH}px;
+  overflow-y:scroll;
+  scroll-snap-type:y mandatory;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  overscroll-behavior:contain;
+  position:relative;z-index:1;
+  mask-image:linear-gradient(to bottom,
+    transparent 0%,
+    rgba(0,0,0,0.08) 7%,
+    rgba(0,0,0,0.65) 20%,
+    #000 34%,#000 66%,
+    rgba(0,0,0,0.65) 80%,
+    rgba(0,0,0,0.08) 93%,
+    transparent 100%
+  );
+  -webkit-mask-image:linear-gradient(to bottom,
+    transparent 0%,
+    rgba(0,0,0,0.08) 7%,
+    rgba(0,0,0,0.65) 20%,
+    #000 34%,#000 66%,
+    rgba(0,0,0,0.65) 80%,
+    rgba(0,0,0,0.08) 93%,
+    transparent 100%
+  );
+}
+.dt-wheel::-webkit-scrollbar{display:none}
+
+.dt-item{
+  height:${ROW_H}px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:400;
+  color:#334155;
+  cursor:pointer;
+  scroll-snap-align:center;
+  user-select:none;
+  will-change:transform,opacity;
+  white-space:nowrap;
+}
+@media(prefers-color-scheme:dark){.dt-item{color:#CBD5E1}}
+
+.dt-btn{
+  display:block;width:100%;margin-top:16px;
+  padding:13px 24px;
+  background:#10B981;color:#FFFFFF;
+  border:none;border-radius:14px;
+  font-family:'Montserrat',system-ui,sans-serif;
+  font-size:15px;font-weight:700;letter-spacing:-0.2px;
+  cursor:pointer;
+  -webkit-font-smoothing:antialiased;
+  transition:transform .18s cubic-bezier(.34,1.56,.64,1),background .14s ease;
+}
+.dt-btn:hover{transform:scale(1.03);background:#059669}
+.dt-btn:active{transform:scale(0.96)}
+.dt-btn:focus-visible{outline:2.5px solid #10B981;outline-offset:3px}
+
+@media(prefers-reduced-motion:reduce){
+  .dt-btn,.dt-card,.dt-dot{transition:none !important}
+}
+`;
+
+// ─── WheelColumn ─────────────────────────────────────────────────────────────
+interface WheelColumnProps {
+  items: string[];
+  selectedIndex: number;
+  onSettle: (idx: number) => void;
+  wide?: boolean;
+}
+
+function WheelColumn({ items, selectedIndex, onSettle, wide }: WheelColumnProps) {
+  const elRef    = useRef<HTMLDivElement | null>(null);
+  const prevIdx  = useRef<number | null>(null); // null = not yet mounted
+  const timer    = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function snapTo(el: HTMLElement, idx: number): void {
+    el.style.scrollSnapType = 'none';
+    el.scrollTop = idx * ROW_H;
+    requestAnimationFrame(() => {
+      el.style.scrollSnapType = 'y mandatory';
+      applyDepth(el);
+    });
+  }
+
+  // Prop-change detection during render (no useEffect needed)
+  // When parent clamps selectedIndex (e.g. day out of range after month change),
+  // prevIdx diverges and we programmatically re-align the scroll container.
+  if (prevIdx.current !== null &&
+      prevIdx.current !== selectedIndex &&
+      elRef.current) {
+    prevIdx.current = selectedIndex;
+    snapTo(elRef.current, selectedIndex);
+  }
+
+  // Callback ref — fires once on mount, wires the initial scroll position
+  const refCb = (el: HTMLDivElement | null): void => {
+    if (el) {
+      elRef.current   = el;
+      prevIdx.current = selectedIndex;
+      snapTo(el, selectedIndex);
+    }
+  };
+
+  const onScroll = (): void => {
+    const el = elRef.current;
+    if (!el) return;
+    // depth effect on every scroll frame
+    requestAnimationFrame(() => applyDepth(el));
+    // settle → commit when scrolling stops
+    if (timer.current !== null) clearTimeout(timer.current);
+    timer.current = setTimeout(() => {
+      const raw = Math.round(el.scrollTop / ROW_H);
+      const idx = Math.min(Math.max(raw, 0), items.length - 1);
+      if (idx !== prevIdx.current) {
+        prevIdx.current = idx;
+        onSettle(idx);
+      }
+    }, 150);
+  };
+
+  return (
+    <div className={`dt-col${wide ? ' dt-col-wide' : ''}`}>
+      <div className="dt-pill" />
+      <div ref={refCb} className="dt-wheel" onScroll={onScroll}>
+        <div style={{ height: SPACER, flexShrink: 0 }} />
+        {items.map((item, i) => (
+          <div
+            key={item}
+            className="dt-item"
+            onClick={(): void => {
+              const el = elRef.current;
+              if (!el) return;
+              el.scrollTo({ top: i * ROW_H, behavior: 'smooth' });
+              if (timer.current !== null) clearTimeout(timer.current);
+              timer.current = setTimeout(() => {
+                prevIdx.current = i;
+                onSettle(i);
+              }, 380);
+            }}
+          >
+            {item}
+          </div>
+        ))}
+        <div style={{ height: SPACER, flexShrink: 0 }} />
+      </div>
+    </div>
+  );
+}
+
+// ─── root component (must NOT be named DateTimePicker — see render-safety rule) ──
+function DateTimePickerRoot() {
+  const [dayIdx, setDayIdx] = useState<number>(DEF.d);
+  const [moIdx,  setMoIdx]  = useState<number>(DEF.mo);
+  const [yrIdx,  setYrIdx]  = useState<number>(DEF.y);
+  const [hrIdx,  setHrIdx]  = useState<number>(DEF.h);
+  const [minIdx, setMinIdx] = useState<number>(DEF.mi);
+  const [apIdx,  setApIdx]  = useState<number>(DEF.ap);
+  const [flash,  setFlash]  = useState<boolean>(false);
+  const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── derived date facts ────────────────────────────────────────────────────
+  const year    = YEARS[yrIdx];
+  const numDays = daysInMonth(moIdx, year);
+
+  // Clamp day during render (setState during render — React-endorsed pattern)
+  const clampedDay = Math.min(dayIdx, numDays - 1);
+  if (clampedDay !== dayIdx) setDayIdx(clampedDay);
+
+  // ── item arrays ───────────────────────────────────────────────────────────
+  const dayItems = Array.from({ length: numDays }, (_, i) => String(i + 1));
+  const yrItems  = YEARS.map(String);
+  const hrItems  = HOURS.map(String);
+  const minItems = MINUTES.map(pad2);
+
+  // ── header label ─────────────────────────────────────────────────────────
+  const d      = clampedDay + 1;
+  const dn     = weekday(d, moIdx, year);
+  const label  = `${dn} ${d} ${MONTH_SHORT[moIdx]} ${year} · ${HOURS[hrIdx]}:${pad2(minIdx)} ${AMPM[apIdx]}`;
+
+  const handleConfirm = (): void => {
+    if (flashTimer.current !== null) clearTimeout(flashTimer.current);
+    setFlash(true);
+    flashTimer.current = setTimeout(() => setFlash(false), 900);
+  };
+
+  return (
+    <div className="dt-root">
+      <style>{CSS}</style>
+      <div className={`dt-card${flash ? ' dt-flash' : ''}`}>
+
+        {/* ── header ── */}
+        <div className="dt-header">
+          <div
+            className="dt-dot"
+            style={{ background: flash ? '#10B981' : '#CBD5E1' }}
+          />
+          <span className="dt-header-text">{label}</span>
+        </div>
+
+        {/* ── date wheels ── */}
+        <div className="dt-section">Date</div>
+        <div className="dt-row">
+          <WheelColumn
+            items={dayItems}
+            selectedIndex={clampedDay}
+            onSettle={setDayIdx}
+          />
+          <WheelColumn
+            items={MONTHS}
+            selectedIndex={moIdx}
+            onSettle={setMoIdx}
+            wide
+          />
+          <WheelColumn
+            items={yrItems}
+            selectedIndex={yrIdx}
+            onSettle={setYrIdx}
+          />
+        </div>
+
+        <div className="dt-sep" />
+
+        {/* ── time wheels ── */}
+        <div className="dt-section">Time</div>
+        <div className="dt-row">
+          <WheelColumn
+            items={hrItems}
+            selectedIndex={hrIdx}
+            onSettle={setHrIdx}
+          />
+          <WheelColumn
+            items={minItems}
+            selectedIndex={minIdx}
+            onSettle={setMinIdx}
+          />
+          <WheelColumn
+            items={AMPM}
+            selectedIndex={apIdx}
+            onSettle={setApIdx}
+          />
+        </div>
+
+        {/* ── confirm ── */}
+        <button type="button" className="dt-btn" onClick={handleConfirm}>
+          Confirm Selection
+        </button>
+
+      </div>
+    </div>
+  );
+}
+
+// ─── expose to harness ───────────────────────────────────────────────────────
+window.DateTimePicker = DateTimePickerRoot;
