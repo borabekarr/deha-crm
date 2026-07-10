@@ -203,28 +203,32 @@ export default function Multisteps() {
 
           {/* Action buttons */}
           <div className="ms-actions">
-            <button
-              type="button"
-              className={`ms-btn ms-btn--back${isFirst ? '' : ' show'}`}
-              onClick={handleBack}
-              onPointerDown={handleBackPointerDown}
-              aria-label="Go back"
-            >
-              Back
-            </button>
-            <button
-              type="button"
-              ref={nextBtnRef}
-              className={`ms-btn ms-btn--primary${isFinish ? ' is-finish' : ''}`}
-              onClick={handleNext}
-              onPointerDown={handleNextPointerDown}
-              aria-label={isFinish ? 'Finish setup' : 'Continue to next step'}
-            >
-              <span className="ms-check">
-                <span className="material-symbols-outlined">check</span>
-              </span>
-              <span className="ms-next-label">{isFinish ? 'Finish' : 'Continue'}</span>
-            </button>
+            <div className="ms-btn-slot ms-btn-slot--back">
+              <button
+                type="button"
+                className={`ms-btn ms-btn--back${isFirst ? '' : ' show'}`}
+                onClick={handleBack}
+                onPointerDown={handleBackPointerDown}
+                aria-label="Go back"
+              >
+                Back
+              </button>
+            </div>
+            <div className="ms-btn-slot ms-btn-slot--primary">
+              <button
+                type="button"
+                ref={nextBtnRef}
+                className={`ms-btn ms-btn--primary${isFinish ? ' is-finish' : ''}`}
+                onClick={handleNext}
+                onPointerDown={handleNextPointerDown}
+                aria-label={isFinish ? 'Finish setup' : 'Continue to next step'}
+              >
+                <span className="ms-check">
+                  <span className="material-symbols-outlined">check</span>
+                </span>
+                <span className="ms-next-label">{isFinish ? 'Finish' : 'Continue'}</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

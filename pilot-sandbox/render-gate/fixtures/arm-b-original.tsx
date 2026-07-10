@@ -1,0 +1,644 @@
+// Deha CRM — iOS-inspired Date + Time wheel picker
+// Render-safe: no imports/exports, React is a global (React 18.3 UMD).
+// No useEffect. All DOM wiring via callback refs + rAF + scroll settle timers.
+
+const { useState, useRef, useMemo } = React;
+
+// ---- constants ----------------------------------------------------------
+const ROW_H = 38;
+const VIEW_H = 228; // 6 visible rows
+const SPACER = (VIEW_H - ROW_H) / 2;
+
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const WEEKDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+const YEAR_START = 1950;
+const YEAR_END = 2035;
+const YEARS: string[] = [];
+for (let y = YEAR_START; y <= YEAR_END; y++) YEARS.push(String(y));
+
+const HOURS: string[] = [];
+for (let h = 1; h <= 12; h++) HOURS.push(String(h));
+
+const MINUTES: string[] = [];
+for (let m = 0; m < 60; m++) MINUTES.push(m < 10 ? '0' + m : String(m));
+
+const AMPM = ['AM', 'PM'];
+
+function daysInMonth(monthIdx: number, year: number): number {
+  return new Date(year, monthIdx + 1, 0).getDate();
+}
+
+// ---- Wheel --------------------------------------------------------------
+interface WheelProps {
+  items: string[];
+  index: number;
+  onIndexChange: (i: number) => void;
+  width: number | string;
+  ariaLabel: string;
+  align?: 'center' | 'left' | 'right';
+}
+
+function Wheel(props: WheelProps) {
+  const { items, index, onIndexChange, width, ariaLabel, align } = props;
+
+  // Mutable state held outside React so scroll handlers can mutate freely.
+  const s = useRef<any>({
+    el: null,
+    rows: [] as (HTMLDivElement | null)[],
+    aligning: true,
+    lastIndex: index,
+    settleTimer: null as any,
+    rafPending: false,
+    initialized: false,
+  }).current;
+
+  // External index changes (e.g. day clamped when month switches):
+  // detected in render, applied after commit via rAF.
+  if (s.initialized && s.lastIndex !== index) {
+    s.lastIndex = index;
+    s.aligning = true;
+    const target = index;
+    requestAnimationFrame(() => programmaticSnap(s, target));
+  }
+
+  // Clamp lastIndex if items shrunk under us.
+  if (s.lastIndex > items.length - 1) s.lastIndex = items.length - 1;
+
+  const containerRef = (el: HTMLDivElement | null) => {
+    if (!el || s.el === el) return;
+    s.el = el;
+    // Initial align after paint.
+    requestAnimationFrame(() => {
+      programmaticSnap(s, s.lastIndex);
+      requestAnimationFrame(() => {
+        s.aligning = false;
+        s.initialized = true;
+      });
+    });
+  };
+
+  const setRowRef = (i: number) => (el: HTMLDivElement | null) => {
+    if (el) s.rows[i] = el;
+    else s.rows[i] = null;
+  };
+
+  const onScroll = () => {
+    if (!s.rafPending) {
+      s.rafPending = true;
+      requestAnimationFrame(() => {
+        s.rafPending = false;
+        updateDepth(s);
+      });
+    }
+    if (s.settleTimer) clearTimeout(s.settleTimer);
+    s.settleTimer = setTimeout(() => commit(s, items.length, onIndexChange), 120);
+  };
+
+  const clickRow = (i: number) => () => {
+    const el = s.el as HTMLDivElement | null;
+    if (!el) return;
+    el.scrollTo({ top: i * ROW_H, behavior: 'smooth' });
+  };
+
+  return (
+    <div className={'dt-wheel' + (align ? ' dt-wheel--' + align : '')} style={{ width }}>
+      <div className="dt-wheel-mask" />
+      <div className="dt-wheel-pill" aria-hidden="true" />
+      <div
+        className="dt-wheel-scroll"
+        ref={containerRef}
+        onScroll={onScroll}
+        role="listbox"
+        aria-label={ariaLabel}
+        tabIndex={0}
+      >
+        <div className="dt-wheel-spacer" style={{ height: SPACER }} />
+        {items.map((it, i) => (
+          <div
+            key={it + ':' + i}
+            className="dt-wheel-row"
+            ref={setRowRef(i)}
+            onClick={clickRow(i)}
+            role="option"
+            aria-selected={i === s.lastIndex}
+          >
+            <span className="dt-wheel-row-inner">{it}</span>
+          </div>
+        ))}
+        <div className="dt-wheel-spacer" style={{ height: SPACER }} />
+      </div>
+    </div>
+  );
+}
+
+function programmaticSnap(state: any, idx: number) {
+  const el = state.el as HTMLDivElement | null;
+  if (!el) return;
+  const prev = el.style.scrollSnapType;
+  el.style.scrollSnapType = 'none';
+  el.scrollTop = idx * ROW_H;
+  updateDepth(state);
+  requestAnimationFrame(() => {
+    el.style.scrollSnapType = prev || 'y mandatory';
+  });
+}
+
+function updateDepth(state: any) {
+  const el = state.el as HTMLDivElement | null;
+  if (!el) return;
+  const center = el.scrollTop / ROW_H;
+  const rows = state.rows as (HTMLDivElement | null)[];
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row) continue;
+    const d = i - center;
+    const ad = Math.abs(d);
+    const scale = Math.max(0.6, 1 - ad * 0.12);
+    const opacity = Math.max(0.12, 1 - ad * 0.26);
+    const rot = Math.max(-72, Math.min(72, d * 20));
+    row.style.transform = 'perspective(700px) rotateX(' + rot + 'deg) scale(' + scale + ')';
+    row.style.opacity = String(opacity);
+    if (ad < 0.5) row.setAttribute('data-center', 'true');
+    else row.removeAttribute('data-center');
+  }
+}
+
+function commit(state: any, itemCount: number, onIndexChange: (i: number) => void) {
+  const el = state.el as HTMLDivElement | null;
+  if (!el) return;
+  const raw = Math.round(el.scrollTop / ROW_H);
+  const clamped = Math.max(0, Math.min(itemCount - 1, raw));
+  if (Math.abs(el.scrollTop - clamped * ROW_H) > 0.5) {
+    programmaticSnap(state, clamped);
+  }
+  if (state.aligning) {
+    state.aligning = false;
+    return;
+  }
+  if (clamped !== state.lastIndex) {
+    state.lastIndex = clamped;
+    onIndexChange(clamped);
+  }
+}
+
+// ---- Root ---------------------------------------------------------------
+function DateTimePickerRoot() {
+  // Seeded to a constant: 14 June 2025 (Saturday), 2:30 PM.
+  const [year, setYear] = useState(2025);
+  const [monthIdx, setMonthIdx] = useState(5); // June
+  const [day, setDay] = useState(14);
+  const [hour12, setHour12] = useState(2);
+  const [minute, setMinute] = useState(30);
+  const [ampm, setAmpm] = useState<'AM' | 'PM'>('PM');
+  const [pulseKey, setPulseKey] = useState(0);
+  const [confirmed, setConfirmed] = useState<string | null>(null);
+
+  // Day-clamp: derived from month+year, checked in render.
+  const maxDay = daysInMonth(monthIdx, year);
+  const [prevMax, setPrevMax] = useState(maxDay);
+  if (prevMax !== maxDay) {
+    setPrevMax(maxDay);
+    if (day > maxDay) setDay(maxDay);
+  }
+
+  const dayItems = useMemo(() => {
+    const arr: string[] = [];
+    for (let d = 1; d <= maxDay; d++) arr.push(String(d));
+    return arr;
+  }, [maxDay]);
+
+  const safeDay = Math.min(day, maxDay);
+  const weekday = WEEKDAYS[new Date(year, monthIdx, safeDay).getDay()];
+  const displayTime =
+    hour12 + ':' + (minute < 10 ? '0' + minute : String(minute)) + ' ' + ampm;
+  const displayDate = weekday + ' ' + safeDay + ' ' + MONTHS_SHORT[monthIdx] + ' ' + year;
+
+  const onConfirm = () => {
+    setConfirmed(displayDate + ' · ' + displayTime);
+    setPulseKey((k) => k + 1);
+  };
+
+  return (
+    <div className="dt-root">
+      <style>{CSS}</style>
+
+      <div className="dt-card" role="group" aria-label="Date and time picker">
+        <div className="dt-header">
+          <div className="dt-header-label">Selected</div>
+          <div className="dt-header-value" key={pulseKey}>
+            <span className="dt-header-date">{displayDate}</span>
+            <span className="dt-header-dot" aria-hidden="true">·</span>
+            <span className="dt-header-time">{displayTime}</span>
+          </div>
+        </div>
+
+        <div className="dt-section">
+          <div className="dt-section-label">Date</div>
+          <div className="dt-wheels">
+            <Wheel
+              items={dayItems}
+              index={safeDay - 1}
+              onIndexChange={(i) => setDay(i + 1)}
+              width={72}
+              ariaLabel="Day"
+            />
+            <Wheel
+              items={MONTHS}
+              index={monthIdx}
+              onIndexChange={setMonthIdx}
+              width={148}
+              ariaLabel="Month"
+              align="left"
+            />
+            <Wheel
+              items={YEARS}
+              index={year - YEAR_START}
+              onIndexChange={(i) => setYear(YEAR_START + i)}
+              width={92}
+              ariaLabel="Year"
+            />
+          </div>
+        </div>
+
+        <div className="dt-divider" aria-hidden="true" />
+
+        <div className="dt-section">
+          <div className="dt-section-label">Time</div>
+          <div className="dt-wheels">
+            <Wheel
+              items={HOURS}
+              index={hour12 - 1}
+              onIndexChange={(i) => setHour12(i + 1)}
+              width={72}
+              ariaLabel="Hour"
+              align="right"
+            />
+            <div className="dt-colon" aria-hidden="true">:</div>
+            <Wheel
+              items={MINUTES}
+              index={minute}
+              onIndexChange={setMinute}
+              width={72}
+              ariaLabel="Minute"
+              align="left"
+            />
+            <Wheel
+              items={AMPM}
+              index={ampm === 'AM' ? 0 : 1}
+              onIndexChange={(i) => setAmpm(i === 0 ? 'AM' : 'PM')}
+              width={72}
+              ariaLabel="AM or PM"
+            />
+          </div>
+        </div>
+
+        <div className="dt-footer">
+          {confirmed ? (
+            <div className="dt-echo" role="status" key={'e' + pulseKey}>
+              <span className="dt-echo-tick" aria-hidden="true">✓</span>
+              <span className="dt-echo-text">{confirmed}</span>
+            </div>
+          ) : (
+            <div className="dt-hint">Scroll or tap a row · then confirm</div>
+          )}
+          <button type="button" className="dt-btn-green" onClick={onConfirm}>
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---- CSS (single scoped block) -----------------------------------------
+const CSS = `
+.dt-root{
+  font-family:'Montserrat',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color:#0F172A;
+  padding:32px 16px;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  min-height:100%;
+  background:
+    radial-gradient(1200px 600px at 20% -10%, #E2E8F0 0%, transparent 55%),
+    radial-gradient(1000px 600px at 100% 110%, #F1F5F9 0%, transparent 60%),
+    #F8FAFC;
+}
+.dt-card{
+  width:100%;
+  max-width:520px;
+  background:#FFFFFF;
+  border:1px solid #E2E8F0;
+  border-radius:24px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.9) inset,
+    0 24px 48px -20px rgba(15,23,42,.18),
+    0 8px 20px -12px rgba(15,23,42,.14);
+  padding:24px;
+  animation:dt-pop .55s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes dt-pop{
+  from{opacity:0;transform:translateY(8px) scale(.985);}
+  to{opacity:1;transform:none;}
+}
+
+.dt-header{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  padding:4px 4px 16px;
+}
+.dt-header-label{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:#64748B;
+}
+.dt-header-value{
+  font-size:22px;
+  font-weight:800;
+  letter-spacing:-0.4px;
+  color:#0F172A;
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  flex-wrap:wrap;
+  animation:dt-slidein .45s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes dt-slidein{
+  from{opacity:0;transform:translateY(4px);}
+  to{opacity:1;transform:none;}
+}
+.dt-header-date{font-variant-numeric:tabular-nums;}
+.dt-header-dot{color:#CBD5E1;font-weight:400;}
+.dt-header-time{
+  color:#10B981;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-0.3px;
+}
+
+.dt-section{padding:8px 0;}
+.dt-section-label{
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:#94A3B8;
+  padding:0 4px 8px;
+}
+
+.dt-wheels{
+  display:flex;
+  align-items:stretch;
+  justify-content:center;
+  gap:6px;
+  background:linear-gradient(180deg,#F8FAFC 0%,#F1F5F9 100%);
+  border:1px solid #E2E8F0;
+  border-radius:16px;
+  padding:8px;
+  position:relative;
+}
+
+.dt-colon{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:26px;
+  font-weight:800;
+  color:#334155;
+  padding-bottom:6px;
+  width:12px;
+}
+
+.dt-divider{
+  height:1px;
+  background:linear-gradient(90deg,transparent,#E2E8F0 20%,#E2E8F0 80%,transparent);
+  margin:14px 0 10px;
+}
+
+/* ---- Wheel ---- */
+.dt-wheel{
+  position:relative;
+  height:${VIEW_H}px;
+  border-radius:12px;
+  overflow:hidden;
+  flex:0 0 auto;
+}
+.dt-wheel-scroll{
+  height:100%;
+  overflow-y:scroll;
+  scroll-snap-type:y mandatory;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+  -webkit-overflow-scrolling:touch;
+  outline:none;
+}
+.dt-wheel-scroll::-webkit-scrollbar{display:none;}
+.dt-wheel-scroll:focus-visible{
+  box-shadow:inset 0 0 0 2px #10B981;
+  border-radius:12px;
+}
+
+.dt-wheel-spacer{width:100%;pointer-events:none;}
+
+.dt-wheel-row{
+  height:${ROW_H}px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  scroll-snap-align:center;
+  scroll-snap-stop:always;
+  color:#475569;
+  font-size:19px;
+  font-weight:600;
+  letter-spacing:-0.2px;
+  font-variant-numeric:tabular-nums;
+  cursor:pointer;
+  will-change:transform,opacity;
+  transform:perspective(700px) rotateX(0deg) scale(1);
+  transition:color .18s cubic-bezier(.22,1,.36,1);
+  user-select:none;
+}
+.dt-wheel--left .dt-wheel-row{justify-content:flex-start;padding-left:14px;}
+.dt-wheel--right .dt-wheel-row{justify-content:flex-end;padding-right:14px;}
+.dt-wheel-row[data-center="true"]{
+  color:#0F172A;
+  font-weight:800;
+  letter-spacing:-0.3px;
+}
+.dt-wheel-row-inner{display:inline-block;}
+
+.dt-wheel-mask{
+  position:absolute;inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(180deg,
+      rgba(248,250,252,.98) 0%,
+      rgba(248,250,252,.72) 14%,
+      rgba(248,250,252,0) 38%,
+      rgba(248,250,252,0) 62%,
+      rgba(248,250,252,.72) 86%,
+      rgba(248,250,252,.98) 100%);
+  z-index:2;
+  border-radius:12px;
+}
+
+.dt-wheel-pill{
+  position:absolute;
+  left:4px;right:4px;
+  top:50%;
+  height:${ROW_H}px;
+  transform:translateY(-50%);
+  border-radius:10px;
+  background:linear-gradient(180deg,rgba(148,163,184,.16),rgba(148,163,184,.08));
+  border-top:1px solid rgba(148,163,184,.35);
+  border-bottom:1px solid rgba(148,163,184,.35);
+  pointer-events:none;
+  z-index:1;
+}
+
+/* ---- Footer ---- */
+.dt-footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding-top:20px;
+  flex-wrap:wrap;
+}
+.dt-hint{
+  font-size:12px;
+  font-weight:500;
+  color:#94A3B8;
+  letter-spacing:.02em;
+}
+.dt-echo{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  background:rgba(16,185,129,.10);
+  border:1px solid rgba(16,185,129,.32);
+  border-radius:999px;
+  color:#065F46;
+  font-size:12.5px;
+  font-weight:700;
+  letter-spacing:-0.1px;
+  animation:dt-echo-in .5s cubic-bezier(.34,1.56,.64,1) both;
+  max-width:100%;
+}
+.dt-echo-tick{
+  display:inline-flex;
+  width:18px;height:18px;
+  align-items:center;justify-content:center;
+  border-radius:999px;
+  background:#10B981;
+  color:#fff;
+  font-size:11px;
+  font-weight:900;
+}
+@keyframes dt-echo-in{
+  from{opacity:0;transform:translateX(-6px) scale(.96);}
+  to{opacity:1;transform:none;}
+}
+
+.dt-btn-green{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  font-family:inherit;
+  font-weight:800;
+  font-size:14px;
+  letter-spacing:-0.1px;
+  padding:12px 22px;
+  border-radius:12px;
+  color:#fff;
+  background:linear-gradient(180deg,#34D399 0%,#10B981 55%,#059669 100%);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.5) inset,
+    0 8px 20px -8px rgba(16,185,129,.55),
+    0 2px 4px -1px rgba(6,95,70,.35);
+  transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .18s ease;
+  will-change:transform;
+}
+.dt-btn-green:hover{transform:scale(1.03);}
+.dt-btn-green:active{transform:scale(.96);}
+.dt-btn-green:focus-visible{
+  outline:none;
+  box-shadow:
+    0 0 0 3px rgba(16,185,129,.35),
+    0 8px 20px -8px rgba(16,185,129,.55);
+}
+
+/* ---- Dark mode ---- */
+@media (prefers-color-scheme: dark){
+  .dt-root{
+    color:#F8FAFC;
+    background:
+      radial-gradient(1200px 600px at 20% -10%, #1E293B 0%, transparent 55%),
+      radial-gradient(1000px 600px at 100% 110%, #0F172A 0%, transparent 60%),
+      #0B1220;
+  }
+  .dt-card{
+    background:#1E293B;
+    border-color:#334155;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.04) inset,
+      0 24px 48px -20px rgba(0,0,0,.6),
+      0 8px 20px -12px rgba(0,0,0,.5);
+  }
+  .dt-header-label{color:#94A3B8;}
+  .dt-header-value{color:#F8FAFC;}
+  .dt-header-dot{color:#475569;}
+  .dt-section-label{color:#64748B;}
+  .dt-wheels{
+    background:linear-gradient(180deg,#0F172A 0%,#1E293B 100%);
+    border-color:#334155;
+  }
+  .dt-colon{color:#CBD5E1;}
+  .dt-divider{
+    background:linear-gradient(90deg,transparent,#334155 20%,#334155 80%,transparent);
+  }
+  .dt-wheel-row{color:#94A3B8;}
+  .dt-wheel-row[data-center="true"]{color:#F8FAFC;}
+  .dt-wheel-mask{
+    background:
+      linear-gradient(180deg,
+        rgba(15,23,42,.98) 0%,
+        rgba(15,23,42,.72) 14%,
+        rgba(15,23,42,0) 38%,
+        rgba(15,23,42,0) 62%,
+        rgba(15,23,42,.72) 86%,
+        rgba(15,23,42,.98) 100%);
+  }
+  .dt-wheel-pill{
+    background:linear-gradient(180deg,rgba(203,213,225,.10),rgba(203,213,225,.04));
+    border-top-color:rgba(203,213,225,.20);
+    border-bottom-color:rgba(203,213,225,.20);
+  }
+  .dt-hint{color:#64748B;}
+  .dt-echo{
+    background:rgba(16,185,129,.14);
+    border-color:rgba(16,185,129,.42);
+    color:#6EE7B7;
+  }
+}
+
+/* ---- Reduced motion ---- */
+@media (prefers-reduced-motion: reduce){
+  .dt-card,.dt-header-value,.dt-echo{animation:none !important;}
+  .dt-btn-green{transition:none;}
+  .dt-wheel-row{transition:none;}
+}
+`;
+
+// Assign to global. Root component intentionally NOT named DateTimePicker
+// to avoid self-recursion in this non-module harness.
+(window as any).DateTimePicker = DateTimePickerRoot;

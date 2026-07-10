@@ -1,0 +1,59 @@
+/* hover-tokens.css
+ * Single source of truth for normalized hover power and the proximity
+ * visual mapping. Consumed by the singleton proximity engine
+ * (lib/hooks/proximity-engine.ts), which writes the --prox custom property
+ * on [data-proximity] elements; this file owns the visual translation of
+ * that one number into scale/brightness/shadow.
+ *
+ * --prox-radius is documentation/theming only -- the JS engine mirrors this
+ * default (120) internally and does not read this token at runtime.
+ */
+:root {
+  --prox-radius: 120px;
+  --hover-scale-max: 1.04;
+  --hover-brightness-max: 1.05;
+  --hover-shadow-y: 6px;
+  --hover-shadow-blur: 16px;
+  --hover-shadow-color: rgba(15, 23, 42, 0.16);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  /* Selector repeated 3x (specificity 0,3,0) to outrank component-level
+   * `.class:hover { filter: ... }` rules (0,2,0, e.g. .btn-primary:hover in
+   * preview/_base.css) without !important, so a local `filter: none`
+   * opt-out on [data-proximity] itself can still escape this rule. */
+  [data-proximity][data-proximity][data-proximity] {
+    scale: calc(1 + var(--prox, 0) * (var(--hover-scale-max) - 1));
+    filter: brightness(calc(1 + var(--prox, 0) * (var(--hover-brightness-max) - 1)))
+      drop-shadow(
+        0
+        calc(var(--prox, 0) * var(--hover-shadow-y))
+        calc(var(--prox, 0) * var(--hover-shadow-blur))
+        var(--hover-shadow-color)
+      );
+  }
+
+  /* Low specificity on purpose: `transition` shorthands don't merge across
+   * rules, so a component's own `transition:` (0,1,0, loaded after this file)
+   * must be able to win outright. Components that opt into proximity must
+   * list `scale`/`filter` themselves; this rule is only the bare fallback
+   * for [data-proximity] elements with no component-level transition. */
+  [data-proximity] {
+    transition:
+      scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+      filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+  }
+
+  [data-proximity]:hover,
+  [data-proximity]:focus-visible {
+    --prox: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-proximity][data-proximity][data-proximity] {
+    scale: none;
+    filter: none;
+    transition: none;
+  }
+}

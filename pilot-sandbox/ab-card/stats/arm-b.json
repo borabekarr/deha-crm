@@ -1,0 +1,18 @@
+{
+  "arm": "b",
+  "model": "claude-opus-4-7",
+  "exit_code": 0,
+  "wall_ms": 244784,
+  "input_tokens": 14,
+  "output_tokens": 23084,
+  "cache_read_input_tokens": 100826,
+  "cache_creation_input_tokens": 47100,
+  "total_cost_usd": 1.0985829999999999,
+  "duration_ms": 243338,
+  "duration_api_ms": 242844,
+  "num_turns": 4,
+  "is_error": false,
+  "result_tail": "s committed value via key-remount CSS animation; supports dark mode via `prefers-color-scheme` and honors `prefers-reduced-motion`. All styling is inline via one `<style>` block using the Montserrat + slate hex ramp + `#10B981` accent, with house cubic-beziers for spring/exit.\n\n**Debt logged:** none",
+  "file_exists": true,
+  "file_bytes": 18037
+}

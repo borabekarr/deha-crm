@@ -13,3 +13,6 @@ export {
 
 export { useAutoHeight } from './use-auto-height';
 export type { UseAutoHeightOptions, UseAutoHeightResult } from './use-auto-height';
+
+export { useProximityGroup, registerProximityGroup } from './use-proximity-group';
+export type { ProximityOptions } from './use-proximity-group';

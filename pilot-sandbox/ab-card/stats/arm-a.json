@@ -1,0 +1,17 @@
+{
+  "arm": "a",
+  "model": "claude-sonnet-4-6",
+  "exit_code": 0,
+  "wall_ms": 391299,
+  "input_tokens": 7,
+  "output_tokens": 26378,
+  "cache_read_input_tokens": 62955,
+  "cache_creation_input_tokens": 37665,
+  "total_cost_usd": 0.6405675,
+  "duration_ms": 387261,
+  "num_turns": 3,
+  "is_error": false,
+  "result_tail": "arations, the two `interface`/typed props can be erased.\n\n**Debt logged:** Montserrat not loaded from CDN (offline rule) \u2014 system-ui fallback renders instead if the OS doesn't have Montserrat installed | `scrollend` event not used (limited browser support); 150 ms settle timer is the fallback | none",
+  "file_exists": true,
+  "file_bytes": 13615
+}

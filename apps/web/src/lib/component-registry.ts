@@ -284,6 +284,16 @@ export const registry: RegistryEntry[] = [
     Component: lazy(() => import('@/components/design-system/buttons/Buttons')),
   },
   {
+    slug: 'buttons-proximity',
+    name: 'Buttons Proximity',
+    status: 'Proceeding',
+    category: 'Primitives',
+    subtitle: 'Proximity hover pilot',
+    viewport: { width: 700, height: 140 },
+    sourceHtml: '/design-system/preview/components-buttons.html',
+    Component: lazy(() => import('@/components/design-system/buttons-proximity/ButtonsProximity')),
+  },
+  {
     slug: 'pills',
     name: 'Pills, chips & badges',
     status: 'Finished',

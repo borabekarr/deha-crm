@@ -1,0 +1,17 @@
+<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>&nbsp;</title>
+<style>html,body{margin:0;background:#f4f4f5;font-family:system-ui,sans-serif}
+@media (prefers-color-scheme:dark){html,body{background:#0b0b0c;color:#e7e7ea}}
+.wrap{display:grid;grid-template-columns:repeat(3,minmax(340px,1fr));gap:0;height:82vh;min-height:520px}
+iframe{border:0;width:100%;height:100%;background:transparent}
+.col+.col{border-left:1px solid rgba(128,128,128,.25)}
+.stats{border-collapse:collapse;width:100%;font-size:13px;margin:0}
+.stats th,.stats td{padding:8px 12px;border-bottom:1px solid rgba(128,128,128,.2);text-align:right}
+.stats th:first-child,.stats td:first-child{text-align:left;font-weight:700}
+.stats thead th{background:rgba(128,128,128,.08);position:sticky;top:0}
+.stats .muted{color:#9aa0a6;text-align:left}
+.stats .err{color:#EF4444;font-weight:700}
+.statwrap{overflow:auto;max-height:18vh}</style>
+</head><body><div class="wrap"><div class="col"><iframe src="submission1.html?v=5" title="1"></iframe></div><div class="col"><iframe src="submission2.html?v=5" title="2"></iframe></div><div class="col"><iframe src="submission3.html?v=5" title="3"></iframe></div></div>
+<div class="statwrap"><table class="stats"><thead><tr><th>arm</th><th>input tok</th><th>output tok</th><th>cache tok</th><th>duration</th><th>cost</th><th>turns</th><th>errored</th></tr></thead><tbody><tr><td>sub1</td><td>1,764</td><td>27,300</td><td>640,904</td><td>361.0s</td><td>$1.4889</td><td>17</td><td>no</td></tr><tr><td>sub2</td><td>7</td><td>26,378</td><td>62,955</td><td>387.3s</td><td>$0.6406</td><td>3</td><td>no</td></tr><tr><td>sub3</td><td>14</td><td>23,084</td><td>100,826</td><td>243.3s</td><td>$1.0986</td><td>4</td><td>no</td></tr></tbody></table></div>
+</body></html>

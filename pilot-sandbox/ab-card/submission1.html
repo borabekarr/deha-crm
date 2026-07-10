@@ -1,0 +1,386 @@
+<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="vendor/react.js"></script>
+<script src="vendor/react-dom.js"></script>
+<script>
+/* Harness watchdog: abort a runaway render before it OOM-crashes the tab.
+   Caps React.createElement; a well-behaved component uses a few hundred. */
+(function(){var n=0,orig=React.createElement;React.createElement=function(){if(++n>20000){throw new Error('render-watchdog: aborted after '+n+' createElement calls');}return orig.apply(React,arguments);};})();
+</script>
+<style>html,body{margin:0;padding:24px;background:#fff;font-family:system-ui,sans-serif}
+@media (prefers-color-scheme:dark){html,body{background:#0b0b0c}}</style>
+</head><body><div id="root"></div>
+<script>/* iOS-style Date + Time wheel picker for Deha CRM.
+   Render-safe for the no-bundler harness: React is a global, the module ends by
+   assigning window.DateTimePicker, and the root component is named
+   DateTimePickerRoot (never the global name) to avoid self-recursion. */
+const { useState, useRef, useCallback } = React;
+const ROW_H = 38;
+const VIEW_H = 190; // 5 visible rows
+const SPACER = (VIEW_H - ROW_H) / 2; // 76
+const MONTHS = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+];
+const MONTHS_SHORT = MONTHS.map((m) => m.slice(0, 3));
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const YEAR_MIN = 1950;
+const YEAR_MAX = 2035;
+const YEARS = [];
+for (let y = YEAR_MIN; y <= YEAR_MAX; y++)
+    YEARS.push(y);
+const HOURS = [];
+for (let h = 1; h <= 12; h++)
+    HOURS.push(String(h));
+const MINUTES = [];
+for (let m = 0; m < 60; m++)
+    MINUTES.push(m < 10 ? "0" + m : String(m));
+const AMPM = ["AM", "PM"];
+function daysInMonth(monthIdx, year) {
+    return new Date(year, monthIdx + 1, 0).getDate();
+}
+const STYLE = `
+.dt-card{
+  --bg:#FFFFFF; --surface:#F8FAFC; --border:#E2E8F0; --line:#F1F5F9;
+  --text:#0F172A; --muted:#64748B; --dim:#94A3B8; --sub:#475569;
+  --pill:rgba(148,163,184,0.16); --pill-line:rgba(100,116,139,0.28);
+  --green:#10B981; --green-press:#0EA372;
+  font-family:'Montserrat',system-ui,-apple-system,sans-serif;
+  width:344px; max-width:100%; box-sizing:border-box;
+  background:var(--bg); color:var(--text);
+  border:1px solid var(--border); border-radius:20px; padding:24px;
+  box-shadow:0 1px 2px rgba(15,23,42,0.04), 0 12px 32px -12px rgba(15,23,42,0.18);
+}
+.dt-card *{ box-sizing:border-box; }
+@media (prefers-color-scheme: dark){
+  .dt-card{
+    --bg:#1E293B; --surface:#0F172A; --border:#334155; --line:#334155;
+    --text:#F8FAFC; --muted:#94A3B8; --dim:#64748B; --sub:#CBD5E1;
+    --pill:rgba(148,163,184,0.13); --pill-line:rgba(203,213,225,0.22);
+    box-shadow:0 1px 2px rgba(0,0,0,0.4), 0 16px 40px -16px rgba(0,0,0,0.6);
+  }
+}
+.dt-head{ margin-bottom:16px; }
+.dt-eyebrow{
+  font-size:10px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase;
+  color:var(--dim); margin-bottom:6px;
+}
+.dt-title{
+  font-size:21px; font-weight:800; letter-spacing:-0.3px; color:var(--text);
+  line-height:1.1; font-variant-numeric:tabular-nums;
+}
+.dt-title .dt-dot{ color:var(--dim); font-weight:600; margin:0 4px; }
+.dt-title .dt-time{ color:var(--green); }
+.dt-group{ margin-top:16px; }
+.dt-glabel{
+  font-size:9px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase;
+  color:var(--dim); margin:0 0 6px 2px;
+}
+.dt-labels{ display:flex; gap:4px; margin-bottom:4px; }
+.dt-labels span{
+  font-size:10px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase;
+  color:var(--muted); text-align:center;
+}
+.dt-viewport{
+  position:relative; height:${VIEW_H}px; border-radius:14px;
+  background:var(--surface); border:1px solid var(--line); overflow:hidden;
+}
+.dt-fade{ position:absolute; left:0; right:0; height:${SPACER}px; z-index:3; pointer-events:none; }
+.dt-fade-top{ top:0; background:linear-gradient(to bottom, var(--surface) 12%, rgba(0,0,0,0)); }
+.dt-fade-bot{ bottom:0; background:linear-gradient(to top, var(--surface) 12%, rgba(0,0,0,0)); }
+.dt-pill{
+  position:absolute; left:8px; right:8px; top:50%; height:${ROW_H}px; z-index:2;
+  transform:translateY(-50%); border-radius:10px; background:var(--pill);
+  border-top:1px solid var(--pill-line); border-bottom:1px solid var(--pill-line);
+  pointer-events:none;
+}
+.dt-wheels{ display:flex; gap:4px; height:100%; position:relative; z-index:1; }
+.dt-col{ flex:1 1 0; min-width:0; }
+.dt-scroll{
+  height:100%; overflow-y:auto; overflow-x:hidden;
+  scroll-snap-type:y mandatory; perspective:900px;
+  scrollbar-width:none; outline:none; text-align:center;
+  -webkit-overflow-scrolling:touch;
+}
+.dt-scroll::-webkit-scrollbar{ display:none; }
+.dt-scroll:focus-visible{ box-shadow:inset 0 0 0 2px var(--green); border-radius:10px; }
+.dt-spacer{ height:${SPACER}px; }
+.dt-item{
+  height:${ROW_H}px; line-height:${ROW_H}px; scroll-snap-align:center;
+  font-size:18px; font-weight:600; letter-spacing:-0.2px; color:var(--dim);
+  cursor:pointer; will-change:transform,opacity; transform-origin:center center;
+  font-variant-numeric:tabular-nums; user-select:none;
+  -webkit-font-smoothing:antialiased;
+}
+.dt-foot{ display:flex; align-items:center; gap:12px; margin-top:20px; }
+.dt-btn-green{
+  flex:1 1 auto; appearance:none; border:none; cursor:pointer;
+  background:var(--green); color:#FFFFFF; font-family:inherit;
+  font-size:14px; font-weight:700; letter-spacing:-0.2px;
+  height:46px; border-radius:13px; padding:0 18px;
+  box-shadow:0 6px 16px -6px rgba(16,185,129,0.7);
+  transition:transform .18s cubic-bezier(.34,1.56,.64,1), background .15s ease;
+}
+.dt-btn-green:hover{ transform:scale(1.03); background:var(--green-press); }
+.dt-btn-green:active{ transform:scale(.96); }
+.dt-btn-green:focus-visible{ outline:2px solid var(--text); outline-offset:2px; }
+.dt-echo{
+  min-width:0; flex:0 0 auto; max-width:52%;
+  font-size:12px; font-weight:700; letter-spacing:-0.2px; color:var(--sub);
+  font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden;
+  text-overflow:ellipsis; opacity:0;
+}
+.dt-echo.dt-live{ opacity:1; animation:dt-pop .42s cubic-bezier(.34,1.56,.64,1); }
+.dt-echo .dt-check{ color:var(--green); margin-right:4px; }
+@keyframes dt-pop{
+  0%{ transform:translateY(6px) scale(.92); opacity:0; }
+  100%{ transform:translateY(0) scale(1); opacity:1; }
+}
+@media (prefers-reduced-motion: reduce){
+  .dt-btn-green, .dt-echo.dt-live{ transition:none; animation:none; }
+  .dt-btn-green:hover, .dt-btn-green:active{ transform:none; }
+}
+`;
+function Wheel({ items, value, onChange, label }) {
+    const elRef = useRef(null);
+    const rowsRef = useRef([]);
+    const itemsRef = useRef(items);
+    const onChangeRef = useRef(onChange);
+    const alignedRef = useRef(value); // index the DOM is currently aligned to
+    const aligningRef = useRef(false);
+    const rafRef = useRef(0);
+    const settleRef = useRef(0);
+    itemsRef.current = items;
+    onChangeRef.current = onChange;
+    // Derive-in-render: external value change (e.g. day clamp) realigns the DOM.
+    if (elRef.current && alignedRef.current !== value) {
+        alignedRef.current = value;
+        const el = elRef.current;
+        requestAnimationFrame(() => programAlign(el, value));
+    }
+    function updateDepth(el) {
+        const center = el.scrollTop / ROW_H;
+        const n = itemsRef.current.length;
+        const rows = rowsRef.current;
+        for (let i = 0; i < n; i++) {
+            const row = rows[i];
+            if (!row)
+                continue;
+            const d = i - center;
+            const ad = Math.abs(d);
+            const scale = Math.max(0.62, 1 - ad * 0.16);
+            const opacity = Math.max(0.08, 1 - ad * 0.32);
+            let rot = d * -24;
+            if (rot > 70)
+                rot = 70;
+            if (rot < -70)
+                rot = -70;
+            row.style.transform = "rotateX(" + rot + "deg) scale(" + scale + ")";
+            row.style.opacity = opacity;
+            row.style.fontWeight = ad < 0.5 ? "800" : "600";
+            row.style.color = ad < 0.5 ? "var(--text)" : "var(--dim)";
+        }
+    }
+    function programAlign(el, idx) {
+        aligningRef.current = true;
+        el.style.scrollSnapType = "none";
+        el.scrollTop = idx * ROW_H;
+        requestAnimationFrame(() => {
+            el.style.scrollSnapType = "";
+            updateDepth(el);
+            aligningRef.current = false;
+        });
+    }
+    function settle(el) {
+        const raw = el.scrollTop / ROW_H;
+        const max = itemsRef.current.length - 1;
+        let idx = Math.round(raw);
+        if (idx < 0)
+            idx = 0;
+        if (idx > max)
+            idx = max;
+        if (Math.abs(raw - idx) > 0.001) {
+            el.style.scrollSnapType = "none";
+            el.scrollTop = idx * ROW_H;
+            requestAnimationFrame(() => {
+                el.style.scrollSnapType = "";
+                updateDepth(el);
+            });
+        }
+        if (aligningRef.current)
+            return;
+        if (idx !== alignedRef.current) {
+            alignedRef.current = idx;
+            onChangeRef.current(idx);
+        }
+    }
+    function onScroll() {
+        const el = elRef.current;
+        if (!el)
+            return;
+        if (rafRef.current)
+            cancelAnimationFrame(rafRef.current);
+        rafRef.current = requestAnimationFrame(() => updateDepth(el));
+        clearTimeout(settleRef.current);
+        settleRef.current = setTimeout(() => settle(el), 120);
+    }
+    function onScrollEnd() {
+        const el = elRef.current;
+        if (!el)
+            return;
+        clearTimeout(settleRef.current);
+        settle(el);
+    }
+    // Stable callback ref: wire listeners + initial align once; null = unmount cleanup.
+    const setRef = useCallback((el) => {
+        if (!el) {
+            const old = elRef.current;
+            if (old) {
+                old.removeEventListener("scroll", onScroll);
+                old.removeEventListener("scrollend", onScrollEnd);
+            }
+            clearTimeout(settleRef.current);
+            if (rafRef.current)
+                cancelAnimationFrame(rafRef.current);
+            elRef.current = null;
+            return;
+        }
+        elRef.current = el;
+        el.addEventListener("scroll", onScroll, { passive: true });
+        if ("onscrollend" in el)
+            el.addEventListener("scrollend", onScrollEnd);
+        programAlign(el, alignedRef.current);
+    }, []);
+    function clickRow(i) {
+        const el = elRef.current;
+        if (!el)
+            return;
+        el.scrollTo({ top: i * ROW_H, behavior: "smooth" });
+    }
+    function onKeyDown(e) {
+        const el = elRef.current;
+        if (!el)
+            return;
+        const cur = Math.round(el.scrollTop / ROW_H);
+        if (e.key === "ArrowUp") {
+            e.preventDefault();
+            clickRow(Math.max(0, cur - 1));
+        }
+        else if (e.key === "ArrowDown") {
+            e.preventDefault();
+            clickRow(Math.min(items.length - 1, cur + 1));
+        }
+    }
+    return (React.createElement("div", { className: "dt-col" },
+        React.createElement("div", { className: "dt-scroll", ref: setRef, tabIndex: 0, role: "listbox", "aria-label": label, onKeyDown: onKeyDown },
+            React.createElement("div", { className: "dt-spacer", "aria-hidden": "true" }),
+            items.map((it, i) => (React.createElement("div", { className: "dt-item", key: String(it), role: "option", "aria-selected": i === value, ref: (node) => {
+                    if (node)
+                        rowsRef.current[i] = node;
+                }, onClick: () => clickRow(i) }, it))),
+            React.createElement("div", { className: "dt-spacer", "aria-hidden": "true" }))));
+}
+function DateTimePickerRoot() {
+    // Seed: Saturday 14 June 2025, 2:30 PM (constant, deterministic).
+    const [monthIdx, setMonthIdx] = useState(5);
+    const [year, setYear] = useState(2025);
+    const [dayIdx, setDayIdx] = useState(13); // day 14 -> index 13
+    const [hourIdx, setHourIdx] = useState(1); // hour 2 -> index 1
+    const [minuteIdx, setMinuteIdx] = useState(30);
+    const [ampmIdx, setAmpmIdx] = useState(1); // PM
+    const [echo, setEcho] = useState("");
+    const [flash, setFlash] = useState(0);
+    const maxDay = daysInMonth(monthIdx, year);
+    // Derive-in-render clamp: re-clamp day when month/year shrinks the range.
+    if (dayIdx > maxDay - 1) {
+        setDayIdx(maxDay - 1);
+    }
+    const safeDayIdx = Math.min(dayIdx, maxDay - 1);
+    const days = [];
+    for (let d = 1; d <= maxDay; d++)
+        days.push(String(d));
+    const day = safeDayIdx + 1;
+    const hour = hourIdx + 1;
+    const minute = MINUTES[minuteIdx];
+    const ap = AMPM[ampmIdx];
+    const weekday = WEEKDAYS[new Date(year, monthIdx, day).getDay()];
+    const composed = weekday + " " + day + " " + MONTHS_SHORT[monthIdx] + " " + year +
+        " · " + hour + ":" + minute + " " + ap;
+    const confirm = () => {
+        setEcho(composed);
+        setFlash((f) => f + 1);
+    };
+    return (React.createElement("div", { className: "dt-card" },
+        React.createElement("style", null, STYLE),
+        React.createElement("div", { className: "dt-head" },
+            React.createElement("div", { className: "dt-eyebrow" }, "Schedule"),
+            React.createElement("div", { className: "dt-title" },
+                weekday,
+                " ",
+                day,
+                " ",
+                MONTHS_SHORT[monthIdx],
+                " ",
+                year,
+                React.createElement("span", { className: "dt-dot" }, "\u00B7"),
+                React.createElement("span", { className: "dt-time" },
+                    hour,
+                    ":",
+                    minute,
+                    " ",
+                    ap))),
+        React.createElement("div", { className: "dt-group" },
+            React.createElement("div", { className: "dt-glabel" }, "Date"),
+            React.createElement("div", { className: "dt-labels" },
+                React.createElement("span", { style: { flex: "0.8 1 0" } }, "Day"),
+                React.createElement("span", { style: { flex: "1.7 1 0" } }, "Month"),
+                React.createElement("span", { style: { flex: "1.1 1 0" } }, "Year")),
+            React.createElement("div", { className: "dt-viewport" },
+                React.createElement("div", { className: "dt-fade dt-fade-top" }),
+                React.createElement("div", { className: "dt-fade dt-fade-bot" }),
+                React.createElement("div", { className: "dt-pill" }),
+                React.createElement("div", { className: "dt-wheels" },
+                    React.createElement("div", { style: { flex: "0.8 1 0", minWidth: 0 } },
+                        React.createElement(Wheel, { items: days, value: safeDayIdx, onChange: setDayIdx, label: "Day" })),
+                    React.createElement("div", { style: { flex: "1.7 1 0", minWidth: 0 } },
+                        React.createElement(Wheel, { items: MONTHS, value: monthIdx, onChange: setMonthIdx, label: "Month" })),
+                    React.createElement("div", { style: { flex: "1.1 1 0", minWidth: 0 } },
+                        React.createElement(Wheel, { items: YEARS.map(String), value: year - YEAR_MIN, onChange: (i) => setYear(YEAR_MIN + i), label: "Year" }))))),
+        React.createElement("div", { className: "dt-group" },
+            React.createElement("div", { className: "dt-glabel" }, "Time"),
+            React.createElement("div", { className: "dt-labels" },
+                React.createElement("span", { style: { flex: "1 1 0" } }, "Hour"),
+                React.createElement("span", { style: { flex: "1 1 0" } }, "Min"),
+                React.createElement("span", { style: { flex: "1 1 0" } }, "AM/PM")),
+            React.createElement("div", { className: "dt-viewport" },
+                React.createElement("div", { className: "dt-fade dt-fade-top" }),
+                React.createElement("div", { className: "dt-fade dt-fade-bot" }),
+                React.createElement("div", { className: "dt-pill" }),
+                React.createElement("div", { className: "dt-wheels" },
+                    React.createElement("div", { style: { flex: "1 1 0", minWidth: 0 } },
+                        React.createElement(Wheel, { items: HOURS, value: hourIdx, onChange: setHourIdx, label: "Hour" })),
+                    React.createElement("div", { style: { flex: "1 1 0", minWidth: 0 } },
+                        React.createElement(Wheel, { items: MINUTES, value: minuteIdx, onChange: setMinuteIdx, label: "Minute" })),
+                    React.createElement("div", { style: { flex: "1 1 0", minWidth: 0 } },
+                        React.createElement(Wheel, { items: AMPM, value: ampmIdx, onChange: setAmpmIdx, label: "AM or PM" }))))),
+        React.createElement("div", { className: "dt-foot" },
+            React.createElement("button", { type: "button", className: "dt-btn-green", onClick: confirm }, "Confirm date & time"),
+            React.createElement("div", { className: echo ? "dt-echo dt-live" : "dt-echo", key: flash, "aria-live": "polite" }, echo ? React.createElement("span", null,
+                React.createElement("span", { className: "dt-check" }, "\u2713"),
+                echo) : null))));
+}
+window.DateTimePicker = DateTimePickerRoot;
+</script>
+<script>
+function note(msg){document.getElementById('root').innerHTML='<div style="font:13px/1.5 system-ui,sans-serif;color:#9aa0a6;padding:16px">'+msg+'</div>';}
+try{
+  var C = window.DateTimePicker;
+  if(!C){note('did not render');}
+  else{
+    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(C));
+    /* watchdog abort escapes React's async render, so backstop with a post-check */
+    setTimeout(function(){var r=document.getElementById('root');if(r&&r.childElementCount===0)note('did not render');},1600);
+  }
+}catch(e){note('did not render');}
+</script>
+</body></html>
