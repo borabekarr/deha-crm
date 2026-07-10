@@ -3,7 +3,7 @@ import '../../../../design-system/preview/_base.css';
 import '../../../../design-system/preview/_darkmode.css';
 import './TaskBoard.css';
 import { iconClass } from '@/lib/iconClass';
-import { useAutoHeight } from '@/lib/hooks';
+import { useAutoHeight } from '@/lib/hooks/use-auto-height';
 import { makeTaskBoardTimers, type SyncPhase, type TaskBoardTimers } from './task-board-hook';
 
 // ---------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react'
-import { useAutoHeight } from '../../../lib/hooks'
+import { useAutoHeight } from '../../../lib/hooks/use-auto-height'
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './AiMemoryCard.css'

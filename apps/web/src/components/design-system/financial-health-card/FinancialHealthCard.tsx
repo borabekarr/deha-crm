@@ -3,7 +3,7 @@ import '../../../../design-system/preview/_darkmode.css'
 import './FinancialHealthCard.css'
 
 import { useRef, useState, useCallback } from 'react'
-import { useAutoHeight } from '@/lib/hooks'
+import { useAutoHeight } from '@/lib/hooks/use-auto-height'
 import {
   ZONES,
   type FhcRefs,

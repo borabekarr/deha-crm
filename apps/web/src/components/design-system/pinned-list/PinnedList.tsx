@@ -14,7 +14,7 @@
 
 import { useState, useCallback, useRef } from 'react'
 import { iconClass } from '../../../lib/iconClass'
-import { useAutoHeight } from '../../../lib/hooks'
+import { useAutoHeight } from '../../../lib/hooks/use-auto-height'
 import { useEntranceRef, useFLIPRefs } from './pinned-list-hook'
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
