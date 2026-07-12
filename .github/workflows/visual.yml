@@ -23,7 +23,7 @@ jobs:
     outputs:
       ui: ${{ steps.filter.outputs.ui }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: dorny/paths-filter@v3
         id: filter
@@ -45,7 +45,7 @@ jobs:
     if: needs.changes.outputs.ui == 'true' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@v5
         with:
