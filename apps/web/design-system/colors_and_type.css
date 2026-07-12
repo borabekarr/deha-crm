@@ -127,6 +127,7 @@
   --radius-2xl:           24px;      /* hero / chart cards (rounded-[24px]) */
   --radius-pill:          16px;     /* "pill" tokens — soft rounded, used for chips/filters/badges */
   --radius-circle:        9999px;   /* only for circular elements (avatars, dots) */
+  --corner-smoothing:     0.6;      /* Apple/Figma 60% corner smoothing factor; consumed by use-squircle */
 
   /* ---------- Spacing (4-point) ---------- */
   --space-0:              0;
