@@ -188,6 +188,16 @@ html.dark .btn-text { color: var(--brand-primary-400); }
   pointer-events: none;
 }
 
+/* Row 4 — proximity wrapper for the locked DeleteButton. Scoped to
+   .btn-page-root .btn-prox-wrap only; does not touch [data-proximity]::after
+   globally, which would overwrite .btn-apply::after's rainbow underglow. */
+.btn-page-root .btn-prox-wrap { display: inline-flex; align-items: center; position: relative; }
+.btn-page-root .btn-prox-wrap::after {
+  content: ''; position: absolute; inset: 50%;
+  width: max(100%, 40px); height: max(100%, 40px);
+  transform: translate(-50%, -50%); pointer-events: none;
+}
+
 /* Active state scoped to .btn-apply; hover is raised via .btn-page-root below */
 .btn-apply:active { transform: scale(0.985); }
 

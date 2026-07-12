@@ -53,6 +53,7 @@ export default function Buttons() {
   const row1Ref = useProximityGroup<HTMLDivElement>()
   const row2Ref = useProximityGroup<HTMLDivElement>()
   const row3Ref = useProximityGroup<HTMLDivElement>()
+  const row4Ref = useProximityGroup<HTMLDivElement>()
 
   return (
     <div className="btn-page-root card">
@@ -96,8 +97,10 @@ export default function Buttons() {
       </div>
 
       <span className="btn-label" style={{ marginTop: 20 }}>Delete (morphing three-state)</span>
-      <div className="btn-row">
-        <DeleteButton onDelete={() => undefined} />
+      <div className="btn-row" ref={row4Ref}>
+        <span className="btn-prox-wrap" data-proximity>
+          <DeleteButton onDelete={() => undefined} />
+        </span>
       </div>
 
       <span className="btn-label" style={{ marginTop: 20 }}>Task footer (--fbtn color token)</span>
