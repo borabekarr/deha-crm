@@ -48,7 +48,7 @@ function AcmeMark() {
   return (
     <svg viewBox="0 0 48 48" aria-hidden="true">
       <path
-        fill="#0F172A"
+        fill="#111111"
         d="M24 3.5l13.6 7.2a4 4 0 012.1 3.5v19.6a4 4 0 01-2.1 3.5L24 44.5l-13.6-7.2a4 4 0 01-2.1-3.5V14.2a4 4 0 012.1-3.5L24 3.5z"
       />
       <path fill="#fff" d="M28.5 16.5l-9 15h-4l9-15h4z" />

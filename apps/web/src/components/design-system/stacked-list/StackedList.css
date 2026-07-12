@@ -1,7 +1,7 @@
 /* ===================================================================
    StackedList — Deha Design System (React port)
    Member directory: active-members panel + floating expandable dock.
-   Tokens: Montserrat (var(--font-display)), emerald #10B981, slate neutrals.
+   Tokens: Montserrat (var(--font-display)), emerald var(--brand-primary-500), slate neutrals.
    Durations wrapped in calc(… * var(--anim-mult,1)).
    =================================================================== */
 
@@ -13,10 +13,10 @@
   background: var(--card-bg, #FFFFFF);
   border-radius: var(--card-radius, 24px);
   overflow: hidden;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(15,23,42,.05);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(17,17,17,.05);
 }
 html.dark .sl-panel {
-  background: var(--card-bg, #1E293B);
+  background: var(--card-bg, #1C1C1C);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 1px rgba(255,255,255,.06);
 }
 
@@ -43,7 +43,7 @@ html.dark .sl-panel {
   flex: none; width: 38px; height: 38px; border-radius: 50%;
   display: grid; place-items: center;
   background: var(--card-bg, #FFFFFF); color: var(--fg3);
-  border: 1px solid var(--card-border, #CBD5E1); cursor: pointer;
+  border: 1px solid var(--card-border, #D4D4D4); cursor: pointer;
   transition:
     background calc(.16s * var(--anim-mult,1)),
     color calc(.16s * var(--anim-mult,1)),
@@ -51,7 +51,7 @@ html.dark .sl-panel {
     border-color calc(.16s * var(--anim-mult,1));
 }
 .sl-add .material-symbols-outlined { font-size: 20px; font-variation-settings: 'wght' 600; }
-.sl-add:hover { background: var(--slate-50); color: var(--fg1); border-color: var(--slate-300); }
+.sl-add:hover { background: var(--gray-50); color: var(--fg1); border-color: var(--gray-300); }
 html.dark .sl-add:hover { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.18); }
 .sl-add:active { transform: scale(.9); }
 
@@ -64,7 +64,7 @@ html.dark .sl-add:hover { background: rgba(255,255,255,.06); border-color: rgba(
 .sl-search input {
   width: 100%; height: 46px; padding: 0 16px 0 44px;
   border: none; border-radius: 15px;
-  background: var(--sl-field, var(--slate-100)); color: var(--fg1);
+  background: var(--sl-field, var(--gray-100)); color: var(--fg1);
   font-family: var(--font-display);
   font-size: 14.5px; font-weight: 600;
   outline: none; box-shadow: inset 0 0 0 1px transparent;
@@ -75,7 +75,7 @@ html.dark .sl-add:hover { background: rgba(255,255,255,.06); border-color: rgba(
 .sl-search input::placeholder { color: var(--fg4); font-weight: 500; }
 .sl-search input:focus {
   background: var(--card-bg, #FFFFFF);
-  box-shadow: inset 0 0 0 1.5px var(--card-border, #CBD5E1);
+  box-shadow: inset 0 0 0 1.5px var(--card-border, #D4D4D4);
 }
 .sl-search.sl-search--sm input { height: 42px; font-size: 13.5px; border-radius: 13px; padding-left: 42px; }
 .sl-search.sl-search--sm > .material-symbols-outlined { left: 13px; font-size: 18px; }
@@ -84,8 +84,8 @@ html.dark .sl-search input {
   background: var(--sl-field, rgba(255,255,255,.055));
 }
 html.dark .sl-search input:focus {
-  background: var(--card-bg, #1E293B);
-  box-shadow: inset 0 0 0 1.5px var(--card-border, #334155);
+  background: var(--card-bg, #1C1C1C);
+  box-shadow: inset 0 0 0 1.5px var(--card-border, #232323);
 }
 
 /* ----- List ----- */
@@ -94,11 +94,11 @@ html.dark .sl-search input:focus {
   padding: 2px 26px 116px;
 }
 .sl-list::-webkit-scrollbar { width: 7px; }
-.sl-list::-webkit-scrollbar-thumb { background: var(--slate-300); border-radius: 4px; }
-.sl-list::-webkit-scrollbar-thumb:hover { background: var(--slate-400); }
-.sl-list { scrollbar-width: thin; scrollbar-color: var(--slate-300) transparent; }
-html.dark .sl-list { scrollbar-color: var(--slate-700) transparent; }
-html.dark .sl-list::-webkit-scrollbar-thumb { background: var(--slate-700); }
+.sl-list::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 4px; }
+.sl-list::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
+.sl-list { scrollbar-width: thin; scrollbar-color: var(--gray-300) transparent; }
+html.dark .sl-list { scrollbar-color: var(--gray-700) transparent; }
+html.dark .sl-list::-webkit-scrollbar-thumb { background: var(--gray-700); }
 
 .sl-empty {
   padding: 36px 8px; text-align: center;
@@ -111,7 +111,7 @@ html.dark .sl-list::-webkit-scrollbar-thumb { background: var(--slate-700); }
 .sl-item {
   display: flex; align-items: center; gap: 14px;
   padding: 14px 4px;
-  border-bottom: 1px solid color-mix(in srgb, var(--card-border, #CBD5E1) 55%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--card-border, #D4D4D4) 55%, transparent);
 }
 .sl-item:last-child { border-bottom: none; }
 .sl-list .sl-item:first-child { padding-top: 6px; }
@@ -127,7 +127,7 @@ html.dark .sl-list::-webkit-scrollbar-thumb { background: var(--slate-700); }
     inset 0 1px 0 rgba(255,255,255,.5),
     inset 0 -2px 0 rgba(0,0,0,.18),
     inset 0 0 0 1px rgba(255,255,255,.14),
-    0 1px 2px rgba(15,23,42,.12);
+    0 1px 2px rgba(17,17,17,.12);
   background-image:
     linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px);
@@ -144,10 +144,10 @@ html.dark .sl-list::-webkit-scrollbar-thumb { background: var(--slate-700); }
 }
 .sl-online::after {
   content: ''; width: 8px; height: 8px; border-radius: 50%;
-  background: #10B981;
-  box-shadow: 0 0 0 1.5px color-mix(in srgb, #10B981 28%, transparent);
+  background: var(--brand-primary-500);
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--brand-primary-500) 28%, transparent);
 }
-html.dark .sl-online { background: var(--card-bg, #1E293B); }
+html.dark .sl-online { background: var(--card-bg, #1C1C1C); }
 
 .sl-meta { flex: 1; min-width: 0; }
 .sl-name {
@@ -157,14 +157,14 @@ html.dark .sl-online { background: var(--card-bg, #1E293B); }
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .sl-status { display: flex; align-items: center; gap: 6px; }
-.sl-status .dot { width: 6px; height: 6px; border-radius: 50%; background: #10B981; flex: none; }
+.sl-status .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand-primary-500); flex: none; }
 .sl-status span {
   font-family: var(--font-display);
   font-size: 13px; font-weight: 600; line-height: 1;
 }
-.sl-status.is-online span { color: #059669; }
+.sl-status.is-online span { color: var(--brand-primary-600); }
 .sl-status.is-off span { color: var(--fg4); }
-html.dark .sl-status.is-online span { color: #6EE7B7; }
+html.dark .sl-status.is-online span { color: var(--brand-primary-300); }
 
 /* ===================== Role badge ===================== */
 .sl-badge {
@@ -179,25 +179,25 @@ html.dark .sl-status.is-online span { color: #6EE7B7; }
 .sl-badge .sl-badge-lbl { white-space: nowrap; }
 
 .sl-badge[data-tone="pm"]       { background: var(--semantic-warning-bg, #FEF3C7); color: #92600A; border-color: #FDE68A; }
-.sl-badge[data-tone="designer"] { background: #ECFDF5; color: #047857; border-color: #A7F3D0; }
-.sl-badge[data-tone="data"]     { background: var(--slate-100, #F1F5F9); color: var(--slate-600, #475569); border-color: var(--slate-200, #E2E8F0); }
+.sl-badge[data-tone="designer"] { background: var(--brand-primary-50); color: var(--brand-primary-700); border-color: var(--brand-primary-200); }
+.sl-badge[data-tone="data"]     { background: var(--gray-100, #F5F5F5); color: var(--gray-600, #4A4A4A); border-color: var(--gray-200, #ECECEC); }
 .sl-badge[data-tone="creator"]  { background: var(--semantic-hot-bg, #FFF7ED); color: #C2410C; border-color: #FED7AA; }
 
 /* Mono mode */
 .sl-panel.is-mono .sl-badge {
-  background: var(--slate-100, #F1F5F9) !important;
-  color: var(--slate-600, #475569) !important;
-  border-color: var(--slate-200, #E2E8F0) !important;
+  background: var(--gray-100, #F5F5F5) !important;
+  color: var(--gray-600, #4A4A4A) !important;
+  border-color: var(--gray-200, #ECECEC) !important;
 }
 
 html.dark .sl-badge[data-tone="pm"]       { background: rgba(234,179,8,.14);  color: #FCD34D; border-color: rgba(234,179,8,.28); }
-html.dark .sl-badge[data-tone="designer"] { background: rgba(16,185,129,.15); color: #6EE7B7; border-color: rgba(16,185,129,.30); }
-html.dark .sl-badge[data-tone="data"]     { background: rgba(148,163,184,.14); color: #CBD5E1; border-color: rgba(148,163,184,.24); }
+html.dark .sl-badge[data-tone="designer"] { background: color-mix(in srgb, var(--brand-primary-500) 15%, transparent); color: var(--brand-primary-300); border-color: color-mix(in srgb, var(--brand-primary-500) 30%, transparent); }
+html.dark .sl-badge[data-tone="data"]     { background: rgba(161,161,161,.14); color: #D4D4D4; border-color: rgba(161,161,161,.24); }
 html.dark .sl-badge[data-tone="creator"]  { background: rgba(249,115,22,.15); color: #FDBA74; border-color: rgba(249,115,22,.30); }
 html.dark .sl-panel.is-mono .sl-badge {
-  background: rgba(148,163,184,.14) !important;
-  color: #CBD5E1 !important;
-  border-color: rgba(148,163,184,.24) !important;
+  background: rgba(161,161,161,.14) !important;
+  color: #D4D4D4 !important;
+  border-color: rgba(161,161,161,.24) !important;
 }
 
 /* ===================== Floating directory dock ===================== */
@@ -208,8 +208,8 @@ html.dark .sl-panel.is-mono .sl-badge {
   height: 70px;
   border-radius: 22px;
   background: var(--card-bg, #FFFFFF);
-  border: 1px solid var(--card-border, #CBD5E1);
-  box-shadow: 0 12px 32px -10px rgba(15,23,42,.22), inset 0 1px 0 rgba(255,255,255,.85);
+  border: 1px solid var(--card-border, #D4D4D4);
+  box-shadow: 0 12px 32px -10px rgba(17,17,17,.22), inset 0 1px 0 rgba(255,255,255,.85);
   overflow: hidden;
   display: flex; flex-direction: column;
   cursor: pointer;
@@ -222,8 +222,8 @@ html.dark .sl-panel.is-mono .sl-badge {
     box-shadow calc(.4s * var(--anim-mult,1)) ease;
 }
 html.dark .sl-bar {
-  background: var(--card-bg, #1E293B);
-  border-color: var(--card-border, #334155);
+  background: var(--card-bg, #1C1C1C);
+  border-color: var(--card-border, #232323);
   box-shadow: 0 14px 34px -10px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.06);
 }
 .sl-bar.is-expanded {
@@ -232,16 +232,16 @@ html.dark .sl-bar {
   height: calc(var(--sl-panel-h, 564px) - 20px);
   border-radius: 20px;
   cursor: default;
-  box-shadow: 0 26px 60px -16px rgba(15,23,42,.34), inset 0 1px 0 rgba(255,255,255,.85);
+  box-shadow: 0 26px 60px -16px rgba(17,17,17,.34), inset 0 1px 0 rgba(255,255,255,.85);
 }
 html.dark .sl-bar.is-expanded {
   box-shadow: 0 28px 64px -16px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.06);
 }
 .sl-bar:not(.is-expanded):hover {
-  background: color-mix(in srgb, var(--slate-200, #E2E8F0) 22%, var(--card-bg, #FFFFFF));
+  background: color-mix(in srgb, var(--gray-200, #ECECEC) 22%, var(--card-bg, #FFFFFF));
 }
 html.dark .sl-bar:not(.is-expanded):hover {
-  background: color-mix(in srgb, #fff 5%, var(--card-bg, #1E293B));
+  background: color-mix(in srgb, #fff 5%, var(--card-bg, #1C1C1C));
 }
 
 /* dock header row — styled as .card-inner */
@@ -251,27 +251,27 @@ html.dark .sl-bar:not(.is-expanded):hover {
   padding: 0 13px;
   background: var(--card-bg, #FFFFFF);
   border-radius: var(--card-radius, 20px);
-  box-shadow: inset 0 0 0 1px rgba(15,23,42,0.04);
+  box-shadow: inset 0 0 0 1px rgba(17,17,17,0.04);
   transition:
     border-color calc(.3s * var(--anim-mult,1)),
     border-radius calc(.52s * var(--anim-mult,1)) cubic-bezier(.32,1.12,.4,1);
   border-bottom: 1px solid transparent;
 }
 html.dark .sl-bar-head {
-  background: var(--card-bg, #1E293B);
+  background: var(--card-bg, #1C1C1C);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
 }
 .sl-bar.is-expanded .sl-bar-head {
   border-radius: 0;
-  border-bottom-color: var(--card-border, #CBD5E1);
+  border-bottom-color: var(--card-border, #D4D4D4);
 }
 .sl-bar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .sl-bar-icon {
   flex: none; width: 44px; height: 44px; border-radius: 13px;
   display: grid; place-items: center;
   background: var(--card-bg, #FFFFFF); color: var(--fg3);
-  border: 1px solid var(--card-border, #CBD5E1);
-  box-shadow: 0 1px 2px rgba(15,23,42,.04);
+  border: 1px solid var(--card-border, #D4D4D4);
+  box-shadow: 0 1px 2px rgba(17,17,17,.04);
   transition: transform calc(.25s * var(--anim-mult,1)) cubic-bezier(.34,1.4,.5,1);
 }
 .sl-bar-icon .material-symbols-outlined { font-size: 22px; }
@@ -305,7 +305,7 @@ html.dark .sl-bar-icon { background: rgba(255,255,255,.04); border-color: rgba(2
 }
 html.dark .sl-stack .sl-mini,
 html.dark .sl-stack .sl-more {
-  box-shadow: 0 0 0 2.5px var(--card-bg, #1E293B);
+  box-shadow: 0 0 0 2.5px var(--card-bg, #1C1C1C);
 }
 .sl-stack .sl-mini:first-child { margin-left: 0; }
 .sl-mini {
@@ -341,7 +341,7 @@ html.dark .sl-stack .sl-more {
 }
 .sl-close .material-symbols-outlined { font-size: 20px; font-variation-settings: 'wght' 600; }
 .sl-bar.is-expanded .sl-close { opacity: 1; transform: translateY(-50%) scale(1); pointer-events: auto; }
-.sl-close:hover { background: var(--slate-200, #E2E8F0); color: var(--fg1); }
+.sl-close:hover { background: var(--gray-200, #ECECEC); color: var(--fg1); }
 html.dark .sl-close:hover { background: rgba(255,255,255,.12); color: var(--fg1); }
 .sl-close:active { transform: translateY(-50%) scale(.88); }
 
@@ -355,10 +355,10 @@ html.dark .sl-close:hover { background: rgba(255,255,255,.12); color: var(--fg1)
 .sl-bar-search { flex: none; padding: 16px 18px 8px; }
 .sl-bar-list { flex: 1; min-height: 0; overflow-y: auto; padding: 2px 20px 18px; }
 .sl-bar-list::-webkit-scrollbar { width: 7px; }
-.sl-bar-list::-webkit-scrollbar-thumb { background: var(--slate-300); border-radius: 4px; }
-.sl-bar-list { scrollbar-width: thin; scrollbar-color: var(--slate-300) transparent; }
-html.dark .sl-bar-list { scrollbar-color: var(--slate-700) transparent; }
-html.dark .sl-bar-list::-webkit-scrollbar-thumb { background: var(--slate-700); }
+.sl-bar-list::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 4px; }
+.sl-bar-list { scrollbar-width: thin; scrollbar-color: var(--gray-300) transparent; }
+html.dark .sl-bar-list { scrollbar-color: var(--gray-700) transparent; }
+html.dark .sl-bar-list::-webkit-scrollbar-thumb { background: var(--gray-700); }
 
 @media (prefers-reduced-motion: reduce) {
   .sl-panel *,

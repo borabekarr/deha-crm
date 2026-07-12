@@ -144,7 +144,7 @@ function Flag({ code, size = 30 }: { code: string; size?: number }) {
     ),
   }
 
-  const content = svgMap[code] ?? <rect width="30" height="30" fill="#E2E8F0" />
+  const content = svgMap[code] ?? <rect width="30" height="30" fill="#ECECEC" />
   return (
     <svg viewBox="0 0 30 30" width={size} height={size} aria-hidden="true">
       {content}
@@ -160,7 +160,7 @@ const DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 function Roll({
   value,
   color = 'var(--cc-fg1)',
-  muteColor = '#94A3B8',
+  muteColor = '#A1A1A1',
 }: {
   value: string
   color?: string
@@ -282,7 +282,7 @@ function CurrencyPill({ currency, onClick }: { currency: Currency; onClick: () =
       <span style={{ letterSpacing: '-0.005em' }}>{currency.code}</span>
       <span
         className={iconClass('keyboard_arrow_down')}
-        style={{ fontSize: 14, color: '#94A3B8', marginLeft: -2, fontVariationSettings: '"opsz" 24, "wght" 600' }}
+        style={{ fontSize: 14, color: '#A1A1A1', marginLeft: -2, fontVariationSettings: '"opsz" 24, "wght" 600' }}
         aria-hidden="true"
       >
         keyboard_arrow_down
@@ -406,7 +406,7 @@ function CurrencyPicker({
           }}>
             <span
               className="material-symbols-outlined"
-              style={{ fontSize: 17, color: '#94A3B8', fontVariationSettings: '"opsz" 24, "wght" 500' }}
+              style={{ fontSize: 17, color: '#A1A1A1', fontVariationSettings: '"opsz" 24, "wght" 500' }}
               aria-hidden="true"
             >
               search
@@ -430,7 +430,7 @@ function CurrencyPicker({
               aria-label="Close currency picker"
               style={{
                 fontFamily: 'Montserrat', fontSize: 10.5, fontWeight: 700,
-                color: '#64748B', background: 'var(--cc-chip)',
+                color: '#6B6B6B', background: 'var(--cc-chip)',
                 border: 'none', padding: '3px 9px', borderRadius: 6,
                 cursor: 'pointer', letterSpacing: '0.04em',
               }}
@@ -453,21 +453,21 @@ function CurrencyPicker({
                 >
                   <span style={{
                     width: 26, height: 26, borderRadius: '50%', overflow: 'hidden',
-                    boxShadow: 'inset 0 0 0 1px rgba(15,23,42,0.10), 0 1px 2px rgba(15,23,42,0.06)',
+                    boxShadow: 'inset 0 0 0 1px rgba(17,17,17,0.10), 0 1px 2px rgba(17,17,17,0.06)',
                     display: 'grid', placeItems: 'center', flexShrink: 0,
                   }}>
                     <Flag code={c.flag} size={26} />
                   </span>
                   <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                     <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--cc-fg1)', letterSpacing: '-0.005em' }}>{c.code}</span>
-                    <span style={{ fontSize: 11.5, fontWeight: 500, color: '#94A3B8' }}>{c.name}</span>
+                    <span style={{ fontSize: 11.5, fontWeight: 500, color: '#A1A1A1' }}>{c.name}</span>
                   </span>
                   <span
                     aria-hidden="true"
                     style={{
                       marginLeft: 'auto',
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: 11, color: '#94A3B8',
+                      fontSize: 11, color: '#A1A1A1',
                     }}
                   >
                     {disabled ? 'in use' : c.symbol}
@@ -476,7 +476,7 @@ function CurrencyPicker({
               )
             })}
             {filtered.length === 0 && (
-              <div style={{ padding: '18px 16px', fontSize: 12.5, color: '#94A3B8', fontWeight: 600 }}>
+              <div style={{ padding: '18px 16px', fontSize: 12.5, color: '#A1A1A1', fontWeight: 600 }}>
                 No matches for &ldquo;{query}&rdquo;
               </div>
             )}
@@ -586,7 +586,7 @@ export default function CurrencyConverter() {
               display: 'inline-flex', alignItems: 'center', gap: 6,
               padding: '4px 10px',
               background: 'var(--cc-chip)',
-              border: '1px solid rgba(15,23,42,0.04)',
+              border: '1px solid rgba(17,17,17,0.04)',
               borderRadius: 9999,
               boxShadow: 'inset 0 -2px 4px rgba(0,0,0,0.04), inset 0 1px 0 var(--cc-inset-hi)',
             }}>
@@ -598,7 +598,7 @@ export default function CurrencyConverter() {
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
             <span className="cc-live-dot" aria-hidden="true" />
             <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--cc-fg1)' }}>Live</span>
-            <span className="cc-mono" style={{ fontSize: 11.5, fontWeight: 500, color: '#94A3B8' }}>· {now}</span>
+            <span className="cc-mono" style={{ fontSize: 11.5, fontWeight: 500, color: '#A1A1A1' }}>· {now}</span>
           </div>
         </div>
 
@@ -610,7 +610,7 @@ export default function CurrencyConverter() {
               <div style={{ flex: 1, minWidth: 0, textAlign: 'right', paddingRight: 10 }}>
                 <div style={{
                   fontSize: 10, fontWeight: 700, letterSpacing: '0.14em',
-                  textTransform: 'uppercase', color: '#94A3B8', marginBottom: 4,
+                  textTransform: 'uppercase', color: '#A1A1A1', marginBottom: 4,
                 }}>
                   You Send
                 </div>
@@ -641,8 +641,8 @@ export default function CurrencyConverter() {
                   }}
                 >
                   <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-                    <path d="M3 6.5 H13 M11 4.5 L13 6.5 L11 8.5" fill="none" stroke="#0F172A" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M15 11.5 H5 M7 9.5 L5 11.5 L7 13.5" fill="none" stroke="#0F172A" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M3 6.5 H13 M11 4.5 L13 6.5 L11 8.5" fill="none" stroke="#111111" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M15 11.5 H5 M7 9.5 L5 11.5 L7 13.5" fill="none" stroke="#111111" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </span>
               </button>
@@ -659,7 +659,7 @@ export default function CurrencyConverter() {
             <div style={{ flex: 1, minWidth: 0, textAlign: 'right', paddingRight: 10 }}>
               <div style={{
                 fontSize: 10, fontWeight: 700, letterSpacing: '0.14em',
-                textTransform: 'uppercase', color: '#94A3B8', marginBottom: 4,
+                textTransform: 'uppercase', color: '#A1A1A1', marginBottom: 4,
               }}>
                 They Get
               </div>

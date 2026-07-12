@@ -10,17 +10,17 @@
 .pinlist {
   --pl-surface:       linear-gradient(168deg, var(--card-bg, #FFFFFF) 0%, #F6F8FB 100%);
   --pl-card:          var(--card-bg, #FFFFFF);
-  --pl-card-bd:       var(--card-border, rgba(15,23,42,0.07));
-  --pl-ico-bg:        #F1F5F9;
-  --pl-ico-fg:        #64748B;
+  --pl-card-bd:       var(--card-border, rgba(17,17,17,0.07));
+  --pl-ico-bg:        #F5F5F5;
+  --pl-ico-fg:        #6B6B6B;
   --pl-shadow:
-    0 30px 70px -22px rgba(15,23,42,0.34),
-    0 8px 20px -10px rgba(15,23,42,0.16),
+    0 30px 70px -22px rgba(17,17,17,0.34),
+    0 8px 20px -10px rgba(17,17,17,0.16),
     inset 0 1px 0 rgba(255,255,255,0.95);
   --pl-cardshadow:
     inset 0 1px 0 rgba(255,255,255,1),
-    inset 0 -2px 0 rgba(15,23,42,0.05),
-    0 4px 12px -6px rgba(15,23,42,0.14);
+    inset 0 -2px 0 rgba(17,17,17,0.05),
+    0 4px 12px -6px rgba(17,17,17,0.14);
 
   position: relative;
   width: 392px;
@@ -28,7 +28,7 @@
   padding: var(--space-6, 24px) var(--space-5, 20px) var(--space-5, 20px);
   border-radius: 36px;
   background: var(--pl-surface);
-  border: 1px solid rgba(15,23,42,0.05);
+  border: 1px solid rgba(17,17,17,0.05);
   box-shadow: var(--pl-shadow);
   font-family: var(--font-display);
   color: var(--fg1);
@@ -52,7 +52,7 @@
   display: grid;
   place-items: center;
   color: #fff;
-  background-color: #0F172A;
+  background-color: #111111;
   background-image:
     linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px);
@@ -60,7 +60,7 @@
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.18),
     inset 0 -2px 0 rgba(0,0,0,0.35),
-    0 4px 12px -4px rgba(15,23,42,0.5);
+    0 4px 12px -4px rgba(17,17,17,0.5);
 }
 
 .pl-top-ic span { font-size: 20px; }
@@ -186,7 +186,7 @@
   color: var(--pl-ico-fg);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.9),
-    inset 0 0 0 1px rgba(15,23,42,0.04);
+    inset 0 0 0 1px rgba(17,17,17,0.04);
   transition:
     background calc(260ms * var(--anim-mult, 1)) ease,
     color calc(260ms * var(--anim-mult, 1)) ease;
@@ -203,8 +203,8 @@
   background-size: 7px 7px;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.5),
-    inset 0 -2px 0 rgba(15,23,42,0.18),
-    inset 0 0 0 1px rgba(15,23,42,0.08);
+    inset 0 -2px 0 rgba(17,17,17,0.18),
+    inset 0 0 0 1px rgba(17,17,17,0.08);
 }
 
 /* ── Text ─────────────────────────────────────────────────────────────── */
@@ -250,7 +250,7 @@
   color: var(--fg4);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.7),
-    inset 0 0 0 1px rgba(15,23,42,0.04);
+    inset 0 0 0 1px rgba(17,17,17,0.04);
   transition:
     background calc(200ms * var(--anim-mult, 1)) ease,
     color calc(200ms * var(--anim-mult, 1)) ease,
@@ -306,11 +306,11 @@
 
 /* ── Dark mode ────────────────────────────────────────────────────────── */
 html.dark .pinlist {
-  --pl-surface:     linear-gradient(168deg, var(--card-bg, #1E293B) 0%, #172033 100%);
-  --pl-card:        #243449;
+  --pl-surface:     linear-gradient(168deg, var(--card-bg, #1C1C1C) 0%, #202020 100%);
+  --pl-card:        #242424;
   --pl-card-bd:     var(--card-border, rgba(255,255,255,0.07));
-  --pl-ico-bg:      #0F172A;
-  --pl-ico-fg:      #94A3B8;
+  --pl-ico-bg:      #111111;
+  --pl-ico-fg:      #A1A1A1;
   --pl-shadow:
     0 30px 70px -22px rgba(0,0,0,0.7),
     0 8px 20px -10px rgba(0,0,0,0.5),
@@ -336,7 +336,7 @@ html.dark .pl-pin {
     inset 0 0 0 1px rgba(255,255,255,0.05);
 }
 
-html.dark .pl-pin:hover { background: var(--slate-700, #334155); }
+html.dark .pl-pin:hover { background: var(--gray-700, #232323); }
 html.dark .pl-head .pl-count { color: var(--fg3); }
 
 /* ── Responsive ───────────────────────────────────────────────────────── */

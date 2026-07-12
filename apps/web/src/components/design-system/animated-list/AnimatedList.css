@@ -22,15 +22,15 @@
 .al-radar {
   --rd-surface: linear-gradient(168deg, #FFFFFF 0%, #F6F8FB 100%);
   --rd-card:    #FFFFFF;
-  --rd-card-bd: rgba(15,23,42,0.07);
+  --rd-card-bd: rgba(17,17,17,0.07);
   --rd-shadow:
-    0 30px 70px -22px rgba(15,23,42,0.34),
-    0 8px 20px -10px rgba(15,23,42,0.16),
+    0 30px 70px -22px rgba(17,17,17,0.34),
+    0 8px 20px -10px rgba(17,17,17,0.16),
     inset 0 1px 0 rgba(255,255,255,0.95);
   --rd-cardshadow:
     inset 0 1px 0 rgba(255,255,255,1),
-    inset 0 -2px 0 rgba(15,23,42,0.05),
-    0 4px 12px -6px rgba(15,23,42,0.14);
+    inset 0 -2px 0 rgba(17,17,17,0.05),
+    0 4px 12px -6px rgba(17,17,17,0.14);
 
   position: relative;
   width: 404px; max-width: calc(100vw - 40px);
@@ -38,16 +38,16 @@
   padding: 24px 22px 22px;
   border-radius: var(--card-radius, 36px);
   background: var(--rd-surface);
-  border: 1px solid rgba(15,23,42,0.05);
+  border: 1px solid rgba(17,17,17,0.05);
   box-shadow: var(--rd-shadow);
-  color: var(--fg1, #0F172A);
+  color: var(--fg1, #111111);
   user-select: none;
   overflow: hidden;
 }
 
 html.dark .al-radar {
-  --rd-surface: linear-gradient(168deg, #1E293B 0%, #172033 100%);
-  --rd-card:    #243449;
+  --rd-surface: linear-gradient(168deg, #1C1C1C 0%, #202020 100%);
+  --rd-card:    #242424;
   --rd-card-bd: rgba(255,255,255,0.07);
   --rd-shadow:
     0 30px 70px -22px rgba(0,0,0,0.7),
@@ -67,7 +67,7 @@ html.dark .al-radar {
 .al-rd-ic {
   width: 38px; height: 38px; border-radius: 12px;
   flex: none; display: grid; place-items: center; color: #fff;
-  background-color: #0F172A;
+  background-color: #111111;
   background-image:
     linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px);
@@ -75,17 +75,17 @@ html.dark .al-radar {
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.18),
     inset 0 -2px 0 rgba(0,0,0,0.35),
-    0 4px 12px -4px rgba(15,23,42,0.5);
+    0 4px 12px -4px rgba(17,17,17,0.5);
   font-size: 20px;
 }
 html.dark .al-rd-ic { background-color: #060B16; }
 
 .al-rd-tt {
   font-size: 17px; font-weight: 900; letter-spacing: -0.02em; line-height: 1;
-  color: var(--fg1, #0F172A);
+  color: var(--fg1, #111111);
 }
 .al-rd-sb {
-  font-size: 11.5px; font-weight: 700; color: var(--fg4, #94A3B8); margin-top: 4px;
+  font-size: 11.5px; font-weight: 700; color: var(--fg4, #A1A1A1); margin-top: 4px;
 }
 
 /* ── Live badge ───────────────────────────────────────────────────── */
@@ -94,42 +94,42 @@ html.dark .al-rd-ic { background-color: #060B16; }
   display: inline-flex; align-items: center; gap: 6px;
   padding: 5px 11px 5px 9px; border-radius: 9999px;
   font-size: 10.5px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase;
-  color: #059669;
-  background: rgba(16,185,129,0.10);
-  box-shadow: inset 0 0 0 1px rgba(16,185,129,0.22);
+  color: var(--brand-primary-600);
+  background: color-mix(in srgb, var(--brand-primary-500) 10%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-primary-500) 22%, transparent);
   transition:
     opacity calc(240ms * var(--anim-mult,1)) ease,
     filter  calc(240ms * var(--anim-mult,1)) ease;
 }
 .al-live.al-paused {
-  color: var(--fg4, #94A3B8);
-  background: var(--bg-chip, #F1F5F9);
-  box-shadow: inset 0 0 0 1px rgba(15,23,42,0.06);
+  color: var(--fg4, #A1A1A1);
+  background: var(--bg-chip, #F5F5F5);
+  box-shadow: inset 0 0 0 1px rgba(17,17,17,0.06);
 }
 html.dark .al-live {
-  color: #34D399;
-  background: rgba(16,185,129,0.12);
+  color: var(--brand-primary-400);
+  background: color-mix(in srgb, var(--brand-primary-500) 12%, transparent);
 }
 html.dark .al-live.al-paused {
-  color: var(--fg4, #94A3B8);
+  color: var(--fg4, #A1A1A1);
   background: rgba(255,255,255,0.05);
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.07);
 }
 
 .al-live-dot {
   width: 7px; height: 7px; border-radius: 50%;
-  background: #10B981;
-  box-shadow: 0 0 0 0 rgba(16,185,129,0.5);
+  background: var(--brand-primary-500);
+  box-shadow: 0 0 0 0 var(--brand-glow);
   animation: al-pulse calc(1.8s * var(--anim-mult,1)) ease-out infinite;
 }
 .al-live.al-paused .al-live-dot {
-  background: var(--fg4, #94A3B8);
+  background: var(--fg4, #A1A1A1);
   animation: none;
 }
 @keyframes al-pulse {
-  0%   { box-shadow: 0 0 0 0   rgba(16,185,129,0.5); }
-  70%  { box-shadow: 0 0 0 7px rgba(16,185,129,0); }
-  100% { box-shadow: 0 0 0 0   rgba(16,185,129,0); }
+  0%   { box-shadow: 0 0 0 0   var(--brand-glow); }
+  70%  { box-shadow: 0 0 0 7px color-mix(in srgb, var(--brand-primary-500) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0   color-mix(in srgb, var(--brand-primary-500) 0%, transparent); }
 }
 
 /* ── Demo controls ────────────────────────────────────────────────── */
@@ -142,9 +142,9 @@ html.dark .al-live.al-paused {
   padding: 7px 14px; border-radius: 9999px;
   font-family: var(--font-display);
   font-size: 11px; font-weight: 800; letter-spacing: 0.03em; text-transform: uppercase;
-  color: var(--fg3, #64748B);
+  color: var(--fg3, #6B6B6B);
   background: var(--card-bg, #FFFFFF);
-  border: 1px solid var(--card-border, #CBD5E1);
+  border: 1px solid var(--card-border, #D4D4D4);
   cursor: pointer;
   transition:
     background calc(160ms * var(--anim-mult,1)),
@@ -153,9 +153,9 @@ html.dark .al-live.al-paused {
     box-shadow calc(160ms * var(--anim-mult,1));
 }
 .al-push-btn:hover {
-  background: #F8FAFC;
-  color: var(--fg1, #0F172A);
-  border-color: #94A3B8;
+  background: #FAFAFA;
+  color: var(--fg1, #111111);
+  border-color: #A1A1A1;
 }
 .al-push-btn:active {
   transform: scale(0.96);
@@ -163,12 +163,12 @@ html.dark .al-live.al-paused {
 html.dark .al-push-btn {
   background: rgba(255,255,255,0.05);
   border-color: rgba(255,255,255,0.12);
-  color: var(--fg3, #64748B);
+  color: var(--fg3, #6B6B6B);
 }
 html.dark .al-push-btn:hover {
   background: rgba(255,255,255,0.09);
   border-color: rgba(255,255,255,0.22);
-  color: var(--fg1, #F1F5F9);
+  color: var(--fg1, #F5F5F5);
 }
 
 /* ── Anim selector pills ──────────────────────────────────────────── */
@@ -179,9 +179,9 @@ html.dark .al-push-btn:hover {
   padding: 4px 10px; border-radius: 9999px;
   font-family: var(--font-display);
   font-size: 10px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase;
-  color: var(--fg3, #64748B);
+  color: var(--fg3, #6B6B6B);
   background: transparent;
-  border: 1px solid var(--card-border, #CBD5E1);
+  border: 1px solid var(--card-border, #D4D4D4);
   cursor: pointer;
   transition:
     background calc(140ms * var(--anim-mult,1)),
@@ -190,12 +190,12 @@ html.dark .al-push-btn:hover {
 }
 .al-anim-pill.al-active {
   color: #fff;
-  background: #10B981;
+  background: var(--brand-primary-500);
   border-color: transparent;
-  box-shadow: 0 2px 8px -2px rgba(16,185,129,0.45);
+  box-shadow: 0 2px 8px -2px var(--brand-glow);
 }
-html.dark .al-anim-pill { border-color: rgba(255,255,255,0.12); color: var(--fg3, #94A3B8); }
-html.dark .al-anim-pill.al-active { color: #fff; background: #059669; }
+html.dark .al-anim-pill { border-color: rgba(255,255,255,0.12); color: var(--fg3, #A1A1A1); }
+html.dark .al-anim-pill.al-active { color: #fff; background: var(--brand-primary-600); }
 
 /* ── Feed area ────────────────────────────────────────────────────── */
 .al-feed { min-height: 220px; }
@@ -206,15 +206,15 @@ html.dark .al-anim-pill.al-active { color: #fff; background: #059669; }
   padding: 11px 13px 11px 11px;
   border-radius: 18px;
   background: var(--card-bg, #FFFFFF);
-  border: 1px solid var(--card-border, rgba(15,23,42,0.07));
+  border: 1px solid var(--card-border, rgba(17,17,17,0.07));
   box-shadow: var(--rd-cardshadow,
     inset 0 1px 0 rgba(255,255,255,1),
-    inset 0 -2px 0 rgba(15,23,42,0.05),
-    0 4px 12px -6px rgba(15,23,42,0.14)
+    inset 0 -2px 0 rgba(17,17,17,0.05),
+    0 4px 12px -6px rgba(17,17,17,0.14)
   );
 }
 html.dark .al-ev {
-  background: var(--card-bg, #243449);
+  background: var(--card-bg, #242424);
   border-color: var(--card-border, rgba(255,255,255,0.07));
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.08),
@@ -227,7 +227,7 @@ html.dark .al-ev {
   display: grid; place-items: center;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.9),
-    inset 0 0 0 1px rgba(15,23,42,0.04);
+    inset 0 0 0 1px rgba(17,17,17,0.04);
   font-size: 20px;
 }
 html.dark .al-ev-ico {
@@ -236,12 +236,12 @@ html.dark .al-ev-ico {
     inset 0 0 0 1px rgba(255,255,255,0.04);
 }
 
-.al-ev--low      .al-ev-ico { background: rgba(16,185,129,0.10); color: #059669; }
+.al-ev--low      .al-ev-ico { background: color-mix(in srgb, var(--brand-primary-500) 10%, transparent); color: var(--brand-primary-600); }
 .al-ev--elevated .al-ev-ico { background: rgba(234,179,8,0.12);  color: #B7860B; }
 .al-ev--blocked  .al-ev-ico { background: rgba(239,68,68,0.10);  color: #DC2626; }
 .al-ev--review   .al-ev-ico { background: rgba(249,115,22,0.10); color: #EA580C; }
 
-html.dark .al-ev--low      .al-ev-ico { background: rgba(16,185,129,0.16); color: #34D399; }
+html.dark .al-ev--low      .al-ev-ico { background: color-mix(in srgb, var(--brand-primary-500) 16%, transparent); color: var(--brand-primary-400); }
 html.dark .al-ev--elevated .al-ev-ico { background: rgba(234,179,8,0.16);  color: #FACC15; }
 html.dark .al-ev--blocked  .al-ev-ico { background: rgba(239,68,68,0.16);  color: #F87171; }
 html.dark .al-ev--review   .al-ev-ico { background: rgba(249,115,22,0.16); color: #FB923C; }
@@ -250,14 +250,14 @@ html.dark .al-ev--review   .al-ev-ico { background: rgba(249,115,22,0.16); color
 .al-ev-amt-row { display: flex; align-items: baseline; gap: 8px; }
 .al-ev-amt {
   font-size: 15px; font-weight: 900; letter-spacing: -0.02em;
-  color: var(--fg1, #0F172A); font-variant-numeric: tabular-nums;
+  color: var(--fg1, #111111); font-variant-numeric: tabular-nums;
 }
 .al-ev-meth {
-  font-size: 11.5px; font-weight: 700; color: var(--fg4, #94A3B8);
+  font-size: 11.5px; font-weight: 700; color: var(--fg4, #A1A1A1);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .al-ev-sub {
-  font-size: 11.5px; font-weight: 600; color: var(--fg3, #64748B);
+  font-size: 11.5px; font-weight: 600; color: var(--fg3, #6B6B6B);
   margin-top: 3px; display: flex; align-items: center; gap: 4px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
@@ -272,12 +272,12 @@ html.dark .al-ev--review   .al-ev-ico { background: rgba(249,115,22,0.16); color
 }
 
 .al-ev--low .al-ev-pill {
-  color: #fff; background: #10B981;
+  color: #fff; background: var(--brand-primary-500);
   background-image:
     linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
   background-size: 7px 7px;
-  box-shadow: 0 2px 8px -2px rgba(16,185,129,0.45), inset 0 1px 0 rgba(255,255,255,0.4);
+  box-shadow: 0 2px 8px -2px var(--brand-glow), inset 0 1px 0 rgba(255,255,255,0.4);
 }
 .al-ev--elevated .al-ev-pill {
   color: #92660A; background: rgba(234,179,8,0.12);
@@ -297,6 +297,6 @@ html.dark .al-ev--blocked  .al-ev-pill { color: #FCA5A5; background: rgba(239,68
 html.dark .al-ev--review   .al-ev-pill { color: #FDBA74; background: rgba(249,115,22,0.16); }
 
 .al-ev-score {
-  font-size: 10px; font-weight: 800; color: var(--fg4, #94A3B8);
+  font-size: 10px; font-weight: 800; color: var(--fg4, #A1A1A1);
   letter-spacing: 0.04em; font-variant-numeric: tabular-nums;
 }

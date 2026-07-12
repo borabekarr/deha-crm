@@ -73,7 +73,7 @@ test('reduced-motion: proximity never ramps regardless of pointer movement', asy
   expect(await getScale(page, target)).toBeCloseTo(1, 3)
 })
 
-test('ramp: scale grows with proximity and resets on departure (default project only)', async ({ page }, testInfo) => {
+test('ramp: scale grows with edge proximity and resets on departure (default project only)', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'default', 'live-transition assertions require the default project')
 
   await page.goto(URL)
@@ -85,20 +85,45 @@ test('ramp: scale grows with proximity and resets on departure (default project 
   const cx = box.x + box.width / 2
   const cy = box.y + box.height / 2
 
-  // Mid-ramp: ~60px from center.
-  await page.mouse.move(cx + 60, cy, { steps: 5 })
+  // Mid-ramp: 60px beyond the RIGHT edge, vertically centered (edge distance, radius 80).
+  await page.mouse.move(box.x + box.width + 60, cy, { steps: 5 })
   await expect.poll(() => getScale(page, target), { timeout: 3000 }).toBeGreaterThan(1.001)
-  await expect.poll(() => getScale(page, target), { timeout: 3000 }).toBeLessThan(1.039)
+  await expect.poll(() => getScale(page, target), { timeout: 3000 }).toBeLessThan(1.01)
 
-  // Center: near max ramp.
+  // Center: pointer over the rect, dist 0 — near max ramp (scale max 1.02).
   await page.mouse.move(cx, cy, { steps: 5 })
-  await expect.poll(() => getScale(page, target), { timeout: 3000 }).toBeGreaterThanOrEqual(1.035)
-  await expect.poll(() => getScale(page, target), { timeout: 3000 }).toBeLessThanOrEqual(1.045)
+  await expect.poll(() => getScale(page, target), { timeout: 3000 }).toBeGreaterThanOrEqual(1.016)
+  await expect.poll(() => getScale(page, target), { timeout: 3000 }).toBeLessThanOrEqual(1.021)
 
-  // Departure: > 150px away — back to rest, --prox removed.
+  // Departure: far away — back to rest, --prox removed.
   await page.mouse.move(cx + 400, cy + 400, { steps: 5 })
   await expect.poll(() => getScale(page, target), { timeout: 3000 }).toBeCloseTo(1, 3)
   await expect.poll(() => getProxVar(page, target), { timeout: 3000 }).toBe('')
+})
+
+test('directional: horizontal weighting reaches further sideways than vertically (default project only)', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'default', 'live-transition assertions require the default project')
+
+  await page.goto(URL)
+  await waitForPreview(page)
+
+  const target = page.locator('[data-proximity]').first()
+  const box = await target.boundingBox()
+  if (!box) throw new Error('target has no boundingBox')
+  const cx = box.x + box.width / 2
+  const cy = box.y + box.height / 2
+
+  // 60px below the bottom edge: dy weighted 3x pushes dist past radius 80 — no ramp.
+  await page.mouse.move(cx, box.y + box.height + 60, { steps: 5 })
+  await expect.poll(() => getProxVar(page, target), { timeout: 3000 }).toBe('')
+
+  // 60px beside the right edge, same vertical band: within radius, clearly ramped.
+  await page.mouse.move(box.x + box.width + 60, cy, { steps: 5 })
+  await expect
+    .poll(() => getProxVar(page, target).then((v) => (v === '' ? 0 : parseFloat(v))), { timeout: 3000 })
+    .toBeGreaterThan(0.1)
 })
 
 test('spam: rapid pointer sweeps never error and settle consistently', async ({ page }) => {
@@ -130,5 +155,5 @@ test('spam: rapid pointer sweeps never error and settle consistently', async ({ 
   const near = page.locator('[data-proximity]').first()
   const scale = await getScale(page, near)
   expect(scale).toBeGreaterThanOrEqual(1)
-  expect(scale).toBeLessThanOrEqual(1.041)
+  expect(scale).toBeLessThanOrEqual(1.021)
 })

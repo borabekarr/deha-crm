@@ -29,7 +29,7 @@ const MODELS: ModelOption[] = [
     id: 'auto',
     name: 'Auto',
     icon: 'auto_mode',
-    iconColor: '#10B981',
+    iconColor: 'var(--brand-primary-500)',
     desc: 'Choose for me',
     hasStats: false,
   },

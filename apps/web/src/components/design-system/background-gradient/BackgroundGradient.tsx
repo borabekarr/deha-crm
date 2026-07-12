@@ -13,10 +13,10 @@ export default function BackgroundGradient() {
           </div>
         </div>
         <div className="bg-stage grid">
-          <span className="bg-pill" style={{ background: '#10B981' }}>SECTION</span>
+          <span className="bg-pill" style={{ background: 'var(--brand-primary-500)' }}>SECTION</span>
           <div className="bg-meta">
             <div className="bg-name">Grid on white</div>
-            <div className="bg-desc">24px grid · rgba(15,23,42,0.035)<br />Reserved for highlighted sections</div>
+            <div className="bg-desc">24px grid · rgba(17,17,17,0.035)<br />Reserved for highlighted sections</div>
           </div>
         </div>
       </div>

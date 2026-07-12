@@ -15,7 +15,7 @@ export default function SpacingShadows() {
         </div>
         <div className="sh-box sh-emerald-glow sh-emerald-glow-full">
           <div className="sh-name">shadow-emerald-glow</div>
-          <div className="sh-meta">Hero accent cards · 10/40 –10 · rgba(16,185,129,0.5)</div>
+          <div className="sh-meta">Hero accent cards · 10/40 –10 · var(--brand-glow)</div>
         </div>
       </div>
     </div>

@@ -24,7 +24,7 @@ import {
 
 // ---- accent palettes -------------------------------------------------------
 const ACCENTS: Record<DiAccent, { base: string; bright: string; glow: string }> = {
-  emerald: { base: '#10B981', bright: '#34D399', glow: 'rgba(16,185,129,0.55)' },
+  emerald: { base: 'var(--brand-primary-500)', bright: 'var(--brand-primary-400)', glow: 'var(--brand-glow)' },
   blue:    { base: '#3B82F6', bright: '#60A5FA', glow: 'rgba(59,130,246,0.55)' },
   violet:  { base: '#8B5CF6', bright: '#A78BFA', glow: 'rgba(139,92,246,0.55)' },
   amber:   { base: '#F59E0B', bright: '#FBBF24', glow: 'rgba(245,158,11,0.55)' },
@@ -107,10 +107,10 @@ interface ArticleBodyProps {
 }
 
 function ArticleBody({ accent, dark }: ArticleBodyProps) {
-  const fg1 = dark ? '#F1F5F9' : '#0F172A'
-  const fg2 = dark ? '#CBD5E1' : '#334155'
-  const fg3 = dark ? '#94A3B8' : '#64748B'
-  const hair = dark ? 'rgba(148,163,184,0.18)' : '#EEF1F5'
+  const fg1 = dark ? '#F5F5F5' : '#111111'
+  const fg2 = dark ? '#D4D4D4' : '#232323'
+  const fg3 = dark ? '#A1A1A1' : '#6B6B6B'
+  const hair = dark ? 'rgba(161,161,161,0.18)' : '#EEF1F5'
   const a = ACCENTS[accent] || ACCENTS.emerald
 
   return (
@@ -118,7 +118,7 @@ function ArticleBody({ accent, dark }: ArticleBodyProps) {
       <span style={{
         display: 'inline-flex', alignItems: 'center', gap: 6,
         padding: '5px 11px', borderRadius: 999,
-        background: dark ? 'rgba(16,185,129,0.16)' : a.base,
+        background: dark ? 'color-mix(in srgb, var(--brand-primary-500) 16%, transparent)' : a.base,
         color: dark ? a.bright : '#fff',
         fontSize: 10.5, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase',
         boxShadow: dark ? 'none' : 'inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -1.5px 0 rgba(0,0,0,0.14)',
@@ -149,7 +149,7 @@ function ArticleBody({ accent, dark }: ArticleBodyProps) {
         marginTop: 22, height: 188, borderRadius: 18, overflow: 'hidden',
         position: 'relative', border: `1px solid ${hair}`,
         background: dark ? '#0E1626' : '#F6F8FB',
-        backgroundImage: `repeating-linear-gradient(135deg, ${dark ? 'rgba(148,163,184,0.10)' : 'rgba(15,23,42,0.05)'} 0 10px, transparent 10px 20px)`,
+        backgroundImage: `repeating-linear-gradient(135deg, ${dark ? 'rgba(161,161,161,0.10)' : 'rgba(17,17,17,0.05)'} 0 10px, transparent 10px 20px)`,
         display: 'grid', placeItems: 'center',
       }}>
         <span style={{
@@ -179,8 +179,8 @@ function ArticleBody({ accent, dark }: ArticleBodyProps) {
           if (b.t === 'end') return (
             <div key={b.x} style={{
               margin: '40px 0 0', padding: '20px', borderRadius: 16,
-              border: `1px dashed ${dark ? 'rgba(16,185,129,0.4)' : a.base}`,
-              background: dark ? 'rgba(16,185,129,0.08)' : a.base + '12',
+              border: `1px dashed ${dark ? 'color-mix(in srgb, var(--brand-primary-500) 40%, transparent)' : a.base}`,
+              background: dark ? 'color-mix(in srgb, var(--brand-primary-500) 8%, transparent)' : a.base + '12',
               display: 'flex', alignItems: 'center', gap: 12,
             }}>
               <span className="material-symbols-outlined" style={{ fontSize: 22, color: a.base }}>check_circle</span>
@@ -205,7 +205,7 @@ interface IOSStatusBarProps {
 }
 
 function IOSStatusBar({ dark }: IOSStatusBarProps) {
-  const fg = dark ? 'rgba(255,255,255,0.88)' : '#0F172A'
+  const fg = dark ? 'rgba(255,255,255,0.88)' : '#111111'
   return (
     <div style={{
       height: 50, display: 'flex', alignItems: 'center',
@@ -295,9 +295,9 @@ function DynamicIsland({
 
   // When darkArticle is true, force light-theme colors on the island face
   const effectiveDark = darkArticle ? false : islandDark
-  const trackBg = effectiveDark ? 'rgba(255,255,255,0.12)' : 'rgba(15,23,42,0.10)'
-  const labelColor = effectiveDark ? '#F1F5F9' : '#0F172A'
-  const iconColor = effectiveDark ? 'rgba(255,255,255,0.55)' : '#475569'
+  const trackBg = effectiveDark ? 'rgba(255,255,255,0.12)' : 'rgba(17,17,17,0.10)'
+  const labelColor = effectiveDark ? '#F5F5F5' : '#111111'
+  const iconColor = effectiveDark ? 'rgba(255,255,255,0.55)' : '#4A4A4A'
 
   const surface = glass
     ? (effectiveDark ? {
@@ -306,7 +306,7 @@ function DynamicIsland({
         backdropFilter: 'blur(16px) saturate(180%)', WebkitBackdropFilter: 'blur(16px) saturate(180%)',
       } : {
         background: 'rgba(255,255,255,0.72)',
-        boxShadow: '0 1px 2px rgba(15,23,42,0.10), 0 12px 30px -10px rgba(15,23,42,0.28), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 0 0 1px rgba(15,23,42,0.06)',
+        boxShadow: '0 1px 2px rgba(17,17,17,0.10), 0 12px 30px -10px rgba(17,17,17,0.28), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 0 0 1px rgba(17,17,17,0.06)',
         backdropFilter: 'blur(16px) saturate(180%)', WebkitBackdropFilter: 'blur(16px) saturate(180%)',
       })
     : (effectiveDark ? {
@@ -317,8 +317,8 @@ function DynamicIsland({
       } : {
         background: '#FFFFFF',
         boxShadow: expanded
-          ? '0 2px 6px rgba(0,0,0,0.22), 0 16px 36px -10px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(15,23,42,0.06)'
-          : '0 2px 6px rgba(0,0,0,0.32), inset 0 0 0 1px rgba(15,23,42,0.06)',
+          ? '0 2px 6px rgba(0,0,0,0.22), 0 16px 36px -10px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(17,17,17,0.06)'
+          : '0 2px 6px rgba(0,0,0,0.32), inset 0 0 0 1px rgba(17,17,17,0.06)',
       })
 
   // Fill glow replay — callback-ref pattern (no effect hook)
@@ -586,7 +586,7 @@ export default function DynamicIslandReader() {
   }
 
   const dark = tweaks.darkArticle
-  const screenBg = dark ? '#0B1220' : '#FFFFFF'
+  const screenBg = dark ? '#0A0A0A' : '#FFFFFF'
 
   return (
     <div className="dir-root">
@@ -646,21 +646,21 @@ export default function DynamicIslandReader() {
       {/* Tweaks panel — inline, no harness dependency */}
       <div style={{
         position: 'fixed', right: 16, top: '50%', transform: 'translateY(-50%)',
-        background: 'rgba(15,23,42,0.92)', backdropFilter: 'blur(12px)',
+        background: 'rgba(17,17,17,0.92)', backdropFilter: 'blur(12px)',
         borderRadius: 16, padding: '16px 14px', display: 'flex', flexDirection: 'column',
         gap: 10, minWidth: 170, boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
         border: '1px solid rgba(255,255,255,0.08)',
       }}>
-        <span style={{ fontSize: 10, fontWeight: 700, color: '#64748B', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 2 }}>Indicator</span>
+        <span style={{ fontSize: 10, fontWeight: 700, color: '#6B6B6B', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 2 }}>Indicator</span>
 
         <label htmlFor="dir-dark-island" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, cursor: 'pointer' }}>
-          <span style={{ fontSize: 12, color: '#CBD5E1' }}>Dark island</span>
+          <span style={{ fontSize: 12, color: '#D4D4D4' }}>Dark island</span>
           <input id="dir-dark-island" aria-label="Dark island" type="checkbox" checked={tweaks.darkIsland} onChange={(e) => setTweak('darkIsland', e.target.checked)} />
         </label>
 
         {/* Accent */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <span style={{ fontSize: 11, color: '#94A3B8' }}>Accent</span>
+          <span style={{ fontSize: 11, color: '#A1A1A1' }}>Accent</span>
           <div style={{ display: 'flex', gap: 5 }}>
             {(['emerald', 'blue', 'violet', 'amber'] as DiAccent[]).map((ac) => (
               <button
@@ -680,7 +680,7 @@ export default function DynamicIslandReader() {
 
         {/* Readout */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <span style={{ fontSize: 11, color: '#94A3B8' }}>Readout</span>
+          <span style={{ fontSize: 11, color: '#A1A1A1' }}>Readout</span>
           <div style={{ display: 'flex', gap: 4 }}>
             {(['percent', 'time', 'off'] as DiShowMode[]).map((v) => (
               <button
@@ -689,8 +689,8 @@ export default function DynamicIslandReader() {
                 onClick={() => setTweak('showMode', v)}
                 style={{
                   fontSize: 10, padding: '3px 7px', borderRadius: 6,
-                  background: tweaks.showMode === v ? '#10B981' : 'rgba(255,255,255,0.08)',
-                  color: tweaks.showMode === v ? '#fff' : '#94A3B8',
+                  background: tweaks.showMode === v ? 'var(--brand-primary-500)' : 'rgba(255,255,255,0.08)',
+                  color: tweaks.showMode === v ? '#fff' : '#A1A1A1',
                   border: 'none', cursor: 'pointer',
                 }}
               >{v}</button>
@@ -700,7 +700,7 @@ export default function DynamicIslandReader() {
 
         {/* Pill style */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <span style={{ fontSize: 11, color: '#94A3B8' }}>Pill style</span>
+          <span style={{ fontSize: 11, color: '#A1A1A1' }}>Pill style</span>
           <div style={{ display: 'flex', gap: 4 }}>
             {(['island', 'glass'] as DiPillStyle[]).map((v) => (
               <button
@@ -709,8 +709,8 @@ export default function DynamicIslandReader() {
                 onClick={() => setTweak('pillStyle', v)}
                 style={{
                   fontSize: 10, padding: '3px 7px', borderRadius: 6,
-                  background: tweaks.pillStyle === v ? '#10B981' : 'rgba(255,255,255,0.08)',
-                  color: tweaks.pillStyle === v ? '#fff' : '#94A3B8',
+                  background: tweaks.pillStyle === v ? 'var(--brand-primary-500)' : 'rgba(255,255,255,0.08)',
+                  color: tweaks.pillStyle === v ? '#fff' : '#A1A1A1',
                   border: 'none', cursor: 'pointer',
                 }}
               >{v}</button>
@@ -718,22 +718,22 @@ export default function DynamicIslandReader() {
           </div>
         </div>
 
-        <span style={{ fontSize: 10, fontWeight: 700, color: '#64748B', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 4 }}>Behavior</span>
+        <span style={{ fontSize: 10, fontWeight: 700, color: '#6B6B6B', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 4 }}>Behavior</span>
 
         <label htmlFor="dir-collapse-idle" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, cursor: 'pointer' }}>
-          <span style={{ fontSize: 12, color: '#CBD5E1' }}>Collapse idle</span>
+          <span style={{ fontSize: 12, color: '#D4D4D4' }}>Collapse idle</span>
           <input id="dir-collapse-idle" aria-label="Collapse when idle" type="checkbox" checked={tweaks.collapseIdle} onChange={(e) => handleCollapseIdleChange(e.target.checked)} />
         </label>
 
         <label htmlFor="dir-celebrate" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, cursor: 'pointer' }}>
-          <span style={{ fontSize: 12, color: '#CBD5E1' }}>Confetti</span>
+          <span style={{ fontSize: 12, color: '#D4D4D4' }}>Confetti</span>
           <input id="dir-celebrate" aria-label="Confetti on finish" type="checkbox" checked={tweaks.celebrate} onChange={(e) => setTweak('celebrate', e.target.checked)} />
         </label>
 
-        <span style={{ fontSize: 10, fontWeight: 700, color: '#64748B', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 4 }}>Article</span>
+        <span style={{ fontSize: 10, fontWeight: 700, color: '#6B6B6B', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 4 }}>Article</span>
 
         <label htmlFor="dir-dark-article" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, cursor: 'pointer' }}>
-          <span style={{ fontSize: 12, color: '#CBD5E1' }}>Dark article</span>
+          <span style={{ fontSize: 12, color: '#D4D4D4' }}>Dark article</span>
           <input id="dir-dark-article" aria-label="Dark article" type="checkbox" checked={tweaks.darkArticle} onChange={(e) => setTweak('darkArticle', e.target.checked)} />
         </label>
       </div>

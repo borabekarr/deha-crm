@@ -10,11 +10,11 @@
  */
 :root {
   --prox-radius: 120px;
-  --hover-scale-max: 1.04;
-  --hover-brightness-max: 1.05;
-  --hover-shadow-y: 6px;
-  --hover-shadow-blur: 16px;
-  --hover-shadow-color: rgba(15, 23, 42, 0.16);
+  --hover-scale-max: 1.02;
+  --hover-brightness-max: 1.02;
+  --hover-shadow-y: 4px;
+  --hover-shadow-blur: 10px;
+  --hover-shadow-color: rgba(15, 23, 42, 0.10);
 }
 
 @media (hover: hover) and (pointer: fine) {

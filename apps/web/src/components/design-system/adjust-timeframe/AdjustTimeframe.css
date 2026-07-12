@@ -5,22 +5,22 @@
   background: var(--shell-bg, #d4dce8);
   border-radius: 28px;
   padding: 10px;
-  box-shadow: 0 10px 30px rgba(15,23,42,0.12), 0 2px 8px rgba(15,23,42,0.06);
+  box-shadow: 0 10px 30px rgba(17,17,17,0.12), 0 2px 8px rgba(17,17,17,0.06);
   max-width: 536px;
   width: 100%;
   margin: 0 auto;
 }
 html.dark .tf-shell {
-  background: #020617;
+  background: #0A0A0A;
   border: 1px solid var(--card-border);
   border-top-color: rgba(255,255,255,.22) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
 }
 /* ---- dark-mode polish ---- */
 html.dark .tf-pan:hover:not(:disabled) { background: color-mix(in srgb, #fff 10%, var(--card-bg)); color: var(--fg1); }
-html.dark .tf-preset-glider { background: #F1F5F9; box-shadow: 0 1px 2px rgba(0,0,0,.30); }
-html.dark .tf-preset.active { color: #0F172A; }
-html.dark .tf-preset.active:hover { color: #0F172A; }
+html.dark .tf-preset-glider { background: #F5F5F5; box-shadow: 0 1px 2px rgba(0,0,0,.30); }
+html.dark .tf-preset.active { color: #111111; }
+html.dark .tf-preset.active:hover { color: #111111; }
 html.dark .tf-month:hover { background: color-mix(in srgb, #fff 8%, var(--card-bg)); }
 html.dark .tf-ruler { background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.16) 0 1px, transparent 1px var(--ppd)); }
 html.dark .tf-monthtick { background: rgba(255,255,255,.26); }
@@ -30,7 +30,7 @@ html.dark .tf-monthtick { background: rgba(255,255,255,.26); }
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: var(--card-radius);
-  box-shadow: inset 0 0 0 1px rgba(15,23,42,0.04);
+  box-shadow: inset 0 0 0 1px rgba(17,17,17,0.04);
   overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
@@ -55,7 +55,7 @@ html.dark .tf-card {
   display: inline-flex; align-items: baseline; gap: 6px;
   white-space: nowrap;
 }
-.tf-range .tf-dash { color: var(--slate-300); font-weight: 500; }
+.tf-range .tf-dash { color: var(--gray-300); font-weight: 500; }
 .tf-range .tf-seg.end { color: var(--fg1); }
 /* tiny pop when the range text changes (own class — `seg`/`dash` collide with the
    global preview control styles in _controls.css that paint a pill background) */
@@ -66,7 +66,7 @@ html.dark .tf-card {
 /* ---- Item 2: segmented presets — mirrors .seg.accent pattern exactly ---- */
 .tf-presets {
   position: relative; display: inline-flex; align-items: center;
-  background: #F1F5F9;
+  background: #F5F5F5;
   border-radius: 9999px; padding: 3px;
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
   font-family: 'Montserrat', sans-serif;
@@ -74,13 +74,13 @@ html.dark .tf-card {
   /* fieldset reset */
   border: none; margin: 0; min-inline-size: unset;
 }
-html.dark .tf-presets { background: #0B1220; box-shadow: inset 0 2px 4px rgba(0,0,0,.4); }
+html.dark .tf-presets { background: #0A0A0A; box-shadow: inset 0 2px 4px rgba(0,0,0,.4); }
 .tf-card[data-dragging="true"] .tf-presets { opacity: .5; }
 
 /* Sliding glider pill — mirrors .seg-pill (black light / white dark) */
 .tf-preset-glider {
   position: absolute; top: 3px; bottom: 3px; z-index: 0; border-radius: 9999px;
-  background: #0F172A;
+  background: #111111;
   box-shadow: 0 1px 2px rgba(0,0,0,0.18);
   transition: left calc(300ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.64,1), width calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), opacity calc(160ms * var(--anim-mult, 1)) ease;
   pointer-events: none;
@@ -92,16 +92,16 @@ html.dark .tf-presets { background: #0B1220; box-shadow: inset 0 2px 4px rgba(0,
   position: relative; z-index: 1;
   appearance: none; border: none; background: transparent; cursor: pointer;
   font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 800;
-  color: #64748B; padding: 6px 10px; border-radius: 9999px; line-height: 1;
+  color: #6B6B6B; padding: 6px 10px; border-radius: 9999px; line-height: 1;
   transition: color calc(240ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
   white-space: nowrap;
 }
-html.dark .tf-preset { color: #94A3B8; }
+html.dark .tf-preset { color: #A1A1A1; }
 .tf-preset:hover { color: var(--fg2); }
 .tf-preset:active { transform: scale(.93); }
 /* white text on black pill (light) / dark text on white pill (dark) — mirrors .seg button.active */
 .tf-preset.active { color: #FFFFFF; font-weight: 900; }
-html.dark .tf-preset.active { color: #0F172A; }
+html.dark .tf-preset.active { color: #111111; }
 .tf-preset:focus-visible { outline: 2px solid var(--tf-accent); outline-offset: 2px; }
 
 .tf-divider { height: 1px; background: var(--card-border); }
@@ -115,13 +115,13 @@ html.dark .tf-preset.active { color: #0F172A; }
 .tf-pan {
   flex: none; width: 26px; height: 26px; border-radius: var(--radius-circle);
   display: grid; place-items: center; cursor: pointer;
-  border: none; background: transparent; color: var(--slate-400);
+  border: none; background: transparent; color: var(--gray-400);
   /* Item 4: align button center to ruler centerline (ruler center ≈ 17.5px from track top).
      Button is 26px tall; half = 13px. Offset = 17.5 - 13 = 4.5px → 5px */
   margin-top: 5px; align-self: flex-start;
   transition: background calc(150ms * var(--anim-mult, 1)) ease, color calc(150ms * var(--anim-mult, 1)) ease, opacity calc(200ms * var(--anim-mult, 1)) ease, transform calc(120ms * var(--anim-mult, 1)) ease;
 }
-.tf-pan:hover:not(:disabled) { background: var(--slate-100); color: var(--fg2); }
+.tf-pan:hover:not(:disabled) { background: var(--gray-100); color: var(--fg2); }
 .tf-pan:active:not(:disabled) { transform: scale(.9); }
 .tf-pan:disabled { opacity: .25; cursor: default; }
 .tf-pan .material-symbols-outlined { font-size: 17px; }
@@ -137,13 +137,13 @@ html.dark .tf-preset.active { color: #0F172A; }
 /* base ruler ticks */
 .tf-ruler {
   position: absolute; top: 10px; left: 0; height: 15px;
-  background-image: repeating-linear-gradient(90deg, var(--slate-300) 0 1px, transparent 1px var(--ppd));
+  background-image: repeating-linear-gradient(90deg, var(--gray-300) 0 1px, transparent 1px var(--ppd));
   -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 2px, #000 calc(100% - 2px), transparent 100%);
   mask-image: linear-gradient(90deg, transparent 0, #000 2px, #000 calc(100% - 2px), transparent 100%);
   opacity: 1;
 }
 /* month start gridline ticks (taller) */
-.tf-monthtick { position: absolute; top: 8px; width: 1px; height: 20px; background: var(--slate-300); opacity: .8; }
+.tf-monthtick { position: absolute; top: 8px; width: 1px; height: 20px; background: var(--gray-300); opacity: .8; }
 
 /* month labels (click to select the whole month) */
 .tf-month {
@@ -155,7 +155,7 @@ html.dark .tf-preset.active { color: #0F172A; }
   padding: 2px 6px; border-radius: 7px;
   transition: color calc(260ms * var(--anim-mult, 1)) ease, font-weight calc(260ms * var(--anim-mult, 1)) ease, background calc(150ms * var(--anim-mult, 1)) ease, left calc(400ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
 }
-.tf-month:hover { color: var(--fg2); background: var(--slate-100); }
+.tf-month:hover { color: var(--fg2); background: var(--gray-100); }
 .tf-month:active { transform: translateX(-50%) scale(.94); }
 .tf-month[data-in="true"] { color: var(--fg1); font-weight: var(--weight-bold); }
 .tf-month:focus-visible { outline: 2px solid var(--tf-accent); outline-offset: 1px; }
@@ -177,8 +177,8 @@ html.dark .tf-preset.active { color: #0F172A; }
   position: absolute; inset: 0; overflow: hidden;
   border-radius: 9px;
   background: var(--card-bg);
-  border: 1px solid rgba(15,23,42,.10);
-  box-shadow: 0 1px 2px rgba(15,23,42,.10), 0 6px 14px -8px rgba(15,23,42,.28), inset 0 1px 0 rgba(255,255,255,.9);
+  border: 1px solid rgba(17,17,17,.10);
+  box-shadow: 0 1px 2px rgba(17,17,17,.10), 0 6px 14px -8px rgba(17,17,17,.28), inset 0 1px 0 rgba(255,255,255,.9);
 }
 html.dark .tf-lens {
   background: color-mix(in srgb, #fff 14%, var(--card-bg));

@@ -26,13 +26,13 @@ interface Member {
 }
 
 const MEMBERS: Member[] = [
-  { id: '01', name: 'Oliver Smith',  initials: 'OS', online: true,  status: 'Online',  role: 'pm',       color: '#059669' },
-  { id: '02', name: 'Sophie Chen',   initials: 'SC', online: false, status: '17m ago', role: 'designer', color: '#475569' },
+  { id: '01', name: 'Oliver Smith',  initials: 'OS', online: true,  status: 'Online',  role: 'pm',       color: 'var(--brand-primary-600)' },
+  { id: '02', name: 'Sophie Chen',   initials: 'SC', online: false, status: '17m ago', role: 'designer', color: '#4A4A4A' },
   { id: '03', name: 'Noah Wilson',   initials: 'NW', online: false, status: '29m ago', role: 'data',     color: '#F59E0B' },
   { id: '04', name: 'Emma Davis',    initials: 'ED', online: false, status: '48m ago', role: 'creator',  color: '#F97316' },
-  { id: '05', name: 'Leo Garcia',    initials: 'LG', online: true,  status: 'Online',  role: 'designer', color: '#047857' },
-  { id: '06', name: 'Mia Thompson',  initials: 'MT', online: true,  status: 'Online',  role: 'pm',       color: '#64748B' },
-  { id: '07', name: 'Ethan Wright',  initials: 'EW', online: false, status: '5h ago',  role: 'data',     color: '#334155' },
+  { id: '05', name: 'Leo Garcia',    initials: 'LG', online: true,  status: 'Online',  role: 'designer', color: 'var(--brand-primary-700)' },
+  { id: '06', name: 'Mia Thompson',  initials: 'MT', online: true,  status: 'Online',  role: 'pm',       color: '#6B6B6B' },
+  { id: '07', name: 'Ethan Wright',  initials: 'EW', online: false, status: '5h ago',  role: 'data',     color: '#232323' },
 ]
 
 /* ----------------------------- sub-components ----------------------------- */

@@ -8,14 +8,14 @@
 /* NOTE: .gc-card is now the root element (no .shell wrapper in the component DOM).
    These rules are inert but harmless; left for preview-page shell compatibility. */
 .shell:has(.gc-card) {
-  background: #F8FAFC;
+  background: #FAFAFA;
   box-shadow: none;
   padding: 24px;
   border-radius: 0;
 }
 
 html.dark .shell:has(.gc-card) {
-  background: #0B1220;
+  background: #0A0A0A;
 }
 
 /* ===== Outer grey field (canonical grey shell) ===== */
@@ -24,15 +24,15 @@ html.dark .shell:has(.gc-card) {
   padding: 10px;
   border-radius: 28px;
   display: inline-block;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12), 0 2px 8px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 10px 30px rgba(17,17,17, 0.12), 0 2px 8px rgba(17,17,17, 0.06);
 }
 
 html.dark .gc-outer {
-  background: #020617;
-  border: 1px solid var(--card-border, #334155);
+  background: #0A0A0A;
+  border: 1px solid var(--card-border, #232323);
   box-shadow:
-    0 10px 30px rgba(15, 23, 42, 0.12),
-    0 2px 8px rgba(15, 23, 42, 0.06),
+    0 10px 30px rgba(17,17,17, 0.12),
+    0 2px 8px rgba(17,17,17, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.05),
     inset 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
@@ -46,10 +46,10 @@ html.dark .gc-outer {
   width: max-content;
   max-width: calc(100vw - 80px);
   background: var(--card-bg, #ffffff);
-  border: 1px solid var(--card-border, #CBD5E1);
+  border: 1px solid var(--card-border, #D4D4D4);
   border-radius: var(--card-radius, 20px);
   padding: var(--pad-card, 16px) 26px;
-  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(17,17,17, 0.04);
 }
 
 html.dark .gc-card {
@@ -81,7 +81,7 @@ html.dark .gc-card {
   display: grid;
   place-items: center;
   color: #fff;
-  background-color: var(--brand-primary, #10B981);
+  background-color: var(--brand-primary, var(--brand-primary-500));
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.13) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.13) 1px, transparent 1px);
@@ -89,45 +89,45 @@ html.dark .gc-card {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.28),
     inset 0 0 0 1px rgba(0, 0, 0, 0.1),
-    0 4px 12px rgba(16, 185, 129, 0.35);
+    0 4px 12px color-mix(in srgb, var(--brand-primary-500) 35%, transparent);
 }
 
 .gc-name {
   font-family: var(--font-display);
   font-weight: var(--weight-extrabold, 800);
   font-size: 15px;
-  color: var(--fg1, #0F172A);
+  color: var(--fg1, #111111);
   letter-spacing: -0.02em;
 }
 
 html.dark .gc-name {
-  color: var(--fg1-dark, #F1F5F9);
+  color: var(--fg1-dark, #F5F5F5);
 }
 
 .gc-sub {
   font-size: 12px;
-  color: var(--fg3, #64748B);
+  color: var(--fg3, #6B6B6B);
   margin-top: 2px;
 }
 
 .gc-total {
   font-family: var(--font-display);
   font-size: 13px;
-  color: var(--fg2, #334155);
+  color: var(--fg2, #232323);
   white-space: nowrap;
 }
 
 html.dark .gc-total {
-  color: var(--fg2-dark, #CBD5E1);
+  color: var(--fg2-dark, #D4D4D4);
 }
 
 .gc-total b {
   font-weight: var(--weight-extrabold, 800);
-  color: var(--fg1, #0F172A);
+  color: var(--fg1, #111111);
 }
 
 html.dark .gc-total b {
-  color: var(--fg1-dark, #F1F5F9);
+  color: var(--fg1-dark, #F5F5F5);
 }
 
 /* ===== Scroller / grid ===== */
@@ -146,7 +146,7 @@ html.dark .gc-total b {
 }
 
 .gc-scroller::-webkit-scrollbar-thumb {
-  background: rgba(15, 23, 42, 0.15);
+  background: rgba(17,17,17, 0.15);
   border-radius: 2px;
 }
 
@@ -166,7 +166,7 @@ html.dark .gc-scroller::-webkit-scrollbar-thumb {
   font-family: var(--font-display);
   font-size: 10px;
   font-weight: var(--weight-semibold, 600);
-  color: var(--fg3, #64748B);
+  color: var(--fg3, #6B6B6B);
   letter-spacing: 0.04em;
 }
 
@@ -188,7 +188,7 @@ html.dark .gc-scroller::-webkit-scrollbar-thumb {
   font-family: var(--font-display);
   font-size: 9px;
   font-weight: var(--weight-semibold, 600);
-  color: var(--fg3, #64748B);
+  color: var(--fg3, #6B6B6B);
   display: grid;
   align-items: center;
   height: var(--cell);
@@ -225,7 +225,7 @@ html.dark .gc-scroller::-webkit-scrollbar-thumb {
 /* hover ring — inset outline (-2px offset) stays fully inside the cell bounds
    so it never overlays or underlays neighboring cells; no z-index needed */
 .gc-cell:not(.gc-empty):hover {
-  outline: 2px solid rgba(15, 23, 42, 0.5);
+  outline: 2px solid rgba(17,17,17, 0.5);
   outline-offset: -2px;
   cursor: pointer;
 }
@@ -287,7 +287,7 @@ html.dark .gc-legend-cell.gc-l4 { background: var(--dl4); }
 .gc-tip {
   position: fixed;
   transform: translate(-50%, calc(-100% - 9px));
-  background: #1E293B;
+  background: #1C1C1C;
   color: #fff;
   padding: 7px 11px;
   border-radius: 9px;
@@ -299,12 +299,12 @@ html.dark .gc-legend-cell.gc-l4 { background: var(--dl4); }
   display: flex;
   gap: 5px;
   align-items: baseline;
-  box-shadow: 0 10px 24px -8px rgba(15, 23, 42, 0.5);
+  box-shadow: 0 10px 24px -8px rgba(17,17,17, 0.5);
   animation: gcTip calc(0.14s * var(--anim-mult, 1)) ease;
 }
 
 html.dark .gc-tip {
-  background: #334155;
+  background: #232323;
 }
 
 .gc-tip b {
@@ -312,7 +312,7 @@ html.dark .gc-tip {
 }
 
 .gc-tip span {
-  color: #94A3B8;
+  color: #A1A1A1;
 }
 
 .gc-tip::after {
@@ -322,11 +322,11 @@ html.dark .gc-tip {
   left: 50%;
   transform: translateX(-50%);
   border: 6px solid transparent;
-  border-top-color: #1E293B;
+  border-top-color: #1C1C1C;
 }
 
 html.dark .gc-tip::after {
-  border-top-color: #334155;
+  border-top-color: #232323;
 }
 
 @keyframes gcTip {
@@ -361,8 +361,8 @@ html.dark .gc-tip::after {
   background-size: 7px 7px;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.55),
-    inset 0 -2px 0 rgba(15, 23, 42, 0.18),
-    inset 0 0 0 1px rgba(15, 23, 42, 0.10);
+    inset 0 -2px 0 rgba(17,17,17, 0.18),
+    inset 0 0 0 1px rgba(17,17,17, 0.10);
   color: #fff;
   font-family: var(--font-display);
   font-size: 11px;
@@ -392,7 +392,7 @@ html.dark .gc-tip::after {
   gap: 6px;
   font-family: var(--font-display);
   font-size: 11px;
-  color: var(--fg3, #64748B);
+  color: var(--fg3, #6B6B6B);
 }
 
 .gc-legend-cells {

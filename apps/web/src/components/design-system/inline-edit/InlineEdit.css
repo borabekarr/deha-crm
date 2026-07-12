@@ -20,13 +20,13 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--fg4, #94A3B8);
+  color: var(--fg4, #A1A1A1);
 }
 
 /* ---------- field container ---------------------------------------------- */
 .ie-field {
-  --ie-glow: var(--brand-primary-100, #D1FAE5);
-  --ie-rest: inset 0 1px 0 rgba(255,255,255,1), 0 1px 2px rgba(15,23,42,.05);
+  --ie-glow: var(--brand-primary-100, var(--brand-primary-100));
+  --ie-rest: inset 0 1px 0 rgba(255,255,255,1), 0 1px 2px rgba(17,17,17,.05);
 
   position: relative;
   display: flex;
@@ -38,8 +38,8 @@
   padding-right: 5px;
   border-radius: 9999px;
   background: var(--bg-card-solid, #fff);
-  border: 2px solid var(--border-hairline, #E2E8F0);
-  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0), var(--ie-rest);
+  border: 2px solid var(--border-hairline, #ECECEC);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand-primary-500) 0%, transparent), var(--ie-rest);
   transition:
     width        calc(.45s * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
     border-color calc(.25s * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
@@ -48,7 +48,7 @@
 }
 
 html.dark .ie-field {
-  --ie-glow: rgba(16, 185, 129, .30);
+  --ie-glow: color-mix(in srgb, var(--brand-primary-500) 30%, transparent);
   --ie-rest: inset 0 1px 0 rgba(255,255,255,.06), 0 1px 2px rgba(0,0,0,.3);
 }
 
@@ -56,7 +56,7 @@ html.dark .ie-field {
 
 .ie-field[data-editing="true"] {
   width: 318px;
-  border-color: var(--brand-primary, #10B981);
+  border-color: var(--brand-primary, var(--brand-primary-500));
   box-shadow: 0 0 0 4px var(--ie-glow), var(--ie-rest);
   /* Width springs out with overshoot; border and glow ease in via base transition. */
 }
@@ -67,7 +67,7 @@ html.dark .ie-field {
 }
 
 @keyframes ieSaved {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0), var(--ie-rest); }
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand-primary-500) 0%, transparent), var(--ie-rest); }
   28%      { box-shadow: 0 0 0 6px var(--ie-glow), var(--ie-rest); }
 }
 
@@ -77,7 +77,7 @@ html.dark .ie-field {
   font-family: var(--font-display);
   font-size: 13px;
   font-weight: 800;
-  color: var(--fg4, #94A3B8);
+  color: var(--fg4, #A1A1A1);
   margin-right: 1px;
   user-select: none;
   transition:
@@ -86,7 +86,7 @@ html.dark .ie-field {
 }
 
 .ie-field[data-editing="true"] .ie-prefix {
-  color: var(--brand-primary-600, #059669);
+  color: var(--brand-primary-600, var(--brand-primary-600));
 }
 
 /* Fade out prefix while saved morph is showing */
@@ -107,7 +107,7 @@ html.dark .ie-field {
   font-size: 13px;
   font-weight: 600;
   letter-spacing: -.01em;
-  color: var(--fg3, #475569);
+  color: var(--fg3, #4A4A4A);
   padding: 0;
   transition:
     color   calc(.2s * var(--anim-mult, 1)),
@@ -115,7 +115,7 @@ html.dark .ie-field {
 }
 
 .ie-field[data-editing="true"] .ie-input {
-  color: var(--fg1, #0F172A);
+  color: var(--fg1, #111111);
 }
 
 /* Fade out the input while saved morph is showing */
@@ -125,11 +125,11 @@ html.dark .ie-field {
 }
 
 .ie-input::selection {
-  background: var(--brand-primary-200, #A7F3D0);
+  background: var(--brand-primary-200, var(--brand-primary-200));
 }
 
 html.dark .ie-input::selection {
-  background: rgba(16, 185, 129, .4);
+  background: color-mix(in srgb, var(--brand-primary-500) 40%, transparent);
 }
 
 /* ---------- action button (pen <-> check morph) -------------------------- */
@@ -178,34 +178,34 @@ html.dark .ie-input::selection {
 /* pen state */
 .ie-act[data-mode="edit"] {
   background: var(--bg-card-solid, #fff);
-  color: var(--fg3, #475569);
-  border-color: var(--border-hairline, #E2E8F0);
-  box-shadow: 0 1px 4px rgba(15,23,42,.08);
+  color: var(--fg3, #4A4A4A);
+  border-color: var(--border-hairline, #ECECEC);
+  box-shadow: 0 1px 4px rgba(17,17,17,.08);
 }
 
 .ie-act[data-mode="edit"]:hover {
-  color: var(--fg1, #0F172A);
-  background: #F8FAFC;
+  color: var(--fg1, #111111);
+  background: #FAFAFA;
 }
 
 html.dark .ie-act[data-mode="edit"] {
-  background: color-mix(in srgb, #fff 5%, var(--bg-card-solid, #1E293B));
+  background: color-mix(in srgb, #fff 5%, var(--bg-card-solid, #1C1C1C));
 }
 
 html.dark .ie-act[data-mode="edit"]:hover {
-  background: color-mix(in srgb, #fff 10%, var(--bg-card-solid, #1E293B));
+  background: color-mix(in srgb, #fff 10%, var(--bg-card-solid, #1C1C1C));
 }
 
 /* check / save state — mirrors .btn-green pill treatment */
 .ie-act[data-mode="save"] {
   color: #fff;
-  background-color: var(--brand-primary, #10B981);
+  background-color: var(--brand-primary, var(--brand-primary-500));
   background-image:
     linear-gradient(rgba(255,255,255,.12) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,.12) 1px, transparent 1px);
   background-size: 7px 7px;
   box-shadow:
-    0 0 0 2px rgba(16,185,129,.25),
+    0 0 0 2px color-mix(in srgb, var(--brand-primary-500) 25%, transparent),
     inset 0 1px 0 rgba(255,255,255,.5),
     inset 0 -2px 0 rgba(0,0,0,.22),
     inset 0 0 0 1px rgba(255,255,255,.15);
@@ -229,10 +229,10 @@ html.dark .ie-act[data-mode="edit"]:hover {
   margin-left: 6px;
   display: grid;
   place-items: center;
-  border: 1px solid #CBD5E1;
+  border: 1px solid #D4D4D4;
   cursor: pointer;
   background: none;
-  color: var(--fg4, #94A3B8);
+  color: var(--fg4, #A1A1A1);
   /* Hidden when not editing */
   opacity: 0;
   pointer-events: none;
@@ -245,7 +245,7 @@ html.dark .ie-act[data-mode="edit"]:hover {
 }
 
 html.dark .ie-cancel {
-  border-color: #334155;
+  border-color: #232323;
 }
 
 .ie-cancel[data-visible="true"] {
@@ -340,7 +340,7 @@ html.dark .ie-cancel:hover {
   font-family: var(--font-display);
   font-size: 10px;
   font-weight: 600;
-  color: var(--fg4, #94A3B8);
+  color: var(--fg4, #A1A1A1);
   letter-spacing: -.005em;
   text-align: center;
   transition: opacity calc(.2s * var(--anim-mult, 1));
@@ -367,7 +367,7 @@ html.dark .ie-cancel:hover {
   font-family: var(--font-display);
   font-size: 12px;
   font-weight: 900;
-  color: var(--brand-primary-600, #059669);
+  color: var(--brand-primary-600, var(--brand-primary-600));
   letter-spacing: -.005em;
   pointer-events: none;
   /* Resting state: invisible and scaled slightly down */
@@ -379,7 +379,7 @@ html.dark .ie-cancel:hover {
 }
 
 html.dark .ie-saved-morph {
-  color: var(--brand-primary-300, #6EE7B7);
+  color: var(--brand-primary-300, var(--brand-primary-300));
 }
 
 /* Visible state when saved=true: eases in AFTER input/prefix have faded out (~200ms). */

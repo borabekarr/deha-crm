@@ -50,7 +50,7 @@ const TODAY_INDEX = 2 // Wed of week 1 in the reference shot
 const PRIORITY: Record<string, { color: string; bg: string; label: string; rank: number }> = {
   P0: { color: '#EF4444', bg: '#FEF2F2', label: 'P0', rank: 0 },
   P1: { color: '#F97316', bg: '#FFF7ED', label: 'P1', rank: 1 },
-  P2: { color: '#10B981', bg: '#ECFDF5', label: 'P2', rank: 2 },
+  P2: { color: 'var(--brand-primary-500)', bg: 'var(--brand-primary-50)', label: 'P2', rank: 2 },
 }
 
 interface TicketData {
@@ -203,7 +203,7 @@ function Ticket({ ticket, onDragStart, onDragEnd, dragging, onDelete, successKin
   onDelete: (id: string) => void
   successKind?: string
 }) {
-  const p = PRIORITY[ticket.priority] ?? { color: '#94A3B8', bg: '#F1F5F9', label: ticket.priority || '—', rank: 9 }
+  const p = PRIORITY[ticket.priority] ?? { color: '#A1A1A1', bg: '#F5F5F5', label: ticket.priority || '—', rank: 9 }
   const isBuffer = ticket.priority === 'BUFFER'
   const successClass = successKind ? `success-${successKind.toLowerCase()}` : ''
   return (
@@ -234,7 +234,7 @@ function Ticket({ ticket, onDragStart, onDragEnd, dragging, onDelete, successKin
           position: 'absolute', top: 6, right: 6,
           width: 20, height: 20, padding: 0,
           background: 'transparent', border: 'none',
-          color: '#94A3B8', cursor: 'pointer',
+          color: '#A1A1A1', cursor: 'pointer',
           borderRadius: 6, display: 'grid', placeItems: 'center',
         }}
       >
@@ -255,7 +255,7 @@ function Ticket({ ticket, onDragStart, onDragEnd, dragging, onDelete, successKin
           fontSize: 11, fontWeight: 700, color: 'var(--sp-fg3)',
           letterSpacing: '0.06em', textTransform: 'uppercase',
         }}>
-          <span className={iconClass('schedule')} style={{ fontSize: 13, color: '#94A3B8', lineHeight: 1 }}>schedule</span>
+          <span className={iconClass('schedule')} style={{ fontSize: 13, color: '#A1A1A1', lineHeight: 1 }}>schedule</span>
           Buffer
         </div>
       ) : (
@@ -351,11 +351,11 @@ function DayCell({ idx, dayLabel, date, isToday, tickets, onDragStart, onDragEnd
           style={{
             width: 22, height: 22, padding: 0,
             background: 'transparent', border: '1px solid transparent',
-            color: '#CBD5E1', cursor: 'pointer',
+            color: '#D4D4D4', cursor: 'pointer',
             borderRadius: 6, display: 'grid', placeItems: 'center',
             transition: 'color 150ms, border-color 150ms, background 150ms',
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.color = '#10B981'; e.currentTarget.style.background = 'var(--sp-addhover-bg)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--brand-primary-500)'; e.currentTarget.style.background = 'var(--sp-addhover-bg)' }}
           onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--sp-faint)'; e.currentTarget.style.background = 'transparent' }}
         >
           <span className={iconClass('add')} style={{ fontSize: 16, lineHeight: 1 }}>add</span>
@@ -444,7 +444,7 @@ function WeekSection({ label, range, dates, todayIdx, tickets, weekIndex, succes
         <span style={{
           fontSize: 9, fontWeight: 800,
           letterSpacing: '0.16em', textTransform: 'uppercase',
-          color: '#94A3B8',
+          color: '#A1A1A1',
           fontFamily: 'Montserrat',
         }}>{label}</span>
         <span style={{ fontSize: 10.5, fontWeight: 600, color: 'var(--sp-faint)', fontFamily: 'Montserrat' }}>{range}</span>
@@ -596,7 +596,7 @@ function CommandPalette({ open, onClose, onRun, tickets }: {
           padding: '16px 18px',
           borderBottom: visibleSuggestions.length > 0 ? '1px solid var(--sp-hairline)' : '1px solid transparent',
         }}>
-          <span className={iconClass('neurology')} style={{ fontSize: 17, lineHeight: 1, color: '#10B981', flexShrink: 0 }}>neurology</span>
+          <span className={iconClass('neurology')} style={{ fontSize: 17, lineHeight: 1, color: 'var(--brand-primary-500)', flexShrink: 0 }}>neurology</span>
           {/* item 12: smaller input text */}
           <input
             id="sp-palette-input"
@@ -616,7 +616,7 @@ function CommandPalette({ open, onClose, onRun, tickets }: {
           />
           <button type="button" onClick={onClose} style={{
             fontFamily: 'var(--font-display, Montserrat)', fontSize: 11, fontWeight: 700,
-            color: '#64748B', background: 'var(--sp-chip)',
+            color: '#6B6B6B', background: 'var(--sp-chip)',
             border: 'none', padding: '4px 10px', borderRadius: 6,
             cursor: 'pointer', letterSpacing: '0.04em',
           }}>Esc</button>
@@ -629,7 +629,7 @@ function CommandPalette({ open, onClose, onRun, tickets }: {
               padding: '14px 14px', display: 'flex', alignItems: 'center', gap: 10,
               fontFamily: 'var(--font-display, Montserrat)', fontSize: 12, color: 'var(--sp-fg3)',
             }}>
-              <span className={iconClass('keyboard_return')} style={{ fontSize: 16, color: '#94A3B8', lineHeight: 1 }}>keyboard_return</span>
+              <span className={iconClass('keyboard_return')} style={{ fontSize: 16, color: '#A1A1A1', lineHeight: 1 }}>keyboard_return</span>
               Press Enter to ask Claude to interpret <strong style={{ color: 'var(--sp-fg1)', fontWeight: 700 }}>"{query}"</strong>
             </div>
           )}
@@ -653,7 +653,7 @@ function CommandPalette({ open, onClose, onRun, tickets }: {
                 ? <span className="sugg-row-spinner" />
                 : <span style={{
                     width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
-                    background: '#CBD5E1', display: 'inline-block',
+                    background: '#D4D4D4', display: 'inline-block',
                   }} />
               }
               {/* item 14: Montserrat labels */}
@@ -662,7 +662,7 @@ function CommandPalette({ open, onClose, onRun, tickets }: {
                 letterSpacing: '-0.005em',
               }}>{s.label}</span>
               <span style={{
-                marginLeft: 'auto', fontFamily: 'var(--font-display, Montserrat)', fontSize: 11.5, color: '#94A3B8', fontWeight: 500,
+                marginLeft: 'auto', fontFamily: 'var(--font-display, Montserrat)', fontSize: 11.5, color: '#A1A1A1', fontWeight: 500,
                 whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                 maxWidth: '50%',
               }}>{s.hint}</span>
@@ -675,7 +675,7 @@ function CommandPalette({ open, onClose, onRun, tickets }: {
           borderTop: '1px solid var(--sp-hairline)',
           padding: '9px 16px',
           display: 'flex', alignItems: 'center', gap: 14,
-          fontFamily: 'var(--font-display, Montserrat)', fontSize: 10.5, color: '#94A3B8', fontWeight: 600,
+          fontFamily: 'var(--font-display, Montserrat)', fontSize: 10.5, color: '#A1A1A1', fontWeight: 600,
           letterSpacing: '0.02em',
         }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
@@ -706,10 +706,10 @@ function Toast({ message, kind = 'success', onUndo, onClose, phase, stackOffset 
 }) {
   if (!message) return null
   const cfg = {
-    success: { bg: '#10B981', label: 'Done',    icon: 'check_circle' },
+    success: { bg: 'var(--brand-primary-500)', label: 'Done',    icon: 'check_circle' },
     danger:  { bg: '#EF4444', label: 'Removed', icon: 'delete' },
     info:    { bg: '#3B82F6', label: 'Update',  icon: 'info' },
-  }[kind] ?? { bg: '#10B981', label: 'Done', icon: 'check_circle' }
+  }[kind] ?? { bg: 'var(--brand-primary-500)', label: 'Done', icon: 'check_circle' }
 
   return (
     <output
@@ -727,7 +727,7 @@ function Toast({ message, kind = 'success', onUndo, onClose, phase, stackOffset 
         padding: '8px 8px 8px 12px',
         boxShadow: [
           `0 8px 22px -8px ${cfg.bg}AA`,
-          '0 2px 6px rgba(15,23,42,0.18)',
+          '0 2px 6px rgba(17,17,17,0.18)',
           'inset 0 1px 0 rgba(255,255,255,0.5)',
           'inset 0 -2px 0 rgba(0,0,0,0.22)',
           'inset 0 0 0 1px rgba(255,255,255,0.15)',
@@ -764,7 +764,7 @@ function Toast({ message, kind = 'success', onUndo, onClose, phase, stackOffset 
           onClick={onUndo}
           style={{
             display: 'inline-flex', alignItems: 'center', gap: 5,
-            background: '#0F172A',
+            background: '#111111',
             color: '#fff',
             border: 'none',
             padding: '6px 11px 6px 9px',
@@ -828,7 +828,7 @@ function SprintHeader({ range, onAskAI }: {
           margin: '0 2px',
         }} />
         <span style={{
-          fontSize: 12, fontWeight: 600, color: '#94A3B8',
+          fontSize: 12, fontWeight: 600, color: '#A1A1A1',
           letterSpacing: '-0.005em',
         }}>{range}</span>
       </div>
@@ -945,7 +945,7 @@ function AddTicketModal({ open, day, onClose, onSubmit }: {
           fontSize: 9.5, fontWeight: 900,
           fontFamily: 'var(--font-display, Montserrat)',
           letterSpacing: '0.16em', textTransform: 'uppercase',
-          color: '#94A3B8', marginBottom: 6,
+          color: '#A1A1A1', marginBottom: 6,
         }}>New ticket &middot; {dayName}</div>
         {/* item 7: title textbox — text anchored to bottom edge, minimized font */}
         <input

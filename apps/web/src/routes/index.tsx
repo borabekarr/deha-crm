@@ -1,6 +1,7 @@
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { getGroupedByStatus } from '@/lib/component-registry'
 import { GalleryLayout } from '@/components/library/GalleryLayout'
+import { makeRevealRef } from '@/lib/make-reveal-ref'
 
 const PREVIEW_ROUTE = import.meta.env.VITE_PREVIEW_ROUTE as string | undefined
 
@@ -38,7 +39,7 @@ function ShowcasePage() {
             <h2 className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
               Live
             </h2>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div ref={makeRevealRef()} className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <Link
                 to="/leads"
                 className="group flex flex-col rounded-lg border border-emerald-200 bg-emerald-50 p-4 transition-colors hover:bg-emerald-100 dark:border-emerald-900 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60"
@@ -67,7 +68,7 @@ function ShowcasePage() {
                   <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
                     {category}
                   </h3>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <div ref={makeRevealRef()} className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {entries.map((entry) => (
                       <Link
                         key={entry.slug}

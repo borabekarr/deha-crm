@@ -1,11 +1,11 @@
 .btn-row { display:flex; gap: 12px; align-items:center; flex-wrap: wrap; }
 .btn-row + .btn-row { margin-top: 14px; }
-.btn-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #94A3B8; display:block; margin-bottom: 6px; }
+.btn-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #A1A1A1; display:block; margin-bottom: 6px; }
 
 .btn-primary {
   display:inline-flex; align-items:center; gap: 8px;
   padding: 12px 20px;
-  background: #10B981; color: #fff;
+  background: var(--brand-primary-500); color: #fff;
   border: none; border-radius: 14px;
   font-family: 'Montserrat'; font-size: 14px; font-weight: 800;
   text-shadow: 0 1px 2px rgba(0,0,0,0.18);
@@ -28,45 +28,45 @@
     inset 0 1px 0 rgba(255,255,255,0.5),
     inset 0 -2px 0 rgba(0,0,0,0.22),
     inset 0 0 0 1px rgba(255,255,255,0.15),
-    0 6px 18px -4px rgba(16,185,129,0.45);
+    0 6px 18px -4px var(--brand-glow);
 }
 .btn-primary:active { transform: scale(0.96); box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -1px 0 rgba(0,0,0,0.22), inset 0 0 0 1px rgba(255,255,255,0.15); }
 
 .btn-inverse {
   display:inline-flex; align-items:center; gap: 8px;
   padding: 12px 20px;
-  background: var(--card-bg); color: #10B981;
+  background: var(--card-bg); color: var(--brand-primary-500);
   border: none; border-radius: 14px;
   font-family: 'Montserrat'; font-size: 14px; font-weight: 800;
   box-shadow:
-    inset 0 0 0 1px rgba(15,23,42,0.22),
+    inset 0 0 0 1px rgba(17,17,17,0.22),
     inset 0 1px 0 rgba(255,255,255,0.7),
-    inset 0 -2px 0 rgba(15,23,42,0.14);
+    inset 0 -2px 0 rgba(17,17,17,0.14);
   cursor: pointer;
   transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear, filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 .btn-inverse:hover {
   transform: translateY(-1px);
   box-shadow:
-    inset 0 0 0 1px rgba(15,23,42,0.22),
+    inset 0 0 0 1px rgba(17,17,17,0.22),
     inset 0 1px 0 rgba(255,255,255,0.7),
-    inset 0 -2px 0 rgba(15,23,42,0.14),
-    0 6px 18px -4px rgba(15,23,42,0.18);
+    inset 0 -2px 0 rgba(17,17,17,0.14),
+    0 6px 18px -4px rgba(17,17,17,0.18);
 }
-.btn-inverse:active { transform: scale(0.96); box-shadow: inset 0 0 0 1px rgba(15,23,42,0.22), inset 0 1px 0 rgba(255,255,255,0.7), inset 0 -1px 0 rgba(15,23,42,0.14); }
+.btn-inverse:active { transform: scale(0.96); box-shadow: inset 0 0 0 1px rgba(17,17,17,0.22), inset 0 1px 0 rgba(255,255,255,0.7), inset 0 -1px 0 rgba(17,17,17,0.14); }
 
 .btn-glass {
   display:inline-flex; align-items:center; gap: 8px;
   padding: 10px 18px;
   background: rgba(255,255,255,0.8);
-  color: #334155;
+  color: #232323;
   border: none;
   border-radius: 14px;
   font-family: 'Montserrat'; font-size: 14px; font-weight: 700;
   box-shadow:
-    inset 0 0 0 1px rgba(15,23,42,0.22),
+    inset 0 0 0 1px rgba(17,17,17,0.22),
     inset 0 1px 0 rgba(255,255,255,0.6),
-    inset 0 -2px 0 rgba(15,23,42,0.12);
+    inset 0 -2px 0 rgba(17,17,17,0.12);
   backdrop-filter: blur(20px);
   cursor: pointer;
   transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-base) * var(--anim-mult, 1)), scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear, filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
@@ -75,16 +75,16 @@
   transform: translateY(-1px);
   background: rgba(255,255,255,0.9);
   box-shadow:
-    inset 0 0 0 1px rgba(15,23,42,0.22),
+    inset 0 0 0 1px rgba(17,17,17,0.22),
     inset 0 1px 0 rgba(255,255,255,0.6),
-    inset 0 -2px 0 rgba(15,23,42,0.12),
-    0 6px 18px -4px rgba(15,23,42,0.14);
+    inset 0 -2px 0 rgba(17,17,17,0.12),
+    0 6px 18px -4px rgba(17,17,17,0.14);
 }
-.btn-glass:active { transform: scale(0.96); background: rgba(255,255,255,0.7); box-shadow: inset 0 0 0 1px rgba(15,23,42,0.22), inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(15,23,42,0.12); }
+.btn-glass:active { transform: scale(0.96); background: rgba(255,255,255,0.7); box-shadow: inset 0 0 0 1px rgba(17,17,17,0.22), inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(17,17,17,0.12); }
 
 .btn-text {
   background: none; border: none;
-  color: #10B981;
+  color: var(--brand-primary-500);
   font-family: 'Montserrat'; font-size: 14px; font-weight: 800;
   display:inline-flex; align-items:center; gap: 4px;
   padding: 6px 0;
@@ -96,19 +96,19 @@
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
-.btn-text:hover { opacity: 0.8; transform: translateY(-1px); box-shadow: 0 4px 12px -4px rgba(16,185,129,0.4); }
+.btn-text:hover { opacity: 0.8; transform: translateY(-1px); box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--brand-primary-500) 40%, transparent); }
 .btn-text:active { opacity: 0.55; transform: translateY(0); }
 html.dark .btn-text:hover { box-shadow: 0 4px 12px -4px rgba(52,211,153,0.45); }
 
 .btn-mi { font-size: 18px; }
 
 /* Dark mode — html.dark convention */
-html.dark .btn-label { color: #94A3B8; }
-html.dark .btn-inverse { background: #1E293B; color: #34D399; box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), inset 0 1px 0 rgba(255,255,255,.08), inset 0 -2px 0 rgba(0,0,0,.3); }
-html.dark .btn-inverse:hover { background: #273449; box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), inset 0 1px 0 rgba(255,255,255,.08), inset 0 -2px 0 rgba(0,0,0,.3), 0 6px 18px -4px rgba(0,0,0,0.4); }
-html.dark .btn-glass { background: rgba(30,41,59,.7); color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), inset 0 1px 0 rgba(255,255,255,.08), inset 0 -2px 0 rgba(0,0,0,.3); }
+html.dark .btn-label { color: #A1A1A1; }
+html.dark .btn-inverse { background: #1C1C1C; color: var(--brand-primary-400); box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), inset 0 1px 0 rgba(255,255,255,.08), inset 0 -2px 0 rgba(0,0,0,.3); }
+html.dark .btn-inverse:hover { background: #242424; box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), inset 0 1px 0 rgba(255,255,255,.08), inset 0 -2px 0 rgba(0,0,0,.3), 0 6px 18px -4px rgba(0,0,0,0.4); }
+html.dark .btn-glass { background: rgba(28,28,28,.7); color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), inset 0 1px 0 rgba(255,255,255,.08), inset 0 -2px 0 rgba(0,0,0,.3); }
 html.dark .btn-glass:hover { background: rgba(39,52,73,.85); box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), inset 0 1px 0 rgba(255,255,255,.08), inset 0 -2px 0 rgba(0,0,0,.3), 0 6px 18px -4px rgba(0,0,0,0.4); }
-html.dark .btn-text { color: #34D399; }
+html.dark .btn-text { color: var(--brand-primary-400); }
 
 /* ─────────────────────────────────────────────────────────────────
    New variants (Step 3)
@@ -135,8 +135,7 @@ html.dark .btn-text { color: #34D399; }
     background-color calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring),
     transform calc(240ms * var(--anim-mult, 1)) var(--ease-out),
     box-shadow calc(240ms * var(--anim-mult, 1)) var(--ease-out),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 
 @keyframes btn-rainbow-scroll {
@@ -220,7 +219,7 @@ html.dark .btn-text { color: #34D399; }
   min-width: unset;
   width: 72px;
   padding: 0 10px;
-  background: #10B981;
+  background: var(--brand-primary-500);
 }
 
 /* ── Radial spinner (replaces loading bar) ── */
@@ -294,13 +293,13 @@ html.dark .btn-text { color: #34D399; }
 
 /* ── Dark mode for .btn-apply ── */
 /* White inner in dark; rainbow ::before border is preserved by .btn-green rules */
-html.dark .btn-apply { background: #FFFFFF; color: #0F172A; }
+html.dark .btn-apply { background: #FFFFFF; color: #111111; }
 html.dark .btn-apply .material-icons,
-html.dark .btn-apply .material-symbols-outlined { color: #0F172A; }
+html.dark .btn-apply .material-symbols-outlined { color: #111111; }
 
 /* Done state in dark: keep white button, green check glyph */
 html.dark .btn-apply.is-done { background: #FFFFFF; }
-html.dark .btn-apply.is-done .btn-apply-check-ic { color: #10B981; }
+html.dark .btn-apply.is-done .btn-apply-check-ic { color: var(--brand-primary-500); }
 
 /* Discuss button — mirrors .pc-discuss-btn (pipeline-card source) */
 .btn-discuss {
@@ -308,8 +307,8 @@ html.dark .btn-apply.is-done .btn-apply-check-ic { color: #10B981; }
   border-radius: 9999px; cursor: pointer;
   font-family: var(--font-display); font-size: 12px; font-weight: 800;
   display: inline-flex; align-items: center;
-  background: transparent; color: var(--r-text, #0F172A);
-  border: 1.5px solid var(--r-chip-bd, #CBD5E1);
+  background: transparent; color: var(--r-text, #111111);
+  border: 1.5px solid var(--r-chip-bd, #D4D4D4);
   transition:
     border-color calc(var(--duration-base) * var(--anim-mult, 1)),
     background-color calc(var(--duration-base) * var(--anim-mult, 1)),
@@ -319,13 +318,13 @@ html.dark .btn-apply.is-done .btn-apply-check-ic { color: #10B981; }
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 .btn-discuss:hover {
-  background: var(--r-btn-hover, rgba(15,23,42,0.06));
-  border-color: var(--r-btn, #64748B);
+  background: var(--r-btn-hover, rgba(17,17,17,0.06));
+  border-color: var(--r-btn, #6B6B6B);
   transform: translateY(-1px);
   box-shadow: 0 6px 18px -4px rgba(100,116,139,0.22);
 }
 .btn-discuss:active { transform: scale(0.97); }
-html.dark .btn-discuss { color: #F1F5F9; border-color: rgba(255,255,255,0.18); }
+html.dark .btn-discuss { color: #F5F5F5; border-color: rgba(255,255,255,0.18); }
 html.dark .btn-discuss:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.35); }
 
 /* Delete button — mirrors three-state .db (delete-button source).
@@ -372,12 +371,12 @@ html.dark .btn-delete {
   flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
   gap: var(--gap-icon-text, 6px);
   font-family: var(--font-display); font-size: 11px; font-weight: 800;
-  color: #fff; background: var(--fbtn, #0F172A); border: 1px solid var(--fbtn, #0F172A);
+  color: #fff; background: var(--fbtn, #111111); border: 1px solid var(--fbtn, #111111);
   padding: 6px 14px; border-radius: 9999px; cursor: pointer;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.22),
     inset 0 -1.5px 0 rgba(0,0,0,0.18),
-    0 0 10px -3px var(--fbtn, #0F172A);
+    0 0 10px -3px var(--fbtn, #111111);
   text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   transition:
     border-color calc(150ms * var(--anim-mult, 1)),
@@ -394,7 +393,7 @@ html.dark .btn-delete {
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.22),
     inset 0 -1.5px 0 rgba(0,0,0,0.18),
-    0 8px 20px -4px var(--fbtn, #0F172A);
+    0 8px 20px -4px var(--fbtn, #111111);
 }
 .btn-task:active { transform: scale(0.98); }
 .btn-task .material-icons { color: #fff; font-size: 16px; }
@@ -459,7 +458,7 @@ html.dark .btn-delete {
    replacing scale with the canonical translateY(-1px) + tinted directional glow. */
 .btn-prox-root .btn-green:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px -4px rgba(16,185,129,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+  box-shadow: 0 6px 18px -4px color-mix(in srgb, var(--brand-primary-500) 40%, transparent), inset 0 1px 0 rgba(255,255,255,0.2);
 }
 .btn-prox-root .btn-yellow:hover {
   transform: translateY(-1px);
@@ -479,12 +478,15 @@ html.dark .btn-prox-root .btn-green:hover {
    .btn-green is NOT redefined globally; these rules are scoped to .btn-prox-root .btn-apply. */
 .btn-prox-root .btn-apply:hover {
   transform: translateY(-0.5px);
-  box-shadow: 0 4px 12px -4px rgba(16,185,129,0.25);
+  box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--brand-primary-500) 25%, transparent);
 }
 html.dark .btn-prox-root .btn-apply:hover {
   transform: translateY(-0.5px);
   box-shadow: 0 4px 12px -4px rgba(52,211,153,0.28);
 }
+
+/* proximity filter washes the rainbow border/glow, scale-only by design. */
+.btn-prox-root .btn-apply[data-proximity] { filter: none; }
 
 /* Step 3 additions: prox mapping lives in styles/hover-tokens.css; structural
    only (no new timing). Wrapper carries data-proximity for locked DeleteButton. */

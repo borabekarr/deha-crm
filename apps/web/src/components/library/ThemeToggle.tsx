@@ -28,7 +28,7 @@ export function ThemeToggle() {
       type="button"
       onClick={handleToggle}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-      className="flex size-8 items-center justify-center rounded-md border border-border bg-background text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary-500)] focus-visible:ring-offset-2"
+      className="flex size-8 items-center justify-center rounded-md border border-[var(--border-hairline)] bg-[var(--bg-card-solid)] text-[var(--fg1)] transition-[color,background-color,border-color,transform] hover:bg-[var(--bg-chip)] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary-500)] focus-visible:ring-offset-2"
     >
       {isDark ? (
         // Sun icon

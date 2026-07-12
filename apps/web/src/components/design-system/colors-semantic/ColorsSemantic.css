@@ -8,8 +8,8 @@
   text-shadow: 0 1px 2px rgba(0,0,0,0.28);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.55),
-    inset 0 -2px 0 rgba(15,23,42,0.18),
-    inset 0 0 0 1px rgba(15,23,42,0.10);
+    inset 0 -2px 0 rgba(17,17,17,0.18),
+    inset 0 0 0 1px rgba(17,17,17,0.10);
   background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
                     linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
   background-size: 7px 7px;
@@ -20,10 +20,10 @@
 .sem-use  { font-size: 11px; font-weight: 600; line-height: 1.35; opacity: 0.8; }
 
 /* Dark mode — card chrome adapts; semantic swatch backgrounds + pill colors stay unchanged */
-html.dark .card { background: #1E293B; background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.08) 0%, rgba(30,41,59,1) 50%, #1E293B 100%); }
+html.dark .card { background: #1C1C1C; background-image: radial-gradient(ellipse at top right, color-mix(in srgb, var(--brand-primary-500) 8%, transparent) 0%, rgba(28,28,28,1) 50%, #1C1C1C 100%); }
 
 /* Dark mode — semantic box panels: dark-tinted bg, light readable text; badge/dot/pill untouched */
-html.dark .sem.success { background: #0c2a20 !important; color: #A7F3D0 !important; }
+html.dark .sem.success { background: #0c2a20 !important; color: color-mix(in oklch, var(--semantic-success), white 55%) !important; }
 html.dark .sem.warning { background: #2a1f06 !important; color: #FDE68A !important; }
 html.dark .sem.danger  { background: #2a0d0d !important; color: #FCA5A5 !important; }
 html.dark .sem.hot     { background: #2a1506 !important; color: #FDBA74 !important; }

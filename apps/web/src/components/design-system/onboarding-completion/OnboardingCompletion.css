@@ -9,9 +9,9 @@
   width: 100%; height: 462px;
   padding: 10px;
   background: var(--card-bg, #FFFFFF);
-  border: 1px solid var(--card-border, #CBD5E1);
+  border: 1px solid var(--card-border, #D4D4D4);
   border-radius: var(--card-radius, 20px);
-  box-shadow: 0 16px 56px rgba(15,23,42,.14), 0 3px 10px rgba(15,23,42,.07);
+  box-shadow: 0 16px 56px rgba(17,17,17,.14), 0 3px 10px rgba(17,17,17,.07);
   transition: height calc(460ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
 }
 html.dark .oc-panel-wrap { box-shadow: 0 16px 56px rgba(0,0,0,.4), 0 3px 10px rgba(0,0,0,.3); }
@@ -23,7 +23,7 @@ html.dark .oc-panel-wrap { box-shadow: 0 16px 56px rgba(0,0,0,.4), 0 3px 10px rg
   display: flex; flex-direction: column;
   background: var(--bg-card-solid);
   border-radius: 22px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(15,23,42,.05);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(17,17,17,.05);
   overflow: hidden;
   animation: ocCardIn calc(420ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
 }
@@ -43,7 +43,7 @@ html.dark .oc-card { box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 0 
 .oc-glyph {
   flex: none; display: grid; place-items: center;
   border-radius: 11px; color: #fff;
-  background-color: var(--icon-c, #10B981);
+  background-color: var(--icon-c, var(--brand-primary-500));
   background-image:
     linear-gradient(rgba(255,255,255,.13) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,.13) 1px, transparent 1px);
@@ -51,8 +51,8 @@ html.dark .oc-card { box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 0 
   box-shadow:
     0 4px 14px -4px color-mix(in srgb, var(--icon-c) 55%, rgba(0,0,0,0.3)),
     inset 0 1px 0 rgba(255,255,255,.55),
-    inset 0 -2px 0 rgba(15,23,42,.20),
-    inset 0 0 0 1px rgba(15,23,42,.12);
+    inset 0 -2px 0 rgba(17,17,17,.20),
+    inset 0 0 0 1px rgba(17,17,17,.12);
   transition: transform calc(300ms * var(--anim-mult, 1)) cubic-bezier(.34,1.4,.5,1), opacity calc(300ms * var(--anim-mult, 1)) ease;
 }
 .oc-glyph svg { filter: drop-shadow(0 1px 1px rgba(0,0,0,.18)); }
@@ -69,17 +69,17 @@ html.dark .oc-card { box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 0 
   background: var(--bg-card-solid);
   border: none;
   border-radius: 22px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(15,23,42,.05);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(17,17,17,.05);
   cursor: pointer; text-align: left; font-family: inherit;
   transition: background calc(180ms * var(--anim-mult, 1)) ease, transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.5,1);
   animation: ocCardIn calc(420ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
 }
 html.dark .oc-prompt { box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 0 0 1px rgba(255,255,255,.06); }
-.oc-prompt:hover { background: var(--slate-50); }
+.oc-prompt:hover { background: var(--gray-50); }
 html.dark .oc-prompt:hover { background: color-mix(in srgb, #fff 4%, var(--bg-card-solid)); }
 .oc-prompt:active { transform: scale(.992); }
 .oc-prompt:focus { outline: none; }
-.oc-prompt:focus-visible { outline: none; box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(15,23,42,.05), 0 0 0 3px color-mix(in srgb, var(--oc-accent) 32%, transparent); }
+.oc-prompt:focus-visible { outline: none; box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(17,17,17,.05), 0 0 0 3px color-mix(in srgb, var(--oc-accent) 32%, transparent); }
 .oc-prompt-title-row { display: flex; align-items: center; gap: 8px; }
 .oc-prompt-ico {
   display: inline-flex; align-items: center; justify-content: center; flex: none;
@@ -89,7 +89,7 @@ html.dark .oc-prompt:hover { background: color-mix(in srgb, #fff 4%, var(--bg-ca
     linear-gradient(rgba(255,255,255,.13) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,.13) 1px, transparent 1px);
   background-size: 6px 6px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -2px 0 rgba(15,23,42,.20), inset 0 0 0 1px rgba(15,23,42,.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -2px 0 rgba(17,17,17,.20), inset 0 0 0 1px rgba(17,17,17,.12);
 }
 .oc-prompt-ico svg { display: block; filter: drop-shadow(0 1px 1px rgba(0,0,0,.18)); }
 .oc-prompt-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; position: relative; z-index: 1; }
@@ -107,16 +107,16 @@ html.dark .oc-prompt:hover { background: color-mix(in srgb, #fff 4%, var(--bg-ca
   background-size: 7px 7px;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.55),
-    inset 0 -2px 0 rgba(15,23,42,.22),
-    inset 0 0 0 1px rgba(15,23,42,.14);
+    inset 0 -2px 0 rgba(17,17,17,.22),
+    inset 0 0 0 1px rgba(17,17,17,.14);
   animation: ocBadgePop .5s cubic-bezier(.34,1.56,.64,1) both;
 }
 .oc-icon-btn {
   flex: none; width: 34px; height: 34px; border: none; background: transparent;
-  border-radius: 50%; display: grid; place-items: center; color: var(--slate-400);
+  border-radius: 50%; display: grid; place-items: center; color: var(--gray-400);
   cursor: pointer; transition: background calc(150ms * var(--anim-mult, 1)), color calc(150ms * var(--anim-mult, 1));
 }
-.oc-icon-btn:hover { background: var(--slate-100); color: var(--fg2); }
+.oc-icon-btn:hover { background: var(--gray-100); color: var(--fg2); }
 
 /* ===================== Card focus ===================== */
 .oc-card-body { position: relative; }
@@ -135,7 +135,7 @@ html.dark .oc-prompt:hover { background: color-mix(in srgb, #fff 4%, var(--bg-ca
   position: relative; overflow: hidden;
   display: flex; align-items: center; gap: 13px;
   padding: 11px 14px; width: 100%;
-  background: var(--slate-50);
+  background: var(--gray-50);
   border: 1px solid transparent;
   border-radius: var(--radius-lg);
   cursor: pointer; font-family: inherit; text-align: left;
@@ -148,7 +148,7 @@ html.dark .oc-prompt:hover { background: color-mix(in srgb, #fff 4%, var(--bg-ca
   animation: ocRowRipple calc(620ms * var(--anim-mult, 1)) ease-out forwards;
 }
 @keyframes ocRowRipple { to { transform: translate(-50%, -50%) scale(22); opacity: 0; } }
-.oc-row:hover:not(:disabled) { background: var(--slate-100); transform: translateX(2px); border-color: var(--border-hairline); }
+.oc-row:hover:not(:disabled) { background: var(--gray-100); transform: translateX(2px); border-color: var(--border-hairline); }
 .oc-row:active:not(:disabled) { transform: scale(.985); }
 .oc-row:disabled { cursor: default; }
 html.dark .oc-row { background: color-mix(in srgb, #fff 5%, var(--bg-card-solid)); }
@@ -179,7 +179,7 @@ html.dark .oc-row.is-done { background: color-mix(in srgb, var(--oc-accent) 17%,
   cursor: pointer;
   text-shadow: 0 1px 2px rgba(0,0,0,.18);
   box-shadow:
-    0 12px 26px -10px rgba(15,23,42,.40),
+    0 12px 26px -10px rgba(17,17,17,.40),
     inset 0 1px 0 rgba(255,255,255,.5),
     inset 0 -2px 0 rgba(0,0,0,.22),
     inset 0 0 0 1px rgba(255,255,255,.15);
@@ -189,7 +189,7 @@ html.dark .oc-row.is-done { background: color-mix(in srgb, var(--oc-accent) 17%,
   content: ''; position: absolute; inset: 0; pointer-events: none;
   background: radial-gradient(ellipse at top right, rgba(255,255,255,.14) 0%, transparent 55%);
 }
-.oc-cta:hover { filter: brightness(1.05); box-shadow: 0 16px 34px -10px rgba(15,23,42,.46), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -2px 0 rgba(0,0,0,.22), inset 0 0 0 1px rgba(255,255,255,.15); }
+.oc-cta:hover { filter: brightness(1.05); box-shadow: 0 16px 34px -10px rgba(17,17,17,.46), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -2px 0 rgba(0,0,0,.22), inset 0 0 0 1px rgba(255,255,255,.15); }
 .oc-cta:active { transform: scale(.98); }
 .oc-cta:disabled { cursor: default; filter: saturate(.9) brightness(.98); }
 .oc-cta-inner { display: inline-flex; align-items: center; gap: 9px; position: relative; z-index: 1; }
@@ -230,7 +230,7 @@ html.dark .oc-row.is-done { background: color-mix(in srgb, var(--oc-accent) 17%,
 .oc-success-desc { margin: 0; font-size: 15px; line-height: 1.5; font-weight: var(--weight-medium); color: var(--fg3); max-width: 250px; text-wrap: pretty; animation: ocFadeUp calc(500ms * var(--anim-mult, 1)) ease calc(300ms * var(--anim-mult, 1)) both; }
 .oc-success-foot { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; animation: ocFadeUp calc(500ms * var(--anim-mult, 1)) ease calc(400ms * var(--anim-mult, 1)) both; }
 .oc-replay { display: inline-flex; align-items: center; gap: 5px; border: none; background: transparent; color: var(--fg4); font-family: inherit; font-size: 13px; font-weight: var(--weight-semibold); cursor: pointer; padding: 5px 10px; border-radius: 8px; transition: color calc(150ms * var(--anim-mult, 1)), background calc(150ms * var(--anim-mult, 1)); }
-.oc-replay:hover { color: var(--fg2); background: var(--slate-100); }
+.oc-replay:hover { color: var(--fg2); background: var(--gray-100); }
 @keyframes ocFadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @keyframes ocBadgePop { 0% { opacity: 0; transform: scale(.4); } 60% { opacity: 1; transform: scale(1.08); } 100% { transform: scale(1); } }
 
@@ -261,13 +261,13 @@ html.dark .oc-row.is-done { background: color-mix(in srgb, var(--oc-accent) 17%,
 /* ===================== Segmented switcher ===================== */
 .oc-seg {
   position: relative; display: flex; align-items: center;
-  background: var(--slate-100); border-radius: 13px; padding: 3px;
+  background: var(--gray-100); border-radius: 13px; padding: 3px;
   box-shadow: var(--shadow-recessed);
 }
 .oc-seg-thumb {
   position: absolute; top: 3px; bottom: 3px; width: calc((100% - 6px) / 3);
   background: var(--bg-card-solid); border-radius: 10px;
-  box-shadow: 0 1px 2px rgba(15,23,42,.14), 0 2px 6px -2px rgba(15,23,42,.18);
+  box-shadow: 0 1px 2px rgba(17,17,17,.14), 0 2px 6px -2px rgba(17,17,17,.18);
   transition: left calc(260ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.5,1);
 }
 .oc-seg-btn {

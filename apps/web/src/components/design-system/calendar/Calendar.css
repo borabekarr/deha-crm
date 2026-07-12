@@ -6,13 +6,13 @@ body { background: #E4E8ED; font-family: 'Montserrat', sans-serif; }
   background: var(--shell-bg, #D4DCE8);
   border-radius: 28px;
   padding: 10px;
-  box-shadow: 0 10px 30px rgba(15,23,42,0.12), 0 2px 8px rgba(15,23,42,0.06);
+  box-shadow: 0 10px 30px rgba(17,17,17,0.12), 0 2px 8px rgba(17,17,17,0.06);
   background-image: none;
 }
-/* !important to beat the global `html.dark .card { background:#0F172A !important }` in _darkmode.css
-   (wrapper is class="card cal-shell"); canonical dark bezel is #020617 */
+/* !important to beat the global `html.dark .card { background:#111111 !important }` in _darkmode.css
+   (wrapper is class="card cal-shell"); canonical dark bezel is #0A0A0A */
 html.dark .cal-shell {
-  background: #020617 !important;
+  background: #0A0A0A !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05),
               inset 0 0 0 1px rgba(255,255,255,.04);
 }
@@ -24,7 +24,7 @@ html.dark .cal-shell {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: var(--card-radius);
-  box-shadow: inset 0 0 0 1px rgba(15,23,42,0.04);
+  box-shadow: inset 0 0 0 1px rgba(17,17,17,0.04);
   overflow: hidden;
 }
 
@@ -32,25 +32,25 @@ html.dark .cal-shell {
 .cal-header {
   display: flex; justify-content: space-between; align-items: center;
   padding: 16px 16px 10px;
-  border-bottom: 1px solid #F8FAFC;
+  border-bottom: 1px solid #FAFAFA;
 }
 .cal-title-area { display: flex; align-items: center; gap: 8px; }
-.cal-month-yr { font-size: 20px; font-weight: 900; color: #0F172A; letter-spacing: -0.02em; }
-.cal-count { background: #E2E8F0; color: #64748B; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 9999px; }
+.cal-month-yr { font-size: 20px; font-weight: 900; color: #111111; letter-spacing: -0.02em; }
+.cal-count { background: #ECECEC; color: #6B6B6B; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 9999px; }
 .cal-actions { display: flex; gap: 5px; align-items: center; }
-.cal-today-btn { background: #0F172A; border: 1px solid transparent; border-radius: 9999px; padding: 6px 14px; font-family: 'Montserrat'; font-size: 12px; font-weight: 800; color: #fff; cursor: pointer; transition: background calc(150ms * var(--anim-mult, 1)), color calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.22); }
-.cal-today-btn:hover { background: #1E293B; }
+.cal-today-btn { background: #111111; border: 1px solid transparent; border-radius: 9999px; padding: 6px 14px; font-family: 'Montserrat'; font-size: 12px; font-weight: 800; color: #fff; cursor: pointer; transition: background calc(150ms * var(--anim-mult, 1)), color calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.22); }
+.cal-today-btn:hover { background: #1C1C1C; }
 .cal-today-btn:active { transform: scale(0.94); }
-.cal-today-btn.is-today { background: #E2E8F0; color: #0F172A; border-color: #CBD5E1; box-shadow: inset 0 2px 4px rgba(0,0,0,0.10), inset 0 1px 2px rgba(0,0,0,0.06); }
+.cal-today-btn.is-today { background: #ECECEC; color: #111111; border-color: #D4D4D4; box-shadow: inset 0 2px 4px rgba(0,0,0,0.10), inset 0 1px 2px rgba(0,0,0,0.06); }
 .cal-today-btn.is-today:hover { background: #D8E0EA; }
-.cal-nav-btn { background: #fff; border: 1px solid #E2E8F0; border-radius: 50%; width: 30px; height: 30px; display: grid; place-items: center; cursor: pointer; transition: background calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgba(0,0,0,0.04); }
-.cal-nav-btn:hover { background: #F8FAFC; }
+.cal-nav-btn { background: #fff; border: 1px solid #ECECEC; border-radius: 50%; width: 30px; height: 30px; display: grid; place-items: center; cursor: pointer; transition: background calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgba(0,0,0,0.04); }
+.cal-nav-btn:hover { background: #FAFAFA; }
 .cal-nav-btn:active { transform: scale(0.88); }
-.cal-nav-btn .material-icons { font-size: 17px; color: #64748B; }
+.cal-nav-btn .material-icons { font-size: 17px; color: #6B6B6B; }
 
 /* ── Day headers ── */
 .cal-dow-row { display: grid; grid-template-columns: repeat(7,1fr); padding: 10px 6px 4px; }
-.cal-dow { text-align: center; font-size: 11px; font-weight: 700; color: #94A3B8; letter-spacing: 0.04em; padding: 4px 0; }
+.cal-dow { text-align: center; font-size: 11px; font-weight: 700; color: #A1A1A1; letter-spacing: 0.04em; padding: 4px 0; }
 
 /* ── Grid ── */
 .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); padding: 4px 4px 8px; }
@@ -64,43 +64,43 @@ html.dark .cal-shell {
 .cal-date-num {
   width: 30px; height: 30px; border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 14px; font-weight: 600; color: #0F172A;
+  font-size: 14px; font-weight: 600; color: #111111;
   transition: background calc(140ms * var(--anim-mult, 1)), transform calc(110ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
 }
-.cal-cell.other-month .cal-date-num { color: #CBD5E1; font-weight: 500; }
+.cal-cell.other-month .cal-date-num { color: #D4D4D4; font-weight: 500; }
 /* Hover: only non-selected, non-other-month cells */
-.cal-cell:not(.other-month):not(.selected):hover .cal-date-num { background: #F1F5F9; }
+.cal-cell:not(.other-month):not(.selected):hover .cal-date-num { background: #F5F5F5; }
 /* Click animation */
-.cal-cell:active .cal-date-num { transform: scale(0.85); background: #E2E8F0 !important; }
-.cal-cell.selected:active .cal-date-num { background: #0F172A !important; }
+.cal-cell:active .cal-date-num { transform: scale(0.85); background: #ECECEC !important; }
+.cal-cell.selected:active .cal-date-num { background: #111111 !important; }
 /* Selected: black bg, white text, inner + outer shadow */
 .cal-cell.selected .cal-date-num {
-  background: #0F172A; color: #fff; font-weight: 800;
+  background: #111111; color: #fff; font-weight: 800;
   box-shadow: 0 2px 8px rgba(0,0,0,0.28), 0 1px 3px rgba(0,0,0,0.18),
               inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.28);
 }
 /* Hover on selected: stay black */
-.cal-cell.selected:hover .cal-date-num { background: #0F172A; }
+.cal-cell.selected:hover .cal-date-num { background: #111111; }
 
 .cal-dots { display: flex; gap: 5px; justify-content: center; align-items: center; min-height: 8px; margin-top: 5px; }
 .cal-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
 /* FIX 4: overflow "+" badge when >3 events */
-.cal-dot-more { font-size: 9px; font-weight: 800; line-height: 1; color: #94A3B8; flex-shrink: 0; }
-html.dark .cal-dot-more { color: #64748B; }
+.cal-dot-more { font-size: 9px; font-weight: 800; line-height: 1; color: #A1A1A1; flex-shrink: 0; }
+html.dark .cal-dot-more { color: #6B6B6B; }
 
 /* ── Divider ── */
-.cal-divider { height: 1px; background: #F1F5F9; }
+.cal-divider { height: 1px; background: #F5F5F5; }
 
 /* ── Events ── */
 .cal-events { padding: 14px 12px 10px; position: relative; }
-.cal-ev-label { font-size: 10px; font-weight: 700; color: #94A3B8; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
-.cal-ev-item { display: flex; align-items: center; width: 100%; padding: 10px 2px; border: 0; border-bottom: 1px solid #F8FAFC; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; appearance: none; transition: transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
+.cal-ev-label { font-size: 10px; font-weight: 700; color: #A1A1A1; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+.cal-ev-item { display: flex; align-items: center; width: 100%; padding: 10px 2px; border: 0; border-bottom: 1px solid #FAFAFA; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; appearance: none; transition: transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
 .cal-ev-item:active { transform: scale(0.985); }
 .cal-ev-item:last-of-type { border-bottom: none; }
 .cev-left { display: flex; align-items: center; gap: 8px; flex: 1; overflow: hidden; }
 .cev-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.cev-time { font-size: 13px; font-weight: 500; color: #94A3B8; min-width: 38px; flex-shrink: 0; }
-.cev-title { font-size: 14px; font-weight: 700; color: #0F172A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cev-time { font-size: 13px; font-weight: 500; color: #A1A1A1; min-width: 38px; flex-shrink: 0; }
+.cev-title { font-size: 14px; font-weight: 700; color: #111111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* Deha semantic-colors pill style */
 .cev-badge {
   display: inline-flex; align-items: center; gap: 4px;
@@ -108,49 +108,49 @@ html.dark .cal-dot-more { color: #64748B; }
   color: #fff;
   font-size: 11px; font-weight: 800; font-family: 'Montserrat';
   text-shadow: 0 1px 2px rgba(0,0,0,0.28);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(15,23,42,0.18), inset 0 0 0 1px rgba(15,23,42,0.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(17,17,17,0.18), inset 0 0 0 1px rgba(17,17,17,0.10);
   background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
   background-size: 7px 7px;
   white-space: nowrap;
 }
 .cev-badge .material-icons { font-size: 12px; color: rgba(255,255,255,0.85); }
-.cal-no-events { font-size: 13px; font-weight: 500; color: #CBD5E1; padding: 6px 0 4px; }
+.cal-no-events { font-size: 13px; font-weight: 500; color: #D4D4D4; padding: 6px 0 4px; }
 .cal-add-row { display: flex; align-items: center; gap: 10px; padding: 10px 2px 4px; cursor: pointer; opacity: 0.7; transition: opacity calc(150ms * var(--anim-mult, 1)); }
 .cal-add-row:hover { opacity: 1; }
-.cal-add-icon { width: 26px; height: 26px; border-radius: 50%; background: #F1F5F9; display: grid; place-items: center; color: #94A3B8; }
+.cal-add-icon { width: 26px; height: 26px; border-radius: 50%; background: #F5F5F5; display: grid; place-items: center; color: #A1A1A1; }
 .cal-add-icon .material-icons { font-size: 16px; }
-.cal-add-text { font-size: 13px; font-weight: 500; color: #94A3B8; }
+.cal-add-text { font-size: 13px; font-weight: 500; color: #A1A1A1; }
 
 /* ── Dark mode — driven by app-global html.dark (FIX#3: converted from [data-theme="dark"]) ── */
 /* dark inner card: border-top highlight + inset shadow */
 html.dark .cal-panel{ border-top-color:rgba(255,255,255,0.22); box-shadow:inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04); }
-html.dark .cal-header{ border-bottom-color:var(--slate-700); }
-html.dark .cal-month-yr{ color:var(--slate-100); }
-html.dark .cal-count{ background:var(--slate-700); color:var(--slate-300); }
+html.dark .cal-header{ border-bottom-color:var(--gray-700); }
+html.dark .cal-month-yr{ color:var(--gray-100); }
+html.dark .cal-count{ background:var(--gray-700); color:var(--gray-300); }
 /* FIX 3: dark Today btn = white bg + black text */
-html.dark .cal-today-btn{ background:#FFFFFF; color:#0F172A; box-shadow:inset 0 1px 0 rgba(255,255,255,1), inset 0 -2px 0 rgba(0,0,0,.08); }
-html.dark .cal-today-btn:hover{ background:#F1F5F9; color:#0F172A; }
-html.dark .cal-today-btn.is-today{ background:var(--slate-700); color:var(--slate-100); border-color:var(--slate-600); box-shadow:inset 0 2px 4px rgba(0,0,0,.3); }
-html.dark .cal-today-btn.is-today:hover{ background:#273449; }
-html.dark .cal-nav-btn{ background:var(--slate-800); border-color:var(--slate-700); box-shadow:inset 0 1px 0 rgba(255,255,255,.05); }
-html.dark .cal-nav-btn:hover{ background:var(--slate-900); }
-html.dark .cal-nav-btn .material-icons{ color:var(--slate-400); }
-html.dark .cal-date-num{ color:var(--slate-100); }
-html.dark .cal-cell.other-month .cal-date-num{ color:var(--slate-600); }
+html.dark .cal-today-btn{ background:#FFFFFF; color:#111111; box-shadow:inset 0 1px 0 rgba(255,255,255,1), inset 0 -2px 0 rgba(0,0,0,.08); }
+html.dark .cal-today-btn:hover{ background:#F5F5F5; color:#111111; }
+html.dark .cal-today-btn.is-today{ background:var(--gray-700); color:var(--gray-100); border-color:var(--gray-600); box-shadow:inset 0 2px 4px rgba(0,0,0,.3); }
+html.dark .cal-today-btn.is-today:hover{ background:#242424; }
+html.dark .cal-nav-btn{ background:var(--gray-800); border-color:var(--gray-700); box-shadow:inset 0 1px 0 rgba(255,255,255,.05); }
+html.dark .cal-nav-btn:hover{ background:var(--gray-900); }
+html.dark .cal-nav-btn .material-icons{ color:var(--gray-400); }
+html.dark .cal-date-num{ color:var(--gray-100); }
+html.dark .cal-cell.other-month .cal-date-num{ color:var(--gray-600); }
 html.dark .cal-cell:not(.other-month):not(.selected):hover .cal-date-num{ background:rgba(255,255,255,.07); }
-html.dark .cal-cell:active .cal-date-num{ background:var(--slate-700) !important; }
+html.dark .cal-cell:active .cal-date-num{ background:var(--gray-700) !important; }
 /* FIX 2: dark selected = white chip, black text, subtle shadow — no green */
-html.dark .cal-cell.selected .cal-date-num{ background:#FFFFFF; color:#0F172A; box-shadow:0 2px 8px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,1), inset 0 -2px 0 rgba(0,0,0,.08); }
-html.dark .cal-cell.selected:hover .cal-date-num{ background:#F1F5F9; }
-html.dark .cal-cell.selected:active .cal-date-num{ background:#E2E8F0 !important; }
-html.dark .cal-divider{ background:var(--slate-700); }
-html.dark .cal-ev-item{ border-bottom-color:var(--slate-700); }
-html.dark .cev-title{ color:var(--slate-100); }
-html.dark .cal-no-events{ color:#94A3B8; }
-html.dark .cal-add-row .cal-add-icon{ background:var(--slate-700); color:var(--slate-300); }
-html.dark .cal-add-row .cal-add-text{ color:var(--slate-400); }
-html.dark .cal-ep-donut-mid { background: #1E293B; }
-html.dark .cal-ep-cust-act:hover { background: #273449; }
+html.dark .cal-cell.selected .cal-date-num{ background:#FFFFFF; color:#111111; box-shadow:0 2px 8px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,1), inset 0 -2px 0 rgba(0,0,0,.08); }
+html.dark .cal-cell.selected:hover .cal-date-num{ background:#F5F5F5; }
+html.dark .cal-cell.selected:active .cal-date-num{ background:#ECECEC !important; }
+html.dark .cal-divider{ background:var(--gray-700); }
+html.dark .cal-ev-item{ border-bottom-color:var(--gray-700); }
+html.dark .cev-title{ color:var(--gray-100); }
+html.dark .cal-no-events{ color:#A1A1A1; }
+html.dark .cal-add-row .cal-add-icon{ background:var(--gray-700); color:var(--gray-300); }
+html.dark .cal-add-row .cal-add-text{ color:var(--gray-400); }
+html.dark .cal-ep-donut-mid { background: #1C1C1C; }
+html.dark .cal-ep-cust-act:hover { background: #242424; }
 
 /* Morph-in when switching days (event panel rebuilds → fresh nodes replay this) */
 @keyframes calEvIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -171,7 +171,7 @@ html.dark .cal-ep-cust-act:hover { background: #273449; }
 /* ── Task-creation popover (FIX#2) ── */
 .cal-popover-backdrop {
   position: fixed; inset: 0; z-index: 100;
-  background: rgba(15,23,42,0.35);
+  background: rgba(17,17,17,0.35);
   display: flex; align-items: center; justify-content: center;
   animation: calPopBackdropIn calc(160ms * var(--anim-mult, 1)) ease both;
 }
@@ -183,7 +183,7 @@ html.dark .cal-ep-cust-act:hover { background: #273449; }
   border-radius: var(--card-radius);
   padding: 24px;
   width: 320px;
-  box-shadow: 0 24px 80px rgba(15,23,42,0.22), 0 4px 16px rgba(15,23,42,0.08),
+  box-shadow: 0 24px 80px rgba(17,17,17,0.22), 0 4px 16px rgba(17,17,17,0.08),
               inset 0 1px 0 rgba(255,255,255,0.8);
   display: flex; flex-direction: column; gap: 16px;
   animation: calPopIn calc(240ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) both;
@@ -194,20 +194,20 @@ html.dark .cal-ep-cust-act:hover { background: #273449; }
 }
 
 .cal-pop-title {
-  font-size: 16px; font-weight: 800; color: #0F172A;
+  font-size: 16px; font-weight: 800; color: #111111;
   letter-spacing: -0.02em; margin: 0;
 }
 
 .cal-pop-field { display: flex; flex-direction: column; gap: 6px; }
-.cal-pop-label { font-size: 11px; font-weight: 700; color: #94A3B8; letter-spacing: 0.08em; text-transform: uppercase; }
+.cal-pop-label { font-size: 11px; font-weight: 700; color: #A1A1A1; letter-spacing: 0.08em; text-transform: uppercase; }
 .cal-pop-input {
-  background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px;
+  background: #FAFAFA; border: 1px solid #ECECEC; border-radius: 10px;
   padding: 9px 12px; font-family: 'Montserrat', sans-serif;
-  font-size: 14px; font-weight: 500; color: #0F172A;
+  font-size: 14px; font-weight: 500; color: #111111;
   outline: none; transition: border-color calc(120ms * var(--anim-mult, 1));
   width: 100%; box-sizing: border-box;
 }
-.cal-pop-input:focus { border-color: #10B981; }
+.cal-pop-input:focus { border-color: var(--brand-primary-500); }
 
 /* Color picker row */
 .cal-pop-colors { display: flex; gap: 10px; }
@@ -218,19 +218,19 @@ html.dark .cal-ep-cust-act:hover { background: #273449; }
   outline: none;
 }
 .cal-pop-color-btn:hover { transform: scale(1.12); }
-.cal-pop-color-btn.active { border-color: #0F172A; transform: scale(1.1); }
+.cal-pop-color-btn.active { border-color: #111111; transform: scale(1.1); }
 
 /* Actions row */
 .cal-pop-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
 .cal-pop-cancel {
-  background: #F1F5F9; border: none; border-radius: 10px;
+  background: #F5F5F5; border: none; border-radius: 10px;
   padding: 9px 16px; font-family: 'Montserrat', sans-serif;
-  font-size: 13px; font-weight: 700; color: #64748B;
+  font-size: 13px; font-weight: 700; color: #6B6B6B;
   cursor: pointer; transition: background calc(120ms * var(--anim-mult, 1));
 }
-.cal-pop-cancel:hover { background: #E2E8F0; }
+.cal-pop-cancel:hover { background: #ECECEC; }
 .cal-pop-add {
-  background: #10B981; border: none; border-radius: 10px;
+  background: var(--brand-primary-500); border: none; border-radius: 10px;
   padding: 9px 20px; font-family: 'Montserrat', sans-serif;
   font-size: 13px; font-weight: 800; color: #fff;
   cursor: pointer;
@@ -246,7 +246,7 @@ html.dark .cal-ep-cust-act:hover { background: #273449; }
 .cal-ep-overlay {
   position: fixed; inset: 0; z-index: 200;
   font-family: 'Montserrat', sans-serif;
-  background: rgba(15,23,42,0.46);
+  background: rgba(17,17,17,0.46);
   -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
   display: flex; align-items: center; justify-content: center;
   visibility: hidden; opacity: 0; pointer-events: none;
@@ -274,7 +274,7 @@ html.dark .cal-ep-cust-act:hover { background: #273449; }
 .cal-ep-overlay.open .cal-ep-outer {
   opacity: 1; transform: none;
 }
-html.dark .cal-ep-outer { background: #0F172A; }
+html.dark .cal-ep-outer { background: #111111; }
 
 /* Card surface — matches .tp-card (1px solid card-border, 22px radius) */
 .cal-ep-card {
@@ -286,7 +286,7 @@ html.dark .cal-ep-outer { background: #0F172A; }
   display: flex; flex-direction: column;
   min-height: 0;
 }
-html.dark .cal-ep-card { background: #1E293B; }
+html.dark .cal-ep-card { background: #1C1C1C; }
 
 /* Coloured header — uses --ep-color set on .cal-ep-card */
 .cal-ep-head {
@@ -321,7 +321,7 @@ html.dark .cal-ep-card { background: #1E293B; }
   color: #fff;
   font-size: 11px; font-weight: 800;
   text-shadow: 0 1px 2px rgba(0,0,0,0.28);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -2px 0 rgba(15,23,42,0.18), inset 0 0 0 1px rgba(15,23,42,0.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -2px 0 rgba(17,17,17,0.18), inset 0 0 0 1px rgba(17,17,17,0.10);
   background-image: linear-gradient(rgba(255,255,255,0.10) 1px, transparent 1px),
                     linear-gradient(90deg, rgba(255,255,255,0.10) 1px, transparent 1px);
   background-size: 7px 7px;
@@ -388,12 +388,12 @@ html.dark .cal-ep-card { background: #1E293B; }
 /* ── Organiser card — canonical outer shell wrapping the canonical inner-card ── */
 .cal-ep-customer-outer {
   margin-top: 13px;
-  background: var(--shell-bg, #F1F5F9);
+  background: var(--shell-bg, #F5F5F5);
   border-radius: 28px;
   padding: 10px;
 }
 html.dark .cal-ep-customer-outer {
-  background: #020617;
+  background: #0A0A0A;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
 }
 .cal-ep-customer {
@@ -401,7 +401,7 @@ html.dark .cal-ep-customer-outer {
   padding: 10px 12px;
   border-radius: calc(var(--card-radius) - 2px);
   background: var(--card-bg); border: 1px solid var(--card-border);
-  box-shadow: inset 0 0 0 1px rgba(15,23,42,0.04);
+  box-shadow: inset 0 0 0 1px rgba(17,17,17,0.04);
   position: relative; overflow: hidden; z-index: 0; cursor: pointer;
 }
 html.dark .cal-ep-customer {
@@ -417,8 +417,8 @@ html.dark .cal-ep-customer {
     linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
   background-size: cover, 7px 7px, 7px 7px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(15,23,42,0.20),
-    inset 0 0 0 1px rgba(15,23,42,0.12), 0 2px 6px rgba(0,0,0,0.10),
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(17,17,17,0.20),
+    inset 0 0 0 1px rgba(17,17,17,0.12), 0 2px 6px rgba(0,0,0,0.10),
     0 0 10px -2px var(--icon-c, var(--brand-primary));
   text-shadow: 0 1px 2px rgba(0,0,0,0.35);
 }
@@ -448,7 +448,7 @@ html.dark .cal-ep-cust-sub { color: var(--fg3) !important; }
 .cal-ep-cust-ripple {
   position: absolute; border-radius: 50%; transform: scale(0);
   z-index: -1; pointer-events: none;
-  background: rgba(15,23,42,0.10);
+  background: rgba(17,17,17,0.10);
   animation: cal-ep-cust-rip calc(560ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) forwards;
 }
 html.dark .cal-ep-cust-ripple { background: rgba(255,255,255,0.11); }
@@ -468,7 +468,7 @@ html.dark .cal-ep-cust-ripple { background: rgba(255,255,255,0.11); }
 }
 /* (1) Dark mode: 75% mix keeps it noticeably red (was 55%) */
 html.dark .cal-ep-alerts {
-  background-color: color-mix(in srgb, #FF3B3B 75%, #0F172A) !important;
+  background-color: color-mix(in srgb, #FF3B3B 75%, #111111) !important;
   background-image:
     radial-gradient(ellipse at top right, rgba(255,255,255,0.12), transparent 55%),
     linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
@@ -482,9 +482,9 @@ html.dark .cal-ep-alerts {
 .cal-ep-alerts-k .material-icons { font-size: 18px; color: #fff !important; }
 .cal-ep-alerts-list { background: rgba(255,255,255,0.13); border-radius: 14px; padding: 8px; display: flex; flex-direction: column; gap: 7px; }
 .cal-ep-alert { display: flex; align-items: center; gap: 9px; padding: 8px 9px; border-radius: 10px;
-  background: #FFFFFF !important; border: 1px solid #CBD5E1 !important; border-top-color: rgba(255,255,255,0.9) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(15,23,42,0.04) !important; }
-html.dark .cal-ep-alert { background: #1E293B !important; border: 1px solid #334155 !important; border-top-color: rgba(255,255,255,0.22) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04) !important; }
+  background: #FFFFFF !important; border: 1px solid #D4D4D4 !important; border-top-color: rgba(255,255,255,0.9) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(17,17,17,0.04) !important; }
+html.dark .cal-ep-alert { background: #1C1C1C !important; border: 1px solid #232323 !important; border-top-color: rgba(255,255,255,0.22) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04) !important; }
 .cal-ep-alert-ic { width: 24px; height: 24px; flex-shrink: 0; border-radius: 50% !important; display: grid; place-items: center; color: #fff; background: #EF4444 !important; }
 .cal-ep-alert-ic .material-icons { font-size: 14px; }
 .cal-ep-alert.r .cal-ep-alert-ic { background: #EF4444 !important; }
@@ -492,7 +492,7 @@ html.dark .cal-ep-alert { background: #1E293B !important; border: 1px solid #334
 .cal-ep-alert-t { font-size: 11.5px; font-weight: 600; color: var(--fg1) !important; margin-right: auto; line-height: 1.35; }
 .cal-ep-alert-cta {
   display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; font-family: var(--font-display); font-size: 11px; font-weight: 900;
-  color: #fff !important; background: #0F172A !important; border: none; cursor: pointer; padding: 6px 11px; border-radius: 9px;
+  color: #fff !important; background: #111111 !important; border: none; cursor: pointer; padding: 6px 11px; border-radius: 9px;
   background-image: linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
                     linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px) !important;
   background-size: 9px 9px !important;
@@ -504,11 +504,11 @@ html.dark .cal-ep-alert { background: #1E293B !important; border: 1px solid #334
 .cal-ep-alert-cta:active { transform: scale(0.96); }
 .cal-ep-alert-cta .material-icons { font-size: 14px; color: #fff !important; }
 html.dark .cal-ep-alert-cta {
-  background: #F1F5F9 !important; background-image: none !important; border-color: #F1F5F9 !important;
-  color: #0F172A !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), inset 0 -2px 0 rgba(15,23,42,0.12), 0 1px 3px rgba(0,0,0,0.3) !important;
+  background: #F5F5F5 !important; background-image: none !important; border-color: #F5F5F5 !important;
+  color: #111111 !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), inset 0 -2px 0 rgba(17,17,17,0.12), 0 1px 3px rgba(0,0,0,0.3) !important;
   text-shadow: none;
 }
-html.dark .cal-ep-alert-cta .material-icons { color: #0F172A !important; }
+html.dark .cal-ep-alert-cta .material-icons { color: #111111 !important; }
 
 /* ── Metric list (grey tray with individual shells) ────────────────── */
 .cal-ep-list { display: flex; flex-direction: column; gap: 11px; background: none !important; border: none !important; padding: 0 !important; }
@@ -516,19 +516,19 @@ html.dark .cal-ep-alert-cta .material-icons { color: #0F172A !important; }
 html.dark .cal-ep-list { background: none !important; }
 /* Grey outer tray — canonical outer shell wrapping each metric card */
 .cal-ep-w-tray {
-  background: var(--shell-bg, #F1F5F9);
+  background: var(--shell-bg, #F5F5F5);
   border-radius: 28px;
   padding: 10px;
 }
 html.dark .cal-ep-w-tray {
-  background: #020617;
+  background: #0A0A0A;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
 }
 /* Metric card — canonical .card-inner; .cal-ep-w is transparent content area */
 .cal-ep-w-shell {
   background: var(--card-bg); border-radius: calc(var(--card-radius) - 1px);
   border: 1px solid var(--card-border);
-  box-shadow: inset 0 0 0 1px rgba(15,23,42,0.04);
+  box-shadow: inset 0 0 0 1px rgba(17,17,17,0.04);
   overflow: hidden;
 }
 html.dark .cal-ep-w-shell {
@@ -552,7 +552,7 @@ html.dark .cal-ep-w { background: none !important; border-color: transparent !im
     linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
   background-size: cover, 7px 7px, 7px 7px;
   /* (7) Colored glow tinted to --acc accent color */
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(15,23,42,0.20), inset 0 0 0 1px rgba(15,23,42,0.12), 0 2px 6px rgba(0,0,0,0.10),
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(17,17,17,0.20), inset 0 0 0 1px rgba(17,17,17,0.12), 0 2px 6px rgba(0,0,0,0.10),
     0 0 10px -2px var(--acc, var(--brand-primary));
 }
 .cal-ep-w-ic .material-icons { font-size: 16px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.35); filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15)); }
@@ -575,24 +575,24 @@ html.dark .cal-ep-tip { background: color-mix(in srgb, var(--fg1) 5%, var(--bg-c
 .cal-ep-tip-cta:hover { filter: brightness(1.06); }
 .cal-ep-tip-cta:active { transform: scale(0.96); }
 .cal-ep-tip-cta .material-icons { font-size: 14px; }
-html.dark .cal-ep-tip-cta { background: #F1F5F9 !important; background-image: none !important; color: #0F172A !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), inset 0 -2px 0 rgba(15,23,42,0.12), 0 1px 3px rgba(0,0,0,0.3) !important; text-shadow: none; }
-html.dark .cal-ep-tip-cta .material-icons { color: #0F172A !important; }
+html.dark .cal-ep-tip-cta { background: #F5F5F5 !important; background-image: none !important; color: #111111 !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), inset 0 -2px 0 rgba(17,17,17,0.12), 0 1px 3px rgba(0,0,0,0.3) !important; text-shadow: none; }
+html.dark .cal-ep-tip-cta .material-icons { color: #111111 !important; }
 
 /* ── Category headers — symmetric spacing above and below the divider line ── */
 .cal-ep-category-header { display: flex; align-items: center; gap: 6px; padding: 16px 2px 14px;
   border-top: 1.5px solid var(--border-hairline); margin-top: 16px; }
 .cal-ep-category-header.first { border-top: 1.5px solid var(--border-hairline); padding-top: 16px; margin-top: 16px; }
-.cal-ep-category-header .material-icons { font-size: 16px; color: #0F172A; }
+.cal-ep-category-header .material-icons { font-size: 16px; color: #111111; }
 html.dark .cal-ep-category-header .material-icons { color: var(--fg1); }
 .cal-ep-category-label { font-family: var(--font-display); font-size: 19px; font-weight: 900;
-  letter-spacing: -0.01em; text-transform: none; color: #0F172A; }
+  letter-spacing: -0.01em; text-transform: none; color: #111111; }
 html.dark .cal-ep-category-label { color: var(--fg1); }
 .cal-ep-category-ts { margin-left: auto; font-size: 10px; font-weight: 700; color: var(--brand-primary); }
 
 /* ── Sub-steps donut ───────────────────────────────────────────────── */
 .cal-ep-donut-row { display: flex; align-items: center; gap: 11px; }
 .cal-ep-donut { width: 58px !important; height: 58px !important; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center;
-  box-shadow: inset 0 0 0 1px rgba(15,23,42,0.05), 0 4px 10px -4px color-mix(in srgb, var(--brand-primary) 60%, transparent); }
+  box-shadow: inset 0 0 0 1px rgba(17,17,17,0.05), 0 4px 10px -4px color-mix(in srgb, var(--brand-primary) 60%, transparent); }
 .cal-ep-donut-mid { width: 44px !important; height: 44px !important; border-radius: 50%; background: var(--bg-card-solid); display: grid; place-items: center; }
 .cal-ep-donut-mid b { font-size: 14px !important; font-weight: 900; color: var(--fg1); }
 .cal-ep-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
@@ -638,7 +638,7 @@ html.dark .cal-ep-focus-sub { box-shadow: inset 0 1px 0 rgba(255,255,255,0.15); 
 .cal-ep-batt-row { display: flex; align-items: center; gap: 9px; }
 .cal-ep-batt { position: relative; display: flex; gap: 2px; padding: 3px; border: 1.5px solid var(--fg4); border-radius: 5px; }
 .cal-ep-batt i { width: 9px; height: 15px; border-radius: 1px; background: var(--bg-chip); }
-.cal-ep-batt.p1 i.on, .cal-ep-batt.p2 i.on { background: #10B981; box-shadow: inset 0 1px 0 rgba(255,255,255,0.4); }
+.cal-ep-batt.p1 i.on, .cal-ep-batt.p2 i.on { background: var(--brand-primary-500); box-shadow: inset 0 1px 0 rgba(255,255,255,0.4); }
 .cal-ep-batt.p3 i.on { background: #EAB308; box-shadow: inset 0 1px 0 rgba(255,255,255,0.4); }
 .cal-ep-batt.p4 i.on, .cal-ep-batt.p5 i.on { background: #EF4444; box-shadow: inset 0 1px 0 rgba(255,255,255,0.4); }
 .cal-ep-batt-nub { position: absolute; right: -4px; top: 50%; transform: translateY(-50%); width: 3px; height: 8px; border-radius: 0 2px 2px 0; background: var(--fg4); }
@@ -655,7 +655,7 @@ html.dark .cal-ep-focus-sub { box-shadow: inset 0 1px 0 rgba(255,255,255,0.15); 
 html.dark .cal-ep-age-chip { box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 0 10px -2px #3B82F6; }
 .cal-ep-age-chip .material-icons { font-size: 14px; }
 .cal-ep-age-of { font-size: 11px; font-weight: 600; color: var(--fg4); }
-.cal-ep-age-meter { height: 7px; border-radius: 9999px; background: var(--bg-chip); overflow: hidden; box-shadow: inset 0 1px 2px rgba(15,23,42,0.08); }
+.cal-ep-age-meter { height: 7px; border-radius: 9999px; background: var(--bg-chip); overflow: hidden; box-shadow: inset 0 1px 2px rgba(17,17,17,0.08); }
 .cal-ep-age-meter i { display: block; height: 100%; border-radius: 9999px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.4); transition: width calc(200ms * var(--anim-mult, 1)) linear; }
 
 /* ── SyncScore time table ──────────────────────────────────────────── */
@@ -665,7 +665,7 @@ html.dark .cal-ep-age-chip { box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0
 .cal-ep-sync-head span { font-size: 11px; font-weight: 600; color: var(--fg4); line-height: 1.4; }
 .cal-ep-sync-table { display: flex; flex-direction: column; gap: 5px; }
 .cal-ep-sync-row { display: flex; align-items: center; gap: 9px; }
-.cal-ep-sync-row.peak { background: color-mix(in srgb, #10B981 8%, var(--bg-chip)); border-radius: 8px; padding: 2px 6px; margin: 0 -6px; }
+.cal-ep-sync-row.peak { background: color-mix(in srgb, var(--brand-primary-500) 8%, var(--bg-chip)); border-radius: 8px; padding: 2px 6px; margin: 0 -6px; }
 .cal-ep-sync-hh { font-size: 11px; font-weight: 800; color: var(--fg3); font-variant-numeric: tabular-nums; min-width: 38px; }
 .cal-ep-sync-bar { flex: 1; height: 7px; border-radius: 9999px; background: var(--bg-chip); overflow: hidden; }
 .cal-ep-sync-bar i { display: block; height: 100%; border-radius: 9999px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.4); transition: width calc(200ms * var(--anim-mult, 1)) linear; }
@@ -683,11 +683,11 @@ html.dark .cal-ep-age-chip { box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0
 html.dark .cal-ep-chain-step { box-shadow: inset 0 1px 0 rgba(255,255,255,0.07); }
 .cal-ep-chain-step.done {
   color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.28);
-  background-color: #10B981;
+  background-color: var(--brand-primary-500);
   background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
                     linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
   background-size: 7px 7px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.40), inset 0 -1.5px 0 rgba(0,0,0,0.18), inset 0 0 0 1px rgba(15,23,42,0.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.40), inset 0 -1.5px 0 rgba(0,0,0,0.18), inset 0 0 0 1px rgba(17,17,17,0.10);
 }
 .cal-ep-chain-step.active {
   color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.28);
@@ -730,10 +730,10 @@ html.dark .cal-ep-chain-step { box-shadow: inset 0 1px 0 rgba(255,255,255,0.07);
   flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--font-display);
   font-size: 11px; font-weight: 800; cursor: pointer;
   color: #fff;
-  background: var(--fbtn, #0F172A);
-  border: 1px solid var(--fbtn, #0F172A);
+  background: var(--fbtn, #111111);
+  border: 1px solid var(--fbtn, #111111);
   padding: 6px 14px; border-radius: 9999px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1.5px 0 rgba(0,0,0,0.18), 0 0 10px -3px var(--fbtn, #0F172A);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1.5px 0 rgba(0,0,0,0.18), 0 0 10px -3px var(--fbtn, #111111);
   transition: border-color calc(150ms * var(--anim-mult, 1)), color calc(150ms * var(--anim-mult, 1)), background calc(150ms * var(--anim-mult, 1)), filter calc(150ms * var(--anim-mult, 1));
 }
 .cal-ep-foot-btn .material-icons { color: #fff; font-size: 16px; }
@@ -751,45 +751,45 @@ html.dark .cal-ep-foot-btn.primary .material-icons { color: #04231a; }
 
 /* ── Toast ─────────────────────────────────────────────────────────── */
 .cal-ep-toast { position: absolute; left: 50%; bottom: 16px; transform: translate(-50%, 14px); z-index: 5;
-  display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 800; color: #fff; background: #0F172A;
+  display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 800; color: #fff; background: #111111;
   padding: 9px 15px; border-radius: 9999px; box-shadow: 0 10px 24px -8px rgba(0,0,0,0.5); opacity: 0; pointer-events: none;
   transition: opacity calc(220ms * var(--anim-mult, 1)), transform calc(220ms * var(--anim-mult, 1)); white-space: nowrap; }
 .cal-ep-toast.show { opacity: 1; transform: translate(-50%, 0); }
-.cal-ep-toast .material-icons { font-size: 16px; color: #34D399; }
+.cal-ep-toast .material-icons { font-size: 16px; color: var(--brand-primary-400); }
 
 /* ── Card must be position:relative for toast absolute positioning ── */
 .cal-ep-card { position: relative; }
 
 /* Event item gets pointer + chevron cue */
 .cal-ev-item { cursor: pointer; }
-.cal-ev-item:hover { background: #F8FAFC; border-radius: 8px; }
-.cev-chevron { font-size: 16px; color: #CBD5E1; flex-shrink: 0; margin-left: auto; }
+.cal-ev-item:hover { background: #FAFAFA; border-radius: 8px; }
+.cev-chevron { font-size: 16px; color: #D4D4D4; flex-shrink: 0; margin-left: auto; }
 
 /* Dark mode for event-detail popover */
-html.dark .cal-ep-outer { background: #0F172A; }
-html.dark .cal-ep-card { background: var(--slate-800); border-top-color: rgba(255,255,255,0.22); }
+html.dark .cal-ep-outer { background: #111111; }
+html.dark .cal-ep-card { background: var(--gray-800); border-top-color: rgba(255,255,255,0.22); }
 /* Primary footer CTA: slate-100 pill in dark — mirrors html.dark .tp-foot-btn.primary */
 html.dark .cal-ep-foot-btn.primary {
-  background: #F1F5F9 !important;
-  border-color: #F1F5F9 !important;
-  color: #0F172A !important;
+  background: #F5F5F5 !important;
+  border-color: #F5F5F5 !important;
+  color: #111111 !important;
 }
-html.dark .cal-ep-foot-btn.primary .material-icons { color: #0F172A !important; }
-html.dark .cal-ep-foot-btn.primary:hover { filter: brightness(0.96); background: #F1F5F9 !important; }
-html.dark .cal-ep-row-val { color: var(--slate-100); }
-html.dark .cal-ep-row-detail { color: #94A3B8; }
+html.dark .cal-ep-foot-btn.primary .material-icons { color: #111111 !important; }
+html.dark .cal-ep-foot-btn.primary:hover { filter: brightness(0.96); background: #F5F5F5 !important; }
+html.dark .cal-ep-row-val { color: var(--gray-100); }
+html.dark .cal-ep-row-detail { color: #A1A1A1; }
 /* Fix #3: removed stale slate-700 override — dark non-primary footer btns stay emerald (set at .cal-ep-foot-btn dark rule above) */
 html.dark .cal-ev-item:hover { background: rgba(255,255,255,0.05); }
 
 /* Dark mode for task popover */
-html.dark .cal-popover { background: var(--slate-800); box-shadow: 0 24px 80px rgba(0,0,0,.5), 0 4px 16px rgba(0,0,0,.3); }
-html.dark .cal-pop-title { color: var(--slate-100); }
-html.dark .cal-pop-label { color: var(--slate-400); }
-html.dark .cal-pop-input { background: var(--slate-900); border-color: var(--slate-700); color: var(--slate-100); }
+html.dark .cal-popover { background: var(--gray-800); box-shadow: 0 24px 80px rgba(0,0,0,.5), 0 4px 16px rgba(0,0,0,.3); }
+html.dark .cal-pop-title { color: var(--gray-100); }
+html.dark .cal-pop-label { color: var(--gray-400); }
+html.dark .cal-pop-input { background: var(--gray-900); border-color: var(--gray-700); color: var(--gray-100); }
 html.dark .cal-pop-input:focus { border-color: var(--brand-primary); }
-html.dark .cal-pop-color-btn.active { border-color: var(--slate-100); }
-html.dark .cal-pop-cancel { background: var(--slate-700); color: var(--slate-300); }
-html.dark .cal-pop-cancel:hover { background: #273449; }
+html.dark .cal-pop-color-btn.active { border-color: var(--gray-100); }
+html.dark .cal-pop-cancel { background: var(--gray-700); color: var(--gray-300); }
+html.dark .cal-pop-cancel:hover { background: #242424; }
 html.dark .cal-popover-backdrop { background: rgba(0,0,0,.55); }
 
 /* ── Events scroll + blur masks + left-edge scrollbar (item i) ── */
@@ -840,9 +840,9 @@ html.dark .cal-popover-backdrop { background: rgba(0,0,0,.55); }
 /* Scrollbar thumb */
 .cal-ev-scrollbar-thumb {
   position: absolute; right: 0; left: auto; width: 3px; border-radius: 9999px;
-  background: #94A3B8;
+  background: #A1A1A1;
   transition: top calc(50ms * var(--anim-mult, 1)) linear,
               height calc(50ms * var(--anim-mult, 1)) linear;
 }
 html.dark .cal-ev-scrollbar { background: rgba(255,255,255,0.08); }
-html.dark .cal-ev-scrollbar-thumb { background: #475569; }
+html.dark .cal-ev-scrollbar-thumb { background: #4A4A4A; }

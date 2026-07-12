@@ -13,16 +13,16 @@
   --dc-fg:        #F4F4F6;
   --dc-fg-dim:    #8A8A95;
   --dc-fg-dimmer: #5A5A65;
-  --dc-accent:    #10B981;   /* design-system brand green */
-  --dc-accent-bg: rgba(16,185,129,0.12);
+  --dc-accent:    var(--brand-primary-500);   /* design-system brand green */
+  --dc-accent-bg: color-mix(in srgb, var(--brand-primary-500) 12%, transparent);
   --dc-warn:      #FBBF24;
 }
 
 /* ============ LIGHT MODE ============ */
 html:not(.dark) {
-  --dc-fg:        #0F172A;
-  --dc-fg-dim:    #64748B;
-  --dc-fg-dimmer: #94A3B8;
+  --dc-fg:        #111111;
+  --dc-fg-dim:    #6B6B6B;
+  --dc-fg-dimmer: #A1A1A1;
 }
 /* Item 1 — island chip surface: dark-on-light / light-on-dark for ALL THREE states
    (compact idle, preview hover, expanded click). Single rule on the island base so
@@ -40,33 +40,33 @@ html:not(.dark) .dc-island {
   --dc-fg-dimmer: #5A5A65;
 }
 html.dark .dc-island {
-  background: #F1F5F9;
-  background-image: radial-gradient(ellipse at top, rgba(15,23,42,0.03) 0%, transparent 60%);
+  background: #F5F5F5;
+  background-image: radial-gradient(ellipse at top, rgba(17,17,17,0.03) 0%, transparent 60%);
   box-shadow:
     0 18px 50px -10px rgba(0,0,0,0.25),
     0 8px 18px -6px rgba(0,0,0,0.15),
     inset 0 1px 0 rgba(255,255,255,0.80),
-    inset 0 0 0 1px rgba(15,23,42,0.06);
-  --dc-fg: #0F172A;
-  --dc-fg-dim: #64748B;
-  --dc-fg-dimmer: #94A3B8;
+    inset 0 0 0 1px rgba(17,17,17,0.06);
+  --dc-fg: #111111;
+  --dc-fg-dim: #6B6B6B;
+  --dc-fg-dimmer: #A1A1A1;
 }
 /* Surface-detail overrides follow the island surface, NOT the page theme.
    Light page = DARK island (default rules apply). Dark page = LIGHT island
    (these html.dark overrides give the white-surface treatment). */
-html.dark .dc-nav-btn { background: rgba(15,23,42,0.05); border-color: rgba(15,23,42,0.06); }
-html.dark .dc-nav-btn:hover { background: rgba(15,23,42,0.10); color: #0F172A; }
-html.dark .dc-cell:hover { background: rgba(15,23,42,0.06); }
-html.dark .dc-close { background: rgba(15,23,42,0.05); border-color: rgba(15,23,42,0.06); }
-html.dark .dc-close:hover { background: rgba(15,23,42,0.12); color: #0F172A; }
-html.dark .dc-event-list { scrollbar-color: rgba(15,23,42,0.18) transparent; }
-html.dark .dc-event-list::-webkit-scrollbar-thumb { background: rgba(15,23,42,0.16); }
+html.dark .dc-nav-btn { background: rgba(17,17,17,0.05); border-color: rgba(17,17,17,0.06); }
+html.dark .dc-nav-btn:hover { background: rgba(17,17,17,0.10); color: #111111; }
+html.dark .dc-cell:hover { background: rgba(17,17,17,0.06); }
+html.dark .dc-close { background: rgba(17,17,17,0.05); border-color: rgba(17,17,17,0.06); }
+html.dark .dc-close:hover { background: rgba(17,17,17,0.12); color: #111111; }
+html.dark .dc-event-list { scrollbar-color: rgba(17,17,17,0.18) transparent; }
+html.dark .dc-event-list::-webkit-scrollbar-thumb { background: rgba(17,17,17,0.16); }
 html.dark .dc-event-list-wrap::after { background: linear-gradient(to bottom, rgba(241,245,249,0) 0%, rgba(241,245,249,0.85) 70%, rgba(241,245,249,1) 100%); }
-html.dark .dc-preview-list-item { background: rgba(15,23,42,0.04); }
-html.dark .dc-today-btn { color: #059669; }
-html.dark .dc-cell.today:not(.selected) { color: #059669; }
+html.dark .dc-preview-list-item { background: rgba(17,17,17,0.04); }
+html.dark .dc-today-btn { color: var(--brand-primary-600); }
+html.dark .dc-cell.today:not(.selected) { color: var(--brand-primary-600); }
 html.dark .dc-cell.selected { color: #fff; }
-html.dark .dc-event-row { color: #0F172A; }
+html.dark .dc-event-row { color: #111111; }
 html.dark .dc-event-row:hover {
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.32),
@@ -89,11 +89,11 @@ html.dark .dc-event-row.is-focus {
   border-radius: 28px;
   overflow: hidden;
   box-shadow:
-    0 24px 80px -16px rgba(15,23,42,0.30),
-    0 8px 24px -8px rgba(15,23,42,0.18),
+    0 24px 80px -16px rgba(17,17,17,0.30),
+    0 8px 24px -8px rgba(17,17,17,0.18),
     inset 0 1px 0 rgba(255,255,255,0.6);
   background:
-    radial-gradient(circle at 25% 18%, rgba(16,185,129,0.10), transparent 45%),
+    radial-gradient(circle at 25% 18%, color-mix(in srgb, var(--brand-primary-500) 10%, transparent), transparent 45%),
     radial-gradient(circle at 78% 84%, rgba(99,102,241,0.10), transparent 50%),
     radial-gradient(circle at 12% 92%, rgba(251,191,36,0.06), transparent 55%),
     linear-gradient(160deg, #C7D2DA 0%, #95A4B3 100%);
@@ -137,7 +137,7 @@ html.dark .dc-event-row.is-focus {
   bottom: 32px; left: 50%;
   transform: translateX(-50%);
   text-align: center;
-  color: rgba(15,23,42,0.55);
+  color: rgba(17,17,17,0.55);
   font-size: 12px; font-weight: 600;
   letter-spacing: -0.005em;
   pointer-events: none;
@@ -151,11 +151,11 @@ html.dark .dc-event-row.is-focus {
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.5);
   border-radius: 9999px;
-  box-shadow: 0 4px 12px -4px rgba(15,23,42,0.12);
+  box-shadow: 0 4px 12px -4px rgba(17,17,17,0.12);
 }
 .dc-hint kbd {
   font-family: 'Montserrat'; font-size: 10px; font-weight: 800;
-  color: #475569; background: #F1F5F9; border: 1px solid #E2E8F0;
+  color: #4A4A4A; background: #F5F5F5; border: 1px solid #ECECEC;
   padding: 1px 5px; border-radius: 4px;
 }
 
@@ -268,13 +268,13 @@ html.dark .dc-event-row.is-focus {
   width: 5px; height: 5px;
   border-radius: 50%;
   background: var(--dc-accent);
-  box-shadow: 0 0 0 0 rgba(16,185,129,0.55);
+  box-shadow: 0 0 0 0 var(--brand-glow);
   animation: dcPulse calc(2000ms * var(--anim-mult, 1)) ease-out infinite;
 }
 @keyframes dcPulse {
-  0%   { box-shadow: 0 0 0 0   rgba(16,185,129,0.55); }
-  70%  { box-shadow: 0 0 0 6px rgba(16,185,129,0);   }
-  100% { box-shadow: 0 0 0 0   rgba(16,185,129,0);   }
+  0%   { box-shadow: 0 0 0 0   var(--brand-glow); }
+  70%  { box-shadow: 0 0 0 6px color-mix(in srgb, var(--brand-primary-500) 0%, transparent);   }
+  100% { box-shadow: 0 0 0 0   color-mix(in srgb, var(--brand-primary-500) 0%, transparent);   }
 }
 
 /* ----- Preview event detail (revealed only in preview state) ----- */
@@ -359,7 +359,7 @@ html.dark .dc-event-row.is-focus {
   padding-right: 22px;
 }
 html.dark .dc-left {
-  border-right-color: rgba(15,23,42,0.10);
+  border-right-color: rgba(17,17,17,0.10);
 }
 .dc-today-row {
   display: flex; align-items: center;
@@ -440,7 +440,7 @@ html.dark .dc-left {
     0 6px 14px -6px rgba(0,0,0,0.45);
 }
 /* Kind-event — semantic-success / brand green */
-.dc-event-row.kind-event       { background-color: #10B981; }
+.dc-event-row.kind-event       { background-color: var(--brand-primary-500); }
 /* Kind-bday — bright semantic-warning yellow with dark text for contrast */
 .dc-event-row.kind-bday        {
   background-color: #FACC15;
@@ -500,7 +500,7 @@ html.dark .dc-left {
   padding: 0 8px;
   border-radius: 9999px;
   background: rgba(255,255,255,0.94);
-  color: rgba(15,23,42,0.85);
+  color: rgba(17,17,17,0.85);
   font-family: 'Montserrat', system-ui, sans-serif;
   font-size: 10px; font-weight: 900;
   font-variant-numeric: tabular-nums;
@@ -564,9 +564,9 @@ html.dark .dc-left {
   padding: 0 11px 0 9px;
   margin-right: 4px;
   border-radius: 9999px;
-  border: 1px solid rgba(16,185,129,0.30);
-  background: rgba(16,185,129,0.10);
-  color: #34D399;
+  border: 1px solid color-mix(in srgb, var(--brand-primary-500) 30%, transparent);
+  background: color-mix(in srgb, var(--brand-primary-500) 10%, transparent);
+  color: var(--brand-primary-400);
   font-family: 'Montserrat', system-ui, sans-serif;
   font-size: 11px; font-weight: 800;
   letter-spacing: 0.04em;
@@ -574,7 +574,7 @@ html.dark .dc-left {
   cursor: pointer;
   transition: background calc(160ms * var(--anim-mult, 1)), border-color calc(160ms * var(--anim-mult, 1)), transform calc(140ms * var(--anim-mult, 1));
 }
-.dc-today-btn:hover { background: rgba(16,185,129,0.18); border-color: rgba(16,185,129,0.45); }
+.dc-today-btn:hover { background: color-mix(in srgb, var(--brand-primary-500) 18%, transparent); border-color: var(--brand-glow); }
 .dc-today-btn:active { transform: scale(0.96); }
 .dc-today-btn .dc-icon {
   font-size: 12px;
@@ -660,14 +660,14 @@ html.dark .dc-left {
   width: 4px; height: 4px;
   border-radius: 50%;
   background: var(--dc-accent);
-  box-shadow: 0 0 0 2px rgba(16,185,129,0.20);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-primary-500) 20%, transparent);
 }
 /* Selected (any day) takes the prominent green pill */
 .dc-cell.selected {
   background: var(--dc-accent);
-  color: #0F172A;
+  color: #111111;
   font-weight: 900;
-  box-shadow: 0 4px 12px -2px rgba(16,185,129,0.45), inset 0 1px 0 rgba(255,255,255,0.20);
+  box-shadow: 0 4px 12px -2px var(--brand-glow), inset 0 1px 0 rgba(255,255,255,0.20);
 }
 .dc-cell.selected::after { display: none; }
 .dc-cell.selected:hover { background: var(--dc-accent); filter: brightness(1.10); }
@@ -708,16 +708,16 @@ html.dark .dc-left {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 8px 14px 8px 11px;
   border-radius: 9999px;
-  border: 1px solid rgba(16,185,129,0.32);
-  background: rgba(16,185,129,0.12);
-  color: #34D399;
+  border: 1px solid color-mix(in srgb, var(--brand-primary-500) 32%, transparent);
+  background: color-mix(in srgb, var(--brand-primary-500) 12%, transparent);
+  color: var(--brand-primary-400);
   font-family: 'Montserrat', system-ui, sans-serif;
   font-size: 12.5px; font-weight: 800;
   letter-spacing: 0.02em;
   cursor: pointer;
   transition: background calc(160ms * var(--anim-mult, 1)), border-color calc(160ms * var(--anim-mult, 1)), transform calc(140ms * var(--anim-mult, 1));
 }
-.dc-add-task:hover { background: rgba(16,185,129,0.18); border-color: rgba(16,185,129,0.50); }
+.dc-add-task:hover { background: color-mix(in srgb, var(--brand-primary-500) 18%, transparent); border-color: var(--brand-glow); }
 .dc-add-task:active { transform: scale(0.96); }
 .dc-add-task .dc-icon {
   font-size: 14px;

@@ -240,7 +240,7 @@ export default function Leaderboard() {
                     <div>
                       <div
                         className="name"
-                        style={prominent ? undefined : { color: '#334155' }}
+                        style={prominent ? undefined : { color: '#232323' }}
                       >
                         {agent.name}
                       </div>
@@ -254,7 +254,7 @@ export default function Leaderboard() {
                   </div>
                   <div
                     className="rev"
-                    style={leader ? undefined : { color: '#334155', fontSize: '15px' }}
+                    style={leader ? undefined : { color: '#232323', fontSize: '15px' }}
                   >
                     {fmt(metric, display[agent.id] ?? 0)}
                   </div>

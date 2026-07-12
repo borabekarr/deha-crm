@@ -44,7 +44,7 @@ const TEMPLATES: TemplateCard[] = [
     nodes: [
       { color: '#4F46E5', icon: 'edit',              size: 'sm' },
       { color: '#34A853', icon: 'svg',               size: 'lg' }, // Google Drive SVG
-      { color: '#059669', icon: 'chat_bubble_outline', size: 'sm' },
+      { color: 'var(--brand-primary-600)', icon: 'chat_bubble_outline', size: 'sm' },
     ],
     title: 'Google Drive AI Agent',
     badge: 'PRO',
@@ -55,7 +55,7 @@ const TEMPLATES: TemplateCard[] = [
     nodes: [
       { color: '#4F46E5', icon: 'edit',        size: 'sm' },
       { color: '#7C3AED', icon: 'security',    size: 'lg' },
-      { color: '#059669', icon: 'description', size: 'sm' },
+      { color: 'var(--brand-primary-600)', icon: 'description', size: 'sm' },
     ],
     title: 'InfoSec Query Assistant',
     description: 'Automatically analyze vulnerabilities and generate detailed threat reports.',
@@ -65,7 +65,7 @@ const TEMPLATES: TemplateCard[] = [
     nodes: [
       { color: '#DC2626', icon: 'storage',           size: 'sm' },
       { color: '#29B5E8', icon: 'ac_unit',           size: 'lg' },
-      { color: '#059669', icon: 'chat_bubble_outline', size: 'sm' },
+      { color: 'var(--brand-primary-600)', icon: 'chat_bubble_outline', size: 'sm' },
     ],
     title: 'Snowflake AI Agent',
     badge: 'NEW',
@@ -76,7 +76,7 @@ const TEMPLATES: TemplateCard[] = [
     nodes: [
       { color: '#4F46E5', icon: 'travel_explore', size: 'sm' },
       { color: '#8B5CF6', icon: 'psychology',     size: 'lg' },
-      { color: '#059669', icon: 'summarize',       size: 'sm' },
+      { color: 'var(--brand-primary-600)', icon: 'summarize',       size: 'sm' },
     ],
     title: 'Website Researcher',
     description: 'Research any website and generate a comprehensive AI-powered summary.',

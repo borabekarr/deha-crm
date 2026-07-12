@@ -2,7 +2,7 @@
    Pipeline2.css — iOS grouped inset list mapped to Deha tokens.
    Local chrome vars are flipped wholesale under html.dark (dtw pattern).
    Every selector is scoped under .pipeline-2 so nothing leaks into the
-   shared global stylesheet. Emerald accents are the canonical #10B981
+   shared global stylesheet. Emerald accents are the canonical var(--brand-primary-500)
    (== oklch(0.696 0.149 162.5)); danger is #EF4444. Hairlines, not borders.
    Entrance: staggered rise+fade with EXPLICIT per-item delays (nth-child) —
    sidesteps the unregistered calc(var(--i)*1ms)==0s gotcha entirely.
@@ -26,27 +26,27 @@
 .pipeline-2 {
   /* bezel + inset surfaces */
   --p2-bezel: #D4DCE8;
-  --p2-bezel-border: #CBD5E1;
+  --p2-bezel-border: #D4D4D4;
   --p2-card: #FFFFFF;
-  --p2-card-border: #CBD5E1;
-  --p2-edge: #E2E8F0;        /* hairline separator */
+  --p2-card-border: #D4D4D4;
+  --p2-edge: #ECECEC;        /* hairline separator */
   /* text */
-  --p2-fg1: #0F172A;
-  --p2-fg3: #64748B;
-  --p2-fg4: #94A3B8;
-  --p2-header-fg: #64748B;
+  --p2-fg1: #111111;
+  --p2-fg3: #6B6B6B;
+  --p2-fg4: #A1A1A1;
+  --p2-header-fg: #6B6B6B;
   /* accents */
-  --p2-emerald: #10B981;
+  --p2-emerald: var(--brand-primary-500);
   --p2-danger: #EF4444;
-  --p2-muted-fg: #64748B;
-  --p2-row-hover: rgba(15, 23, 42, 0.03);
+  --p2-muted-fg: #6B6B6B;
+  --p2-row-hover: rgba(17,17,17, 0.03);
   /* Dynamic-island popover chrome (flipped wholesale under html.dark) */
-  --p2-pop-bg: #0F172A;
+  --p2-pop-bg: #111111;
   --p2-pop-border: rgba(255, 255, 255, 0.08);
-  --p2-pop-fg1: #F8FAFC;
-  --p2-pop-fg3: #94A3B8;
+  --p2-pop-fg1: #FAFAFA;
+  --p2-pop-fg3: #A1A1A1;
   --p2-pop-hair: rgba(255, 255, 255, 0.08);
-  --p2-pop-emerald: #34D399;
+  --p2-pop-emerald: var(--brand-primary-400);
   --p2-pop-danger: #EF4444;
 
   display: flex;
@@ -66,8 +66,8 @@
      on the three edges the inset touches; top keeps 14px for the header. */
   padding: 14px 8px 8px;
   box-shadow:
-    0 16px 44px rgba(15, 23, 42, 0.13),
-    0 3px 9px rgba(15, 23, 42, 0.07),
+    0 16px 44px rgba(17,17,17, 0.13),
+    0 3px 9px rgba(17,17,17, 0.07),
     inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
@@ -95,7 +95,7 @@
   overflow: visible;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.85),
-    0 1px 2px rgba(15, 23, 42, 0.05);
+    0 1px 2px rgba(17,17,17, 0.05);
 }
 
 /* Concentric corners — keep row hover/press fill inside the rounded card. */
@@ -371,30 +371,30 @@
 
 /* Lost row popover — muted header dot, same stats surface. */
 .pipeline-2 .p2-pop--muted .p2-pop-dot {
-  box-shadow: 0 0 8px -2px rgba(148, 163, 184, 0.5);
+  box-shadow: 0 0 8px -2px rgba(161,161,161, 0.5);
 }
 .pipeline-2 .p2-pop--muted .p2-pop-title { color: var(--p2-pop-fg3); }
 
 /* ── Dark mode — flip local vars only (html.dark, literal hex) ────────────── */
 html.dark .pipeline-2 {
-  --p2-bezel: #020617;
-  --p2-bezel-border: #334155;
-  --p2-card: #1E293B;
-  --p2-card-border: #334155;
-  --p2-edge: #334155;
-  --p2-fg1: #F1F5F9;
-  --p2-fg3: #94A3B8;
-  --p2-fg4: #64748B;
-  --p2-header-fg: #94A3B8;
-  --p2-muted-fg: #64748B;
+  --p2-bezel: #0A0A0A;
+  --p2-bezel-border: #232323;
+  --p2-card: #1C1C1C;
+  --p2-card-border: #232323;
+  --p2-edge: #232323;
+  --p2-fg1: #F5F5F5;
+  --p2-fg3: #A1A1A1;
+  --p2-fg4: #6B6B6B;
+  --p2-header-fg: #A1A1A1;
+  --p2-muted-fg: #6B6B6B;
   --p2-row-hover: rgba(255, 255, 255, 0.04);
   /* Popover lifts above the dark card as a raised slate surface. */
-  --p2-pop-bg: #334155;
+  --p2-pop-bg: #232323;
   --p2-pop-border: rgba(255, 255, 255, 0.1);
-  --p2-pop-fg1: #F8FAFC;
-  --p2-pop-fg3: #CBD5E1;
+  --p2-pop-fg1: #FAFAFA;
+  --p2-pop-fg3: #D4D4D4;
   --p2-pop-hair: rgba(255, 255, 255, 0.1);
-  --p2-pop-emerald: #34D399;
+  --p2-pop-emerald: var(--brand-primary-400);
   --p2-pop-danger: #EF4444;
 }
 html.dark .pipeline-2 .p2-shell {

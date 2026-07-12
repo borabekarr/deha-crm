@@ -5,20 +5,20 @@ export default function ColorsNeutrals() {
   return (
     <div className="card">
       <div className="cn-label-row">
-        <div className="cn-lr-title"><span className="cn-lr-dot"></span>Neutrals — Slate</div>
+        <div className="cn-lr-title"><span className="cn-lr-dot"></span>Neutrals — Gray</div>
         <div className="cn-lr-meta">fg / bg / borders</div>
       </div>
       <div className="swatches">
-        <div className="sw lite" style={{ background: '#F8FAFC', border: '1px solid #E2E8F0' }}>50<br />F8FAFC</div>
-        <div className="sw lite" style={{ background: '#F1F5F9' }}>100<br />F1F5F9</div>
-        <div className="sw lite" style={{ background: '#E2E8F0' }}>200<br />E2E8F0</div>
-        <div className="sw lite" style={{ background: '#CBD5E1' }}>300<br />CBD5E1</div>
-        <div className="sw lite" style={{ background: '#94A3B8' }}>400<br />94A3B8</div>
-        <div className="sw dark" style={{ background: '#64748B' }}>500<br />64748B</div>
-        <div className="sw dark" style={{ background: '#475569' }}>600<br />475569</div>
-        <div className="sw dark" style={{ background: '#334155' }}>700<br />334155</div>
-        <div className="sw dark" style={{ background: '#1E293B' }}>800<br />1E293B</div>
-        <div className="sw dark" style={{ background: '#0F172A' }}>900<br />0F172A</div>
+        <div className="sw lite" style={{ background: '#FAFAFA', border: '1px solid #ECECEC' }}>50<br />FAFAFA</div>
+        <div className="sw lite" style={{ background: '#F5F5F5' }}>100<br />F5F5F5</div>
+        <div className="sw lite" style={{ background: '#ECECEC' }}>200<br />ECECEC</div>
+        <div className="sw lite" style={{ background: '#D4D4D4' }}>300<br />D4D4D4</div>
+        <div className="sw lite" style={{ background: '#A1A1A1' }}>400<br />A1A1A1</div>
+        <div className="sw dark" style={{ background: '#6B6B6B' }}>500<br />6B6B6B</div>
+        <div className="sw dark" style={{ background: '#4A4A4A' }}>600<br />4A4A4A</div>
+        <div className="sw dark" style={{ background: '#232323' }}>700<br />232323</div>
+        <div className="sw dark" style={{ background: '#1C1C1C' }}>800<br />1C1C1C</div>
+        <div className="sw dark" style={{ background: '#111111' }}>900<br />111111</div>
       </div>
     </div>
   )

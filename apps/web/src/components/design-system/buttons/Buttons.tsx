@@ -96,7 +96,7 @@ export default function Buttons() {
 
       <span className="btn-label" style={{ marginTop: 20 }}>Task footer (--fbtn color token)</span>
       <div className="btn-row">
-        <button type="button" className="btn-task" style={{ '--fbtn': '#10B981' } as React.CSSProperties}>
+        <button type="button" className="btn-task" style={{ '--fbtn': 'var(--brand-primary-500)' } as React.CSSProperties}>
           <span className="material-icons btn-task-icon">task_alt</span>
           Mark Done
         </button>
@@ -113,7 +113,7 @@ export default function Buttons() {
       </div>
       <span className="btn-label" style={{ marginTop: 20 }}>CTA (optimization report)</span>
       <div className="btn-row">
-        <button type="button" className="btn-cta" style={{ '--accent': '#10B981', '--ctaglow': 'rgba(16,185,129,0.5)' } as React.CSSProperties}>
+        <button type="button" className="btn-cta" style={{ '--accent': 'var(--brand-primary-500)', '--ctaglow': 'var(--brand-glow)' } as React.CSSProperties}>
           <span className="material-symbols-outlined">insights</span>
           Get Optimization
         </button>

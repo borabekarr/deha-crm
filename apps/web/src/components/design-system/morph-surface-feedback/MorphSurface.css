@@ -25,10 +25,10 @@
   border-radius: 9999px;
   background: var(--ms2-surface-bg);
   box-shadow:
-    0 1px 1px rgba(15, 23, 42, 0.05),
+    0 1px 1px rgba(17,17,17, 0.05),
     inset 0 1px 1px rgba(255, 255, 255, 0.55),
     inset 0 0 0 1px rgba(255, 255, 255, 0.12),
-    0 10px 28px -14px rgba(15, 23, 42, 0.22);
+    0 10px 28px -14px rgba(17,17,17, 0.22);
   cursor: pointer;
   transition:
     width calc(440ms * var(--anim-mult, 1)) var(--ms2-ease),
@@ -47,8 +47,8 @@
   box-shadow:
     inset 0 1px 1px rgba(255, 255, 255, 0.45),
     inset 0 0 0 1px rgba(255, 255, 255, 0.1),
-    0 26px 60px -18px rgba(15, 23, 42, 0.32),
-    0 6px 16px -10px rgba(15, 23, 42, 0.2);
+    0 26px 60px -18px rgba(17,17,17, 0.32),
+    0 6px 16px -10px rgba(17,17,17, 0.2);
 }
 
 /* ── Morphing brand dot — anchored to the fixed BOTTOM edge ──────────────── */
@@ -62,7 +62,7 @@
   display: grid;
   place-items: center;
   color: #fff;
-  background-color: #10b981;
+  background-color: var(--brand-primary-500);
   background-image:
     radial-gradient(ellipse at top right, rgba(255, 255, 255, 0.22) 0%, transparent 60%),
     linear-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px),
@@ -71,8 +71,8 @@
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.55),
     inset 0 -1px 0 rgba(0, 0, 0, 0.22),
-    inset 0 0 0 1px rgba(15, 23, 42, 0.1),
-    0 1px 3px rgba(16, 185, 129, 0.45);
+    inset 0 0 0 1px rgba(17,17,17, 0.1),
+    0 1px 3px var(--brand-glow);
   z-index: 3;
   transition:
     bottom calc(440ms * var(--anim-mult, 1)) var(--ms2-ease),
@@ -135,7 +135,7 @@
   min-width: 0;
   font-size: 14px;
   font-weight: 600;
-  color: var(--fg2, #475569);
+  color: var(--fg2, #4A4A4A);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -149,7 +149,7 @@
   font-family: var(--font-display);
   font-size: 14px;
   font-weight: 700;
-  color: var(--fg3, #64748b);
+  color: var(--fg3, #6B6B6B);
   padding: 6px 12px;
   border-radius: 9999px;
   transition:
@@ -158,8 +158,8 @@
 }
 
 .ms2-trigger:hover {
-  color: var(--fg1, #0f172a);
-  background: var(--bg-chip, rgba(15, 23, 42, 0.06));
+  color: var(--fg1, #111111);
+  background: var(--bg-chip, rgba(17,17,17, 0.06));
 }
 
 /* ── Expanded feedback form ───────────────────────────────────────────────── */
@@ -195,7 +195,7 @@
   margin-left: 32px;
   font-size: 13px;
   font-weight: 700;
-  color: var(--fg3, #64748b);
+  color: var(--fg3, #6B6B6B);
   letter-spacing: -0.01em;
 }
 
@@ -219,18 +219,18 @@
   font-family: var(--font-display);
   font-size: 11px;
   font-weight: 700;
-  color: var(--fg3, #64748b);
-  background: var(--bg-chip, rgba(15, 23, 42, 0.06));
+  color: var(--fg3, #6B6B6B);
+  background: var(--bg-chip, rgba(17,17,17, 0.06));
   border-radius: 7px;
-  box-shadow: inset 0 0 0 1px var(--border-hairline, rgba(15, 23, 42, 0.12));
+  box-shadow: inset 0 0 0 1px var(--border-hairline, rgba(17,17,17, 0.12));
   transition:
     color calc(140ms * var(--anim-mult, 1)) ease,
     background calc(140ms * var(--anim-mult, 1)) ease;
 }
 
 .ms2-submit:hover kbd {
-  color: var(--fg1, #0f172a);
-  background: rgba(16, 185, 129, 0.1);
+  color: var(--fg1, #111111);
+  background: color-mix(in srgb, var(--brand-primary-500) 10%, transparent);
 }
 
 .ms2-textarea {
@@ -245,21 +245,21 @@
   font-size: 15px;
   font-weight: 500;
   line-height: 1.45;
-  color: var(--fg1, #0f172a);
-  background: var(--bg-chip, rgba(15, 23, 42, 0.04));
+  color: var(--fg1, #111111);
+  background: var(--bg-chip, rgba(17,17,17, 0.04));
   border-radius: 10px;
-  box-shadow: var(--shadow-recessed, inset 0 2px 4px rgba(15, 23, 42, 0.06));
-  caret-color: #10b981;
+  box-shadow: var(--shadow-recessed, inset 0 2px 4px rgba(17,17,17, 0.06));
+  caret-color: var(--brand-primary-500);
 }
 
 .ms2-textarea::placeholder {
-  color: var(--fg4, #94a3b8);
+  color: var(--fg4, #A1A1A1);
   font-weight: 500;
 }
 
 /* ── Dark mode ────────────────────────────────────────────────────────────── */
 html.dark .ms2-wrap {
-  --ms2-surface-bg: #1e293b;
+  --ms2-surface-bg: #1C1C1C;
 }
 
 html.dark .ms2-surface {
@@ -279,39 +279,39 @@ html.dark .ms2-surface.ms2-open {
 }
 
 html.dark .ms2-label {
-  color: var(--fg2, #94a3b8);
+  color: var(--fg2, #A1A1A1);
 }
 
 html.dark .ms2-trigger {
-  color: var(--fg3, #64748b);
+  color: var(--fg3, #6B6B6B);
 }
 
 html.dark .ms2-trigger:hover {
-  color: var(--fg1, #f1f5f9);
+  color: var(--fg1, #F5F5F5);
   background: rgba(255, 255, 255, 0.08);
 }
 
 html.dark .ms2-form-title {
-  color: var(--fg3, #64748b);
+  color: var(--fg3, #6B6B6B);
 }
 
 html.dark .ms2-submit kbd {
-  color: var(--fg3, #64748b);
+  color: var(--fg3, #6B6B6B);
   background: rgba(255, 255, 255, 0.06);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 html.dark .ms2-submit:hover kbd {
-  background: rgba(16, 185, 129, 0.14);
-  color: #6ee7b7;
+  background: color-mix(in srgb, var(--brand-primary-500) 14%, transparent);
+  color: var(--brand-primary-300);
 }
 
 html.dark .ms2-textarea {
-  color: var(--fg1, #f1f5f9);
+  color: var(--fg1, #F5F5F5);
   background: rgba(255, 255, 255, 0.05);
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 html.dark .ms2-textarea::placeholder {
-  color: var(--fg4, #475569);
+  color: var(--fg4, #4A4A4A);
 }

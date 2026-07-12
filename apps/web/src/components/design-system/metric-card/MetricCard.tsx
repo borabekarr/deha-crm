@@ -35,7 +35,7 @@ const METRICS: Record<string, MetricData> = {
     num: '142', goal: '/ 160 goal',
     dir: 'up', delta: '+12%', period: 'vs last month',
     insight: 'You gained <b>+15 leads</b> this month. At this pace you\'ll hit your monthly target <b>4 days early</b>.',
-    color: '#10B981', gradId: 'expG1',
+    color: 'var(--brand-primary-500)', gradId: 'expG1',
     axes: ['Jan','Feb','Mar','Apr','May','Jun'],
     solidLine: 'M0,91 C20,90 40,78 60,75 C80,72 100,68 120,66 C140,64 160,57 180,50 C200,43 220,38 240,33',
     solidArea: 'M0,91 C20,90 40,78 60,75 C80,72 100,68 120,66 C140,64 160,57 180,50 C200,43 220,38 240,33 L240,120 L0,120 Z',
@@ -75,7 +75,7 @@ function ExpandedCard({ metricKey, onClose }: ExpandedCardProps) {
     <>
       <div className="exp-top">
         <div className="exp-crumb">
-          Dashboard <span style={{ color: '#CBD5E1', margin: '0 1px' }}>/</span>{' '}
+          Dashboard <span style={{ color: '#D4D4D4', margin: '0 1px' }}>/</span>{' '}
           <span className="material-symbols-outlined">{m.icon}</span>
           <strong>{m.label}</strong>
         </div>
@@ -157,7 +157,7 @@ export default function MetricCard() {
   }
 
   return (
-    <div className="card" style={{ padding: 0, background: '#F8FAFC' }}>
+    <div className="card" style={{ padding: 0, background: '#FAFAFA' }}>
       <div className="frame mc-frame">
         <div className="grid">
 
@@ -182,12 +182,12 @@ export default function MetricCard() {
                 <svg viewBox="0 0 100 40" preserveAspectRatio="none">
                   <defs>
                     <linearGradient id="mc1" x1="0" x2="0" y1="0" y2="1">
-                      <stop offset="0%" stopColor="#10B981" stopOpacity="0.45" />
-                      <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
+                      <stop offset="0%" stopColor="var(--brand-primary-500)" stopOpacity="0.45" />
+                      <stop offset="100%" stopColor="var(--brand-primary-500)" stopOpacity="0" />
                     </linearGradient>
                   </defs>
                   <path d="M0,30 C18,32 30,22 48,18 C66,14 82,8 100,6 L100,40 L0,40 Z" fill="url(#mc1)" />
-                  <path d="M0,30 C18,32 30,22 48,18 C66,14 82,8 100,6" fill="none" stroke="#10B981" strokeWidth="2.2" strokeLinecap="round" />
+                  <path d="M0,30 C18,32 30,22 48,18 C66,14 82,8 100,6" fill="none" stroke="var(--brand-primary-500)" strokeWidth="2.2" strokeLinecap="round" />
                 </svg>
               </div>
             </div>

@@ -107,7 +107,7 @@ export default function IndexBar() {
   // Build bar elements (static array, derived from constants)
   const bars = Array.from({ length: N_BARS }, (_, i) => {
     const isActive = i === ACTIVE_BAR
-    const bg = isActive ? '#10B981' : lerpColor(i / (N_BARS - 1))
+    const bg = isActive ? 'var(--brand-primary-500)' : lerpColor(i / (N_BARS - 1))
     const gridImage = isActive
       ? 'linear-gradient(rgba(255,255,255,0.18) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.18) 1px,transparent 1px)'
       : undefined

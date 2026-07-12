@@ -22,7 +22,7 @@ export default function Fab() {
   }
 
   return (
-    <div className="card" style={{ padding: 0, background: '#F8FAFC' }}>
+    <div className="card" style={{ padding: 0, background: '#FAFAFA' }}>
       <div className="frame">
         <div>
           <div className="shell">
@@ -116,7 +116,7 @@ export default function Fab() {
                   {/* New lead — emerald */}
                   <div
                     className="fab-item"
-                    style={{ '--ic-bg': '#10B981' } as React.CSSProperties}
+                    style={{ '--ic-bg': 'var(--brand-primary-500)' } as React.CSSProperties}
                     onClick={(e) => onPickItem(e)}
                   >
                     <div className="fab-item-ic">

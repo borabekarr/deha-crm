@@ -322,9 +322,9 @@ export default function AiMemoryCard() {
         flexDirection: 'column',
         alignItems: 'center',
         gap: '20px',
-        background: '#F8FAFC',
+        background: '#FAFAFA',
         backgroundImage:
-          'radial-gradient(ellipse at top right, rgba(16,185,129,0.06) 0%, #F8FAFC 55%)',
+          'radial-gradient(ellipse at top right, color-mix(in srgb, var(--brand-primary-500) 6%, transparent) 0%, #FAFAFA 55%)',
       }}
     >
       <MemCard title={SINGLE_MEMORY.title} memories={SINGLE_MEMORY.memories} />

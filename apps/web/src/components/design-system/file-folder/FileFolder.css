@@ -1,11 +1,11 @@
 /* FileFolder.css — verbatim inline styles from components-file-folder.html */
 
-body { background:#F8FAFC; }
+body { background:#FAFAFA; }
 /* R2: strip preview background — show only the folder components, no grey card surface.
    Scoped to :has(.folder) so this bare-.card rule cannot leak across the shared global
    stylesheet onto other pages (e.g. the card-primitives .card.cards-outer shell). */
 .card:has(.folder) { display:flex; flex-direction:column; align-items:center; gap:6px; position:relative; background:transparent; }
-/* Dark `.card` is forced #0F172A + emerald gradient by global _darkmode.css with !important;
+/* Dark `.card` is forced #111111 + emerald gradient by global _darkmode.css with !important;
    re-scope to THIS component only (.card holding .folder) so the preview surface is stripped
    in dark too, without regressing other components' dark cards. */
 html.dark .card:has(.folder) { background:transparent !important; background-image:none !important; }
@@ -29,7 +29,7 @@ html.dark .card:has(.folder) { background:transparent !important; background-ima
   font-family:'Montserrat'; font-size:11px; font-weight:800; letter-spacing:0.02em;
   color:var(--fg3); background:#FFFFFF; border:1px solid var(--border-hairline);
   padding:6px 12px; border-radius:9999px; cursor:pointer;
-  box-shadow:0 2px 6px rgba(15,23,42,0.07), inset 0 1px 0 rgba(255,255,255,0.9);
+  box-shadow:0 2px 6px rgba(17,17,17,0.07), inset 0 1px 0 rgba(255,255,255,0.9);
   transition:transform calc(130ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), color calc(150ms * var(--anim-mult, 1));
 }
 .ff-replay:hover { transform:translateY(-1px); color:var(--fg1); }
@@ -47,30 +47,30 @@ html.dark .card:has(.folder) { background:transparent !important; background-ima
 
   /* light theme tokens (default = light mode) */
   --ff-body: #FFFFFF;
-  --ff-border: rgba(15,23,42,0.10);
+  --ff-border: rgba(17,17,17,0.10);
   --ff-pocket: #FFFFFF;
-  --ff-pocket-edge: rgba(15,23,42,0.13);
-  --ff-pocket-shadow: rgba(15,23,42,0.18);
-  --ff-title: #0F172A;
-  --ff-title-glow: rgba(15,23,42,0);
-  --ff-sub: #64748B;
-  --ff-meta: #475569;
+  --ff-pocket-edge: rgba(17,17,17,0.13);
+  --ff-pocket-shadow: rgba(17,17,17,0.18);
+  --ff-title: #111111;
+  --ff-title-glow: rgba(17,17,17,0);
+  --ff-sub: #6B6B6B;
+  --ff-meta: #4A4A4A;
   --ff-paper: #FFFFFF;
   --ff-line: #DCE3EC;
-  --ff-paper-shadow: 0 10px 22px rgba(15,23,42,0.20), 0 1px 0 rgba(15,23,42,0.05);
+  --ff-paper-shadow: 0 10px 22px rgba(17,17,17,0.20), 0 1px 0 rgba(17,17,17,0.05);
   --ff-gloss: rgba(255,255,255,0.5);
   /* inner background panel that the labels sit on */
   --ff-panel: linear-gradient(180deg, #FFFFFF 0%, #EFF3F9 100%);
-  --ff-panel-bd: rgba(15,23,42,0.07);
+  --ff-panel-bd: rgba(17,17,17,0.07);
   --ff-panel-hi: rgba(255,255,255,0.95);
-  --ff-panel-sh: rgba(15,23,42,0.07);
+  --ff-panel-sh: rgba(17,17,17,0.07);
 
   position: relative;
   width: var(--size); height: var(--size);
   border-radius: var(--rad);
   background: var(--ff-body);
-  border: 1px solid #CBD5E1;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(15,23,42,0.04);
+  border: 1px solid #D4D4D4;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(17,17,17,0.04);
   transform: translateY(var(--fy)) scale(var(--fsc));
   transform-origin: center 62%;
   cursor: pointer;
@@ -153,10 +153,10 @@ html.dark .card:has(.folder) { background:transparent !important; background-ima
   cursor:pointer; -webkit-tap-highlight-color:transparent;
   transition:background calc(140ms * var(--anim-mult, 1)) ease, color calc(140ms * var(--anim-mult, 1)) ease, transform calc(120ms * var(--anim-mult, 1)) ease;
 }
-.ff-dots:hover { background:rgba(15,23,42,0.06); color:var(--ff-title); }
+.ff-dots:hover { background:rgba(17,17,17,0.06); color:var(--ff-title); }
 html.dark .ff-dots:hover { background:rgba(255,255,255,0.08); }
 .ff-dots:active { transform:scale(0.92); }
-.ff-dots.open { background:rgba(15,23,42,0.08); color:var(--ff-title); }
+.ff-dots.open { background:rgba(17,17,17,0.08); color:var(--ff-title); }
 html.dark .ff-dots.open { background:rgba(255,255,255,0.10); }
 .ff-dots:focus-visible { outline:2px solid #5594F1; outline-offset:2px; }
 .ff-dots i { width:5px; height:5px; border-radius:50%; background:currentColor; display:block; }
@@ -166,7 +166,7 @@ html.dark .ff-dots.open { background:rgba(255,255,255,0.10); }
   position:absolute; right:18px; top:158px; z-index:60; min-width:152px;
   display:flex; flex-direction:column; gap:2px; padding:6px;
   background:var(--card-bg); border:1px solid var(--card-border); border-radius:14px;
-  box-shadow:0 18px 44px -12px rgba(15,23,42,0.40), inset 0 0 0 1px rgba(15,23,42,0.04);
+  box-shadow:0 18px 44px -12px rgba(17,17,17,0.40), inset 0 0 0 1px rgba(17,17,17,0.04);
   font-family:'Montserrat';
   opacity:0; transform:scale(0.94) translateY(-6px); transform-origin:top right; pointer-events:none;
   transition:opacity calc(160ms * var(--anim-mult, 1)) ease,
@@ -183,8 +183,8 @@ html.dark .ff-menu {
   color:var(--ff-title); text-align:left; cursor:pointer;
   transition:background calc(130ms * var(--anim-mult, 1)) ease;
 }
-.ff-menu-item:hover { background:rgba(15,23,42,0.06); }
-html.dark .ff-menu-item { color:#F1F5F9; }
+.ff-menu-item:hover { background:rgba(17,17,17,0.06); }
+html.dark .ff-menu-item { color:#F5F5F5; }
 html.dark .ff-menu-item:hover { background:rgba(255,255,255,0.07); }
 .ff-menu-item .material-symbols-outlined { font-size:17px; color:var(--ff-sub); }
 .ff-menu-item--danger { color:#EF4444; }
@@ -255,7 +255,7 @@ html.dark .ff-menu-item--danger .material-symbols-outlined { color:#FB7185; }
 /* ════════════════════ FILE LIST POPOVER ════════════════════ */
 .ff-scrim {
   position:absolute; inset:0; z-index:40; border-radius:inherit;
-  background:rgba(15,23,42,0.20); -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);
+  background:rgba(17,17,17,0.20); -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);
   opacity:0; pointer-events:none; transition:opacity calc(220ms * var(--anim-mult, 1)) ease;
 }
 .ff-scrim.show { opacity:1; pointer-events:auto; }
@@ -270,24 +270,24 @@ html.dark .ff-scrim { background:rgba(0,0,0,0.5); }
               transform calc(320ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1);
 }
 .ff-pop-outer.show { opacity:1; transform:scale(1) translateY(0); pointer-events:auto; }
-html.dark .ff-pop-outer { border:1px solid #334155; }
+html.dark .ff-pop-outer { border:1px solid #232323; }
 
 /* Canonical inner card */
 .ff-pop {
-  --ff-pop-bg:#FFFFFF; --ff-pop-bd:rgba(15,23,42,0.08);
-  --ff-pop-fg:#0F172A; --ff-pop-fg3:#64748B;
-  --ff-row:#F6F8FC; --ff-row-bd:rgba(15,23,42,0.05); --ff-row-hover:#EEF2F9;
+  --ff-pop-bg:#FFFFFF; --ff-pop-bd:rgba(17,17,17,0.08);
+  --ff-pop-fg:#111111; --ff-pop-fg3:#6B6B6B;
+  --ff-row:#F6F8FC; --ff-row-bd:rgba(17,17,17,0.05); --ff-row-hover:#EEF2F9;
   width:100%; box-sizing:border-box;
   background:var(--ff-pop-bg); border-radius:20px;
-  border:1px solid #CBD5E1;
-  box-shadow:inset 0 0 0 1px rgba(15,23,42,0.04);
+  border:1px solid #D4D4D4;
+  box-shadow:inset 0 0 0 1px rgba(17,17,17,0.04);
   padding:15px 15px 14px; font-family:'Montserrat';
 }
 html.dark .ff-pop {
-  --ff-pop-bg:#1E293B; --ff-pop-bd:#334155;
-  --ff-pop-fg:#F1F5F9; --ff-pop-fg3:#94A3B8;
-  --ff-row:#0F172A; --ff-row-bd:rgba(255,255,255,0.05); --ff-row-hover:#273449;
-  border:1px solid #334155; border-top-color:rgba(255,255,255,0.22);
+  --ff-pop-bg:#1C1C1C; --ff-pop-bd:#232323;
+  --ff-pop-fg:#F5F5F5; --ff-pop-fg3:#A1A1A1;
+  --ff-row:#111111; --ff-row-bd:rgba(255,255,255,0.05); --ff-row-hover:#242424;
+  border:1px solid #232323; border-top-color:rgba(255,255,255,0.22);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.05),
              inset 0 0 0 1px rgba(255,255,255,.04);
 }
@@ -328,12 +328,12 @@ html.dark .ff-pop {
 .ff-file {
   display:flex; align-items:center; gap:10px; padding:8px; border-radius:12px;
   background:var(--ff-row); border:1px solid var(--ff-row-bd); cursor:pointer;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -1px 0 rgba(15,23,42,0.06);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -1px 0 rgba(17,17,17,0.06);
   transition:background calc(140ms * var(--anim-mult, 1)) ease, transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
 }
 .ff-file:hover { background:var(--ff-row-hover); transform:translateX(2px); }
 .ff-file:active { transform:scale(0.98); }
-/* dark: inner shadow on the bottom edge, darker than the --ff-row (#0F172A) fill */
+/* dark: inner shadow on the bottom edge, darker than the --ff-row (#111111) fill */
 html.dark .ff-file {
   box-shadow: inset 0 -2px 4px rgba(0,0,0,0.38),
               inset 0 1px 0 rgba(255,255,255,0.04);
@@ -342,7 +342,7 @@ html.dark .ff-file {
   flex:none; display:inline-flex; align-items:center;
   padding:4px 9px; border-radius:9999px;
   font-size:9px; font-weight:900; letter-spacing:0.05em; text-transform:uppercase; line-height:1;
-  color:#fff; background:#64748B;
+  color:#fff; background:#6B6B6B;
   text-shadow:0 1px 2px rgba(0,0,0,0.32), 0 1px 0 rgba(0,0,0,0.20);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), inset 0 -1.5px 0 rgba(0,0,0,0.18), inset 0 0 0 1px rgba(0,0,0,0.07);
   white-space:nowrap;
@@ -350,35 +350,35 @@ html.dark .ff-file {
 /* per-type color mapping */
 .ff-file-ic.ff-ext-pdf     { background:#EF4444; }
 .ff-file-ic.ff-ext-doc     { background:#3B82F6; }
-.ff-file-ic.ff-ext-xls     { background:#10B981; }
+.ff-file-ic.ff-ext-xls     { background:var(--brand-primary-500); }
 .ff-file-ic.ff-ext-img     { background:#F59E0B; }
-.ff-file-ic.ff-ext-default { background:#64748B; }
+.ff-file-ic.ff-ext-default { background:#6B6B6B; }
 .ff-file-meta { min-width:0; display:flex; flex-direction:column; gap:2px; }
 .ff-file-name { font-size:13px; font-weight:700; color:var(--ff-pop-fg); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .ff-file-sub  { font-size:11px; font-weight:600; color:var(--ff-pop-fg3); }
 
 /* ════════════════════ DARK MODE (System A — the screenshot) ════════════════════ */
-html.dark .ff-replay { background:#1E293B; border-color:#334155; color:#CBD5E1; }
+html.dark .ff-replay { background:#1C1C1C; border-color:#232323; color:#D4D4D4; }
 
 html.dark .folder {
-  --ff-body: #1E293B;
-  --ff-border: #334155;
-  --ff-pocket: #1E293B;
+  --ff-body: #1C1C1C;
+  --ff-border: #232323;
+  --ff-pocket: #1C1C1C;
   --ff-pocket-edge: rgba(0,0,0,0.6);
   --ff-pocket-shadow: rgba(0,0,0,0.55);
-  --ff-title: #F1F5F9;
+  --ff-title: #F5F5F5;
   --ff-title-glow: var(--glow);
-  --ff-sub: #94A3B8;
-  --ff-meta: #CBD5E1;
-  --ff-paper: #F1F5F9;
+  --ff-sub: #A1A1A1;
+  --ff-meta: #D4D4D4;
+  --ff-paper: #F5F5F5;
   --ff-line: #D8DFE8;
   --ff-paper-shadow: 0 14px 30px rgba(0,0,0,0.5), 0 1px 0 rgba(0,0,0,0.3);
   --ff-gloss: rgba(255,255,255,0.10);
-  --ff-panel: linear-gradient(180deg, #1E293B 0%, #0F172A 100%);
-  --ff-panel-bd: #334155;
+  --ff-panel: linear-gradient(180deg, #1C1C1C 0%, #111111 100%);
+  --ff-panel-bd: #232323;
   --ff-panel-hi: rgba(255,255,255,0.07);
   --ff-panel-sh: rgba(0,0,0,0.45);
-  border-color: #334155;
+  border-color: #232323;
   border-top-color: rgba(255,255,255,0.22);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
 }

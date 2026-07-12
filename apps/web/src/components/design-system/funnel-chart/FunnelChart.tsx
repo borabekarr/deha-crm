@@ -20,7 +20,7 @@ const DEMO_STAGES: FunnelStage[] = [
   { label: 'Qualified',   value: 2640, color: '#F97316' },
   { label: 'Proposal',    value: 1180, color: '#EF4444' },
   { label: 'Negotiation', value: 540,  color: '#8B5CF6' },
-  { label: 'Won',         value: 286,  color: '#10B981' },
+  { label: 'Won',         value: 286,  color: 'var(--brand-primary-500)' },
 ]
 
 /* ── Types ────────────────────────────────────────────────────────────────── */
@@ -208,7 +208,7 @@ function deriveMeta(stages: FunnelStage[]): {
 /* ── Main component ────────────────────────────────────────────────────────── */
 export default function FunnelChart({
   stages = DEMO_STAGES,
-  color = '#10B981',
+  color = 'var(--brand-primary-500)',
   layers = 3,
   gap = 6,
   edges = 'curved',

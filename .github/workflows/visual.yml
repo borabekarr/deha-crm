@@ -9,13 +9,40 @@ on:
     branches:
       - main
       - feat/ui-library
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
+  changes:
+    name: Detect changed paths
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      ui: ${{ steps.filter.outputs.ui }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            ui:
+              - 'apps/web/design-system/**'
+              - 'apps/web/src/components/design-system/**'
+              - 'apps/web/tests/**'
+              - 'apps/web/e2e/**'
+              - 'apps/web/playwright.config.*'
+              - 'apps/web/package.json'
+              - 'pnpm-lock.yaml'
+              - '.github/workflows/visual.yml'
+
   visual:
     name: Playwright visual regression
+    needs: changes
+    if: needs.changes.outputs.ui == 'true' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -32,8 +59,19 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - uses: actions/cache@v4
+        id: pw-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+
       - name: Install Playwright browsers
+        if: steps.pw-cache.outputs.cache-hit != 'true'
         run: pnpm --filter @deha/web exec playwright install --with-deps chromium
+
+      - name: Install Playwright OS dependencies (cache hit)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: pnpm --filter @deha/web exec playwright install-deps chromium
 
       - name: Run visual regression suite
         run: pnpm --filter @deha/web test:e2e

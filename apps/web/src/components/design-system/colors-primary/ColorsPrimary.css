@@ -1,13 +1,16 @@
 /* swatches + sw defined here so ColorsPrimary works standalone */
 .cp-swatches { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; }
 .cp-sw { aspect-ratio: 1; border-radius: 10px; display:flex; flex-direction:column; justify-content:flex-end; padding: 6px; font-size: 9px; font-weight: 700; line-height: 1.1; color: #fff; }
-.cp-sw.lite { color: #0F172A; }
+.cp-sw.lite { color: #111111; }
 .cp-label-row { display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 10px; }
-.cp-lr-title { font-weight: 900; font-size: 18px; letter-spacing: -0.02em; color: #0F172A; display:flex; align-items:center; gap:8px; }
+.cp-lr-title { font-weight: 900; font-size: 18px; letter-spacing: -0.02em; color: #111111; display:flex; align-items:center; gap:8px; }
 .cp-lr-dot { width: 14px; height: 14px; border-radius: 4px; background: #10B981; }
-.cp-lr-meta { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11px; color: #64748B; }
+.cp-lr-meta { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11px; color: #6B6B6B; }
+
+.cp-extra-row { margin-top: 16px; }
+.cp-lr-title-sm { font-size: 13px; font-weight: 800; gap: 0; }
 
 /* Dark mode — chrome adapts, swatch fills stay */
-html.dark .card { background: #1E293B; background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.08) 0%, rgba(30,41,59,1) 50%, #1E293B 100%); }
-html.dark .cp-lr-title { color: #F1F5F9; }
-html.dark .cp-lr-meta { color: #94A3B8; }
+html.dark .card { background: #1C1C1C; background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.08) 0%, rgba(28,28,28,1) 50%, #1C1C1C 100%); }
+html.dark .cp-lr-title { color: #F5F5F5; }
+html.dark .cp-lr-meta { color: #A1A1A1; }

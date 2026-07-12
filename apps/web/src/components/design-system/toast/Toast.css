@@ -11,15 +11,15 @@
   display: flex;
   flex-direction: column;
   gap: 26px;
-  background: #f8fafc;
-  background-image: radial-gradient(ellipse at top right, rgba(16, 185, 129, 0.06) 0%, #f8fafc 55%);
+  background: #FAFAFA;
+  background-image: radial-gradient(ellipse at top right, color-mix(in srgb, var(--brand-primary-500) 6%, transparent) 0%, #FAFAFA 55%);
   font-family: var(--font-display);
   min-height: 100%;
   box-sizing: border-box;
 }
 html.dark .tst-demo {
-  background: #0b1220;
-  background-image: radial-gradient(ellipse at top right, rgba(16, 185, 129, 0.08) 0%, #0b1220 55%);
+  background: #0A0A0A;
+  background-image: radial-gradient(ellipse at top right, color-mix(in srgb, var(--brand-primary-500) 8%, transparent) 0%, #0A0A0A 55%);
 }
 
 /* ── section scaffolding ── */
@@ -65,7 +65,7 @@ html.dark .tst-demo {
   font-weight: var(--weight-extrabold);
   color: var(--fg2);
   background: var(--bg-card-solid);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 6px -3px rgba(15, 23, 42, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 6px -3px rgba(17,17,17, 0.18);
   transition:
     transform calc(140ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1),
     filter calc(140ms * var(--anim-mult, 1));
@@ -121,7 +121,7 @@ html.dark .tst-demo {
 .tst {
   --acc: var(--semantic-success);
   --acc-bg: var(--semantic-success-bg);
-  --acc-bd: rgba(16, 185, 129, 0.3);
+  --acc-bd: color-mix(in srgb, var(--brand-primary-500) 30%, transparent);
   position: relative;
   width: 340px;
   box-sizing: border-box;
@@ -133,9 +133,9 @@ html.dark .tst-demo {
   padding: 13px 14px;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    inset 0 -2px 0 rgba(15, 23, 42, 0.06),
-    0 6px 18px -6px rgba(15, 23, 42, 0.18),
-    0 2px 6px rgba(15, 23, 42, 0.05);
+    inset 0 -2px 0 rgba(17,17,17, 0.06),
+    0 6px 18px -6px rgba(17,17,17, 0.18),
+    0 2px 6px rgba(17,17,17, 0.05);
   overflow: hidden;
   transition:
     width calc(260ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1),
@@ -179,8 +179,8 @@ html.dark .tst-demo {
   background-size: cover, 7px 7px, 7px 7px;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.55),
-    inset 0 -2px 0 rgba(15, 23, 42, 0.22),
-    inset 0 0 0 1px rgba(15, 23, 42, 0.12),
+    inset 0 -2px 0 rgba(17,17,17, 0.22),
+    inset 0 0 0 1px rgba(17,17,17, 0.12),
     0 2px 6px rgba(0, 0, 0, 0.12);
   transition: border-radius calc(260ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -280,7 +280,7 @@ html.dark .tst-demo {
   border-radius: 9999px;
   background: var(--bg-chip);
   overflow: hidden;
-  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
+  box-shadow: inset 0 1px 2px rgba(17,17,17, 0.08);
 }
 .tst-prog > i {
   display: block;
@@ -349,7 +349,7 @@ html.dark .tst-demo {
   color: var(--fg2);
   text-shadow: none;
   background-image: none;
-  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.07);
+  box-shadow: inset 0 0 0 1px rgba(17,17,17, 0.07);
 }
 
 /* loading spinner glyph — type-neutral (grey rail + badge) */
@@ -446,7 +446,7 @@ html.dark .tst-demo {
   background: var(--bg-chip);
   border-radius: 9999px;
   padding: 2px 8px;
-  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(17,17,17, 0.06);
 }
 
 /* ── swipe-to-dismiss affordance ── */

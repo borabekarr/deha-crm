@@ -95,7 +95,7 @@
   }
 
   /* hover lifts the whole grey/black shell (bezel + card) together */
-  .nf-shell { background: #020617; transition: transform calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
+  .nf-shell { background: #0A0A0A; transition: transform calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
   .nf-shell:hover { transform: translateY(-2px); }
   /* arrow press must not bounce the shell — :has guard isolates the arrows */
   .nf-shell:active:not(:has(.nf-arrow:active)) { transform: scale(0.99); transition-duration: calc(120ms * var(--anim-mult, 1)); }
@@ -287,12 +287,12 @@
     font-family: 'Montserrat'; font-size: 12px; font-weight: 700; letter-spacing: 0.01em;
     padding: 9px 15px; border-radius: 13px; cursor: pointer;
     display: inline-flex; align-items: center; gap: 6px;
-    background: rgba(30,41,59,0.7); color: #CBD5E1; border: 1px solid #334155;
+    background: rgba(28,28,28,0.7); color: #D4D4D4; border: 1px solid #232323;
     box-shadow: 0 2px 10px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
     transition: transform calc(140ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), background calc(160ms * var(--anim-mult, 1)), color calc(160ms * var(--anim-mult, 1)), border-color calc(160ms * var(--anim-mult, 1));
   }
   .nf-btn .material-icons { font-size: 16px; }
-  .nf-btn:hover { transform: translateY(-1px); color: #F1F5F9; border-color: #475569; background: rgba(39,52,73,0.8); }
+  .nf-btn:hover { transform: translateY(-1px); color: #F5F5F5; border-color: #4A4A4A; background: rgba(39,52,73,0.8); }
   .nf-btn:active { transform: scale(0.96); }
 
   @media (max-width: 720px) {

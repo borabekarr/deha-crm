@@ -16,7 +16,7 @@ function calcOffset(pct: number): string {
 
 export default function MetricCircle() {
   return (
-    <div className="card" style={{ padding: 0, background: '#F8FAFC' }}>
+    <div className="card" style={{ padding: 0, background: '#FAFAFA' }}>
       <div className="frame">
 
         {/* Pill 1 — emerald, percentage format, 67% */}

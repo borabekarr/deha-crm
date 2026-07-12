@@ -7,15 +7,15 @@
 /* ── Card container ─────────────────────────────────────────────────────── */
 .fc-card {
   background: var(--card-bg, #fff);
-  border: 1px solid var(--card-border, #CBD5E1);
+  border: 1px solid var(--card-border, #D4D4D4);
   border-radius: var(--card-radius, 20px);
   padding: 20px 22px 18px;
   font-family: 'Montserrat', sans-serif;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 1),
-    inset 0 -2px 0 rgba(15, 23, 42, 0.10),
-    inset 1px 0 0 rgba(15, 23, 42, 0.07),
-    inset -1px 0 0 rgba(15, 23, 42, 0.07);
+    inset 0 -2px 0 rgba(17,17,17, 0.10),
+    inset 1px 0 0 rgba(17,17,17, 0.07),
+    inset -1px 0 0 rgba(17,17,17, 0.07);
 }
 
 html.dark .fc-card {
@@ -37,7 +37,7 @@ html.dark .fc-card {
 .fc-eyebrow {
   font-size: 11px;
   font-weight: 800;
-  color: #475569;
+  color: #4A4A4A;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   display: flex;
@@ -46,27 +46,27 @@ html.dark .fc-card {
 }
 
 html.dark .fc-eyebrow {
-  color: #CBD5E1;
+  color: #D4D4D4;
 }
 
 .fc-icon-chip {
   width: 24px;
   height: 24px;
   border-radius: 8px;
-  background: #ECFDF5;
+  background: var(--brand-primary-50);
   display: grid;
   place-items: center;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    inset 0 -1px 0 rgba(16, 185, 129, 0.22),
-    inset 0 0 0 1px rgba(16, 185, 129, 0.25);
+    inset 0 -1px 0 color-mix(in srgb, var(--brand-primary-500) 22%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--brand-primary-500) 25%, transparent);
   font-size: 16px;
-  color: #10B981;
+  color: var(--brand-primary-500);
 }
 
 html.dark .fc-icon-chip {
-  background: rgba(16, 185, 129, 0.16);
-  box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.30);
+  background: color-mix(in srgb, var(--brand-primary-500) 16%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-primary-500) 30%, transparent);
 }
 
 .fc-stat {
@@ -79,14 +79,14 @@ html.dark .fc-icon-chip {
 .fc-num {
   font-size: 32px;
   font-weight: 800;
-  color: #0F172A;
+  color: #111111;
   letter-spacing: -0.02em;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
 html.dark .fc-num {
-  color: #F1F5F9;
+  color: #F5F5F5;
 }
 
 .fc-stat-row {
@@ -99,7 +99,7 @@ html.dark .fc-num {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  background: #10B981;
+  background: var(--brand-primary-500);
   color: #fff;
   font-size: 11px;
   font-weight: 800;
@@ -115,7 +115,7 @@ html.dark .fc-num {
 .fc-period {
   font-size: 12px;
   font-weight: 600;
-  color: #94A3B8;
+  color: #A1A1A1;
 }
 
 /* ── Funnel viz stage ────────────────────────────────────────────────────── */
@@ -163,7 +163,7 @@ html.dark .fc-num {
   mask-image: linear-gradient(to right, transparent 0, #000 4%, #000 96%, transparent 100%);
   -webkit-mask-image: linear-gradient(to right, transparent 0, #000 4%, #000 96%, transparent 100%);
   /* Single thin crisp edge shadow — no large soft blur, no external outline. */
-  filter: drop-shadow(0 1px 2px rgba(15, 23, 42, 0.18));
+  filter: drop-shadow(0 1px 2px rgba(17,17,17, 0.18));
 }
 
 html.dark .fc-seg svg {
@@ -236,13 +236,13 @@ html.dark .fc-seg svg {
   font-size: 13px;
   font-weight: 900;
   font-family: 'Montserrat', sans-serif;
-  color: var(--val-c, #0F172A);
+  color: var(--val-c, #111111);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
 html.dark .fc-value {
-  color: color-mix(in srgb, var(--val-c, #F1F5F9) 70%, #F1F5F9);
+  color: color-mix(in srgb, var(--val-c, #F5F5F5) 70%, #F5F5F5);
 }
 
 .fc-stagelabel {
@@ -252,12 +252,12 @@ html.dark .fc-value {
   font-size: 13px;
   font-weight: 900;
   font-family: 'Montserrat', sans-serif;
-  color: #334155;
+  color: #232323;
   white-space: nowrap;
 }
 
 html.dark .fc-stagelabel {
-  color: #CBD5E1;
+  color: #D4D4D4;
 }
 
 .fc-dot {
@@ -273,7 +273,7 @@ html.dark .fc-stagelabel {
 html.dark .fc-dot {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.30),
-    0 0 0 2px rgba(30, 41, 59, 0.85);
+    0 0 0 2px rgba(28,28,28, 0.85);
 }
 
 /* ── Conversion badges ───────────────────────────────────────────────────── */
@@ -309,22 +309,22 @@ html.dark .fc-dot {
   gap: 4px;
   font-size: 11px;
   font-weight: 900;
-  color: var(--conv-next, #10B981);
-  background-color: color-mix(in srgb, var(--conv-next, #10B981) 14%, transparent);
+  color: var(--conv-next, var(--brand-primary-500));
+  background-color: color-mix(in srgb, var(--conv-next, var(--brand-primary-500)) 14%, transparent);
   padding: 2px 8px;
   border-radius: 9999px;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.55),
-    inset 0 0 0 1px color-mix(in srgb, var(--conv-next, #10B981) 35%, transparent);
+    inset 0 0 0 1px color-mix(in srgb, var(--conv-next, var(--brand-primary-500)) 35%, transparent);
 }
 
 html.dark .fc-conv-pill {
-  background-color: color-mix(in srgb, var(--conv-next, #10B981) 20%, transparent);
+  background-color: color-mix(in srgb, var(--conv-next, var(--brand-primary-500)) 20%, transparent);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.10),
-    inset 0 0 0 1px color-mix(in srgb, var(--conv-next, #10B981) 40%, transparent);
+    inset 0 0 0 1px color-mix(in srgb, var(--conv-next, var(--brand-primary-500)) 40%, transparent);
 }
 
 .fc-conv-arrow {
@@ -341,11 +341,11 @@ html.dark .fc-conv-pill {
   gap: 8px;
   margin-top: 18px;
   padding-top: 14px;
-  border-top: 1px solid #F1F5F9;
+  border-top: 1px solid #F5F5F5;
 }
 
 html.dark .fc-footer {
-  border-top-color: #334155;
+  border-top-color: #232323;
 }
 
 .fc-f-cell {
@@ -359,14 +359,14 @@ html.dark .fc-footer {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #475569;
+  color: #4A4A4A;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 html.dark .fc-f-label {
-  color: #CBD5E1;
+  color: #D4D4D4;
 }
 
 .fc-f-icon {
@@ -395,17 +395,17 @@ html.dark .fc-f-icon--gold {
 }
 
 .fc-f-icon--slate {
-  background: #F1F5F9;
-  color: #475569;
+  background: #F5F5F5;
+  color: #4A4A4A;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    inset 0 -1px 0 rgba(15, 23, 42, 0.10),
-    inset 0 0 0 1px rgba(15, 23, 42, 0.08);
+    inset 0 -1px 0 rgba(17,17,17, 0.10),
+    inset 0 0 0 1px rgba(17,17,17, 0.08);
 }
 
 html.dark .fc-f-icon--slate {
-  background: #334155;
-  color: #CBD5E1;
+  background: #232323;
+  color: #D4D4D4;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
@@ -426,17 +426,17 @@ html.dark .fc-f-icon--danger {
 .fc-f-val {
   font-size: 15px;
   font-weight: 800;
-  color: #0F172A;
+  color: #111111;
   letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums;
 }
 
 html.dark .fc-f-val {
-  color: #F1F5F9;
+  color: #F5F5F5;
 }
 
 .fc-f-val--green {
-  color: #10B981;
+  color: var(--brand-primary-500);
 }
 
 /* ── Reduced motion ──────────────────────────────────────────────────────── */

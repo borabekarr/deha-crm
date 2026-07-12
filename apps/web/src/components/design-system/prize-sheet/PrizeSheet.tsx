@@ -42,7 +42,7 @@ function PrizeContent() {
               <div className="wallet-bal">$100.00<span className="gain">+$100</span></div>
             </div>
           </div>
-          <span className="material-symbols-outlined" style={{ color: '#10B981', fontSize: '22px' }}>trending_up</span>
+          <span className="material-symbols-outlined" style={{ color: 'var(--brand-primary-500)', fontSize: '22px' }}>trending_up</span>
         </div>
       </div>
     </>
@@ -235,7 +235,7 @@ function DesktopScope() {
 
 export default function PrizeSheet() {
   return (
-    <div className="card" style={{ padding: 0, background: '#F8FAFC' }}>
+    <div className="card" style={{ padding: 0, background: '#FAFAFA' }}>
       <div className="frame">
         <MobileScope />
         <DesktopScope />

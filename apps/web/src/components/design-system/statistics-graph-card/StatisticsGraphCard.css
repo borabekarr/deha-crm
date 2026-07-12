@@ -3,65 +3,65 @@
 /* ── frame / preview layout ────────────────────────────────────────────── */
 .sgc-frame {
   padding: 26px 22px 30px;
-  background: #F8FAFC;
+  background: #FAFAFA;
   background-image: none;
 }
 html.dark .sgc-frame {
-  background: #0B1220;
+  background: #0A0A0A;
   background-image: none;
 }
 .sgc-sec {
   font-family: 'Montserrat'; font-size: 11px; font-weight: 800;
-  letter-spacing: 0.08em; text-transform: uppercase; color: var(--slate-500, #64748B);
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--gray-500, #6B6B6B);
   margin: 4px 2px 4px;
 }
 .sgc-sec-sub {
   font-family: 'Montserrat'; font-size: 12px; font-weight: 600;
-  color: var(--slate-400, #94A3B8); margin: 0 2px 18px; letter-spacing: -0.005em;
+  color: var(--gray-400, #A1A1A1); margin: 0 2px 18px; letter-spacing: -0.005em;
 }
 /* ITEM 1 — grey external frame; cards full-width single column */
 .sgc-grid {
   display: grid; grid-template-columns: 1fr; gap: 16px;
-  background: #F8FAFC;
+  background: #FAFAFA;
   padding: 24px;
   background-image: none;
   border-radius: var(--card-radius, 20px);
 }
 html.dark .sgc-grid {
-  background: #0B1220;
+  background: #0A0A0A;
   background-image: none;
 }
 .sgc-cap {
   font-family: 'Montserrat'; font-size: 11.5px; font-weight: 700;
-  color: var(--slate-500, #64748B); margin: 10px 4px 0; letter-spacing: -0.005em;
+  color: var(--gray-500, #6B6B6B); margin: 10px 4px 0; letter-spacing: -0.005em;
 }
-.sgc-cap b { color: var(--slate-700, #334155); font-weight: 800; }
+.sgc-cap b { color: var(--gray-700, #232323); font-weight: 800; }
 
 /* ── toast ──────────────────────────────────────────────────────────────── */
 .sgc-toast {
   position: fixed; z-index: 400; left: 50%; bottom: 22px; transform: translate(-50%, 14px); opacity: 0;
   display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 9999px;
-  background: #0F172A; color: #fff; font-family: 'Montserrat'; font-size: 12px; font-weight: 800;
-  box-shadow: 0 10px 30px rgba(15,23,42,0.3); pointer-events: none;
+  background: #111111; color: #fff; font-family: 'Montserrat'; font-size: 12px; font-weight: 800;
+  box-shadow: 0 10px 30px rgba(17,17,17,0.3); pointer-events: none;
   transition: opacity calc(240ms * var(--anim-mult, 1)), transform calc(320ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1);
 }
-html.dark .sgc-toast { background: rgb(255 255 255); color: #0F172A; }
+html.dark .sgc-toast { background: rgb(255 255 255); color: #111111; }
 .sgc-toast .material-symbols-outlined { font-size: 15px; }
 .sgc-toast.show { opacity: 1; transform: translate(-50%, 0); }
 
 /* ───────────────────────── widget surface ───────────────────────── */
 .sg-card {
   /* stage tokens: accent (line/fill/CTA), accent-deep (button base), accent-text (AA-safe label) */
-  --accent:#10B981; --accent-deep:#059669; --accent-text:#047857;
-  --glow:rgba(16,185,129,0.42); --ring:rgba(16,185,129,0.22); --glow2:rgba(16,185,129,0.78);
-  --ctaglow:rgba(16,185,129,0.55); --flashc:rgba(16,185,129,0.24);
+  --accent:var(--brand-primary-500); --accent-deep:var(--brand-primary-600); --accent-text:var(--brand-primary-700);
+  --glow:color-mix(in srgb, var(--brand-primary-500) 42%, transparent); --ring:color-mix(in srgb, var(--brand-primary-500) 22%, transparent); --glow2:color-mix(in srgb, var(--brand-primary-500) 78%, transparent);
+  --ctaglow:var(--brand-glow); --flashc:color-mix(in srgb, var(--brand-primary-500) 24%, transparent);
   position: relative; width: 100%; height: 364px; box-sizing: border-box;
   border-radius: var(--card-radius); overflow: hidden; font-family: 'Montserrat';
   /* grey outer shell -- inner card surface lives on .sg-inner */
-  background: var(--shell-bg, #F1F5F9);
+  background: var(--shell-bg, #F5F5F5);
   opacity: 1; transform: none;
 }
-.sg-card.acc-good { --accent:#10B981; --accent-deep:#059669; --accent-text:#047857; --glow:rgba(16,185,129,0.42); --ring:rgba(16,185,129,0.22); --glow2:rgba(16,185,129,0.78); --ctaglow:rgba(16,185,129,0.55); --flashc:rgba(16,185,129,0.24); }
+.sg-card.acc-good { --accent:var(--brand-primary-500); --accent-deep:var(--brand-primary-600); --accent-text:var(--brand-primary-700); --glow:color-mix(in srgb, var(--brand-primary-500) 42%, transparent); --ring:color-mix(in srgb, var(--brand-primary-500) 22%, transparent); --glow2:color-mix(in srgb, var(--brand-primary-500) 78%, transparent); --ctaglow:var(--brand-glow); --flashc:color-mix(in srgb, var(--brand-primary-500) 24%, transparent); }
 .sg-card.acc-warn { --accent:#EAB308; --accent-deep:#CA8A04; --accent-text:#A16207; --glow:rgba(234,179,8,0.42); --ring:rgba(234,179,8,0.22); --glow2:rgba(234,179,8,0.78); --ctaglow:rgba(234,179,8,0.55); --flashc:rgba(234,179,8,0.24); }
 .sg-card.acc-risk { --accent:#EF4444; --accent-deep:#DC2626; --accent-text:#B91C1C; --glow:rgba(239,68,68,0.42); --ring:rgba(239,68,68,0.22); --glow2:rgba(239,68,68,0.78); --ctaglow:rgba(239,68,68,0.55); --flashc:rgba(239,68,68,0.24); }
 html.dark .sg-card {
@@ -69,14 +69,14 @@ html.dark .sg-card {
   background: #0D1B2E;
 }
 /* lighter, sparser AA-safe label colors in dark mode */
-html.dark .sg-card.acc-good { --accent-text:#34D399; }
+html.dark .sg-card.acc-good { --accent-text:var(--brand-primary-400); }
 html.dark .sg-card.acc-warn { --accent-text:#FACC15; }
 html.dark .sg-card.acc-risk { --accent-text:#F87171; }
 
 /* sparse dot texture on the inner card surface (clipped by .sg-inner overflow:hidden) */
 .sg-inner::before {
   content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 1;
-  background-image: radial-gradient(circle, rgba(15,23,42,0.055) 1.1px, transparent 1.4px);
+  background-image: radial-gradient(circle, rgba(17,17,17,0.055) 1.1px, transparent 1.4px);
   background-size: 22px 22px;
   -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 42%, transparent 70%);
           mask-image: linear-gradient(to bottom, #000 0%, #000 42%, transparent 70%);
@@ -106,14 +106,14 @@ html.dark .sg-inner::before {
   position: absolute; inset: 9px; z-index: 2; box-sizing: border-box;
   display: flex; flex-direction: column;
   background: var(--card-bg, #FFFFFF);
-  border: 1px solid var(--card-border, #CBD5E1);
+  border: 1px solid var(--card-border, #D4D4D4);
   border-radius: calc(var(--card-radius, 20px) - 4px);
-  box-shadow: inset 0 0 0 1px rgba(15,23,42,0.04);
+  box-shadow: inset 0 0 0 1px rgba(17,17,17,0.04);
   overflow: hidden;
 }
 html.dark .sg-inner {
-  background: var(--card-bg, #0F172A);
-  border-color: #334155;
+  background: var(--card-bg, #111111);
+  border-color: #232323;
   border-top-color: rgba(255,255,255,.22);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
 }
@@ -128,14 +128,14 @@ html.dark .sg-inner {
 .sg-id { display: flex; align-items: center; gap: 11px; min-width: 0; }
 .sg-avatar {
   width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center;
-  font-size: 12.5px; font-weight: 800; letter-spacing: 0.01em; color: var(--fg2, #334155);
-  background: var(--bg-chip, #F1F5F9); box-shadow: inset 0 0 0 1px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.7);
+  font-size: 12.5px; font-weight: 800; letter-spacing: 0.01em; color: var(--fg2, #232323);
+  background: var(--bg-chip, #F5F5F5); box-shadow: inset 0 0 0 1px rgba(17,17,17,0.06), inset 0 1px 0 rgba(255,255,255,0.7);
   position: relative;
 }
 .sg-avatar .material-symbols-outlined { font-size: 19px; color: var(--accent-text); }
-html.dark .sg-avatar { color: #E2E8F0; background: rgba(255,255,255,0.07); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.09); }
+html.dark .sg-avatar { color: #ECECEC; background: rgba(255,255,255,0.07); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.09); }
 .sg-avatar::after { content: ''; position: absolute; inset: -2px; border-radius: 50%; border: 2px solid var(--accent); opacity: 0.85; }
-.sg-name { font-size: 16px; font-weight: 900; color: var(--fg1, #0F172A); line-height: 1.15; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sg-name { font-size: 16px; font-weight: 900; color: var(--fg1, #111111); line-height: 1.15; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* sync column — stacks the sync button above the vertical range chip */
 .sg-sync-col {
@@ -143,13 +143,13 @@ html.dark .sg-avatar { color: #E2E8F0; background: rgba(255,255,255,0.07); box-s
 }
 .sg-sync {
   display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
-  font-size: 11.5px; font-weight: 700; color: var(--fg3, #64748B);
+  font-size: 11.5px; font-weight: 700; color: var(--fg3, #6B6B6B);
   background: transparent; border: none; font-family: 'Montserrat'; padding: 3px 5px; border-radius: 9px;
   line-height: 1;
   transition: transform calc(140ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1);
 }
 .sg-sync .material-symbols-outlined { font-size: 15px; line-height: 1; transition: transform calc(700ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
-.sg-sync:hover { color: var(--fg1, #0F172A); }
+.sg-sync:hover { color: var(--fg1, #111111); }
 .sg-sync:active { transform: scale(0.93); }
 .sg-sync.spin .material-symbols-outlined { transform: rotate(360deg); }
 
@@ -171,8 +171,8 @@ html.dark .sg-card.filters-open .sg-scrim { background: rgba(2,6,23,0.40); }
   position: absolute; left: 50%; top: 50%; z-index: 7; width: auto;
   padding: 6px; border-radius: var(--card-radius, 20px); text-align: center;
   background: var(--card-bg, #FFFFFF);
-  border: 1px solid var(--card-border, #CBD5E1);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(15,23,42,0.04);
+  border: 1px solid var(--card-border, #D4D4D4);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(17,17,17,0.04);
   opacity: 0;
   transform: translate(-50%, calc(-50% + 12px)) scale(0.95);
   transform-origin: 50% 50%;
@@ -189,7 +189,7 @@ html.dark .sg-rangepop {
 .sg-poplabel {
   display: flex; align-items: center; justify-content: center; gap: 6px;
   font-family: var(--font-display); font-size: 9.5px; font-weight: 900; letter-spacing: 0.09em; text-transform: uppercase;
-  color: var(--fg4, #94A3B8); margin: 6px 9px 8px;
+  color: var(--fg4, #A1A1A1); margin: 6px 9px 8px;
 }
 /* ITEM 2+7 — bigger icon in poplabel */
 .sg-poplabel .material-symbols-outlined { font-size: 17px; }
@@ -207,7 +207,7 @@ html.dark .sg-rangepop {
 }
 .sg-rangepop .seg.vert button { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 8px 16px; text-align: center; border-radius: 9999px; font-size: 12px; transition: color calc(200ms * var(--anim-mult, 1)), background calc(160ms * var(--anim-mult, 1)), transform calc(110ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
 .sg-rangepop .seg.vert button .material-symbols-outlined { font-size: 16px; }
-.sg-rangepop .seg.vert button:not(.active):hover { color: var(--fg1, #0F172A); background: rgba(15,23,42,0.05); }
+.sg-rangepop .seg.vert button:not(.active):hover { color: var(--fg1, #111111); background: rgba(17,17,17,0.05); }
 html.dark .sg-rangepop .seg.vert button:not(.active):hover { color: #fff; background: rgba(255,255,255,0.07); }
 .sg-rangepop .seg.vert button:active { transform: scale(0.96); }
 /* brief highlight pulse on the just-picked option */
@@ -216,7 +216,7 @@ html.dark .sg-rangepop .seg.vert button:not(.active):hover { color: #fff; backgr
 
 /* "applying…" loader bar — collapses to zero height when idle so it adds no bottom space */
 /* ITEM 5 — speed reduced to ~450ms to match hook setTimeout */
-.sg-poploader { height: 0; border-radius: 9999px; margin: 0 6px; background: var(--bg-chip, #F1F5F9); overflow: hidden; opacity: 0; transition: opacity calc(160ms * var(--anim-mult, 1)) ease, height calc(200ms * var(--anim-mult, 1)) ease, margin calc(200ms * var(--anim-mult, 1)) ease; }
+.sg-poploader { height: 0; border-radius: 9999px; margin: 0 6px; background: var(--bg-chip, #F5F5F5); overflow: hidden; opacity: 0; transition: opacity calc(160ms * var(--anim-mult, 1)) ease, height calc(200ms * var(--anim-mult, 1)) ease, margin calc(200ms * var(--anim-mult, 1)) ease; }
 html.dark .sg-poploader { background: rgba(255,255,255,0.08); }
 .sg-poploader::after { content: ''; display: block; height: 100%; width: 0; border-radius: inherit; background: var(--accent); }
 .sg-rangepop.loading .sg-poploader { height: 3px; margin: 9px 6px 3px; opacity: 1; }
@@ -232,15 +232,15 @@ html.dark .sg-poploader { background: rgba(255,255,255,0.08); }
   font-size: 9.5px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase;
   /* Fix 2: selected-pill aesthetic — solid dark fill, white text (mirrors .seg button.active + .seg-pill) */
   color: #ffffff;
-  background: #0F172A; border: none; border-radius: 9999px;
+  background: #111111; border: none; border-radius: 9999px;
   padding: 4px 9px; line-height: 1;
   box-shadow: 0 1px 2px rgba(0,0,0,0.18);
   /* overshoot bounce on press -- same cubic as canonical .seg-pill transition */
   transition: transform calc(140ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1), box-shadow calc(160ms * var(--anim-mult, 1)), background calc(160ms * var(--anim-mult, 1));
 }
-/* Fix 2 dark-mode counterpart: invert to light pill on dark surface (mirrors html.dark .seg .seg-pill = #F1F5F9, active text = #0F172A) */
+/* Fix 2 dark-mode counterpart: invert to light pill on dark surface (mirrors html.dark .seg .seg-pill = #F5F5F5, active text = #111111) */
 html.dark .sg-rangechip {
-  background: #F1F5F9; color: #0F172A;
+  background: #F5F5F5; color: #111111;
   box-shadow: 0 1px 2px rgba(0,0,0,0.35);
 }
 .sg-rangechip .material-symbols-outlined {
@@ -259,29 +259,29 @@ html.dark .sg-rangechip:hover { filter: brightness(0.92); }
 .sg-spacer { flex: 1 1 auto; min-height: 30px; }
 
 /* ITEM 2+7 — Montserrat 900 for both labels; vlabel is now a black pill */
-.sg-vlabel { display: inline-flex; align-items: center; font-family: 'Montserrat', var(--font-display); font-size: 10px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; color: #ffffff; background: #0F172A; border-radius: 9999px; padding: 3px 9px; margin-bottom: 5px; }
-.sg-value { font-size: 34px; font-weight: 800; letter-spacing: -0.025em; line-height: 1; color: var(--fg1, #0F172A); font-variant-numeric: tabular-nums; }
+.sg-vlabel { display: inline-flex; align-items: center; font-family: 'Montserrat', var(--font-display); font-size: 10px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; color: #ffffff; background: #111111; border-radius: 9999px; padding: 3px 9px; margin-bottom: 5px; }
+.sg-value { font-size: 34px; font-weight: 800; letter-spacing: -0.025em; line-height: 1; color: var(--fg1, #111111); font-variant-numeric: tabular-nums; }
 
 /* delta pill — matches metric-card .m-delta exactly (white text on solid color = AA-safe) */
 .sg-sub2 { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
 .sg-delta-pill {
   display: inline-flex; align-items: center; gap: 4px; color: #fff; font-size: 11px; font-weight: 800;
   padding: 3px 9px; border-radius: 16px; text-shadow: 0 1px 1px rgba(0,0,0,0.18);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(15,23,42,0.18), inset 0 0 0 1px rgba(15,23,42,0.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(17,17,17,0.18), inset 0 0 0 1px rgba(17,17,17,0.10);
 }
 .sg-delta-pill .material-icons { font-size: 12px; }
-.sg-delta-pill.up   { background-color: #10B981; }
+.sg-delta-pill.up   { background-color: var(--brand-primary-500); }
 .sg-delta-pill.down { background-color: #EF4444; }
-.sg-period { font-size: 11px; font-weight: 600; color: var(--fg4, #94A3B8); }
+.sg-period { font-size: 11px; font-weight: 600; color: var(--fg4, #A1A1A1); }
 
 /* likelihood meter — small but effective */
 .sg-meter { margin-top: 14px; }
 .sg-meter-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
-.sg-meter-label { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg3, #64748B); }
+.sg-meter-label { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg3, #6B6B6B); }
 .sg-meter-val { font-size: 14px; font-weight: 800; color: var(--accent-text); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
 .sg-meter-track {
   position: relative; height: 9px; border-radius: 9999px; overflow: hidden;
-  background: var(--bg-chip, #F1F5F9); box-shadow: inset 0 1px 2px rgba(15,23,42,0.12), inset 0 0 0 1px rgba(15,23,42,0.04);
+  background: var(--bg-chip, #F5F5F5); box-shadow: inset 0 1px 2px rgba(17,17,17,0.12), inset 0 0 0 1px rgba(17,17,17,0.04);
 }
 html.dark .sg-meter-track { background: rgba(255,255,255,0.08); box-shadow: inset 0 1px 2px rgba(0,0,0,0.45); }
 .sg-meter-fill {
@@ -294,7 +294,7 @@ html.dark .sg-meter-track { background: rgba(255,255,255,0.08); box-shadow: inse
 /* four tick segments for an at-a-glance read */
 .sg-meter-track::after {
   content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 1;
-  background-image: linear-gradient(90deg, rgba(15,23,42,0.10) 1px, transparent 1px);
+  background-image: linear-gradient(90deg, rgba(17,17,17,0.10) 1px, transparent 1px);
   background-size: 25% 100%;
 }
 html.dark .sg-meter-track::after { background-image: linear-gradient(90deg, rgba(255,255,255,0.12) 1px, transparent 1px); }

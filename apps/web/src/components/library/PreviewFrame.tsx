@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import type { RegistryEntry } from '@/lib/component-registry'
+import { makeRevealRef } from '@/lib/make-reveal-ref'
 
 interface PreviewFrameProps {
   entry: RegistryEntry
@@ -12,7 +13,7 @@ export function PreviewFrame({ entry, children }: PreviewFrameProps) {
   const minHeight = viewport?.height
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
+    <div ref={makeRevealRef({ from: 'first' })} className="flex flex-1 flex-col overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border px-6 py-3">
         <div className="flex flex-col gap-0.5">

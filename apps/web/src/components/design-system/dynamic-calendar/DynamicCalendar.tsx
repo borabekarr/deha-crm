@@ -477,7 +477,7 @@ export default function DynamicCalendar({
             style={{
               display: 'inline-block',
               width: 6, height: 6, borderRadius: '50%',
-              background: '#10B981', boxShadow: '0 0 0 3px rgba(16,185,129,0.18)',
+              background: 'var(--brand-primary-500)', boxShadow: '0 0 0 3px color-mix(in srgb, var(--brand-primary-500) 18%, transparent)',
             }}
           />
           {' '}Hover the island for a preview · Click to expand · <kbd>Esc</kbd> to close

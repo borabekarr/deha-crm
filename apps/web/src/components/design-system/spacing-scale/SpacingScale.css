@@ -2,13 +2,13 @@
 .ss-ru  { display:flex; flex-direction:column; align-items:center; gap: 6px; }
 .ss-ru-sm  { width: 55px; }
 .ss-ru-md  { width: 65px; }
-.ss-bar { background: #10B981; border-radius: 4px; width: 100%; }
+.ss-bar { background: var(--brand-primary-500); border-radius: 4px; width: 100%; }
 .ss-b1  { height: 4px; }  .ss-b2 { height: 8px; }  .ss-b3 { height: 12px; }
 .ss-b4  { height: 16px; } .ss-b5 { height: 20px; } .ss-b6 { height: 24px; }
 .ss-b8  { height: 32px; } .ss-b10 { height: 40px; } .ss-b12 { height: 48px; }
-.ss-label { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 10px; color: #64748B; }
-.ss-role  { font-size: 10px; font-weight: 700; color: #0F172A; text-align:center; }
+.ss-label { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 10px; color: #6B6B6B; }
+.ss-role  { font-size: 10px; font-weight: 700; color: #111111; text-align:center; }
 
 /* ── Dark mode: chrome adapts, bar specimens stay ── */
-html.dark .ss-role  { color: #F1F5F9; }
-html.dark .ss-label { color: #94A3B8; }
+html.dark .ss-role  { color: #F5F5F5; }
+html.dark .ss-label { color: #A1A1A1; }
