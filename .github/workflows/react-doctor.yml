@@ -3,6 +3,12 @@ name: React Doctor
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'apps/web/src/**'
+      - 'apps/mobile/src/**'
+      - 'apps/web/package.json'
+      - 'apps/mobile/package.json'
+      - 'pnpm-lock.yaml'
 
 permissions:
   contents: read

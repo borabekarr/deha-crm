@@ -42,7 +42,7 @@ const TONEBG: Record<string, [string, string, string]> = {
   r:['var(--r)','var(--r-bg)','var(--r-bd)'], b:['var(--b)','var(--b-bg)','var(--b-bd)'],
   v:['var(--v)','var(--v-bg)','var(--v-bd)'], o:['var(--o)','var(--o-bg)','var(--o-bd)'],
 }
-const HEALTH:   Record<string, string> = { g:'#0F9D6B', a:'#D97A2B', r:'#475569' }
+const HEALTH:   Record<string, string> = { g:'#0F9D6B', a:'#D97A2B', r:'#4A4A4A' }
 const healthOf = (s: number) => s >= 70 ? 'g' : s >= 45 ? 'a' : 'r'
 const HEALTH_WORD: Record<string, string> = { g:'On track', a:'Needs attention', r:'At risk' }
 const STAGE_ICON: Record<string, string> = {
@@ -52,7 +52,7 @@ const STAGE_ICON: Record<string, string> = {
 const TEMP: Record<string, { c: string; ic: string }> = {
   hot:  { c:'#F97316', ic:'local_fire_department' },
   warm: { c:'#EAB308', ic:'thermostat' },
-  cold: { c:'#64748B', ic:'ac_unit' },
+  cold: { c:'#6B6B6B', ic:'ac_unit' },
 }
 const TONE_HEX: Record<string, string> = {
   g:'var(--g-l)', a:'var(--a-l)', r:'var(--r-l)', b:'var(--b-l)',
@@ -674,7 +674,7 @@ function LeadTools({ ws, lead }: { ws: string; lead: Lead }) {
     { ic:'neurology',   t:'Ghostwrite follow-up', color:'#8B5CF6' },
     { ic:'travel_explore', t:'Match listings',        color:'#3B82F6' },
     { ic:'plagiarism',     t:'Ghost-buyer check',     color:'#F97316' },
-    { ic:'insights',       t:'Propensity score',      color:'#10B981' },
+    { ic:'insights',       t:'Propensity score',      color:'var(--brand-primary-500)' },
   ]
   if (ws === 'healthcare') tools.splice(1, 0, { ic:'sentiment_satisfied', t:'Patient tone adaptor', color:'#EAB308' })
 

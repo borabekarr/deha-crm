@@ -19,18 +19,67 @@
   --brand-primary-700:    #047857;
   --brand-primary-800:    #065F46;
   --brand-primary-900:    #064E3B;
+  --brand-glow:           rgba(16,185,129,0.50);
 
-  /* ---------- Neutrals (Slate) ---------- */
-  --slate-50:             #F8FAFC;
-  --slate-100:            #F1F5F9;
-  --slate-200:            #E2E8F0;
-  --slate-300:            #CBD5E1;
-  --slate-400:            #94A3B8;
-  --slate-500:            #64748B;
-  --slate-600:            #475569;
-  --slate-700:            #334155;
-  --slate-800:            #1E293B;
-  --slate-900:            #0F172A;
+  /* ---------- Extra palettes (Step 8) — raw stops, authored order 1..6 ---------- */
+  --sunflower-1:  oklch(95.6% 0.126 98.7);
+  --sunflower-2:  oklch(91.8% 0.174 96.9);
+  --sunflower-3:  oklch(87.8% 0.222 93.9);
+  --sunflower-4:  oklch(82.6% 0.258 87.8);
+  --sunflower-5:  oklch(78.1% 0.264 79.7);
+  --sunflower-6:  oklch(75.2% 0.258 75.3);
+
+  --bloodymary-1: oklch(41.7% 0.178 18.8);
+  --bloodymary-2: oklch(47.6% 0.198 22.3);
+  --bloodymary-3: oklch(53.2% 0.207 24.9);
+  --bloodymary-4: oklch(58.8% 0.211 26.8);
+  --bloodymary-5: oklch(64.2% 0.210 28.3);
+  --bloodymary-6: oklch(69.5% 0.205 29.5);
+
+  --petalglow-1:  oklch(87.0% 0.072 6.9);
+  --petalglow-2:  oklch(81.2% 0.111 5.7);
+  --petalglow-3:  oklch(75.5% 0.154 6.3);
+  --petalglow-4:  oklch(70.4% 0.196 8.0);
+  --petalglow-5:  oklch(66.7% 0.227 11.0);
+  --petalglow-6:  oklch(64.3% 0.248 14.1);
+
+  --sexyblue-1:   oklch(58.7% 0.254 256.9);
+  --sexyblue-2:   oklch(64.6% 0.213 250.4);
+  --sexyblue-3:   oklch(70.5% 0.173 243.9);
+  --sexyblue-4:   oklch(76.5% 0.132 237.4);
+  --sexyblue-5:   oklch(82.4% 0.091 231.0);
+  --sexyblue-6:   oklch(88.3% 0.051 224.5);
+
+  --richgold-1:   oklch(77.2% 0.177 91.5);
+  --richgold-2:   oklch(80.5% 0.163 93.4);
+  --richgold-3:   oklch(83.9% 0.148 95.3);
+  --richgold-4:   oklch(87.2% 0.132 97.2);
+  --richgold-5:   oklch(90.6% 0.113 99.1);
+  --richgold-6:   oklch(93.9% 0.094 101.0);
+
+  /* ---------- Neutrals (Gray) — Theme Palette Lab, chroma-0 (2026-07-10) ---------- */
+  --gray-50:              #FAFAFA;
+  --gray-100:             #F5F5F5;
+  --gray-200:             #ECECEC;
+  --gray-300:             #D4D4D4;
+  --gray-400:             #A1A1A1;
+  --gray-500:             #6B6B6B;
+  --gray-600:             #4A4A4A;
+  --gray-700:             #232323;
+  --gray-800:             #1C1C1C;
+  --gray-900:             #111111;
+
+  /* --slate-* retained as aliases for existing var(--slate-*) consumers; Step 5 migrates callers to --gray-* */
+  --slate-50:             var(--gray-50);
+  --slate-100:            var(--gray-100);
+  --slate-200:            var(--gray-200);
+  --slate-300:            var(--gray-300);
+  --slate-400:            var(--gray-400);
+  --slate-500:            var(--gray-500);
+  --slate-600:            var(--gray-600);
+  --slate-700:            var(--gray-700);
+  --slate-800:            var(--gray-800);
+  --slate-900:            var(--gray-900);
 
   /* ---------- Semantic ---------- */
   --semantic-success:     #10B981;  /* Emerald   — low priority, growth */
@@ -46,26 +95,27 @@
   --bg-app:               #FFFFFF;
   --bg-app-gradient:      #FFFFFF;  /* App background is FLAT white. Use --bg-section-grid for highlighted sections. */
   --bg-section-grid:
-    linear-gradient(to right, rgba(15,23,42,0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(15,23,42,0.035) 1px, transparent 1px);
+    linear-gradient(to right, rgba(17,17,17,0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(17,17,17,0.035) 1px, transparent 1px);
   --bg-section-grid-size: 24px 24px;
   --bg-card:              rgba(255, 255, 255, 0.70);   /* glass-light */
   --bg-card-solid:        #FFFFFF;
   --bg-accent:            #10B981;
-  --bg-chip:              #F1F5F9;
-  --shell-bg:             #D4DCE8;  /* grey "bezel" behind component surfaces */
+  --bg-chip:              #ECECEC;
+  --shell-bg:             #D9D9D9;  /* grey "bezel" behind component surfaces */
 
-  --fg1:                  #0F172A;  /* primary text — slate-900 */
-  --fg2:                  #334155;  /* strong body — slate-700 */
-  --fg3:                  #64748B;  /* secondary  — slate-500 */
-  --fg4:                  #94A3B8;  /* tertiary   — slate-400 */
+  --fg1:                  #0A0A0A;  /* primary text — gray-900 */
+  --fg2:                  #232323;  /* strong body — gray-700 */
+  --fg3:                  #6B6B6B;  /* secondary  — gray-500 */
+  --fg4:                  #A1A1A1;  /* tertiary   — gray-400 */
   --fg-inverse:           #FFFFFF;
   --fg-brand:             #10B981;
+  --brand-on-primary:     #fff;  /* text color on brand-primary-filled surfaces; themes may remap */
 
   /* ---------- Borders ---------- */
   --border-glass:         rgba(255, 255, 255, 0.60);
   --border-glass-dark:    rgba(255, 255, 255, 0.10);
-  --border-hairline:      #E2E8F0;    /* slate-200 */
+  --border-hairline:      #ECECEC;    /* gray-200 */
   --border-accent:        rgba(255, 255, 255, 0.30);  /* inside emerald cards */
 
   /* ---------- Radii ---------- */
@@ -77,6 +127,7 @@
   --radius-2xl:           24px;      /* hero / chart cards (rounded-[24px]) */
   --radius-pill:          16px;     /* "pill" tokens — soft rounded, used for chips/filters/badges */
   --radius-circle:        9999px;   /* only for circular elements (avatars, dots) */
+  --corner-smoothing:     0.6;      /* Apple/Figma 60% corner smoothing factor; consumed by use-squircle */
 
   /* ---------- Spacing (4-point) ---------- */
   --space-0:              0;
@@ -160,22 +211,114 @@
    ========================================================================= */
 :root[data-theme="dark"],
 .dark {
-  --bg-app:               #0F172A;
-  --bg-app-gradient:      #0F172A;
+  --bg-app:               #111111;
+  --bg-app-gradient:      #111111;
   --bg-section-grid:
     linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
-  --bg-card:              rgba(30, 41, 59, 0.70);
-  --bg-card-solid:        #1E293B;
-  --bg-chip:              #0F172A;
-  --shell-bg:             #020617;
+  --bg-card:              rgba(28, 28, 28, 0.70);
+  --bg-card-solid:        #1C1C1C;
+  --bg-chip:              #111111;
+  --shell-bg:             #0A0A0A;
 
-  --fg1:                  #F1F5F9;
-  --fg2:                  #CBD5E1;
-  --fg3:                  #94A3B8;
-  --fg4:                  #64748B;
+  --fg1:                  #EDEDED;
+  --fg2:                  #D4D4D4;
+  --fg3:                  #A1A1A1;
+  --fg4:                  #6B6B6B;
 
-  --border-hairline:      #334155;
+  --border-hairline:      #232323;
+}
+
+/* =========================================================================
+   Primary theme remaps — Theme Palette Lab (Step 8)
+   Attribute-scoped like data-theme; only brand-role tokens overridden.
+   No data-primary attribute (or an unrecognized value) means emerald: the
+   :root defaults above stay exactly as today.
+   ========================================================================= */
+:root[data-primary="sunflower"] {
+  --brand-primary:        var(--sunflower-4);
+  --brand-primary-50:     color-mix(in oklch, var(--sunflower-1), white 75%);
+  --brand-primary-100:    color-mix(in oklch, var(--sunflower-1), white 55%);
+  --brand-primary-200:    color-mix(in oklch, var(--sunflower-1), white 35%);
+  --brand-primary-300:    var(--sunflower-2);
+  --brand-primary-400:    var(--sunflower-3);
+  --brand-primary-500:    var(--sunflower-4);
+  --brand-primary-600:    var(--sunflower-5);
+  --brand-primary-700:    var(--sunflower-6);
+  --brand-primary-800:    color-mix(in oklch, var(--sunflower-6), black 20%);
+  --brand-primary-900:    color-mix(in oklch, var(--sunflower-6), black 35%);
+  --bg-accent:            var(--sunflower-4);
+  --fg-brand:             var(--sunflower-4);
+  --brand-glow:           color-mix(in oklch, var(--sunflower-4), transparent 50%);
+}
+
+:root[data-primary="bloodymary"] {
+  --brand-primary:        var(--bloodymary-3);
+  --brand-primary-50:     color-mix(in oklch, var(--bloodymary-6), white 75%);
+  --brand-primary-100:    color-mix(in oklch, var(--bloodymary-6), white 55%);
+  --brand-primary-200:    color-mix(in oklch, var(--bloodymary-6), white 35%);
+  --brand-primary-300:    var(--bloodymary-5);
+  --brand-primary-400:    var(--bloodymary-4);
+  --brand-primary-500:    var(--bloodymary-3);
+  --brand-primary-600:    var(--bloodymary-2);
+  --brand-primary-700:    var(--bloodymary-1);
+  --brand-primary-800:    color-mix(in oklch, var(--bloodymary-1), black 20%);
+  --brand-primary-900:    color-mix(in oklch, var(--bloodymary-1), black 35%);
+  --bg-accent:            var(--bloodymary-3);
+  --fg-brand:             var(--bloodymary-3);
+  --brand-glow:           color-mix(in oklch, var(--bloodymary-3), transparent 50%);
+}
+
+:root[data-primary="petalglow"] {
+  --brand-primary:        var(--petalglow-4);
+  --brand-primary-50:     color-mix(in oklch, var(--petalglow-1), white 75%);
+  --brand-primary-100:    color-mix(in oklch, var(--petalglow-1), white 55%);
+  --brand-primary-200:    color-mix(in oklch, var(--petalglow-1), white 35%);
+  --brand-primary-300:    var(--petalglow-2);
+  --brand-primary-400:    var(--petalglow-3);
+  --brand-primary-500:    var(--petalglow-4);
+  --brand-primary-600:    var(--petalglow-5);
+  --brand-primary-700:    var(--petalglow-6);
+  --brand-primary-800:    color-mix(in oklch, var(--petalglow-6), black 20%);
+  --brand-primary-900:    color-mix(in oklch, var(--petalglow-6), black 35%);
+  --bg-accent:            var(--petalglow-4);
+  --fg-brand:             var(--petalglow-4);
+  --brand-glow:           color-mix(in oklch, var(--petalglow-4), transparent 50%);
+}
+
+:root[data-primary="sexyblue"] {
+  --brand-primary:        var(--sexyblue-3);
+  --brand-primary-50:     color-mix(in oklch, var(--sexyblue-6), white 75%);
+  --brand-primary-100:    color-mix(in oklch, var(--sexyblue-6), white 55%);
+  --brand-primary-200:    color-mix(in oklch, var(--sexyblue-6), white 35%);
+  --brand-primary-300:    var(--sexyblue-5);
+  --brand-primary-400:    var(--sexyblue-4);
+  --brand-primary-500:    var(--sexyblue-3);
+  --brand-primary-600:    var(--sexyblue-2);
+  --brand-primary-700:    var(--sexyblue-1);
+  --brand-primary-800:    color-mix(in oklch, var(--sexyblue-1), black 20%);
+  --brand-primary-900:    color-mix(in oklch, var(--sexyblue-1), black 35%);
+  --bg-accent:            var(--sexyblue-3);
+  --fg-brand:             var(--sexyblue-3);
+  --brand-glow:           color-mix(in oklch, var(--sexyblue-3), transparent 50%);
+}
+
+:root[data-primary="richgold"] {
+  --brand-primary:        var(--richgold-3);
+  --brand-primary-50:     color-mix(in oklch, var(--richgold-6), white 75%);
+  --brand-primary-100:    color-mix(in oklch, var(--richgold-6), white 55%);
+  --brand-primary-200:    color-mix(in oklch, var(--richgold-6), white 35%);
+  --brand-primary-300:    var(--richgold-5);
+  --brand-primary-400:    var(--richgold-4);
+  --brand-primary-500:    var(--richgold-3);
+  --brand-primary-600:    var(--richgold-2);
+  --brand-primary-700:    var(--richgold-1);
+  --brand-primary-800:    color-mix(in oklch, var(--richgold-1), black 20%);
+  --brand-primary-900:    color-mix(in oklch, var(--richgold-1), black 35%);
+  --bg-accent:            var(--richgold-3);
+  --fg-brand:             var(--richgold-3);
+  --brand-glow:           color-mix(in oklch, var(--richgold-3), transparent 50%);
+  --brand-on-primary:     #111111;
 }
 
 /* =========================================================================
@@ -299,7 +442,7 @@ html, body {
   padding: 12px 20px;
   border-radius: var(--radius-lg);
   background: #10B981;
-  color: #fff;
+  color: var(--brand-on-primary);
   font-weight: 800;
   font-size: var(--type-body);
   border: none;
@@ -317,6 +460,7 @@ html, body {
   transition: filter 200ms cubic-bezier(.22,1,.36,1), transform 200ms;
 }
 .btn-primary:hover { filter: brightness(1.05); }
+:root[data-primary="richgold"] .btn-primary { text-shadow: none; }
 .btn-primary:active { transform: scale(0.98); }
 
 .btn-inverse {

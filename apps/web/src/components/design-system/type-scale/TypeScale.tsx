@@ -32,7 +32,7 @@ export default function TypeScale() {
         </div>
         <div className="ts-r">
           <div className="ts-px">14 / 500</div>
-          <div className="ts-sample" style={{ fontSize: 14, fontWeight: 500, color: '#64748B' }}>Your dashboard is already analyzing leads.</div>
+          <div className="ts-sample" style={{ fontSize: 14, fontWeight: 500, color: '#6B6B6B' }}>Your dashboard is already analyzing leads.</div>
           <div className="ts-role">Body</div>
         </div>
         <div className="ts-r">
@@ -42,7 +42,7 @@ export default function TypeScale() {
         </div>
         <div className="ts-r">
           <div className="ts-px">10 / 700</div>
-          <div className="ts-sample" style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#94A3B8' }}>Personal Goal Tracker</div>
+          <div className="ts-sample" style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#A1A1A1' }}>Personal Goal Tracker</div>
           <div className="ts-role">Micro Label</div>
         </div>
       </div>

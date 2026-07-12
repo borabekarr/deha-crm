@@ -73,21 +73,21 @@ export const registry: RegistryEntry[] = [
   // ══ Finished ══════════════════════════════════════════════════════════════
   {
     slug: 'colors-neutrals',
-    name: 'Neutrals — Slate',
+    name: 'Neutrals — Gray',
     status: 'Finished',
     category: 'Foundations',
-    subtitle: 'Slate fg/bg/border scale',
+    subtitle: 'Neutral gray fg/bg/border scale',
     viewport: { width: 700, height: 160 },
     sourceHtml: '/design-system/preview/colors-neutrals.html',
     Component: lazy(() => import('@/components/design-system/colors-neutrals/ColorsNeutrals')),
   },
   {
     slug: 'colors-primary',
-    name: 'Primary — Emerald',
+    name: 'Primary Colors',
     status: 'Finished',
     category: 'Foundations',
-    subtitle: '10-step emerald scale anchored at #10B981',
-    viewport: { width: 700, height: 160 },
+    subtitle: 'Emerald brand scale + extra palettes',
+    viewport: { width: 700, height: 560 },
     sourceHtml: '/design-system/preview/colors-primary.html',
     Component: lazy(() => import('@/components/design-system/colors-primary/ColorsPrimary')),
   },
@@ -752,16 +752,6 @@ export const registry: RegistryEntry[] = [
     viewport: { width: 480, height: 760 },
     sourceHtml: '',
     Component: lazy(() => import('@/components/design-system/pipeline-2/Pipeline2')),
-  },
-
-  {
-    slug: 'theme-palette-lab',
-    name: 'Theme Palette Lab',
-    status: 'Proceeding',
-    category: 'Foundations',
-    subtitle: 'Live theme token palette explorer',
-    sourceHtml: '',
-    Component: lazy(() => import('@/components/design-system/theme-palette-lab/ThemePaletteLab')),
   },
 
   // ══ Waiting ═══════════════════════════════════════════════════════════════

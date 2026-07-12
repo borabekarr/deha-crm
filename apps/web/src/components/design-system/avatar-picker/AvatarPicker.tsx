@@ -37,14 +37,14 @@ interface Avatar {
 }
 
 const AVATARS: Avatar[] = [
-  { id: 1, ring: '30, 41, 59',    src: '/avatars/black.jpg',  alt: 'Black'  },
+  { id: 1, ring: '28,28,28',    src: '/avatars/black.jpg',  alt: 'Black'  },
   { id: 2, ring: '59, 130, 246',  src: '/avatars/blue.jpg',   alt: 'Blue'   },
   { id: 3, ring: '34, 197, 94',   src: '/avatars/green.jpg',  alt: 'Green'  },
   { id: 4, ring: '249, 115, 22',  src: '/avatars/orange.jpg', alt: 'Orange' },
   { id: 5, ring: '236, 72, 153',  src: '/avatars/pink.jpg',   alt: 'Pink'   },
   { id: 6, ring: '168, 85, 247',  src: '/avatars/purple.jpg', alt: 'Purple' },
   { id: 7, ring: '239, 68, 68',   src: '/avatars/red.jpg',    alt: 'Red'    },
-  { id: 8, ring: '148, 163, 184', src: '/avatars/white.jpg',  alt: 'White'  },
+  { id: 8, ring: '161,161,161', src: '/avatars/white.jpg',  alt: 'White'  },
 ]
 
 export default function AvatarPicker({ onComplete }: AvatarPickerProps) {

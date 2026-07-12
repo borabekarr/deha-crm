@@ -2,21 +2,21 @@
 .sc-stage {
   --tone: var(--semantic-warning); width: 340px; max-width: 100%;
   padding: 8px;
-  background: var(--card-border, #CBD5E1);
+  background: var(--card-border, #D4D4D4);
   border-radius: calc(var(--card-radius, 20px) + 8px);
-  box-shadow: 0 16px 56px rgba(15,23,42,.14), 0 3px 10px rgba(15,23,42,.07);
+  box-shadow: 0 16px 56px rgba(17,17,17,.14), 0 3px 10px rgba(17,17,17,.07);
 }
 html.dark .sc-stage { background: #1A2535; box-shadow: 0 16px 56px rgba(0,0,0,.42), 0 3px 10px rgba(0,0,0,.3); }
 
 .sc-card {
   position: relative;
   background: var(--card-bg, #FFFFFF);
-  border: 1px solid var(--card-border, #CBD5E1);
+  border: 1px solid var(--card-border, #D4D4D4);
   border-radius: var(--card-radius, 20px);
-  box-shadow: inset 0 0 0 1px rgba(15,23,42,.05);
+  box-shadow: inset 0 0 0 1px rgba(17,17,17,.05);
   overflow: hidden;
 }
-html.dark .sc-card { background: var(--card-bg, #1E293B); border-color: var(--card-border, #334155); box-shadow: inset 0 0 0 1px rgba(255,255,255,.06); }
+html.dark .sc-card { background: var(--card-bg, #1C1C1C); border-color: var(--card-border, #232323); box-shadow: inset 0 0 0 1px rgba(255,255,255,.06); }
 .sc-header:hover { transform: scale(1.006); }
 .sc-card.is-pressed .sc-header { transform: scale(.985); transition-duration: calc(90ms * var(--anim-mult, 1)); }
 
@@ -39,25 +39,25 @@ html.dark .sc-card { background: var(--card-bg, #1E293B); border-color: var(--ca
   background-size: 14px 14px;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.55),
-    inset 0 -2px 0 rgba(15,23,42,.20),
-    inset 0 0 0 1px rgba(15,23,42,.12);
+    inset 0 -2px 0 rgba(17,17,17,.20),
+    inset 0 0 0 1px rgba(17,17,17,.12);
 }
 /* warning/yellow: black icon (bg already #FDE047 via --tone or --icon-c) */
 .sc-icon.sc-icon--warning { --sc-icon-color: #000; }
 .sc-icon svg { filter: none; }
 .sc-title { flex: 1; min-width: 0; font-size: 14px; font-weight: var(--weight-bold); letter-spacing: -.02em; color: var(--fg1); }
 .sc-chev {
-  flex: none; display: grid; place-items: center; color: var(--slate-400);
+  flex: none; display: grid; place-items: center; color: var(--gray-400);
   width: 20px; height: 20px; border-radius: 6px;
   transition: transform calc(340ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.5,1), background calc(150ms * var(--anim-mult, 1)), color calc(150ms * var(--anim-mult, 1));
 }
 .sc-card[data-open="true"] .sc-chev { transform: rotate(180deg); }
-.sc-header:hover .sc-chev { background: var(--slate-100); color: var(--fg2); }
+.sc-header:hover .sc-chev { background: var(--gray-100); color: var(--fg2); }
 html.dark .sc-header:hover .sc-chev { background: color-mix(in srgb, #fff 10%, var(--card-bg)); color: var(--fg1); }
 
 .sc-ripple {
   position: absolute; width: 16px; height: 16px; border-radius: 50%;
-  background: rgba(148,163,184,.28);
+  background: rgba(161,161,161,.28);
   transform: translate(-50%, -50%) scale(0); pointer-events: none;
   animation: scRipple calc(650ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) forwards;
 }
@@ -87,7 +87,7 @@ html.dark .sc-ripple { background: rgba(100,116,139,.30); }
   cursor: pointer; white-space: nowrap;
   transition: background calc(160ms * var(--anim-mult, 1)), border-color calc(160ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.5,1), color calc(160ms * var(--anim-mult, 1));
 }
-.sc-chip:hover { background: var(--slate-50); border-color: var(--slate-300); transform: translateY(-1px); }
+.sc-chip:hover { background: var(--gray-50); border-color: var(--gray-300); transform: translateY(-1px); }
 html.dark .sc-chip:hover { background: color-mix(in srgb, #fff 8%, var(--card-bg)); border-color: color-mix(in srgb, #fff 18%, transparent); }
 .sc-chip:active { transform: translateY(0) scale(.97); }
 .sc-chip-ico { display: grid; place-items: center; color: var(--fg4); transition: color calc(160ms * var(--anim-mult, 1)); }
@@ -114,7 +114,7 @@ html.dark .sc-chip:hover { background: color-mix(in srgb, #fff 8%, var(--card-bg
 .sc-time {
   margin-left: auto; flex: none;
   font-size: 10px; font-weight: var(--weight-semibold); color: var(--fg4);
-  background: var(--slate-100); padding: 5px 9px; border-radius: 7px;
+  background: var(--gray-100); padding: 5px 9px; border-radius: 7px;
   font-variant-numeric: tabular-nums;
 }
 html.dark .sc-time { background: color-mix(in srgb, #fff 8%, var(--card-bg)); }
@@ -124,25 +124,25 @@ html.dark .sc-chip.is-copied { background: color-mix(in srgb, var(--brand-primar
 .sc-tip {
   position: absolute; bottom: calc(100% + 9px); left: 50%;
   transform: translateX(-50%) translateY(4px) scale(.96);
-  background: var(--slate-900); color: #fff;
+  background: var(--gray-900); color: #fff;
   font-size: 12.5px; font-weight: var(--weight-semibold); letter-spacing: -.01em;
   padding: 6px 10px; border-radius: 8px; white-space: nowrap;
   opacity: 0; pointer-events: none; z-index: 6;
-  box-shadow: 0 10px 24px -8px rgba(15,23,42,.45);
+  box-shadow: 0 10px 24px -8px rgba(17,17,17,.45);
   transition: opacity calc(160ms * var(--anim-mult, 1)) ease, transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.5,1);
 }
 .sc-chip:hover .sc-tip { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
-.sc-tip-arrow { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: 0; height: 0; border: 5px solid transparent; border-top-color: var(--slate-900); }
-html.dark .sc-tip { background: #334155; }
-html.dark .sc-tip-arrow { border-top-color: #334155; }
+.sc-tip-arrow { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: 0; height: 0; border: 5px solid transparent; border-top-color: var(--gray-900); }
+html.dark .sc-tip { background: #232323; }
+html.dark .sc-tip-arrow { border-top-color: #232323; }
 
 /* ---- skeleton ---- */
 .sc-skel { cursor: default; }
 .sc-skel .sc-header { cursor: default; }
-.sk { display: block; border-radius: 8px; background: var(--slate-100); position: relative; overflow: hidden; }
+.sk { display: block; border-radius: 8px; background: var(--gray-100); position: relative; overflow: hidden; }
 .sk::after {
   content: ''; position: absolute; inset: 0; transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--slate-300) 60%, transparent), transparent);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gray-300) 60%, transparent), transparent);
   animation: scShimmer 1.3s infinite;
 }
 @keyframes scShimmer { 100% { transform: translateX(100%); } }

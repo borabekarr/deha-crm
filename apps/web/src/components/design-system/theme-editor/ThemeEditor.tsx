@@ -5,11 +5,11 @@ import './ThemeEditor.css'
 import { useState } from 'react'
 
 // ── Swatch colours (verbatim from prototype) ─────────────────────────────────
-const SWATCHES = ['#10B981', '#EF4444', '#EAB308', '#F97316', '#334155']
+const SWATCHES = ['var(--brand-primary-500)', '#EF4444', '#EAB308', '#F97316', '#232323']
 
 // ── Range background helper (mirrors updateRange / updateBrightness JS) ──────
 function rangeGradient(value: number): string {
-  return `linear-gradient(to right, #10B981 0%, #10B981 ${value}%, var(--tk-empty,#E2E8F0) ${value}%, var(--tk-empty,#E2E8F0) 100%)`
+  return `linear-gradient(to right, var(--brand-primary-500) 0%, var(--brand-primary-500) ${value}%, var(--tk-empty,#ECECEC) ${value}%, var(--tk-empty,#ECECEC) 100%)`
 }
 
 export default function ThemeEditor() {

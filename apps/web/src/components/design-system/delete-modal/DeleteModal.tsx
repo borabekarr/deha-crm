@@ -197,7 +197,7 @@ export function DeleteModal({
 
           <div
             className={`dm-badge icon-badge icon-badge--lg${isDone ? ' dm-badge--done' : ''}`}
-            style={{ '--icon-c': isDone ? '#10B981' : '#EF4444' } as React.CSSProperties}
+            style={{ '--icon-c': isDone ? 'var(--brand-primary-500)' : '#EF4444' } as React.CSSProperties}
             data-done={isDone}
           >
             <span className="material-symbols-outlined" aria-hidden="true">

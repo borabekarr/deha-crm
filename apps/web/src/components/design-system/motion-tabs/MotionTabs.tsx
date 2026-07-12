@@ -47,7 +47,7 @@ const PANEL_ROWS: Record<string, PanelRow[]> = {
   pipeline: [
     { icon: 'tune',  title: 'Qualifying',    sub: 'Discovery in progress', count: 9, color: '#F59E0B' },
     { icon: 'send',  title: 'Proposal sent', sub: 'Awaiting response',     count: 4, color: '#14B8A6' },
-    { icon: 'flag',  title: 'Closing',       sub: 'Final negotiation',     count: 3, color: '#10B981' },
+    { icon: 'flag',  title: 'Closing',       sub: 'Final negotiation',     count: 3, color: 'var(--brand-primary-500)' },
   ],
   calls: [
     { icon: 'today',       title: "Today's calls", sub: 'Scheduled for today',   count: 7, color: '#F97316' },
@@ -55,7 +55,7 @@ const PANEL_ROWS: Record<string, PanelRow[]> = {
     { icon: 'schedule',    title: 'Scheduled',     sub: 'Upcoming this week',    count: 5, color: '#3B82F6' },
   ],
   profile: [
-    { icon: 'person',  title: 'Personal details', sub: 'Name, role, contact', color: '#0F172A' },
+    { icon: 'person',  title: 'Personal details', sub: 'Name, role, contact', color: '#111111' },
     { icon: 'palette', title: 'Appearance',        sub: 'Theme and density',   color: '#8B5CF6' },
     { icon: 'help',    title: 'Help',              sub: 'Guides and support',  color: '#14B8A6' },
   ],
@@ -124,7 +124,7 @@ export default function MotionTabs() {
   const isOpen = view !== 'default'
 
   return (
-    <div className="card" style={{ padding: 0, background: '#F8FAFC' }}>
+    <div className="card" style={{ padding: 0, background: '#FAFAFA' }}>
       <div className="frame">
         <div className="shell">
           <div
@@ -160,7 +160,7 @@ export default function MotionTabs() {
                         {rows.map((row) => (
                           <button type="button" key={row.title} className="mt-row">
                             <div
-                              className={`mt-row-ic${row.color === '#0F172A' ? ' mt-row-ic--black' : ''}`}
+                              className={`mt-row-ic${row.color === '#111111' ? ' mt-row-ic--black' : ''}`}
                               style={row.color ? ({ '--icon-c': row.color } as React.CSSProperties) : undefined}
                             >
                               <span className="material-symbols-outlined">{row.icon}</span>

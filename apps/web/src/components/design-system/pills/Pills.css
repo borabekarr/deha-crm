@@ -1,55 +1,55 @@
 .pills-row { display:flex; align-items:center; gap: 8px; flex-wrap: wrap; }
 .pills-row + .pills-row { margin-top: 12px; }
 
-.pill-priority { display:inline-flex; align-items:center; gap: 6px; padding: 6px 14px; border-radius: 9999px; background: #FFFFFF; border: 1px solid #CBD5E1; font-size: 13px; font-weight: 600; color: #64748B; font-family:'Montserrat'; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.07), inset 0 -1px 2px rgba(0,0,0,0.04); transition: transform calc(140ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
+.pill-priority { display:inline-flex; align-items:center; gap: 6px; padding: 6px 14px; border-radius: 9999px; background: #FFFFFF; border: 1px solid #D4D4D4; font-size: 13px; font-weight: 600; color: #6B6B6B; font-family:'Montserrat'; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.07), inset 0 -1px 2px rgba(0,0,0,0.04); transition: transform calc(140ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
 .pill-priority .dot { width: 8px; height: 8px; border-radius: 50%; }
 
-.pill-tab { display:inline-flex; align-items:center; padding: 6px 16px; border-radius: 9999px; background: #FFFFFF; border: 1px solid #CBD5E1; font-size: 12px; font-weight: 600; color: #64748B; font-family:'Montserrat'; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.07), inset 0 -1px 2px rgba(0,0,0,0.04); transition: background calc(180ms * var(--anim-mult, 1)), color calc(180ms * var(--anim-mult, 1)); }
-.pill-tab.active { background: #10B981; color:#fff; border-color: transparent; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.15), inset 0 -1px 0 rgba(255,255,255,0.15); font-weight: 800; }
-.pill-tab.dark { background:#0F172A; color:#fff; font-weight: 800; border-color: transparent; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.35), inset 0 -1px 0 rgba(255,255,255,0.06); }
+.pill-tab { display:inline-flex; align-items:center; padding: 6px 16px; border-radius: 9999px; background: #FFFFFF; border: 1px solid #D4D4D4; font-size: 12px; font-weight: 600; color: #6B6B6B; font-family:'Montserrat'; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.07), inset 0 -1px 2px rgba(0,0,0,0.04); transition: background calc(180ms * var(--anim-mult, 1)), color calc(180ms * var(--anim-mult, 1)); }
+.pill-tab.active { background: var(--brand-primary-500); color:#fff; border-color: transparent; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.15), inset 0 -1px 0 rgba(255,255,255,0.15); font-weight: 800; }
+.pill-tab.dark { background:#111111; color:#fff; font-weight: 800; border-color: transparent; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.35), inset 0 -1px 0 rgba(255,255,255,0.06); }
 
 .badge { display:inline-flex; align-items:center; gap: 6px; padding: 1px 8px; border-radius: 9999px; font-size: 11px; font-weight: 900; font-family:'Montserrat'; }
-.badge.success { background: #10B981; color:#fff; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.14), inset 0 -1px 0 rgba(255,255,255,0.15); }
+.badge.success { background: var(--brand-primary-500); color:#fff; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.14), inset 0 -1px 0 rgba(255,255,255,0.15); }
 .badge.success .material-icons { font-size: 14px; font-variation-settings: 'wght' 700; }
-.badge.gci { background:#10B981; color:#fff; border:none; padding: 4px 10px; text-shadow: 0 1px 2px rgba(0,0,0,0.28); box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(15,23,42,0.18), inset 0 0 0 1px rgba(15,23,42,0.10); background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px); background-size: 7px 7px; }
-.badge.time { background:#EF4444; color:#fff; padding: 3px 8px; border:none; text-shadow: 0 1px 2px rgba(0,0,0,0.28); box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(15,23,42,0.18), inset 0 0 0 1px rgba(15,23,42,0.10); background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px); background-size: 7px 7px; }
+.badge.gci { background:var(--brand-primary-500); color:#fff; border:none; padding: 4px 10px; text-shadow: 0 1px 2px rgba(0,0,0,0.28); box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(17,17,17,0.18), inset 0 0 0 1px rgba(17,17,17,0.10); background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px); background-size: 7px 7px; }
+.badge.time { background:#EF4444; color:#fff; padding: 3px 8px; border:none; text-shadow: 0 1px 2px rgba(0,0,0,0.28); box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(17,17,17,0.18), inset 0 0 0 1px rgba(17,17,17,0.10); background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px); background-size: 7px 7px; }
 .badge.time .material-icons { font-size: 12px; font-variation-settings: 'wght' 700; }
 .badge.danger { background:#EF4444; color:#fff; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.14), inset 0 -1px 0 rgba(255,255,255,0.15); }
 .badge.danger .material-icons { font-size: 14px; font-variation-settings: 'wght' 700; }
-.badge.tag { background:#F1F5F9; color:#334155; font-size: 11px; padding: 3px 8px; border: 1px solid #E2E8F0; box-shadow: inset 0 -1px 0 rgba(0,0,0,0.05); }
-.badge.tag .material-icons { font-size: 13px; color: #64748B; font-variation-settings: 'wght' 700; }
+.badge.tag { background:#F5F5F5; color:#232323; font-size: 11px; padding: 3px 8px; border: 1px solid #ECECEC; box-shadow: inset 0 -1px 0 rgba(0,0,0,0.05); }
+.badge.tag .material-icons { font-size: 13px; color: #6B6B6B; font-variation-settings: 'wght' 700; }
 
 /* Task board column tags */
 .badge.col-tag { display:inline-flex; align-items:center; gap: 6px; padding: 5px 5px 5px 9px; border-radius: 9999px; font-family:'Montserrat'; font-size: 11px; font-weight: 800; color:#fff; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1; text-shadow: 0 1px 2px rgba(0,0,0,0.35), 0 1px 0 rgba(0,0,0,0.22); box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), inset 0 -1.5px 0 rgba(0,0,0,0.18), inset 0 0 0 1px rgba(0,0,0,0.06); }
 .badge.col-tag .material-icons { font-size: 14px; text-shadow: 0 1px 2px rgba(0,0,0,0.40), 0 1px 0 rgba(0,0,0,0.22); }
-.badge.col-tag .count { display:inline-grid; place-items:center; min-width: 18px; height: 18px; padding: 0 6px; border-radius: 9999px; background: rgba(255,255,255,0.94); color: rgba(15,23,42,0.85); font-size: 10.5px; font-weight: 900; letter-spacing: 0; text-shadow: none; box-shadow: inset 0 -1px 0 rgba(0,0,0,0.08), inset 0 0 0 1px rgba(0,0,0,0.05); font-variant-numeric: tabular-nums; }
-.badge.col-tag.todo     { background:#64748B; }
+.badge.col-tag .count { display:inline-grid; place-items:center; min-width: 18px; height: 18px; padding: 0 6px; border-radius: 9999px; background: rgba(255,255,255,0.94); color: rgba(17,17,17,0.85); font-size: 10.5px; font-weight: 900; letter-spacing: 0; text-shadow: none; box-shadow: inset 0 -1px 0 rgba(0,0,0,0.08), inset 0 0 0 1px rgba(0,0,0,0.05); font-variant-numeric: tabular-nums; }
+.badge.col-tag.todo     { background:#6B6B6B; }
 .badge.col-tag.progress { background:#F97316; }
 .badge.col-tag.review   { background:#FACC15; color:#451A03; text-shadow: none; }
 .badge.col-tag.review .material-icons { text-shadow: none; }
-.badge.col-tag.done     { background:#10B981; }
+.badge.col-tag.done     { background:var(--brand-primary-500); }
 
-.pills-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #94A3B8; margin-bottom: 8px; display:block; }
+.pills-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #A1A1A1; margin-bottom: 8px; display:block; }
 
 /* Segmented control — React state–driven active, accent emerald pill */
 .pills-seg {
   position: relative; display:inline-flex;
-  background: #F1F5F9; border-radius: 9999px; padding: 3px;
+  background: #F5F5F5; border-radius: 9999px; padding: 3px;
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.06); font-family:'Montserrat';
 }
 
 .pills-seg-pill {
   position: absolute; top: 3px; bottom: 3px; z-index: 0; border-radius: 9999px;
-  background: #10B981;
+  background: var(--brand-primary-500);
   background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
   background-size: 7px 7px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 8px -1px rgba(16,185,129,0.6);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 8px -1px color-mix(in srgb, var(--brand-primary-500) 60%, transparent);
   transition: left calc(300ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.64,1), width calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
 }
 .pills-seg button {
   position:relative; z-index:1; border:none; background:transparent;
   padding: 8px 16px; border-radius: 9999px; font-family:'Montserrat';
-  font-size: 13px; font-weight: 700; color:#64748B; cursor:pointer;
+  font-size: 13px; font-weight: 700; color:#6B6B6B; cursor:pointer;
   transition: color calc(240ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
 }
 .pills-seg button:active { transform: scale(0.93); }
@@ -58,14 +58,14 @@
 }
 
 /* Event badges — glassy colored pills (fill via inline backgroundColor) */
-.badge-event { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:9999px; flex-shrink:0; color:#fff; font-size:11px; font-weight:800; font-family:'Montserrat'; text-shadow:0 1px 2px rgba(0,0,0,0.28); box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(15,23,42,0.18), inset 0 0 0 1px rgba(15,23,42,0.10); background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px); background-size:7px 7px; white-space:nowrap; }
+.badge-event { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:9999px; flex-shrink:0; color:#fff; font-size:11px; font-weight:800; font-family:'Montserrat'; text-shadow:0 1px 2px rgba(0,0,0,0.28); box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(17,17,17,0.18), inset 0 0 0 1px rgba(17,17,17,0.10); background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px); background-size:7px 7px; white-space:nowrap; }
 .badge-event .material-icons { font-size:12px; color:rgba(255,255,255,0.85); }
 
 /* Dark mode — html.dark convention */
-html.dark .pill-priority { background: #1E293B; border-color: #334155; color: #CBD5E1; }
-html.dark .pill-tab { background: #1E293B; border-color: #334155; color: #94A3B8; }
-html.dark .pill-tab.active { background: #10B981; color: #fff; border-color: transparent; }
-html.dark .pill-tab.dark { background: #020617; color: #fff; border-color: transparent; }
-html.dark .badge.tag { background: #1E293B; color: #CBD5E1; border-color: #334155; }
-html.dark .badge.tag .material-icons { color: #94A3B8; }
-html.dark .pills-label { color: #94A3B8; }
+html.dark .pill-priority { background: #1C1C1C; border-color: #232323; color: #D4D4D4; }
+html.dark .pill-tab { background: #1C1C1C; border-color: #232323; color: #A1A1A1; }
+html.dark .pill-tab.active { background: var(--brand-primary-500); color: #fff; border-color: transparent; }
+html.dark .pill-tab.dark { background: #0A0A0A; color: #fff; border-color: transparent; }
+html.dark .badge.tag { background: #1C1C1C; color: #D4D4D4; border-color: #232323; }
+html.dark .badge.tag .material-icons { color: #A1A1A1; }
+html.dark .pills-label { color: #A1A1A1; }

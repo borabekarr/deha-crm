@@ -86,8 +86,8 @@ const METRIC_SCHEMA: MetricSchema[] = [
 ]
 
 const TP_ACC: Record<string, string> = {
-  substeps: '#10B981', reschedule: '#F97316', context_switch: '#EF4444', energy: '#EAB308',
-  ageing: '#3B82F6', sync_score: '#10B981', revenue_velocity: '#10B981', blockers: '#6366F1', lifecycle: '#8B5CF6',
+  substeps: 'var(--brand-primary-500)', reschedule: '#F97316', context_switch: '#EF4444', energy: '#EAB308',
+  ageing: '#3B82F6', sync_score: 'var(--brand-primary-500)', revenue_velocity: 'var(--brand-primary-500)', blockers: '#6366F1', lifecycle: '#8B5CF6',
 }
 
 // metric category groups (item 9) — each header gets an icon + gray separator
@@ -159,8 +159,8 @@ const TASK_METRICS: Record<string, TaskMetrics> = {
 
 const TASK_CARDS = [
   {
-    cls: 't-low', delay: '.05s', tag: '#10B981',
-    title: 'Property Viewing', section: 'Prospect', priority: 'Low Priority', priColor: '#10B981',
+    cls: 't-low', delay: '.05s', tag: 'var(--brand-primary-500)',
+    title: 'Property Viewing', section: 'Prospect', priority: 'Low Priority', priColor: 'var(--brand-primary-500)',
     status: 'Under Review', statusColor: '#3B82F6', industry: 'Real Estate',
     link: 'customer' as const, entName: 'Canberk Yıldız', entSub: '+90 532 118 4470', entInit: 'CY', entColor: '#F59E0B',
     desc: 'Confirm the villa viewing slot, share the location pin and prepare the listing sheet for the prospect.',
@@ -191,7 +191,7 @@ const TASK_CARDS = [
   {
     cls: 't-mod', delay: '.29s', tag: '#F97316',
     title: 'Test Drive Scheduled', section: 'Prospect', priority: 'Moderate Priority', priColor: '#F97316',
-    status: 'In Progress', statusColor: '#10B981', industry: 'Automotive',
+    status: 'In Progress', statusColor: 'var(--brand-primary-500)', industry: 'Automotive',
     link: 'company' as const, entName: 'Yıldız Motors', entSub: 'Showroom · Maslak', entInit: 'directions_car', entColor: '#06B6D4',
     desc: 'Confirm the test-drive slot, prepare the vehicle spec sheet and outline the financing options.',
     bannerIcon: 'drag_handle',
@@ -258,7 +258,7 @@ function SubSteps({ data }: { data: NonNullable<TaskMetrics['substeps']> }) {
 
 function Reschedule({ data }: { data: NonNullable<TaskMetrics['reschedule']> }) {
   const dots = Math.max(data.count, 4)
-  const tone = data.count >= 3 ? '#EF4444' : data.count >= 1 ? '#F97316' : '#10B981'
+  const tone = data.count >= 3 ? '#EF4444' : data.count >= 1 ? '#F97316' : 'var(--brand-primary-500)'
   return (
     <div className="tp-resched">
       <span className="tp-resched-n" style={{ color: tone }}>{data.count}&times;</span>
@@ -280,7 +280,7 @@ function Reschedule({ data }: { data: NonNullable<TaskMetrics['reschedule']> }) 
 function FocusCost({ data }: { data: NonNullable<TaskMetrics['context_switch']> }) {
   const n = competeCount(data)
   const lv = (['Low', 'Medium', 'High'] as const)[data.level] ?? 'Medium'
-  const tone = data.level >= 2 ? '#EF4444' : data.level === 1 ? '#EAB308' : '#10B981'
+  const tone = data.level >= 2 ? '#EF4444' : data.level === 1 ? '#EAB308' : 'var(--brand-primary-500)'
   return (
     <div className="tp-focus">
       <span className="tp-focus-n" style={{ color: tone }}>{n}</span>
@@ -311,7 +311,7 @@ function Battery({ data }: { data: NonNullable<TaskMetrics['energy']> }) {
 function Ageing({ data }: { data: NonNullable<TaskMetrics['ageing']> }) {
   const pct = Math.min(100, Math.round(data.days / data.span * 100))
   const w = useTween(pct, 760)
-  const tone = data.frozen ? '#3B82F6' : pct > 75 ? '#EF4444' : '#10B981'
+  const tone = data.frozen ? '#3B82F6' : pct > 75 ? '#EF4444' : 'var(--brand-primary-500)'
   return (
     <div className="tp-age">
       <div className="tp-age-chips">
@@ -331,7 +331,7 @@ function Ageing({ data }: { data: NonNullable<TaskMetrics['ageing']> }) {
 // ── Widget: SyncScore ─────────────────────────────────────────────────────────
 
 function SyncScore({ data }: { data: NonNullable<TaskMetrics['sync_score']> }) {
-  const tone = data.pct >= 80 ? '#10B981' : data.pct >= 60 ? '#EAB308' : '#EF4444'
+  const tone = data.pct >= 80 ? 'var(--brand-primary-500)' : data.pct >= 60 ? '#EAB308' : '#EF4444'
   const peakH = 11
   const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
   const fitFor = (h: number) => Math.max(12, Math.round(data.pct - Math.abs(h - peakH) * 11))
@@ -346,7 +346,7 @@ function SyncScore({ data }: { data: NonNullable<TaskMetrics['sync_score']> }) {
         {hours.map(h => {
           const fit = fitFor(h)
           const isPeak = h === peakH
-          const slotTone = fit >= 75 ? '#10B981' : fit >= 50 ? '#EAB308' : '#94A3B8'
+          const slotTone = fit >= 75 ? 'var(--brand-primary-500)' : fit >= 50 ? '#EAB308' : '#A1A1A1'
           return (
             <div key={h} className={'tp-sync-row' + (isPeak ? ' peak' : '')}>
               <span className="tp-sync-hh">{String(h).padStart(2, '0')}:00</span>
@@ -378,9 +378,12 @@ function RevenueVelocity({ data }: { data: NonNullable<TaskMetrics['revenue_velo
 
 // ── Widget: Blockers ──────────────────────────────────────────────────────────
 
+const TASK_BLOCKER_ICONS: Record<string, string> = { done: 'check_circle', active: 'radio_button_checked', locked: 'lock' }
+const TASK_BLOCKER_TONES: Record<string, string> = { done: 'var(--brand-primary-500)', active: '#3B82F6', locked: '#A1A1A1' }
+
 function Blockers({ data }: { data: NonNullable<TaskMetrics['blockers']> }) {
-  const ic: Record<string, string> = { done: 'check_circle', active: 'radio_button_checked', locked: 'lock' }
-  const tone: Record<string, string> = { done: '#10B981', active: '#3B82F6', locked: '#94A3B8' }
+  const ic = TASK_BLOCKER_ICONS
+  const tone = TASK_BLOCKER_TONES
   return (
     <div className="tp-chain-steps">
       {data.chain.map((b, i) => (
@@ -787,7 +790,7 @@ function TaskDetailsPopover({
               <button type="button" className="tp-foot-btn" style={{ '--fbtn': '#3B82F6' } as React.CSSProperties} onClick={() => act('Reassign')}>
                 <span className="material-icons">person_add</span>Reassign
               </button>
-              <button type="button" className="tp-foot-btn primary" style={{ '--fbtn': '#10B981' } as React.CSSProperties} onClick={() => act('Open deal')}>
+              <button type="button" className="tp-foot-btn primary" style={{ '--fbtn': 'var(--brand-primary-500)' } as React.CSSProperties} onClick={() => act('Open deal')}>
                 <span className="material-icons">open_in_new</span>View deal
               </button>
             </div>

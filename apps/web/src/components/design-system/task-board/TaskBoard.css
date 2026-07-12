@@ -5,44 +5,44 @@
   --tb-col-bg:#FAFBFC;
   --tb-col-border:#EEF1F5;
   --tb-card-bg:#FFFFFF;
-  --tb-card-hl:#ECFDF5;
-  --tb-card-border:#CBD5E1;
-  --tb-fg1:#0F172A;
-  --tb-fg2:#475569;
-  --tb-fg3:#64748B;
-  --tb-fg4:#94A3B8;
-  --tb-chip-bg:#F1F5F9;
-  --tb-chip-fg:#475569;
+  --tb-card-hl:var(--brand-primary-50);
+  --tb-card-border:#D4D4D4;
+  --tb-fg1:#111111;
+  --tb-fg2:#4A4A4A;
+  --tb-fg3:#6B6B6B;
+  --tb-fg4:#A1A1A1;
+  --tb-chip-bg:#F5F5F5;
+  --tb-chip-fg:#4A4A4A;
   --tb-feed-bg:#FFFFFF;
   --tb-fade1:rgba(250,251,252,0);
   --tb-fade2:rgba(250,251,252,0.88);
   --tb-fade3:rgba(250,251,252,1);
-  --tb-syncbtn:#0F172A;
-  --tb-syncbtn-hover:#1E293B;
-  --tb-wash-done:#ECFDF5; --tb-wash-done2:#F0FDF9;
+  --tb-syncbtn:#111111;
+  --tb-syncbtn-hover:#1C1C1C;
+  --tb-wash-done:var(--brand-primary-50); --tb-wash-done2:#F0FDF9;
   --tb-wash-prog:#FFF7ED; --tb-wash-prog2:#FFFAF2;
   --tb-wash-rev:#FEFCE8;  --tb-wash-rev2:#FFFCEE;
 }
 html.dark{
-  --tb-shell:#0B1220;
-  --tb-panel:#1E293B;
-  --tb-col-bg:#0F172A;
-  --tb-col-border:#243044;
-  --tb-card-bg:#243044;
-  --tb-card-hl:rgba(16,185,129,0.16);
-  --tb-card-border:#334155;
-  --tb-fg1:#F1F5F9;
-  --tb-fg2:#CBD5E1;
-  --tb-fg3:#94A3B8;
-  --tb-fg4:#64748B;
-  --tb-chip-bg:#0F172A;
-  --tb-chip-fg:#CBD5E1;
-  --tb-feed-bg:#1E293B;
-  --tb-fade1:rgba(15,23,42,0);
-  --tb-fade2:rgba(15,23,42,0.88);
-  --tb-fade3:rgba(15,23,42,1);
-  --tb-syncbtn:#10B981;
-  --tb-syncbtn-hover:#059669;
+  --tb-shell:#0A0A0A;
+  --tb-panel:#1C1C1C;
+  --tb-col-bg:#111111;
+  --tb-col-border:#242424;
+  --tb-card-bg:#242424;
+  --tb-card-hl:color-mix(in srgb, var(--brand-primary-500) 16%, transparent);
+  --tb-card-border:#232323;
+  --tb-fg1:#F5F5F5;
+  --tb-fg2:#D4D4D4;
+  --tb-fg3:#A1A1A1;
+  --tb-fg4:#6B6B6B;
+  --tb-chip-bg:#111111;
+  --tb-chip-fg:#D4D4D4;
+  --tb-feed-bg:#1C1C1C;
+  --tb-fade1:rgba(17,17,17,0);
+  --tb-fade2:rgba(17,17,17,0.88);
+  --tb-fade3:rgba(17,17,17,1);
+  --tb-syncbtn:var(--brand-primary-500);
+  --tb-syncbtn-hover:var(--brand-primary-600);
   --tb-wash-done:#0E2A20; --tb-wash-done2:#0F2D22;
   --tb-wash-prog:#2A1E12; --tb-wash-prog2:#2D2014;
   --tb-wash-rev:#2A2410;  --tb-wash-rev2:#2D2612;
@@ -53,7 +53,7 @@ html.dark{
   background: var(--tb-shell);
   border-radius: 28px;
   padding: 10px;
-  box-shadow: 0 16px 56px rgba(15,23,42,0.14), 0 3px 10px rgba(15,23,42,0.07),
+  box-shadow: 0 16px 56px rgba(17,17,17,0.14), 0 3px 10px rgba(17,17,17,0.07),
               inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
 }
 html.dark .tb-outer { box-shadow: 0 16px 56px rgba(0,0,0,0.5), 0 3px 10px rgba(0,0,0,0.3),
@@ -86,13 +86,13 @@ html.dark .tb-panel { box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); }
 /* Hover: only restyle plain cards, NOT cards mid-success-animation
    (otherwise the color wash disappears on mouseover) */
 .tb-card:not(.success-done):not(.success-progress):not(.success-review):hover {
-  border-color: rgba(15,23,42,0.16) !important;
+  border-color: rgba(17,17,17,0.16) !important;
   background: var(--tb-card-bg) !important;
-  box-shadow: 0 6px 16px -4px rgba(15,23,42,0.10), 0 2px 4px -1px rgba(15,23,42,0.04) !important;
+  box-shadow: 0 6px 16px -4px rgba(17,17,17,0.10), 0 2px 4px -1px rgba(17,17,17,0.04) !important;
   transform: translateY(-1px) scale(1.005);
 }
 html.dark .tb-card:not(.success-done):not(.success-progress):not(.success-review):hover {
-  border-color: #475569 !important;
+  border-color: #4A4A4A !important;
   box-shadow: 0 6px 16px -4px rgba(0,0,0,0.4), 0 2px 4px -1px rgba(0,0,0,0.3) !important;
 }
 /* While the success wash plays, only lift the card — let the animated background through */
@@ -107,10 +107,10 @@ html.dark .tb-card:not(.success-done):not(.success-progress):not(.success-review
   outline-offset: -1px;
   transition: background 160ms, outline-color 160ms;
 }
-.tb-column.drop-target[data-col="todo"]     { background: #F8FAFC !important; outline: 1.5px dashed rgba(100,116,139,0.55); }
+.tb-column.drop-target[data-col="todo"]     { background: #FAFAFA !important; outline: 1.5px dashed rgba(100,116,139,0.55); }
 .tb-column.drop-target[data-col="progress"] { background: #FFF7ED !important; outline: 1.5px dashed rgba(249,115,22,0.55); }
 .tb-column.drop-target[data-col="review"]   { background: #FEFCE8 !important; outline: 1.5px dashed rgba(251,191,36,0.70); }
-.tb-column.drop-target[data-col="done"]     { background: #ECFDF5 !important; outline: 1.5px dashed rgba(16,185,129,0.60); }
+.tb-column.drop-target[data-col="done"]     { background: var(--brand-primary-50) !important; outline: 1.5px dashed color-mix(in srgb, var(--brand-primary-500) 60%, transparent); }
 
 /* ---- Column header tags (shared stat-badge style) ---- */
 .tb-stat-badge {
@@ -126,7 +126,7 @@ html.dark .tb-card:not(.success-done):not(.success-progress):not(.success-review
     inset 0 1px 0 rgba(255,255,255,0.5),
     inset 0 -1px 0 rgba(0,0,0,0.16),
     inset 0 0 0 1px rgba(0,0,0,0.06),
-    0 8px 16px -4px rgba(15,23,42,0.30);
+    0 8px 16px -4px rgba(17,17,17,0.30);
   background-image:
     linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
@@ -160,7 +160,7 @@ html.dark .tb-card:not(.success-done):not(.success-progress):not(.success-review
     inset 0 1px 0 rgba(255,255,255,0.5),
     inset 0 -1px 0 rgba(0,0,0,0.16),
     inset 0 0 0 1px rgba(0,0,0,0.06),
-    0 8px 16px -4px rgba(15,23,42,0.30);
+    0 8px 16px -4px rgba(17,17,17,0.30);
   animation: badgeFly 1900ms cubic-bezier(.22,1,.36,1) forwards;
   z-index: 6; pointer-events: none;
   white-space: nowrap;
@@ -185,9 +185,9 @@ html.dark .tb-card:not(.success-done):not(.success-progress):not(.success-review
 }
 
 @keyframes cardDone {
-  0%   { background: var(--tb-wash-done);  border-color: #10B981; box-shadow: inset 0 0 0 0 rgba(16,185,129,0),    inset 0 0 0 0 rgba(16,185,129,0); }
-  18%  { background: var(--tb-wash-done);  border-color: #10B981; box-shadow: inset 0 0 0 2px rgba(16,185,129,0.50), inset 0 0 14px 0 rgba(16,185,129,0.35); }
-  72%  { background: var(--tb-wash-done2); border-color: #10B981; box-shadow: inset 0 0 0 1px rgba(16,185,129,0.25), inset 0 0 8px 0 rgba(16,185,129,0.18); }
+  0%   { background: var(--tb-wash-done);  border-color: var(--brand-primary-500); box-shadow: inset 0 0 0 0 color-mix(in srgb, var(--brand-primary-500) 0%, transparent),    inset 0 0 0 0 color-mix(in srgb, var(--brand-primary-500) 0%, transparent); }
+  18%  { background: var(--tb-wash-done);  border-color: var(--brand-primary-500); box-shadow: inset 0 0 0 2px var(--brand-glow), inset 0 0 14px 0 color-mix(in srgb, var(--brand-primary-500) 35%, transparent); }
+  72%  { background: var(--tb-wash-done2); border-color: var(--brand-primary-500); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-primary-500) 25%, transparent), inset 0 0 8px 0 color-mix(in srgb, var(--brand-primary-500) 18%, transparent); }
   100% { background: var(--tb-card-bg);    border-color: var(--tb-card-border); box-shadow: inset 0 0 0 0 transparent, inset 0 0 0 0 transparent; }
 }
 .tb-card.success-done { animation: cardDone 1900ms cubic-bezier(.22,1,.36,1) forwards; }
@@ -253,16 +253,16 @@ html.dark .tb-card:not(.success-done):not(.success-progress):not(.success-review
 /* ---- Column scrollbar — visible (slim, design-system grey) ---- */
 .tb-column-scroll {
   scrollbar-width: thin;
-  scrollbar-color: #CBD5E1 transparent;
+  scrollbar-color: #D4D4D4 transparent;
 }
 .tb-column-scroll::-webkit-scrollbar { width: 6px; }
 .tb-column-scroll::-webkit-scrollbar-track { background: transparent; }
 .tb-column-scroll::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: #D4D4D4;
   border-radius: 3px;
   transition: background 200ms;
 }
-.tb-column-scroll::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+.tb-column-scroll::-webkit-scrollbar-thumb:hover { background: #A1A1A1; }
 
 /* ---- Sync button morph: bounce replays on each phase change (key={phase} remount) ---- */
 @keyframes syncMorphBounce {
@@ -275,13 +275,13 @@ html.dark .tb-card:not(.success-done):not(.success-progress):not(.success-review
 .sync-btn:active:not([disabled]) { transform: scale(0.97) !important; }
 
 /* ===== Dark mode (class-based surfaces) ===== */
-html.dark .tb-column.drop-target[data-col="todo"]     { background:#172033 !important; outline-color: rgba(148,163,184,0.5); }
+html.dark .tb-column.drop-target[data-col="todo"]     { background:#202020 !important; outline-color: rgba(161,161,161,0.5); }
 html.dark .tb-column.drop-target[data-col="progress"] { background:#2A1E12 !important; outline-color: rgba(249,115,22,0.65); }
 html.dark .tb-column.drop-target[data-col="review"]   { background:#2A2410 !important; outline-color: rgba(251,191,36,0.75); }
-html.dark .tb-column.drop-target[data-col="done"]     { background:#0E2A20 !important; outline-color: rgba(16,185,129,0.65); }
-html.dark .tb-column-scroll{ scrollbar-color:#334155 transparent; }
-html.dark .tb-column-scroll::-webkit-scrollbar-thumb{ background:#334155; }
-html.dark .tb-column-scroll::-webkit-scrollbar-thumb:hover{ background:#475569; }
+html.dark .tb-column.drop-target[data-col="done"]     { background:#0E2A20 !important; outline-color: color-mix(in srgb, var(--brand-primary-500) 65%, transparent); }
+html.dark .tb-column-scroll{ scrollbar-color:#232323 transparent; }
+html.dark .tb-column-scroll::-webkit-scrollbar-thumb{ background:#232323; }
+html.dark .tb-column-scroll::-webkit-scrollbar-thumb:hover{ background:#4A4A4A; }
 
 /* ---- Keyframes shared across components ---- */
 @keyframes itemIn {

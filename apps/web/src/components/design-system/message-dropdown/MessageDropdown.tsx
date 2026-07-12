@@ -56,7 +56,7 @@ const SAMPLE_MESSAGES: Message[] = [
   {
     id: 'm3', sender: 'Charlie Davis', time: 'Yesterday', unread: true,
     preview: "Can you send me the files from last week's sprint?",
-    gradient: 'linear-gradient(135deg, #34D399 0%, #06B6D4 100%)',
+    gradient: 'linear-gradient(135deg, var(--brand-primary-400) 0%, #06B6D4 100%)',
   },
 ]
 

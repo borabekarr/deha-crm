@@ -16,3 +16,5 @@ export type { UseAutoHeightOptions, UseAutoHeightResult } from './use-auto-heigh
 
 export { useProximityGroup, registerProximityGroup } from './use-proximity-group';
 export type { ProximityOptions } from './use-proximity-group';
+
+export { useSquircle } from './use-squircle';

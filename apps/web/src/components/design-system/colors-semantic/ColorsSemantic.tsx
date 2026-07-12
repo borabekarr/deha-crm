@@ -5,13 +5,13 @@ export default function ColorsSemantic() {
   return (
     <div className="card">
       <div className="grid4">
-        <div className="sem success" style={{ background: '#ECFDF5', color: '#047857' }}>
-          <span className="sem-dot" style={{ background: '#10B981' }}></span>
+        <div className="sem success" style={{ background: 'var(--semantic-success-bg)', color: 'color-mix(in oklch, var(--semantic-success), black 30%)' }}>
+          <span className="sem-dot" style={{ background: 'var(--semantic-success)' }}></span>
           <div>
             <div className="sem-name">Success</div>
-            <div className="sem-hex">#10B981</div>
+            <div className="sem-hex">--semantic-success</div>
           </div>
-          <div className="sem-pill" style={{ background: '#10B981' }}>+12%</div>
+          <div className="sem-pill" style={{ background: 'var(--semantic-success)' }}>+12%</div>
           <div className="sem-use">Growth deltas. Low-priority tasks. Confirmed actions.</div>
         </div>
         <div className="sem warning" style={{ background: '#FEFCE8', color: '#854D0E' }}>

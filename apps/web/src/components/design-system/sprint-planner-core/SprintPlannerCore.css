@@ -8,52 +8,52 @@
   --p0-bg: #FEF2F2;
   --p1-color: #F97316;
   --p1-bg: #FFF7ED;
-  --p2-color: #10B981;
-  --p2-bg: #ECFDF5;
-  --buf-color: #94A3B8;
-  --buf-bg:    #F1F5F9;
+  --p2-color: var(--brand-primary-500);
+  --p2-bg: var(--brand-primary-50);
+  --buf-color: #A1A1A1;
+  --buf-bg:    #F5F5F5;
 
   /* themeable surfaces (light = originals) */
   --sp-shell:#D4DCE8; --sp-panel:#FFFFFF;
   --sp-cell-bg:#FAFBFC; --sp-cell-border:#EEF1F5;
-  --sp-card-bg:#FFFFFF; --sp-card-border:#CBD5E1;
-  --sp-fg1:#0F172A; --sp-fg2:#475569; --sp-fg3:#64748B; --sp-fg4:#94A3B8;
-  --sp-faint:#CBD5E1; --sp-chip:#F1F5F9; --sp-chip-fg:#475569; --sp-hairline:#F1F5F9;
-  --sp-pop-bg:#FFFFFF; --sp-kbd-bg:#F8FAFC; --sp-sep:#E2E8F0;
-  --sp-today-fg:#047857; --sp-addhover-bg:#ECFDF5;
+  --sp-card-bg:#FFFFFF; --sp-card-border:#D4D4D4;
+  --sp-fg1:#111111; --sp-fg2:#4A4A4A; --sp-fg3:#6B6B6B; --sp-fg4:#A1A1A1;
+  --sp-faint:#D4D4D4; --sp-chip:#F5F5F5; --sp-chip-fg:#4A4A4A; --sp-hairline:#F5F5F5;
+  --sp-pop-bg:#FFFFFF; --sp-kbd-bg:#FAFAFA; --sp-sep:#ECECEC;
+  --sp-today-fg:var(--brand-primary-700); --sp-addhover-bg:var(--brand-primary-50);
   --sp-fade1:rgba(250,251,252,0); --sp-fade-mid:rgba(250,251,252,0.85); --sp-fade-solid:rgba(250,251,252,1);
-  --sp-askai:#0F172A; --sp-askai-hover:#1E293B;
+  --sp-askai:#111111; --sp-askai-hover:#1C1C1C;
   /* move-glow wash tints (light) */
   --sp-wash-p0:#FEF2F2; --sp-wash-p0b:#FFF6F6;
   --sp-wash-p1:#FFF7ED; --sp-wash-p1b:#FFFAF2;
-  --sp-wash-p2:#ECFDF5; --sp-wash-p2b:#F0FDF9;
-  --sp-wash-buf:#F1F5F9; --sp-wash-bufb:#F8FAFC;
+  --sp-wash-p2:var(--brand-primary-50); --sp-wash-p2b:#F0FDF9;
+  --sp-wash-buf:#F5F5F5; --sp-wash-bufb:#FAFAFA;
 }
 
 html.dark {
-  --sp-shell:#0B1220; --sp-panel:#1E293B;
-  --sp-cell-bg:#0F172A; --sp-cell-border:#243044;
-  --sp-card-bg:#243044; --sp-card-border:#334155;
-  --sp-fg1:#F1F5F9; --sp-fg2:#CBD5E1; --sp-fg3:#94A3B8; --sp-fg4:#64748B;
-  --sp-faint:#475569; --sp-chip:#0F172A; --sp-chip-fg:#CBD5E1; --sp-hairline:#243044;
-  --sp-pop-bg:#1E293B; --sp-kbd-bg:#0F172A; --sp-sep:#334155;
-  --sp-today-fg:#34D399; --sp-addhover-bg:rgba(16,185,129,0.16);
-  --sp-fade1:rgba(15,23,42,0); --sp-fade-mid:rgba(15,23,42,0.85); --sp-fade-solid:rgba(15,23,42,1);
-  --sp-askai:#10B981; --sp-askai-hover:#34D399;
+  --sp-shell:#0A0A0A; --sp-panel:#1C1C1C;
+  --sp-cell-bg:#111111; --sp-cell-border:#242424;
+  --sp-card-bg:#242424; --sp-card-border:#232323;
+  --sp-fg1:#F5F5F5; --sp-fg2:#D4D4D4; --sp-fg3:#A1A1A1; --sp-fg4:#6B6B6B;
+  --sp-faint:#4A4A4A; --sp-chip:#111111; --sp-chip-fg:#D4D4D4; --sp-hairline:#242424;
+  --sp-pop-bg:#1C1C1C; --sp-kbd-bg:#111111; --sp-sep:#232323;
+  --sp-today-fg:var(--brand-primary-400); --sp-addhover-bg:color-mix(in srgb, var(--brand-primary-500) 16%, transparent);
+  --sp-fade1:rgba(17,17,17,0); --sp-fade-mid:rgba(17,17,17,0.85); --sp-fade-solid:rgba(17,17,17,1);
+  --sp-askai:var(--brand-primary-500); --sp-askai-hover:var(--brand-primary-400);
   /* move-glow wash tints (dark) */
   --sp-wash-p0:#3A1417; --sp-wash-p0b:#311115;
   --sp-wash-p1:#33230F; --sp-wash-p1b:#2A1C0C;
   --sp-wash-p2:#0E2E22; --sp-wash-p2b:#0C271D;
-  --sp-wash-buf:#243044; --sp-wash-bufb:#1E2A3C;
+  --sp-wash-buf:#242424; --sp-wash-bufb:#1E2A3C;
 }
 
 /* Outer gray shell + inner white panel (theme-editor pattern) */
-/* item 1: outer uses --sp-shell grey; inner panel uses card tokens (light #FFFFFF/#CBD5E1/20px, dark #1E293B/#334155) */
+/* item 1: outer uses --sp-shell grey; inner panel uses card tokens (light #FFFFFF/#D4D4D4/20px, dark #1C1C1C/#232323) */
 .sp-outer {
   background: var(--sp-shell);
   border-radius: 28px;
   padding: 10px;
-  box-shadow: 0 16px 56px rgba(15,23,42,0.14), 0 3px 10px rgba(15,23,42,0.07);
+  box-shadow: 0 16px 56px rgba(17,17,17,0.14), 0 3px 10px rgba(17,17,17,0.07);
   display: inline-block;
   min-width: 880px;
   max-width: calc(100vw - 40px);
@@ -62,7 +62,7 @@ html.dark .sp-outer { box-shadow: 0 16px 56px rgba(0,0,0,0.5), 0 3px 10px rgba(0
 .sp-panel {
   /* item 1: canonical card tokens — matches .card-inner in both themes */
   background: var(--card-bg, #FFFFFF);
-  border: 1px solid var(--card-border, #CBD5E1);
+  border: 1px solid var(--card-border, #D4D4D4);
   border-radius: var(--card-radius, 20px);
   overflow: hidden;
   box-shadow: inset 0 1px 0 rgba(255,255,255,1);
@@ -72,8 +72,8 @@ html.dark .sp-outer { box-shadow: 0 16px 56px rgba(0,0,0,0.5), 0 3px 10px rgba(0
   position: relative;
 }
 html.dark .sp-panel {
-  background: var(--card-bg, #1E293B);
-  border-color: var(--card-border, #334155);
+  background: var(--card-bg, #1C1C1C);
+  border-color: var(--card-border, #232323);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
 }
 
@@ -130,13 +130,13 @@ html.dark .sp-palette-centered { background: rgba(2,6,12,0.7); }
 }
 /* Hover preserves the dashed border + lifts above siblings */
 .ticket:not(.success-p0):not(.success-p1):not(.success-p2):not(.success-buffer):hover {
-  border-color: rgba(15,23,42,0.18) !important;
+  border-color: rgba(17,17,17,0.18) !important;
   background: var(--sp-card-bg) !important;
-  box-shadow: 0 4px 12px -2px rgba(15,23,42,0.10), 0 2px 4px -1px rgba(15,23,42,0.04), inset 0 1px 0 rgba(255,255,255,0.6) !important;
+  box-shadow: 0 4px 12px -2px rgba(17,17,17,0.10), 0 2px 4px -1px rgba(17,17,17,0.04), inset 0 1px 0 rgba(255,255,255,0.6) !important;
   transform: translateY(-1px);
 }
 html.dark .ticket:not(.success-p0):not(.success-p1):not(.success-p2):not(.success-buffer):hover {
-  border-color: #475569 !important;
+  border-color: #4A4A4A !important;
   box-shadow: 0 4px 12px -2px rgba(0,0,0,0.4), 0 2px 4px -1px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04) !important;
 }
 .ticket:hover { z-index: 3; }
@@ -161,13 +161,13 @@ html.dark .ticket:not(.success-p0):not(.success-p1):not(.success-p2):not(.succes
 .day-cell {
   transition: background 160ms, border-color 160ms, outline-color 160ms, box-shadow 160ms;
   box-shadow:
-    inset 0 1px 2px rgba(15,23,42,0.04),
-    inset 0 0 0 1px rgba(15,23,42,0.02);
+    inset 0 1px 2px rgba(17,17,17,0.04),
+    inset 0 0 0 1px rgba(17,17,17,0.02);
 }
 /* item 2: drop-target — clean solid black outline (white in dark), no green glow */
 .day-cell.drop-target {
   background: var(--sp-addhover-bg) !important;
-  outline: 2px solid rgba(15,23,42,0.70);
+  outline: 2px solid rgba(17,17,17,0.70);
   outline-offset: 0px;
   transition: outline-color 80ms;
 }
@@ -177,34 +177,34 @@ html.dark .day-cell.drop-target {
 /* Today's day cell — thicker green inner ring + subtle inner green wash */
 .day-cell.today {
   background: #F6FEFB;
-  border-color: #10B981;
+  border-color: var(--brand-primary-500);
   box-shadow:
-    inset 0 0 0 1.5px #10B981,
-    inset 0 2px 10px rgba(16,185,129,0.12),
-    inset 0 -1px 0 rgba(16,185,129,0.18);
+    inset 0 0 0 1.5px var(--brand-primary-500),
+    inset 0 2px 10px color-mix(in srgb, var(--brand-primary-500) 12%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--brand-primary-500) 18%, transparent);
 }
-html.dark .day-cell.today { background: rgba(16,185,129,0.08); }
+html.dark .day-cell.today { background: color-mix(in srgb, var(--brand-primary-500) 8%, transparent); }
 .day-cell.today.drop-target {
   background: #DCFCE7 !important;
 }
-html.dark .day-cell.today.drop-target { background: rgba(16,185,129,0.18) !important; }
+html.dark .day-cell.today.drop-target { background: color-mix(in srgb, var(--brand-primary-500) 18%, transparent) !important; }
 
 /* Slim, design-system grey scrollbar inside each day cell (visible) */
 .sp-day-scroll {
   scrollbar-width: thin;
-  scrollbar-color: #CBD5E1 transparent;
+  scrollbar-color: #D4D4D4 transparent;
 }
 .sp-day-scroll::-webkit-scrollbar { width: 5px; }
 .sp-day-scroll::-webkit-scrollbar-track { background: transparent; }
 .sp-day-scroll::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: #D4D4D4;
   border-radius: 3px;
   transition: background 200ms;
 }
-.sp-day-scroll::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
-html.dark .sp-day-scroll { scrollbar-color:#334155 transparent; }
-html.dark .sp-day-scroll::-webkit-scrollbar-thumb { background:#334155; }
-html.dark .sp-day-scroll::-webkit-scrollbar-thumb:hover { background:#475569; }
+.sp-day-scroll::-webkit-scrollbar-thumb:hover { background: #A1A1A1; }
+html.dark .sp-day-scroll { scrollbar-color:#232323 transparent; }
+html.dark .sp-day-scroll::-webkit-scrollbar-thumb { background:#232323; }
+html.dark .sp-day-scroll::-webkit-scrollbar-thumb:hover { background:#4A4A4A; }
 
 /* Command palette suggestion row — item 13: hover effect */
 .sugg-row {
@@ -239,13 +239,13 @@ html.dark .sugg-row:hover, html.dark .sugg-row.active {
   100% { background: var(--sp-card-bg);    border-color: var(--sp-card-border); box-shadow: inset 0 0 0 0 transparent; }
 }
 @keyframes ticketWashP2 {
-  0%   { background: var(--sp-wash-p2); border-color: #10B981; box-shadow: inset 0 0 0 2px rgba(16,185,129,0.50), inset 0 0 14px 0 rgba(16,185,129,0.30); }
-  72%  { background: var(--sp-wash-p2b); border-color: #10B981; box-shadow: inset 0 0 0 1px rgba(16,185,129,0.25), inset 0 0 8px 0 rgba(16,185,129,0.16); }
+  0%   { background: var(--sp-wash-p2); border-color: var(--brand-primary-500); box-shadow: inset 0 0 0 2px var(--brand-glow), inset 0 0 14px 0 color-mix(in srgb, var(--brand-primary-500) 30%, transparent); }
+  72%  { background: var(--sp-wash-p2b); border-color: var(--brand-primary-500); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-primary-500) 25%, transparent), inset 0 0 8px 0 color-mix(in srgb, var(--brand-primary-500) 16%, transparent); }
   100% { background: var(--sp-card-bg);    border-color: var(--sp-card-border); box-shadow: inset 0 0 0 0 transparent; }
 }
 @keyframes ticketWashBuffer {
-  0%   { background: var(--sp-wash-buf); border-color: #64748B; box-shadow: inset 0 0 0 2px rgba(100,116,139,0.40), inset 0 0 14px 0 rgba(100,116,139,0.20); }
-  72%  { background: var(--sp-wash-bufb); border-color: #64748B; box-shadow: inset 0 0 0 1px rgba(100,116,139,0.18), inset 0 0 8px 0 rgba(100,116,139,0.10); }
+  0%   { background: var(--sp-wash-buf); border-color: #6B6B6B; box-shadow: inset 0 0 0 2px rgba(100,116,139,0.40), inset 0 0 14px 0 rgba(100,116,139,0.20); }
+  72%  { background: var(--sp-wash-bufb); border-color: #6B6B6B; box-shadow: inset 0 0 0 1px rgba(100,116,139,0.18), inset 0 0 8px 0 rgba(100,116,139,0.10); }
   100% { background: var(--sp-card-bg);    border-color: var(--sp-card-border); box-shadow: inset 0 0 0 0 transparent; }
 }
 .ticket.success-p0     { animation: ticketWashP0     1800ms cubic-bezier(.22,1,.36,1) forwards; }
@@ -313,7 +313,7 @@ html.dark .sugg-row:hover, html.dark .sugg-row.active {
   padding: 0 7px;
   border-radius: 9999px;
   background: rgba(255,255,255,0.94);
-  color: rgba(15,23,42,0.85);
+  color: rgba(17,17,17,0.85);
   font-family: 'Montserrat';
   font-size: 10.5px; font-weight: 900;
   letter-spacing: 0; text-transform: none;
@@ -323,10 +323,10 @@ html.dark .sugg-row:hover, html.dark .sugg-row.active {
     inset 0 0 0 1px rgba(0,0,0,0.05);
   font-variant-numeric: tabular-nums;
 }
-.sp-stat-badge.kind-neutral { background:#64748B; }
+.sp-stat-badge.kind-neutral { background:#6B6B6B; }
 .sp-stat-badge.kind-danger  { background:#EF4444; }
 .sp-stat-badge.kind-hot     { background:#F97316; }
-.sp-stat-badge.kind-success { background:#10B981; }
+.sp-stat-badge.kind-success { background:var(--brand-primary-500); }
 .sp-ask-ai {
   background: var(--sp-askai);
   cursor: pointer;
@@ -337,17 +337,17 @@ html.dark .sugg-row:hover, html.dark .sugg-row.active {
 
 /* Ask AI — white theme in dark mode */
 html.dark .sp-ask-ai {
-  background: #F1F5F9; color: #0F172A; text-shadow: none;
+  background: #F5F5F5; color: #111111; text-shadow: none;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.7),
-    inset 0 -1.5px 0 rgba(15,23,42,0.14),
-    inset 0 0 0 1px rgba(15,23,42,0.10);
+    inset 0 -1.5px 0 rgba(17,17,17,0.14),
+    inset 0 0 0 1px rgba(17,17,17,0.10);
 }
 html.dark .sp-ask-ai:hover { background: #FFFFFF; }
-html.dark .sp-ask-ai svg path { fill: #0F172A; }
+html.dark .sp-ask-ai svg path { fill: #111111; }
 html.dark .sp-ask-ai .kbd-pill {
-  background: rgba(15,23,42,0.10); color: rgba(15,23,42,0.78);
-  box-shadow: inset 0 0 0 1px rgba(15,23,42,0.10);
+  background: rgba(17,17,17,0.10); color: rgba(17,17,17,0.78);
+  box-shadow: inset 0 0 0 1px rgba(17,17,17,0.10);
 }
 
 /* Reduce-motion respect */
@@ -383,26 +383,26 @@ html.dark .sugg-row::before {
 /* item 13: CommandPalette dialog — inner-card look (card tokens) */
 .sp-palette-dialog {
   background: var(--card-bg, #FFFFFF) !important;
-  border: 1px solid var(--card-border, #CBD5E1) !important;
+  border: 1px solid var(--card-border, #D4D4D4) !important;
   border-radius: var(--card-radius, 20px) !important;
-  box-shadow: 0 24px 56px -16px rgba(15,23,42,0.22), 0 8px 20px -8px rgba(15,23,42,0.12), inset 0 1px 0 rgba(255,255,255,0.9) !important;
+  box-shadow: 0 24px 56px -16px rgba(17,17,17,0.22), 0 8px 20px -8px rgba(17,17,17,0.12), inset 0 1px 0 rgba(255,255,255,0.9) !important;
 }
 html.dark .sp-palette-dialog {
-  background: var(--card-bg, #1E293B) !important;
-  border-color: var(--card-border, #334155) !important;
+  background: var(--card-bg, #1C1C1C) !important;
+  border-color: var(--card-border, #232323) !important;
   box-shadow: 0 24px 56px -16px rgba(0,0,0,0.5), 0 8px 20px -8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06) !important;
 }
 
 /* item 13: AddTicketModal dialog — inner-card look */
 .sp-modal-dialog {
   background: var(--card-bg, #FFFFFF) !important;
-  border: 1px solid var(--card-border, #CBD5E1) !important;
+  border: 1px solid var(--card-border, #D4D4D4) !important;
   border-radius: var(--card-radius, 20px) !important;
-  box-shadow: 0 24px 56px -16px rgba(15,23,42,0.22), 0 8px 20px -8px rgba(15,23,42,0.12), inset 0 1px 0 rgba(255,255,255,0.9) !important;
+  box-shadow: 0 24px 56px -16px rgba(17,17,17,0.22), 0 8px 20px -8px rgba(17,17,17,0.12), inset 0 1px 0 rgba(255,255,255,0.9) !important;
 }
 html.dark .sp-modal-dialog {
-  background: var(--card-bg, #1E293B) !important;
-  border-color: var(--card-border, #334155) !important;
+  background: var(--card-bg, #1C1C1C) !important;
+  border-color: var(--card-border, #232323) !important;
   box-shadow: 0 24px 56px -16px rgba(0,0,0,0.5), 0 8px 20px -8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06) !important;
 }
 
@@ -421,24 +421,24 @@ html.dark .ticket {
   padding: 8px 16px;
   border: none;
   border-radius: 9999px;
-  background: #0F172A;
+  background: #111111;
   color: #fff;
   font-family: 'Montserrat';
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.04em;
   cursor: pointer;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 2px 6px rgba(15,23,42,0.28);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 2px 6px rgba(17,17,17,0.28);
   transition: background-color calc(180ms * var(--anim-mult, 1)), transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1);
   background-image:
     linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
   background-size: auto, 16px 16px, 16px 16px;
 }
-.sp-add-ticket-btn:hover { transform: scale(1.03); box-shadow: 0 8px 20px rgba(15,23,42,0.32), inset 0 1px 0 rgba(255,255,255,0.2); }
+.sp-add-ticket-btn:hover { transform: scale(1.03); box-shadow: 0 8px 20px rgba(17,17,17,0.32), inset 0 1px 0 rgba(255,255,255,0.2); }
 .sp-add-ticket-btn:active { transform: scale(0.96); }
 .sp-add-ticket-btn:disabled {
-  background: #CBD5E1;
+  background: #D4D4D4;
   background-image: none;
   box-shadow: none;
   cursor: not-allowed;
@@ -446,15 +446,15 @@ html.dark .ticket {
   color: #fff;
 }
 html.dark .sp-add-ticket-btn {
-  background: #10B981;
+  background: var(--brand-primary-500);
   background-image:
     linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px);
   background-size: auto, 16px 16px, 16px 16px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 8px rgba(16,185,129,0.34);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 8px color-mix(in srgb, var(--brand-primary-500) 34%, transparent);
 }
 html.dark .sp-add-ticket-btn:disabled {
-  background: #334155;
+  background: #232323;
   background-image: none;
 }
 
@@ -476,7 +476,7 @@ html.dark .sp-add-ticket-btn:disabled {
   display: inline-block;
   width: 14px;
   height: 14px;
-  border: 2px solid rgba(15,23,42,0.15);
+  border: 2px solid rgba(17,17,17,0.15);
   border-top-color: var(--sp-fg1);
   border-radius: 50%;
   animation: spRowSpin calc(600ms * var(--anim-mult, 1)) linear infinite;

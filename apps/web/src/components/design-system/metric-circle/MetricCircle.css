@@ -1,8 +1,8 @@
-body { background: #F8FAFC; }
+body { background: #FAFAFA; }
 .frame {
   padding: 34px 30px;
   display: flex; flex-direction: column; align-items: center; gap: 24px;
-  background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.10) 0%, rgba(248,250,252,1) 50%, #FFFFFF 100%);
+  background-image: radial-gradient(ellipse at top right, color-mix(in srgb, var(--brand-primary-500) 10%, transparent) 0%, rgba(248,250,252,1) 50%, #FFFFFF 100%);
 }
 .hint {
   font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
@@ -17,7 +17,7 @@ body { background: #F8FAFC; }
 /* ── The capsule ────────────────────────────────────────────────────── */
 .metric-circle {
   --c0: #0FB57C; --c1: #3DF0A6; --glow: #10E08F;
-  --num: #0F172A; --label: #94A3B8; --track: rgba(15,23,42,0.08);
+  --num: #111111; --label: #A1A1A1; --track: rgba(17,17,17,0.08);
   position: relative;
   width: 100%;
   min-height: 62px;
@@ -29,11 +29,11 @@ body { background: #F8FAFC; }
   user-select: none;
   font-family: var(--font-display);
   background: linear-gradient(180deg, #FFFFFF 0%, #EDF1F7 100%);
-  border: 1px solid #E2E8F0;
+  border: 1px solid #ECECEC;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,1),
-    inset 0 -3px 6px rgba(15,23,42,0.05),
-    0 16px 34px -16px rgba(15,23,42,0.24);
+    inset 0 -3px 6px rgba(17,17,17,0.05),
+    0 16px 34px -16px rgba(17,17,17,0.24);
   transition: none;
 }
 
@@ -96,9 +96,9 @@ body { background: #F8FAFC; }
 
 /* ── Dark mode (System A) — canonical dark surface matching MetricCard/Cards ── */
 html.dark .metric-circle {
-  --num: #F8FAFC; --label: #868D97; --track: rgba(255,255,255,0.06);
-  background: #1E293B;
-  border: 1px solid #334155;
+  --num: #FAFAFA; --label: #868D97; --track: rgba(255,255,255,0.06);
+  background: #1C1C1C;
+  border: 1px solid #232323;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.05),
     inset 0 0 0 1px rgba(255,255,255,0.04),

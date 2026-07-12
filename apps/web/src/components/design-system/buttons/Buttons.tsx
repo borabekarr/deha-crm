@@ -3,6 +3,7 @@ import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './Buttons.css'
 import DeleteButton from '@/components/design-system/delete-button/DeleteButton'
+import { useProximityGroup } from '@/lib/hooks'
 import { btnRootRef, cleanupBtnRoot, runApplyBtn } from './buttons-hook'
 
 // ---------------------------------------------------------------------------
@@ -21,6 +22,7 @@ function ApplyButton() {
     <button
       type="button"
       className={`btn-green btn-apply${phaseClass}`}
+      data-proximity
       ref={(el) => {
         btnRootRef(el)
         if (!el) cleanupBtnRoot(el)
@@ -48,26 +50,29 @@ function ApplyButton() {
 }
 
 export default function Buttons() {
+  const row1Ref = useProximityGroup<HTMLDivElement>()
+  const row2Ref = useProximityGroup<HTMLDivElement>()
+
   return (
     <div className="btn-page-root card">
       <span className="btn-label">Buttons</span>
-      <div className="btn-row">
-        <button type="button" className="btn-primary">View Your Leads <span className="material-icons btn-mi">arrow_forward</span></button>
-        <button type="button" className="btn-inverse">View Your Leads <span className="material-icons btn-mi">arrow_forward</span></button>
-        <button type="button" className="btn-glass">Son 30 Gün <span className="material-icons btn-mi">expand_more</span></button>
-        <button type="button" className="btn-text">Tüm Görevleri Gör <span className="material-icons btn-mi">arrow_forward</span></button>
+      <div className="btn-row" ref={row1Ref}>
+        <button type="button" className="btn-primary" data-proximity>View Your Leads <span className="material-icons btn-mi">arrow_forward</span></button>
+        <button type="button" className="btn-inverse" data-proximity>View Your Leads <span className="material-icons btn-mi">arrow_forward</span></button>
+        <button type="button" className="btn-glass" data-proximity>Son 30 Gün <span className="material-icons btn-mi">expand_more</span></button>
+        <button type="button" className="btn-text" data-proximity>Tüm Görevleri Gör <span className="material-icons btn-mi">arrow_forward</span></button>
       </div>
 
       <span className="btn-label" style={{ marginTop: 20 }}>Apply &amp; Discuss (pipeline-card variants)</span>
-      <div className="btn-row">
+      <div className="btn-row" ref={row2Ref}>
         {/* Stateful apply button — done → reset */}
         <ApplyButton />
         {/* Ask Jeru — static, inherits rainbow border + softened hover from .btn-apply */}
-        <button type="button" className="btn-green btn-apply">
+        <button type="button" className="btn-green btn-apply" data-proximity>
           <span className="material-symbols-outlined btn-apply-icon">neurology</span>
           Ask Jeru
         </button>
-        <button type="button" className="btn-discuss">
+        <button type="button" className="btn-discuss" data-proximity>
           <span className="material-icons" style={{ fontSize: 16 }}>chat</span>
           Discuss
         </button>
@@ -96,7 +101,7 @@ export default function Buttons() {
 
       <span className="btn-label" style={{ marginTop: 20 }}>Task footer (--fbtn color token)</span>
       <div className="btn-row">
-        <button type="button" className="btn-task" style={{ '--fbtn': '#10B981' } as React.CSSProperties}>
+        <button type="button" className="btn-task" style={{ '--fbtn': 'var(--brand-primary-500)' } as React.CSSProperties}>
           <span className="material-icons btn-task-icon">task_alt</span>
           Mark Done
         </button>
@@ -113,7 +118,7 @@ export default function Buttons() {
       </div>
       <span className="btn-label" style={{ marginTop: 20 }}>CTA (optimization report)</span>
       <div className="btn-row">
-        <button type="button" className="btn-cta" style={{ '--accent': '#10B981', '--ctaglow': 'rgba(16,185,129,0.5)' } as React.CSSProperties}>
+        <button type="button" className="btn-cta" style={{ '--accent': 'var(--brand-primary-500)', '--ctaglow': 'var(--brand-glow)' } as React.CSSProperties}>
           <span className="material-symbols-outlined">insights</span>
           Get Optimization
         </button>

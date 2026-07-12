@@ -16,7 +16,7 @@ import { pvRootRef } from './pipeline-view-hook'
    Terminal "Lost" row reads muted (desaturated slate) with a red trend.
    Structure carries `--i` per row so step 2 can add CSS-only stagger.
    No framer-motion. Fully static — zero effect hooks of any kind.
-   Stage palette reused from funnel-chart. Emerald == #10B981.
+   Stage palette reused from funnel-chart. Emerald == var(--brand-primary-500).
    ========================================================================= */
 
 /* ── Types ────────────────────────────────────────────────────────────────── */
@@ -53,8 +53,8 @@ const DEMO_STAGES: readonly PipelineStage[] = [
   { key: 'qual',   label: 'Qualified',   color: '#F97316', count: 312, value: '₺1.28B', convFromPrev: 64,   prevLabel: 'New Leads',   trendDir: 'up',   trendPct: '4.6%', avgDays: 6 },
   { key: 'prop',   label: 'Proposal',    color: '#EF4444', count: 174, value: '₺742M',  convFromPrev: 56,   prevLabel: 'Qualified',   trendDir: 'up',   trendPct: '2.1%', avgDays: 9 },
   { key: 'nego',   label: 'Negotiation', color: '#8B5CF6', count: 88,  value: '₺418M',  convFromPrev: 51,   prevLabel: 'Proposal',    trendDir: 'down', trendPct: '1.4%', avgDays: 14 },
-  { key: 'won',    label: 'Won',         color: '#10B981', count: 43,  value: '₺214M',  convFromPrev: 49,   prevLabel: 'Negotiation', trendDir: 'up',   trendPct: '6.7%', avgDays: 22 },
-  { key: 'lost',   label: 'Lost',        color: '#64748B', count: 45,  value: '₺198M',  convFromPrev: null, prevLabel: null,          trendDir: 'down', trendPct: '3.1%', avgDays: 11, muted: true },
+  { key: 'won',    label: 'Won',         color: 'var(--brand-primary-500)', count: 43,  value: '₺214M',  convFromPrev: 49,   prevLabel: 'Negotiation', trendDir: 'up',   trendPct: '6.7%', avgDays: 22 },
+  { key: 'lost',   label: 'Lost',        color: '#6B6B6B', count: 45,  value: '₺198M',  convFromPrev: null, prevLabel: null,          trendDir: 'down', trendPct: '3.1%', avgDays: 11, muted: true },
 ] as const
 
 /* ── Stat deep-dive popover ───────────────────────────────────────────────────

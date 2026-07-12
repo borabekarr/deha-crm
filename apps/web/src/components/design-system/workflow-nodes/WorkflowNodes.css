@@ -48,7 +48,7 @@
      sits with equal gaps on all sides (canonical: padding = 10px). */
   border-radius: 28px;
   padding: 10px;
-  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 12px 40px rgba(17,17,17, 0.10), 0 2px 8px rgba(17,17,17, 0.06);
   display: flex;
   flex-direction: column;
   position: relative;
@@ -131,15 +131,15 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 1px solid #E2E8F0;
+  border: 1px solid #ECECEC;
   background: var(--card-bg, #FFFFFF);
   display: grid;
   place-items: center;
   cursor: pointer;
-  color: #475569;
+  color: #4A4A4A;
   padding: 0;
   position: relative;
-  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  box-shadow: 0 3px 8px rgba(17,17,17, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.85);
   transition: background calc(140ms * var(--anim-mult, 1)), color calc(140ms * var(--anim-mult, 1)), border-color calc(140ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
 }
 
@@ -154,14 +154,14 @@
 /* Connect handle — hollow circle, outline only */
 .wf-tool.connect {
   background: transparent;
-  border: 2px solid #94A3B8;
+  border: 2px solid #A1A1A1;
   cursor: crosshair;
   box-shadow: none;
 }
 
-.wf-tool.connect:hover { background: transparent; border-color: #475569; transform: translateY(-1px) scale(1.08); }
-.wf-tool.add:hover     { color: #047857; background: #ECFDF5; border-color: #A7F3D0; }
-.wf-tool.edit:hover    { color: #0F172A; background: #F8FAFC; border-color: #CBD5E1; }
+.wf-tool.connect:hover { background: transparent; border-color: #4A4A4A; transform: translateY(-1px) scale(1.08); }
+.wf-tool.add:hover     { color: var(--brand-primary-700); background: var(--brand-primary-50); border-color: var(--brand-primary-200); }
+.wf-tool.edit:hover    { color: #111111; background: #FAFAFA; border-color: #D4D4D4; }
 .wf-tool.del:hover     { color: #B91C1C; background: #FEF2F2; border-color: #FECACA; }
 
 /* Tooltip — appears to the LEFT of the toolbar (inside the canvas) */
@@ -173,7 +173,7 @@
   left: auto;
   bottom: auto;
   transform: translateY(-50%) translateX(4px);
-  background: #0F172A;
+  background: #111111;
   color: #fff;
   white-space: nowrap;
   font-family: 'Montserrat', sans-serif;
@@ -185,7 +185,7 @@
   opacity: 0;
   pointer-events: none;
   z-index: 40;
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.22);
+  box-shadow: 0 6px 16px rgba(17,17,17, 0.22);
   transition: opacity calc(130ms * var(--anim-mult, 1)) ease, transform calc(130ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
 }
 
@@ -198,7 +198,7 @@
   bottom: auto;
   transform: translateY(-50%);
   border: 4px solid transparent;
-  border-left-color: #0F172A;
+  border-left-color: #111111;
   opacity: 0;
   pointer-events: none;
   z-index: 40;
@@ -225,8 +225,8 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.55),
-    inset 0 -2px 0 rgba(15, 23, 42, 0.18),
-    inset 0 0 0 1px rgba(15, 23, 42, 0.10);
+    inset 0 -2px 0 rgba(17,17,17, 0.18),
+    inset 0 0 0 1px rgba(17,17,17, 0.10);
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.13) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.13) 1px, transparent 1px);
@@ -235,15 +235,15 @@
 
 .wf-tag .material-icons { font-size: 13px; }
 .wf-tag.trigger { background-color: #FBBF24; }
-.wf-tag.action  { background-color: #10B981; }
+.wf-tag.action  { background-color: var(--brand-primary-500); }
 .wf-tag.output  { background-color: #F97316; }
 
 /* ── Card (white inner — canonical tokens) ───────────────────────────────── */
 .wf-card {
   background: var(--card-bg, #FFFFFF);
-  border: 1px solid var(--card-border, #CBD5E1);
+  border: 1px solid var(--card-border, #D4D4D4);
   border-radius: var(--card-radius, 20px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), inset 0 -1px 0 rgba(15, 23, 42, 0.03);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), inset 0 -1px 0 rgba(17,17,17, 0.03);
   /* Bottom padding moved to .wf-foot margin-bottom so the footer/.wf-warn block
      sits INSIDE the content box with a real bottom gap (equal to its top gap),
      instead of being flush against the content-box inner bottom. */
@@ -263,13 +263,13 @@
   gap: 8px;
   font-size: 14px;
   font-weight: 800;
-  color: #0F172A;
+  color: #111111;
   letter-spacing: -0.01em;
 }
 
 .wf-title .ic {
   font-size: 16px;
-  color: #334155;
+  color: #232323;
 }
 
 .wf-title .brand-letter {
@@ -295,13 +295,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #94A3B8;
+  color: #A1A1A1;
   border-radius: 6px;
   padding: 0;
   flex-shrink: 0;
 }
 
-.wf-menu:hover { background: #F1F5F9; color: #475569; }
+.wf-menu:hover { background: #F5F5F5; color: #4A4A4A; }
 
 .wf-menu .material-icons {
   font-size: 18px;
@@ -315,14 +315,14 @@
   align-items: center;
   gap: 5px;
   padding: 4px 10px;
-  background: #F8FAFC;
-  border: 1px solid #E2E8F0;
+  background: #FAFAFA;
+  border: 1px solid #ECECEC;
   border-radius: 10px;
   font-size: 12px;
   font-weight: 600;
-  color: #334155;
+  color: #232323;
   font-family: 'Montserrat', sans-serif;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -1px 0 rgba(15, 23, 42, 0.03);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -1px 0 rgba(17,17,17, 0.03);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -330,8 +330,8 @@
 }
 
 .wf-chip.method {
-  background: #F1F5F9;
-  color: #64748B;
+  background: #F5F5F5;
+  color: #6B6B6B;
   font-weight: 800;
   padding: 4px 7px;
   font-size: 11px;
@@ -351,7 +351,7 @@
 .wf-url {
   flex: 1;
   min-width: 0;
-  color: #64748B;
+  color: #6B6B6B;
   font-weight: 500;
 }
 
@@ -359,31 +359,31 @@
 .wf-connect {
   width: 100%;
   background: var(--card-bg, #FFFFFF);
-  border: 1px solid #E2E8F0;
+  border: 1px solid #ECECEC;
   border-radius: 10px;
   padding: 5px 12px;
   font-family: 'Montserrat', sans-serif;
   font-size: 13px;
   font-weight: 700;
-  color: #0F172A;
+  color: #111111;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   cursor: pointer;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), inset 0 -1px 0 rgba(15, 23, 42, 0.04);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), inset 0 -1px 0 rgba(17,17,17, 0.04);
   transition: background calc(150ms * var(--anim-mult, 1)), transform calc(100ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
 }
 
-.wf-connect:hover  { background: #F8FAFC; }
+.wf-connect:hover  { background: #FAFAFA; }
 .wf-connect:active { transform: scale(0.985); }
-.wf-connect .ic { font-size: 14px; color: #334155; }
+.wf-connect .ic { font-size: 14px; color: #232323; }
 
 /* ── Description text ────────────────────────────────────────────────────── */
 .wf-desc {
   font-size: 12px;
   font-weight: 500;
-  color: #64748B;
+  color: #6B6B6B;
   line-height: 1.3;
   margin-bottom: 4px;
   /* Clamp to 1 line with ellipsis — no hard crop */
@@ -395,13 +395,13 @@
 
 /* ── Prompt preview ──────────────────────────────────────────────────────── */
 .wf-prompt {
-  background: #F8FAFC;
-  border: 1px solid #E2E8F0;
+  background: #FAFAFA;
+  border: 1px solid #ECECEC;
   border-radius: 10px;
   padding: 5px 10px;
   font-size: 11.5px;
   font-weight: 500;
-  color: #475569;
+  color: #4A4A4A;
   line-height: 1.35;
   margin-bottom: 4px;
   /* Clamp to 2 lines with ellipsis — no hard crop */
@@ -413,8 +413,8 @@
 
 .wf-prompt .var {
   display: inline-block;
-  background: rgba(16, 185, 129, 0.12);
-  color: #047857;
+  background: color-mix(in srgb, var(--brand-primary-500) 12%, transparent);
+  color: var(--brand-primary-700);
   padding: 1px 6px;
   border-radius: 6px;
   font-weight: 700;
@@ -440,7 +440,7 @@
   gap: 4px;
   font-size: 11px;
   font-weight: 600;
-  color: #94A3B8;
+  color: #A1A1A1;
 }
 
 .wf-meta .ic { font-size: 12px; }
@@ -477,13 +477,13 @@
 /* Mirror html.dark .* blocks from _darkmode.css verbatim */
 
 html.dark .wn-shell {
-  background: #0F172A !important;
-  background-image: radial-gradient(circle at 1px 1px, #334155 1px, transparent 1px) !important;
+  background: #111111 !important;
+  background-image: radial-gradient(circle at 1px 1px, #232323 1px, transparent 1px) !important;
   background-size: 16px 16px !important;
 }
 
 html.dark .wf-outer {
-  background: #020617;
+  background: #0A0A0A;
   /* Canonical dark rim on outer shell (external line visible against dark canvas) */
   box-shadow:
     0 12px 40px rgba(0, 0, 0, 0.30),
@@ -493,64 +493,64 @@ html.dark .wf-outer {
 }
 
 /* Hover-expand shell extension — dark mode background */
-html.dark .wf-outer::after { background: #020617; }
+html.dark .wf-outer::after { background: #0A0A0A; }
 
 html.dark .wf-tool {
-  background: #1E293B;
-  border-color: #334155;
-  color: #CBD5E1;
+  background: #1C1C1C;
+  border-color: #232323;
+  color: #D4D4D4;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
-html.dark .wf-tool.connect { background: transparent; border-color: #64748B; }
-html.dark .wf-tool.connect:hover { border-color: #94A3B8; }
+html.dark .wf-tool.connect { background: transparent; border-color: #6B6B6B; }
+html.dark .wf-tool.connect:hover { border-color: #A1A1A1; }
 
-html.dark .wf-tool.add:hover  { color: #6EE7B7; background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.40); }
-html.dark .wf-tool.edit:hover { color: #F1F5F9; background: #273449; border-color: #475569; }
+html.dark .wf-tool.add:hover  { color: var(--brand-primary-300); background: color-mix(in srgb, var(--brand-primary-500) 15%, transparent); border-color: color-mix(in srgb, var(--brand-primary-500) 40%, transparent); }
+html.dark .wf-tool.edit:hover { color: #F5F5F5; background: #242424; border-color: #4A4A4A; }
 html.dark .wf-tool.del:hover  { color: #FCA5A5; background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.40); }
 
 html.dark .wf-card {
-  background: #1E293B;
-  border-color: #334155;
+  background: #1C1C1C;
+  border-color: #232323;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.20);
 }
 
-html.dark .wf-title { color: #F1F5F9; }
-html.dark .wf-title .ic { color: #CBD5E1; }
+html.dark .wf-title { color: #F5F5F5; }
+html.dark .wf-title .ic { color: #D4D4D4; }
 
-html.dark .wf-menu:hover { background: #273449; color: #CBD5E1; }
+html.dark .wf-menu:hover { background: #242424; color: #D4D4D4; }
 
 html.dark .wf-chip {
-  background: #0F172A;
-  border-color: #334155;
-  color: #CBD5E1;
+  background: #111111;
+  border-color: #232323;
+  color: #D4D4D4;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), inset 0 -1px 0 rgba(0, 0, 0, 0.20);
 }
 
-html.dark .wf-chip.method { background: #273449; color: #94A3B8; }
-html.dark .wf-url { color: #94A3B8; }
+html.dark .wf-chip.method { background: #242424; color: #A1A1A1; }
+html.dark .wf-url { color: #A1A1A1; }
 
 html.dark .wf-connect {
-  background: #0F172A;
-  border-color: #334155;
-  color: #F1F5F9;
+  background: #111111;
+  border-color: #232323;
+  color: #F5F5F5;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.20);
 }
 
-html.dark .wf-connect:hover { background: #273449; }
-html.dark .wf-connect .ic { color: #CBD5E1; }
+html.dark .wf-connect:hover { background: #242424; }
+html.dark .wf-connect .ic { color: #D4D4D4; }
 
-html.dark .wf-desc { color: #CBD5E1; }
+html.dark .wf-desc { color: #D4D4D4; }
 
 html.dark .wf-prompt {
-  background: #0F172A;
-  border-color: #334155;
-  color: #CBD5E1;
+  background: #111111;
+  border-color: #232323;
+  color: #D4D4D4;
 }
 
 html.dark .wf-prompt .var {
-  background: rgba(16, 185, 129, 0.18);
-  color: #6EE7B7;
+  background: color-mix(in srgb, var(--brand-primary-500) 18%, transparent);
+  color: var(--brand-primary-300);
 }
 
 html.dark .wf-warn {

@@ -41,10 +41,10 @@ interface NodeItem {
 
 const GENERAL_CATS: Category[] = [
   { id: 'input',     name: 'Input',           icon: 'login',         color: '#4F46E5' },
-  { id: 'output',    name: 'Output',          icon: 'logout',        color: '#10B981' },
+  { id: 'output',    name: 'Output',          icon: 'logout',        color: 'var(--brand-primary-500)' },
   { id: 'llm',       name: 'LLM',             icon: 'psychology',    color: '#8B5CF6' },
   { id: 'action',    name: 'Action',          icon: 'bolt',          color: '#F59E0B' },
-  { id: 'kb',        name: 'Knowledge Base',  icon: 'folder_open',   color: '#334155' },
+  { id: 'kb',        name: 'Knowledge Base',  icon: 'folder_open',   color: '#232323' },
   { id: 'database',  name: 'Database',        icon: 'storage',       color: '#EF4444' },
   { id: 'docreader', name: 'Document Reader', icon: 'description',   color: '#D97706' },
   { id: 'logic',     name: 'Logic',           icon: 'call_split',    color: '#F97316' },
@@ -64,10 +64,10 @@ const INTEGRATION_CATS: Category[] = [
 
 const NODES: Record<string, NodeItem[]> = {
   input:     [{ name: 'Text Prompt',     icon: 'notes',           color: '#4F46E5' }, { name: 'URL Fetcher',     icon: 'link',            color: '#4F46E5' }, { name: 'File Upload',     icon: 'upload_file',     color: '#4F46E5' }, { name: 'Audio Upload',    icon: 'mic',             color: '#4F46E5' }, { name: 'Image Upload',    icon: 'image',           color: '#4F46E5' }, { name: 'Form Input',      icon: 'edit_note',       color: '#4F46E5' }, { name: 'Webhook',         icon: 'webhook',         color: '#4F46E5' }, { name: 'Database Query',  icon: 'storage',         color: '#4F46E5' }],
-  output:    [{ name: 'Text Output',     icon: 'text_fields',     color: '#059669' }, { name: 'Audio Output',    icon: 'graphic_eq',      color: '#059669' }, { name: 'Image Output',    icon: 'image',           color: '#059669' }, { name: 'Email Send',      icon: 'send',            color: '#059669' }, { name: 'Slack Message',   icon: 'chat',            color: '#059669' }, { name: 'Webhook Push',    icon: 'webhook',         color: '#059669' }],
+  output:    [{ name: 'Text Output',     icon: 'text_fields',     color: 'var(--brand-primary-600)' }, { name: 'Audio Output',    icon: 'graphic_eq',      color: 'var(--brand-primary-600)' }, { name: 'Image Output',    icon: 'image',           color: 'var(--brand-primary-600)' }, { name: 'Email Send',      icon: 'send',            color: 'var(--brand-primary-600)' }, { name: 'Slack Message',   icon: 'chat',            color: 'var(--brand-primary-600)' }, { name: 'Webhook Push',    icon: 'webhook',         color: 'var(--brand-primary-600)' }],
   llm:       [{ name: 'Claude',          icon: 'smart_toy',       color: '#7C3AED' }, { name: 'GPT-4o',          icon: 'smart_toy',       color: '#7C3AED' }, { name: 'Gemini 2.0',      icon: 'neurology',    color: '#7C3AED' }, { name: 'Mistral',         icon: 'psychology',      color: '#7C3AED' }, { name: 'Llama 3',         icon: 'memory',          color: '#7C3AED' }],
   action:    [{ name: 'Write to Notion', icon: 'edit',            color: '#D97706' }, { name: 'Send Email',      icon: 'email',           color: '#D97706' }, { name: 'HTTP Request',    icon: 'http',            color: '#D97706' }, { name: 'Create Record',   icon: 'add_circle',      color: '#D97706' }, { name: 'Slack Post',      icon: 'chat_bubble',     color: '#D97706' }],
-  kb:        [{ name: 'Vector Search',   icon: 'manage_search',   color: '#334155' }, { name: 'Embed Document',  icon: 'upload_file',     color: '#334155' }, { name: 'Semantic Search', icon: 'travel_explore',  color: '#334155' }, { name: 'Hybrid Search',   icon: 'search',          color: '#334155' }],
+  kb:        [{ name: 'Vector Search',   icon: 'manage_search',   color: '#232323' }, { name: 'Embed Document',  icon: 'upload_file',     color: '#232323' }, { name: 'Semantic Search', icon: 'travel_explore',  color: '#232323' }, { name: 'Hybrid Search',   icon: 'search',          color: '#232323' }],
   database:  [{ name: 'Query',           icon: 'search',          color: '#DC2626' }, { name: 'Insert Row',      icon: 'add',             color: '#DC2626' }, { name: 'Update Row',      icon: 'edit',            color: '#DC2626' }, { name: 'Delete Row',      icon: 'delete',          color: '#DC2626' }],
   docreader: [{ name: 'PDF Reader',      icon: 'picture_as_pdf',  color: '#B45309' }, { name: 'Word Document',   icon: 'article',         color: '#B45309' }, { name: 'CSV Parser',      icon: 'table_chart',     color: '#B45309' }, { name: 'HTML Scraper',    icon: 'code',            color: '#B45309' }],
   logic:     [{ name: 'If / Else',       icon: 'call_split',      color: '#EA580C' }, { name: 'Loop',            icon: 'loop',            color: '#EA580C' }, { name: 'Switch',          icon: 'alt_route',       color: '#EA580C' }, { name: 'Filter',          icon: 'filter_list',     color: '#EA580C' }],
@@ -109,7 +109,7 @@ interface MenuState {
 const DARK_BADGE_IDS = new Set(['notion', 'github', 'kb', 'slack'])
 
 // Known near-black color values used in node data (same dark categories).
-const INK_COLORS = new Set(['#000000', '#000', '#24292e', '#334155', '#4a154b'])
+const INK_COLORS = new Set(['#000000', '#000', '#24292e', '#232323', '#4a154b'])
 
 /** Returns true when the hex color is near-black (unreadable on a dark background). */
 function isInkColor(color: string): boolean {

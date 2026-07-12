@@ -70,7 +70,7 @@
   cursor: pointer;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    0 1px 2px rgba(15, 23, 42, 0.04);
+    0 1px 2px rgba(17,17,17, 0.04);
   transition:
     background calc(150ms * var(--anim-mult, 1)),
     transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1),
@@ -95,7 +95,7 @@
   cursor: pointer;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    0 1px 2px rgba(15, 23, 42, 0.04);
+    0 1px 2px rgba(17,17,17, 0.04);
   transition:
     background calc(150ms * var(--anim-mult, 1)),
     transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1);
@@ -253,8 +253,8 @@
   overflow: hidden;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    0 1px 2px rgba(15, 23, 42, 0.05),
-    0 4px 10px -6px rgba(15, 23, 42, 0.12);
+    0 1px 2px rgba(17,17,17, 0.05),
+    0 4px 10px -6px rgba(17,17,17, 0.12);
   transition:
     box-shadow calc(140ms * var(--anim-mult, 1)),
     transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1);
@@ -273,14 +273,14 @@
   background-size: 15px 15px;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.45),
-    inset 0 -2px 0 rgba(15, 23, 42, 0.16);
+    inset 0 -2px 0 rgba(17,17,17, 0.16);
 }
 .cal2-ev:hover {
   background: var(--bg-chip);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    0 2px 4px rgba(15, 23, 42, 0.06),
-    0 10px 22px -10px rgba(15, 23, 42, 0.22);
+    0 2px 4px rgba(17,17,17, 0.06),
+    0 10px 22px -10px rgba(17,17,17, 0.22);
   transform: translateY(-1px);
   z-index: 7;
 }
@@ -439,7 +439,7 @@
   position: fixed;
   inset: 0;
   z-index: 998;
-  background: rgba(15, 23, 42, 0.34);
+  background: rgba(17,17,17, 0.34);
   opacity: 0;
   visibility: hidden;
   transition:
@@ -459,7 +459,7 @@
   max-width: 460px;
   background: var(--card-bg, var(--bg-card-solid));
   border-left: 1px solid var(--border-hairline);
-  box-shadow: -24px 0 60px -24px rgba(15, 23, 42, 0.34);
+  box-shadow: -24px 0 60px -24px rgba(17,17,17, 0.34);
   transform: translateX(100%);
   transition: transform calc(360ms * var(--anim-mult, 1)) cubic-bezier(0.5, 1, 0.36, 1);
   overflow: hidden;
@@ -517,7 +517,7 @@
     background calc(140ms * var(--anim-mult, 1)),
     transform calc(120ms * var(--anim-mult, 1));
 }
-.cal2-sh-close:hover { background: var(--slate-200); }
+.cal2-sh-close:hover { background: var(--gray-200); }
 .cal2-sh-close:active { transform: scale(0.9); }
 .cal2-sh-close .material-icons { font-size: 17px; }
 
@@ -567,7 +567,7 @@
   cursor: pointer;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    0 1px 2px rgba(15, 23, 42, 0.04);
+    0 1px 2px rgba(17,17,17, 0.04);
   transition:
     background calc(150ms * var(--anim-mult, 1)),
     transform calc(120ms * var(--anim-mult, 1));
@@ -679,7 +679,7 @@
   background: var(--fg1);
   color: var(--card-bg, var(--bg-card-solid));
   box-shadow:
-    0 1px 3px rgba(15, 23, 42, 0.2),
+    0 1px 3px rgba(17,17,17, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
@@ -745,7 +745,7 @@
   font-weight: 700;
   cursor: pointer;
   box-shadow:
-    0 2px 6px rgba(15, 23, 42, 0.18),
+    0 2px 6px rgba(17,17,17, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
   transition:
     transform calc(120ms * var(--anim-mult, 1)),
@@ -830,7 +830,7 @@ html.dark .cal2-ev {
     0 1px 2px rgba(0, 0, 0, 0.4),
     0 6px 16px -8px rgba(0, 0, 0, 0.6);
 }
-html.dark .cal2-ev:hover { background: var(--slate-700); }
+html.dark .cal2-ev:hover { background: var(--gray-700); }
 html.dark .cal2-today,
 html.dark .cal2-arrow,
 html.dark .cal2-sh-outline-btn,
@@ -841,8 +841,8 @@ html.dark .cal2-sh-copy {
 }
 html.dark .cal2-today:hover,
 html.dark .cal2-arrow:hover { background: var(--bg-chip); }
-html.dark .cal2-ev-meet-ic { background: rgba(16, 185, 129, 0.16); }
-html.dark .cal2-sh-close:hover { background: var(--slate-700); }
-html.dark .cal2-sh-join { background: rgba(255, 255, 255, 1); color: #0F172A; }
-html.dark .cal2-sh-join .cal2-sh-kbds kbd { background: rgba(15, 23, 42, 0.12); color: #0F172A; }
-html.dark .cal2-sh-rsvp-btn.is-active { background: rgba(255, 255, 255, 1); color: #0F172A; }
+html.dark .cal2-ev-meet-ic { background: color-mix(in srgb, var(--brand-primary-500) 16%, transparent); }
+html.dark .cal2-sh-close:hover { background: var(--gray-700); }
+html.dark .cal2-sh-join { background: rgba(255, 255, 255, 1); color: #111111; }
+html.dark .cal2-sh-join .cal2-sh-kbds kbd { background: rgba(17,17,17, 0.12); color: #111111; }
+html.dark .cal2-sh-rsvp-btn.is-active { background: rgba(255, 255, 255, 1); color: #111111; }

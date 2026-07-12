@@ -32,7 +32,7 @@ interface ActionItem {
 }
 
 const ACTIONS: ActionItem[] = [
-  { icon: 'play_arrow',  label: 'Run Workflow',          color: '#10B981' },
+  { icon: 'play_arrow',  label: 'Run Workflow',          color: 'var(--brand-primary-500)' },
   { icon: 'history',     label: 'View Execution Log',    color: '#EAB308' },
   { icon: 'api',         label: 'Generate API Endpoint', color: '#F97316' },
 ]

@@ -66,8 +66,8 @@ function ScoreCell({ lead }: { lead: Lead }) {
 function SentimentCell({ lead }: { lead: Lead }) {
   const s = lead.sentiment
   let emoji: string, label: string, bg: string, lite = false
-  if (s >= 75)      { emoji = '😄'; label = 'Happy';    bg = '#10B981' }
-  else if (s >= 60) { emoji = '🙂'; label = 'Positive'; bg = '#10B981' }
+  if (s >= 75)      { emoji = '😄'; label = 'Happy';    bg = 'var(--brand-primary-500)' }
+  else if (s >= 60) { emoji = '🙂'; label = 'Positive'; bg = 'var(--brand-primary-500)' }
   else if (s >= 45) { emoji = '😐'; label = 'Neutral';  bg = '#EAB308'; lite = true }
   else              { emoji = '🙁'; label = 'Unhappy';  bg = '#EF4444' }
   return (
@@ -87,7 +87,7 @@ function LeadRow({ lead, isActive, onClick }: { lead: Lead; isActive: boolean; o
   const whenTxt = lead.last < 50 ? 'today' : rel(lead.last)
   const stLite = lead.stage === 'proposal'
   const srcLite = src.kind === 'paid'
-  const tempBg = lead.temp === 'hot' ? '#F97316' : lead.temp === 'warm' ? '#EAB308' : '#64748B'
+  const tempBg = lead.temp === 'hot' ? '#F97316' : lead.temp === 'warm' ? '#EAB308' : '#6B6B6B'
   const tempIcon = lead.temp === 'hot' ? 'local_fire_department' : lead.temp === 'warm' ? 'thermostat' : 'ac_unit'
 
   return (
@@ -458,7 +458,7 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
               type="button"
               className={`lt-qf${qf === 'value' ? ' on' : ''}`}
               data-qf="value"
-              style={{ '--qf-c': '#10B981' } as React.CSSProperties}
+              style={{ '--qf-c': 'var(--brand-primary-500)' } as React.CSSProperties}
               onClick={() => handleQf('value')}
             >
               <span className="material-symbols-outlined">apartment</span>

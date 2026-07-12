@@ -16,13 +16,13 @@
 .mss-card {
   display:flex; flex-direction:column; align-items:center; gap:11px;
   padding:27px 19px 32px;
-  background:#F8FAFC;
-  background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.07) 0%, #F8FAFC 55%);
+  background:#FAFAFA;
+  background-image: radial-gradient(ellipse at top right, color-mix(in srgb, var(--brand-primary-500) 7%, transparent) 0%, #FAFAFA 55%);
 }
 .mss-hint { font-family: ui-monospace,"SF Mono",Menlo,monospace; font-size:10.5px; color:var(--fg4); letter-spacing:0.01em; }
 html.dark .mss-card {
-  background:#0F172A;
-  background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.06) 0%, #0F172A 55%);
+  background:#111111;
+  background-image: radial-gradient(ellipse at top right, color-mix(in srgb, var(--brand-primary-500) 6%, transparent) 0%, #111111 55%);
 }
 
 /* ════════════════ Grey bezel — own shell, no zoom (the card owns the hover) ════ */
@@ -41,24 +41,24 @@ html.dark .mss-card {
 
   --body:#FFFFFF;
   --header:#F4F7FB;
-  --edge:rgba(15,23,42,0.07);
+  --edge:rgba(17,17,17,0.07);
   --hi:rgba(255,255,255,0.92);
-  --title:#0F172A;
-  --vendor:#64748B;
-  --m-label:#334155;
-  --m-icbg:#EEF2F8; --m-icbd:rgba(15,23,42,0.10); --m-icfg:#64748B;
+  --title:#111111;
+  --vendor:#6B6B6B;
+  --m-label:#232323;
+  --m-icbg:#EEF2F8; --m-icbd:rgba(17,17,17,0.10); --m-icfg:#6B6B6B;
   --track:#E5EAF1;
-  --hdr-label:#94A3B8;
-  --navbg:rgba(15,23,42,0.04); --navbd:rgba(15,23,42,0.10); --navfg:#64748B;
-  --dot:rgba(15,23,42,0.16); --dot-on:#0F172A;
-  --specs-bd:rgba(15,23,42,0.12); --specs-fg:#64748B; --specs-rule:rgba(15,23,42,0.10);
-  --hover-glow:rgba(16,185,129,0.30);
+  --hdr-label:#A1A1A1;
+  --navbg:rgba(17,17,17,0.04); --navbd:rgba(17,17,17,0.10); --navfg:#6B6B6B;
+  --dot:rgba(17,17,17,0.16); --dot-on:#111111;
+  --specs-bd:rgba(17,17,17,0.12); --specs-fg:#6B6B6B; --specs-rule:rgba(17,17,17,0.10);
+  --hover-glow:color-mix(in srgb, var(--brand-primary-500) 30%, transparent);
 
   position:relative; width:344px; box-sizing:border-box;
   border-radius:var(--card-radius); overflow:hidden;
   background:var(--card-bg);
   border:1px solid var(--card-border);
-  box-shadow: inset 0 0 0 1px rgba(15,23,42,0.04);
+  box-shadow: inset 0 0 0 1px rgba(17,17,17,0.04);
   transition: box-shadow calc(300ms * var(--anim-mult, 1)) ease, translate calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
 }
 /* Resting state is fully visible. The entrance is a progressive enhancement
@@ -69,7 +69,7 @@ html.dark .mss-card {
   .sheet.intro { animation: sheetIn calc(600ms * var(--anim-mult, 1)) cubic-bezier(.16,1.28,.3,1); }
 }
 @keyframes sheetIn { 0% { transform: scale(0.85); } 100% { transform: scale(1); } }
-html.dark .shell.sel-shell { background:#020617; }
+html.dark .shell.sel-shell { background:#0A0A0A; }
 
 /* ── Header ── */
 .sh-head {
@@ -110,7 +110,7 @@ html.dark .shell.sel-shell { background:#020617; }
 /* identity */
 .ident { display:flex; align-items:center; gap:13px; }
 .logo {
-  --accent:#10B981;
+  --accent:var(--brand-primary-500);
   position:relative; width:50px; height:50px; border-radius:14px; flex-shrink:0;
   display:grid; place-items:center;
   background:
@@ -162,13 +162,13 @@ html.dark .shell.sel-shell { background:#020617; }
 /* colorful glossy icon tile — matches the AI Model Selector option icon badge */
 .m-ic {
   width:19px; height:19px; border-radius:6px; flex-shrink:0; display:grid; place-items:center;
-  background-color: var(--ic, #10B981);
+  background-color: var(--ic, var(--brand-primary-500));
   background-image:
     radial-gradient(ellipse at top right, rgba(255,255,255,0.20) 0%, transparent 55%),
     linear-gradient(rgba(255,255,255,0.14) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.14) 1px, transparent 1px);
   background-size: cover, 6px 6px, 6px 6px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -2px 0 rgba(15,23,42,0.22), inset 0 0 0 1px rgba(15,23,42,0.12), 0 2px 6px rgba(0,0,0,0.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -2px 0 rgba(17,17,17,0.22), inset 0 0 0 1px rgba(17,17,17,0.12), 0 2px 6px rgba(0,0,0,0.12);
 }
 .m-ic .material-symbols-outlined { font-size:12px; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.35); }
 .m-label { font-size:11.5px; font-weight:700; color:var(--m-label); letter-spacing:-0.01em; }
@@ -189,8 +189,8 @@ html.dark .shell.sel-shell { background:#020617; }
   position:absolute; left:0; right:0; top:3px; text-align:center;
   pointer-events:none; will-change:filter,opacity,transform;
 }
-.m-badge.tone-good    { background:#10B981; }
-.m-badge.tone-neutral { background:#64748B; }
+.m-badge.tone-good    { background:var(--brand-primary-500); }
+.m-badge.tone-neutral { background:#6B6B6B; }
 .m-badge.tone-cost    { background:#FACC15; color:#451A03; text-shadow:none; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.10), inset 0 -1px 0 rgba(255,255,255,0.25); }
 @media (prefers-reduced-motion: no-preference) {
   .m-badge.morphing .m-badge-txt { animation: txtMorphIn var(--mss-enter) var(--mss-ease); }
@@ -218,13 +218,13 @@ html.dark .shell.sel-shell { background:#020617; }
   .morph-host .morph-cur.morph-in  { animation: txtMorphIn var(--mss-enter) var(--mss-ease); }
 }
 
-.bar { height:7px; border-radius:9999px; background:var(--track); overflow:hidden; box-shadow: inset 0 1px 2px rgba(15,23,42,0.06); }
+.bar { height:7px; border-radius:9999px; background:var(--track); overflow:hidden; box-shadow: inset 0 1px 2px rgba(17,17,17,0.06); }
 .bar-fill {
   height:100%; width:var(--w, 0%); border-radius:9999px;
   background-image:
     linear-gradient(rgba(255,255,255,0.18) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.18) 1px, transparent 1px),
-    linear-gradient(90deg, var(--barcolor,#10B981), var(--barcolor,#10B981));
+    linear-gradient(90deg, var(--barcolor,var(--brand-primary-500)), var(--barcolor,var(--brand-primary-500)));
   background-size:7px 7px,7px 7px,cover;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -1px 0 rgba(0,40,30,0.20);
   transition: width calc(760ms * var(--anim-mult, 1)) cubic-bezier(.16,1.16,.3,1);
@@ -247,14 +247,14 @@ html.dark .shell.sel-shell { background:#020617; }
 }
 .specs-ext-icon { font-size:13px; opacity:0.7; }
 .specs-btn:hover {
-  color:#10B981; border-color:rgba(16,185,129,0.45);
-  box-shadow: 0 0 0 3px rgba(16,185,129,0.10), 0 4px 14px -6px rgba(16,185,129,0.5);
+  color:var(--brand-primary-500); border-color:var(--brand-glow);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-primary-500) 10%, transparent), 0 4px 14px -6px var(--brand-glow);
   animation: specsPulse calc(1.6s * var(--anim-mult, 1)) ease-in-out infinite;
 }
 .specs-btn:active { transform:scale(0.96); }
 @keyframes specsPulse {
-  0%,100%{ box-shadow:0 0 0 3px rgba(16,185,129,0.10), 0 4px 14px -6px rgba(16,185,129,0.45); }
-  50%{ box-shadow:0 0 0 5px rgba(16,185,129,0.05), 0 6px 18px -6px rgba(16,185,129,0.7); }
+  0%,100%{ box-shadow:0 0 0 3px color-mix(in srgb, var(--brand-primary-500) 10%, transparent), 0 4px 14px -6px var(--brand-glow); }
+  50%{ box-shadow:0 0 0 5px color-mix(in srgb, var(--brand-primary-500) 5%, transparent), 0 6px 18px -6px color-mix(in srgb, var(--brand-primary-500) 70%, transparent); }
 }
 
 /* confirm CTA */
@@ -262,10 +262,10 @@ html.dark .shell.sel-shell { background:#020617; }
   position:relative; overflow:hidden;
   height:44px; min-width:140px; padding:0 22px; gap:8px;
   border-radius:9999px; border:none; cursor:pointer; align-self:center;
-  background:#0F172A; color:#fff;
+  background:#111111; color:#fff;
   font-size:13px; font-weight:800; font-family:'Montserrat';
   display:inline-flex; align-items:center; justify-content:center;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 2px 6px rgba(15,23,42,0.28);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 2px 6px rgba(17,17,17,0.28);
   /* Smooth morph for background-color AND transform/box-shadow */
   transition: background-color var(--mss-confirm-morph) cubic-bezier(.22,1,.36,1),
               color var(--mss-confirm-morph) cubic-bezier(.22,1,.36,1),
@@ -275,10 +275,10 @@ html.dark .shell.sel-shell { background:#020617; }
 }
 .confirm .material-symbols-outlined { font-size:18px; }
 .confirm-icon { font-variation-settings:'FILL' 1, 'wght' 700, 'GRAD' 0, 'opsz' 24; }
-.confirm:hover { transform: scale(1.02); box-shadow: 0 8px 20px rgba(15,23,42,0.32), inset 0 1px 0 rgba(255,255,255,0.2); }
+.confirm:hover { transform: scale(1.02); box-shadow: 0 8px 20px rgba(17,17,17,0.32), inset 0 1px 0 rgba(255,255,255,0.2); }
 /* Press feedback — fires on every click (not blocked by is-morphing on color change) */
 .confirm:active { transform: scale(0.95) !important; transition-duration: calc(80ms * var(--anim-mult,1)), calc(80ms * var(--anim-mult,1)), calc(80ms * var(--anim-mult,1)), calc(80ms * var(--anim-mult,1)) !important; }
-.confirm:focus-visible { outline:2px solid #10B981; outline-offset:2px; }
+.confirm:focus-visible { outline:2px solid var(--brand-primary-500); outline-offset:2px; }
 /* Compaction animation — plays when IS-MORPHING + IS-COMPACT, same duration both ways */
 .confirm.is-morphing.is-compact {
   transform: scale(0.92);
@@ -287,24 +287,24 @@ html.dark .shell.sel-shell { background:#020617; }
   transform: scale(1);
 }
 /* black → green morph: background-color animates via transition above */
-.confirm.is-done { background-color:#10B981; color:#fff; box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 8px rgba(16,185,129,0.34); }
+.confirm.is-done { background-color:var(--brand-primary-500); color:#fff; box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 8px color-mix(in srgb, var(--brand-primary-500) 34%, transparent); }
 .confirm.is-done .confirm-icon { animation: confirmPop calc(320ms * var(--anim-mult, 1)) cubic-bezier(.34,1.4,.5,1); }
 @keyframes confirmPop { 0% { transform:scale(0.4); opacity:0; } 60% { transform:scale(1.15); } 100% { transform:scale(1); opacity:1; } }
 
 /* ── Dark mode: confirm button is LIGHT-themed (not emerald) ── */
 /* Scoped to #mss-confirmBtn to override html.dark .confirm from global .btn-green cascade */
 html.dark #mss-confirmBtn {
-  background-color:#F1F5F9;
-  color:#0F172A;
+  background-color:#F5F5F5;
+  color:#111111;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.80), 0 2px 6px rgba(0,0,0,0.28);
 }
 html.dark #mss-confirmBtn:hover {
   box-shadow: 0 8px 20px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.80);
 }
 html.dark #mss-confirmBtn.is-done {
-  background-color:#10B981;
+  background-color:var(--brand-primary-500);
   color:#fff;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 8px rgba(16,185,129,0.34);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 8px color-mix(in srgb, var(--brand-primary-500) 34%, transparent);
 }
 
 /* ════════════════ Dark mode (System A) — flip local vars only ════════════════ */
@@ -333,21 +333,21 @@ html.dark .mss-card .bar-fill {
 }
 
 html.dark .sheet {
-  --header:#0F172A;
+  --header:#111111;
   --edge:rgba(255,255,255,0.07);
   --hi:rgba(255,255,255,0.06);
-  --title:#F1F5F9;
-  --vendor:#94A3B8;
-  --m-label:#CBD5E1;
-  --m-icbg:rgba(255,255,255,0.06); --m-icbd:rgba(255,255,255,0.10); --m-icfg:#94A3B8;
+  --title:#F5F5F5;
+  --vendor:#A1A1A1;
+  --m-label:#D4D4D4;
+  --m-icbg:rgba(255,255,255,0.06); --m-icbd:rgba(255,255,255,0.10); --m-icfg:#A1A1A1;
   --track:rgba(255,255,255,0.09);
   --hdr-label:#7C8AA0;
-  --navbg:rgba(255,255,255,0.05); --navbd:rgba(255,255,255,0.09); --navfg:#94A3B8;
-  --dot:rgba(255,255,255,0.20); --dot-on:#F1F5F9;
-  --specs-bd:rgba(255,255,255,0.12); --specs-fg:#94A3B8; --specs-rule:rgba(255,255,255,0.10);
-  --hover-glow:rgba(16,185,129,0.34);
-  --good-bg:rgba(16,185,129,0.14); --good-fg:#34D399; --good-bd:rgba(16,185,129,0.30);
-  --neu-bg:rgba(255,255,255,0.06); --neu-fg:#CBD5E1; --neu-bd:rgba(255,255,255,0.10);
+  --navbg:rgba(255,255,255,0.05); --navbd:rgba(255,255,255,0.09); --navfg:#A1A1A1;
+  --dot:rgba(255,255,255,0.20); --dot-on:#F5F5F5;
+  --specs-bd:rgba(255,255,255,0.12); --specs-fg:#A1A1A1; --specs-rule:rgba(255,255,255,0.10);
+  --hover-glow:color-mix(in srgb, var(--brand-primary-500) 34%, transparent);
+  --good-bg:color-mix(in srgb, var(--brand-primary-500) 14%, transparent); --good-fg:var(--brand-primary-400); --good-bd:color-mix(in srgb, var(--brand-primary-500) 30%, transparent);
+  --neu-bg:rgba(255,255,255,0.06); --neu-fg:#D4D4D4; --neu-bd:rgba(255,255,255,0.10);
   --cost-bg:rgba(234,179,8,0.14); --cost-fg:#FACC15; --cost-bd:rgba(234,179,8,0.32);
 }
 html.dark .sheet { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04); }

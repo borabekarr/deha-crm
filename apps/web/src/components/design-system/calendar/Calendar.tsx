@@ -257,7 +257,7 @@ function CalSubSteps({ data }: { data: CalEventMetrics['substeps'] }) {
 
 function CalReschedule({ data }: { data: CalEventMetrics['reschedule'] }) {
   const dots = Math.max(data.count, 4)
-  const tone = data.count >= 3 ? '#EF4444' : data.count >= 1 ? '#F97316' : '#10B981'
+  const tone = data.count >= 3 ? '#EF4444' : data.count >= 1 ? '#F97316' : 'var(--brand-primary-500)'
   return (
     <div className="cal-ep-resched">
       <span className="cal-ep-resched-n" style={{ color: tone }}>{data.count}&times;</span>
@@ -278,7 +278,7 @@ function CalReschedule({ data }: { data: CalEventMetrics['reschedule'] }) {
 
 function CalFocusCost({ data }: { data: CalEventMetrics['context_switch'] }) {
   const lv = (['Low', 'Medium', 'High'] as const)[data.level] ?? 'Medium'
-  const tone = data.level >= 2 ? '#EF4444' : data.level === 1 ? '#EAB308' : '#10B981'
+  const tone = data.level >= 2 ? '#EF4444' : data.level === 1 ? '#EAB308' : 'var(--brand-primary-500)'
   const n = data.level + 2
   return (
     <div className="cal-ep-focus">
@@ -311,7 +311,7 @@ function CalBattery({ data }: { data: CalEventMetrics['energy'] }) {
 
 function CalAgeing({ data }: { data: CalEventMetrics['ageing'] }) {
   const pct = Math.min(100, Math.round(data.days / data.span * 100))
-  const tone = data.frozen ? '#3B82F6' : pct > 75 ? '#EF4444' : '#10B981'
+  const tone = data.frozen ? '#3B82F6' : pct > 75 ? '#EF4444' : 'var(--brand-primary-500)'
   return (
     <div className="cal-ep-age">
       <div className="cal-ep-age-chips">
@@ -331,7 +331,7 @@ function CalAgeing({ data }: { data: CalEventMetrics['ageing'] }) {
 // ── Cal widget: SyncScore ─────────────────────────────────────────────────
 
 function CalSyncScore({ data }: { data: CalEventMetrics['sync_score'] }) {
-  const tone = data.pct >= 80 ? '#10B981' : data.pct >= 60 ? '#EAB308' : '#EF4444'
+  const tone = data.pct >= 80 ? 'var(--brand-primary-500)' : data.pct >= 60 ? '#EAB308' : '#EF4444'
   const peakH = 10
   const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
   const fitFor = (h: number) => Math.max(12, Math.round(data.pct - Math.abs(h - peakH) * 11))
@@ -345,7 +345,7 @@ function CalSyncScore({ data }: { data: CalEventMetrics['sync_score'] }) {
         {hours.map(h => {
           const fit = fitFor(h)
           const isPeak = h === peakH
-          const slotTone = fit >= 75 ? '#10B981' : fit >= 50 ? '#EAB308' : '#94A3B8'
+          const slotTone = fit >= 75 ? 'var(--brand-primary-500)' : fit >= 50 ? '#EAB308' : '#A1A1A1'
           return (
             <div key={h} className={'cal-ep-sync-row' + (isPeak ? ' peak' : '')}>
               <span className="cal-ep-sync-hh">{String(h).padStart(2, '0')}:00</span>
@@ -363,9 +363,12 @@ function CalSyncScore({ data }: { data: CalEventMetrics['sync_score'] }) {
 
 // ── Cal widget: Blockers ──────────────────────────────────────────────────
 
+const CAL_BLOCKER_ICONS: Record<string, string> = { done: 'check_circle', active: 'radio_button_checked', locked: 'lock' }
+const CAL_BLOCKER_TONES: Record<string, string> = { done: 'var(--brand-primary-500)', active: '#3B82F6', locked: '#A1A1A1' }
+
 function CalBlockers({ data }: { data: CalEventMetrics['blockers'] }) {
-  const ic: Record<string, string> = { done: 'check_circle', active: 'radio_button_checked', locked: 'lock' }
-  const tone: Record<string, string> = { done: '#10B981', active: '#3B82F6', locked: '#94A3B8' }
+  const ic = CAL_BLOCKER_ICONS
+  const tone = CAL_BLOCKER_TONES
   return (
     <div className="cal-ep-chain-steps">
       {data.chain.map((b, i) => (
@@ -454,8 +457,8 @@ const CAL_METRIC_GROUPS: { label: string; icon: string; ids: string[] }[] = [
 ]
 
 const CAL_EP_ACC: Record<string, string> = {
-  substeps: '#10B981', reschedule: '#F97316', context_switch: '#EF4444', energy: '#EAB308',
-  ageing: '#3B82F6', sync_score: '#10B981', blockers: '#6366F1', lifecycle: '#8B5CF6',
+  substeps: 'var(--brand-primary-500)', reschedule: '#F97316', context_switch: '#EF4444', energy: '#EAB308',
+  ageing: '#3B82F6', sync_score: 'var(--brand-primary-500)', blockers: '#6366F1', lifecycle: '#8B5CF6',
 }
 
 const CAL_METRIC_META: Record<string, { label: string; icon: string }> = {
@@ -664,7 +667,7 @@ function CalEventPopoverCard({
           <button type="button" className="cal-ep-foot-btn" style={{ '--fbtn': '#3B82F6' } as React.CSSProperties} onClick={() => act('Invite')}>
             <span className="material-icons">person_add</span>Invite
           </button>
-          <button type="button" className="cal-ep-foot-btn primary" style={{ '--fbtn': '#10B981' } as React.CSSProperties} onClick={() => act('Open event')}>
+          <button type="button" className="cal-ep-foot-btn primary" style={{ '--fbtn': 'var(--brand-primary-500)' } as React.CSSProperties} onClick={() => act('Open event')}>
             <span className="material-icons">open_in_new</span>Open event
           </button>
         </div>

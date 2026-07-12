@@ -116,7 +116,7 @@ export default function ModelSelectionSheet() {
               {/* Price */}
               <div className="metric">
                 <div className="m-top">
-                  <span className="m-ic" style={{ '--ic': '#10B981' } as React.CSSProperties}>
+                  <span className="m-ic" style={{ '--ic': 'var(--brand-primary-500)' } as React.CSSProperties}>
                     <span className="material-symbols-outlined">attach_money</span>
                   </span>
                   <span className="m-label">Price</span>

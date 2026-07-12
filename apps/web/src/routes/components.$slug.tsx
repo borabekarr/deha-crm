@@ -4,6 +4,7 @@ import { getBySlug } from '@/lib/component-registry'
 import { GalleryLayout } from '@/components/library/GalleryLayout'
 import { PreviewFrame } from '@/components/library/PreviewFrame'
 import { ComponentErrorBoundary } from '@/components/library/ComponentErrorBoundary'
+import { makeRevealRef } from '@/lib/make-reveal-ref'
 
 export const Route = createFileRoute('/components/$slug')({
   component: ComponentPreviewPage,
@@ -45,7 +46,9 @@ function ComponentPreviewPage() {
               </div>
             }
           >
-            <Component />
+            <div key={entry.slug} ref={makeRevealRef()}>
+              <Component />
+            </div>
           </Suspense>
         </ComponentErrorBoundary>
       </PreviewFrame>

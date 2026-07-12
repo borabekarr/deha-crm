@@ -67,7 +67,7 @@ type ToneKey = 'warning' | 'danger' | 'success' | 'info'
 const TONES: Record<ToneKey, { glyph: React.ComponentType<{ s?: number }>; color: string }> = {
   warning: { glyph: IcoWarn,   color: '#FDE047' },
   danger:  { glyph: IcoDanger, color: '#EF4444' },
-  success: { glyph: IcoCheck,  color: '#10B981' },
+  success: { glyph: IcoCheck,  color: 'var(--semantic-success)' },
   info:    { glyph: IcoInfo,   color: '#2A6FDB' },
 }
 
@@ -314,7 +314,7 @@ export default function StatusCard(props: StatusCardProps = {}) {
         issueId="IMP-04"
         alerts={0}
         time="22 min"
-        iconColor="#10B981"
+        iconColor="var(--semantic-success)"
       />
     </div>
   )

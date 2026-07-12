@@ -20,7 +20,7 @@ import { p2RootRef } from './pipeline-2-hook'
    per-row delays) and a tap-for-detail dynamic-island popover per row
    (always mounted; open/closed is a visibility/opacity/transform state
    class). Behavior wiring lives in pipeline-2-hook.ts — zero effect hooks.
-   Emerald == #10B981 == oklch(0.696 0.149 162.5).
+   Emerald == var(--brand-primary-500) == oklch(0.696 0.149 162.5).
    ========================================================================= */
 
 /* ── Types ────────────────────────────────────────────────────────────────── */
@@ -58,9 +58,9 @@ const STAGES: readonly Pipeline2Stage[] = [
   { key: 'new',  label: 'New Leads',   color: '#EAB308', count: 214, value: '₺612M',  convFromPrev: null, prevLabel: null,          trendDir: 'up',   trendPct: '6.8%', avgDays: 4,  weeklyDelta: 14 },
   { key: 'qual', label: 'Qualified',   color: '#F97316', count: 128, value: '₺388M',  convFromPrev: 60,   prevLabel: 'New Leads',   trendDir: 'up',   trendPct: '3.4%', avgDays: 7,  weeklyDelta: 4 },
   { key: 'prop', label: 'Proposal',    color: '#EF4444', count: 67,  value: '₺214M',  convFromPrev: 52,   prevLabel: 'Qualified',   trendDir: 'down', trendPct: '1.2%', avgDays: 11, weeklyDelta: -1 },
-  { key: 'nego', label: 'Negotiation', color: '#34D399', count: 31,  value: '₺104M',  convFromPrev: 46,   prevLabel: 'Proposal',    trendDir: 'up',   trendPct: '2.9%', avgDays: 16, weeklyDelta: 1 },
-  { key: 'won',  label: 'Won',         color: '#10B981', count: 14,  value: '₺46.2M', convFromPrev: 45,   prevLabel: 'Negotiation', trendDir: 'up',   trendPct: '5.1%', avgDays: 24, weeklyDelta: 1 },
-  { key: 'lost', label: 'Lost',        color: '#64748B', count: 17,  value: '₺58.4M', convFromPrev: null, prevLabel: null,          trendDir: 'down', trendPct: '2.3%', avgDays: 13, weeklyDelta: -2, muted: true },
+  { key: 'nego', label: 'Negotiation', color: 'var(--brand-primary-400)', count: 31,  value: '₺104M',  convFromPrev: 46,   prevLabel: 'Proposal',    trendDir: 'up',   trendPct: '2.9%', avgDays: 16, weeklyDelta: 1 },
+  { key: 'won',  label: 'Won',         color: 'var(--brand-primary-500)', count: 14,  value: '₺46.2M', convFromPrev: 45,   prevLabel: 'Negotiation', trendDir: 'up',   trendPct: '5.1%', avgDays: 24, weeklyDelta: 1 },
+  { key: 'lost', label: 'Lost',        color: '#6B6B6B', count: 17,  value: '₺58.4M', convFromPrev: null, prevLabel: null,          trendDir: 'down', trendPct: '2.3%', avgDays: 13, weeklyDelta: -2, muted: true },
 ] as const
 
 /* ── Stage deep-dive popover (dynamic-island) ─────────────────────────────────

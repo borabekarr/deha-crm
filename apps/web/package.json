@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
     "test:e2e": "playwright test",
+    "test:lite": "bash ../../scripts/test-lite.sh",
     "check-bundle-budget": "MODE_BUDGET=1 vite build && node ./scripts/check-bundle-budget.mjs",
     "test:eslint-rules": "node --test eslint-rules/*.test.js"
   },

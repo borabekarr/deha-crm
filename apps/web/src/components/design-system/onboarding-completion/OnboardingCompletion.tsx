@@ -129,7 +129,7 @@ function ProgressRing({
   return (
     <span className="oc-ring" style={{ width: size, height: size }}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} fill="none" aria-hidden="true" style={{ transform: 'rotate(-90deg)' }}>
-        <circle cx={size / 2} cy={size / 2} r={r} stroke="var(--slate-200)" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="var(--gray-200)" strokeWidth={stroke} />
         <circle
           cx={size / 2} cy={size / 2} r={r}
           stroke={color} strokeWidth={stroke}
@@ -142,7 +142,7 @@ function ProgressRing({
   )
 }
 
-const CONFETTI_COLORS = ['#10B981','#6366F1','#F59E0B','#EF4444','#3B82F6','#8B5CF6','#F97316']
+const CONFETTI_COLORS = ['var(--brand-primary-500)','#6366F1','#F59E0B','#EF4444','#3B82F6','#8B5CF6','#F97316']
 const CONFETTI_SHAPES = ['4px 2px','3px 6px','5px 3px','2px 5px','6px 2px']
 
 function Confetti({ fire, count = 32, loop = false }: { fire: boolean; count?: number; loop?: boolean }) {
@@ -195,7 +195,7 @@ interface Step {
 const STEP_POOL: Step[] = [
   { id: 'slack',   glyph: 'slack',  color: '#2A6FDB', title: 'Connect to Slack',   desc: 'Link your workspace so updates land where your team already works.',       cta: 'Connect Slack' },
   { id: 'access',  glyph: 'shield', color: '#EAB308', title: 'Review access',       desc: 'Confirm who can view and manage your workspace data.',                    cta: 'Review access' },
-  { id: 'payouts', glyph: 'coin',   color: '#10B981', title: 'Customize payouts',   desc: 'Choose a payout schedule and the account funds are sent to.',              cta: 'Set up payouts' },
+  { id: 'payouts', glyph: 'coin',   color: 'var(--brand-primary-500)', title: 'Customize payouts',   desc: 'Choose a payout schedule and the account funds are sent to.',              cta: 'Set up payouts' },
   { id: 'team',    glyph: 'people', color: '#F97316', title: 'Invite your team',    desc: 'Bring teammates in so everyone gets started together.',                    cta: 'Send invites' },
   { id: 'goals',   glyph: 'target', color: '#EF4444', title: 'Set your goals',      desc: 'Tell us what success looks like so we can tune your dashboard.',           cta: 'Set goals' },
 ]
@@ -300,7 +300,7 @@ function StepRow({
         ) : done ? (
           <span className="oc-row-check"><DrawCheck size={15} play stroke={3.6} /></span>
         ) : (
-          <Chevron dir="right" size={18} color="var(--slate-400)" />
+          <Chevron dir="right" size={18} color="var(--gray-400)" />
         )}
       </span>
     </button>
@@ -343,27 +343,27 @@ const OC_OVERRIDES = `
   /* FIX 1 — Option cards use inner-card tokens (grey outer bg + white inner card) */
   .oc-card {
     background: var(--card-bg, #FFFFFF);
-    border: 1px solid var(--card-border, #CBD5E1);
+    border: 1px solid var(--card-border, #D4D4D4);
     border-radius: var(--card-radius, 20px);
     box-shadow: none;
   }
   html.dark .oc-card {
-    background: var(--card-bg, #1E293B);
-    border-color: var(--card-border, #334155);
+    background: var(--card-bg, #1C1C1C);
+    border-color: var(--card-border, #232323);
     box-shadow: none;
   }
   /* Checklist rows: white card on grey outer surface */
   .oc-row {
     background: #FFFFFF;
-    border: 1px solid #E2E8F0;
+    border: 1px solid #ECECEC;
   }
   html.dark .oc-row {
-    background: color-mix(in srgb, #fff 8%, var(--card-bg, #1E293B));
-    border-color: var(--card-border, #334155);
+    background: color-mix(in srgb, #fff 8%, var(--card-bg, #1C1C1C));
+    border-color: var(--card-border, #232323);
   }
-  .oc-row:hover:not(:disabled) { background: #F8FAFC; }
-  html.dark .oc-row:hover:not(:disabled) { background: color-mix(in srgb, #fff 13%, var(--card-bg, #1E293B)); border-color: color-mix(in srgb, #fff 18%, transparent); }
-  html.dark .oc-row.is-done { background: color-mix(in srgb, var(--oc-accent) 18%, var(--card-bg, #1E293B)); }
+  .oc-row:hover:not(:disabled) { background: #FAFAFA; }
+  html.dark .oc-row:hover:not(:disabled) { background: color-mix(in srgb, #fff 13%, var(--card-bg, #1C1C1C)); border-color: color-mix(in srgb, #fff 18%, transparent); }
+  html.dark .oc-row.is-done { background: color-mix(in srgb, var(--oc-accent) 18%, var(--card-bg, #1C1C1C)); }
   .oc-row.is-done { background: color-mix(in srgb, var(--oc-accent) 10%, #FFFFFF); }
   /* Focus card body in card variant */
   .oc-focus { background: transparent; }
@@ -430,7 +430,7 @@ const OC_OVERRIDES = `
 
 export default function OnboardingCompletion() {
   const steps = DEFAULT_STEPS
-  const accent = '#10B981'
+  const accent = 'var(--brand-primary-500)'
   const n = steps.length
 
   const [status, setStatus] = useState<StatusMap>(
@@ -522,7 +522,7 @@ export default function OnboardingCompletion() {
                 </span>
                 <span className="oc-prompt-sub">{doneCount}/{n} Completed</span>
               </span>
-              <Chevron dir="right" size={20} color="var(--slate-400)" />
+              <Chevron dir="right" size={20} color="var(--gray-400)" />
             </button>
           )
         )}

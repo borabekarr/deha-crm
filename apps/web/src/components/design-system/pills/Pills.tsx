@@ -7,19 +7,19 @@ const EVENT_BADGES = [
   { color: '#EC4899', icon: 'self_improvement', label: 'Personal' },
   { color: '#3B82F6', icon: 'event', label: 'Meeting' },
   { color: '#F97316', icon: 'call', label: 'Call' },
-  { color: '#10B981', icon: 'task_alt', label: 'Done' },
+  { color: 'var(--brand-primary-500)', icon: 'task_alt', label: 'Done' },
   { color: '#EF4444', icon: 'warning', label: 'Urgent' },
-  { color: '#0F172A', icon: 'lock', label: 'Private' },
+  { color: '#111111', icon: 'lock', label: 'Private' },
   { color: '#EAB308', icon: 'star', label: 'Featured' },
 ]
 
 const ICON_BADGES = [
-  { color: '#10B981', icon: 'bolt' },
+  { color: 'var(--brand-primary-500)', icon: 'bolt' },
   { color: '#EF4444', icon: 'favorite' },
   { color: '#F97316', icon: 'schedule' },
   { color: '#3B82F6', icon: 'insights' },
   { color: '#EAB308', icon: 'lock' },
-  { color: '#0F172A', icon: 'dark_mode' },
+  { color: '#111111', icon: 'dark_mode' },
 ]
 
 export default function Pills() {
@@ -29,7 +29,7 @@ export default function Pills() {
       <div className="pills-row">
         <span className="pill-priority"><span className="dot" style={{ background: '#EF4444' }}></span> Yüksek</span>
         <span className="pill-priority"><span className="dot" style={{ background: '#EAB308' }}></span> Orta</span>
-        <span className="pill-priority"><span className="dot" style={{ background: '#10B981' }}></span> Düşük</span>
+        <span className="pill-priority"><span className="dot" style={{ background: 'var(--brand-primary-500)' }}></span> Düşük</span>
         <span className="pill-tab dark">Tümü</span>
       </div>
 

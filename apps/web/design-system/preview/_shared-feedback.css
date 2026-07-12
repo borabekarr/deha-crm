@@ -14,13 +14,13 @@
 
   /* Card surface tokens -- consumed by .card-inner and any other white-card surface */
   --card-bg: #FFFFFF;
-  --card-border: #CBD5E1;
+  --card-border: #D4D4D4;
   --card-radius: 20px;
 }
 
 html.dark {
-  --card-bg: #1E293B;
-  --card-border: #334155;
+  --card-bg: #1C1C1C;
+  --card-border: #232323;
 }
 
 .grid-texture {
@@ -37,18 +37,18 @@ html.dark {
 .btn-green {
   position: relative; overflow: hidden; height: 36px; min-width: 104px; padding: 0 17px; gap: 7px;
   border-radius: 9999px; border: none; cursor: pointer;
-  background: #0F172A; color: #fff; font-size: 12px; font-weight: 800; font-family: 'Montserrat';
+  background: #111111; color: #fff; font-size: 12px; font-weight: 800; font-family: 'Montserrat';
   display: inline-flex; align-items: center; justify-content: center;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 2px 6px rgba(15,23,42,0.28);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 2px 6px rgba(17,17,17,0.28);
   transition:
     background-color calc(180ms * var(--anim-mult, 1)),
     transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
     box-shadow calc(200ms * var(--anim-mult, 1));
 }
-.btn-green:hover { transform: scale(1.03); box-shadow: 0 8px 20px rgba(15,23,42,0.32), inset 0 1px 0 rgba(255,255,255,0.2); }
+.btn-green:hover { transform: scale(1.03); box-shadow: 0 8px 20px rgba(17,17,17,0.32), inset 0 1px 0 rgba(255,255,255,0.2); }
 .btn-green:active { transform: scale(0.96); }
-.btn-green:focus-visible { outline: 2px solid #10B981; outline-offset: 2px; }
-html.dark .btn-green { background: #10B981; box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 8px rgba(16,185,129,0.34); }
+.btn-green:focus-visible { outline: 2px solid var(--brand-primary-500); outline-offset: 2px; }
+html.dark .btn-green { background: var(--brand-primary-500); box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 8px color-mix(in srgb, var(--brand-primary-500) 34%, transparent); }
 
 /* --------------------------------------------------------------------------
  * .btn-yellow -- canonical yellow pill button (mirrors .btn-green structure)
@@ -132,9 +132,9 @@ html.dark .btn-red { background: #EF4444; box-shadow: inset 0 1px 0 rgba(255,255
  * (c) Semantic color tokens — copied verbatim from ColorsSemantic.css
  * -------------------------------------------------------------------------- */
 :root {
-  --sem-success: #10B981;
-  --sem-success-bg:   rgba(16, 185, 129, 0.12);
-  --sem-success-text: #059669;
+  --sem-success: var(--brand-primary-500);
+  --sem-success-bg:   color-mix(in srgb, var(--brand-primary-500) 12%, transparent);
+  --sem-success-text: var(--brand-primary-600);
 
   --sem-warning: #FBBF24;
   --sem-warning-bg:   rgba(251, 191, 36, 0.12);
@@ -150,7 +150,7 @@ html.dark .btn-red { background: #EF4444; box-shadow: inset 0 1px 0 rgba(255,255
 }
 
 /* Dark mode panel backgrounds — verbatim from ColorsSemantic.css */
-html.dark .sem.success { background: #0c2a20 !important; color: #A7F3D0 !important; }
+html.dark .sem.success { background: #0c2a20 !important; color: var(--brand-primary-200) !important; }
 html.dark .sem.warning { background: #2a1f06 !important; color: #FDE68A !important; }
 html.dark .sem.danger  { background: #2a0d0d !important; color: #FCA5A5 !important; }
 html.dark .sem.hot     { background: #2a1506 !important; color: #FDBA74 !important; }
@@ -163,7 +163,7 @@ html.dark .sem.hot     { background: #2a1506 !important; color: #FDBA74 !importa
 .icon-badge {
   width: 30px; height: 30px; border-radius: 9px;
   display: grid; place-items: center; flex-shrink: 0;
-  background-color: var(--icon-c, #10B981);
+  background-color: var(--icon-c, var(--brand-primary-500));
   background-image:
     radial-gradient(ellipse at top right, rgba(255,255,255,0.20) 0%, transparent 55%),
     linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
@@ -171,8 +171,8 @@ html.dark .sem.hot     { background: #2a1506 !important; color: #FDBA74 !importa
   background-size: cover, 7px 7px, 7px 7px;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.55),
-    inset 0 -2px 0 rgba(15,23,42,0.20),
-    inset 0 0 0 1px rgba(15,23,42,0.12),
+    inset 0 -2px 0 rgba(17,17,17,0.20),
+    inset 0 0 0 1px rgba(17,17,17,0.12),
     0 2px 6px rgba(0,0,0,0.10);
 }
 
@@ -202,10 +202,10 @@ html.dark .sem.hot     { background: #2a1506 !important; color: #FDBA74 !importa
 .icon-badge--glow {
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.55),
-    inset 0 -2px 0 rgba(15,23,42,0.20),
-    inset 0 0 0 1px rgba(15,23,42,0.12),
+    inset 0 -2px 0 rgba(17,17,17,0.20),
+    inset 0 0 0 1px rgba(17,17,17,0.12),
     0 2px 6px rgba(0,0,0,0.10),
-    0 0 10px -2px var(--icon-c, #10B981);
+    0 0 10px -2px var(--icon-c, var(--brand-primary-500));
 }
 
 /* --------------------------------------------------------------------------

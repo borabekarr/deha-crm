@@ -1,10 +1,10 @@
-  body { background: #F8FAFC; font-family: 'Montserrat', sans-serif; }
+  body { background: #FAFAFA; font-family: 'Montserrat', sans-serif; }
   .ms-card {
     display: flex; flex-direction: column; align-items: center;
     justify-content: flex-start;
     padding: 32px 24px;
-    background: #F8FAFC;
-    background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.07) 0%, #F8FAFC 55%);
+    background: #FAFAFA;
+    background-image: radial-gradient(ellipse at top right, color-mix(in srgb, var(--brand-primary-500) 7%, transparent) 0%, #FAFAFA 55%);
   }
 
   /* ── Single morphing shell ──────────────────────────────────────────────── */
@@ -28,7 +28,7 @@
     background: #D4DCE8;
     border-radius: 30px;
     padding: 10px;
-    box-shadow: 0 16px 56px rgba(15,23,42,0.13), 0 3px 10px rgba(15,23,42,0.06);
+    box-shadow: 0 16px 56px rgba(17,17,17,0.13), 0 3px 10px rgba(17,17,17,0.06);
 
     /* ① CLOSED state — pill footprint, invisible but CLICKABLE (full bounding box) */
     transform-origin: top center;
@@ -62,19 +62,19 @@
     top: 12px; right: 12px;
     display: flex; align-items: center; justify-content: center;
     width: 28px; height: 28px;
-    background: rgba(15,23,42,0.06);
-    border: 1px solid rgba(15,23,42,0.08);
+    background: rgba(17,17,17,0.06);
+    border: 1px solid rgba(17,17,17,0.08);
     border-radius: 50%;
     cursor: pointer;
-    color: #64748B;
+    color: #6B6B6B;
     padding: 0;
     transition: background calc(150ms * var(--anim-mult, 1)), color calc(150ms * var(--anim-mult, 1));
     /* ① Button click animation */
     transform: scale(1);
   }
   .ms-close-btn:hover {
-    background: rgba(15,23,42,0.10);
-    color: #0F172A;
+    background: rgba(17,17,17,0.10);
+    color: #111111;
   }
   .ms-close-btn:active { transform: scale(0.92); }
   .ms-close-btn .material-icons { font-size: 16px; }
@@ -85,12 +85,12 @@
     padding: 10px 14px;
     background: var(--card-bg, rgba(255,255,255,0.92));
     backdrop-filter: blur(20px);
-    border: 1px solid var(--card-border, #CBD5E1);
+    border: 1px solid var(--card-border, #D4D4D4);
     border-radius: 20px;
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,1),
-      inset 0 -2px 4px rgba(15,23,42,0.06),
-      inset 0 0 0 1px rgba(15,23,42,0.04);
+      inset 0 -2px 4px rgba(17,17,17,0.06),
+      inset 0 0 0 1px rgba(17,17,17,0.04);
     font-family: 'Montserrat';
     /* ① Click animation on the header when closed */
     transition: box-shadow calc(150ms * var(--anim-mult, 1));
@@ -114,7 +114,7 @@
 
   /* ④ Text morph: label fades + scales in on mount (triggered by key prop change) */
   .ms-t-model {
-    font-size: 14px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em;
+    font-size: 14px; font-weight: 800; color: #111111; letter-spacing: -0.01em;
     animation: msLabelIn calc(280ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
   }
   @keyframes msLabelIn {
@@ -122,17 +122,17 @@
     to   { opacity: 1; transform: scale(1)    translateY(0);   filter: blur(0); }
   }
 
-  .ms-t-sep     { width: 1px; height: 16px; background: #E2E8F0; flex-shrink: 0; }
-  .ms-t-label   { font-size: 13px; font-weight: 600; color: #94A3B8; }
+  .ms-t-sep     { width: 1px; height: 16px; background: #ECECEC; flex-shrink: 0; }
+  .ms-t-label   { font-size: 13px; font-weight: 600; color: #A1A1A1; }
   .ms-t-chevron {
-    font-size: 18px; color: #94A3B8; margin-left: auto; flex-shrink: 0;
+    font-size: 18px; color: #A1A1A1; margin-left: auto; flex-shrink: 0;
     transition: transform calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
   }
 
   /* ── Horizontal divider between header and panel ── */
   .ms-divider {
     height: 1px;
-    background: rgba(15,23,42,0.10);
+    background: rgba(17,17,17,0.10);
     border-radius: 1px;
     margin: 0 2px;
   }
@@ -146,8 +146,8 @@
     position: relative; /* needed for .ms-sel-indicator absolute positioning */
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,1),
-      inset 0 -1px 0 rgba(15,23,42,0.04),
-      inset 0 0 0 1px rgba(15,23,42,0.04);
+      inset 0 -1px 0 rgba(17,17,17,0.04),
+      inset 0 0 0 1px rgba(17,17,17,0.04);
     width: 420px;
     /* Row height: icon 38px + padding 12px top + 12px bottom = 62px */
     --ms-row-h: 62px;
@@ -164,18 +164,18 @@
   .ms-row::after {
     content: ''; position: absolute;
     bottom: 0; left: 14px; right: 14px;
-    height: 1px; background: #F1F5F9;
+    height: 1px; background: #F5F5F5;
   }
   .ms-row:last-of-type::after { display: none; }
-  .ms-row:hover { background: #F8FAFC; }
+  .ms-row:hover { background: #FAFAFA; }
   /* ① Row click animation */
-  .ms-row:active { transform: scale(0.985); background: #F1F5F9; }
+  .ms-row:active { transform: scale(0.985); background: #F5F5F5; }
   /* Selected: black bg, white text */
   .ms-row.sel {
-    background: #0F172A;
+    background: #111111;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -2px 0 rgba(0,0,0,0.25);
   }
-  .ms-row.sel:hover { background: #1E293B; }
+  .ms-row.sel:hover { background: #1C1C1C; }
   .ms-row.sel .ms-name { color: #fff; }
   .ms-row.sel .ms-desc { color: rgba(255,255,255,0.55); }
   .ms-row.sel::after { display: none; }
@@ -186,7 +186,7 @@
     position: absolute;
     top: 0; left: 0; right: 0;
     height: var(--ms-row-h, 62px);
-    background: #0F172A;
+    background: #111111;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -2px 0 rgba(0,0,0,0.25);
     pointer-events: none;
     z-index: 0;
@@ -208,14 +208,14 @@
 
   /* ── Dark mode: card wrapper ── */
   html.dark .ms-card {
-    background: #0F172A;
-    background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.07) 0%, #0F172A 55%);
+    background: #111111;
+    background-image: radial-gradient(ellipse at top right, color-mix(in srgb, var(--brand-primary-500) 7%, transparent) 0%, #111111 55%);
   }
 
   /* ── Dark mode: outer shell (ms-shell takes role of old ms-outer) ── */
   html.dark .ms-shell {
-    background: #020617;
-    border: 1px solid var(--card-border, #334155);
+    background: #0A0A0A;
+    border: 1px solid var(--card-border, #232323);
     box-shadow:
       0 16px 56px rgba(0,0,0,0.5), 0 3px 10px rgba(0,0,0,0.3),
       inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
@@ -237,11 +237,11 @@
   html.dark .ms-close-btn {
     background: rgba(255,255,255,0.06);
     border-color: rgba(255,255,255,0.08);
-    color: #94A3B8;
+    color: #A1A1A1;
   }
   html.dark .ms-close-btn:hover {
     background: rgba(255,255,255,0.12);
-    color: #F1F5F9;
+    color: #F5F5F5;
   }
 
   /* ── Dark mode: selected row uses white/light fill ── */
@@ -249,12 +249,12 @@
     background: #FFFFFF;
     box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 -2px 0 rgba(0,0,0,0.06);
   }
-  html.dark .ms-row.sel:hover { background: #F1F5F9; }
-  html.dark .ms-row.sel .ms-name { color: #0F172A; }
-  html.dark .ms-row.sel .ms-desc { color: #64748B; }
-  html.dark .ms-row.sel .ms-check { color: #0F172A; -webkit-text-stroke: 1px #0F172A; text-shadow: none; }
-  html.dark .ms-row.sel .ms-stat { color: #1E293B; }
-  html.dark .ms-row.sel .ms-stat .material-icons { color: #475569; }
+  html.dark .ms-row.sel:hover { background: #F5F5F5; }
+  html.dark .ms-row.sel .ms-name { color: #111111; }
+  html.dark .ms-row.sel .ms-desc { color: #6B6B6B; }
+  html.dark .ms-row.sel .ms-check { color: #111111; -webkit-text-stroke: 1px #111111; text-shadow: none; }
+  html.dark .ms-row.sel .ms-stat { color: #1C1C1C; }
+  html.dark .ms-row.sel .ms-stat .material-icons { color: #4A4A4A; }
   /* Dark mode indicator also uses white */
   html.dark .ms-sel-indicator {
     background: #FFFFFF;
@@ -272,8 +272,8 @@
   /* ── Text ── */
   .ms-text { flex: 1; min-width: 0; }
   .ms-name-row { display: flex; align-items: center; gap: 7px; }
-  .ms-name { font-size: 15px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em; line-height: 1.2; }
-  .ms-desc { font-size: 12px; font-weight: 500; color: #94A3B8; margin-top: 2px; }
+  .ms-name { font-size: 15px; font-weight: 800; color: #111111; letter-spacing: -0.01em; line-height: 1.2; }
+  .ms-desc { font-size: 12px; font-weight: 500; color: #A1A1A1; margin-top: 2px; }
 
   /* ── Meta column (right side) ── */
   .ms-meta {
@@ -303,13 +303,13 @@
   .ms-stat {
     display: inline-flex; align-items: center; gap: 4px;
     font-size: 11px; font-weight: 800;
-    color: #64748B;
+    color: #6B6B6B;
     letter-spacing: -0.01em;
     line-height: 1;
   }
   .ms-stat .material-icons {
     font-size: 14px;
-    color: #94A3B8;
+    color: #A1A1A1;
   }
   /* On selected (black bg): override to white */
   .ms-row.sel .ms-stat { color: rgba(255,255,255,0.95); }
@@ -348,10 +348,10 @@
     padding: 2px 7px; border-radius: 9999px; flex-shrink: 0;
   }
   .ms-badge.new {
-    background: #10B981; color: #fff;
+    background: var(--brand-primary-500); color: #fff;
     background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
     background-size: 7px 7px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(15,23,42,0.18);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(17,17,17,0.18);
   }
   .ms-badge.pro {
     background: linear-gradient(135deg, #F59E0B, #EF4444);

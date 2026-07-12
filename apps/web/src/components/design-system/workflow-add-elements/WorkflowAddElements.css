@@ -9,7 +9,7 @@
   width: 100%;
   height: 100%;
   background-color: #FFFFFF;
-  background-image: radial-gradient(circle, #CBD5E1 1px, transparent 1px);
+  background-image: radial-gradient(circle, #D4D4D4 1px, transparent 1px);
   background-size: 22px 22px;
   cursor: default;
   user-select: none;
@@ -30,15 +30,15 @@
   background: rgba(255, 255, 255, 0.80);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(17,17,17, 0.08);
   border-radius: 9999px;
   font-size: 11px;
   font-weight: 700;
-  color: #64748B;
+  color: #6B6B6B;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   pointer-events: none;
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 1px 4px rgba(17,17,17, 0.06);
   white-space: nowrap;
 }
 
@@ -56,8 +56,8 @@
   border-radius: 24px;
   padding: 10px;
   box-shadow:
-    0 12px 40px rgba(15, 23, 42, 0.12),
-    0 2px 8px rgba(15, 23, 42, 0.06);
+    0 12px 40px rgba(17,17,17, 0.12),
+    0 2px 8px rgba(17,17,17, 0.06);
   z-index: 100;
   opacity: 0;
   transform: scale(0.96) translateY(6px);
@@ -80,7 +80,7 @@
   border-radius: 16px;
   overflow: hidden;
   box-shadow:
-    inset 0 -1px 0 rgba(15, 23, 42, 0.03);
+    inset 0 -1px 0 rgba(17,17,17, 0.03);
 }
 
 /* ── Badge icon ─────────────────────────────────────────────────────────── */
@@ -93,8 +93,8 @@
   border-radius: 8px;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.55),
-    inset 0 -2px 0 rgba(15, 23, 42, 0.18),
-    inset 0 0 0 1px rgba(15, 23, 42, 0.10);
+    inset 0 -2px 0 rgba(17,17,17, 0.18),
+    inset 0 0 0 1px rgba(17,17,17, 0.10);
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.13) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.13) 1px, transparent 1px);
@@ -144,14 +144,14 @@
   gap: 7px;
   font-size: 15px;
   font-weight: 800;
-  color: #0F172A;
+  color: #111111;
   letter-spacing: -0.025em;
   margin-bottom: 11px;
 }
 
 .wae-ae-title .material-icons {
   font-size: 17px;
-  color: #64748B;
+  color: #6B6B6B;
   flex-shrink: 0;
 }
 
@@ -161,15 +161,15 @@
   align-items: center;
   gap: 8px;
   padding: 7px 11px;
-  background: #F8FAFC;
-  border: 1px solid #E2E8F0;
+  background: #FAFAFA;
+  border: 1px solid #ECECEC;
   border-radius: 9px;
-  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.03);
+  box-shadow: inset 0 1px 2px rgba(17,17,17, 0.03);
 }
 
 .wae-ae-search .material-icons {
   font-size: 15px;
-  color: #94A3B8;
+  color: #A1A1A1;
   flex-shrink: 0;
 }
 
@@ -180,12 +180,12 @@
   font-family: 'Montserrat', system-ui, sans-serif;
   font-size: 12px;
   font-weight: 500;
-  color: #0F172A;
+  color: #111111;
   outline: none;
 }
 
 .wae-ae-search input::placeholder {
-  color: #94A3B8;
+  color: #A1A1A1;
 }
 
 /* Category list */
@@ -205,18 +205,18 @@
 
 .wae-ae-item:hover,
 .wae-ae-item.hovered {
-  background: #F1F5F9;
+  background: #F5F5F5;
 }
 
 .wae-ae-item.hovered .wae-ae-chevron {
-  color: #64748B !important;
+  color: #6B6B6B !important;
 }
 
 .wae-ae-name {
   flex: 1;
   font-size: 13px;
   font-weight: 700;
-  color: #0F172A;
+  color: #111111;
   letter-spacing: -0.01em;
 }
 
@@ -231,7 +231,7 @@
 /* Footer */
 .wae-ae-sep {
   height: 1px;
-  background: #F1F5F9;
+  background: #F5F5F5;
   margin: 4px 0;
 }
 
@@ -288,7 +288,7 @@
 }
 
 .wae-search-cols::-webkit-scrollbar-thumb {
-  background: #E2E8F0;
+  background: #ECECEC;
   border-radius: 99px;
 }
 
@@ -302,15 +302,15 @@
 
 /* 1px separator element that spans the full column height via CSS grid stretch. */
 .wae-search-col-sep {
-  background: #E2E8F0;
+  background: #ECECEC;
   align-self: stretch;
   border-radius: 1px;
 }
 
 /* Category card: header + nested node list, light surface. */
 .wae-search-cat-card {
-  background: #F8FAFC;
-  border: 1px solid #E2E8F0;
+  background: #FAFAFA;
+  border: 1px solid #ECECEC;
   border-radius: 10px;
   overflow: hidden;
 }
@@ -322,7 +322,7 @@
   align-items: center;
   gap: 4px;
   padding: 8px 10px 6px;
-  border-bottom: 1px solid #E2E8F0;
+  border-bottom: 1px solid #ECECEC;
 }
 
 /* Item 3c: search-result header icon is a plain glyph, not a colored badge tag,
@@ -336,7 +336,7 @@
 
 .wae-search-cat-header .wae-badge-icon .material-icons,
 .wae-search-cat-header .wae-badge-icon .material-symbols-outlined {
-  color: #334155;
+  color: #232323;
   text-shadow: none;
 }
 
@@ -344,7 +344,7 @@
 .wae-search-cat-name {
   font-size: 10px;
   font-weight: 800;
-  color: #334155;
+  color: #232323;
   letter-spacing: -0.01em;
   white-space: nowrap;
   overflow: hidden;
@@ -365,7 +365,7 @@
   font-family: 'Montserrat', system-ui, sans-serif;
   font-size: 10px;
   font-weight: 900;
-  color: #94A3B8;
+  color: #A1A1A1;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -373,16 +373,16 @@
 /* Item 4: larger leading icon on the SEARCH RESULTS / NODES header. */
 .wae-nodes-header .material-icons {
   font-size: 17px;
-  color: #94A3B8;
+  color: #A1A1A1;
   line-height: 1;
 }
 
 html.dark .wae-nodes-header {
-  color: #64748B;
+  color: #6B6B6B;
 }
 
 html.dark .wae-nodes-header .material-icons {
-  color: #64748B;
+  color: #6B6B6B;
 }
 
 .wae-nodes-list {
@@ -400,7 +400,7 @@ html.dark .wae-nodes-header .material-icons {
 }
 
 .wae-nodes-list::-webkit-scrollbar-thumb {
-  background: #E2E8F0;
+  background: #ECECEC;
   border-radius: 99px;
 }
 
@@ -415,7 +415,7 @@ html.dark .wae-nodes-header .material-icons {
 }
 
 .wae-node-item:hover {
-  background: #F1F5F9;
+  background: #F5F5F5;
 }
 
 .wae-node-item:hover .wae-node-add-btn {
@@ -426,7 +426,7 @@ html.dark .wae-nodes-header .material-icons {
   flex: 1;
   font-size: 12px;
   font-weight: 700;
-  color: #0F172A;
+  color: #111111;
   letter-spacing: -0.01em;
 }
 
@@ -434,7 +434,7 @@ html.dark .wae-nodes-header .material-icons {
   width: 18px;
   height: 18px;
   border-radius: 5px;
-  background: #10B981;
+  background: var(--brand-primary-500);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -443,8 +443,8 @@ html.dark .wae-nodes-header .material-icons {
   transition: opacity calc(120ms * var(--anim-mult, 1));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.45),
-    inset 0 -1px 0 rgba(15, 23, 42, 0.18),
-    0 1px 3px rgba(16, 185, 129, 0.30);
+    inset 0 -1px 0 rgba(17,17,17, 0.18),
+    0 1px 3px color-mix(in srgb, var(--brand-primary-500) 30%, transparent);
 }
 
 .wae-node-add-btn .material-icons {
@@ -507,7 +507,7 @@ html.dark .wae-badge-icon.wae-badge--ink {
 
 html.dark .wae-badge-icon.wae-badge--ink .material-icons,
 html.dark .wae-badge-icon.wae-badge--ink .material-symbols-outlined {
-  color: #0F172A !important;
+  color: #111111 !important;
   text-shadow: none;
 }
 
@@ -520,8 +520,8 @@ html.dark .wae-badge-icon.wae-badge--ink .material-symbols-outlined {
    transparent glyph, not a tile) by a more-specific re-strip rule below. */
 html.dark .wae-badge-icon.wae-badge--ink {
   background-image:
-    linear-gradient(to right, rgba(15, 23, 42, var(--grid-alpha, 0.07)) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(15, 23, 42, var(--grid-alpha, 0.07)) 1px, transparent 1px) !important;
+    linear-gradient(to right, rgba(17,17,17, var(--grid-alpha, 0.07)) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(17,17,17, var(--grid-alpha, 0.07)) 1px, transparent 1px) !important;
   background-size: 7px 7px !important;
 }
 
@@ -532,60 +532,60 @@ html.dark .wae-search-cat-header .wae-badge-icon.wae-badge--ink {
 }
 
 html.dark .wae-canvas {
-  background-color: #0F172A;
-  background-image: radial-gradient(circle, #334155 1px, transparent 1px);
+  background-color: #111111;
+  background-image: radial-gradient(circle, #232323 1px, transparent 1px);
 }
 
 html.dark .wae-canvas-hint {
-  background: rgba(30, 41, 59, 0.85);
+  background: rgba(28,28,28, 0.85);
   border-color: rgba(255, 255, 255, 0.08);
-  color: #94A3B8;
+  color: #A1A1A1;
 }
 
 html.dark .wae-pop-outer {
-  background: #020617;
+  background: #0A0A0A;
 }
 
 html.dark .wae-pop-inner {
-  background: #1E293B;
+  background: #1C1C1C;
 }
 
 html.dark .wae-ae-title {
-  color: #F1F5F9;
+  color: #F5F5F5;
 }
 
 html.dark .wae-ae-title .material-icons {
-  color: #94A3B8;
+  color: #A1A1A1;
 }
 
 html.dark .wae-ae-search {
-  background: #0F172A;
-  border-color: #334155;
+  background: #111111;
+  border-color: #232323;
 }
 
 html.dark .wae-ae-search input {
-  color: #F1F5F9;
+  color: #F5F5F5;
 }
 
 html.dark .wae-ae-item:hover,
 html.dark .wae-ae-item.hovered {
-  background: #273449;
+  background: #242424;
 }
 
 html.dark .wae-ae-item.hovered .wae-ae-chevron {
-  color: #94A3B8 !important;
+  color: #A1A1A1 !important;
 }
 
 html.dark .wae-ae-name {
-  color: #F1F5F9;
+  color: #F5F5F5;
 }
 
 html.dark .wae-ae-chevron {
-  color: #475569 !important;
+  color: #4A4A4A !important;
 }
 
 html.dark .wae-ae-sep {
-  background: #334155;
+  background: #232323;
 }
 
 /* Item 2: grid texture on footer .btn-green in dark mode (mirrors light mode rule). */
@@ -597,42 +597,42 @@ html.dark .wae-ae-footer .btn-green {
 }
 
 html.dark .wae-nodes-list::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #232323;
 }
 
 html.dark .wae-node-item:hover {
-  background: #273449;
+  background: #242424;
 }
 
 html.dark .wae-node-name {
-  color: #F1F5F9;
+  color: #F5F5F5;
 }
 
 html.dark .wae-search-cols::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #232323;
 }
 
 html.dark .wae-search-col-sep {
-  background: #334155;
+  background: #232323;
 }
 
 html.dark .wae-search-cat-card {
-  background: #0F172A;
-  border-color: #334155;
+  background: #111111;
+  border-color: #232323;
 }
 
 html.dark .wae-search-cat-name {
-  color: #94A3B8;
+  color: #A1A1A1;
 }
 
 /* Item 3 dark parity: separator + plain header icon color. */
 html.dark .wae-search-cat-header {
-  border-bottom-color: #334155;
+  border-bottom-color: #232323;
 }
 
 html.dark .wae-search-cat-header .wae-badge-icon .material-icons,
 html.dark .wae-search-cat-header .wae-badge-icon .material-symbols-outlined {
-  color: #94A3B8 !important;
+  color: #A1A1A1 !important;
   text-shadow: none;
 }
 
@@ -722,7 +722,7 @@ html.dark .wae-search-cat-header .wae-badge-icon .material-symbols-outlined {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #CBD5E1;
+  background: #D4D4D4;
   border: none;
   cursor: pointer;
   /* Item 3: mounted-through-exit. Button stays in the DOM; appearance AND
@@ -741,7 +741,7 @@ html.dark .wae-search-cat-header .wae-badge-icon .material-symbols-outlined {
 
 .wae-ae-search-clear .material-icons {
   font-size: 12px;
-  color: #475569;
+  color: #4A4A4A;
   line-height: 1;
   display: block;
 }
@@ -754,7 +754,7 @@ html.dark .wae-search-cat-header .wae-badge-icon .material-symbols-outlined {
 }
 
 .wae-ae-search-clear:hover {
-  background: #94A3B8;
+  background: #A1A1A1;
 }
 
 .wae-ae-search-clear:hover .material-icons {
@@ -762,15 +762,15 @@ html.dark .wae-search-cat-header .wae-badge-icon .material-symbols-outlined {
 }
 
 html.dark .wae-ae-search-clear {
-  background: #334155;
+  background: #232323;
 }
 
 html.dark .wae-ae-search-clear .material-icons {
-  color: #94A3B8;
+  color: #A1A1A1;
 }
 
 html.dark .wae-ae-search-clear:hover {
-  background: #475569;
+  background: #4A4A4A;
 }
 
 /* ── Item 4: scrollable region + progressive-blur edge fade on .wae-search-cols ──

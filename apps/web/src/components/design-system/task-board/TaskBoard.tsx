@@ -48,7 +48,7 @@ const INITIAL_TASKS: Task[] = [
 ];
 
 const MOVE_CONFIG: Record<string, { bg: string; icon: string; label: string }> = {
-  'success-done':     { bg: '#10B981', icon: 'task_alt',   label: 'Done' },
+  'success-done':     { bg: 'var(--brand-primary-500)', icon: 'task_alt',   label: 'Done' },
   'success-progress': { bg: '#F97316', icon: 'bolt',       label: 'In Progress' },
   'success-review':   { bg: '#FBBF24', icon: 'visibility', label: 'Review' },
 };
@@ -56,18 +56,18 @@ const MOVE_CONFIG: Record<string, { bg: string; icon: string; label: string }> =
 // Phase-specific config for the single morphing sync button
 const SYNC_BTN_PHASE: Record<string, { bg: string; color: string; icon: string; label: string; spin: boolean }> = {
   idle:       { bg: 'var(--tb-syncbtn)', color: '#fff',    icon: 'autorenew', label: 'Sync with Agent', spin: false },
-  connecting: { bg: '#64748B',           color: '#fff',    icon: 'sync',      label: 'Connecting…',     spin: true  },
+  connecting: { bg: '#6B6B6B',           color: '#fff',    icon: 'sync',      label: 'Connecting…',     spin: true  },
   slack:      { bg: '#F97316',           color: '#fff',    icon: 'autorenew', label: 'Reading Slack…',  spin: true  },
   github:     { bg: '#FBBF24',           color: '#451A03', icon: 'autorenew', label: 'Reading GitHub…', spin: true  },
-  notion:     { bg: '#10B981',           color: '#fff',    icon: 'autorenew', label: 'Reading Notion…', spin: true  },
-  done:       { bg: '#10B981',           color: '#fff',    icon: 'task_alt',  label: 'Synced!',         spin: false },
+  notion:     { bg: 'var(--brand-primary-500)',           color: '#fff',    icon: 'autorenew', label: 'Reading Notion…', spin: true  },
+  done:       { bg: 'var(--brand-primary-500)',           color: '#fff',    icon: 'task_alt',  label: 'Synced!',         spin: false },
 };
 
 const COL_TAG: Record<string, { bg: string; fg: string; icon: string; label: string }> = {
-  todo:     { bg: '#64748B', fg: '#FFFFFF', icon: 'inbox',      label: 'Todo' },
+  todo:     { bg: '#6B6B6B', fg: '#FFFFFF', icon: 'inbox',      label: 'Todo' },
   progress: { bg: '#F97316', fg: '#FFFFFF', icon: 'bolt',       label: 'In Progress' },
   review:   { bg: '#FACC15', fg: '#451A03', icon: 'visibility', label: 'Review' },
-  done:     { bg: '#10B981', fg: '#FFFFFF', icon: 'task_alt',   label: 'Done' },
+  done:     { bg: 'var(--brand-primary-500)', fg: '#FFFFFF', icon: 'task_alt',   label: 'Done' },
 };
 
 // ---------------------------------------------------------------------------
@@ -82,13 +82,13 @@ const SlackMark = ({ size = 14 }: { size?: number }) => (
   </svg>
 );
 
-const GithubMark = ({ size = 14, color = '#0F172A' }: { size?: number; color?: string }) => (
+const GithubMark = ({ size = 14, color = '#111111' }: { size?: number; color?: string }) => (
   <svg viewBox="0 0 16 16" width={size} height={size} aria-hidden="true">
     <path fill={color} d="M8 1.2a6.8 6.8 0 0 0-2.15 13.25c.34.06.46-.15.46-.32v-1.13c-1.9.41-2.3-.91-2.3-.91-.31-.79-.76-1-.76-1-.62-.42.05-.41.05-.41.69.05 1.05.71 1.05.71.61 1.05 1.6.75 1.99.57.06-.45.24-.75.43-.92-1.52-.17-3.11-.76-3.11-3.39 0-.75.27-1.36.7-1.84-.07-.17-.31-.87.07-1.81 0 0 .58-.19 1.9.7a6.6 6.6 0 0 1 3.46 0c1.32-.89 1.9-.7 1.9-.7.38.94.14 1.64.07 1.81.44.48.7 1.09.7 1.84 0 2.64-1.6 3.21-3.12 3.38.25.21.47.63.47 1.27v1.88c0 .18.12.39.46.32A6.8 6.8 0 0 0 8 1.2z" />
   </svg>
 );
 
-const NotionMark = ({ size = 14, color = '#0F172A' }: { size?: number; color?: string }) => (
+const NotionMark = ({ size = 14, color = '#111111' }: { size?: number; color?: string }) => (
   <svg viewBox="0 0 16 16" width={size} height={size} aria-hidden="true">
     <rect x="0.5" y="0.5" width="15" height="15" rx="3.5" fill="none" stroke={color} strokeWidth="1" />
     <path fill={color} d="M5 4.4 L5 11.6 L6.05 11.6 L6.05 6.55 L9.4 11.6 L11 11.6 L11 4.4 L9.95 4.4 L9.95 9.45 L6.6 4.4 Z" />
@@ -116,7 +116,7 @@ const CheckIcon = ({ size = 11, color = '#fff' }: { size?: number; color?: strin
 // ---------------------------------------------------------------------------
 // Confetti burst (flows INSIDE the card; clipped to its box)
 // ---------------------------------------------------------------------------
-const CONFETTI_COLORS = ['#10B981', '#34D399', '#6EE7B7', '#A7F3D0', '#FBBF24', '#FCD34D'];
+const CONFETTI_COLORS = ['var(--brand-primary-500)', 'var(--brand-primary-400)', 'var(--brand-primary-300)', 'var(--brand-primary-200)', '#FBBF24', '#FCD34D'];
 
 // Particles computed once at module level so Math.random() never runs during render.
 const CONFETTI_PARTICLES = (() => {
@@ -166,7 +166,7 @@ function Confetti() {
             ['--dy' as string]: p.dy,
             ['--rot' as string]: p.rot,
             animation: `confettiFlow ${p.duration}ms cubic-bezier(.34,.84,.36,1) ${p.delay}ms forwards`,
-            boxShadow: '0 1px 2px rgba(15,23,42,0.10)',
+            boxShadow: '0 1px 2px rgba(17,17,17,0.10)',
           }}
         />
       ))}
@@ -213,7 +213,7 @@ function Toast({
   onUndo: (() => void) | null;
   onClose: () => void;
 }) {
-  const cfg = MOVE_CONFIG[kind] ?? { bg: '#64748B', icon: 'info', label: '' };
+  const cfg = MOVE_CONFIG[kind] ?? { bg: '#6B6B6B', icon: 'info', label: '' };
   return (
     <div
       className={`tb-toast ${phase === 'out' ? 'tb-toast-out' : 'tb-toast-in'}`}
@@ -227,7 +227,7 @@ function Toast({
         color: '#fff',
         fontSize: 12.5, fontWeight: 700,
         letterSpacing: '-0.005em',
-        boxShadow: '0 8px 24px -6px rgba(15,23,42,0.35), inset 0 1px 0 rgba(255,255,255,0.20)',
+        boxShadow: '0 8px 24px -6px rgba(17,17,17,0.35), inset 0 1px 0 rgba(255,255,255,0.20)',
         maxWidth: 360,
         whiteSpace: 'nowrap',
       }}
@@ -319,7 +319,7 @@ function TaskCard({
       style={{
         position: 'relative',
         background: highlight ? 'var(--tb-card-hl)' : 'var(--tb-card-bg)',
-        border: `1px ${highlight ? 'dashed' : 'solid'} ${highlight ? '#10B981' : 'var(--tb-card-border)'}`,
+        border: `1px ${highlight ? 'dashed' : 'solid'} ${highlight ? 'var(--brand-primary-500)' : 'var(--tb-card-border)'}`,
         borderRadius: 10,
         padding: '10px 11px 10px',
         cursor: 'grab',
@@ -552,7 +552,7 @@ function Header({ total }: { total: number }) {
       </span>
       {/* AI Sync pushed to right with marginLeft: auto */}
       <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
-        <SymIcon name="neurology" size={18} style={{ color: '#10B981' }} />
+        <SymIcon name="neurology" size={18} style={{ color: 'var(--brand-primary-500)' }} />
         <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--tb-fg3)', letterSpacing: '-0.01em' }}>
           AI Sync
         </span>
@@ -569,7 +569,7 @@ function SourcePill({ source, state }: { source: string; state: string }) {
     return (
       <div style={{
         width: 22, height: 22, borderRadius: '50%',
-        background: '#10B981', display: 'grid', placeItems: 'center',
+        background: 'var(--brand-primary-500)', display: 'grid', placeItems: 'center',
         boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.12)',
         animation: 'checkPop 360ms cubic-bezier(.34,1.32,.64,1)',
       }}>
@@ -578,15 +578,15 @@ function SourcePill({ source, state }: { source: string; state: string }) {
     );
   }
   const Mark = source === 'slack' ? SlackMark : source === 'github' ? GithubMark : NotionMark;
-  const ringColor = source === 'slack' ? '#6F4DDB' : '#0F172A';
+  const ringColor = source === 'slack' ? '#6F4DDB' : '#111111';
   const ring =
     state === 'active'
-      ? { background: source === 'slack' ? '#F4F0FF' : '#F1F5F9', boxShadow: `0 0 0 1.5px ${ringColor}, inset 0 1px 0 rgba(255,255,255,0.5)` }
-      : { background: '#F8FAFC', boxShadow: 'inset 0 0 0 1px #E2E8F0' };
+      ? { background: source === 'slack' ? '#F4F0FF' : '#F5F5F5', boxShadow: `0 0 0 1.5px ${ringColor}, inset 0 1px 0 rgba(255,255,255,0.5)` }
+      : { background: '#FAFAFA', boxShadow: 'inset 0 0 0 1px #ECECEC' };
 
   return (
     <div style={{ width: 22, height: 22, borderRadius: '50%', display: 'grid', placeItems: 'center', ...ring }}>
-      <Mark size={12} color={source === 'github' ? (state === 'active' ? '#0F172A' : '#94A3B8') : undefined} />
+      <Mark size={12} color={source === 'github' ? (state === 'active' ? '#111111' : '#A1A1A1') : undefined} />
     </div>
   );
 }
@@ -594,6 +594,11 @@ function SourcePill({ source, state }: { source: string; state: string }) {
 // ---------------------------------------------------------------------------
 // Update feed item
 // ---------------------------------------------------------------------------
+const UPDATE_ITEM_TAG_STYLE: React.CSSProperties = {
+  display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 700,
+  color: 'var(--brand-primary-500)', flexShrink: 0, marginTop: 2,
+};
+
 interface FeedItem {
   id: string;
   source: string;
@@ -606,10 +611,10 @@ interface FeedItem {
 function UpdateItem({ item }: { item: FeedItem }) {
   const palette = ({
     slack:  { dot: '#6F4DDB', label: 'Slack',  prefix: '·' },
-    github: { dot: '#0F172A', label: 'GitHub', prefix: '·' },
-    notion: { dot: '#475569', label: 'Notion', prefix: '·' },
-    agent:  { dot: '#10B981', label: 'Agent',  prefix: '' },
-  } as Record<string, { dot: string; label: string; prefix: string }>)[item.source] ?? { dot: '#475569', label: item.source, prefix: '·' };
+    github: { dot: '#111111', label: 'GitHub', prefix: '·' },
+    notion: { dot: '#4A4A4A', label: 'Notion', prefix: '·' },
+    agent:  { dot: 'var(--brand-primary-500)', label: 'Agent',  prefix: '' },
+  } as Record<string, { dot: string; label: string; prefix: string }>)[item.source] ?? { dot: '#4A4A4A', label: item.source, prefix: '·' };
 
   return (
     <div style={{
@@ -635,8 +640,8 @@ function UpdateItem({ item }: { item: FeedItem }) {
         </div>
       </div>
       {item.tag && (
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 700, color: '#10B981', flexShrink: 0, marginTop: 2 }}>
-          <CheckIcon size={11} color="#10B981" />
+        <div style={UPDATE_ITEM_TAG_STYLE}>
+          <CheckIcon size={11} color="var(--brand-primary-500)" />
           {item.tag}
         </div>
       )}
@@ -704,7 +709,7 @@ function StatusBar({
                 key={i}
                 style={{
                   width: 22, height: 22, borderRadius: '50%',
-                  background: '#10B981', display: 'grid', placeItems: 'center',
+                  background: 'var(--brand-primary-500)', display: 'grid', placeItems: 'center',
                   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.12)',
                   animation: `checkPop 360ms cubic-bezier(.34,1.32,.64,1) ${i * 90}ms both`,
                 }}
@@ -722,7 +727,7 @@ function StatusBar({
         )}
         <span style={{
           fontSize: 13, fontWeight: 600,
-          color: isDone ? '#10B981' : 'var(--tb-fg2)',
+          color: isDone ? 'var(--brand-primary-500)' : 'var(--tb-fg2)',
           letterSpacing: '-0.005em',
           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         }}>
@@ -746,7 +751,7 @@ function StatusBar({
           border: 'none',
           fontSize: 12.5, fontWeight: 700, letterSpacing: '-0.005em',
           cursor: isClickable ? 'pointer' : 'not-allowed',
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.22), inset 0 0 0 1px rgba(0,0,0,0.12), 0 6px 16px -6px rgba(15,23,42,0.45)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.22), inset 0 0 0 1px rgba(0,0,0,0.12), 0 6px 16px -6px rgba(17,17,17,0.45)',
         }}
         onMouseDown={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(0.97)'; }}
         onMouseUp={(e)   => { (e.currentTarget as HTMLButtonElement).style.transform = ''; }}

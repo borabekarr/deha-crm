@@ -8,8 +8,8 @@
 .md-card {
   position: relative;
   padding: 36px 20px 48px;
-  background: #F1F5F9;
-  border: 1px solid #E2E8F0;
+  background: #F5F5F5;
+  border: 1px solid #ECECEC;
   border-radius: 16px;
   display: flex; flex-direction: column; align-items: center;
   min-height: 460px;
@@ -30,7 +30,7 @@
    so it collapses cleanly into the trigger footprint — no scale distortion.
    Fix (2): shell and panel-bg share the SAME width/height/top/border-radius MORPH
    easing + duration so they animate as a single physical unit.
-   COLOUR GATING: collapsed background = trigger colour (#0F172A light / #FFFFFF dark)
+   COLOUR GATING: collapsed background = trigger colour (#111111 light / #FFFFFF dark)
    so the circle is invisible against the trigger. Enter flip defers background-color to
    calc(--md-dur*0.82) so shell stays trigger-colour while expanding. Close flip defers
    background-color to calc(--md-dur*0.55) so shell stays grey/shell-colour while
@@ -44,10 +44,10 @@
   transform-origin: top center;
   width: 56px; height: 56px;
   border-radius: 50%;
-  background: #0F172A;
-  /* Fix (1): closed border matches trigger bg (#0F172A) — invisible, no grey ring seam.
+  background: #111111;
+  /* Fix (1): closed border matches trigger bg (#111111) — invisible, no grey ring seam.
      border-color snaps to card-border deferred via transition (same gate as background-color). */
-  border: 1px solid #0F172A;
+  border: 1px solid #111111;
   box-shadow: none;
   opacity: 1;
   visibility: visible;
@@ -70,12 +70,12 @@
   border-radius: var(--card-radius, 20px);
   background: #D4DCE8;
   /* Fix (1): restore card-border on the expanded shell; deferred via transition. */
-  border-color: var(--card-border, #CBD5E1);
+  border-color: var(--card-border, #D4D4D4);
   box-shadow:
-    0 16px 56px rgba(15,23,42,0.14),
-    0 3px 10px rgba(15,23,42,0.07),
+    0 16px 56px rgba(17,17,17,0.14),
+    0 3px 10px rgba(17,17,17,0.07),
     inset 0 1px 0 rgba(255,255,255,.22),
-    inset 0 0 0 1px rgba(15,23,42,0.04);
+    inset 0 0 0 1px rgba(17,17,17,0.04);
   pointer-events: auto;
   z-index: 3; /* above goo-wrap (z-index:2), below dialog (z-index:9000) — rim is hit-testable */
   /* Open (enter): bouncy morph; colour, border and shadow deferred until shape expanded */
@@ -112,7 +112,7 @@
   top: 0; left: 50%; transform: translateX(-50%);
   width: 56px; height: 56px;
   border-radius: 50%;
-  background: #0F172A;
+  background: #111111;
   pointer-events: none;
   transition: transform calc(220ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
 }
@@ -126,7 +126,7 @@
    compress-to-circle morph lands within 1-2px of the trigger button.
    Fix (2): enter = bouncy cubic-bezier(.55,1.35,.35,1); exit (default) = smooth
    ease-out cubic-bezier(.22,1,.36,1) so closing has no bounce.
-   Fix (7): border uses var(--card-border,#CBD5E1) + top rim-light in light mode.
+   Fix (7): border uses var(--card-border,#D4D4D4) + top rim-light in light mode.
              border-radius aligned to --card-radius (20px).
    Fix (4): height reduced from 334px to 274px to eliminate dead space below footer. */
 .md-panel-bg {
@@ -134,9 +134,9 @@
   top: 0;
   left: 50%; transform: translateX(-50%);
   width: 56px; height: 56px;
-  background: #0F172A;
+  background: #111111;
   border-radius: 50%;
-  box-shadow: 0 0 0 0 rgba(15,23,42,0);
+  box-shadow: 0 0 0 0 rgba(17,17,17,0);
   transform-origin: top center;
   /* Closed (exit): smooth ease-out; background-color snaps to trigger colour at
      ~55% of close duration so surface stays card-colour while shrinking and only
@@ -156,10 +156,10 @@
   border-radius: var(--card-radius, 20px);
   background-color: var(--card-bg, #FFFFFF);
   box-shadow:
-    0 18px 40px -12px rgba(15,23,42,0.22),
-    0 4px 12px -4px rgba(15,23,42,0.10),
+    0 18px 40px -12px rgba(17,17,17,0.22),
+    0 4px 12px -4px rgba(17,17,17,0.10),
     inset 0 1px 0 rgba(255,255,255,0.9),
-    inset 0 0 0 1px var(--card-border, #CBD5E1);
+    inset 0 0 0 1px var(--card-border, #D4D4D4);
   /* Open (enter): bouncy easing; background-color deferred to near end of morph
      so the surface stays as trigger colour until the shape is almost fully expanded.
      Explicit 0s delays on shape properties (no blanket transition-delay override). */
@@ -190,7 +190,7 @@
 .md-root:has(.md-trigger:hover) .md-trigger { transform: translateX(-50%) scale(1.04); }
 .md-trigger:active { transform: translateX(-50%) scale(0.94); }
 .md-trigger:focus-visible {
-  outline: 2px solid #10B981;
+  outline: 2px solid var(--brand-primary-500);
   outline-offset: 4px;
 }
 .md-trigger .material-symbols-outlined {
@@ -210,7 +210,7 @@
   min-width: 22px; height: 22px;
   padding: 0 5px;
   border-radius: 9999px;
-  background: #10B981;
+  background: var(--brand-primary-500);
   color: #fff;
   font-family: 'Montserrat';
   font-size: 13px; font-weight: 900;
@@ -222,10 +222,10 @@
     inset 0 1px 0 rgba(255,255,255,0.50),
     inset 0 -2px 0 rgba(0,0,0,0.22),
     inset 0 0 0 1px rgba(0,0,0,0.10),
-    0 0 0 2px #F1F5F9,
-    0 6px 14px -2px rgba(16,185,129,0.60),
-    0 12px 28px -6px rgba(16,185,129,0.55),
-    0 2px 4px rgba(15,23,42,0.18);
+    0 0 0 2px #F5F5F5,
+    0 6px 14px -2px color-mix(in srgb, var(--brand-primary-500) 60%, transparent),
+    0 12px 28px -6px var(--brand-glow),
+    0 2px 4px rgba(17,17,17,0.18);
   background-image:
     linear-gradient(rgba(255,255,255,0.14) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.14) 1px, transparent 1px);
@@ -311,10 +311,10 @@ dialog.md-panel-content {
     0s;
 }
 .md-item:hover {
-  background: #F1F5F9;
+  background: #F5F5F5;
 }
 .md-item:focus-visible {
-  outline: 2px solid #10B981;
+  outline: 2px solid var(--brand-primary-500);
   outline-offset: -2px;
 }
 .md-avatar {
@@ -324,7 +324,7 @@ dialog.md-panel-content {
   box-shadow:
     inset 0 -3px 6px rgba(0,0,0,0.18),
     inset 0 1px 0 rgba(255,255,255,0.30),
-    0 2px 4px rgba(15,23,42,0.12);
+    0 2px 4px rgba(17,17,17,0.12);
 }
 .md-item-text {
   flex: 1;
@@ -338,36 +338,36 @@ dialog.md-panel-content {
 }
 .md-sender {
   font-size: 13.5px; font-weight: 700;
-  color: #0F172A;
+  color: #111111;
   letter-spacing: -0.005em;
 }
 .md-time {
   font-size: 10.5px; font-weight: 600;
-  color: #94A3B8;
+  color: #A1A1A1;
   flex-shrink: 0;
   letter-spacing: 0.005em;
 }
 .md-preview {
   font-size: 12px; font-weight: 500;
-  color: #64748B;
+  color: #6B6B6B;
   line-height: 1.35;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   letter-spacing: -0.002em;
 }
-.md-unread .md-sender  { color: #0F172A; }
-.md-unread .md-preview { color: #475569; }
+.md-unread .md-sender  { color: #111111; }
+.md-unread .md-preview { color: #4A4A4A; }
 
 .md-footer {
   margin-top: 16px;
   padding-top: 20px; /* Fix (4): symmetric perceived gaps — item-content→divider = 10+16=26px; divider→button-content = 20+6=26px */
-  border-top: 1px solid #E2E8F0;
+  border-top: 1px solid #ECECEC;
   display: flex; justify-content: stretch; align-items: stretch;
   gap: 8px;
 }
 /* Fix (6): Restyle footer buttons to canonical .btn-task look —
    pill radius 9999px, font-weight 800, colored fill + white text,
    inset + glow box-shadows, text-shadow, brightness hover, scale active.
-   "View Messages" = navy #0F172A fill; "Mark all as read" = emerald #10B981 fill.
+   "View Messages" = navy #111111 fill; "Mark all as read" = emerald var(--brand-primary-500) fill.
    Existing mark-all-read tick/close JS behavior + classes preserved unchanged. */
 .md-footer button {
   flex: 1 1 0;
@@ -377,7 +377,7 @@ dialog.md-panel-content {
   justify-content: center;
   gap: 6px;
   /* Default: navy fill (View Messages button) */
-  --md-fbtn: #0F172A;
+  --md-fbtn: #111111;
   background: var(--md-fbtn);
   border: 1px solid var(--md-fbtn);
   color: #fff;
@@ -424,7 +424,7 @@ dialog.md-panel-content {
 .md-footer button:active { transform: scale(0.98); }
 /* Mark-all-as-read gets emerald fill to distinguish from the navy View button */
 .md-footer .md-mark-read {
-  --md-fbtn: #10B981;
+  --md-fbtn: var(--brand-primary-500);
 }
 
 /* ---- Fix (4): Mark-all-as-read animation sequence ---- */
@@ -529,8 +529,8 @@ dialog.md-panel-content {
 
 /* ===================== Dark mode (html.dark) ===================== */
 html.dark .md-card {
-  background: #0F172A;
-  border-color: #243044;
+  background: #111111;
+  border-color: #242424;
 }
 html.dark .md-panel-shell {
   /* Collapsed state in dark: trigger colour = #FFFFFF so the circle blends
@@ -542,51 +542,51 @@ html.dark .md-panel-shell {
   box-shadow: none;
 }
 html.dark .md-root.open .md-panel-shell {
-  /* Open state in dark: shell surface sits between card (#0F172A) and panel (#1E293B).
+  /* Open state in dark: shell surface sits between card (#111111) and panel (#1C1C1C).
      Mirror light mode's relationship: darker than panel, lighter than card.
      Fix (1) dark open: restore card-border for the expanded shell frame.
      Fix (5): dark canonical inner-card border + inset highlight.
      Fix (5b): brighter top hairline lifts the shell off the dark background. */
   background: #172230;
-  border-color: var(--card-border, #334155);
+  border-color: var(--card-border, #232323);
   border-top-color: rgba(255,255,255,0.22) !important; /* beats border-color shorthand */
   box-shadow:
     0 16px 56px rgba(0,0,0,0.5),
     0 3px 10px rgba(0,0,0,0.3),
     inset 0 1px 0 rgba(255,255,255,.22),
-    inset 0 0 0 1px rgba(15,23,42,0.04);
+    inset 0 0 0 1px rgba(17,17,17,0.04);
 }
 html.dark .md-trigger-bg,
 html.dark .md-panel-bg { background: #FFFFFF; }
-html.dark .md-trigger { color: #0F172A; }
+html.dark .md-trigger { color: #111111; }
 html.dark .md-trigger .material-symbols-outlined { text-shadow: none; }
 html.dark .md-root.open .md-panel-bg {
-  /* Fix (7): use canonical --card-bg / --card-border tokens (#1E293B / #334155).
-     Top rim-light #334155 (dark) instead of rgba(255,255,255,0.9) (light). */
-  background-color: var(--card-bg, #1E293B);
+  /* Fix (7): use canonical --card-bg / --card-border tokens (#1C1C1C / #232323).
+     Top rim-light #232323 (dark) instead of rgba(255,255,255,0.9) (light). */
+  background-color: var(--card-bg, #1C1C1C);
   box-shadow:
     0 18px 40px -12px rgba(0,0,0,0.55),
     0 4px 12px -4px rgba(0,0,0,0.35),
     inset 0 1px 0 rgba(255,255,255,0.06),
-    inset 0 0 0 1px var(--card-border, #334155);
+    inset 0 0 0 1px var(--card-border, #232323);
 }
 html.dark .md-item:hover { background: rgba(255,255,255,0.05); }
 html.dark .md-sender,
-html.dark .md-unread .md-sender { color: #F1F5F9; }
-html.dark .md-preview { color: #94A3B8; }
-html.dark .md-unread .md-preview { color: #CBD5E1; }
-html.dark .md-time { color: #64748B; }
+html.dark .md-unread .md-sender { color: #F5F5F5; }
+html.dark .md-preview { color: #A1A1A1; }
+html.dark .md-unread .md-preview { color: #D4D4D4; }
+html.dark .md-time { color: #6B6B6B; }
 html.dark .md-trigger-badge {
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.50),
     inset 0 -2px 0 rgba(0,0,0,0.22),
     inset 0 0 0 1px rgba(0,0,0,0.10),
-    0 0 0 2px #0B1220,
-    0 6px 14px -2px rgba(16,185,129,0.60),
-    0 12px 28px -6px rgba(16,185,129,0.55),
+    0 0 0 2px #0A0A0A,
+    0 6px 14px -2px color-mix(in srgb, var(--brand-primary-500) 60%, transparent),
+    0 12px 28px -6px var(--brand-glow),
     0 2px 4px rgba(0,0,0,0.3);
 }
-html.dark .md-footer { border-color: #334155; }
+html.dark .md-footer { border-color: #232323; }
 /* Fix (6) dark: btn-task fill still works in dark — navy + emerald are both colorful.
    Just keep the :hover brightness filter consistent (inherited). */
 html.dark .md-footer button {
@@ -602,9 +602,9 @@ html.dark .md-footer button {
 /* Fix (8) dark mode: extended gradient stops to match light mode (48/72/100/150) */
 html.dark .md-tick-overlay {
   background: linear-gradient(to left,
-    #1E293B 48px,
-    rgba(30,41,59,0.96) 72px,
-    rgba(30,41,59,0.80) 100px,
-    rgba(30,41,59,0) 150px
+    #1C1C1C 48px,
+    rgba(28,28,28,0.96) 72px,
+    rgba(28,28,28,0.80) 100px,
+    rgba(28,28,28,0) 150px
   );
 }

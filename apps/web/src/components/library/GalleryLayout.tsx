@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { ThemeToggle } from './ThemeToggle'
 import { SlowDownToggle } from './SlowDownToggle'
+import { PrimaryThemeSwitcher } from './PrimaryThemeSwitcher'
 import { Sidebar } from './Sidebar'
 
 interface GalleryLayoutProps {
@@ -16,6 +17,7 @@ export function GalleryLayout({ children, activeSlug }: GalleryLayoutProps) {
         <span className="text-xs text-muted-foreground">UI Library — Deha CRM</span>
         <div className="flex items-center gap-2">
           <SlowDownToggle />
+          <PrimaryThemeSwitcher />
           <ThemeToggle />
         </div>
       </header>

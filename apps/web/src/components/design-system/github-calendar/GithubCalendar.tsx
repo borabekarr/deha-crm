@@ -21,29 +21,29 @@ const SCHEMES: Record<string, {
   glow: string,
 }> = {
   emerald: {
-    light: ['#E9EEF3', '#A7F3D0', '#34D399', '#10B981', '#047857'],
-    dark:  ['#172132', '#0C5A43', '#065F46', '#10B981', '#34D399'],
-    glow:  '#10B981',
+    light: ['#E9EEF3', 'var(--brand-primary-200)', 'var(--brand-primary-400)', 'var(--brand-primary-500)', 'var(--brand-primary-700)'],
+    dark:  ['#202020', '#0C5A43', 'var(--brand-primary-800)', 'var(--brand-primary-500)', 'var(--brand-primary-400)'],
+    glow:  'var(--brand-primary-500)',
   },
   ocean: {
     light: ['#E9EEF3', '#BAE6FD', '#38BDF8', '#0284C7', '#0369A1'],
-    dark:  ['#172132', '#0C4A6E', '#075985', '#0284C7', '#38BDF8'],
+    dark:  ['#202020', '#0C4A6E', '#075985', '#0284C7', '#38BDF8'],
     glow:  '#38BDF8',
   },
   violet: {
     light: ['#E9EEF3', '#DDD6FE', '#A78BFA', '#7C3AED', '#5B21B6'],
-    dark:  ['#172132', '#2E1065', '#3B0764', '#7C3AED', '#A78BFA'],
+    dark:  ['#202020', '#2E1065', '#3B0764', '#7C3AED', '#A78BFA'],
     glow:  '#A78BFA',
   },
   amber: {
     light: ['#E9EEF3', '#FDE68A', '#FBBF24', '#D97706', '#92400E'],
-    dark:  ['#172132', '#451A03', '#78350F', '#D97706', '#FBBF24'],
+    dark:  ['#202020', '#451A03', '#78350F', '#D97706', '#FBBF24'],
     glow:  '#FBBF24',
   },
   slate: {
-    light: ['#E9EEF3', '#CBD5E1', '#94A3B8', '#64748B', '#334155'],
-    dark:  ['#172132', '#334155', '#475569', '#94A3B8', '#CBD5E1'],
-    glow:  '#94A3B8',
+    light: ['#E9EEF3', '#D4D4D4', '#A1A1A1', '#6B6B6B', '#232323'],
+    dark:  ['#202020', '#232323', '#4A4A4A', '#A1A1A1', '#D4D4D4'],
+    glow:  '#A1A1A1',
   },
 }
 

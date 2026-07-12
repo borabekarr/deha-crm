@@ -24,7 +24,7 @@ function RingSVG({ pct }: { pct: number }) {
       <circle
         className="ring-prog"
         cx="17.5" cy="17.5" r={RING_R}
-        fill="none" stroke="#10B981" strokeWidth="3.4"
+        fill="none" stroke="var(--brand-primary-500)" strokeWidth="3.4"
         strokeLinecap="round"
         strokeDasharray={circumStr}
         strokeDashoffset={circumStr}
@@ -287,7 +287,7 @@ export default function StreakCard() {
 
   return (
     <div className="stk-root">
-      <div className="card" style={{ padding: 0, background: '#F8FAFC' }}>
+      <div className="card" style={{ padding: 0, background: '#FAFAFA' }}>
         <div className="frame">
 
           {/* Shell bezel */}

@@ -19,7 +19,7 @@ interface GroupState {
   dirty: boolean;
 }
 
-const DEFAULT_RADIUS = 120;
+const DEFAULT_RADIUS = 80;
 const DEFAULT_SELECTOR = '[data-proximity]';
 const EPSILON = 0.005;
 
@@ -92,9 +92,9 @@ function processGroup(state: GroupState): void {
   const radius = state.radius;
   state.children.forEach((el, i) => {
     const rect = state.rects[i];
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    const dist = Math.hypot(pointerX - cx, pointerY - cy);
+    const dx = Math.max(0, rect.left - pointerX, pointerX - rect.right);
+    const dy = Math.max(0, rect.top - pointerY, pointerY - rect.bottom);
+    const dist = Math.hypot(dx, dy * 3);
     const raw = Math.max(0, 1 - dist / radius);
     const t = raw * raw * (3 - 2 * raw);
     const prev = state.prev[i];

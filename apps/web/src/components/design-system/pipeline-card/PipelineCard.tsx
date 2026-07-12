@@ -642,7 +642,7 @@ function OutcomesBlock({ outcomes }: { outcomes: Outcomes }) {
   return (
     <div className="pcx-block">
       <p className="pcx-sec-title">
-        <span className="pcx-sec-icon icon-badge icon-badge--sm" style={{ '--icon-c': '#10B981' } as React.CSSProperties}>
+        <span className="pcx-sec-icon icon-badge icon-badge--sm" style={{ '--icon-c': 'var(--brand-primary-500)' } as React.CSSProperties}>
           <span className="material-symbols-outlined">trending_up</span>
         </span>
         Expected outcome
@@ -900,13 +900,13 @@ function EmptyState() {
         <div style={{
           width: '54px', height: '54px', borderRadius: '16px', margin: '0 auto 14px',
           display: 'grid', placeItems: 'center', color: '#fff',
-          background: 'linear-gradient(150deg,#34D399,#10B981)',
-          boxShadow: '0 8px 22px rgba(16,185,129,0.34),inset 0 1px 0 rgba(255,255,255,0.5)',
+          background: 'linear-gradient(150deg,var(--brand-primary-400),var(--brand-primary-500))',
+          boxShadow: '0 8px 22px color-mix(in srgb, var(--brand-primary-500) 34%, transparent),inset 0 1px 0 rgba(255,255,255,0.5)',
         }}>
           <span className="material-symbols-outlined" style={{ fontSize: '28px' }}>task_alt</span>
         </div>
-        <div style={{ fontSize: '16px', fontWeight: 800, color: '#0F172A', letterSpacing: '-0.01em' }}>No actions for today</div>
-        <div style={{ fontSize: '12.5px', fontWeight: 500, color: '#64748B', marginTop: '5px', lineHeight: 1.5 }}>
+        <div style={{ fontSize: '16px', fontWeight: 800, color: '#111111', letterSpacing: '-0.01em' }}>No actions for today</div>
+        <div style={{ fontSize: '12.5px', fontWeight: 500, color: '#6B6B6B', marginTop: '5px', lineHeight: 1.5 }}>
           Your pipeline looks healthy. The briefing refills overnight.
         </div>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: '5px', height: '38px', marginTop: '18px' }}>
@@ -914,11 +914,11 @@ function EmptyState() {
             <div key={bar.day} style={{
               width: '13px', borderRadius: '4px 4px 2px 2px',
               height: bar.h * 5 + 6 + 'px',
-              background: i === 6 ? '#10B981' : '#CBD5E1',
+              background: i === 6 ? 'var(--brand-primary-500)' : '#D4D4D4',
             }}></div>
           ))}
         </div>
-        <div style={{ fontSize: '9.5px', fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#94A3B8', marginTop: '8px' }}>
+        <div style={{ fontSize: '9.5px', fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#A1A1A1', marginTop: '8px' }}>
           Cards handled this week
         </div>
       </div>

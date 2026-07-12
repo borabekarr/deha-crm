@@ -68,22 +68,22 @@ html.dark .db[data-state='confirming'] {
 
 /* ---- done state — solid green fill, white text ------------------- */
 .db[data-state='done'] {
-  background: #10B981;
+  background: var(--brand-primary-500);
   color: #fff;
   cursor: default;
   box-shadow:
-    0 6px 18px -8px rgba(16, 185, 129, 0.55),
+    0 6px 18px -8px var(--brand-glow),
     inset 0 1px 0 rgba(255, 255, 255, 0.35),
-    inset 0 0 0 1.5px rgba(16, 185, 129, 0.3);
+    inset 0 0 0 1.5px color-mix(in srgb, var(--brand-primary-500) 30%, transparent);
 }
 
 html.dark .db[data-state='done'] {
-  background: #059669;
+  background: var(--brand-primary-600);
   color: #fff;
   box-shadow:
     0 6px 18px -8px rgba(5, 150, 105, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    inset 0 0 0 1.5px rgba(16, 185, 129, 0.25);
+    inset 0 0 0 1.5px color-mix(in srgb, var(--brand-primary-500) 25%, transparent);
 }
 
 /* ---- inner container — clip mask + position context for morph slots */

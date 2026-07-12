@@ -55,8 +55,8 @@
   border-radius: var(--card-radius, 20px);
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.4),
-    0 8px 24px rgba(15, 23, 42, 0.10),
-    0 2px 6px rgba(15, 23, 42, 0.06);
+    0 8px 24px rgba(17,17,17, 0.10),
+    0 2px 6px rgba(17,17,17, 0.06);
   cursor: pointer;
   text-align: left;
   font-family: var(--font-display);
@@ -64,7 +64,7 @@
     transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
     box-shadow calc(220ms * var(--anim-mult, 1)) ease;
 }
-.dtw-trigger:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(15, 23, 42, 0.14); }
+.dtw-trigger:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(17,17,17, 0.14); }
 .dtw-trigger:active { transform: scale(0.98); }
 .dtw-trigger:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 3px; }
 
@@ -80,7 +80,7 @@
   background: var(--brand-primary);
   color: #fff;
   font-size: 15px;
-  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.40);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--brand-primary-500) 40%, transparent);
   font-variation-settings: 'FILL' 1, 'wght' 700, 'GRAD' 0, 'opsz' 20;
 }
 .dtw-trigger-badge.pop {
@@ -120,7 +120,7 @@
 .dtw-scrim {
   position: absolute;
   inset: 0;
-  background: rgba(15, 23, 42, 0.28);
+  background: rgba(17,17,17, 0.28);
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
   opacity: 0;
@@ -141,16 +141,16 @@
   --dtw-exit:  calc(var(--dtw-exit-raw)  * var(--anim-mult, 1));
 
   /* ── Local chrome vars — flipped wholesale under html.dark ── */
-  --dtw-header: var(--slate-50);
+  --dtw-header: var(--gray-50);
   --dtw-edge: var(--card-border);
-  --dtw-track: var(--slate-200);
-  --dtw-cancel-fg: var(--slate-500);
+  --dtw-track: var(--gray-200);
+  --dtw-cancel-fg: var(--gray-500);
   --dtw-done-fg: var(--brand-primary);
   --dtw-title-fg: var(--fg1);
   --dtw-summary-fg: var(--fg4);
   --dtw-item-fg: var(--fg4);
   --dtw-item-active-fg: var(--fg1);
-  --dtw-divider: var(--slate-200);
+  --dtw-divider: var(--gray-200);
 
   position: absolute;
   left: 50%;
@@ -171,7 +171,7 @@
   border-radius: 28px 28px 0 0;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    0 -8px 40px rgba(15, 23, 42, 0.18);
+    0 -8px 40px rgba(17,17,17, 0.18);
   overflow: hidden;
   z-index: 6;
   opacity: 0;
@@ -289,9 +289,9 @@
   left: 14px;
   right: 14px;
   height: 44px;
-  background: rgba(16, 185, 129, 0.07);
-  border-top: 1.5px solid rgba(16, 185, 129, 0.30);
-  border-bottom: 1.5px solid rgba(16, 185, 129, 0.30);
+  background: color-mix(in srgb, var(--brand-primary-500) 7%, transparent);
+  border-top: 1.5px solid color-mix(in srgb, var(--brand-primary-500) 30%, transparent);
+  border-bottom: 1.5px solid color-mix(in srgb, var(--brand-primary-500) 30%, transparent);
   border-radius: 10px;
   pointer-events: none;
   z-index: 1;
@@ -422,8 +422,8 @@
   min-height: 34px;
   padding: 7px 16px;
   border-radius: 9999px;
-  border: 1px solid rgba(16, 185, 129, 0.30);
-  background: rgba(16, 185, 129, 0.10);
+  border: 1px solid color-mix(in srgb, var(--brand-primary-500) 30%, transparent);
+  background: color-mix(in srgb, var(--brand-primary-500) 10%, transparent);
   color: var(--brand-primary);
   font-family: var(--font-display);
   font-size: 12px;
@@ -432,7 +432,7 @@
   cursor: pointer;
   transition: transform calc(140ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1), background calc(180ms * var(--anim-mult, 1)) ease;
 }
-.dtw-reset:hover { background: rgba(16, 185, 129, 0.16); }
+.dtw-reset:hover { background: color-mix(in srgb, var(--brand-primary-500) 16%, transparent); }
 .dtw-reset:active { transform: scale(0.95); }
 .dtw-reset:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 2px; }
 .dtw-reset .material-symbols-outlined {
@@ -442,25 +442,25 @@
 
 /* ── Dark mode — flip local vars only + targeted resets ───────────────────── */
 html.dark .dtw-sheet {
-  --dtw-header: var(--slate-900);
+  --dtw-header: var(--gray-900);
   --dtw-edge: rgba(255, 255, 255, 0.07);
   --dtw-track: rgba(255, 255, 255, 0.09);
   --dtw-cancel-fg: var(--fg3);
   --dtw-done-fg: var(--brand-primary-400);
   --dtw-title-fg: var(--fg1);
   --dtw-summary-fg: var(--fg4);
-  --dtw-item-fg: var(--slate-600);
+  --dtw-item-fg: var(--gray-600);
   --dtw-item-active-fg: var(--fg1);
-  --dtw-divider: var(--slate-700);
+  --dtw-divider: var(--gray-700);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.05),
     inset 0 0 0 1px rgba(255, 255, 255, 0.04),
     0 -8px 40px rgba(0, 0, 0, 0.45);
 }
 html.dark .dtw-band {
-  background: rgba(16, 185, 129, 0.07);
-  border-top-color: rgba(16, 185, 129, 0.34);
-  border-bottom-color: rgba(16, 185, 129, 0.34);
+  background: color-mix(in srgb, var(--brand-primary-500) 7%, transparent);
+  border-top-color: color-mix(in srgb, var(--brand-primary-500) 34%, transparent);
+  border-bottom-color: color-mix(in srgb, var(--brand-primary-500) 34%, transparent);
 }
 html.dark .dtw-trigger {
   box-shadow:
@@ -468,8 +468,8 @@ html.dark .dtw-trigger {
     0 8px 24px rgba(0, 0, 0, 0.40);
 }
 html.dark .dtw-reset {
-  border-color: rgba(16, 185, 129, 0.34);
-  background: rgba(16, 185, 129, 0.14);
+  border-color: color-mix(in srgb, var(--brand-primary-500) 34%, transparent);
+  background: color-mix(in srgb, var(--brand-primary-500) 14%, transparent);
   color: var(--brand-primary-400);
 }
-html.dark .dtw-reset:hover { background: rgba(16, 185, 129, 0.20); }
+html.dark .dtw-reset:hover { background: color-mix(in srgb, var(--brand-primary-500) 20%, transparent); }
