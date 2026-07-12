@@ -594,6 +594,11 @@ function SourcePill({ source, state }: { source: string; state: string }) {
 // ---------------------------------------------------------------------------
 // Update feed item
 // ---------------------------------------------------------------------------
+const UPDATE_ITEM_TAG_STYLE: React.CSSProperties = {
+  display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 700,
+  color: 'var(--brand-primary-500)', flexShrink: 0, marginTop: 2,
+};
+
 interface FeedItem {
   id: string;
   source: string;
@@ -635,7 +640,7 @@ function UpdateItem({ item }: { item: FeedItem }) {
         </div>
       </div>
       {item.tag && (
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 700, color: 'var(--brand-primary-500)', flexShrink: 0, marginTop: 2 }}>
+        <div style={UPDATE_ITEM_TAG_STYLE}>
           <CheckIcon size={11} color="var(--brand-primary-500)" />
           {item.tag}
         </div>

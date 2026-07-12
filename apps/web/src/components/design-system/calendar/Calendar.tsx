@@ -363,9 +363,12 @@ function CalSyncScore({ data }: { data: CalEventMetrics['sync_score'] }) {
 
 // ── Cal widget: Blockers ──────────────────────────────────────────────────
 
+const CAL_BLOCKER_ICONS: Record<string, string> = { done: 'check_circle', active: 'radio_button_checked', locked: 'lock' }
+const CAL_BLOCKER_TONES: Record<string, string> = { done: 'var(--brand-primary-500)', active: '#3B82F6', locked: '#A1A1A1' }
+
 function CalBlockers({ data }: { data: CalEventMetrics['blockers'] }) {
-  const ic: Record<string, string> = { done: 'check_circle', active: 'radio_button_checked', locked: 'lock' }
-  const tone: Record<string, string> = { done: 'var(--brand-primary-500)', active: '#3B82F6', locked: '#A1A1A1' }
+  const ic = CAL_BLOCKER_ICONS
+  const tone = CAL_BLOCKER_TONES
   return (
     <div className="cal-ep-chain-steps">
       {data.chain.map((b, i) => (

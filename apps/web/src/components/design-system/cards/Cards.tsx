@@ -1,7 +1,7 @@
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './Cards.css'
-import { useSquircle } from '../../../lib/hooks'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
 
 export default function Cards() {
   const innerSquircleRef = useSquircle<HTMLDivElement>()

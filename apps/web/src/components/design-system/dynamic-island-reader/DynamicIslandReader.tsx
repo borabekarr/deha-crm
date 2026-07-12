@@ -643,14 +643,10 @@ export default function DynamicIslandReader() {
         </div>
       </div>
 
-      {/* Tweaks panel — inline, no harness dependency */}
-      <div style={{
-        position: 'fixed', right: 16, top: '50%', transform: 'translateY(-50%)',
-        background: 'rgba(17,17,17,0.92)', backdropFilter: 'blur(12px)',
-        borderRadius: 16, padding: '16px 14px', display: 'flex', flexDirection: 'column',
-        gap: 10, minWidth: 170, boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-        border: '1px solid rgba(255,255,255,0.08)',
-      }}>
+      {/* Tweaks panel — static style lives in CSS (di-tweaks-panel) so the
+          backdrop-filter blur isn't re-applied from a fresh inline object on
+          every scroll-driven re-render of this component. */}
+      <div className="di-tweaks-panel">
         <span style={{ fontSize: 10, fontWeight: 700, color: '#6B6B6B', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 2 }}>Indicator</span>
 
         <label htmlFor="dir-dark-island" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, cursor: 'pointer' }}>

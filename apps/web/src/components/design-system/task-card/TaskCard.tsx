@@ -378,9 +378,12 @@ function RevenueVelocity({ data }: { data: NonNullable<TaskMetrics['revenue_velo
 
 // ── Widget: Blockers ──────────────────────────────────────────────────────────
 
+const TASK_BLOCKER_ICONS: Record<string, string> = { done: 'check_circle', active: 'radio_button_checked', locked: 'lock' }
+const TASK_BLOCKER_TONES: Record<string, string> = { done: 'var(--brand-primary-500)', active: '#3B82F6', locked: '#A1A1A1' }
+
 function Blockers({ data }: { data: NonNullable<TaskMetrics['blockers']> }) {
-  const ic: Record<string, string> = { done: 'check_circle', active: 'radio_button_checked', locked: 'lock' }
-  const tone: Record<string, string> = { done: 'var(--brand-primary-500)', active: '#3B82F6', locked: '#A1A1A1' }
+  const ic = TASK_BLOCKER_ICONS
+  const tone = TASK_BLOCKER_TONES
   return (
     <div className="tp-chain-steps">
       {data.chain.map((b, i) => (

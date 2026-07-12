@@ -99,6 +99,26 @@
 /* compact ring spin (subtle) — none; ring is static arc */
 .di-tap { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 
+/* Tweaks panel — static, non-animating. Kept as a real CSS rule (not an
+   inline style object) so the backdrop-filter blur isn't recreated and
+   re-applied on every scroll-driven re-render of the component. */
+.di-tweaks-panel {
+  position: fixed;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(17,17,17,0.92);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 170px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
 /* ---- wrapper / stage ---- */
 .dir-root {
   display: flex;

@@ -1,7 +1,5 @@
 import { useState } from 'react'
-
-export const PRIMARY_THEMES = ['emerald', 'sunflower', 'bloodymary', 'petalglow', 'sexyblue', 'richgold'] as const
-export type PrimaryTheme = (typeof PRIMARY_THEMES)[number]
+import { PRIMARY_THEMES, type PrimaryTheme } from '@/lib/primary-themes'
 
 function readInitialPrimary(): PrimaryTheme {
   if (typeof window === 'undefined') return 'emerald'
