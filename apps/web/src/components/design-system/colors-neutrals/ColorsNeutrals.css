@@ -7,7 +7,17 @@
 .cn-lr-dot { width: 14px; height: 14px; border-radius: 4px; background: #6B6B6B; }
 .cn-lr-meta { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11px; color: #6B6B6B; }
 
+.cn-usage { margin-top: 16px; padding-top: 12px; border-top: 1px solid #ECECEC; display: flex; flex-direction: column; gap: 6px; }
+.cn-usage-title { font-weight: 900; font-size: 12px; letter-spacing: -0.01em; color: #111111; margin-bottom: 2px; }
+.cn-usage-row { display: flex; align-items: baseline; gap: 8px; font-size: 12px; }
+.cn-usage-row code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11px; font-weight: 700; color: #111111; background: #ECECEC; border-radius: 4px; padding: 1px 5px; }
+.cn-usage-row span { color: #6B6B6B; }
+
 /* Dark mode — chrome adapts, swatch fills stay */
 html.dark .card { background: #1C1C1C; background-image: radial-gradient(ellipse at top right, color-mix(in srgb, var(--brand-primary-500) 8%, transparent) 0%, rgba(28,28,28,1) 50%, #1C1C1C 100%); }
 html.dark .cn-lr-title { color: #F5F5F5; }
 html.dark .cn-lr-meta { color: #A1A1A1; }
+html.dark .cn-usage { border-top-color: #232323; }
+html.dark .cn-usage-title { color: #F5F5F5; }
+html.dark .cn-usage-row code { color: #F5F5F5; background: #232323; }
+html.dark .cn-usage-row span { color: #A1A1A1; }

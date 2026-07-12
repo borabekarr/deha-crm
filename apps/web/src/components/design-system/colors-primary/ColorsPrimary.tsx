@@ -81,6 +81,32 @@ export default function ColorsPrimary() {
         <div className="cp-sw lite" style={{ background: 'oklch(90.6% 0.113 99.1)' }}>5<br />90.6/.113/99.1</div>
         <div className="cp-sw lite" style={{ background: 'oklch(93.9% 0.094 101.0)' }}>6<br />93.9/.094/101.0</div>
       </div>
+
+      <div className="cp-usage">
+        <div className="cp-usage-title">Where brand color goes</div>
+        <div className="cp-usage-row">
+          <code>--brand-primary-500</code>
+          <span>primary actions (.btn-primary fill)</span>
+        </div>
+        <div className="cp-usage-row">
+          <code>--bg-accent</code>
+          <span>accent card backgrounds</span>
+        </div>
+        <div className="cp-usage-row">
+          <code>--brand-glow</code>
+          <span>soft glow / highlight halos</span>
+        </div>
+        <div className="cp-usage-row">
+          <code>--semantic-success</code>
+          <span>success state — stays emerald regardless of active theme</span>
+        </div>
+        <p className="cp-usage-note">
+          The 5 alternate palettes above (Sunflower, Bloody Mary, Petal Glow,
+          Sexy Blue, Rich Gold) remap these tokens via{' '}
+          <code>:root[data-primary]</code>; the header theme switcher cycles
+          through them.
+        </p>
+      </div>
     </div>
   )
 }

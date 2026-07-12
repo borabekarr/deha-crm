@@ -20,11 +20,6 @@ function readRegistryFinishedSlugs(): string[] {
   return slugs.filter((_, i) => statuses[i] === 'Finished')
 }
 
-function registryHasSlug(slug: string): boolean {
-  const src = fs.readFileSync(REGISTRY_PATH, 'utf8')
-  return new RegExp(`slug:\\s*'${slug}'`).test(src)
-}
-
 async function trackErrors(page: Page): Promise<{ consoleErrors: string[]; pageErrors: string[] }> {
   const consoleErrors: string[] = []
   const pageErrors: string[] = []
@@ -137,21 +132,6 @@ test.describe('animation spam', () => {
     await page.waitForTimeout(340 + 300)
     const secondOpenHeight = await measure(page, '.tb-sync-feed--visible')
     expect(Math.abs(secondOpenHeight - firstOpenHeight)).toBeLessThanOrEqual(1)
-    expect(consoleErrors).toEqual([])
-    expect(pageErrors).toEqual([])
-  })
-
-  // V7: theme-palette-lab smoke, guarded so it activates automatically once
-  // Step 12 registers the slug (do not import component-registry.ts).
-  const hasThemePaletteLab = registryHasSlug('theme-palette-lab')
-  test('spam / theme-palette-lab smoke', async ({ page }) => {
-    test.skip(!hasThemePaletteLab, 'theme-palette-lab not yet registered (Step 12)')
-    const { consoleErrors, pageErrors } = await trackErrors(page)
-    await page.goto('/components/theme-palette-lab')
-    await settle(page)
-    const toggle = page.getByRole('button', { name: /theme|dark|light/i }).first()
-    if (await toggle.count()) await toggle.click({ force: true })
-    await page.waitForTimeout(300)
     expect(consoleErrors).toEqual([])
     expect(pageErrors).toEqual([])
   })

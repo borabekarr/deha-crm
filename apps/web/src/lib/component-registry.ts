@@ -754,16 +754,6 @@ export const registry: RegistryEntry[] = [
     Component: lazy(() => import('@/components/design-system/pipeline-2/Pipeline2')),
   },
 
-  {
-    slug: 'theme-palette-lab',
-    name: 'Theme Palette Lab',
-    status: 'Proceeding',
-    category: 'Foundations',
-    subtitle: 'Live theme token palette explorer',
-    sourceHtml: '',
-    Component: lazy(() => import('@/components/design-system/theme-palette-lab/ThemePaletteLab')),
-  },
-
   // ══ Waiting ═══════════════════════════════════════════════════════════════
   {
     slug: 'leads-table',
