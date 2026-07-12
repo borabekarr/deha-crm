@@ -485,8 +485,10 @@ html.dark .btn-prox-root .btn-apply:hover {
   box-shadow: 0 4px 12px -4px rgba(52,211,153,0.28);
 }
 
-/* proximity filter washes the rainbow border/glow, scale-only by design. */
-.btn-prox-root .btn-apply[data-proximity] { filter: none; }
+/* proximity filter washes the rainbow border/glow, scale-only by design.
+   Doubled class beats hover-tokens.css's [data-proximity]x3 (0,4,0 > 0,3,0)
+   regardless of CSS load order. */
+.btn-prox-root .btn-apply.btn-apply[data-proximity] { filter: none; }
 
 /* Step 3 additions: prox mapping lives in styles/hover-tokens.css; structural
    only (no new timing). Wrapper carries data-proximity for locked DeleteButton. */
