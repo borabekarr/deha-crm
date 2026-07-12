@@ -9,10 +9,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.105.4"
+    "@supabase/supabase-js": "^2.110.2"
   },
   "peerDependencies": {
-    "@supabase/supabase-js": "^2.105.4"
+    "@supabase/supabase-js": "^2.110.2"
   },
   "peerDependenciesMeta": {
     "@supabase/supabase-js": {
