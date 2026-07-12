@@ -55,6 +55,7 @@ export default function Buttons() {
   const row3Ref = useProximityGroup<HTMLDivElement>()
   const row4Ref = useProximityGroup<HTMLDivElement>()
   const row5Ref = useProximityGroup<HTMLDivElement>()
+const row6Ref = useProximityGroup<HTMLDivElement>()
 
   return (
     <div className="btn-page-root card">
@@ -122,24 +123,24 @@ export default function Buttons() {
         <button type="button" className="btn-discuss" data-proximity><span className="material-icons" style={{ fontSize: 16 }}>more_horiz</span>More</button>
       </div>
       <span className="btn-label" style={{ marginTop: 20 }}>CTA (optimization report)</span>
-      <div className="btn-row">
-        <button type="button" className="btn-cta" style={{ '--accent': 'var(--brand-primary-500)', '--ctaglow': 'var(--brand-glow)' } as React.CSSProperties}>
+      <div className="btn-row" ref={row6Ref}>
+        <button type="button" className="btn-cta" data-proximity style={{ '--accent': 'var(--brand-primary-500)', '--ctaglow': 'var(--brand-glow)' } as React.CSSProperties}>
           <span className="material-symbols-outlined">insights</span>
           Get Optimization
         </button>
-        <button type="button" className="btn-cta" style={{ '--accent': '#EF4444', '--ctaglow': 'rgba(239,68,68,0.5)' } as React.CSSProperties}>
+        <button type="button" className="btn-cta" data-proximity style={{ '--accent': '#EF4444', '--ctaglow': 'rgba(239,68,68,0.5)' } as React.CSSProperties}>
           <span className="material-symbols-outlined">insights</span>
           Get Optimization
         </button>
-        <button type="button" className="btn-cta" style={{ '--accent': '#F97316', '--ctaglow': 'rgba(249,115,22,0.5)' } as React.CSSProperties}>
+        <button type="button" className="btn-cta" data-proximity style={{ '--accent': '#F97316', '--ctaglow': 'rgba(249,115,22,0.5)' } as React.CSSProperties}>
           <span className="material-symbols-outlined">insights</span>
           Get Optimization
         </button>
-        <button type="button" className="btn-cta" style={{ '--accent': '#3B82F6', '--ctaglow': 'rgba(59,130,246,0.5)' } as React.CSSProperties}>
+        <button type="button" className="btn-cta" data-proximity style={{ '--accent': '#3B82F6', '--ctaglow': 'rgba(59,130,246,0.5)' } as React.CSSProperties}>
           <span className="material-symbols-outlined">insights</span>
           Get Optimization
         </button>
-        <button type="button" className="btn-cta" style={{ '--accent': '#EAB308', '--ctaglow': 'rgba(234,179,8,0.5)' } as React.CSSProperties}>
+        <button type="button" className="btn-cta" data-proximity style={{ '--accent': '#EAB308', '--ctaglow': 'rgba(234,179,8,0.5)' } as React.CSSProperties}>
           <span className="material-symbols-outlined">insights</span>
           Get Optimization
         </button>

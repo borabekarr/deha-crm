@@ -446,7 +446,8 @@ html.dark .btn-delete {
   transition:
     filter calc(200ms * var(--anim-mult, 1)),
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring),
-    box-shadow calc(200ms * var(--anim-mult, 1));
+    box-shadow calc(200ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 .btn-cta:hover {
   filter: brightness(1.07);
