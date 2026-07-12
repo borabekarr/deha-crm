@@ -82,6 +82,19 @@ test('richgold: .btn-primary text is black-on-gold; default stays white', async 
   expect(richgoldColor).toBe('rgb(17, 17, 17)')
 })
 
+test('sunflower: .btn-primary text is black-on-gold; default stays white', async ({ page }) => {
+  await page.goto('/components/buttons')
+  const btn = page.locator('.btn-primary').first()
+  await expect(btn).toBeVisible()
+
+  const defaultColor = await btn.evaluate((el) => getComputedStyle(el).color)
+  expect(defaultColor).toBe('rgb(255, 255, 255)')
+
+  await page.evaluate(() => document.documentElement.setAttribute('data-primary', 'sunflower'))
+  const sunflowerColor = await btn.evaluate((el) => getComputedStyle(el).color)
+  expect(sunflowerColor).toBe('rgb(17, 17, 17)')
+})
+
 test('motion: switcher resolves hover and press states via token-driven transitions', async ({ page }) => {
   const switcher = page.locator(SWITCHER)
   await page.goto(URL)

@@ -5,7 +5,7 @@
 .btn-primary {
   display:inline-flex; align-items:center; gap: 8px;
   padding: 12px 20px;
-  background: var(--brand-primary-500); color: #fff;
+  background: var(--brand-primary-500); color: var(--brand-on-primary);
   border: none; border-radius: 14px;
   font-family: 'Montserrat'; font-size: 14px; font-weight: 800;
   text-shadow: 0 1px 2px rgba(0,0,0,0.18);

@@ -172,7 +172,7 @@ body { background: var(--bg-app); }
 .tp-card { background: var(--bg-card-solid); border-radius: 22px; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
 
 /* sticky colored header (priority color) */
-.tp-head { position: relative; flex-shrink: 0; padding: 15px 17px 14px; color: #fff; background-color: var(--ph, var(--brand-primary-500));
+.tp-head { position: relative; flex-shrink: 0; padding: 15px 17px 14px; color: var(--brand-on-primary); background-color: var(--ph, var(--brand-primary-500));
   overflow: hidden; text-shadow: 0 1px 2px rgba(0,0,0,0.22);
   background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
                     linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
@@ -410,7 +410,7 @@ html.dark .tp-w:hover { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 6px 
 .tp-tip-t { font-size: 11.5px; font-weight: 600; color: var(--fg1); line-height: 1.4; margin-right: auto; text-wrap: pretty; }
 .tp-tip-t b { font-weight: 800; }
 .tp-tip-cta { display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; font-family: var(--font-display); font-size: 11px; font-weight: 800;
-  color: #fff; background: var(--cc, var(--brand-primary)); border: none; cursor: pointer; padding: 6px 11px; border-radius: 9px;
+  color: var(--brand-on-primary); background: var(--cc, var(--brand-primary)); border: none; cursor: pointer; padding: 6px 11px; border-radius: 9px;
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.25), 0 0 10px color-mix(in srgb, var(--cc, var(--brand-primary)) 40%, transparent);
   text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   transition: filter calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)); }
@@ -430,7 +430,7 @@ html.dark .tp-w:hover { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 6px 
 .tp-alert.r .tp-alert-ic { background: #EF4444; } .tp-alert.a .tp-alert-ic { background: #F59E0B; }
 .tp-alert-t { font-size: 11.5px; font-weight: 600; color: var(--fg1); margin-right: auto; line-height: 1.35; }
 .tp-alert-cta { display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; font-family: var(--font-display); font-size: 11px; font-weight: 800;
-  color: #fff; background: var(--alert-cta-bg, var(--brand-primary)); border: none; cursor: pointer; padding: 6px 11px; border-radius: 9px;
+  color: var(--brand-on-primary); background: var(--alert-cta-bg, var(--brand-primary)); border: none; cursor: pointer; padding: 6px 11px; border-radius: 9px;
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.25), 0 0 10px color-mix(in srgb, var(--alert-cta-bg, var(--brand-primary)) 40%, transparent);
   text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   transition: filter calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)); }
@@ -629,10 +629,10 @@ html.dark .tp-w:hover { box-shadow: 0 14px 26px -14px rgba(0,0,0,0.6), inset 0 1
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1.5px 0 rgba(0,0,0,0.18), 0 0 10px -3px var(--fbtn, #111111);
 }
 .tp-foot-btn .material-icons { color: #fff; font-size: 16px; }
-.tp-foot-btn:hover { background: var(--fbtn, var(--brand-primary)); border-color: var(--fbtn, var(--brand-primary)); color: #fff; filter: brightness(1.08); }
+.tp-foot-btn:hover { background: var(--fbtn, var(--brand-primary)); border-color: var(--fbtn, var(--brand-primary)); color: var(--brand-on-primary); filter: brightness(1.08); }
 .tp-foot-btn:hover .material-icons { color: #fff; }
 /* primary stays solid-filled (view-deal) */
-.tp-foot-btn.primary { background: var(--fbtn, var(--brand-primary)); border-color: var(--fbtn, var(--brand-primary)); color: #fff;
+.tp-foot-btn.primary { background: var(--fbtn, var(--brand-primary)); border-color: var(--fbtn, var(--brand-primary)); color: var(--brand-on-primary);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1.5px 0 rgba(0,0,0,0.18), 0 0 10px -2px var(--fbtn, var(--brand-primary)); }
 .tp-foot-btn.primary .material-icons { color: #fff; }
 .tp-foot-btn.primary:hover { filter: brightness(1.08); color: #fff; }

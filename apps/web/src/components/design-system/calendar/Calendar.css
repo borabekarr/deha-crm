@@ -565,7 +565,7 @@ html.dark .cal-ep-tip { background: color-mix(in srgb, var(--fg1) 5%, var(--bg-c
 .cal-ep-tip > .material-icons { font-size: 16px; color: var(--fg3); flex-shrink: 0; }
 .cal-ep-tip-t { font-size: 11.5px; font-weight: 600; color: var(--fg1); line-height: 1.4; margin-right: auto; text-wrap: pretty; }
 .cal-ep-tip-cta { display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; font-family: var(--font-display); font-size: 11px; font-weight: 900;
-  color: #fff; background: var(--cc, var(--brand-primary)); border: none; cursor: pointer; padding: 6px 11px; border-radius: 9px;
+  color: var(--brand-on-primary); background: var(--cc, var(--brand-primary)); border: none; cursor: pointer; padding: 6px 11px; border-radius: 9px;
   background-image: linear-gradient(rgba(255,255,255,0.10) 1px, transparent 1px),
                     linear-gradient(90deg, rgba(255,255,255,0.10) 1px, transparent 1px);
   background-size: 9px 9px;
@@ -737,11 +737,11 @@ html.dark .cal-ep-chain-step { box-shadow: inset 0 1px 0 rgba(255,255,255,0.07);
   transition: border-color calc(150ms * var(--anim-mult, 1)), color calc(150ms * var(--anim-mult, 1)), background calc(150ms * var(--anim-mult, 1)), filter calc(150ms * var(--anim-mult, 1));
 }
 .cal-ep-foot-btn .material-icons { color: #fff; font-size: 16px; }
-.cal-ep-foot-btn:hover { background: var(--fbtn, var(--brand-primary)); border-color: var(--fbtn, var(--brand-primary)); color: #fff; filter: brightness(1.08); }
+.cal-ep-foot-btn:hover { background: var(--fbtn, var(--brand-primary)); border-color: var(--fbtn, var(--brand-primary)); color: var(--brand-on-primary); filter: brightness(1.08); }
 .cal-ep-foot-btn:hover .material-icons { color: #fff; }
 .cal-ep-foot-btn:active { transform: scale(0.98); }
 /* primary — solid-filled (mirrors .tp-foot-btn.primary v7) */
-.cal-ep-foot-btn.primary { background: var(--fbtn, var(--brand-primary)); border-color: var(--fbtn, var(--brand-primary)); color: #fff;
+.cal-ep-foot-btn.primary { background: var(--fbtn, var(--brand-primary)); border-color: var(--fbtn, var(--brand-primary)); color: var(--brand-on-primary);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1.5px 0 rgba(0,0,0,0.18), 0 0 10px -2px var(--fbtn, var(--brand-primary)); }
 .cal-ep-foot-btn.primary .material-icons { color: #fff; }
 .cal-ep-foot-btn.primary:hover { filter: brightness(1.08); color: #fff; }

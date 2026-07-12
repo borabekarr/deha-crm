@@ -20,7 +20,9 @@ html.dark .cards-outer { background: #0A0A0A !important; }
    that trace the same squircle outline (see use-squircle.ts). Elements
    without data-squircle="on" keep the plain border-radius fallback above. */
 .card-inner[data-squircle="on"] {
-  border-color: transparent;
+  border: 0;
+  padding: calc(var(--pad-card) + 1px);
+  border-radius: 0;
   box-shadow: none;
   --corner-radius: var(--card-radius);
 }
@@ -47,6 +49,33 @@ html.dark .cards-outer { background: #0A0A0A !important; }
   border-radius: 28px;
   padding: 8px;
 }
+.concentric-demo-outer[data-squircle="on"] { border-radius: 0; }
+
+.concentric-demo {
+  position: relative;
+  transition: transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out), filter calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
+  filter: drop-shadow(0 10px 15px rgba(17,17,17,0.12)) drop-shadow(0 2px 4px rgba(17,17,17,0.06));
+}
+.concentric-demo:hover {
+  transform: scale(1.007);
+  filter: drop-shadow(0 16px 25px rgba(17,17,17,0.13)) drop-shadow(0 3px 4.5px rgba(17,17,17,0.07));
+}
+.concentric-demo:active { transform: scale(1.003); }
+.concentric-demo-resize-handle {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  touch-action: none;
+  background:
+    linear-gradient(135deg, transparent 40%, var(--fg4) 40%, var(--fg4) 46%, transparent 46%),
+    linear-gradient(135deg, transparent 60%, var(--fg4) 60%, var(--fg4) 66%, transparent 66%),
+    linear-gradient(135deg, transparent 80%, var(--fg4) 80%, var(--fg4) 86%, transparent 86%);
+  opacity: 0.6;
+  z-index: 1;
+}
 .card-accent {
   background: var(--brand-primary-500); color: var(--brand-on-primary);
   border-radius: 24px; padding: 18px;
@@ -57,7 +86,7 @@ html.dark .cards-outer { background: #0A0A0A !important; }
     inset 0 0 0 1px rgba(255,255,255,0.15);
   position: relative; overflow:hidden;
   cursor: pointer;
-  transition: transform calc(220ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(220ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  transition: transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
   font-family: var(--font-display);
   text-shadow: 0 1px 2px rgba(0,0,0,0.18);
   background-image:
@@ -99,6 +128,14 @@ html.dark .card-inner[data-squircle="on"] { box-shadow: none; }
    (box-shadow can't follow a clip-path). */
 html.dark .card-inner[data-squircle="on"]::after {
   background: linear-gradient(to bottom, rgba(255,255,255,0.05), rgba(255,255,255,0) 60%);
+}
+html.dark .concentric-demo-outer[data-squircle="on"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--card-border);
+  clip-path: var(--squircle-border-path);
 }
 html.dark .card-name { color: #F5F5F5; }
 html.dark .card-desc { color: #A1A1A1; }

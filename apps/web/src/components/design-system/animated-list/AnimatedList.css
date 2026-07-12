@@ -195,7 +195,7 @@ html.dark .al-push-btn:hover {
   box-shadow: 0 2px 8px -2px var(--brand-glow);
 }
 html.dark .al-anim-pill { border-color: rgba(255,255,255,0.12); color: var(--fg3, #A1A1A1); }
-html.dark .al-anim-pill.al-active { color: #fff; background: var(--brand-primary-600); }
+html.dark .al-anim-pill.al-active { color: var(--brand-on-primary); background: var(--brand-primary-600); }
 
 /* ── Feed area ────────────────────────────────────────────────────── */
 .al-feed { min-height: 220px; }
@@ -272,7 +272,7 @@ html.dark .al-ev--review   .al-ev-ico { background: rgba(249,115,22,0.16); color
 }
 
 .al-ev--low .al-ev-pill {
-  color: #fff; background: var(--brand-primary-500);
+  color: var(--brand-on-primary); background: var(--brand-primary-500);
   background-image:
     linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);

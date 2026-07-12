@@ -54,7 +54,7 @@ html.dark .fab-screen {
 html.dark .sc-name { color: #F5F5F5; }
 .sc-avatar {
   width: 42px; height: 42px; border-radius: 50%;
-  background: var(--brand-primary-500); color: #fff; display: grid; place-items: center;
+  background: var(--brand-primary-500); color: var(--brand-on-primary); display: grid; place-items: center;
   font-size: 14px; font-weight: 800;
   background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
   background-size: 8px 8px;

@@ -55,6 +55,12 @@ step in the scale ENCODES A ROLE — use the role, not the raw hex, in component
 Dark mode swaps roles, not hexes: `--fg1` becomes `#F1F5F9`, `--bg-app` becomes `#0F172A`. Never
 invent a new hex; every color in a component must resolve to a token above.
 
+**Primary theme palettes:** the design system ships five extra primary palettes (sunflower,
+bloodymary, petalglow, sexyblue, richgold), remapped via `:root[data-primary=...]` attribute
+selectors in `colors_and_type.css` and cycled by the gallery's PrimaryThemeSwitcher; emerald is
+the default with no attribute set. `--brand-on-primary` flips on-primary text to `#111111` for
+the light-primary themes (sunflower, richgold).
+
 ## Typography
 
 - Font: `'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif` (`--font-display`),
