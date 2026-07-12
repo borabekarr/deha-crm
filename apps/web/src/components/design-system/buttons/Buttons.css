@@ -5,7 +5,7 @@
 .btn-primary {
   display:inline-flex; align-items:center; gap: 8px;
   padding: 12px 20px;
-  background: var(--brand-primary-500); color: #fff;
+  background: var(--brand-primary-500); color: var(--brand-on-primary);
   border: none; border-radius: 14px;
   font-family: 'Montserrat'; font-size: 14px; font-weight: 800;
   text-shadow: 0 1px 2px rgba(0,0,0,0.18);
@@ -20,6 +20,8 @@
   cursor: pointer;
   transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear, filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
+/* richgold uses dark on-primary text; the dark text-shadow would muddy it */
+:root[data-primary="richgold"] .btn-primary { text-shadow: none; }
 .btn-primary:hover {
   transform: translateY(-1px);
   box-shadow:

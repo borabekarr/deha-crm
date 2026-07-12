@@ -110,6 +110,7 @@
   --fg4:                  #A1A1A1;  /* tertiary   — gray-400 */
   --fg-inverse:           #FFFFFF;
   --fg-brand:             #10B981;
+  --brand-on-primary:     #fff;  /* text color on brand-primary-filled surfaces; themes may remap */
 
   /* ---------- Borders ---------- */
   --border-glass:         rgba(255, 255, 255, 0.60);
@@ -316,6 +317,7 @@
   --bg-accent:            var(--richgold-3);
   --fg-brand:             var(--richgold-3);
   --brand-glow:           color-mix(in oklch, var(--richgold-3), transparent 50%);
+  --brand-on-primary:     #111111;
 }
 
 /* =========================================================================
@@ -439,7 +441,7 @@ html, body {
   padding: 12px 20px;
   border-radius: var(--radius-lg);
   background: #10B981;
-  color: #fff;
+  color: var(--brand-on-primary);
   font-weight: 800;
   font-size: var(--type-body);
   border: none;
@@ -457,6 +459,7 @@ html, body {
   transition: filter 200ms cubic-bezier(.22,1,.36,1), transform 200ms;
 }
 .btn-primary:hover { filter: brightness(1.05); }
+:root[data-primary="richgold"] .btn-primary { text-shadow: none; }
 .btn-primary:active { transform: scale(0.98); }
 
 .btn-inverse {

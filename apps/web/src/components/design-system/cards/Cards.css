@@ -15,7 +15,7 @@ html.dark .cards-outer { background: #0A0A0A !important; }
   font-family: var(--font-display);
 }
 .card-accent {
-  background: var(--brand-primary-500); color: #fff;
+  background: var(--brand-primary-500); color: var(--brand-on-primary);
   border-radius: 24px; padding: 18px;
   box-shadow:
     0 10px 40px -10px var(--brand-glow),
@@ -46,12 +46,15 @@ html.dark .cards-outer { background: #0A0A0A !important; }
     inset 0 0 0 1px rgba(255,255,255,0.15);
 }
 .card-accent:active { transform: scale(1.003); }
+:root[data-primary="richgold"] .card-accent { text-shadow: none; }
 
 .card-name { font-weight:800; font-size:14px; }
 .card-desc { font-size:12px; color:#6B6B6B; line-height:1.45; margin-top:4px; }
 .card-desc-w { color: rgba(255,255,255,0.85); }
 .card-tag { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 9px; color: #A1A1A1; margin-top: 8px; display:block; }
 .card-tag-w { color: rgba(255,255,255,0.7); }
+:root[data-primary="richgold"] .card-desc-w { color: rgba(17,17,17,0.72); }
+:root[data-primary="richgold"] .card-tag-w { color: rgba(17,17,17,0.60); }
 
 
 /* Dark mode — html.dark convention */
@@ -61,5 +64,6 @@ html.dark .card-name { color: #F5F5F5; }
 html.dark .card-desc { color: #A1A1A1; }
 html.dark .card-tag { color: #6B6B6B; }
 html.dark .card-accent .card-name { color: #fff; }
+html.dark[data-primary="richgold"] .card-accent .card-name { color: var(--brand-on-primary); }
 html.dark .card-accent .card-desc-w { color: rgba(255,255,255,0.9); }
 html.dark .card-accent .card-tag-w { color: rgba(255,255,255,0.72); }
