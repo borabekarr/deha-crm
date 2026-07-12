@@ -52,6 +52,7 @@ function ApplyButton() {
 export default function Buttons() {
   const row1Ref = useProximityGroup<HTMLDivElement>()
   const row2Ref = useProximityGroup<HTMLDivElement>()
+  const row3Ref = useProximityGroup<HTMLDivElement>()
 
   return (
     <div className="btn-page-root card">
@@ -79,16 +80,16 @@ export default function Buttons() {
       </div>
 
       <span className="btn-label" style={{ marginTop: 20 }}>Colorful pill variants (green / yellow / red)</span>
-      <div className="btn-row">
-        <button type="button" className="btn-green">
+      <div className="btn-row" ref={row3Ref}>
+        <button type="button" className="btn-green" data-proximity>
           <span className="material-icons" style={{ fontSize: 16 }}>check_circle</span>
           Confirm
         </button>
-        <button type="button" className="btn-yellow">
+        <button type="button" className="btn-yellow" data-proximity>
           <span className="material-icons" style={{ fontSize: 16 }}>schedule</span>
           Pending
         </button>
-        <button type="button" className="btn-red">
+        <button type="button" className="btn-red" data-proximity>
           <span className="material-icons" style={{ fontSize: 16 }}>cancel</span>
           Reject
         </button>

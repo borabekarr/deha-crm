@@ -484,3 +484,19 @@ html.dark .btn-page-root .btn-apply:hover {
    wash the gradient ring + glow. Doubled class beats hover-tokens.css's
    [data-proximity]x3 (0,4,0 > 0,3,0) regardless of CSS load order. */
 .btn-page-root .btn-apply.btn-apply[data-proximity] { filter: none; }
+
+/* Row 3 (Colorful pills) proximity transition — locked _shared-feedback.css
+   (btn-green L37-51, btn-yellow L57-71, btn-red L77-91) only lists
+   background-color/transform/box-shadow; scale + filter channels added here
+   so hover-tokens.css's --prox mapping doesn't snap. :not(.btn-apply) keeps
+   row 2's Ask Jeru rainbow/scale-only transition untouched. */
+.btn-page-root .btn-green[data-proximity]:not(.btn-apply),
+.btn-page-root .btn-yellow[data-proximity],
+.btn-page-root .btn-red[data-proximity] {
+  transition:
+    background-color calc(180ms * var(--anim-mult, 1)),
+    transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
+    box-shadow calc(200ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
