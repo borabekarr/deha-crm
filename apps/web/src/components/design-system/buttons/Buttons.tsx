@@ -54,6 +54,7 @@ export default function Buttons() {
   const row2Ref = useProximityGroup<HTMLDivElement>()
   const row3Ref = useProximityGroup<HTMLDivElement>()
   const row4Ref = useProximityGroup<HTMLDivElement>()
+  const row5Ref = useProximityGroup<HTMLDivElement>()
 
   return (
     <div className="btn-page-root card">
@@ -104,21 +105,21 @@ export default function Buttons() {
       </div>
 
       <span className="btn-label" style={{ marginTop: 20 }}>Task footer (--fbtn color token)</span>
-      <div className="btn-row">
-        <button type="button" className="btn-task" style={{ '--fbtn': 'var(--brand-primary-500)' } as React.CSSProperties}>
+      <div className="btn-row" ref={row5Ref}>
+        <button type="button" className="btn-task" data-proximity style={{ '--fbtn': 'var(--brand-primary-500)' } as React.CSSProperties}>
           <span className="material-icons btn-task-icon">task_alt</span>
           Mark Done
         </button>
-        <button type="button" className="btn-task" style={{ '--fbtn': '#3B82F6' } as React.CSSProperties}>
+        <button type="button" className="btn-task" data-proximity style={{ '--fbtn': '#3B82F6' } as React.CSSProperties}>
           <span className="material-icons">edit</span>
           Edit Task
         </button>
-        <button type="button" className="btn-task" style={{ '--fbtn': '#F59E0B' } as React.CSSProperties}>
+        <button type="button" className="btn-task" data-proximity style={{ '--fbtn': '#F59E0B' } as React.CSSProperties}>
           <span className="material-icons">schedule</span>
           Reschedule
         </button>
         {/* More → Discuss styling */}
-        <button type="button" className="btn-discuss"><span className="material-icons" style={{ fontSize: 16 }}>more_horiz</span>More</button>
+        <button type="button" className="btn-discuss" data-proximity><span className="material-icons" style={{ fontSize: 16 }}>more_horiz</span>More</button>
       </div>
       <span className="btn-label" style={{ marginTop: 20 }}>CTA (optimization report)</span>
       <div className="btn-row">
