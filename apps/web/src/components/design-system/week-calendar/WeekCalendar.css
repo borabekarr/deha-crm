@@ -170,7 +170,7 @@
   padding: 0 6px;
   border-radius: var(--radius-circle, 9999px);
   background: var(--brand-primary);
-  color: #fff;
+  color: var(--brand-on-primary);
   background-image:
     linear-gradient(to right, rgba(255, 255, 255, 0.13) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.13) 1px, transparent 1px);
@@ -695,7 +695,7 @@
 }
 .cal2-sh-meet-logo {
   font-size: 16px !important;
-  color: #fff;
+  color: var(--brand-on-primary);
   width: 26px;
   height: 26px;
   display: grid !important;

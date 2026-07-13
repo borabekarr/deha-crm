@@ -354,7 +354,7 @@ function DynamicIsland({
   const showCloseBadge = closing && !complete
 
   return (
-    <div style={{
+    <div className="di-drop" style={{
       position: 'absolute', top: 11, left: '50%', transform: 'translateX(-50%)',
       zIndex: 50,
     }}>

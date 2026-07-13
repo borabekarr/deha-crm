@@ -143,7 +143,7 @@
 }
 .wallet-l { display:flex; align-items:center; gap: 11px; }
 .wallet-ic {
-  width: 38px; height: 38px; border-radius: 11px; display:grid; place-items:center; color:#fff;
+  width: 38px; height: 38px; border-radius: 11px; display:grid; place-items:center; color:var(--brand-on-primary);
   background: linear-gradient(160deg, var(--brand-primary-400), var(--brand-primary-500));
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -2px 0 rgba(0,40,30,0.2);
 }

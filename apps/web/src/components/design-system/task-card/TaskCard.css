@@ -286,7 +286,7 @@ html.dark .tp-w { box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
 
 /* 10 · revenue velocity glow pill */
 .tp-rev { display: flex; align-items: center; gap: 9px; }
-.tp-rev-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 900; color: #fff;
+.tp-rev-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 900; color: var(--brand-on-primary);
   padding: 6px 12px; border-radius: 9999px; background: var(--brand-primary-500); text-shadow: 0 1px 1px rgba(0,0,0,0.2);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand-primary-500) 40%, transparent), 0 0 16px -2px color-mix(in srgb, var(--brand-primary-500) 70%, transparent), inset 0 1px 0 rgba(255,255,255,0.4);
   animation: tp-glow calc(2200ms * var(--anim-mult, 1)) ease-in-out infinite; }
@@ -340,7 +340,7 @@ html.dark .tp-w { background: linear-gradient(180deg, color-mix(in srgb, var(--a
 .tp-w:hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 6px 14px -11px rgba(17,17,17,0.3); }
 html.dark .tp-w:hover { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 6px 14px -10px rgba(0,0,0,0.55); }
 .tp-w-head { gap: 8px; }
-.tp-w-tile { width: 27px; height: 27px; border-radius: 8px; flex-shrink: 0; display: grid; place-items: center; color: #fff;
+.tp-w-tile { width: 27px; height: 27px; border-radius: 8px; flex-shrink: 0; display: grid; place-items: center; color: var(--brand-on-primary);
   background: linear-gradient(150deg, color-mix(in srgb, var(--acc, var(--brand-primary)) 68%, #ffffff 32%), var(--acc, var(--brand-primary)));
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -2px 0 rgba(0,0,0,0.16), 0 3px 8px -3px var(--acc, var(--brand-primary)); }
 .tp-w-tile .material-icons { font-size: 16px; text-shadow: 0 1px 1px rgba(0,0,0,0.2); }
@@ -783,7 +783,7 @@ html.dark .tp-cust-sub { color: var(--fg3) !important; }
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), inset 0 0 0 1px rgba(0,0,0,0.06);
 }
 .tp-chain-step.done {
-  color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.28);
+  color: var(--brand-on-primary); text-shadow: 0 1px 2px rgba(0,0,0,0.28);
   background-color: var(--brand-primary-500);
   background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
                     linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
@@ -799,10 +799,10 @@ html.dark .tp-cust-sub { color: var(--fg3) !important; }
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.40), inset 0 -1.5px 0 rgba(0,0,0,0.18), inset 0 0 0 1px rgba(17,17,17,0.10), 0 0 10px rgba(59,130,246,0.4);
 }
 .tp-chain-step.locked { color: var(--fg4); opacity: 0.85; }
-/* (4) Icons: white on colored (done/active) chips — override inline style with important */
+/* (4) Icons: on-primary on the emerald "done" chip, white on the blue "active" chip — override inline style with important */
 .tp-chain-step-ic { display: grid; place-items: center; flex-shrink: 0; }
 .tp-chain-step-ic .material-icons { font-size: 14px; color: inherit; }
-.tp-chain-step.done .tp-chain-step-ic .material-icons,
+.tp-chain-step.done .tp-chain-step-ic .material-icons { color: var(--brand-on-primary) !important; }
 .tp-chain-step.active .tp-chain-step-ic .material-icons { color: #fff !important; }
 /* Label: Montserrat BLACK 900 */
 .tp-chain-step-lbl { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; }

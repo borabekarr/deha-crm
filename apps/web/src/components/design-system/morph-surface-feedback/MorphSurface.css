@@ -61,7 +61,7 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
-  color: #fff;
+  color: var(--brand-on-primary);
   background-color: var(--brand-primary-500);
   background-image:
     radial-gradient(ellipse at top right, rgba(255, 255, 255, 0.22) 0%, transparent 60%),

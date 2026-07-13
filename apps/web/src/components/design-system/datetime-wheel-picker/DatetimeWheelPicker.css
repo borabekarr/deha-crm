@@ -78,7 +78,7 @@
   height: 22px;
   border-radius: 9999px;
   background: var(--brand-primary);
-  color: #fff;
+  color: var(--brand-on-primary);
   font-size: 15px;
   box-shadow: 0 2px 6px color-mix(in srgb, var(--brand-primary-500) 40%, transparent);
   font-variation-settings: 'FILL' 1, 'wght' 700, 'GRAD' 0, 'opsz' 20;

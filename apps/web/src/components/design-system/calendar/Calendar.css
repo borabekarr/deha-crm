@@ -232,7 +232,7 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
 .cal-pop-add {
   background: var(--brand-primary-500); border: none; border-radius: 10px;
   padding: 9px 20px; font-family: 'Montserrat', sans-serif;
-  font-size: 13px; font-weight: 800; color: #fff;
+  font-size: 13px; font-weight: 800; color: var(--brand-on-primary);
   cursor: pointer;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.3), inset 0 -2px 0 rgba(0,0,0,.18);
   transition: filter calc(120ms * var(--anim-mult, 1)), transform calc(100ms * var(--anim-mult, 1));
@@ -411,7 +411,7 @@ html.dark .cal-ep-customer {
 /* Item 6: R5 icon-badge style — colorful square badge */
 .cal-ep-cust-av {
   width: 30px; height: 30px; flex-shrink: 0; border-radius: 9px;
-  display: grid; place-items: center; color: #fff;
+  display: grid; place-items: center; color: var(--brand-on-primary);
   background-color: var(--icon-c, var(--brand-primary));
   background-image: radial-gradient(ellipse at top right, rgba(255,255,255,0.20) 0%, transparent 55%),
     linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
@@ -422,7 +422,7 @@ html.dark .cal-ep-customer {
     0 0 10px -2px var(--icon-c, var(--brand-primary));
   text-shadow: 0 1px 2px rgba(0,0,0,0.35);
 }
-.cal-ep-cust-av .material-icons { font-size: 16px; color: #fff; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15)); }
+.cal-ep-cust-av .material-icons { font-size: 16px; color: var(--brand-on-primary); filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15)); }
 .cal-ep-cust-meta { min-width: 0; margin-right: auto; display: flex; flex-direction: column; align-items: flex-start; gap: 0; }
 .cal-ep-cust-k { font-size: 8.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg4) !important; text-shadow: none; }
 .cal-ep-cust-name-row { display: flex; align-items: center; gap: 4px; }
@@ -544,7 +544,7 @@ html.dark .cal-ep-w { background: none !important; border-color: transparent !im
 /* Widget head */
 .cal-ep-w-head { display: flex; align-items: center; gap: 9px; margin-bottom: 14px; }
 .cal-ep-w-ic {
-  width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0; display: grid; place-items: center; color: #fff;
+  width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0; display: grid; place-items: center; color: var(--brand-on-primary);
   background-color: var(--acc, var(--brand-primary));
   background-image:
     radial-gradient(ellipse at top right, rgba(255,255,255,0.20) 0%, transparent 55%),
@@ -555,7 +555,7 @@ html.dark .cal-ep-w { background: none !important; border-color: transparent !im
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(17,17,17,0.20), inset 0 0 0 1px rgba(17,17,17,0.12), 0 2px 6px rgba(0,0,0,0.10),
     0 0 10px -2px var(--acc, var(--brand-primary));
 }
-.cal-ep-w-ic .material-icons { font-size: 16px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.35); filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15)); }
+.cal-ep-w-ic .material-icons { font-size: 16px; color: var(--brand-on-primary); text-shadow: 0 1px 2px rgba(0,0,0,0.35); filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15)); }
 .cal-ep-w-label { font-family: var(--font-display); font-weight: 900; font-size: 14px !important; letter-spacing: -0.01em !important; color: var(--fg1) !important; text-transform: none !important; }
 
 /* ── Tip ───────────────────────────────────────────────────────────── */
@@ -682,7 +682,7 @@ html.dark .cal-ep-age-chip { box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0
 }
 html.dark .cal-ep-chain-step { box-shadow: inset 0 1px 0 rgba(255,255,255,0.07); }
 .cal-ep-chain-step.done {
-  color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.28);
+  color: var(--brand-on-primary); text-shadow: 0 1px 2px rgba(0,0,0,0.28);
   background-color: var(--brand-primary-500);
   background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
                     linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
@@ -700,8 +700,8 @@ html.dark .cal-ep-chain-step { box-shadow: inset 0 1px 0 rgba(255,255,255,0.07);
 .cal-ep-chain-step.locked { color: var(--fg4); opacity: 0.85; }
 .cal-ep-chain-step-ic { display: grid; place-items: center; flex-shrink: 0; }
 .cal-ep-chain-step-ic .material-icons { font-size: 14px; color: inherit; }
-/* (4) Icons: white on colored (done/active) chips */
-.cal-ep-chain-step.done .cal-ep-chain-step-ic .material-icons,
+/* (4) Icons: on-primary on the emerald "done" chip, white on the blue "active" chip */
+.cal-ep-chain-step.done .cal-ep-chain-step-ic .material-icons { color: var(--brand-on-primary) !important; }
 .cal-ep-chain-step.active .cal-ep-chain-step-ic .material-icons { color: #fff !important; }
 .cal-ep-chain-step-lbl { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; }
 .cal-ep-chain-conn { color: var(--fg4); display: flex; }

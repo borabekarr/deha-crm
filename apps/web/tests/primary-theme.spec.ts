@@ -11,7 +11,7 @@ test.beforeEach(async ({ page }) => {
   await installDeterminism(page)
 })
 
-const URL = '/components/buttons-proximity'
+const URL = '/components/buttons'
 const SWITCHER = '[aria-label^="Primary theme:"]'
 
 async function getBrandPrimary(page: import('@playwright/test').Page): Promise<string> {

@@ -189,7 +189,7 @@ html.dark .al-push-btn:hover {
     border-color calc(140ms * var(--anim-mult,1));
 }
 .al-anim-pill.al-active {
-  color: #fff;
+  color: var(--brand-on-primary);
   background: var(--brand-primary-500);
   border-color: transparent;
   box-shadow: 0 2px 8px -2px var(--brand-glow);

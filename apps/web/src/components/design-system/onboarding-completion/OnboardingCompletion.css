@@ -42,7 +42,7 @@ html.dark .oc-card { box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 0 
 /* ===================== Glyph tiles (AI Model Selector tag style) ===================== */
 .oc-glyph {
   flex: none; display: grid; place-items: center;
-  border-radius: 11px; color: #fff;
+  border-radius: 11px; color: var(--brand-on-primary);
   background-color: var(--icon-c, var(--brand-primary-500));
   background-image:
     linear-gradient(rgba(255,255,255,.13) 1px, transparent 1px),

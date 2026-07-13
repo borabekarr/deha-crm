@@ -116,7 +116,7 @@ html.dark .td-daybtn.active .dnum { color:#111111; font-weight:900; }
 .td-stat-lbl { display: inline-flex; align-items: baseline; gap: 2px; }
 .td-stat .dot-done {
   width: 17px; height: 17px; border-radius: 50%; background: var(--brand-primary);
-  display: grid; place-items: center; color: #fff;
+  display: grid; place-items: center; color: var(--brand-on-primary);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 2px 6px -1px color-mix(in srgb, var(--brand-primary-500) 60%, transparent);
 }
 .td-stat .dot-done .material-icons { font-size: 12px; }
@@ -533,7 +533,7 @@ html.dark .td-scrim { background:rgba(0,0,0,0.5); }
 .td-pop-pri .material-icons { font-size:11px; margin-left:-1px; }
 .td-pop-pri.on { opacity:1; filter:none; }
 .td-pop-pri:active { transform:scale(0.94); }
-.td-pop-save { display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%; margin-top:18px; padding:13px; border-radius:13px; border:none; cursor:pointer; color:#fff; font-family:var(--font-display); font-size:15px; font-weight:900; text-shadow:0 1px 2px rgba(0,0,0,0.2);
+.td-pop-save { display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%; margin-top:18px; padding:13px; border-radius:13px; border:none; cursor:pointer; color:var(--brand-on-primary); font-family:var(--font-display); font-size:15px; font-weight:900; text-shadow:0 1px 2px rgba(0,0,0,0.2);
   background-color:var(--brand-primary);
   /* grid texture toned WAY down (item 13) — very subtle, larger cells */
   background-image: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);

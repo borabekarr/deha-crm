@@ -100,7 +100,7 @@ html.dark .fc-num {
   align-items: center;
   gap: 3px;
   background: var(--brand-primary-500);
-  color: #fff;
+  color: var(--brand-on-primary);
   font-size: 11px;
   font-weight: 800;
   padding: 3px 9px;

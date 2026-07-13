@@ -58,7 +58,7 @@ export default function Buttons() {
 const row6Ref = useProximityGroup<HTMLDivElement>()
 
   return (
-    <div className="btn-page-root card">
+    <div className="btn-page-root card card--flat">
       <span className="btn-label">Buttons</span>
       <div className="btn-row" ref={row1Ref}>
         <button type="button" className="btn-primary" data-proximity>View Your Leads <span className="material-icons btn-mi">arrow_forward</span></button>

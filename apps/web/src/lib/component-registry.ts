@@ -47,6 +47,13 @@ export interface RegistryEntry {
    * is kept only as a reference for legacy context.
    */
   sourceHtml: string
+  /**
+   * Buttons-only pilot: when set, the route-level reveal (see
+   * components.$slug.tsx) targets this selector instead of the default
+   * `:scope > *`, revealing each matched item individually rather than the
+   * component root as one block. Leave unset for every other entry.
+   */
+  revealSelector?: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Component: ReturnType<typeof lazy<ComponentType<any>>>
 }
@@ -281,17 +288,8 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Primary, inverse, glass, text',
     viewport: { width: 700, height: 140 },
     sourceHtml: '/design-system/preview/components-buttons.html',
+    revealSelector: '.btn-row > *',
     Component: lazy(() => import('@/components/design-system/buttons/Buttons')),
-  },
-  {
-    slug: 'buttons-proximity',
-    name: 'Buttons Proximity',
-    status: 'Proceeding',
-    category: 'Primitives',
-    subtitle: 'Proximity hover pilot',
-    viewport: { width: 700, height: 140 },
-    sourceHtml: '/design-system/preview/components-buttons.html',
-    Component: lazy(() => import('@/components/design-system/buttons-proximity/ButtonsProximity')),
   },
   {
     slug: 'pills',

@@ -1,5 +1,7 @@
 /**
- * Proximity hover pilot spec — /components/buttons-proximity.
+ * Proximity hover spec — /components/buttons (per-button [data-proximity]
+ * wiring; the former buttons-proximity pilot page was deleted once this
+ * wiring shipped on the real Buttons page).
  *
  * Not part of design-system.spec.ts's screenshot SLUGS (see that file's
  * header): the proximity effect is pointer-driven and invisible to rest-state
@@ -13,7 +15,7 @@ test.beforeEach(async ({ page }) => {
   await installDeterminism(page)
 })
 
-const URL = '/components/buttons-proximity'
+const URL = '/components/buttons'
 
 async function waitForPreview(page: Page) {
   await page.waitForLoadState('networkidle')

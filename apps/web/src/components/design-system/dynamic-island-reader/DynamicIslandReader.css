@@ -83,9 +83,10 @@
   0%   { opacity: 0; transform: translateX(-50%) translateY(-10px) scale(0.9); }
   100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
 }
+.di-drop { animation: diDrop calc(420ms * var(--anim-mult, 1)) cubic-bezier(.34,1.32,.5,1) both; }
 
 @media (prefers-reduced-motion: reduce) {
-  .di-pulse, .di-fill-glow, .di-confetti-piece, .di-check-pop { animation: none !important; }
+  .di-pulse, .di-fill-glow, .di-confetti-piece, .di-check-pop, .di-drop { animation: none !important; }
 }
 
 /* Dark-article inversion: island face overrides to white/light when article surface is dark */

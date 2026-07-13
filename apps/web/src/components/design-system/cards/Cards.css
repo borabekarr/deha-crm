@@ -46,10 +46,16 @@ html.dark .cards-outer { background: #0A0A0A !important; }
 .concentric-demo-outer {
   position: relative;
   background: var(--shell-bg);
-  border-radius: 28px;
+  border-radius: 36px;
   padding: 8px;
 }
 .concentric-demo-outer[data-squircle="on"] { border-radius: 0; }
+.concentric-demo-inner {
+  border-radius: 28px;
+}
+.card-inner.concentric-demo-inner[data-squircle="on"] {
+  --corner-radius: 28px;
+}
 
 .concentric-demo {
   position: relative;
@@ -61,21 +67,6 @@ html.dark .cards-outer { background: #0A0A0A !important; }
   filter: drop-shadow(0 16px 25px rgba(17,17,17,0.13)) drop-shadow(0 3px 4.5px rgba(17,17,17,0.07));
 }
 .concentric-demo:active { transform: scale(1.003); }
-.concentric-demo-resize-handle {
-  position: absolute;
-  right: 4px;
-  bottom: 4px;
-  width: 16px;
-  height: 16px;
-  cursor: nwse-resize;
-  touch-action: none;
-  background:
-    linear-gradient(135deg, transparent 40%, var(--fg4) 40%, var(--fg4) 46%, transparent 46%),
-    linear-gradient(135deg, transparent 60%, var(--fg4) 60%, var(--fg4) 66%, transparent 66%),
-    linear-gradient(135deg, transparent 80%, var(--fg4) 80%, var(--fg4) 86%, transparent 86%);
-  opacity: 0.6;
-  z-index: 1;
-}
 .card-accent {
   background: var(--brand-primary-500); color: var(--brand-on-primary);
   border-radius: 24px; padding: 18px;

@@ -46,7 +46,14 @@ function ComponentPreviewPage() {
               </div>
             }
           >
-            <div key={entry.slug} ref={makeRevealRef()}>
+            <div
+              key={entry.slug}
+              ref={makeRevealRef(
+                entry.revealSelector
+                  ? { selector: entry.revealSelector, from: 'first' }
+                  : {},
+              )}
+            >
               <Component />
             </div>
           </Suspense>

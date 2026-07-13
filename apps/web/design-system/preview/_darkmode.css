@@ -33,6 +33,10 @@ html.dark .card:has(.tmpl-grid) {
 html.dark .frame {
   background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.10) 0%, rgba(17,17,17,1) 50%, #111111 100%);
 }
+html.dark .card.card--flat {
+  background: transparent !important;
+  background-image: none !important;
+}
 
 /* Shared gray "outer shells" → dark bezel */
 html.dark .ms-outer,

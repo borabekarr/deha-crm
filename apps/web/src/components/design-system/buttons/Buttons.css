@@ -198,6 +198,11 @@ html.dark .btn-text { color: var(--brand-primary-400); }
   transform: translate(-50%, -50%); pointer-events: none;
 }
 
+/* On-primary text override for the locked DeleteButton's "done" state
+   (source: delete-button/DeleteButton.css .db[data-state='done'], locked). */
+.btn-page-root .btn-prox-wrap .db[data-state='done'] { color: var(--brand-on-primary); }
+html.dark .btn-page-root .btn-prox-wrap .db[data-state='done'] { color: var(--brand-on-primary); }
+
 /* Active state scoped to .btn-apply; hover is raised via .btn-page-root below */
 .btn-apply:active { transform: scale(0.985); }
 
@@ -230,6 +235,7 @@ html.dark .btn-text { color: var(--brand-primary-400); }
   width: 72px;
   padding: 0 10px;
   background: var(--brand-primary-500);
+  color: var(--brand-on-primary);
 }
 
 /* ── Radial spinner (replaces loading bar) ── */

@@ -196,7 +196,7 @@
 
 .pl-item.is-pinned .pl-ico {
   background: var(--brand-primary);
-  color: #fff;
+  color: var(--brand-on-primary);
   background-image:
     linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
@@ -267,7 +267,7 @@
 
 .pl-item.is-pinned .pl-pin {
   background: var(--brand-primary);
-  color: #fff;
+  color: var(--brand-on-primary);
   background-image:
     linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);

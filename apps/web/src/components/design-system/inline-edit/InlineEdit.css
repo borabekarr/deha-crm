@@ -198,7 +198,7 @@ html.dark .ie-act[data-mode="edit"]:hover {
 
 /* check / save state — mirrors .btn-green pill treatment */
 .ie-act[data-mode="save"] {
-  color: #fff;
+  color: var(--brand-on-primary);
   background-color: var(--brand-primary, var(--brand-primary-500));
   background-image:
     linear-gradient(rgba(255,255,255,.12) 1px, transparent 1px),
