@@ -4,6 +4,8 @@ import '../../../../design-system/preview/_shared-feedback.css'
 import './AdjustTimeframe.css'
 
 import { useState, useRef, useCallback } from 'react'
+import { useProximityGroup } from '@/lib/hooks'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
 import { trackRef, cleanupTrack, beginDrag } from './adjust-timeframe-hook'
 
 /* ── Date helpers ───────────────────────────────────────────────────────── */
@@ -77,7 +79,7 @@ export default function AdjustTimeframe() {
   const ppd     = trackW > 0 ? trackW / clamp(daysVisible, MIN_DAYS, totalDays) : 6
   const stripW  = totalDays * ppd
   const EDGE_PAD = 18
-  const maxScroll = Math.max(0, stripW - trackW + EDGE_PAD)
+  const maxScroll = Math.max(0, stripW - trackW)
   const minScroll = -EDGE_PAD
 
   const selLeft  = startIdx * ppd
@@ -103,6 +105,19 @@ export default function AdjustTimeframe() {
   /* Item 6: live-scroll ref so drag math always sees current scroll.
      Updated via setScrollLive (wraps setScroll) — never written during render. */
   const scrollRef   = useRef(0)
+
+  /* ── Proximity groups (hover glow, locked convention: radius 80, dy×3) ─
+     tf-month / tf-handle / tf-lens-hit live inside .tf-strip, which
+     translateX()s during drag/scroll — moving elements violate the
+     stationary-anchor rule, so only the static pan buttons + preset
+     pills are wired (see wired/skipped log in the step report). */
+  const panGroupRef = useProximityGroup<HTMLDivElement>()
+  const presetsProxRef = useProximityGroup<HTMLFieldSetElement>()
+
+  /* Squircle conversion (Step 12): tf-shell/tf-card canonical grey-shell/
+     white-card concentric pair (mirrors .te-outer/.te-panel, .dp-outer/.dp-panel). */
+  const shellSquircleRef = useSquircle<HTMLDivElement>()
+  const cardSquircleRef  = useSquircle<HTMLDivElement>()
 
   /* ── Item 1: segmented pill glider ──────────────────────────────────── */
   const presetsRef   = useRef<HTMLFieldSetElement | null>(null)
@@ -130,11 +145,12 @@ export default function AdjustTimeframe() {
   /* Measure after every render that might change the active button */
   const presetsCallbackRef = useCallback((el: HTMLFieldSetElement | null) => {
     presetsRef.current = el
+    presetsProxRef(el)
     if (el) {
       /* rAF so the browser has painted the buttons at their final size */
       requestAnimationFrame(() => measureGlider())
     }
-  }, [measureGlider])
+  }, [measureGlider, presetsProxRef])
 
   /* Helper: update scroll state AND keep the live ref in sync */
   function setScrollLive(v: number | ((prev: number) => number)): void {
@@ -156,7 +172,7 @@ export default function AdjustTimeframe() {
       // First-time: derive ppd from initial daysVisible and center the selection
       const nppd = w / clamp(105, MIN_DAYS, totalDays)
       const nStrip = totalDays * nppd
-      const nMaxScroll = Math.max(0, nStrip - w + EDGE_PAD)
+      const nMaxScroll = Math.max(0, nStrip - w)
       // startIdx/endIdx at this point are the initial preset values
       // We use functional state to compute the right center scroll
       lastTrackW.current = w
@@ -174,7 +190,7 @@ export default function AdjustTimeframe() {
       // with a stale upper bound.
       lastTrackW.current = w
       setTrackW(w)
-      setScrollLive((s) => clamp(s, -EDGE_PAD, Math.max(0, totalDays * (w / clamp(105, MIN_DAYS, totalDays)) - w + EDGE_PAD)))
+      setScrollLive((s) => clamp(s, -EDGE_PAD, Math.max(0, totalDays * (w / clamp(105, MIN_DAYS, totalDays)) - w)))
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // intentionally empty — only fires from ResizeObserver, not from React re-renders
@@ -289,7 +305,8 @@ export default function AdjustTimeframe() {
     requestAnimationFrame(() => measureGlider(pid))
   }
 
-  /* Item 5: zoom centers on the current lens midpoint */
+  /* Item 5: zoom anchors on the current on-screen viewport center, not the
+     selection lens — keeps the visible frame fixed across the zoom stage. */
   function zoom(dir: number) {
     const next =
       dir < 0
@@ -298,11 +315,12 @@ export default function AdjustTimeframe() {
     if (next === daysVisible) return
     const nppd   = trackW / next
     const nStrip = totalDays * nppd
-    /* center on lens midpoint (startIdx + endIdx) / 2 */
-    const lensCenter = (startIdx + endIdx) / 2
+    /* viewport-center anchor: index currently centered on-screen, measured
+       with the pre-zoom ppd, kept centered after ppd changes */
+    const viewCenterIdx = (scroll + trackW / 2) / ppd
     setAnim(true)
     setDaysVisible(next)
-    setScrollLive(clamp(lensCenter * nppd - trackW / 2, minScroll, Math.max(0, nStrip - trackW + EDGE_PAD)))
+    setScrollLive(clamp(viewCenterIdx * nppd - trackW / 2, minScroll, Math.max(0, nStrip - trackW)))
   }
 
   function selectMonth(m: MonthInfo) {
@@ -340,9 +358,10 @@ export default function AdjustTimeframe() {
 
   /* ── Render ─────────────────────────────────────────────────────────── */
   return (
-    <div className="tf-shell">
+    <div className="tf-shell" ref={shellSquircleRef}>
       <div
         className="tf-card"
+        ref={cardSquircleRef}
         style={{ '--ppd': ppd + 'px', '--tf-accent': accent } as React.CSSProperties}
         data-dragging={drag ? 'true' : 'false'}
         data-moving={drag === 'move' ? 'true' : 'false'}
@@ -376,6 +395,7 @@ export default function AdjustTimeframe() {
                 key={p.id}
                 type="button"
                 data-id={p.id}
+                data-proximity
                 className={`tf-preset${activeId === p.id ? ' active' : ''}`}
                 aria-pressed={activeId === p.id ? 'true' : 'false'}
                 onClick={() => applyPreset(p)}
@@ -388,10 +408,11 @@ export default function AdjustTimeframe() {
 
         <div className="tf-divider" />
 
-        <div className="tf-body">
+        <div className="tf-body" ref={panGroupRef}>
           <button
             type="button"
             className="tf-pan"
+            data-proximity
             aria-label="Zoom out"
             title="Zoom out"
             disabled={daysVisible >= totalDays}
@@ -504,6 +525,7 @@ export default function AdjustTimeframe() {
           <button
             type="button"
             className="tf-pan"
+            data-proximity
             aria-label="Zoom in"
             title="Zoom in"
             disabled={daysVisible <= MIN_DAYS || (endIdx - startIdx + 1) >= Math.max(Math.round(daysVisible / 1.5), MIN_DAYS)}

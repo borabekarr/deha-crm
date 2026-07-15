@@ -29,9 +29,9 @@
      ───────────────────────────────────────────────────────────────────── */
   .nf-card {
     --nf-radius:       18px;
-    --nf-surface:      #0C100E;
+    --nf-surface:      #1C1C1C;
     --nf-glow:         radial-gradient(125% 105% at 64% 124%, var(--nf-c-strong) 0%, var(--nf-c-soft) 38%, transparent 72%);
-    --nf-border:       rgba(255,255,255,0.07);
+    --nf-border:       #232323;
     --nf-shadow:       0 16px 36px -16px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.06);
     --nf-grid-line:    rgba(255,255,255,0.06);
 
@@ -63,7 +63,7 @@
     font-family: 'Montserrat', sans-serif;
     cursor: pointer;
     user-select: none;
-    transition: transform calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+    transition: transform calc(360ms * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(360ms * var(--anim-mult, 1)) var(--ease-out);
     will-change: transform;
   }
 
@@ -78,7 +78,7 @@
     position: absolute; inset: 0; z-index: -1;
     background: var(--nf-glow);
     opacity: 0.92;
-    animation: nfPulse calc(2200ms * var(--anim-mult, 1)) ease-in-out infinite;
+    animation: nfPulse calc(2200ms * var(--anim-mult, 1)) var(--ease-in-out) infinite;
     pointer-events: none;
   }
   @keyframes nfPulse {
@@ -95,14 +95,14 @@
   }
 
   /* hover lifts the whole grey/black shell (bezel + card) together */
-  .nf-shell { background: #0A0A0A; transition: transform calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
+  .nf-shell { background: #0A0A0A; transition: transform calc(360ms * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(360ms * var(--anim-mult, 1)) var(--ease-out); }
   .nf-shell:hover { transform: translateY(-2px); }
   /* arrow press must not bounce the shell — :has guard isolates the arrows */
   .nf-shell:active:not(:has(.nf-arrow:active)) { transform: scale(0.99); transition-duration: calc(120ms * var(--anim-mult, 1)); }
   .nf-shell:hover .nf-card { box-shadow: var(--nf-shadow), 0 20px 44px -24px var(--nf-c-strong); }
   .nf-shell:hover .nf-glow { animation-duration: calc(1100ms * var(--anim-mult, 1)); }
   /* genuine card-body click presses shell + card together (hook toggles .nf-shell.tap) */
-  .nf-shell.tap { animation: nfTap calc(300ms * var(--anim-mult, 1)) ease-out; }
+  .nf-shell.tap { animation: nfTap calc(300ms * var(--anim-mult, 1)) var(--ease-out); }
   @keyframes nfTap {
     0%   { transform: scale(0.99); }
     100% { transform: scale(1); }
@@ -123,12 +123,23 @@
     color: var(--nf-arrow-fg);
     cursor: pointer;
     -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
-    transition: transform calc(200ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(220ms * var(--anim-mult, 1)), border-color calc(200ms * var(--anim-mult, 1));
+    transition: transform calc(200ms * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(220ms * var(--anim-mult, 1)), border-color calc(200ms * var(--anim-mult, 1));
   }
   .nf-arrow svg { width: 15px; height: 15px; }
+  /* Proximity: own transition (0,1,0) beats hover-tokens.css's [data-proximity]x3
+     fallback; scale + filter channels added here so the engine's --prox mapping
+     doesn't snap. */
+  .nf-arrow[data-proximity] {
+    transition:
+      transform calc(200ms * var(--anim-mult, 1)) var(--ease-out),
+      box-shadow calc(220ms * var(--anim-mult, 1)),
+      border-color calc(200ms * var(--anim-mult, 1)),
+      scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+      filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+  }
   .nf-arrow:hover { transform: scale(1.04); border-color: var(--nf-c-strong); box-shadow: 0 0 0 4px color-mix(in srgb, var(--nf-c-strong) 18%, transparent), 0 6px 18px -6px var(--nf-c-strong); }
   .nf-arrow:active { transform: scale(0.92); }
-  .nf-arrow .material-icons { transition: transform calc(240ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1); }
+  .nf-arrow .material-icons { transition: transform calc(240ms * var(--anim-mult, 1)) var(--ease-spring); }
   .nf-arrow:hover .material-icons { transform: translate(2px, -2px); }
 
   /* ── TITLE ── */
@@ -161,7 +172,7 @@
     background: #FFFFFF;
     box-shadow: 0 0 10px var(--nf-bar-glow);
     transform: translateX(calc(var(--nf-idx, 0) * (100% + 6px)));
-    transition: transform calc(300ms * var(--anim-mult, 1)) ease-out;
+    transition: transform calc(300ms * var(--anim-mult, 1)) var(--ease-out);
     pointer-events: none;
   }
 
@@ -169,12 +180,12 @@
   .nf-ind-ghost {
     transform: translateX(calc(var(--nf-ghost-idx, 0) * (100% + 6px)));
     opacity: 0;
-    transition: transform calc(300ms * var(--anim-mult, 1)) ease-out;
+    transition: transform calc(300ms * var(--anim-mult, 1)) var(--ease-out);
   }
 
   /* Wrap animation: primary exits right */
   .nf-ind--exit-right {
-    animation: nfIndExitRight calc(300ms * var(--anim-mult, 1)) ease-out forwards;
+    animation: nfIndExitRight calc(300ms * var(--anim-mult, 1)) var(--ease-out) forwards;
     transition: none !important;
   }
   @keyframes nfIndExitRight {
@@ -184,7 +195,7 @@
 
   /* Wrap animation: ghost enters from left */
   .nf-ind--enter-left {
-    animation: nfIndEnterLeft calc(300ms * var(--anim-mult, 1)) ease-out forwards;
+    animation: nfIndEnterLeft calc(300ms * var(--anim-mult, 1)) var(--ease-out) forwards;
     transition: none !important;
   }
   @keyframes nfIndEnterLeft {
@@ -194,7 +205,7 @@
 
   /* Reverse-wrap animation: primary at position 0 exits to the left */
   .nf-ind--exit-left {
-    animation: nfIndExitLeft calc(300ms * var(--anim-mult, 1)) ease-out forwards;
+    animation: nfIndExitLeft calc(300ms * var(--anim-mult, 1)) var(--ease-out) forwards;
     transition: none !important;
   }
   @keyframes nfIndExitLeft {
@@ -204,7 +215,7 @@
 
   /* Reverse-wrap animation: ghost enters from right to last position (index 2) */
   .nf-ind--enter-right {
-    animation: nfIndEnterRight calc(300ms * var(--anim-mult, 1)) ease-out forwards;
+    animation: nfIndEnterRight calc(300ms * var(--anim-mult, 1)) var(--ease-out) forwards;
     transition: none !important;
   }
   @keyframes nfIndEnterRight {
@@ -221,7 +232,7 @@
   /* ─────────────────────────────────────────────────────────────────────
      1. LOAD — cards spring + slide in from their side, content staggers
      ───────────────────────────────────────────────────────────────────── */
-  .nf-card.anim-in { animation: nfCardIn calc(720ms * var(--anim-mult, 1)) cubic-bezier(.34,1.4,.5,1) both; }
+  .nf-card.anim-in { animation: nfCardIn calc(720ms * var(--anim-mult, 1)) var(--ease-card-pop) both; }
   .nf--bull.anim-in { --nf-from: -46px; }
   .nf--bear.anim-in { --nf-from: 46px; }
   @keyframes nfCardIn {
@@ -229,11 +240,11 @@
     60%  { opacity: 1; transform: translateX(0) scale(1.015); }
     100% { opacity: 1; transform: translateX(0) scale(1); }
   }
-  .anim-in .nf-kicker { animation: nfFade calc(480ms * var(--anim-mult, 1)) ease-out calc(200ms * var(--anim-mult, 1)) both; }
-  .anim-in .nf-arrow  { animation: nfPopSm calc(560ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1) calc(340ms * var(--anim-mult, 1)) both; }
-  .anim-in .nf-title  { animation: nfTitlePop calc(520ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) calc(360ms * var(--anim-mult, 1)) both; }
-  .anim-in .nf-date   { animation: nfGlowFade calc(420ms * var(--anim-mult, 1)) ease-out calc(520ms * var(--anim-mult, 1)) both; }
-  .anim-in .nf-seg    { animation: nfFade calc(520ms * var(--anim-mult, 1)) ease-out both; animation-delay: calc(var(--i) * calc(70ms * var(--anim-mult, 1)) + calc(560ms * var(--anim-mult, 1))); }
+  .anim-in .nf-kicker { animation: nfFade calc(480ms * var(--anim-mult, 1)) var(--ease-out) calc(200ms * var(--anim-mult, 1)) both; }
+  .anim-in .nf-arrow  { animation: nfPopSm calc(560ms * var(--anim-mult, 1)) var(--ease-spring) calc(340ms * var(--anim-mult, 1)) both; }
+  .anim-in .nf-title  { animation: nfTitlePop calc(520ms * var(--anim-mult, 1)) var(--ease-out) calc(360ms * var(--anim-mult, 1)) both; }
+  .anim-in .nf-date   { animation: nfGlowFade calc(420ms * var(--anim-mult, 1)) var(--ease-out) calc(520ms * var(--anim-mult, 1)) both; }
+  .anim-in .nf-seg    { animation: nfFade calc(520ms * var(--anim-mult, 1)) var(--ease-out) both; animation-delay: calc(var(--i) * calc(70ms * var(--anim-mult, 1)) + calc(560ms * var(--anim-mult, 1))); }
   @keyframes nfTitlePop {
     0%   { opacity: 0; transform: translateY(10px); }
     100% { opacity: 1; transform: translateY(0); }
@@ -252,8 +263,8 @@
   /* ─────────────────────────────────────────────────────────────────────
      2. TRANSITION -- flat horizontal ease-out slide, no rotation/tilt
      ───────────────────────────────────────────────────────────────────── */
-  .nf-swap-out { animation: nfSwapOut calc(180ms * var(--anim-mult, 1)) ease-out forwards; }
-  .nf-swap-in  { animation: nfSwapIn  calc(260ms * var(--anim-mult, 1)) ease-out both; }
+  .nf-swap-out { animation: nfSwapOut calc(180ms * var(--anim-mult, 1)) var(--ease-out) forwards; }
+  .nf-swap-in  { animation: nfSwapIn  calc(260ms * var(--anim-mult, 1)) var(--ease-out) both; }
   @keyframes nfSwapOut {
     0%   { opacity: 1; transform: translateX(0); }
     100% { opacity: 0; transform: translateX(var(--swap-dir, -38px)); }
@@ -289,9 +300,21 @@
     display: inline-flex; align-items: center; gap: 6px;
     background: rgba(28,28,28,0.7); color: #D4D4D4; border: 1px solid #232323;
     box-shadow: 0 2px 10px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
-    transition: transform calc(140ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), background calc(160ms * var(--anim-mult, 1)), color calc(160ms * var(--anim-mult, 1)), border-color calc(160ms * var(--anim-mult, 1));
+    transition: transform calc(140ms * var(--anim-mult, 1)) var(--ease-out), background calc(160ms * var(--anim-mult, 1)), color calc(160ms * var(--anim-mult, 1)), border-color calc(160ms * var(--anim-mult, 1));
   }
   .nf-btn .material-icons { font-size: 16px; }
+  /* Proximity: own transition (0,1,0) beats hover-tokens.css's [data-proximity]x3
+     fallback; scale + filter channels added here so the engine's --prox mapping
+     doesn't snap. */
+  .nf-btn[data-proximity] {
+    transition:
+      transform calc(140ms * var(--anim-mult, 1)) var(--ease-out),
+      background calc(160ms * var(--anim-mult, 1)),
+      color calc(160ms * var(--anim-mult, 1)),
+      border-color calc(160ms * var(--anim-mult, 1)),
+      scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+      filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+  }
   .nf-btn:hover { transform: translateY(-1px); color: #F5F5F5; border-color: #4A4A4A; background: rgba(39,52,73,0.8); }
   .nf-btn:active { transform: scale(0.96); }
 

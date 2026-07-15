@@ -1,0 +1,45 @@
+/* LeadsTable component-scoped overrides.
+ * Base chrome lives in the shared apps/web/design-system/preview/_leads-table.css
+ * (imported ahead of this file in LeadsTable.tsx), which is outside this step's
+ * Touches scope. This file only adds Step 15 proximity-wiring additions: the
+ * scale + filter transition channels hover-tokens.css needs for a smooth
+ * --prox glide, and removes/adjusts the handful of hover rules whose own
+ * filter would otherwise be silently overridden by hover-tokens.css's tripled
+ * [data-proximity]x3 selector. Re-declarations here win by import order
+ * (this file loads last). */
+
+.lt-row {
+  transition: background-color calc(150ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
+
+.lt-iconbtn {
+  transition: border-color calc(150ms * var(--anim-mult, 1)), color calc(150ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
+
+.lt-btn {
+  transition: border-color calc(150ms * var(--anim-mult, 1)), color calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)), filter calc(150ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
+
+/* filter:brightness dropped from hover on wiring proximity -- hover-tokens.css's
+   tripled [data-proximity]x3 selector owns filter outright once wired. */
+.lt-btn-ai:hover { color: #fff; }
+
+.lt-qf {
+  transition: scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
+/* filter:brightness dropped from hover on wiring proximity (same reason as
+   .lt-btn-ai above); translateY lift kept -- transform and the incoming
+   `scale` custom property are different channels and compose fine. */
+.lt-qf:hover { transform: translateY(-1px); }
+
+.lt-clear {
+  transition: color calc(150ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}

@@ -22,6 +22,13 @@ function prefersReducedMotion(): boolean {
   );
 }
 
+function getAnimMult(): number {
+  if (typeof document === 'undefined') return 1;
+  const raw = getComputedStyle(document.documentElement).getPropertyValue('--anim-mult');
+  const parsed = parseFloat(raw);
+  return Number.isFinite(parsed) ? parsed : 1;
+}
+
 export function useAutoHeight<T extends HTMLElement>({
   open,
   duration = 380,
@@ -90,7 +97,8 @@ export function useAutoHeight<T extends HTMLElement>({
     el.style.height = `${startHeight}px`;
     void el.offsetHeight; // force reflow so the transition below actually animates
 
-    el.style.transition = `height ${duration}ms ${easing}`;
+    const effectiveDuration = duration * getAnimMult();
+    el.style.transition = `height ${effectiveDuration}ms ${easing}`;
     el.style.height = open ? `${el.scrollHeight}px` : `${collapsedHeight}px`;
     animatingRef.current = true;
 
@@ -108,7 +116,7 @@ export function useAutoHeight<T extends HTMLElement>({
     el.addEventListener('transitionend', onTransitionEnd);
     // transitionend can be swallowed (display:none, detached, backgrounded);
     // this fallback must always be armed and race the listener above
-    const timeoutId = window.setTimeout(finish, duration + 80);
+    const timeoutId = window.setTimeout(finish, effectiveDuration + 80);
 
     cancelPendingRef.current = () => {
       window.clearTimeout(timeoutId);
@@ -123,6 +131,38 @@ export function useAutoHeight<T extends HTMLElement>({
       cancelPendingRef.current = null;
     };
   }, []);
+
+  // Content growth while `open` stays true never reruns the toggle effect
+  // above (its deps are [open, duration, easing, collapsedHeight]), so a
+  // ResizeObserver closes that gap by re-measuring the resting height. It
+  // no-ops while a toggle animation is in flight (that path already owns
+  // the height) and while `open` is false (element stays collapsed).
+  //
+  // The re-measure resolves back to 'auto' rather than a pinned pixel
+  // value. Pinning to a fixed px freezes the element's own border box; this
+  // div's overflow stays visible while open (settle() only sets `hidden`
+  // when closed), so any further child appended past that pinned height
+  // just overflows without changing the element's OWN rendered size --
+  // which means ResizeObserver, which fires only on the observed element's
+  // own box-size changes, would never notify again after the first write.
+  // 'auto' keeps the box permanently self-tracking every future append.
+  useEffect(() => {
+    if (typeof ResizeObserver === 'undefined') return;
+    const el = ref.current;
+    if (!el || !open) return;
+
+    const ro = new ResizeObserver(() => {
+      if (animatingRef.current) return;
+      if (el.style.height === 'auto') return;
+      el.style.transition = 'none';
+      el.style.height = 'auto';
+    });
+    ro.observe(el);
+
+    return () => {
+      ro.disconnect();
+    };
+  }, [open]);
 
   return { ref };
 }

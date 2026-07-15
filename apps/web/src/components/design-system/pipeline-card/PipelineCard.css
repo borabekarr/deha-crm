@@ -3,3 +3,82 @@
  * _base.css, _pipeline-card.css, and _darkmode.css files imported at the top
  * of PipelineCard.tsx. This file is a placeholder for any future component-
  * scoped additions. */
+
+/* ── Proximity wiring (Step 15) ──────────────────────────────────────────
+ * _pipeline-card.css is a shared file outside this step's Touches scope, so
+ * these are re-declarations at equal specificity that win by import order
+ * (this file loads last per PipelineCard.tsx). They (a) append the scale +
+ * filter transition channels hover-tokens.css needs for a smooth --prox
+ * glide, and (b) drop .pc-apply's own competing transform:scale(1.03) hover
+ * (would double up with hover-tokens.css's own `scale` custom property). */
+.pc-expand {
+  transition: background-color calc(180ms * var(--anim-mult, 1)), color calc(180ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) var(--ease-spring),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
+.pc-snooze {
+  transition: opacity calc(180ms * var(--anim-mult, 1)), background-color calc(180ms * var(--anim-mult, 1)), color calc(180ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
+.pc-pop-item {
+  transition: background-color calc(140ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
+.pc-sugg {
+  transition: background-color calc(150ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
+.pc-discuss-btn {
+  transition: border-color calc(160ms * var(--anim-mult, 1)), background-color calc(160ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
+.pc-apply {
+  transition: background-color calc(180ms * var(--anim-mult, 1)), transform calc(160ms * var(--anim-mult, 1)) var(--ease-spring), box-shadow calc(200ms * var(--anim-mult, 1)), min-width calc(260ms * var(--anim-mult, 1)) var(--ease-out),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
+.pc-apply:hover { box-shadow: 0 8px 20px rgba(15,23,42,0.32), inset 0 1px 0 rgba(255,255,255,0.2); }
+
+/* ── Step 7b: popover re-theme (canon shell + card, current color theme) ──
+ * _pipeline-card.css hardcodes .pcx-outer/.pcx-card to legacy literals
+ * (#D4DCE8/#020617 bezel, #fff/#1E293B card) that don't track the current
+ * data-primary theme or the canon shell/card tokens. Re-declared here at
+ * equal specificity (this file loads last) using the shared tokens instead.
+ * Neither surface is brand-colored, so plain --shell-bg/--card-bg apply
+ * (no --brand-on-primary conversion needed). Light = no ring (fill contrast
+ * only, per canon); dark = 1px --card-border ring. Shadow lives on filter
+ * so it isn't lost if a future squircle pass clips these with clip-path. */
+.pcx-outer {
+  background: var(--shell-bg);
+  box-shadow: none;
+  filter:
+    drop-shadow(0 32px 80px rgba(17,17,17,0.16))
+    drop-shadow(0 6px 20px rgba(17,17,17,0.08));
+}
+html.dark .pcx-outer {
+  background: var(--shell-bg);
+  border: 1px solid var(--card-border);
+}
+.pcx-card {
+  background: var(--card-bg);
+}
+html.dark .pcx-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+}
+
+/* snooze popover: match the same card recipe as every other popover
+ * instead of the legacy --r-pop/--r-pop-bd pair (kept upstream for the
+ * priority-header tint, but the floating menu itself should track canon). */
+.pc-pop {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+}
+html.dark .pc-pop {
+  background: var(--card-bg);
+  border-color: var(--card-border);
+}

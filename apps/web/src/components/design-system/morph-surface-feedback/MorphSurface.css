@@ -11,7 +11,10 @@
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
-  --ms2-ease: cubic-bezier(0.32, 1.22, 0.4, 1);
+  /* Softer, no-overshoot deceleration for the open/close shape morph -- the
+     previous bespoke cubic-bezier(0.32, 1.22, 0.4, 1) overshot past its target
+     size before settling back, reading as an "edgy" bounce. */
+  --ms2-ease: var(--ease-out);
   --ms2-surface-bg: var(--card-bg, var(--bg-card-solid, #ffffff));
 }
 
@@ -130,6 +133,15 @@
   transition-duration: calc(120ms * var(--anim-mult, 1));
 }
 
+/* On close, the bar was reappearing immediately while the surface was still
+   mid-shrink (the shape morph runs 440/380ms), so the label flashed in over
+   the still-collapsing box -- the other half of the "edgy" close. Delaying
+   the fade-in until the shape morph is mostly settled lets it appear onto an
+   already-collapsed pill. */
+.ms2-surface:not(.ms2-open) .ms2-bar {
+  transition-delay: calc(260ms * var(--anim-mult, 1));
+}
+
 .ms2-label {
   flex: 1;
   min-width: 0;
@@ -154,7 +166,9 @@
   border-radius: 9999px;
   transition:
     color calc(160ms * var(--anim-mult, 1)) ease,
-    background calc(160ms * var(--anim-mult, 1)) ease;
+    background calc(160ms * var(--anim-mult, 1)) ease,
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 
 .ms2-trigger:hover {

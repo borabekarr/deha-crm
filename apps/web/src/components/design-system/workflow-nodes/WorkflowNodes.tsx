@@ -6,8 +6,11 @@
  *
  * Interaction model (mirrors the source prototype):
  *  - Eight node cards in a 2-column dot-grid canvas.
- *  - Each node has a hover toolbar (connect · add · edit · delete) that slides
- *    in from the right with CSS-only transitions.
+ *  - The toolbar (connect · add · edit · delete) lives INSIDE the grey
+ *    `.wf-outer` shell as a collapsed right-side rail. Hovering a stationary
+ *    hit-strip pinned to the card's fixed right edge (`.wf-hover-strip`)
+ *    extends the shell's real width with a spring bounce, revealing the
+ *    rail — CSS-only, no escaping elements.
  *  - Pressing the hollow "connect" circle starts a rubber-band SVG dashed line
  *    that follows the pointer across the canvas (released on pointer-up).
  *
@@ -17,6 +20,8 @@
 
 import { useCallback, useRef } from 'react'
 import './WorkflowNodes.css'
+import { useProximityGroup } from '../../../lib/hooks'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
 import { mountCanvas } from './workflow-nodes-hook'
 
 // ---------------------------------------------------------------------------
@@ -27,15 +32,17 @@ import { mountCanvas } from './workflow-nodes-hook'
 // Small shared sub-components (no hooks — pure presentation)
 // ---------------------------------------------------------------------------
 
-/** Invisible triangular hover wedge on the right side of the node.
- *  clip-path defines a right-pointing triangle: left edge is full height,
- *  tapers to a point at the right-center. Hovering it reveals .wf-tools
- *  via the CSS sibling combinator (.wf-hover-wedge:hover ~ .wf-tools). */
-function HoverWedge(): React.ReactElement {
-  return <div className="wf-hover-wedge" aria-hidden="true" />
+/** Invisible hit-strip pinned to the fixed right edge of `.wf-body` (which
+ *  never resizes), overlapping the card's rightmost ~36px. Because it sits
+ *  inside the non-animating card box rather than on the growing shell edge,
+ *  it never slides out from under the pointer mid-expansion (hover-transform
+ *  -needs-stationary-anchor). `.wf-outer:has(.wf-hover-strip:hover)` drives
+ *  both the shell's width extension and the `.wf-tools` reveal. */
+function HoverStrip(): React.ReactElement {
+  return <div className="wf-hover-strip" aria-hidden="true" />
 }
 
-/** Hover toolbar shown to the right of each node when hovering the wedge zone. */
+/** Hover toolbar rail collapsed inside the shell's right side at rest. */
 function NodeTools(): React.ReactElement {
   return (
     <div className="wf-tools">
@@ -76,12 +83,13 @@ function BrandLetter({
 
 /** 1. Webhook trigger */
 function WebhookNode(): React.ReactElement {
+  const cardSquircleRef = useSquircle<HTMLDivElement>()
   return (
     <>
       <div className="wf-tag trigger">
         <span className="material-icons">bolt</span>Trigger
       </div>
-      <div className="wf-card">
+      <div className="wf-card" ref={cardSquircleRef}>
         <div className="wf-head">
           <div className="wf-title">
             <span className="material-icons ic">webhook</span>Incoming Webhook
@@ -101,12 +109,13 @@ function WebhookNode(): React.ReactElement {
 
 /** 2. Input URL trigger */
 function InputUrlNode(): React.ReactElement {
+  const cardSquircleRef = useSquircle<HTMLDivElement>()
   return (
     <>
       <div className="wf-tag trigger">
         <span className="material-icons">bolt</span>Trigger
       </div>
-      <div className="wf-card">
+      <div className="wf-card" ref={cardSquircleRef}>
         <div className="wf-head">
           <div className="wf-title">
             <span className="material-icons ic">link</span>Input URL
@@ -128,18 +137,19 @@ function InputUrlNode(): React.ReactElement {
 
 /** 3. Notion action (not connected) */
 function NotionNode(): React.ReactElement {
+  const cardSquircleRef = useSquircle<HTMLDivElement>()
   return (
     <>
       <div className="wf-tag action">
         <span className="material-icons">play_circle</span>Action
       </div>
-      <div className="wf-card">
+      <div className="wf-card" ref={cardSquircleRef}>
         <div className="wf-head">
           <div className="wf-title">
             <BrandLetter letter="N" className="bl-notion" />Write to Notion
           </div>
         </div>
-        <button type="button" className="wf-connect">
+        <button type="button" className="wf-connect" data-proximity>
           <span className="material-icons ic">link</span>Connect Notion Account
         </button>
         <div className="wf-foot">
@@ -153,18 +163,19 @@ function NotionNode(): React.ReactElement {
 
 /** 4. Stripe action (not connected) */
 function StripeNode(): React.ReactElement {
+  const cardSquircleRef = useSquircle<HTMLDivElement>()
   return (
     <>
       <div className="wf-tag action">
         <span className="material-icons">play_circle</span>Action
       </div>
-      <div className="wf-card">
+      <div className="wf-card" ref={cardSquircleRef}>
         <div className="wf-head">
           <div className="wf-title">
             <BrandLetter letter="S" className="bl-stripe" />Create Customer
           </div>
         </div>
-        <button type="button" className="wf-connect">
+        <button type="button" className="wf-connect" data-proximity>
           <span className="material-icons ic">link</span>Connect Stripe Account
         </button>
         <div className="wf-foot">
@@ -178,12 +189,13 @@ function StripeNode(): React.ReactElement {
 
 /** 5. Audio output */
 function AudioOutputNode(): React.ReactElement {
+  const cardSquircleRef = useSquircle<HTMLDivElement>()
   return (
     <>
       <div className="wf-tag output">
         <span className="material-icons">check_circle</span>Output
       </div>
-      <div className="wf-card">
+      <div className="wf-card" ref={cardSquircleRef}>
         <div className="wf-head">
           <div className="wf-title">
             <span className="material-icons ic">graphic_eq</span>Audio Output
@@ -206,12 +218,13 @@ function AudioOutputNode(): React.ReactElement {
 
 /** 6. Image output */
 function ImageOutputNode(): React.ReactElement {
+  const cardSquircleRef = useSquircle<HTMLDivElement>()
   return (
     <>
       <div className="wf-tag output">
         <span className="material-icons">check_circle</span>Output
       </div>
-      <div className="wf-card">
+      <div className="wf-card" ref={cardSquircleRef}>
         <div className="wf-head">
           <div className="wf-title">
             <span className="material-icons ic">image</span>Image Output
@@ -239,12 +252,13 @@ function ImageOutputNode(): React.ReactElement {
 
 /** 7. Send Email action */
 function SendEmailNode(): React.ReactElement {
+  const cardSquircleRef = useSquircle<HTMLDivElement>()
   return (
     <>
       <div className="wf-tag action">
         <span className="material-icons">play_circle</span>Action
       </div>
-      <div className="wf-card">
+      <div className="wf-card" ref={cardSquircleRef}>
         <div className="wf-head">
           <div className="wf-title">
             <span className="material-icons ic">send</span>Send Email
@@ -270,12 +284,13 @@ function SendEmailNode(): React.ReactElement {
 
 /** 8. Anthropic AI action */
 function AnthropicNode(): React.ReactElement {
+  const cardSquircleRef = useSquircle<HTMLDivElement>()
   return (
     <>
       <div className="wf-tag action">
         <span className="material-icons">play_circle</span>Action
       </div>
-      <div className="wf-card">
+      <div className="wf-card" ref={cardSquircleRef}>
         <div className="wf-head">
           <div className="wf-title">
             <BrandLetter letter="A" className="bl-anthropic" />Anthropic
@@ -308,12 +323,16 @@ function AnthropicNode(): React.ReactElement {
 // ---------------------------------------------------------------------------
 
 function NodeCard({ children }: { children: React.ReactNode }): React.ReactElement {
+  const outerSquircleRef = useSquircle<HTMLDivElement>()
   return (
-    <div className="wf-outer">
-      {/* Wedge MUST precede NodeTools in DOM for the CSS ~ sibling selector to work */}
-      <HoverWedge />
+    <div className="wf-outer" ref={outerSquircleRef}>
+      {/* wf-body's width is fixed, so the strip inside it never moves even
+          while wf-tools grows the shell — see HoverStrip doc comment. */}
+      <div className="wf-body">
+        {children}
+        <HoverStrip />
+      </div>
       <NodeTools />
-      {children}
     </div>
   )
 }
@@ -344,9 +363,18 @@ export default function WorkflowNodes(): React.ReactElement {
     svgRef.current = el
   }, [])
 
+  // Proximity group: only the two static "Connect Account" buttons carry
+  // data-proximity — the in-shell toolbar (.wf-tools) grows/reflows on
+  // hover (max-width + margin-left), which would stale the cached hitbox
+  // mid-reveal, so it is intentionally NOT wired.
+  const proximityRef = useProximityGroup<HTMLDivElement>()
+
   return (
     // Outer dot-grid surface acts as the canvas (no shell.zoom — 8 nodes share one surface)
-    <div className="wn-shell" ref={canvasCallbackRef}>
+    <div
+      className="wn-shell"
+      ref={(el) => { canvasCallbackRef(el); proximityRef(el) }}
+    >
       {/* SVG overlay for rubber-band connection preview lines */}
       <svg
         ref={svgCallbackRef}

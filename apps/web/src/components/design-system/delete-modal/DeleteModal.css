@@ -36,7 +36,7 @@
 }
 
 .dm-overlay.dm-anim {
-  animation: dm-ov-in calc(0.28s * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1);
+  animation: dm-ov-in calc(0.28s * var(--anim-mult, 1)) var(--ease-out);
 }
 
 @keyframes dm-ov-in {
@@ -59,13 +59,13 @@
   }
 }
 
-/* ── Outer shell — canonical grey field (#D4DCE8 light / #0A0A0A dark) ── */
+/* ── Outer shell — canonical grey bezel (var(--shell-bg)) ── */
 .dm-shell {
+  position: relative;
   width: min(400px, 100%);
-  background: #D4DCE8;
-  border-radius: 28px;
-  padding: 10px;
-  border: 1px solid var(--card-border, #D4D4D4);
+  background: var(--shell-bg);
+  border-radius: 36px;
+  padding: 8px;
   box-shadow:
     0 16px 56px rgba(17,17,17, 0.16),
     0 3px 10px rgba(17,17,17, 0.07);
@@ -74,16 +74,41 @@
 }
 
 html.dark .dm-shell {
-  background: #0A0A0A;
-  border: 1px solid var(--card-border, #232323);
   box-shadow:
     0 16px 56px rgba(0, 0, 0, 0.45),
     0 3px 10px rgba(0, 0, 0, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
+/* useSquircle takes over corner rendering when supported. Outer shell only
+   wants the corner-radius reset from the shared [data-squircle="on"] recipe
+   (_shared-feedback.css) -- the generic ring/hairline paint is suppressed
+   (content:none) and a dark-mode-only 1px ring is re-enabled below, matching
+   the .concentric-demo-outer reference pattern in Cards.css. Depth shadow
+   migrates to filter:drop-shadow since clip-path clips box-shadow; no
+   light-mode line anywhere on the shell (canon). */
+.dm-shell[data-squircle="on"] {
+  border-radius: 0;
+  filter: drop-shadow(0 16px 56px rgba(17,17,17, 0.16)) drop-shadow(0 3px 10px rgba(17,17,17, 0.07));
+}
+.dm-shell[data-squircle="on"]::before,
+.dm-shell[data-squircle="on"]::after {
+  content: none;
+}
+html.dark .dm-shell[data-squircle="on"] {
+  filter: drop-shadow(0 16px 56px rgba(0, 0, 0, 0.45)) drop-shadow(0 3px 10px rgba(0, 0, 0, 0.25));
+}
+html.dark .dm-shell[data-squircle="on"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--card-border);
+  clip-path: var(--squircle-border-path);
+}
+
 .dm-overlay.dm-anim .dm-shell {
-  animation: dm-card-in calc(0.42s * var(--anim-mult, 1)) cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: dm-card-in calc(0.42s * var(--anim-mult, 1)) var(--ease-spring);
 }
 
 @keyframes dm-card-in {
@@ -109,7 +134,7 @@ html.dark .dm-shell {
   position: relative;
   background: var(--card-bg, #ffffff);
   border: 1px solid var(--card-border, #D4D4D4);
-  border-radius: var(--card-radius, 20px);
+  border-radius: 28px;
   padding: 32px 28px 24px;
   display: flex;
   flex-direction: column;
@@ -133,9 +158,23 @@ html.dark .dm-card {
     inset 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
-/* Shake when delete is armed */
-.dm-card.dm-confirming {
-  animation: dm-shake calc(0.42s * var(--anim-mult, 1)) cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+/* useSquircle takes over corner rendering; the shared [data-squircle="on"]
+   recipe in _shared-feedback.css resets border/box-shadow + paints the ring
+   pseudo-elements. This card only supplies its own padding (padding-box/
+   border-box +1px fix) and corner-radius binding. */
+.dm-card[data-squircle="on"] {
+  padding: 33px 29px 25px;
+  --corner-radius: 28px;
+}
+html.dark .dm-card[data-squircle="on"] {
+  box-shadow: none;
+}
+
+/* Shake when delete is armed — targets the outer shell so the shake reads
+   as one component (grey bezel + card move together), not just the inner
+   card. Single layer: transform lives only on .dm-shell. */
+.dm-shell.dm-confirming {
+  animation: dm-shake calc(0.42s * var(--anim-mult, 1)) var(--ease-shake) both;
 }
 
 @keyframes dm-shake {
@@ -161,10 +200,10 @@ html.dark .dm-card {
 /* ── Close button — default: light-grey bg + dark icon; hover: dark bg + white icon ── */
 .dm-close {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 28px;
-  height: 28px;
+  top: 17px;
+  right: 17px;
+  width: 36px;
+  height: 36px;
   border: none;
   border-radius: 50%;
   background: rgba(17,17,17, 0.08);
@@ -175,7 +214,9 @@ html.dark .dm-card {
   transition:
     background calc(0.15s * var(--anim-mult, 1)) ease,
     color calc(0.15s * var(--anim-mult, 1)) ease,
-    transform calc(0.12s * var(--anim-mult, 1)) ease;
+    transform calc(0.12s * var(--anim-mult, 1)) ease,
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 
 .dm-close:hover {
@@ -190,7 +231,7 @@ html.dark .dm-card {
 
 .dm-close .material-symbols-outlined,
 .dm-close .material-icons {
-  font-size: 13px;
+  font-size: 17px;
 }
 
 html.dark .dm-close {
@@ -220,22 +261,56 @@ html.dark .dm-close:hover {
   font-size: 28px !important;
 }
 
+/* ── Deleted-state morph: crossfade instead of a hard content swap ────────
+   Triggered by data-done flipping on .dm-card; badge icon glyph, title and
+   body copy all dip through a fade rather than snapping to their new text.
+   The badge shell itself gets a small spring pop (existing --ease-spring
+   curve) via .dm-badge--done. Card height never changes here -- the
+   actions row (below) stays mounted and fades to zero opacity in place,
+   so the card never compacts. */
+@media (prefers-reduced-motion: no-preference) {
+  .dm-card[data-done='true'] .dm-badge-icon,
+  .dm-card[data-done='true'] .dm-title,
+  .dm-card[data-done='true'] .dm-body {
+    animation: dm-crossfade calc(0.6s * var(--anim-mult, 1)) var(--ease-out) both;
+  }
+  .dm-badge--done {
+    animation: dm-badge-pop calc(0.5s * var(--anim-mult, 1)) var(--ease-spring) both;
+  }
+}
+
+@keyframes dm-crossfade {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes dm-badge-pop {
+  from {
+    transform: scale(0.7) rotate(-6deg);
+  }
+}
+
 /* ── Entrance animations (transform-only, opacity always 1) ──────────────── */
 @media (prefers-reduced-motion: no-preference) {
   .dm-overlay.dm-anim .dm-badge {
-    animation: dm-pop calc(0.56s * var(--anim-mult, 1)) cubic-bezier(0.34, 1.56, 0.64, 1)
+    animation: dm-pop calc(0.56s * var(--anim-mult, 1)) var(--ease-spring)
       calc(0.08s * var(--anim-mult, 1)) both;
   }
   .dm-overlay.dm-anim .dm-title {
-    animation: dm-rise calc(0.46s * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1)
+    animation: dm-rise calc(0.46s * var(--anim-mult, 1)) var(--ease-out)
       calc(0.15s * var(--anim-mult, 1)) both;
   }
   .dm-overlay.dm-anim .dm-body {
-    animation: dm-rise calc(0.46s * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1)
+    animation: dm-rise calc(0.46s * var(--anim-mult, 1)) var(--ease-out)
       calc(0.21s * var(--anim-mult, 1)) both;
   }
   .dm-overlay.dm-anim .dm-actions {
-    animation: dm-rise calc(0.46s * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1)
+    animation: dm-rise calc(0.46s * var(--anim-mult, 1)) var(--ease-out)
       calc(0.27s * var(--anim-mult, 1)) both;
   }
 }
@@ -263,6 +338,7 @@ html.dark .dm-close:hover {
   .dm-shell,
   .dm-card,
   .dm-badge,
+  .dm-badge-icon,
   .dm-title,
   .dm-body,
   .dm-actions {
@@ -293,6 +369,12 @@ html.dark .dm-title {
   line-height: 1.55;
   color: #4A4A4A;
   margin: 0 0 24px;
+  /* Reserve 2 lines always: the idle-state sentence and the shorter
+     deleted-state sentence ("...has been permanently removed.") wrap to a
+     different line count, which would reflow (shrink) the card the instant
+     phase flips to 'done'. Locking the min-height keeps the card height
+     stable through the whole confirm -> done flow. */
+  min-height: calc(1.55em * 2);
 }
 
 .dm-body b {
@@ -309,10 +391,21 @@ html.dark .dm-body b {
 }
 
 /* ── Actions ─────────────────────────────────────────────────────────────── */
+/* Always mounted (mounted-through-exit): the row never unmounts on
+   phase='done', it only fades to 0 opacity in place. Reserving its height
+   permanently is what guarantees the card never snaps/compacts shorter
+   when the deleted state appears -- see .dm-actions--done below. */
 .dm-actions {
   display: flex;
   gap: 12px;
   width: 100%;
+  opacity: 1;
+  transition: opacity calc(0.3s * var(--anim-mult, 1)) var(--ease-out);
+}
+
+.dm-actions--done {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* .dm-btn stretches canonical global buttons (btn-discuss / btn-delete) to
@@ -391,6 +484,18 @@ html.dark .dm-card .dm-btn.btn-discuss:hover {
   transform: scale(0.985);
 }
 
+/* base .btn-delete transition (Buttons.css, locked) has no scale/filter
+   channels; append them scoped here so proximity's --prox mapping doesn't
+   snap, mirroring Buttons.css's row-3 pattern. */
+.dm-card .dm-btn.btn-delete[data-proximity] {
+  transition:
+    background-color calc(var(--duration-slow) * var(--anim-mult, 1)),
+    transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out),
+    box-shadow calc(var(--duration-slow) * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
+
 html.dark .dm-card .dm-btn.btn-delete {
   background: #FEE2E2;
   color: #EF4444;
@@ -452,7 +557,7 @@ html.dark .dm-card .dm-btn.btn-delete .dm-ok {
   display: inline-block;
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.35);
+  border: 3px solid rgba(255, 255, 255, 0.35);
   border-top-color: #fff;
   border-radius: 50%;
   animation: dm-spin calc(0.7s * var(--anim-mult, 1)) linear infinite;

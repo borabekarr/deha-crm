@@ -48,7 +48,7 @@
 .prize {
   position: relative; z-index: 3; flex: 1; width: 100%;
   display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
-  transition: transform calc(460ms * var(--anim-mult, 1)) cubic-bezier(.16,1.16,.3,1), opacity calc(320ms * var(--anim-mult, 1)) ease;
+  transition: transform calc(460ms * var(--anim-mult, 1)) var(--ease-spring-loose), opacity calc(320ms * var(--anim-mult, 1)) var(--ease-fade);
 }
 
 .amount {
@@ -57,7 +57,7 @@
   -webkit-background-clip: text; background-clip: text; color: transparent;
   filter: drop-shadow(0 1px 0 var(--chrome-hi)) drop-shadow(0 6px 18px var(--chrome-glow));
   transform: scale(0.84); opacity: 0;
-  transition: transform calc(520ms * var(--anim-mult, 1)) cubic-bezier(.16,1.5,.3,1) calc(120ms * var(--anim-mult, 1)), opacity calc(360ms * var(--anim-mult, 1)) ease calc(120ms * var(--anim-mult, 1));
+  transition: transform calc(520ms * var(--anim-mult, 1)) var(--ease-spring-medium) calc(120ms * var(--anim-mult, 1)), opacity calc(360ms * var(--anim-mult, 1)) var(--ease-fade) calc(120ms * var(--anim-mult, 1));
 }
 .amount .cur { font-size: 42px; vertical-align: 0.18em; margin-right: 2px; }
 .panel.is-open .amount { transform: scale(1); opacity: 1; }
@@ -71,19 +71,19 @@
   background: linear-gradient(160deg, #ffffff 0%, #ECECEC 38%, #aeb8c6 62%, #F5F5F5 100%);
   box-shadow: 0 6px 14px rgba(4,7,11,0.30), inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 2px rgba(100,116,139,0.5), inset 0 0 0 1px rgba(255,255,255,0.4);
   text-shadow: 0 1px 0 rgba(255,255,255,0.7);
-  transition: transform calc(520ms * var(--anim-mult, 1)) cubic-bezier(.16,1.5,.3,1) calc(220ms * var(--anim-mult, 1)), opacity calc(360ms * var(--anim-mult, 1)) ease calc(220ms * var(--anim-mult, 1));
+  transition: transform calc(520ms * var(--anim-mult, 1)) var(--ease-spring-medium) calc(220ms * var(--anim-mult, 1)), opacity calc(360ms * var(--anim-mult, 1)) var(--ease-fade) calc(220ms * var(--anim-mult, 1));
 }
 .panel.is-open .wontag { transform: rotate(-7deg) translateY(0) scale(1); opacity: 1; }
 
 .prize-title {
   margin-top: 34px; font-size: 21px; font-weight: 800; letter-spacing: -0.01em; color: var(--title);
   opacity: 0; transform: translateY(8px);
-  transition: transform calc(420ms * var(--anim-mult, 1)) ease calc(320ms * var(--anim-mult, 1)), opacity calc(420ms * var(--anim-mult, 1)) ease calc(320ms * var(--anim-mult, 1));
+  transition: transform calc(420ms * var(--anim-mult, 1)) var(--ease-fade) calc(320ms * var(--anim-mult, 1)), opacity calc(420ms * var(--anim-mult, 1)) var(--ease-fade) calc(320ms * var(--anim-mult, 1));
 }
 .prize-desc {
   margin-top: 8px; max-width: 250px; font-size: 13.5px; font-weight: 500; line-height: 1.5; color: var(--desc);
   opacity: 0; transform: translateY(8px);
-  transition: transform calc(420ms * var(--anim-mult, 1)) ease calc(380ms * var(--anim-mult, 1)), opacity calc(420ms * var(--anim-mult, 1)) ease calc(380ms * var(--anim-mult, 1));
+  transition: transform calc(420ms * var(--anim-mult, 1)) var(--ease-fade) calc(380ms * var(--anim-mult, 1)), opacity calc(420ms * var(--anim-mult, 1)) var(--ease-fade) calc(380ms * var(--anim-mult, 1));
 }
 .panel.is-open .prize-title, .panel.is-open .prize-desc { opacity: 1; transform: translateY(0); }
 
@@ -102,26 +102,37 @@
   background-size: 14px 14px, 14px 14px, cover;
   box-shadow: 0 14px 34px -8px rgba(46,230,197,0.6), 0 4px 10px rgba(17,17,17,0.16), inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -2px 0 rgba(0,40,30,0.2);
   opacity: 0; transform: translateY(14px);
-  transition: transform calc(220ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(220ms * var(--anim-mult, 1)), opacity calc(420ms * var(--anim-mult, 1)) ease calc(440ms * var(--anim-mult, 1)), filter calc(200ms * var(--anim-mult, 1));
+  transition: transform calc(220ms * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(220ms * var(--anim-mult, 1)), opacity calc(420ms * var(--anim-mult, 1)) var(--ease-fade) calc(440ms * var(--anim-mult, 1)), filter calc(200ms * var(--anim-mult, 1));
 }
 .claim-btn .material-symbols-outlined { font-size: 19px; }
 .panel.is-open .claim-btn { opacity: 1; transform: translateY(0); }
 .claim-btn:hover { box-shadow: 0 18px 42px -8px rgba(46,230,197,0.78), 0 6px 14px rgba(17,17,17,0.18), inset 0 1px 0 rgba(255,255,255,0.65), inset 0 -2px 0 rgba(0,40,30,0.2); transform: translateY(-1px); }
 .claim-btn.pressed { transform: scale(0.93); box-shadow: 0 22px 50px -6px rgba(46,230,197,0.9), inset 0 1px 0 rgba(255,255,255,0.7); }
 
+/* Proximity: append scale channel only (filter already present in the base
+   transition above, which is otherwise untouched). */
+.claim-btn[data-proximity] {
+  transition:
+    transform calc(220ms * var(--anim-mult, 1)) var(--ease-out),
+    box-shadow calc(220ms * var(--anim-mult, 1)),
+    opacity calc(420ms * var(--anim-mult, 1)) var(--ease-fade) calc(440ms * var(--anim-mult, 1)),
+    filter calc(200ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
+
 /* success state */
 .success {
   position: absolute; inset: 0; z-index: 4;
   display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 30px;
   opacity: 0; pointer-events: none; transform: translateY(10px);
-  transition: opacity calc(360ms * var(--anim-mult, 1)) ease, transform calc(460ms * var(--anim-mult, 1)) cubic-bezier(.16,1.16,.3,1);
+  transition: opacity calc(360ms * var(--anim-mult, 1)) var(--ease-fade), transform calc(460ms * var(--anim-mult, 1)) var(--ease-spring-loose);
 }
 .panel.claimed .success { opacity: 1; transform: translateY(0); }
 .panel.claimed .prize, .panel.claimed .claim-btn {
   opacity: 0; transform: translateY(-14px) scale(0.96); pointer-events: none;
   /* override the staggered entrance transition (which delays opacity 440ms) so the
      button fades out promptly on click instead of lingering opaque over the success screen */
-  transition: transform calc(340ms * var(--anim-mult, 1)) cubic-bezier(.16,1.16,.3,1), opacity calc(200ms * var(--anim-mult, 1)) ease;
+  transition: transform calc(340ms * var(--anim-mult, 1)) var(--ease-spring-loose), opacity calc(200ms * var(--anim-mult, 1)) var(--ease-fade);
 }
 
 .check {
@@ -130,7 +141,7 @@
   box-shadow: 0 14px 34px -6px color-mix(in srgb, var(--brand-primary-500) 60%, transparent), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -3px 0 rgba(0,40,30,0.22);
   transform: scale(0);
 }
-.panel.claimed .check { animation: pop calc(560ms * var(--anim-mult, 1)) cubic-bezier(.16,1.5,.3,1) calc(80ms * var(--anim-mult, 1)) forwards; }
+.panel.claimed .check { animation: pop calc(560ms * var(--anim-mult, 1)) var(--ease-spring-medium) calc(80ms * var(--anim-mult, 1)) forwards; }
 @keyframes pop { 0%{transform:scale(0)} 60%{transform:scale(1.12)} 100%{transform:scale(1)} }
 .check .material-icons { color:#fff; font-size: 42px; text-shadow: 0 1px 2px rgba(0,40,30,0.3); }
 
@@ -159,11 +170,23 @@
   border-radius: 9999px; font-family: 'Montserrat'; font-size: 15px; font-weight: 800; letter-spacing: 0.01em; color: #06231d;
   background: linear-gradient(100deg, #2EE6C5 0%, #4FE39A 48%, #B6F25B 100%);
   box-shadow: 0 12px 30px -8px rgba(46,230,197,0.6), 0 4px 10px rgba(17,17,17,0.18), inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -2px 0 rgba(0,40,30,0.18);
-  transition: transform calc(200ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(200ms * var(--anim-mult, 1)), opacity calc(300ms * var(--anim-mult, 1));
+  transition: transform calc(200ms * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(200ms * var(--anim-mult, 1)), opacity calc(300ms * var(--anim-mult, 1));
 }
 .ps-fab .material-symbols-outlined { font-size: 19px; }
 .ps-fab:hover { transform: translateX(-50%) translateY(-2px); box-shadow: 0 16px 38px -8px rgba(46,230,197,0.72), 0 6px 14px rgba(17,17,17,0.2), inset 0 1px 0 rgba(255,255,255,0.65), inset 0 -2px 0 rgba(0,40,30,0.18); }
 .ps-fab:active { transform: translateX(-50%) scale(0.96); }
+
+/* Proximity: append scale/filter channels (existing transform/box-shadow/opacity
+   transition untouched; the hover transform above is translateY-only, so no
+   conflict with the separate `scale` custom property). */
+.ps-fab[data-proximity] {
+  transition:
+    transform calc(200ms * var(--anim-mult, 1)) var(--ease-out),
+    box-shadow calc(200ms * var(--anim-mult, 1)),
+    opacity calc(300ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
 
 /* ════════════════════════ PHONE FRAME ════════════════════════ */
 .ps-device {
@@ -175,7 +198,7 @@
 .ps-notch { position: absolute; top: 9px; left: 50%; transform: translateX(-50%); width: 104px; height: 26px; border-radius: 14px; background: #05070b; z-index: 6; }
 .ps-home-ind { position: absolute; bottom: 9px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; border-radius: 3px; background: var(--home, rgba(17,17,17,0.28)); z-index: 30; }
 
-.ps-app { position: absolute; inset: 0; padding: 58px 18px 0; display: flex; flex-direction: column; gap: 12px; transition: filter calc(420ms * var(--anim-mult, 1)) ease, transform calc(420ms * var(--anim-mult, 1)) ease; }
+.ps-app { position: absolute; inset: 0; padding: 58px 18px 0; display: flex; flex-direction: column; gap: 12px; transition: filter calc(420ms * var(--anim-mult, 1)) var(--ease-fade), transform calc(420ms * var(--anim-mult, 1)) var(--ease-fade); }
 .ps-app-title { height: 22px; width: 60%; border-radius: 7px; background: var(--ph, rgba(17,17,17,0.10)); }
 .ps-app-sub   { height: 12px; width: 38%; border-radius: 6px; background: var(--ph, rgba(17,17,17,0.07)); margin-top:-4px; }
 .ps-app-tile  { height: 86px; border-radius: 18px; background: var(--ph, rgba(17,17,17,0.06)); }
@@ -183,17 +206,60 @@
 .ps-app-row > div { flex:1; height: 64px; border-radius: 16px; background: var(--ph, rgba(17,17,17,0.06)); }
 .ps-device.sheet-open .ps-app { filter: blur(3px) saturate(0.9); transform: scale(0.985); }
 
-.ps-overlay { position: absolute; inset: 0; z-index: 14; background: rgba(4,7,11,0.55); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); opacity: 0; pointer-events: none; transition: opacity calc(420ms * var(--anim-mult, 1)) ease; }
+.ps-overlay { position: absolute; inset: 0; z-index: 14; background: rgba(4,7,11,0.55); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); opacity: 0; pointer-events: none; transition: opacity calc(420ms * var(--anim-mult, 1)) var(--ease-fade); }
 .ps-device.sheet-open .ps-overlay { opacity: 1; pointer-events: auto; }
 
 .sheet {
   left: 0; right: 0; bottom: 0; z-index: 16; height: 60%; padding: 14px 26px 30px;
   border-radius: 34px 34px 42px 42px;
   border-top: 1px solid var(--sheet-edge); box-shadow: 0 -20px 50px -10px rgba(4,7,11,0.4), inset 0 1px 0 var(--sheet-hi);
-  transform: translateY(110%); transition: transform calc(560ms * var(--anim-mult, 1)) cubic-bezier(.16,1.16,.3,1); touch-action: none;
+  transform: translateY(110%); transition: transform calc(560ms * var(--anim-mult, 1)) var(--ease-spring-loose); touch-action: none;
 }
 .ps-device.sheet-open .sheet { transform: translateY(0); }
 .ps-device.dragging .sheet { transition: none; }
+/* Squircle geometry only: bottom corners (42) are hidden behind .ps-screen's
+   own overflow:hidden clip, so a uniform radius matches the top corners
+   (34) visually unchanged. Lift shadow migrates to filter: drop-shadow()
+   since box-shadow is clipped by clip-path. */
+.sheet[data-squircle="on"] {
+  --corner-radius: 34px;
+  border-top: 0;
+  box-shadow: none;
+  filter: drop-shadow(0 -20px 50px rgba(4,7,11,0.4));
+}
+/* .panel owns ::before for the dot texture (background-image radial-
+   gradient); it and the shared squircle ring rule both target ::before at
+   equal specificity, so the ring color/clip-path from the shared recipe
+   was leaking through as a stray #D4D4D4 seam (visible at the right/bottom
+   corners where the squircle path bends) in BOTH themes -- the fix/canon
+   surface bug reported at 390px mobile. Re-declare ::before as dot-texture
+   only, then own the ring on the unused ::after: none in light (canon: no
+   ring), the real ring only in dark. */
+.sheet[data-squircle="on"]::before {
+  background: radial-gradient(circle, var(--dot) 1.1px, transparent 1.4px);
+  background-size: 22px 22px;
+}
+.sheet[data-squircle="on"]::after {
+  content: none;
+}
+html.dark .sheet[data-squircle="on"]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--card-border);
+  clip-path: var(--squircle-border-path);
+}
+/* Dark-only: the dot texture's last column sits exactly on the squircle
+   clip boundary, so it renders as jagged half-circles along the right
+   edge. Same geometry exists in light, but the higher dot/bg contrast in
+   dark (rgba(255,255,255,.07) on #1C1C1C) makes the clipped halves read
+   as a broken/dotty seam. Inset the texture's own box so any partially
+   tiled dot is clipped by its own rectangle first, inside a clean margin,
+   well before it reaches the curved boundary. */
+html.dark .sheet[data-squircle="on"]::before {
+  inset: 5px;
+}
 
 /* ════════════════════════ DESKTOP FRAME ════════════════════════ */
 .ps-desktop {
@@ -208,7 +274,7 @@
 .ps-durl .material-symbols-outlined { font-size: 13px; }
 .ps-dscreen { position: absolute; top: 42px; left: 0; right: 0; bottom: 0; overflow: hidden; isolation: isolate; }
 
-.ps-dapp { position: absolute; inset: 0; display: flex; transition: filter calc(420ms * var(--anim-mult, 1)) ease, transform calc(420ms * var(--anim-mult, 1)) ease; }
+.ps-dapp { position: absolute; inset: 0; display: flex; transition: filter calc(420ms * var(--anim-mult, 1)) var(--ease-fade), transform calc(420ms * var(--anim-mult, 1)) var(--ease-fade); }
 .ps-dapp-rail { width: 64px; flex-shrink: 0; background: var(--ph2, rgba(17,17,17,0.04)); border-right: 1px solid var(--ph2, rgba(17,17,17,0.05)); }
 .ps-dapp-main { flex: 1; padding: 26px 28px; display: flex; flex-direction: column; gap: 16px; }
 .ps-dapp-h { height: 24px; width: 200px; border-radius: 7px; background: var(--ph, rgba(17,17,17,0.08)); }
@@ -217,24 +283,61 @@
 .ps-dapp-wide { height: 120px; border-radius: 16px; background: var(--ph, rgba(17,17,17,0.05)); }
 .ps-desktop.modal-open .ps-dapp { filter: blur(4px) saturate(0.92); transform: scale(0.992); }
 
-.ps-doverlay { position: absolute; inset: 0; z-index: 14; background: rgba(4,7,11,0.45); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity calc(360ms * var(--anim-mult, 1)) ease; }
+.ps-doverlay { position: absolute; inset: 0; z-index: 14; background: rgba(4,7,11,0.45); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity calc(360ms * var(--anim-mult, 1)) var(--ease-fade); }
 .ps-desktop.modal-open .ps-doverlay { opacity: 1; pointer-events: auto; }
 
 /* grey outer shell — borrowed from the theme-editor's .te-outer bezel */
 .ps-modal-shell {
   position: absolute; left: 50%; top: 50%; z-index: 16; box-sizing: border-box;
-  padding: 9px; border-radius: 28px; background: var(--shell-bg, #D4DCE8);
+  padding: 9px; border-radius: 28px; background: var(--shell-bg, #D9D9D9);
   box-shadow: 0 32px 70px -22px rgba(4,7,11,0.5), 0 8px 20px rgba(17,17,17,0.14);
   transform: translate(-50%, -46%) scale(0.9); opacity: 0; pointer-events: none;
-  transition: transform calc(520ms * var(--anim-mult, 1)) cubic-bezier(.16,1.3,.3,1), opacity calc(300ms * var(--anim-mult, 1)) ease;
+  transition: transform calc(520ms * var(--anim-mult, 1)) var(--ease-spring-wide), opacity calc(300ms * var(--anim-mult, 1)) var(--ease-fade);
 }
 .ps-desktop.modal-open .ps-modal-shell { transform: translate(-50%, -50%) scale(1); opacity: 1; pointer-events: auto; }
+/* Squircle outer shell of the desktop concentric pair (.modal nests inside).
+   No collision here — .ps-modal-shell doesn't use ::before/::after for
+   anything else, so it follows the Cards.css .concentric-demo-outer
+   convention exactly: suppress the light-mode ring, re-enable a dark-mode
+   hairline only. Lift shadow migrates to filter (wrapping element for the
+   concentric pair, mirrors .concentric-demo). */
+.ps-modal-shell[data-squircle="on"] {
+  --corner-radius: 28px;
+  padding: calc(9px + 1px);
+  box-shadow: none;
+  filter: drop-shadow(0 32px 70px rgba(4,7,11,0.5)) drop-shadow(0 8px 20px rgba(17,17,17,0.14));
+}
+.ps-modal-shell[data-squircle="on"]::before,
+.ps-modal-shell[data-squircle="on"]::after {
+  content: none;
+}
 
 /* minimized desktop popover — sits inside the grey shell (static, not absolute) */
 .modal {
   position: relative; width: 296px; height: 360px; padding: 24px 24px 22px;
   border-radius: 20px; border: 1px solid var(--sheet-edge);
   box-shadow: inset 0 1px 0 var(--sheet-hi);
+}
+/* Squircle inner card of the concentric pair (nested in .ps-modal-shell).
+   Same fix as .sheet above: .panel::before owns the dot texture, so the
+   ring lives on ::after (none in light -- canon has no ring on the inner
+   card -- restored in dark only). */
+.modal[data-squircle="on"] {
+  --corner-radius: 20px;
+  padding: calc(24px + 1px) calc(24px + 1px) calc(22px + 1px);
+  border: 0;
+  box-shadow: none;
+}
+.modal[data-squircle="on"]::after {
+  content: none;
+}
+html.dark .modal[data-squircle="on"]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--card-border);
+  clip-path: var(--squircle-border-path);
 }
 .modal .amount { font-size: 54px; }
 .modal .amount .cur { font-size: 36px; }
@@ -282,3 +385,15 @@ html.dark .panel {
 html.dark .panel-x { color: #A1A1A1; }
 /* modal shell outer bezel → canonical page #111111 (was near-black #0A0A0A) */
 html.dark .ps-modal-shell { --shell-bg: #111111; box-shadow: 0 32px 70px -22px rgba(0,0,0,0.66), inset 0 0 0 1px #232323; }
+html.dark .ps-modal-shell[data-squircle="on"] {
+  box-shadow: none;
+  filter: drop-shadow(0 32px 70px rgba(0,0,0,0.66));
+}
+html.dark .ps-modal-shell[data-squircle="on"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--card-border);
+  clip-path: var(--squircle-border-path);
+}

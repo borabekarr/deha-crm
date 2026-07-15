@@ -3,6 +3,8 @@ import '../../../../design-system/preview/_controls.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './Pills.css'
 
+import { useProximityGroup } from '@/lib/hooks'
+
 const EVENT_BADGES = [
   { color: '#EC4899', icon: 'self_improvement', label: 'Personal' },
   { color: '#3B82F6', icon: 'event', label: 'Meeting' },
@@ -23,14 +25,16 @@ const ICON_BADGES = [
 ]
 
 export default function Pills() {
+  const filterRowRef = useProximityGroup<HTMLDivElement>()
+
   return (
     <div className="card">
       <span className="pills-label">Priority filter</span>
-      <div className="pills-row">
-        <span className="pill-priority"><span className="dot" style={{ background: '#EF4444' }}></span> Yüksek</span>
-        <span className="pill-priority"><span className="dot" style={{ background: '#EAB308' }}></span> Orta</span>
-        <span className="pill-priority"><span className="dot" style={{ background: 'var(--brand-primary-500)' }}></span> Düşük</span>
-        <span className="pill-tab dark">Tümü</span>
+      <div className="pills-row" ref={filterRowRef}>
+        <span className="pill-priority" data-proximity><span className="dot" style={{ background: '#EF4444' }}></span> Yüksek</span>
+        <span className="pill-priority" data-proximity><span className="dot" style={{ background: '#EAB308' }}></span> Orta</span>
+        <span className="pill-priority" data-proximity><span className="dot" style={{ background: 'var(--brand-primary-500)' }}></span> Düşük</span>
+        <span className="pill-tab dark" data-proximity>Tümü</span>
       </div>
 
       <span className="pills-label" style={{ marginTop: 16 }}>Stat badges</span>

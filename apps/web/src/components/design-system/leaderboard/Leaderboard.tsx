@@ -19,6 +19,7 @@ import {
   type TweenState,
   type FlipState,
 } from './leaderboard-hook'
+import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -45,6 +46,15 @@ export default function Leaderboard() {
   type RowsAnim = 'lb-entering' | 'lb-entering-right' | 'lb-entering-left' | 'lb-exiting-left' | 'lb-exiting-right' | ''
   const [rowsAnim, setRowsAnim] = useState<RowsAnim>('')
   const rowsRef = useRef<HTMLDivElement | null>(null)
+  // Proximity group: leaderboard rows are interactive (cursor:pointer, clickable-feel rows).
+  const rowsProximityRef = useProximityGroup<HTMLDivElement>()
+  const rowsCombinedRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      rowsRef.current = el
+      rowsProximityRef(el)
+    },
+    [rowsProximityRef],
+  )
 
   // Refs for FLIP
   const rowEls = useRef<Record<string, HTMLElement | null>>({})
@@ -222,7 +232,7 @@ export default function Leaderboard() {
 
           <div
             className={rowsAnim ? `rows ${rowsAnim}` : 'rows'}
-            ref={rowsRef}
+            ref={rowsCombinedRef}
             style={{'--dir': dir} as React.CSSProperties}
           >
             {ordered.map((agent, i) => {
@@ -234,6 +244,7 @@ export default function Leaderboard() {
                   key={agent.id}
                   className={'row' + (agent.you ? ' win' : '')}
                   ref={makeRowRef(agent.id)}
+                  data-proximity
                 >
                   <div className="who">
                     <div className={'avatar ' + (leader ? 'a1' : 'a2')}>{rank}</div>

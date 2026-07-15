@@ -19,6 +19,7 @@
   --cc-chip: #F5F5F5;
   --cc-hairline: #F5F5F5;
   --cc-inset-hi: rgba(255, 255, 255, 1);
+  --cc-ease-digit: cubic-bezier(.34, 1.18, .64, 1); /* digit-track roll: no byte-match in motion-tokens.css */
 }
 
 html.dark {
@@ -40,6 +41,7 @@ html.dark {
 
 /* Grey outer wrapper — canonical shell (#D4DCE8 light / #0A0A0A dark) */
 .cc-outer {
+  position: relative;
   background: var(--shell-bg, #D4DCE8);
   border-radius: 28px;
   padding: 10px;
@@ -54,6 +56,34 @@ html.dark .cc-outer {
     0 10px 30px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, .05), inset 0 0 0 1px rgba(255, 255, 255, .04);
 }
+/* Squircle conversion (Step 12): cc-outer/cc-panel canonical grey-shell/
+   white-panel concentric pair (mirrors .te-outer/.te-panel, .dp-outer/.dp-panel).
+   Depth shadow migrates to filter:drop-shadow (clip-path clips box-shadow). */
+.cc-outer[data-squircle="on"] {
+  --corner-radius: 28px;
+  box-shadow: none;
+  filter: drop-shadow(0 10px 30px rgba(17,17,17,0.12)) drop-shadow(0 2px 8px rgba(17,17,17,0.06));
+}
+.cc-outer[data-squircle="on"]::before,
+.cc-outer[data-squircle="on"]::after {
+  content: none;
+}
+/* html.dark .cc-outer (above) sets a real border + box-shadow at equal-or-
+   higher specificity; the squircle variant needs its own dark override to
+   actually win and avoid a square-cornered line leaking past the clip-path. */
+html.dark .cc-outer[data-squircle="on"] {
+  border: none;
+  box-shadow: none;
+  filter: drop-shadow(0 10px 30px rgba(0,0,0,0.3)) drop-shadow(0 2px 8px rgba(0,0,0,0.2));
+}
+html.dark .cc-outer[data-squircle="on"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--card-border, #232323);
+  clip-path: var(--squircle-border-path);
+}
 
 /* Footer hint — replaces the removed wrapper div */
 .cc-footer-hint {
@@ -67,6 +97,7 @@ html.dark .cc-outer {
 }
 
 .cc-panel {
+  position: relative;
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: var(--card-radius);
@@ -76,10 +107,25 @@ html.dark .cc-outer {
   max-width: calc(100vw - 80px);
 }
 
-html.dark .cc-panel {
+/* :not([data-squircle="on"]) keeps this scoped to the brief pre-hydration
+   paint before the squircle ref attaches -- once squircle is on, the
+   `.cc-panel[data-squircle="on"] { box-shadow: none }` rule below must win
+   outright; the panel's own ring is re-declared below since the global
+   `html [data-squircle="on"] { border: 0 }` reset would otherwise win
+   (cc-outer is already correct). */
+html.dark .cc-panel:not([data-squircle="on"]) {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05), inset 0 0 0 1px rgba(255, 255, 255, .04);
-  border-top-color: rgba(255, 255, 255, 0.22);
 }
+/* Squircle conversion (Step 12): inner of the .cc-outer/.cc-panel pair.
+   box-shadow here is inset-only (unaffected by clip-path); border stays a
+   real CSS border per the .gc-card/.dp-panel precedent. */
+.cc-panel[data-squircle="on"] {
+  --corner-radius: var(--card-radius);
+  box-shadow: none;
+}
+/* Canon (corrected): inner surfaces carry no external line in either mode --
+   the dark separator lives on .cc-outer's own ::before ring above. No
+   dark-mode border re-declaration here on purpose. */
 
 /* Inner recessed slate panel */
 .cc-slot {
@@ -90,7 +136,7 @@ html.dark .cc-panel {
   box-shadow:
     inset 0 1px 2px rgba(17,17,17, 0.04),
     inset 0 -1px 0 rgba(17,17,17, 0.02);
-  transition: background 220ms cubic-bezier(.22, 1, .36, 1);
+  transition: background calc(220ms * var(--anim-mult, 1)) var(--ease-out);
 }
 
 /* Currency pill (white with bottom inner shadow per design system) */
@@ -111,7 +157,7 @@ html.dark .cc-panel {
     inset 0 -2px 5px rgba(0, 0, 0, 0.07),
     inset 0 -1px 2px rgba(0, 0, 0, 0.04),
     inset 0 1px 0 rgba(255, 255, 255, 1);
-  transition: transform 150ms cubic-bezier(.22, 1, .36, 1), box-shadow 150ms, border-color 150ms;
+  transition: transform calc(150ms * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(150ms * var(--anim-mult, 1)), border-color calc(150ms * var(--anim-mult, 1));
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -126,6 +172,17 @@ html.dark .cc-panel {
 
 .cc-pill:active {
   transform: scale(0.97);
+}
+
+/* Proximity — scale+filter channels appended; no local transform/filter
+   hover rule to remove (hover only recolors border/box-shadow). */
+.cc-pill.cc-pill[data-proximity] {
+  transition:
+    transform calc(150ms * var(--anim-mult, 1)) var(--ease-out),
+    box-shadow calc(150ms * var(--anim-mult, 1)),
+    border-color calc(150ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 
 .cc-flag-ring {
@@ -163,11 +220,11 @@ html.dark .cc-panel {
 }
 
 .cc-flag-layer.morph-out {
-  animation: flagMorphOut 520ms cubic-bezier(.4, 0, .2, 1) forwards;
+  animation: flagMorphOut calc(520ms * var(--anim-mult, 1)) var(--ease-standard) forwards;
 }
 
 .cc-flag-layer.morph-in {
-  animation: flagMorphIn 540ms cubic-bezier(.22, 1, .36, 1) forwards;
+  animation: flagMorphIn calc(540ms * var(--anim-mult, 1)) var(--ease-out) forwards;
 }
 
 
@@ -194,7 +251,7 @@ html.dark .cc-panel {
 .digit-track {
   display: flex;
   flex-direction: column;
-  transition: transform 540ms cubic-bezier(.34, 1.18, .64, 1);
+  transition: transform calc(540ms * var(--anim-mult, 1)) var(--cc-ease-digit);
 }
 
 .digit-track > span {
@@ -216,7 +273,6 @@ html.dark .cc-panel {
 
 html.dark .cc-swap-shell {
   border: 1px solid #232323;
-  border-top-color: rgba(255, 255, 255, .22);
 }
 
 /* Swap button */
@@ -234,7 +290,7 @@ html.dark .cc-swap-shell {
     inset 0 -2px 5px rgba(0, 0, 0, 0.07),
     inset 0 -1px 2px rgba(0, 0, 0, 0.04),
     0 4px 12px -4px rgba(17,17,17, 0.12);
-  transition: transform 220ms cubic-bezier(.22, 1, .36, 1), box-shadow 200ms, border-color 200ms;
+  transition: transform calc(220ms * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(200ms * var(--anim-mult, 1)), border-color calc(200ms * var(--anim-mult, 1));
   color: #111111;
 }
 
@@ -249,6 +305,17 @@ html.dark .cc-swap-shell {
 
 .cc-swap:active {
   transform: scale(0.88) !important;
+}
+
+/* Proximity — scale+filter channels appended; no local transform/filter
+   hover rule to remove (hover only recolors border/box-shadow). */
+.cc-swap.cc-swap[data-proximity] {
+  transition:
+    transform calc(220ms * var(--anim-mult, 1)) var(--ease-out),
+    box-shadow calc(200ms * var(--anim-mult, 1)),
+    border-color calc(200ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 
 /* Icon spin driven by inline transform+transition on .cc-swap-icon (state-based, cumulative) */
@@ -281,7 +348,7 @@ html.dark .cc-swap-shell {
   box-shadow:
     inset 0 1px 2px rgba(17,17,17, 0.04),
     inset 0 -1px 0 rgba(17,17,17, 0.02);
-  transition: background 220ms cubic-bezier(.22, 1, .36, 1), box-shadow 220ms;
+  transition: background calc(220ms * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(220ms * var(--anim-mult, 1));
 }
 
 html.dark .cc-slot-top {
@@ -298,7 +365,7 @@ html.dark .cc-slot-top {
   backdrop-filter: blur(8px) saturate(1.05);
   -webkit-backdrop-filter: blur(8px) saturate(1.05);
   z-index: 100;
-  animation: fadeIn 200ms cubic-bezier(.22, 1, .36, 1);
+  animation: fadeIn calc(200ms * var(--anim-mult, 1)) var(--ease-out);
 }
 
 @keyframes fadeIn {
@@ -308,37 +375,79 @@ html.dark .cc-slot-top {
 
 /* Morph + bounce entrance — scale/opacity ONLY so it composes with the
    centering translate on the wrapper (no translate here = no drift). */
+/* --cc-pop-shadow: referenced inside the keyframes below so the animation's
+   fill-mode:both hold (filter at 100%) matches the resting static filter
+   instead of clobbering it with a bare blur(0px) after entrance completes.
+   Empty by default (non-squircle fallback keeps its box-shadow instead). */
 @keyframes popMorphIn {
-  0%   { opacity: 0; transform: scale(0.86); filter: blur(4px); }
-  60%  { opacity: 1; transform: scale(1.03); filter: blur(0px); }
-  100% { opacity: 1; transform: scale(1); filter: blur(0px); }
+  0%   { opacity: 0; transform: scale(0.9); filter: blur(4px) var(--cc-pop-shadow); }
+  100% { opacity: 1; transform: scale(1); filter: blur(0px) var(--cc-pop-shadow); }
 }
 
-/* Grey outer shell — canonical shell (#D4DCE8 light / #0A0A0A dark).
+/* Grey outer shell — canonical shell (var(--shell-bg): #D9D9D9 light / #0A0A0A dark).
    Matches .cc-outer shell weight for visual consistency. */
 .cc-pop-shell {
-  background: var(--shell-bg, #D4DCE8);
+  position: relative;
+  --cc-pop-shadow: ;
+  background: var(--shell-bg, #D9D9D9);
   border-radius: 28px;
   padding: 10px;
   box-shadow: 0 30px 60px -20px rgba(17,17,17, 0.25), 0 12px 24px -12px rgba(17,17,17, 0.18);
   transform-origin: center center;
-  animation: popMorphIn calc(240ms * var(--anim-mult, 1)) cubic-bezier(.34, 1.3, .5, 1) both;
+  animation: popMorphIn calc(260ms * var(--anim-mult, 1)) var(--ease-spring-strong) both;
 }
 
 html.dark .cc-pop-shell {
-  background: #0A0A0A;
+  background: var(--shell-bg, #0A0A0A);
   border: 1px solid var(--card-border, #232323);
   box-shadow:
     0 30px 60px -20px rgba(0, 0, 0, 0.6), 0 12px 24px -12px rgba(0, 0, 0, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, .05), inset 0 0 0 1px rgba(255, 255, 255, .04);
 }
+/* Squircle conversion (Step 12): nested overlay pair, cc-pop-shell/cc-pop.
+   Animated via popMorphIn (scale/opacity/blur only -- never width/height --
+   so the ResizeObserver-driven clip-path never fights the entrance motion).
+   Depth shadow migrates to filter:drop-shadow (clip-path clips box-shadow). */
+.cc-pop-shell[data-squircle="on"] {
+  --corner-radius: 28px;
+  --cc-pop-shadow: drop-shadow(0 30px 40px rgba(17,17,17,0.25)) drop-shadow(0 12px 12px rgba(17,17,17,0.18));
+  box-shadow: none;
+  filter: var(--cc-pop-shadow);
+}
+.cc-pop-shell[data-squircle="on"]::before,
+.cc-pop-shell[data-squircle="on"]::after {
+  content: none;
+}
+html.dark .cc-pop-shell[data-squircle="on"] {
+  --cc-pop-shadow: drop-shadow(0 30px 40px rgba(0,0,0,0.6)) drop-shadow(0 12px 12px rgba(0,0,0,0.4));
+  filter: var(--cc-pop-shadow);
+  border-color: transparent;
+  /* html.dark .cc-pop-shell (higher specificity than the non-dark squircle
+     rule's box-shadow:none) was re-winning a real box-shadow here; since
+     box-shadow paints inside the clip-path'd shape, it broke unevenly at
+     the squircle corners (same collision class as date-picker). Reset it
+     so only the unclipped filter:drop-shadow above provides depth. */
+  box-shadow: none;
+}
+html.dark .cc-pop-shell[data-squircle="on"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--card-border, #232323);
+  clip-path: var(--squircle-border-path);
+}
 
 .cc-pop {
+  position: relative;
   width: min(372px, 88vw);
   background: var(--card-bg, #FFFFFF);
   border-radius: var(--card-radius, 20px);
-  border: 1px solid var(--card-border, #D4D4D4);
   overflow: hidden;
+}
+/* Squircle conversion (Step 12): inner of the cc-pop-shell/cc-pop pair. */
+.cc-pop[data-squircle="on"] {
+  --corner-radius: var(--card-radius, 20px);
 }
 
 .cc-pop-list {
@@ -365,7 +474,7 @@ html.dark .cc-pop-shell {
   gap: 12px;
   padding: 10px 14px;
   cursor: pointer;
-  transition: background .25s ease, transform .18s cubic-bezier(.22, 1, .36, 1);
+  transition: background calc(.25s * var(--anim-mult, 1)) ease, transform calc(.18s * var(--anim-mult, 1)) var(--ease-out);
   border: none;
   background: transparent;
   width: 100%;

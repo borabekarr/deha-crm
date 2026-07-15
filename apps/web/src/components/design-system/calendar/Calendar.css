@@ -3,6 +3,7 @@
 body { background: #E4E8ED; font-family: 'Montserrat', sans-serif; }
 /* FIX 1: scoped grey bezel — canonical --shell-bg token; no bare .card leak */
 .cal-shell {
+  position: relative;
   background: var(--shell-bg, #D4DCE8);
   border-radius: 28px;
   padding: 10px;
@@ -15,6 +16,24 @@ html.dark .cal-shell {
   background: #0A0A0A !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05),
               inset 0 0 0 1px rgba(255,255,255,.04);
+}
+/* Squircle conversion (Step 7): outer shell is a decorative frame only —
+   default ::before/::after cancelled, dark-only ring re-enabled as a solid
+   line (mirrors .cal-ep-customer-outer, css:420-434). */
+.cal-shell[data-squircle="on"] {
+  --corner-radius: 28px;
+}
+.cal-shell[data-squircle="on"]::before,
+.cal-shell[data-squircle="on"]::after {
+  content: none;
+}
+html.dark .cal-shell[data-squircle="on"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: #232323;
+  clip-path: var(--squircle-border-path);
 }
 
 /* ── Outer spacer removed — .cal-shell padding alone is the gap ── */
@@ -38,12 +57,12 @@ html.dark .cal-shell {
 .cal-month-yr { font-size: 20px; font-weight: 900; color: #111111; letter-spacing: -0.02em; }
 .cal-count { background: #ECECEC; color: #6B6B6B; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 9999px; }
 .cal-actions { display: flex; gap: 5px; align-items: center; }
-.cal-today-btn { background: #111111; border: 1px solid transparent; border-radius: 9999px; padding: 6px 14px; font-family: 'Montserrat'; font-size: 12px; font-weight: 800; color: #fff; cursor: pointer; transition: background calc(150ms * var(--anim-mult, 1)), color calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.22); }
+.cal-today-btn { background: #111111; border: 1px solid transparent; border-radius: 9999px; padding: 6px 14px; font-family: 'Montserrat'; font-size: 12px; font-weight: 800; color: #fff; cursor: pointer; transition: background calc(150ms * var(--anim-mult, 1)), color calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) var(--ease-out); box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.22); }
 .cal-today-btn:hover { background: #1C1C1C; }
 .cal-today-btn:active { transform: scale(0.94); }
 .cal-today-btn.is-today { background: #ECECEC; color: #111111; border-color: #D4D4D4; box-shadow: inset 0 2px 4px rgba(0,0,0,0.10), inset 0 1px 2px rgba(0,0,0,0.06); }
 .cal-today-btn.is-today:hover { background: #D8E0EA; }
-.cal-nav-btn { background: #fff; border: 1px solid #ECECEC; border-radius: 50%; width: 30px; height: 30px; display: grid; place-items: center; cursor: pointer; transition: background calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgba(0,0,0,0.04); }
+.cal-nav-btn { background: #fff; border: 1px solid #ECECEC; border-radius: 50%; width: 30px; height: 30px; display: grid; place-items: center; cursor: pointer; transition: background calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) var(--ease-out); box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgba(0,0,0,0.04); }
 .cal-nav-btn:hover { background: #FAFAFA; }
 .cal-nav-btn:active { transform: scale(0.88); }
 .cal-nav-btn .material-icons { font-size: 17px; color: #6B6B6B; }
@@ -65,7 +84,7 @@ html.dark .cal-shell {
   width: 30px; height: 30px; border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
   font-size: 14px; font-weight: 600; color: #111111;
-  transition: background calc(140ms * var(--anim-mult, 1)), transform calc(110ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  transition: background calc(140ms * var(--anim-mult, 1)), transform calc(110ms * var(--anim-mult, 1)) var(--ease-out);
 }
 .cal-cell.other-month .cal-date-num { color: #D4D4D4; font-weight: 500; }
 /* Hover: only non-selected, non-other-month cells */
@@ -94,9 +113,18 @@ html.dark .cal-dot-more { color: #6B6B6B; }
 /* ── Events ── */
 .cal-events { padding: 14px 12px 10px; position: relative; }
 .cal-ev-label { font-size: 10px; font-weight: 700; color: #A1A1A1; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
-.cal-ev-item { display: flex; align-items: center; width: 100%; padding: 10px 2px; border: 0; border-bottom: 1px solid #FAFAFA; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; appearance: none; transition: transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
+.cal-ev-item { display: flex; align-items: center; width: 100%; padding: 10px 2px; border: 0; border-bottom: 1px solid #FAFAFA; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; appearance: none; transition: transform calc(120ms * var(--anim-mult, 1)) var(--ease-out); }
 .cal-ev-item:active { transform: scale(0.985); }
 .cal-ev-item:last-of-type { border-bottom: none; }
+/* Proximity: own `transform` transition (0,1,0) beats hover-tokens.css's
+   [data-proximity]x3 fallback; scale + filter channels added here so the
+   engine's --prox mapping doesn't snap. */
+.cal-ev-item[data-proximity] {
+  transition:
+    transform calc(120ms * var(--anim-mult, 1)) var(--ease-out),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
 .cev-left { display: flex; align-items: center; gap: 8px; flex: 1; overflow: hidden; }
 .cev-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .cev-time { font-size: 13px; font-weight: 500; color: #A1A1A1; min-width: 38px; flex-shrink: 0; }
@@ -115,15 +143,26 @@ html.dark .cal-dot-more { color: #6B6B6B; }
 }
 .cev-badge .material-icons { font-size: 12px; color: rgba(255,255,255,0.85); }
 .cal-no-events { font-size: 13px; font-weight: 500; color: #D4D4D4; padding: 6px 0 4px; }
-.cal-add-row { display: flex; align-items: center; gap: 10px; padding: 10px 2px 4px; cursor: pointer; opacity: 0.7; transition: opacity calc(150ms * var(--anim-mult, 1)); }
-.cal-add-row:hover { opacity: 1; }
+.cal-add-row { display: flex; align-items: center; gap: 10px; padding: 10px 2px 4px; cursor: pointer; opacity: 0.7; border-radius: 8px; transition: opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade), background calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade); }
+.cal-add-row:hover { opacity: 1; background: #FAFAFA; }
+html.dark .cal-add-row:hover { background: rgba(255,255,255,0.05); }
+/* Proximity: own `opacity` transition (0,1,0) beats hover-tokens.css's
+   [data-proximity]x3 fallback; scale + filter channels appended so the
+   engine's --prox mapping doesn't snap (mirrors .cal-ev-item[data-proximity]). */
+.cal-add-row[data-proximity] {
+  transition:
+    opacity calc(150ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    background calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade);
+}
 .cal-add-icon { width: 26px; height: 26px; border-radius: 50%; background: #F5F5F5; display: grid; place-items: center; color: #A1A1A1; }
 .cal-add-icon .material-icons { font-size: 16px; }
 .cal-add-text { font-size: 13px; font-weight: 500; color: #A1A1A1; }
 
 /* ── Dark mode — driven by app-global html.dark (FIX#3: converted from [data-theme="dark"]) ── */
 /* dark inner card: border-top highlight + inset shadow */
-html.dark .cal-panel{ border-top-color:rgba(255,255,255,0.22); box-shadow:inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04); }
+html.dark .cal-panel{ box-shadow:inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04); }
 html.dark .cal-header{ border-bottom-color:var(--gray-700); }
 html.dark .cal-month-yr{ color:var(--gray-100); }
 html.dark .cal-count{ background:var(--gray-700); color:var(--gray-300); }
@@ -155,8 +194,8 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
 /* Morph-in when switching days (event panel rebuilds → fresh nodes replay this) */
 @keyframes calEvIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes calLabelIn { from { opacity: 0; transform: translateY(-5px); filter: blur(2px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
-.cal-events-container > * { animation: calEvIn calc(.42s * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) both; }
-.cal-events-container > .cal-ev-label { animation: calLabelIn calc(.34s * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) both; }
+.cal-events-container > * { animation: calEvIn calc(.42s * var(--anim-mult, 1)) var(--ease-out) both; }
+.cal-events-container > .cal-ev-label { animation: calLabelIn calc(.34s * var(--anim-mult, 1)) var(--ease-out) both; }
 .cal-events-container > *:nth-child(2) { animation-delay: calc(.05s * var(--anim-mult, 1)); }
 .cal-events-container > *:nth-child(3) { animation-delay: calc(.10s * var(--anim-mult, 1)); }
 .cal-events-container > *:nth-child(4) { animation-delay: calc(.15s * var(--anim-mult, 1)); }
@@ -166,7 +205,7 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
 .cal-events-container > *:nth-child(8) { animation-delay: calc(.35s * var(--anim-mult, 1)); }
 /* Selected day pill gives a little morph pop when it moves — FIX#1: softer overshoot 1.12→1.06, lower bezier tension */
 @keyframes calSelPop { 0% { transform: scale(.7); } 60% { transform: scale(1.06); } 100% { transform: scale(1); } }
-.cal-cell.selected .cal-date-num { animation: calSelPop calc(.34s * var(--anim-mult, 1)) cubic-bezier(.34,1.2,.5,1); }
+.cal-cell.selected .cal-date-num { animation: calSelPop calc(.34s * var(--anim-mult, 1)) var(--ease-spring-pop); }
 
 /* ── Task-creation popover (FIX#2) ── */
 .cal-popover-backdrop {
@@ -186,7 +225,7 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
   box-shadow: 0 24px 80px rgba(17,17,17,0.22), 0 4px 16px rgba(17,17,17,0.08),
               inset 0 1px 0 rgba(255,255,255,0.8);
   display: flex; flex-direction: column; gap: 16px;
-  animation: calPopIn calc(240ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) both;
+  animation: calPopIn calc(240ms * var(--anim-mult, 1)) var(--ease-out) both;
 }
 @keyframes calPopIn {
   from { opacity: 0; transform: scale(.93) translateY(10px); }
@@ -213,7 +252,7 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
 .cal-pop-colors { display: flex; gap: 10px; }
 .cal-pop-color-btn {
   width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent;
-  cursor: pointer; transition: transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
+  cursor: pointer; transition: transform calc(120ms * var(--anim-mult, 1)) var(--ease-out),
                                 border-color calc(100ms * var(--anim-mult, 1));
   outline: none;
 }
@@ -258,7 +297,7 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
   transition: opacity calc(220ms * var(--anim-mult, 1)) ease, visibility 0s;
 }
 
-/* Gray bezel outer shell — pop entrance via cubic-bezier(.34,1.56,.64,1) */
+/* Gray bezel outer shell — pop entrance via var(--ease-spring) */
 .cal-ep-outer {
   background: var(--shell-bg);
   border-radius: 30px;
@@ -268,7 +307,7 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
   display: flex; flex-direction: column;
   box-shadow: 0 32px 80px rgba(0,0,0,0.28), 0 6px 20px rgba(0,0,0,0.12);
   opacity: 0; transform: translateY(16px) scale(0.95);
-  transition: transform calc(320ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
+  transition: transform calc(320ms * var(--anim-mult, 1)) var(--ease-spring),
               opacity calc(240ms * var(--anim-mult, 1)) ease;
 }
 .cal-ep-overlay.open .cal-ep-outer {
@@ -396,6 +435,24 @@ html.dark .cal-ep-customer-outer {
   background: #0A0A0A;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
 }
+/* Squircle conversion (Step 7): concentric outer/inner pair, mirrors
+   .dp-outer/.dp-panel — outer is a decorative frame only, its border/hairline
+   paint is cancelled (content: none) and re-enabled dark-only as a solid ring. */
+.cal-ep-customer-outer[data-squircle="on"] {
+  --corner-radius: 28px;
+}
+.cal-ep-customer-outer[data-squircle="on"]::before,
+.cal-ep-customer-outer[data-squircle="on"]::after {
+  content: none;
+}
+html.dark .cal-ep-customer-outer[data-squircle="on"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: #232323;
+  clip-path: var(--squircle-border-path);
+}
 .cal-ep-customer {
   display: flex; align-items: center; gap: 10px;
   padding: 10px 12px;
@@ -407,6 +464,15 @@ html.dark .cal-ep-customer-outer {
 html.dark .cal-ep-customer {
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
   border-top-color: rgba(255,255,255,.22);
+}
+.cal-ep-customer[data-squircle="on"] {
+  padding: 11px 13px;
+  --corner-radius: calc(var(--card-radius) - 2px);
+}
+/* Canon (corrected): inner line-less in both themes -- the unscoped
+   html.dark .cal-ep-customer rule above wins on specificity over the reset. */
+html.dark .cal-ep-customer[data-squircle="on"] {
+  box-shadow: none;
 }
 /* Item 6: R5 icon-badge style — colorful square badge */
 .cal-ep-cust-av {
@@ -449,7 +515,7 @@ html.dark .cal-ep-cust-sub { color: var(--fg3) !important; }
   position: absolute; border-radius: 50%; transform: scale(0);
   z-index: -1; pointer-events: none;
   background: rgba(17,17,17,0.10);
-  animation: cal-ep-cust-rip calc(560ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) forwards;
+  animation: cal-ep-cust-rip calc(560ms * var(--anim-mult, 1)) var(--ease-out) forwards;
 }
 html.dark .cal-ep-cust-ripple { background: rgba(255,255,255,0.11); }
 @keyframes cal-ep-cust-rip { to { transform: scale(3.4); opacity: 0; } }
@@ -524,6 +590,24 @@ html.dark .cal-ep-w-tray {
   background: #0A0A0A;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
 }
+/* Squircle conversion (Step 7): concentric outer/inner pair, mirrors
+   .dp-outer/.dp-panel — outer is a decorative frame only, its border/hairline
+   paint is cancelled (content: none) and re-enabled dark-only as a solid ring. */
+.cal-ep-w-tray[data-squircle="on"] {
+  --corner-radius: 28px;
+}
+.cal-ep-w-tray[data-squircle="on"]::before,
+.cal-ep-w-tray[data-squircle="on"]::after {
+  content: none;
+}
+html.dark .cal-ep-w-tray[data-squircle="on"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: #232323;
+  clip-path: var(--squircle-border-path);
+}
 /* Metric card — canonical .card-inner; .cal-ep-w is transparent content area */
 .cal-ep-w-shell {
   background: var(--card-bg); border-radius: calc(var(--card-radius) - 1px);
@@ -534,6 +618,14 @@ html.dark .cal-ep-w-tray {
 html.dark .cal-ep-w-shell {
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
   border-top-color: rgba(255,255,255,.22);
+}
+.cal-ep-w-shell[data-squircle="on"] {
+  --corner-radius: calc(var(--card-radius) - 1px);
+}
+/* Canon (corrected): inner line-less in both themes -- the unscoped
+   html.dark .cal-ep-w-shell rule above wins on specificity over the reset. */
+html.dark .cal-ep-w-shell[data-squircle="on"] {
+  box-shadow: none;
 }
 .cal-ep-w {
   display: block; min-height: 0; padding: 13px 14px;
@@ -767,7 +859,7 @@ html.dark .cal-ep-foot-btn.primary .material-icons { color: #04231a; }
 
 /* Dark mode for event-detail popover */
 html.dark .cal-ep-outer { background: #111111; }
-html.dark .cal-ep-card { background: var(--gray-800); border-top-color: rgba(255,255,255,0.22); }
+html.dark .cal-ep-card { background: var(--gray-800); }
 /* Primary footer CTA: slate-100 pill in dark — mirrors html.dark .tp-foot-btn.primary */
 html.dark .cal-ep-foot-btn.primary {
   background: #F5F5F5 !important;
@@ -800,6 +892,7 @@ html.dark .cal-popover-backdrop { background: rgba(0,0,0,.55); }
   max-height: 192px;
   overflow-y: auto;
   scrollbar-width: none;
+  padding-bottom: 4px;
 }
 .cal-ev-scroll::-webkit-scrollbar { display: none; }
 

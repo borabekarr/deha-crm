@@ -5,24 +5,15 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SETTINGS="$ROOT/.claude/settings.local.json"
 
 usage() {
-  echo "Usage: ds-lock.sh <on|off>" >&2
-  echo "  off  — bypass ACTIVE  (inserts DS_DESIGN_EDIT=approved)" >&2
-  echo "  on   — lock RESTORED  (removes DS_DESIGN_EDIT)" >&2
+  echo "Usage: ds-lock.sh <on|off|--with <cmd> [args...]>" >&2
+  echo "  off        — bypass ACTIVE  (inserts DS_DESIGN_EDIT=approved)" >&2
+  echo "  on         — lock RESTORED  (removes DS_DESIGN_EDIT)" >&2
+  echo "  --with cmd — bypass for <cmd>'s duration, re-locks on exit (trap-guaranteed, even on failure)" >&2
   exit 1
 }
 
-[[ $# -eq 1 ]] || usage
-CMD="$1"
-[[ "$CMD" == "on" || "$CMD" == "off" ]] || usage
-
-# Create file if missing
-if [[ ! -f "$SETTINGS" ]]; then
-  echo '{}' > "$SETTINGS"
-fi
-
-case "$CMD" in
-  off)
-    python3 - "$SETTINGS" <<'PYEOF'
+lock_off() {
+  python3 - "$SETTINGS" <<'PYEOF'
 import json, sys
 
 path = sys.argv[1]
@@ -40,9 +31,10 @@ with open(path, "w") as f:
     f.write("\n")
 print("LOCK OFF (bypass active)")
 PYEOF
-    ;;
-  on)
-    python3 - "$SETTINGS" <<'PYEOF'
+}
+
+lock_on() {
+  python3 - "$SETTINGS" <<'PYEOF'
 import json, sys
 
 path = sys.argv[1]
@@ -64,5 +56,32 @@ with open(path, "w") as f:
     f.write("\n")
 print("LOCK ON")
 PYEOF
-    ;;
+}
+
+[[ $# -ge 1 ]] || usage
+CMD="$1"
+
+# Create file if missing
+if [[ ! -f "$SETTINGS" ]]; then
+  echo '{}' > "$SETTINGS"
+fi
+
+if [[ "$CMD" == "--with" ]]; then
+  shift
+  [[ $# -ge 1 ]] || usage
+  lock_off
+  trap 'lock_on' EXIT
+  status=0
+  set +e
+  bash -c "$*"
+  status=$?
+  set -e
+  exit "$status"
+fi
+
+[[ "$CMD" == "on" || "$CMD" == "off" ]] || usage
+
+case "$CMD" in
+  off) lock_off ;;
+  on) lock_on ;;
 esac

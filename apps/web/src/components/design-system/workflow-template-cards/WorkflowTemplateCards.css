@@ -4,15 +4,55 @@
    Dark-mode overrides mirror the html.dark .tmpl-* blocks from _darkmode.css.
    ─────────────────────────────────────────────────────────────────────────── */
 
+/* ── Page grid ───────────────────────────────────────────────────────────────
+   The React port dropped the source prototype's 2-column grid: the root was
+   `display:contents`, relying on an ancestor page grid that doesn't exist in
+   the live route, so .wtc-outer cards rendered as full-width stacked blocks
+   (the reported "broken" layout). This root now owns the grid directly.
+   Halves each card's width versus the old full-width block and widens the
+   inter-card gap to the canonical card-to-card spacing token. */
+.wtc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-6, 24px);
+}
+
 /* ── Outer shell — canonical .shell geometry (token-driven, adapts light+dark) */
 .wtc-outer {
   background: var(--shell-bg);
   border-radius: 28px;
   padding: 10px;
-  box-shadow:
-    0 12px 40px rgba(17,17,17,0.12),
-    0 2px 8px rgba(17,17,17,0.06);
+  /* clip-path clips box-shadow -- migrated to filter:drop-shadow, which
+     follows the clipped squircle silhouette instead (see lib/squircle.ts). */
+  filter:
+    drop-shadow(0 12px 40px rgba(17,17,17,0.12))
+    drop-shadow(0 2px 8px rgba(17,17,17,0.06));
   cursor: pointer;
+  transition:
+    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
+    filter calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
+}
+.wtc-outer:hover {
+  transform: scale(1.007);
+  filter:
+    drop-shadow(0 18px 52px rgba(17,17,17,0.13))
+    drop-shadow(0 3px 11px rgba(17,17,17,0.07));
+}
+.wtc-outer:active {
+  transform: scale(1.003);
+}
+.wtc-outer[data-squircle="on"] {
+  --corner-radius: 28px;
+}
+/* Canon (corrected): outer shell needs exactly one dark-mode line -- no ring
+   mechanism existed at all here. */
+html.dark .wtc-outer[data-squircle="on"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--card-border);
+  clip-path: var(--squircle-border-path);
 }
 
 /* ── Inner white card ────────────────────────────────────────────────────── */
@@ -22,6 +62,9 @@
   border-radius: var(--card-radius);
   overflow: hidden;
   box-shadow: inset 0 1px 0 rgba(255,255,255,1);
+}
+.wtc-card[data-squircle="on"] {
+  --corner-radius: var(--card-radius);
 }
 
 /* ── Preview area ────────────────────────────────────────────────────────── */
@@ -101,7 +144,7 @@
     0 2px 8px rgba(17,17,17,0.24),
     inset 0 1px 0 rgba(255,255,255,0.08),
     inset 0 -1px 0 rgba(0,0,0,0.18);
-  transition: opacity calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(120ms * var(--anim-mult, 1));
+  transition: opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-fast) * var(--anim-mult, 1));
 }
 .wtc-outer:hover .wtc-use {
   opacity: 1;
@@ -213,7 +256,7 @@ html.dark .wtc-badge-pro { background-color: #4A4A4A; }
 .wtc-expand-wrap {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows calc(280ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  transition: grid-template-rows calc(280ms * var(--anim-mult, 1)) var(--ease-out);
 }
 .wtc-outer.wtc-expanded .wtc-expand-wrap {
   grid-template-rows: 1fr;
@@ -226,8 +269,8 @@ html.dark .wtc-badge-pro { background-color: #4A4A4A; }
   opacity: 0;
   transform: translateY(-6px);
   transition:
-    opacity calc(220ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) calc(60ms * var(--anim-mult, 1)),
-    transform calc(220ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) calc(60ms * var(--anim-mult, 1));
+    opacity calc(220ms * var(--anim-mult, 1)) var(--ease-out) calc(60ms * var(--anim-mult, 1)),
+    transform calc(220ms * var(--anim-mult, 1)) var(--ease-out) calc(60ms * var(--anim-mult, 1));
 }
 .wtc-outer.wtc-expanded .wtc-expand-body {
   opacity: 1;

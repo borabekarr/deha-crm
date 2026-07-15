@@ -68,6 +68,9 @@ export default defineConfig(() => ({
     ...(process.env.PUBLIC_TUNNEL === '1'
       ? { hmr: { protocol: 'wss', clientPort: 443 } }
       : {}),
+    // Ignore Playwright's own test-output dirs so the dev server doesn't
+    // broadcast HMR reloads mid-run (see debt/step17-preexisting-proximity-spam-flake.md).
+    watch: { ignored: ['**/test-results/**', '**/playwright-report/**'] },
   },
   build: {
     // Emit brand SVGs as separate hashed files rather than inlining as data URIs.

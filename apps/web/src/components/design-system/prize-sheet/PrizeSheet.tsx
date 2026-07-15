@@ -15,6 +15,8 @@ import './PrizeSheet.css'
 
 import { useCallback, useRef } from 'react'
 import { setupPanelScope } from './prize-sheet-hook'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
+import { useProximityGroup } from '../../../lib/hooks'
 
 // ── Shared prize content ────────────────────────────────────────────────────
 
@@ -27,7 +29,7 @@ function PrizeContent() {
         <div className="prize-title">Claim your prize!</div>
         <div className="prize-desc">Your first reward is here: $100 just for joining. Claim your prize and dive into crypto!</div>
       </div>
-      <button type="button" className="claim-btn" data-claim>
+      <button type="button" className="claim-btn" data-claim data-proximity>
         <span className="material-symbols-outlined">redeem</span>Claim prize
       </button>
       <div className="success">
@@ -56,10 +58,13 @@ function MobileScope() {
   const sheetRef = useRef<HTMLDivElement>(null)
   const fabRef = useRef<HTMLButtonElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
+  const squircleSheetRef = useSquircle<HTMLDivElement>()
+  const proximityRef = useProximityGroup<HTMLDivElement>()
 
   // Callback ref for the sheet panel — wires confetti + drag + open/close
   const handleSheetRef = useCallback((el: HTMLDivElement | null) => {
     sheetRef.current = el
+    squircleSheetRef(el)
     if (!el) return
 
     const cleanup = setupPanelScope(el, {
@@ -90,10 +95,10 @@ function MobileScope() {
       if (overlayEl && dismissFn) overlayEl.removeEventListener('click', dismissFn)
       cleanup()
     }
-  }, [])
+  }, [squircleSheetRef])
 
   return (
-    <div className="demo">
+    <div className="demo" ref={proximityRef}>
       <div className="demo-cap">
         <span className="material-symbols-outlined">smartphone</span>Mobile · bottom sheet
       </div>
@@ -107,7 +112,7 @@ function MobileScope() {
             <div className="ps-app-row"><div></div><div></div></div>
             <div className="ps-app-tile" style={{ height: '64px' }}></div>
           </div>
-          <button type="button" className="ps-fab" ref={fabRef}>
+          <button type="button" className="ps-fab" ref={fabRef} data-proximity>
             <span className="material-symbols-outlined">redeem</span>Claim
           </button>
           <div className="ps-overlay" ref={overlayRef}></div>
@@ -131,12 +136,16 @@ function DesktopScope() {
   const modalRef = useRef<HTMLDivElement>(null)
   const fabRef = useRef<HTMLButtonElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
+  const squircleModalRef = useSquircle<HTMLDivElement>()
+  const squircleShellRef = useSquircle<HTMLDivElement>()
+  const proximityRef = useProximityGroup<HTMLDivElement>()
 
   // Escape key listener — stored as component-level ref so it's wired once
   const escCleanupRef = useRef<(() => void) | null>(null)
 
   const handleModalRef = useCallback((el: HTMLDivElement | null) => {
     modalRef.current = el
+    squircleModalRef(el)
     if (!el) {
       escCleanupRef.current?.()
       escCleanupRef.current = null
@@ -184,10 +193,10 @@ function DesktopScope() {
       document.removeEventListener('keydown', onEscape)
       cleanup()
     }
-  }, [])
+  }, [squircleModalRef])
 
   return (
-    <div className="demo">
+    <div className="demo" ref={proximityRef}>
       <div className="demo-cap">
         <span className="material-symbols-outlined">desktop_windows</span>Desktop · centered dialog
       </div>
@@ -209,11 +218,11 @@ function DesktopScope() {
               <div className="ps-dapp-wide"></div>
             </div>
           </div>
-          <button type="button" className="ps-fab ps-fab-grid" ref={fabRef}>
+          <button type="button" className="ps-fab ps-fab-grid" ref={fabRef} data-proximity>
             <span className="material-symbols-outlined">redeem</span>Claim prize
           </button>
           <div className="ps-doverlay" ref={overlayRef}></div>
-          <div className="ps-modal-shell">
+          <div className="ps-modal-shell" ref={squircleShellRef}>
             <div className="modal panel" ref={handleModalRef}>
               <button type="button" className="panel-x" data-x aria-label="Close">
                 <span className="material-icons">close</span>

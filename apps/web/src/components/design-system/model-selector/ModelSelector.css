@@ -4,84 +4,65 @@
     justify-content: flex-start;
     padding: 32px 24px;
     background: #FAFAFA;
-    background-image: radial-gradient(ellipse at top right, color-mix(in srgb, var(--brand-primary-500) 7%, transparent) 0%, #FAFAFA 55%);
   }
 
-  /* ── Single morphing shell ──────────────────────────────────────────────── */
+  /* ── Static shell (Step 27) ─────────────────────────────────────────────── */
   /*
-   * Replaces the old .ms-trigger + .ms-clip > .ms-outer two-element structure.
-   * Closed: scaleY(0.12) scaleX(0.65) — pill footprint (transform-origin: top center).
-   * Open:   scaleY(1) scaleX(1) — full card.
-   * NO translate/slide — scale only, matching md-panel-shell open pattern.
-   *
-   * Close easing:  cubic-bezier(.22,1,.36,1)  — smooth ease-out compact
-   * Open easing:   cubic-bezier(.55,1.35,.35,1) — spring bounce (overshoot past 1)
+   * Step 27 restructure: the shell no longer morphs. Only the header itself
+   * used to gate the click target when the whole card was collapsed to a
+   * pill footprint (scaleY/scaleX); that whole-shell morph is gone — the
+   * shell is always full size, .ms-header is the persistent toggle button,
+   * and .ms-collapsible (divider+panel) is the only thing that animates
+   * (height via useAutoHeight + opacity crossfade below).
    */
   .ms-shell {
-    --ms-dur: calc(560ms * var(--anim-mult, 1));
-
     position: relative;
     display: flex; flex-direction: column; align-items: stretch;
     gap: 8px;
 
     /* Gray outer shell styling (replaces .ms-outer) */
-    background: #D4DCE8;
+    background: #D9D9D9;
     border-radius: 30px;
     padding: 10px;
     box-shadow: 0 16px 56px rgba(17,17,17,0.13), 0 3px 10px rgba(17,17,17,0.06);
-
-    /* ① CLOSED state — pill footprint, invisible but CLICKABLE (full bounding box) */
-    transform-origin: top center;
-    transform: scaleY(0.12) scaleX(0.65);
-    opacity: 0;
-    pointer-events: auto;   /* keep auto so the bounding box is a click target to reopen */
-    cursor: pointer;
-
-    /* ③ Close easing: smooth ease-out, no bounce */
-    transition:
-      transform var(--ms-dur) cubic-bezier(.22, 1, .36, 1),
-      opacity calc(200ms * var(--anim-mult, 1)) ease;
   }
 
-  /* ② OPEN state — full card, spring bounce */
-  .ms-shell.open {
-    transform: scaleY(1) scaleX(1);
-    opacity: 1;
-    pointer-events: auto;
-    cursor: default;
-
-    /* ② Open easing: spring expand + bounce (cubic-bezier(.55,1.35,.35,1)) */
-    transition:
-      transform var(--ms-dur) cubic-bezier(.55, 1.35, .35, 1),
-      opacity calc(180ms * var(--anim-mult, 1)) ease;
+  /* Squircle conversion (Step 12): ms-shell/ms-panel canonical grey-shell/
+     white-panel concentric pair (mirrors .te-outer/.te-panel, .dp-outer/.dp-panel).
+     Depth shadow migrates to filter:drop-shadow (clip-path clips box-shadow).
+     Step 27: the shell's own box no longer scales/fades, but its height
+     still changes as a side effect of .ms-collapsible's height animation —
+     the ResizeObserver-driven clip-path recomputes every frame, same as the
+     established useAutoHeight+useSquircle pairing (PinnedList/TaskBoard). */
+  .ms-shell[data-squircle="on"] {
+    --corner-radius: 30px;
+    box-shadow: none;
+    filter:
+      drop-shadow(0 16px 56px rgba(17,17,17,0.13))
+      drop-shadow(0 3px 10px rgba(17,17,17,0.06));
   }
-
-  /* ── Close button ── top-right corner of card, absolutely positioned */
-  .ms-close-btn {
+  .ms-shell[data-squircle="on"]::before,
+  .ms-shell[data-squircle="on"]::after {
+    content: none;
+  }
+  html.dark .ms-shell[data-squircle="on"]::before {
+    content: '';
     position: absolute;
-    top: 12px; right: 12px;
-    display: flex; align-items: center; justify-content: center;
-    width: 28px; height: 28px;
-    background: rgba(17,17,17,0.06);
-    border: 1px solid rgba(17,17,17,0.08);
-    border-radius: 50%;
-    cursor: pointer;
-    color: #6B6B6B;
-    padding: 0;
-    transition: background calc(150ms * var(--anim-mult, 1)), color calc(150ms * var(--anim-mult, 1));
-    /* ① Button click animation */
-    transform: scale(1);
+    inset: 0;
+    pointer-events: none;
+    background: var(--card-border, #232323);
+    clip-path: var(--squircle-border-path);
   }
-  .ms-close-btn:hover {
-    background: rgba(17,17,17,0.10);
-    color: #111111;
-  }
-  .ms-close-btn:active { transform: scale(0.92); }
-  .ms-close-btn .material-icons { font-size: 16px; }
 
-  /* ── Header (trigger content lives here) ── */
+  /* ── Header (real toggle button; trigger content lives here) ──
+     Step 27: reserved padding-right for the old floating close button is
+     gone (removed entirely, see tsx comment) — padding is now symmetric
+     14px/14px, mirroring the left-edge↔icon spacing after the Step 26
+     chevron move. Shell padding (10px, above) stays uniform on all sides,
+     which is the "symmetric top inset" the header now merges into. */
   .ms-header {
     display: flex; align-items: center; gap: 8px;
+    width: 100%;
     padding: 10px 14px;
     background: var(--card-bg, rgba(255,255,255,0.92));
     backdrop-filter: blur(20px);
@@ -92,10 +73,18 @@
       inset 0 -2px 4px rgba(17,17,17,0.06),
       inset 0 0 0 1px rgba(17,17,17,0.04);
     font-family: 'Montserrat';
-    /* ① Click animation on the header when closed */
-    transition: box-shadow calc(150ms * var(--anim-mult, 1));
-    /* reserve space for close button when open */
-    padding-right: 46px;
+    text-align: left;
+    appearance: none;
+    cursor: pointer;
+    /* ① Click/press feedback + box-shadow settle */
+    transition:
+      box-shadow calc(150ms * var(--anim-mult, 1)),
+      transform calc(120ms * var(--anim-mult, 1)) var(--ease-out);
+  }
+  .ms-header:active { transform: scale(0.985); }
+  .ms-header:focus-visible {
+    outline: 2px solid var(--brand-primary-500);
+    outline-offset: 2px;
   }
 
   /* Colorful mini icon tag in header — extends .icon-badge.icon-badge--sm */
@@ -105,7 +94,7 @@
       linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
     background-size: cover, 5px 5px, 5px 5px;
-    transition: background-color calc(200ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+    transition: background-color calc(200ms * var(--anim-mult, 1)) var(--ease-out);
   }
   .ms-t-icon-tag .material-icons,
   .ms-t-icon-tag .material-symbols-outlined {
@@ -115,7 +104,7 @@
   /* ④ Text morph: label fades + scales in on mount (triggered by key prop change) */
   .ms-t-model {
     font-size: 14px; font-weight: 800; color: #111111; letter-spacing: -0.01em;
-    animation: msLabelIn calc(280ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+    animation: msLabelIn calc(280ms * var(--anim-mult, 1)) var(--ease-out);
   }
   @keyframes msLabelIn {
     from { opacity: 0; transform: scale(0.82) translateY(3px); filter: blur(2px); }
@@ -125,8 +114,41 @@
   .ms-t-sep     { width: 1px; height: 16px; background: #ECECEC; flex-shrink: 0; }
   .ms-t-label   { font-size: 13px; font-weight: 600; color: #A1A1A1; }
   .ms-t-chevron {
-    font-size: 18px; color: #A1A1A1; margin-left: auto; flex-shrink: 0;
-    transition: transform calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+    font-size: 18px; color: #A1A1A1; flex-shrink: 0; margin-left: -3px;
+    transition: transform calc(300ms * var(--anim-mult, 1)) var(--ease-out);
+  }
+
+  /* ── Collapsible region (Step 27): wraps divider + panel ──
+     Stays mounted through collapse; height is driven imperatively by
+     useAutoHeight (ref, inline `transition:height` + `overflow`) so it must
+     NOT also carry a CSS `transition` shorthand here (an inline style
+     transition wins over any stylesheet rule for the same element and would
+     silently drop the opacity animation below). The divider/panel opacity
+     crossfade below lives on the CHILDREN instead, which is unaffected by
+     the wrapper's inline transition. */
+  .ms-collapsible {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* Divider + panel crossfade in/out with the collapse (own transition,
+     independent of the wrapper's imperative height transition above).
+     flex-shrink:0 is load-bearing: without it, the default flex-shrink:1
+     squeezes both children toward 0 while the JS-driven parent height is
+     still small mid-animation (and scrollHeight — the very number the hook
+     measures as its target — would itself read squeezed-to-~gap-only
+     instead of the true content height), instead of staying full-size and
+     being clipped by the parent's overflow:hidden as intended. */
+  .ms-divider,
+  .ms-panel {
+    flex-shrink: 0;
+    opacity: 1;
+    transition: opacity calc(220ms * var(--anim-mult, 1)) var(--ease-fade);
+  }
+  .ms-collapsible:not(.open) .ms-divider,
+  .ms-collapsible:not(.open) .ms-panel {
+    opacity: 0;
   }
 
   /* ── Horizontal divider between header and panel ── */
@@ -152,6 +174,12 @@
     /* Row height: icon 38px + padding 12px top + 12px bottom = 62px */
     --ms-row-h: 62px;
   }
+  /* Squircle conversion (Step 12): inner of the .ms-shell/.ms-panel pair.
+     box-shadow here is inset-only (unaffected by clip-path); border stays a
+     real CSS border per the .gc-card/.dp-panel precedent. */
+  .ms-panel[data-squircle="on"] {
+    --corner-radius: var(--card-radius);
+  }
 
   /* ── Model rows ── */
   .ms-row {
@@ -159,7 +187,7 @@
     padding: 12px 14px;
     cursor: pointer; user-select: none;
     position: relative;
-    transition: background calc(140ms * var(--anim-mult, 1)), transform calc(100ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+    transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out);
   }
   .ms-row::after {
     content: ''; position: absolute;
@@ -167,9 +195,18 @@
     height: 1px; background: #F5F5F5;
   }
   .ms-row:last-of-type::after { display: none; }
-  .ms-row:hover { background: #FAFAFA; }
+  .ms-row:hover { background: var(--fp-hover); }
   /* ① Row click animation */
-  .ms-row:active { transform: scale(0.985); background: #F5F5F5; }
+  .ms-row:active { transform: scale(0.97); background: #F5F5F5; }
+  /* Proximity — scale+filter channels appended; no local transform/filter
+     hover rule to remove (hover only recolors background). */
+  .ms-row.ms-row[data-proximity] {
+    transition:
+      background calc(var(--duration-fast) * var(--anim-mult, 1)),
+      transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out),
+      scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+      filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+  }
   /* Selected: black bg, white text */
   .ms-row.sel {
     background: #111111;
@@ -191,7 +228,7 @@
     pointer-events: none;
     z-index: 0;
     transform: translateY(calc(var(--sel-idx, 0) * var(--ms-row-h, 62px)));
-    transition: transform calc(300ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.64,1);
+    transition: transform calc(300ms * var(--anim-mult, 1)) var(--ease-slide-bounce);
   }
 
   /* Make rows sit above indicator */
@@ -209,16 +246,27 @@
   /* ── Dark mode: card wrapper ── */
   html.dark .ms-card {
     background: #111111;
-    background-image: radial-gradient(ellipse at top right, color-mix(in srgb, var(--brand-primary-500) 7%, transparent) 0%, #111111 55%);
   }
 
   /* ── Dark mode: outer shell (ms-shell takes role of old ms-outer) ── */
-  html.dark .ms-shell {
-    background: #0A0A0A;
+  /* :not([data-squircle="on"]) keeps this scoped to the brief pre-hydration
+     paint before the squircle ref attaches -- once squircle is on, the
+     `.ms-shell[data-squircle="on"] { box-shadow: none }` rule above must win
+     outright rather than lose the specificity fight to this class-stacked
+     selector (elevation lives in filter:drop-shadow only). */
+  html.dark .ms-shell:not([data-squircle="on"]) {
+    /* Hardcoded per plan Step 26 item 5 (visual judgment override): var(--shell-bg)
+       dark is #0A0A0A which is DARKER than the inner #1C1C1C panel (inverted).
+       ~#262626 reads as a lighter grey shell, distinct from the inner panel. */
+    background: #262626;
     border: 1px solid var(--card-border, #232323);
     box-shadow:
       0 16px 56px rgba(0,0,0,0.5), 0 3px 10px rgba(0,0,0,0.3),
       inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
+  }
+  html.dark .ms-shell[data-squircle="on"] {
+    /* See comment above: hardcoded lighter grey, not var(--shell-bg). */
+    background: #262626;
   }
 
   /* ── Dark mode: header ── */
@@ -230,18 +278,7 @@
 
   /* ── Dark mode: divider ── */
   html.dark .ms-divider {
-    background: rgba(255,255,255,0.07);
-  }
-
-  /* ── Dark mode: close button ── */
-  html.dark .ms-close-btn {
-    background: rgba(255,255,255,0.06);
-    border-color: rgba(255,255,255,0.08);
-    color: #A1A1A1;
-  }
-  html.dark .ms-close-btn:hover {
-    background: rgba(255,255,255,0.12);
-    color: #F5F5F5;
+    background: rgba(255,255,255,0.85);
   }
 
   /* ── Dark mode: selected row uses white/light fill ── */
@@ -289,7 +326,7 @@
     font-size: 20px; color: #fff;
     font-weight: 900;
     opacity: 0; transform: scale(0.6);
-    transition: opacity calc(200ms * var(--anim-mult, 1)), transform calc(200ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+    transition: opacity calc(200ms * var(--anim-mult, 1)), transform calc(200ms * var(--anim-mult, 1)) var(--ease-out);
     text-shadow: 0 1px 3px rgba(0,0,0,0.45), 0 0 1px rgba(255,255,255,0.4);
     -webkit-text-stroke: 1px #fff;
   }
@@ -325,10 +362,10 @@
   .ms-row.sel.has-stats .ms-check {
     position: absolute; right: 0; top: 50%;
     transform: translateY(-50%) scale(1);
-    animation: morphCheck calc(6s * var(--anim-mult, 1)) ease-in-out infinite;
+    animation: morphCheck calc(6s * var(--anim-mult, 1)) var(--ease-in-out) infinite;
   }
   .ms-row.sel.has-stats .ms-stats {
-    animation: morphStats calc(6s * var(--anim-mult, 1)) ease-in-out infinite;
+    animation: morphStats calc(6s * var(--anim-mult, 1)) var(--ease-in-out) infinite;
   }
 
   @keyframes morphCheck {

@@ -23,8 +23,23 @@ function readRegistryFinishedSlugs(): string[] {
 async function trackErrors(page: Page): Promise<{ consoleErrors: string[]; pageErrors: string[] }> {
   const consoleErrors: string[] = []
   const pageErrors: string[] = []
-  page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(m.text()) })
-  page.on('pageerror', (e) => pageErrors.push(e.message))
+  page.on('console', (m) => {
+    if (m.type() !== 'error') return
+    const text = m.text()
+    // Vite's dev-only HMR client fails to reach the port-less wss://localhost
+    // dial in this environment; it's dev-server infra noise, not an app error.
+    // See debt/animation-spam-suite-preexisting-failures.md (item 1).
+    if (/wss:\/\/localhost.*(failed|ERR_CONNECTION_REFUSED)/.test(text)) return
+    if (text.includes('[vite] failed to connect to websocket')) return
+    consoleErrors.push(text)
+  })
+  page.on('pageerror', (e) => {
+    // Same Vite HMR-client infra noise as the console filter above, surfacing
+    // as a pageerror instead: See debt/animation-spam-suite-preexisting-failures.md
+    // (item 1); mirrors the proven pattern at proximity.spec.ts:207-212.
+    if (e.message.includes('WebSocket closed without opened')) return
+    pageErrors.push(e.message)
+  })
   return { consoleErrors, pageErrors }
 }
 
@@ -38,8 +53,8 @@ async function measure(page: Page, selector: string): Promise<number> {
   return box ? box.height : NaN
 }
 
-// Some slugs (status-card, ai-memory-card) showcase multiple example rows
-// sharing the same class — pin to the first instance throughout.
+// Some slugs (status-card) showcase multiple example rows sharing the same
+// class — pin to the first instance throughout.
 async function click(page: Page, selector: string) {
   await page.locator(selector).first().click({ force: true })
 }
@@ -128,6 +143,10 @@ test.describe('animation spam', () => {
     expect(firstOpenHeight).toBeGreaterThanOrEqual(0)
     // Re-trigger while done: restarts the cycle, proving restart safety too.
     await click(page, '.sync-btn')
+    // Guard against the stale "Synced N task" text from the FIRST cycle still
+    // being visible in the instant after the click (phase flips off 'done' on
+    // a next-tick timer, not synchronously) — wait for it to clear first.
+    await expect(page.getByText(/Synced \d+ task/)).toBeHidden({ timeout: 5000 })
     await expect(page.getByText(/Synced \d+ task/)).toBeVisible({ timeout: 12000 })
     await page.waitForTimeout(340 + 300)
     const secondOpenHeight = await measure(page, '.tb-sync-feed--visible')

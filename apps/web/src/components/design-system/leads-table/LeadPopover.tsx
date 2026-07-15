@@ -34,6 +34,9 @@ import { useBrainStage } from './brain-hook'
 import { FilterColumn } from './FilterColumn'
 import { InteractiveBrain } from './InteractiveBrain'
 import { DetailPanel } from './DetailPanel'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
+import { useProximityGroup } from '../../../lib/hooks'
+import { usePillSpring } from '../../../lib/motion-spring'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -413,6 +416,7 @@ function Viz({ d }: { d: any }) {
 function HorizonWidget({ schema, d }: { schema: { icon: string; label: string }; d: any }) {
   const [hz, setHz] = useState<string>(d.horizons[0].id)
   const cur = d.horizons.find((h: { id: string }) => h.id === hz) || d.horizons[0]
+  const hzProxRef = useProximityGroup<HTMLDivElement>()
   return (
     <div className="ldx-w-shell" style={{ '--acc': d.themeAcc || cur.tone } as React.CSSProperties}>
       <section className="ldx-w" style={{ '--acc': d.themeAcc || cur.tone } as React.CSSProperties}>
@@ -420,9 +424,9 @@ function HorizonWidget({ schema, d }: { schema: { icon: string; label: string };
           <span className="ldx-w-ic"><span className="material-symbols-outlined">{schema.icon}</span></span>
           <span className="ldx-w-label">{schema.label}</span>
         </div>
-        <div className="ldx-hz">
+        <div className="ldx-hz" ref={hzProxRef}>
           {d.horizons.map((h: { id: string; label: string }) => (
-            <button type="button" key={h.id} className={'ldx-hz-btn' + (h.id === hz ? ' on' : '')} onClick={() => setHz(h.id)}>{h.label}</button>
+            <button type="button" key={h.id} className={'ldx-hz-btn' + (h.id === hz ? ' on' : '')} onClick={() => setHz(h.id)} data-proximity>{h.label}</button>
           ))}
         </div>
         <div className="ldx-hz-body"><Bar pct={cur.pct} tone={cur.tone} vlabel={null} /></div>
@@ -542,17 +546,26 @@ const TONE_CLASS: Record<string, string> = {
 
 function CollectiveSkeletonCanvas() {
   const { activeChannel, setChannel, indicatorPos, containerRef } = useChannelSwitcher('doc')
+  const segProxRef = useProximityGroup<HTMLDivElement>()
+  const segIndRef = usePillSpring<HTMLSpanElement>(indicatorPos.left, indicatorPos.width)
 
   return (
     <div className="ldx-canvas">
       {/* Header: channel switcher */}
       <div className="ldx-canvas-head">
-        <div className="ldx-seg" ref={containerRef}>
-          <span className="ldx-seg-ind" style={{ left: indicatorPos.left + 'px', width: indicatorPos.width + 'px' }} />
+        <div
+          className="ldx-seg"
+          ref={(el) => {
+            containerRef(el)
+            segProxRef(el)
+          }}
+        >
+          <span className="ldx-seg-ind" ref={segIndRef} style={{ left: 0, transition: 'none' }} />
           <button
             type="button"
             className={'cs-segbtn' + (activeChannel === 'doc' ? ' on' : '')}
             onClick={() => setChannel('doc')}
+            data-proximity
           >
             <span className="material-symbols-outlined">description</span>
             Document / PDF
@@ -561,6 +574,7 @@ function CollectiveSkeletonCanvas() {
             type="button"
             className={'cs-segbtn' + (activeChannel === 'chat' ? ' on' : '')}
             onClick={() => setChannel('chat')}
+            data-proximity
           >
             <span className="material-symbols-outlined">chat</span>
             WhatsApp Chat
@@ -569,6 +583,7 @@ function CollectiveSkeletonCanvas() {
             type="button"
             className={'cs-segbtn' + (activeChannel === 'voice' ? ' on' : '')}
             onClick={() => setChannel('voice')}
+            data-proximity
           >
             <span className="material-symbols-outlined">call</span>
             Voice Call
@@ -644,11 +659,19 @@ function CollectiveSkeletonCanvas() {
 function SegPills({ pills, active, onSelect }: { pills: Pill[]; active: number; onSelect: (p: Pill) => void }) {
   const ref = useRef<HTMLDivElement>(null)
   const pos = usePillIndicator(active, ref)
+  const segPillRef = usePillSpring<HTMLSpanElement>(pos.left, pos.width)
+  const segPillsProxRef = useProximityGroup<HTMLDivElement>()
   return (
-    <div className="ldx-seg fill" ref={ref}>
-      <span className="ldx-seg-pill" style={{ left: pos.left + 'px', width: pos.width + 'px' }} />
+    <div
+      className="ldx-seg fill"
+      ref={(el) => {
+        ref.current = el
+        segPillsProxRef(el)
+      }}
+    >
+      <span className="ldx-seg-pill" ref={segPillRef} style={{ left: 0, transition: 'none' }} />
       {pills.map(p => (
-        <button type="button" key={p.id} className={'ldx-segbtn' + (p.id === active ? ' on' : '')} onClick={() => onSelect(p)}>
+        <button type="button" key={p.id} className={'ldx-segbtn' + (p.id === active ? ' on' : '')} onClick={() => onSelect(p)} data-proximity>
           <span className={'ldx-pill-dot t' + p.tier} />
           <span className="ldx-segbtn-lb">{p.label}</span>
         </button>
@@ -679,6 +702,8 @@ function LeadTools({ ws, lead }: { ws: string; lead: Lead }) {
   if (ws === 'healthcare') tools.splice(1, 0, { ic:'sentiment_satisfied', t:'Patient tone adaptor', color:'#EAB308' })
 
   const { chatOpen, thinking, typed, activeTool, openTool, closeChat } = useTypewriter<Tool>()
+  const toolsProxRef = useProximityGroup<HTMLDivElement>()
+  const chatHeadProxRef = useProximityGroup<HTMLDivElement>()
 
   // Resolve the deterministic response for a tool, then drive the typewriter.
   function runTool(tool: Tool) {
@@ -691,9 +716,9 @@ function LeadTools({ ws, lead }: { ws: string; lead: Lead }) {
     <div className="ldx-tools">
       <div className="ldx-tools-t"><span className="material-symbols-outlined">smart_toy</span>Lead-context AI tools</div>
       {!chatOpen ? (
-        <div className="ldx-tools-btns">
+        <div className="ldx-tools-btns" ref={toolsProxRef}>
           {tools.map((t) => (
-            <button type="button" key={t.t} className="ldx-tool-card" style={{ '--tc': t.color } as React.CSSProperties} onClick={() => runTool(t)}>
+            <button type="button" key={t.t} className="ldx-tool-card" style={{ '--tc': t.color } as React.CSSProperties} onClick={() => runTool(t)} data-proximity>
               <span className="ldx-tool-card-ic"><span className="material-symbols-outlined">{t.ic}</span></span>
               <span className="ldx-tool-card-t">{t.t}</span>
               <span className="material-symbols-outlined ldx-tool-arrow">arrow_forward</span>
@@ -702,13 +727,13 @@ function LeadTools({ ws, lead }: { ws: string; lead: Lead }) {
         </div>
       ) : (
         <div className="ldx-chat">
-          <div className="ldx-chat-head">
+          <div className="ldx-chat-head" ref={chatHeadProxRef}>
             <span className="ldx-chat-av" style={{ '--tc': activeTool?.color } as React.CSSProperties}><span className="material-symbols-outlined">{activeTool?.ic}</span></span>
             <div className="ldx-chat-meta">
               <span className="ldx-chat-name">{activeTool?.t}</span>
               <span className="ldx-chat-status">{thinking ? 'Thinking...' : 'Done'}</span>
             </div>
-            <button type="button" className="ldx-chat-x" onClick={closeChat}><span className="material-icons">close</span></button>
+            <button type="button" className="ldx-chat-x" onClick={closeChat} data-proximity><span className="material-icons">close</span></button>
           </div>
           <div className="ldx-chat-body">
             {thinking
@@ -734,6 +759,10 @@ export default function LeadPopover({ lead, onClose }: LeadPopoverProps) {
   // `key={lead.id}` so a different lead remounts this component and naturally
   // resets every value below -- no reset effect needed (no-use-effect Rule 5).
   const [pill, setPill] = useState(1)
+  const gateProxRef = useProximityGroup<HTMLDivElement>()
+  const headTopProxRef = useProximityGroup<HTMLDivElement>()
+  const scopeProxRef = useProximityGroup<HTMLDivElement>()
+  const moreProxRef = useProximityGroup<HTMLDivElement>()
   // Workspace is fixed at real_estate; no in-popover switcher exists in the
   // source design. Kept as a const so widget/tool filtering still reads `ws`.
   const ws = 'real_estate'
@@ -751,6 +780,7 @@ export default function LeadPopover({ lead, onClose }: LeadPopoverProps) {
     return ch != null ? Date.now() + ch * 3600000 : null
   })
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
+  const cardSquircleRef = useSquircle<HTMLDivElement>()
   const bodyRef = useRef<HTMLDivElement>(null)
   const [scrolled, setScrolled] = useState(false)
   const [edges, setEdges] = useState({ top:false, bottom:false })
@@ -828,15 +858,15 @@ export default function LeadPopover({ lead, onClose }: LeadPopoverProps) {
     body = <Skeletons />
   } else if (curPill.tier === 3 && !computed.has(pill)) {
     body = voice ? (
-      <div className="ldx-gate">
+      <div className="ldx-gate" ref={gateProxRef}>
         <div className="ldx-gate-ic t3"><span className="material-symbols-outlined">graphic_eq</span></div>
         <div className="ldx-gate-t">Deep voice & NLP analysis</div>
         <div className="ldx-gate-s">Runs prosody, hesitation and language-pattern models over {lead.name.split(' ')[0]}'s call recordings. This is the most expensive tier - it only runs when you ask.</div>
-        <button type="button" className="ldx-gate-btn t3" onClick={() => startCompute(4, 1200)}><span className="material-symbols-outlined">bolt</span>Run deep analysis</button>
+        <button type="button" className="ldx-gate-btn t3" onClick={() => startCompute(4, 1200)} data-proximity><span className="material-symbols-outlined">bolt</span>Run deep analysis</button>
         <div className="ldx-gate-cost"><span className="material-symbols-outlined">bolt</span>Tier 3 - ~8s - uses voice credits</div>
       </div>
     ) : (
-      <div className="ldx-gate">
+      <div className="ldx-gate" ref={gateProxRef}>
         <div className="ldx-gate-ic gated"><span className="material-symbols-outlined">mic_off</span></div>
         <div className="ldx-gate-t">Insufficient data for voice analysis</div>
         <div className="ldx-gate-s">No call recordings or sufficient message history exist for {lead.name.split(' ')[0]} yet. Voice & deep-NLP metrics stay disabled until there's something to analyze.</div>
@@ -866,9 +896,11 @@ export default function LeadPopover({ lead, onClose }: LeadPopoverProps) {
           {visible.map(s => <Widget key={s.id} schema={s} data={metrics[s.id]} />)}
         </div>
         {moreItems.length > 0 && !showMore[pill] && (
-          <button type="button" className="ldx-more" onClick={() => setShowMore(s => ({ ...s, [pill]:true }))}>
-            <span className="material-symbols-outlined">expand_more</span>Show {moreItems.length} more
-          </button>
+          <div ref={moreProxRef} style={{ display: 'contents' }}>
+            <button type="button" className="ldx-more" onClick={() => setShowMore(s => ({ ...s, [pill]:true }))} data-proximity>
+              <span className="material-symbols-outlined">expand_more</span>Show {moreItems.length} more
+            </button>
+          </div>
         )}
         <LeadTools ws={ws} lead={lead} />
       </>
@@ -881,11 +913,11 @@ export default function LeadPopover({ lead, onClose }: LeadPopoverProps) {
     // eslint-disable-next-line jsx-a11y/prefer-tag-over-role -- custom overlay CSS depends on div; swapping to <dialog> would break fixed-positioning and backdrop layout pixel-identically
     <div className="ldx-overlay open" onClick={onClose} aria-modal="true" role="dialog" aria-label="Lead details">
       <div className="ldx-outer" onClick={e => e.stopPropagation()}>
-        <div className={'ldx-card' + (scrolled ? ' compact' : '')} data-screen-label="Lead details popover">
+        <div ref={cardSquircleRef} className={'ldx-card' + (scrolled ? ' compact' : '')} data-screen-label="Lead details popover">
 
           <div className="ldx-head" style={{ '--hbg': HEALTH[h] } as React.CSSProperties}>
-            <div className="ldx-head-top">
-              <button type="button" className="ldx-close" onClick={onClose} aria-label="Close"><span className="material-icons">close</span></button>
+            <div className="ldx-head-top" ref={headTopProxRef}>
+              <button type="button" className="ldx-close" onClick={onClose} aria-label="Close" data-proximity><span className="material-icons">close</span></button>
             </div>
             <span className="ldx-health-word">
               <span className="material-symbols-outlined">{h === 'g' ? 'trending_up' : h === 'a' ? 'remove' : 'trending_down'}</span>
@@ -963,7 +995,7 @@ export default function LeadPopover({ lead, onClose }: LeadPopoverProps) {
 
           <div className={'ldx-bodywrap' + (edges.top ? ' fade-top' : '') + (edges.bottom ? ' fade-bottom' : '')}>
             <div className="ldx-body" ref={bodyRef} onScroll={onBodyScroll}>
-              <div className="ldx-scope">
+              <div className="ldx-scope" ref={scopeProxRef}>
                 <span className="ldx-scope-lb">
                   <span className="material-symbols-outlined">monitoring</span>
                   {curPill.tier === 0 ? 'Auto-computed signals' : curPill.tier === 1 ? 'Behavioral logs' : curPill.tier === 2 ? 'AI profiling' : 'Voice & NLP'}
@@ -973,7 +1005,7 @@ export default function LeadPopover({ lead, onClose }: LeadPopoverProps) {
                   {curPill.tier === 0 ? 'updated 2h ago' : (freshComputed ? 'updated just now' : 'updated recently')}
                 </span>
                 {freshComputed && (
-                  <button type="button" className="ldx-recompute" onClick={() => recompute(pill, 850)}>
+                  <button type="button" className="ldx-recompute" onClick={() => recompute(pill, 850)} data-proximity>
                     <span className="material-symbols-outlined">refresh</span>Recompute
                   </button>
                 )}

@@ -150,7 +150,9 @@ html.dark .al-live.al-paused {
     background calc(160ms * var(--anim-mult,1)),
     color      calc(160ms * var(--anim-mult,1)),
     transform  calc(140ms * var(--anim-mult,1)) cubic-bezier(.34,1.4,.5,1),
-    box-shadow calc(160ms * var(--anim-mult,1));
+    box-shadow calc(160ms * var(--anim-mult,1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 .al-push-btn:hover {
   background: #FAFAFA;
@@ -186,7 +188,9 @@ html.dark .al-push-btn:hover {
   transition:
     background calc(140ms * var(--anim-mult,1)),
     color      calc(140ms * var(--anim-mult,1)),
-    border-color calc(140ms * var(--anim-mult,1));
+    border-color calc(140ms * var(--anim-mult,1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 .al-anim-pill.al-active {
   color: var(--brand-on-primary);
@@ -212,6 +216,9 @@ html.dark .al-anim-pill.al-active { color: var(--brand-on-primary); background: 
     inset 0 -2px 0 rgba(17,17,17,0.05),
     0 4px 12px -6px rgba(17,17,17,0.14)
   );
+}
+.al-ev[data-squircle="on"] {
+  --corner-radius: 18px;
 }
 html.dark .al-ev {
   background: var(--card-bg, #242424);

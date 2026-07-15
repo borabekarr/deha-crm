@@ -4,6 +4,7 @@ import './DynamicCalendar.css'
 
 import { useMemo, useRef, useState } from 'react'
 import { iconClass } from '@/lib/iconClass'
+import { useProximityGroup } from '@/lib/hooks/use-proximity-group'
 import { makeDcRefs, type IslandState } from './dynamic-calendar-hook'
 
 // ---------- Calendar helpers ----------
@@ -212,6 +213,8 @@ export default function DynamicCalendar({
 
   // Cell keyboard nav
   const cellRefs = useRef<(HTMLButtonElement | null)[]>([])
+  // Proximity: month-grid day cells (clickable, select a date)
+  const gridProximityRef = useProximityGroup<HTMLTableElement>()
   const onCellKeyDown = (e: React.KeyboardEvent, idx: number) => {
     if (islandState !== 'expanded') return
     let next = -1
@@ -402,6 +405,7 @@ export default function DynamicCalendar({
                   className="dc-grid"
                   role="grid"
                   aria-label={`${MONTHS[viewMonth]} ${viewYear}`}
+                  ref={gridProximityRef}
                 >
                   <thead>
                     <tr>
@@ -444,6 +448,7 @@ export default function DynamicCalendar({
                                 }}
                                 onKeyDown={(e) => onCellKeyDown(e, idx)}
                                 style={{ '--dc-delay': `${120 + idx * 12}ms` } as React.CSSProperties}
+                                data-proximity
                               >
                                 {c.d}
                               </button>

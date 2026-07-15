@@ -17,6 +17,7 @@
 import './Multisteps.css'
 
 import { useState, useRef, useCallback } from 'react'
+import { useProximityGroup } from '@/lib/hooks'
 import {
   type StageElement,
   type SurfaceElement,
@@ -95,6 +96,10 @@ export default function Multisteps() {
   // ── DOM refs ────────────────────────────────────────────────────────────
   const capsuleRef   = useRef<HTMLDivElement>(null)
   const nextBtnRef   = useRef<HTMLButtonElement>(null)
+
+  // ── Proximity groups (hover glow, locked convention: radius 80, dy×3) ───
+  const dotsGroupRef    = useProximityGroup<HTMLDivElement>()
+  const actionsGroupRef = useProximityGroup<HTMLDivElement>()
 
   // ── Callback ref: surface ───────────────────────────────────────────────
   const surfaceRefCb = useCallback((el: SurfaceElement | null) => {
@@ -185,7 +190,7 @@ export default function Multisteps() {
           <div className="ms-eyebrow">Steps</div>
 
           {/* Morphing capsule indicator */}
-          <div className="ms-indicator">
+          <div className="ms-indicator" ref={dotsGroupRef}>
             <div
               className="ms-stage"
               ref={stageRefCb}
@@ -202,11 +207,12 @@ export default function Multisteps() {
           </div>
 
           {/* Action buttons */}
-          <div className="ms-actions">
+          <div className="ms-actions" ref={actionsGroupRef}>
             <div className="ms-btn-slot ms-btn-slot--back">
               <button
                 type="button"
                 className={`ms-btn ms-btn--back${isFirst ? '' : ' show'}`}
+                data-proximity
                 onClick={handleBack}
                 onPointerDown={handleBackPointerDown}
                 aria-label="Go back"
@@ -219,6 +225,7 @@ export default function Multisteps() {
                 type="button"
                 ref={nextBtnRef}
                 className={`ms-btn ms-btn--primary${isFinish ? ' is-finish' : ''}`}
+                data-proximity
                 onClick={handleNext}
                 onPointerDown={handleNextPointerDown}
                 aria-label={isFinish ? 'Finish setup' : 'Continue to next step'}

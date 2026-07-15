@@ -367,8 +367,11 @@ html.dark .sc-hero { background: #0A0A0A; box-shadow: inset 0 1px 0 rgba(255,255
 html.dark .sc-ic { background: #111111; color: #D4D4D4; }
 html.dark .sc-it-name { color: #F5F5F5; }
 html.dark .sc-it-amt { color: #F5F5F5; }
-/* Expanded panel keeps its dark surface; lift it off the dark screen with a ring */
-html.dark .fab-screen.open .fab {
-  background-color: #0A0A0A;
-  box-shadow: 0 30px 70px -12px rgba(0,0,0,0.65), inset 0 0 0 1px rgba(255,255,255,0.06);
-}
+/* Round-3 parity fix: this rule used to own the expanded panel's dark
+   background + shadow, but it has HIGHER selector specificity than Fab.css's
+   own `.fab-screen.open .fab` rule (html + 4 classes here vs 3 classes
+   there), so its box-shadow silently won the cascade over Fab.css's
+   box-shadow:none and leaked a stray shadow/highlight onto the cards-page
+   parity shell. Background + border + filter are now fully owned locally in
+   Fab.css (see --fp-bezel-bg / dark-only border / filter:drop-shadow), so
+   this rule is retired rather than left to fight the cascade. */

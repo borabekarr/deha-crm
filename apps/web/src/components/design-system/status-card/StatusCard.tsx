@@ -3,6 +3,8 @@ import '../../../../design-system/preview/_darkmode.css'
 import './StatusCard.css'
 
 import { useState, useRef, useCallback } from 'react'
+import { useProximityGroup } from '@/lib/hooks'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
 import { addRipple, startCountUp, makeCopyHandle } from './status-card-hook'
 import type { Ripple } from './status-card-hook'
 
@@ -91,6 +93,7 @@ function Chip({ icon, children, tooltip, onClick, active, copied, exiting, trail
       className={cls}
       onClick={onClick}
       type="button"
+      data-proximity
       style={accent ? ({ '--chip-accent': accent } as React.CSSProperties) : undefined}
     >
       <span className="sc-chip-ico">{icon}</span>
@@ -163,6 +166,9 @@ function StatusCardInner({
 
   // copy-link handle — stable object, created once
   const copyHandleRef = useRef(makeCopyHandle())
+  const proximityRef = useProximityGroup<HTMLElement>()
+  const stageSquircleRef = useSquircle<HTMLDivElement>()
+  const cardSquircleRef = useSquircle<HTMLElement>()
 
   const T = TONES[tone] ?? TONES.warning
   const Glyph = T.glyph
@@ -210,17 +216,22 @@ function StatusCardInner({
   } as React.CSSProperties
 
   if (loading) {
-    return <div className="sc-stage" style={stageVars}><Skeleton /></div>
+    return <div className="sc-stage" style={stageVars} ref={stageSquircleRef}><Skeleton /></div>
   }
 
   return (
-    <div className="sc-stage" style={stageVars}>
+    <div className="sc-stage" style={stageVars} ref={stageSquircleRef}>
       <article
+        ref={(el) => {
+          proximityRef(el)
+          cardSquircleRef(el)
+        }}
         className={'sc-card' + (pressed ? ' is-pressed' : '')}
         data-open={open ? 'true' : 'false'}
       >
         <button
           className="sc-header"
+          data-proximity
           onClick={handleToggle}
           onPointerDown={onHeaderDown}
           onPointerUp={onHeaderUp}

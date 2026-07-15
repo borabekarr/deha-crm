@@ -17,6 +17,8 @@
 import { useState, useRef, useCallback, type ReactNode } from 'react'
 import { iconClass } from '../../../lib/iconClass'
 import { useCardRef, useTimerRef, useOverlayRef } from './connect-modal-hook'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
+import { useProximityGroup } from '@/lib/hooks'
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './ConnectModal.css'
@@ -227,6 +229,23 @@ export default function ConnectModal({
   }, [])
   const overlayRef = useOverlayRef(clearAll)
 
+  // Squircle conversion (Step 5): cm-shell/cm-card is a natural concentric
+  // pair. cm-card already carries useCardRef's focus-trap ref, so the
+  // squircle ref is composed alongside it rather than replacing it; the
+  // composed callback is memoized on cardRef's own identity so it stays
+  // stable across renders where cardRef doesn't change.
+  const shellSquircleRef = useSquircle<HTMLDivElement>()
+  const cardSquircleRef = useSquircle<HTMLDivElement>()
+  const cardProxRef = useProximityGroup<HTMLDivElement>()
+  const composedCardRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      cardRef(el)
+      cardSquircleRef(el)
+      cardProxRef(el)
+    },
+    [cardRef, cardSquircleRef, cardProxRef],
+  )
+
   // ---- CTA label ----
   const ctaLabel =
     phase === 'loading' ? (
@@ -251,15 +270,15 @@ export default function ConnectModal({
 
   return (
     <div ref={overlayRef} className="cm-shell-wrap">
-      <div className="cm-shell">
+      <div className="cm-shell" ref={shellSquircleRef}>
         <div
-          ref={cardRef}
+          ref={composedCardRef}
           className="cm-card"
           tabIndex={-1}
           aria-labelledby="cm-title"
           aria-describedby="cm-sub"
         >
-          <button type="button" className="cm-close" aria-label="Close" onClick={handleClose}>
+          <button type="button" className="cm-close" data-proximity aria-label="Close" onClick={handleClose}>
             <span className={iconClass('close')}>close</span>
           </button>
 
@@ -297,6 +316,7 @@ export default function ConnectModal({
                 type="button"
                 key={m.id}
                 className="cm-method"
+                data-proximity
                 role="radio"
                 aria-checked={method === m.id}
                 aria-label={m.label}
@@ -371,6 +391,7 @@ export default function ConnectModal({
                       <button
                         type="button"
                         className={`cm-paste${pasted ? ' cm-pasteflash' : ''}`}
+                        data-proximity
                         data-variant="clear"
                         aria-label="Remove key"
                         onClick={clearToken}
@@ -383,6 +404,7 @@ export default function ConnectModal({
                       <button
                         type="button"
                         className="cm-paste"
+                        data-proximity
                         aria-label="Paste from clipboard"
                         data-variant="paste"
                         onClick={handlePaste}
@@ -404,6 +426,7 @@ export default function ConnectModal({
             <button
               type="button"
               className="cm-cta"
+              data-proximity
               data-enabled={valid && phase === 'idle' ? 'true' : undefined}
               data-style={buttonStyle}
               disabled={!valid || phase !== 'idle'}

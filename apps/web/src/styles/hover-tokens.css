@@ -15,6 +15,15 @@
   --hover-shadow-y: 4px;
   --hover-shadow-blur: 10px;
   --hover-shadow-color: rgba(15, 23, 42, 0.10);
+
+  /* --fp-hover: shared hover-fill token, originally FAB-local. Promoted here
+   * so other components (e.g. file-folder, workflow-add-elements) can reuse
+   * the same fill instead of hardcoding local copies. */
+  --fp-hover: rgba(17, 17, 17, 0.05);
+}
+
+html.dark {
+  --fp-hover: #242424;
 }
 
 @media (hover: hover) and (pointer: fine) {

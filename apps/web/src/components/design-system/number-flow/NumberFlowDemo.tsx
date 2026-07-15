@@ -4,6 +4,7 @@ import './NumberFlow.css'
 
 import { useState, useCallback } from 'react'
 import NumberFlow, { type Format } from '@number-flow/react'
+import { useProximityGroup } from '@/lib/hooks'
 
 // ---------------------------------------------------------------------------
 // DsNumberFlow — reusable house-typography wrapper around @number-flow/react.
@@ -83,6 +84,7 @@ function randomState(): NfState {
 
 export default function NumberFlowDemo() {
   const [state, setState] = useState<NfState>(INITIAL_STATE)
+  const cardRef = useProximityGroup<HTMLDivElement>()
 
   const handleShuffle = useCallback(() => {
     setState(randomState())
@@ -91,7 +93,7 @@ export default function NumberFlowDemo() {
   return (
     <div className="nf-frame">
       <div className="shell nf-shell">
-        <div className="nf-card" data-screen-label="Number flow">
+        <div className="nf-card" data-screen-label="Number flow" ref={cardRef}>
           <div className="nf-eyebrow">
             <span className="material-symbols-outlined">bolt</span>
             Number Flow
@@ -126,7 +128,7 @@ export default function NumberFlowDemo() {
             </div>
           </div>
 
-          <button type="button" className="nf-shuffle" onClick={handleShuffle}>
+          <button type="button" className="nf-shuffle" data-proximity onClick={handleShuffle}>
             <span className="material-symbols-outlined">shuffle</span>
             Shuffle
           </button>

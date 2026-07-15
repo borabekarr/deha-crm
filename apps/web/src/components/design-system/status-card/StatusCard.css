@@ -2,23 +2,83 @@
 .sc-stage {
   --tone: var(--semantic-warning); width: 340px; max-width: 100%;
   padding: 8px;
-  background: var(--card-border, #D4D4D4);
-  border-radius: calc(var(--card-radius, 20px) + 8px);
+  background: var(--shell-bg, #D9D9D9);
+  border-radius: 36px;
   box-shadow: 0 16px 56px rgba(17,17,17,.14), 0 3px 10px rgba(17,17,17,.07);
+  transition: transform calc(200ms * var(--anim-mult, 1)) var(--ease-spring-firm);
 }
-html.dark .sc-stage { background: #1A2535; box-shadow: 0 16px 56px rgba(0,0,0,.42), 0 3px 10px rgba(0,0,0,.3); }
+html.dark .sc-stage { background: var(--shell-bg, #0A0A0A); box-shadow: 0 16px 56px rgba(0,0,0,.42), 0 3px 10px rgba(0,0,0,.3); }
+
+/* Squircle conversion (Step 15 residual sweep): .sc-stage/.sc-card is a
+   canonical grey-shell/white-card concentric pair (mirrors .gc-outer/.gc-card,
+   .dp-outer/.dp-panel). Depth shadow migrates to filter:drop-shadow (clip-path
+   clips box-shadow). */
+.sc-stage[data-squircle="on"] {
+  --corner-radius: 36px;
+  box-shadow: none;
+  filter:
+    drop-shadow(0 16px 56px rgba(17,17,17,.14))
+    drop-shadow(0 3px 10px rgba(17,17,17,.07));
+  transition: filter calc(200ms * var(--anim-mult, 1)) var(--ease-spring-firm),
+    transform calc(200ms * var(--anim-mult, 1)) var(--ease-spring-firm);
+}
+html.dark .sc-stage[data-squircle="on"] {
+  filter:
+    drop-shadow(0 16px 56px rgba(0,0,0,.42))
+    drop-shadow(0 3px 10px rgba(0,0,0,.3));
+}
+/* Step 6 (hover unification): trigger lifted to the stationary outer
+   .sc-stage so the grey shell and inner header react as one composite
+   instead of only .sc-header scaling (was inner-only). Same duration/ease
+   token pair as .sc-header's own transform transition below. */
+.sc-stage[data-squircle="on"]:hover {
+  filter:
+    drop-shadow(0 20px 64px rgba(17,17,17,.18))
+    drop-shadow(0 4px 12px rgba(17,17,17,.09));
+}
+html.dark .sc-stage[data-squircle="on"]:hover {
+  filter:
+    drop-shadow(0 20px 64px rgba(0,0,0,.5))
+    drop-shadow(0 4px 12px rgba(0,0,0,.36));
+}
+/* Dark-mode outer hairline -- .sc-stage has no border of its own in dark mode,
+   so this is a net-new external hairline satisfying the outer-shell
+   dark-mode requirement (mirrors .gc-outer/.dp-outer's dark ::before). */
+html.dark .sc-stage[data-squircle="on"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--card-border, #232323);
+  clip-path: var(--squircle-border-path);
+}
 
 .sc-card {
   position: relative;
   background: var(--card-bg, #FFFFFF);
   border: 1px solid var(--card-border, #D4D4D4);
-  border-radius: var(--card-radius, 20px);
+  border-radius: 28px;
   box-shadow: inset 0 0 0 1px rgba(17,17,17,.05);
   overflow: hidden;
 }
 html.dark .sc-card { background: var(--card-bg, #1C1C1C); border-color: var(--card-border, #232323); box-shadow: inset 0 0 0 1px rgba(255,255,255,.06); }
-.sc-header:hover { transform: scale(1.006); }
-.sc-card.is-pressed .sc-header { transform: scale(.985); transition-duration: calc(90ms * var(--anim-mult, 1)); }
+/* Squircle conversion (Step 15 residual sweep): inner of the .sc-stage/.sc-card
+   pair. box-shadow here is inset-only (unaffected by clip-path); border stays
+   a real CSS border per the .gc-card/.dp-panel precedent. */
+.sc-card[data-squircle="on"] {
+  --corner-radius: 28px;
+}
+/* Canon (corrected): inner line-less in both themes -- the unscoped
+   html.dark .sc-card rule above wins on specificity over the shared reset,
+   so it must be explicitly re-cancelled here once squircle is active. */
+html.dark .sc-card[data-squircle="on"] {
+  box-shadow: none;
+}
+/* Step 9 (whole-composite hover/press): scale the stationary outer .sc-stage
+   itself (not just .sc-header) so the grey shell + white card + ring all
+   move as one unit. :has() reaches up from the pressed inner card. */
+.sc-stage:hover { transform: scale(1.006); }
+.sc-stage:has(.sc-card.is-pressed) { transform: scale(.985); transition-duration: calc(90ms * var(--anim-mult, 1)); }
 
 /* ---- header ---- */
 .sc-header {
@@ -27,7 +87,9 @@ html.dark .sc-card { background: var(--card-bg, #1C1C1C); border-color: var(--ca
   width: 100%; padding: 13px 14px;
   background: transparent; border: none; cursor: pointer;
   font-family: inherit; text-align: left;
-  transition: transform calc(200ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.5,1);
+  transition: transform calc(200ms * var(--anim-mult, 1)) var(--ease-spring-firm),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 .sc-icon {
   flex: none; width: 32px; height: 32px; border-radius: 9px;
@@ -49,7 +111,7 @@ html.dark .sc-card { background: var(--card-bg, #1C1C1C); border-color: var(--ca
 .sc-chev {
   flex: none; display: grid; place-items: center; color: var(--gray-400);
   width: 20px; height: 20px; border-radius: 6px;
-  transition: transform calc(340ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.5,1), background calc(150ms * var(--anim-mult, 1)), color calc(150ms * var(--anim-mult, 1));
+  transition: transform calc(340ms * var(--anim-mult, 1)) var(--ease-spring-firm), background calc(150ms * var(--anim-mult, 1)), color calc(150ms * var(--anim-mult, 1));
 }
 .sc-card[data-open="true"] .sc-chev { transform: rotate(180deg); }
 .sc-header:hover .sc-chev { background: var(--gray-100); color: var(--fg2); }
@@ -59,13 +121,13 @@ html.dark .sc-header:hover .sc-chev { background: color-mix(in srgb, #fff 10%, v
   position: absolute; width: 16px; height: 16px; border-radius: 50%;
   background: rgba(161,161,161,.28);
   transform: translate(-50%, -50%) scale(0); pointer-events: none;
-  animation: scRipple calc(650ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) forwards;
+  animation: scRipple calc(650ms * var(--anim-mult, 1)) var(--ease-out) forwards;
 }
 html.dark .sc-ripple { background: rgba(100,116,139,.30); }
 @keyframes scRipple { to { transform: translate(-50%, -50%) scale(34); opacity: 0; } }
 
 /* ---- collapse ---- */
-.sc-collapse { display: grid; grid-template-rows: 0fr; transition: grid-template-rows calc(420ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
+.sc-collapse { display: grid; grid-template-rows: 0fr; transition: grid-template-rows calc(420ms * var(--anim-mult, 1)) var(--ease-spring-strong); }
 .sc-collapse[data-open="true"] { grid-template-rows: 1fr; }
 .sc-collapse-inner { overflow: hidden; min-height: 0; padding: 0 14px; }
 .sc-card[data-open="true"] .sc-collapse-inner { padding-bottom: 12px; }
@@ -85,7 +147,9 @@ html.dark .sc-ripple { background: rgba(100,116,139,.30); }
   background: var(--card-bg); border: 1px solid var(--border-hairline);
   color: var(--fg2); font-family: inherit; font-size: 11px; font-weight: var(--weight-semibold);
   cursor: pointer; white-space: nowrap;
-  transition: background calc(160ms * var(--anim-mult, 1)), border-color calc(160ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.5,1), color calc(160ms * var(--anim-mult, 1));
+  transition: background calc(160ms * var(--anim-mult, 1)), border-color calc(160ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) var(--ease-spring-firm), color calc(160ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 .sc-chip:hover { background: var(--gray-50); border-color: var(--gray-300); transform: translateY(-1px); }
 html.dark .sc-chip:hover { background: color-mix(in srgb, #fff 8%, var(--card-bg)); border-color: color-mix(in srgb, #fff 18%, transparent); }
@@ -105,9 +169,9 @@ html.dark .sc-chip:hover { background: color-mix(in srgb, #fff 8%, var(--card-bg
 .sc-chip-copied {
   position: absolute; inset: 0; display: inline-flex; align-items: center; justify-content: center; gap: 5px;
   color: var(--brand-primary); font-weight: var(--weight-bold);
-  animation: scPop calc(300ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1);
+  animation: scPop calc(300ms * var(--anim-mult, 1)) var(--ease-spring);
 }
-.sc-chip-copied.is-exiting { animation: scPopOut calc(300ms * var(--anim-mult, 1)) cubic-bezier(.5,0,.75,.4) forwards; }
+.sc-chip-copied.is-exiting { animation: scPopOut calc(300ms * var(--anim-mult, 1)) var(--ease-exit-soft) forwards; }
 @keyframes scPop { from { transform: scale(.8); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes scPopOut { from { transform: none; opacity: 1; } to { transform: scale(.8); opacity: 0; } }
 
@@ -129,7 +193,7 @@ html.dark .sc-chip.is-copied { background: color-mix(in srgb, var(--brand-primar
   padding: 6px 10px; border-radius: 8px; white-space: nowrap;
   opacity: 0; pointer-events: none; z-index: 6;
   box-shadow: 0 10px 24px -8px rgba(17,17,17,.45);
-  transition: opacity calc(160ms * var(--anim-mult, 1)) ease, transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.5,1);
+  transition: opacity calc(160ms * var(--anim-mult, 1)) ease, transform calc(160ms * var(--anim-mult, 1)) var(--ease-spring-firm);
 }
 .sc-chip:hover .sc-tip { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
 .sc-tip-arrow { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: 0; height: 0; border: 5px solid transparent; border-top-color: var(--gray-900); }

@@ -58,7 +58,7 @@ html.dark .stk-root .frame { background: #0A0A0A; background-image: none; }
   position: relative;
   cursor: pointer;
   user-select: none;
-  transition: transform calc(320ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(320ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  transition: transform calc(320ms * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(320ms * var(--anim-mult, 1)) var(--ease-out);
   will-change: transform;
 }
 
@@ -81,11 +81,11 @@ html.dark .stk-root .streak {
 }
 
 /* hover: the whole grey shell (bezel + card) lifts together with the glow */
-.stk-root .sc-shell { transition: transform calc(320ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), box-shadow calc(320ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
+.stk-root .sc-shell { transition: transform calc(320ms * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(320ms * var(--anim-mult, 1)) var(--ease-out); }
 .stk-root .frame:hover .sc-shell { transform: translateY(-3px); box-shadow: 0 20px 44px -20px color-mix(in srgb, var(--brand-primary-500) 22%, transparent), 0 8px 20px rgba(17,17,17,0.10); }
 html.dark .stk-root .frame:hover .sc-shell { box-shadow: 0 22px 50px -20px color-mix(in srgb, var(--brand-primary-500) 30%, transparent), 0 10px 22px rgba(0,0,0,0.5); }
 .stk-root .frame:hover .streak { box-shadow: var(--sc-shadow), var(--sc-glow); }
-.stk-root .sc-shell.pop   { animation: scPop calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
+.stk-root .sc-shell.pop   { animation: scPop calc(300ms * var(--anim-mult, 1)) var(--ease-out); }
 @keyframes scPop { 0%{ transform: scale(.99);} 55%{ transform: scale(1.004);} 100%{ transform: scale(1);} }
 
 /* ── HEAD ── */
@@ -126,7 +126,7 @@ html.dark .stk-root .frame:hover .sc-shell { box-shadow: 0 22px 50px -20px color
 .stk-root .sc-dot {
   width: 24px; height: 24px; border-radius: 50%;
   display: grid; place-items: center; position: relative;
-  transition: transform calc(200ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1), box-shadow calc(220ms * var(--anim-mult, 1));
+  transition: transform calc(200ms * var(--anim-mult, 1)) var(--ease-spring), box-shadow calc(220ms * var(--anim-mult, 1));
 }
 .stk-root .sc-dot.empty { background: var(--sc-empty); box-shadow: var(--sc-empty-border); }
 .stk-root .sc-dot.done {
@@ -148,7 +148,7 @@ html.dark .stk-root .frame:hover .sc-shell { box-shadow: 0 22px 50px -20px color
 .stk-root .sc-dot.active { background: transparent; box-shadow: 0 0 7px color-mix(in srgb, var(--brand-primary-500) 26%, transparent); }
 .stk-root .sc-dot.active svg { width: 24px; height: 24px; display: block; transform: rotate(-90deg); }
 .stk-root .sc-dot.active .ring-prog {
-  transition: stroke-dashoffset calc(760ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  transition: stroke-dashoffset calc(760ms * var(--anim-mult, 1)) var(--ease-out);
 }
 .stk-root .sc-day-label {
   font-size: 9px; font-weight: 700; letter-spacing: 0.04em;
@@ -180,7 +180,7 @@ html.dark .stk-root .frame:hover .sc-shell { box-shadow: 0 22px 50px -20px color
     inset 0 1px 0 rgba(255,255,255,0.45),
     inset 0 -2px 0 rgba(6,78,59,0.25),
     0 0 14px color-mix(in srgb, var(--brand-primary-500) 65%, transparent);
-  transition: width calc(760ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  transition: width calc(760ms * var(--anim-mult, 1)) var(--ease-out);
   position: relative;
 }
 .stk-root .sc-bar-fill::after {
@@ -205,14 +205,14 @@ html.dark .stk-root .frame:hover .sc-shell { box-shadow: 0 22px 50px -20px color
   70%  { transform: scale(.96); }
   100% { transform: scale(1); filter: brightness(1); }
 }
-.stk-root .anim-in .sc-streak-num { animation: scNumPop calc(560ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1) calc(220ms * var(--anim-mult, 1)) both; display: inline-block; }
+.stk-root .anim-in .sc-streak-num { animation: scNumPop calc(560ms * var(--anim-mult, 1)) var(--ease-spring) calc(220ms * var(--anim-mult, 1)) both; display: inline-block; }
 @keyframes scNumPop {
   0%   { opacity: 0; transform: scale(.5) translateY(6px); }
   60%  { opacity: 1; transform: scale(1.14); }
   100% { transform: scale(1); }
 }
 /* dots stagger in: checks slide up + pop, empties fade */
-.stk-root .anim-in .sc-day { animation: scDayIn calc(460ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1) both; animation-delay: calc(var(--i) * calc(70ms * var(--anim-mult, 1)) + calc(360ms * var(--anim-mult, 1))); }
+.stk-root .anim-in .sc-day { animation: scDayIn calc(460ms * var(--anim-mult, 1)) var(--ease-spring) both; animation-delay: calc(var(--i) * calc(70ms * var(--anim-mult, 1)) + calc(360ms * var(--anim-mult, 1))); }
 @keyframes scDayIn {
   0%   { opacity: 0; transform: translateY(10px) scale(.6); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
@@ -227,13 +227,13 @@ html.dark .stk-root .frame:hover .sc-shell { box-shadow: 0 22px 50px -20px color
   25%  { filter: brightness(1.6) hue-rotate(12deg); transform: scale(1.16); }
   100% { filter: brightness(1); transform: scale(1); }
 }
-.stk-root .sc-streak-num.elastic { animation: scElastic calc(640ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1); display: inline-block; }
+.stk-root .sc-streak-num.elastic { animation: scElastic calc(640ms * var(--anim-mult, 1)) var(--ease-spring); display: inline-block; }
 @keyframes scElastic {
   0%{transform:scale(.92);} 35%{transform:scale(1.05);} 65%{transform:scale(.98);} 100%{transform:scale(1);}
 }
-.stk-root .sc-steps-val.bump { animation: scBump calc(520ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1); display: inline-block; }
+.stk-root .sc-steps-val.bump { animation: scBump calc(520ms * var(--anim-mult, 1)) var(--ease-spring); display: inline-block; }
 @keyframes scBump { 0%{transform:scale(1);} 40%{transform:scale(1.08);} 100%{transform:scale(1);} }
-.stk-root .sc-dot.just-done { animation: scJustDone calc(520ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1); }
+.stk-root .sc-dot.just-done { animation: scJustDone calc(520ms * var(--anim-mult, 1)) var(--ease-spring); }
 @keyframes scJustDone { 0%{transform:scale(.4) rotate(-20deg);} 60%{transform:scale(1.18);} 100%{transform:scale(1);} }
 
 /* ── demo controls (chrome, lives outside the component shell) ── */
@@ -245,11 +245,20 @@ html.dark .stk-root .frame:hover .sc-shell { box-shadow: 0 22px 50px -20px color
   background: rgba(255,255,255,0.85); color: #4A4A4A;
   border: 1px solid #ECECEC;
   box-shadow: 0 2px 8px rgba(17,17,17,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
-  transition: transform calc(140ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), background calc(160ms * var(--anim-mult, 1)), color calc(160ms * var(--anim-mult, 1)), border-color calc(160ms * var(--anim-mult, 1));
+  transition: transform calc(140ms * var(--anim-mult, 1)) var(--ease-out), background calc(160ms * var(--anim-mult, 1)), color calc(160ms * var(--anim-mult, 1)), border-color calc(160ms * var(--anim-mult, 1));
 }
 .stk-root .sc-btn .material-icons { font-size: 16px; }
 .stk-root .sc-btn:hover { transform: translateY(-1px); color: #111111; border-color: #D4D4D4; }
 .stk-root .sc-btn:active { transform: scale(0.96); }
+
+/* Proximity: sc-btn's own transition (above) omits scale/filter, so
+   hover-tokens.css's fallback never kicks in and --prox snaps. Append the
+   two channels here, scoped to [data-proximity] instances only. */
+.stk-root .sc-btn[data-proximity] {
+  transition: transform calc(140ms * var(--anim-mult, 1)) var(--ease-out), background calc(160ms * var(--anim-mult, 1)), color calc(160ms * var(--anim-mult, 1)), border-color calc(160ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
 html.dark .stk-root .sc-btn { background: rgba(28,28,28,0.7); color: #D4D4D4; border-color: #232323; box-shadow: 0 2px 10px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05); }
 html.dark .stk-root .sc-btn:hover { color: #F5F5F5; border-color: #4A4A4A; background: rgba(39,52,73,0.8); }
 

@@ -1,0 +1,24 @@
+/* Proximity demo wrapper for the locked DeleteButton (see Buttons.tsx row 4
+   for the reference pattern). Scoped to .db-prox-page-root only. */
+.db-prox-page-root {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+
+.db-prox-page-root .btn-prox-wrap {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+
+.db-prox-page-root .btn-prox-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 50%;
+  width: max(100%, 40px);
+  height: max(100%, 40px);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}

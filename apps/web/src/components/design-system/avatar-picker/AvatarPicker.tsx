@@ -5,6 +5,8 @@ import './AvatarPicker.css'
 import { useState } from 'react'
 import { iconClass } from '../../../lib/iconClass'
 import { validateUsername } from './avatar-picker-hook'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
+import { useProximityGroup } from '@/lib/hooks'
 
 // ---------------------------------------------------------------------------
 // AvatarPicker — profile-setup avatar picker
@@ -57,6 +59,12 @@ export default function AvatarPicker({ onComplete }: AvatarPickerProps) {
   const canScrollLeft  = page === 1
   const canScrollRight = page === 0
 
+  // Concentric squircle pair: outer .ap-card (grey shell) + inner .ap-inner
+  // (white card), mirrors Cards.css .concentric-demo.
+  const apCardRef = useSquircle<HTMLDivElement>()
+  const apInnerRef = useSquircle<HTMLDivElement>()
+  const apProxRef = useProximityGroup<HTMLDivElement>()
+
   const { isValid, showError, nearLimit, trimmed } = validateUsername(username)
 
   function submit() {
@@ -70,8 +78,8 @@ export default function AvatarPicker({ onComplete }: AvatarPickerProps) {
   }
 
   return (
-    <div className="ap-card">
-      <div className="ap-inner">
+    <div className="ap-card" ref={apCardRef}>
+      <div className="ap-inner" ref={(el) => { apInnerRef(el); apProxRef(el) }}>
 
         {/* Header — icon + h2 vertically centered in same row, sub below */}
         <div className="ap-header">
@@ -88,7 +96,8 @@ export default function AvatarPicker({ onComplete }: AvatarPickerProps) {
             <span
               className="ap-ring"
               style={{
-                boxShadow: `0 0 0 2px rgba(${selected.ring},0.55), 0 8px 28px rgba(${selected.ring},0.22)`,
+                outlineColor: `rgba(${selected.ring},1)`,
+                boxShadow: `0 8px 28px rgba(${selected.ring},0.22)`,
               }}
             />
             <div className="ap-big-clip">
@@ -119,6 +128,7 @@ export default function AvatarPicker({ onComplete }: AvatarPickerProps) {
                 <button
                   type="button"
                   className="ap-edge-btn"
+                  data-proximity
                   onClick={() => scrollStrip('left')}
                   aria-label="Scroll left"
                 >
@@ -138,6 +148,7 @@ export default function AvatarPicker({ onComplete }: AvatarPickerProps) {
                       key={a.id}
                       type="button"
                       className={'ap-thumb' + (on ? ' ap-thumb--on' : '')}
+                      data-proximity
                       style={on ? {
                         '--ap-ring-rgb': a.ring,
                       } as React.CSSProperties : undefined}
@@ -163,6 +174,7 @@ export default function AvatarPicker({ onComplete }: AvatarPickerProps) {
                 <button
                   type="button"
                   className="ap-edge-btn"
+                  data-proximity
                   onClick={() => scrollStrip('right')}
                   aria-label="Scroll right"
                 >
@@ -212,6 +224,7 @@ export default function AvatarPicker({ onComplete }: AvatarPickerProps) {
           <button
             type="button"
             className="btn-green ap-submit"
+            data-proximity
             disabled={!isValid}
             onClick={submit}
           >

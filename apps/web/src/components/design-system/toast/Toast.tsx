@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react'
 import { iconClass } from '../../../lib/iconClass'
+import { useProximityGroup } from '@/lib/hooks'
 import './Toast.css'
 import {
   dismiss,
@@ -118,7 +119,7 @@ function LiveToast({ t }: { t: ToastData }) {
       onAnimationEnd={onAnimationEnd}
     >
       {!t.collapsed && (
-        <button className="tst-x" aria-label="Dismiss" type="button" onClick={() => dismiss(t.id, 'auto')}>
+        <button className="tst-x" data-proximity aria-label="Dismiss" type="button" onClick={() => dismiss(t.id, 'auto')}>
           <Glyph name="close" />
         </button>
       )}
@@ -145,6 +146,7 @@ function LiveToast({ t }: { t: ToastData }) {
                   // eslint-disable-next-line react/no-array-index-key
                   key={i}
                   type="button"
+                  data-proximity
                   className={`tst-act${a.ghost ? ' ghost' : ''}`}
                   onClick={() => (a.onClick ? a.onClick(t.id) : dismiss(t.id, 'auto'))}
                 >
@@ -194,7 +196,7 @@ function StaticToast({
       style={style}
     >
       {dismissable && (
-        <button className="tst-x" aria-label="Dismiss" type="button">
+        <button className="tst-x" data-proximity aria-label="Dismiss" type="button">
           <Glyph name="close" />
         </button>
       )}
@@ -221,23 +223,31 @@ function StaticToast({
   )
 }
 
+// Hoisted to module scope — pure, no component state/props involved, so it is
+// not rebuilt on every Toast() render.
+function fireStack() {
+  push({ type: 'success', title: 'Call logged', collapsed: true })
+  push({ type: 'warning', title: 'Follow-up due', collapsed: true })
+  push({ type: 'info', title: 'Reminder set', collapsed: true })
+}
+
 export default function Toast() {
   const toasts = useToasts()
-
-  const fireStack = () => {
-    push({ type: 'success', title: 'Call logged', collapsed: true })
-    push({ type: 'warning', title: 'Follow-up due', collapsed: true })
-    push({ type: 'info', title: 'Reminder set', collapsed: true })
-  }
+  const triggersRef = useProximityGroup<HTMLDivElement>()
+  const liveRef = useProximityGroup<HTMLDivElement>()
+  const expandedRef = useProximityGroup<HTMLDivElement>()
+  const actionRef = useProximityGroup<HTMLDivElement>()
+  const swipeRef = useProximityGroup<HTMLDivElement>()
 
   return (
     <div className="tst-demo">
       {/* ── Live region ── */}
       <div className="tst-sec">
         <span className="tst-label">Live · tap to fire, drag to dismiss</span>
-        <div className="tst-triggers">
+        <div className="tst-triggers" ref={triggersRef}>
           <button
             type="button"
+            data-proximity
             className="tst-trigger t-success"
             onClick={() =>
               push({ type: 'success', title: 'Deal saved', desc: 'Your pipeline changes are synced to the team.' })
@@ -248,6 +258,7 @@ export default function Toast() {
           </button>
           <button
             type="button"
+            data-proximity
             className="tst-trigger t-error"
             onClick={() =>
               push({ type: 'error', title: 'Network error', desc: 'Could not reach the server. Retry in a moment.' })
@@ -258,6 +269,7 @@ export default function Toast() {
           </button>
           <button
             type="button"
+            data-proximity
             className="tst-trigger t-warning"
             onClick={() =>
               push({ type: 'warning', title: 'Quota almost reached', desc: 'You have used 90% of your monthly sends.' })
@@ -268,6 +280,7 @@ export default function Toast() {
           </button>
           <button
             type="button"
+            data-proximity
             className="tst-trigger t-info"
             onClick={() =>
               push({ type: 'info', title: 'New lead assigned', desc: 'Mehmet Y. just entered your pipeline.' })
@@ -276,16 +289,17 @@ export default function Toast() {
             <Glyph name="info" />
             Info
           </button>
-          <button type="button" className="tst-trigger" onClick={() => push({ type: 'loading', title: 'Uploading…', collapsed: true })}>
+          <button type="button" data-proximity className="tst-trigger" onClick={() => push({ type: 'loading', title: 'Uploading…', collapsed: true })}>
             <Glyph name="autorenew" />
             Loading
           </button>
-          <button type="button" className="tst-trigger" onClick={() => pushPromise()}>
+          <button type="button" data-proximity className="tst-trigger" onClick={() => pushPromise()}>
             <Glyph name="east" />
             Promise
           </button>
           <button
             type="button"
+            data-proximity
             className="tst-trigger t-success"
             onClick={() =>
               push({
@@ -299,16 +313,16 @@ export default function Toast() {
             <Glyph name="undo" />
             Action
           </button>
-          <button type="button" className="tst-trigger" onClick={fireStack}>
+          <button type="button" data-proximity className="tst-trigger" onClick={fireStack}>
             <Glyph name="layers" />
             Stack 3
           </button>
-          <button type="button" className="tst-trigger t-clear" onClick={() => clearAll()}>
+          <button type="button" data-proximity className="tst-trigger t-clear" onClick={() => clearAll()}>
             <Glyph name="clear_all" />
             Clear
           </button>
         </div>
-        <div className="tst-live">
+        <div className="tst-live" ref={liveRef}>
           {toasts.map((t) => (
             <LiveToast key={t.id} t={t} />
           ))}
@@ -329,7 +343,7 @@ export default function Toast() {
       {/* ── 2 · Expanded with auto-dismiss progress ── */}
       <div className="tst-sec">
         <span className="tst-label">Expanded · with auto-dismiss progress</span>
-        <div className="tst-bezel">
+        <div className="tst-bezel" ref={expandedRef}>
           <StaticToast type="success" icon="check_circle" title="Deal saved" desc="Your pipeline changes are synced to the team." progress={62} dismissable />
           <StaticToast type="error" icon="error" title="Network error" desc="Could not reach the server. Retry in a moment." progress={34} dismissable />
           <StaticToast type="warning" icon="warning" title="Quota almost reached" desc="You have used 90% of your monthly sends." progress={78} dismissable />
@@ -363,7 +377,7 @@ export default function Toast() {
       {/* ── 5 · Action button ── */}
       <div className="tst-sec">
         <span className="tst-label">With action</span>
-        <div className="tst-bezel">
+        <div className="tst-bezel" ref={actionRef}>
           <StaticToast
             type="success"
             icon="delete"
@@ -372,11 +386,11 @@ export default function Toast() {
             dismissable
             actions={
               <>
-                <button className="tst-act" type="button">
+                <button className="tst-act" data-proximity type="button">
                   <Glyph name="undo" />
                   Undo
                 </button>
-                <button className="tst-act ghost" type="button">
+                <button className="tst-act ghost" data-proximity type="button">
                   Dismiss
                 </button>
               </>
@@ -408,7 +422,7 @@ export default function Toast() {
       {/* ── 7 · Swipe affordance ── */}
       <div className="tst-sec">
         <span className="tst-label">Swipe / click to dismiss</span>
-        <div className="tst-bezel">
+        <div className="tst-bezel" ref={swipeRef}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <StaticToast
               type="info"

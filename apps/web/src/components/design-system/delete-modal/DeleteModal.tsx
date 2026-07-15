@@ -21,6 +21,8 @@
 import { useState, useCallback, type ReactNode } from 'react'
 import { iconClass } from '../../../lib/iconClass'
 import { useCardRef, useTimerRef, useOverlayRef } from './delete-modal-hook'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
+import { useProximityGroup } from '@/lib/hooks'
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
 import '../../../../design-system/preview/_shared-feedback.css'
@@ -100,7 +102,10 @@ export function DeleteModal({
       loadTimer.set(1100, () => {
         setPhase('done')
 
-        resolveTimer.set(900, () => {
+        // Deleted state stays visible ~1.9s before the modal closes (was
+        // 900ms) so the crossfade + badge pop have time to read as a
+        // deliberate confirmation beat, not a flash.
+        resolveTimer.set(1900, () => {
           onConfirm?.()
           onClose?.()
         })
@@ -109,9 +114,10 @@ export function DeleteModal({
   }
 
   // ---- shake reset via animationend (replaces animationend useEffect) ----
-  // The card element fires animationend when dm-confirming completes.
+  // The shell fires animationend when dm-confirming/dm-shake completes (the
+  // shake now targets the outer shell, not just the inner card).
   // We reset shake state here, giving us a clean handler-driven approach.
-  const handleCardAnimationEnd = useCallback(
+  const handleShellAnimationEnd = useCallback(
     (e: React.AnimationEvent<HTMLDivElement>) => {
       if (e.animationName === 'dm-shake') setShake(false)
     },
@@ -120,6 +126,17 @@ export function DeleteModal({
 
   // ---- callback refs (replace keyboard/focus effects) ----
   const cardRef = useCardRef({ open, phase, onClose })
+  const squircleRef = useSquircle<HTMLDivElement>()
+  const shellSquircleRef = useSquircle<HTMLDivElement>()
+  const proxRef = useProximityGroup<HTMLDivElement>()
+  const setCardRefs = useCallback(
+    (el: HTMLDivElement | null) => {
+      cardRef(el)
+      squircleRef(el)
+      proxRef(el)
+    },
+    [cardRef, squircleRef, proxRef],
+  )
 
   // overlay ref: teardown timers when overlay unmounts
   const clearAll = useCallback(() => {
@@ -173,20 +190,25 @@ export function DeleteModal({
         if (e.target === e.currentTarget && phase === 'idle') onClose?.()
       }}
     >
-      <div className="dm-shell">
+      <div
+        ref={shellSquircleRef}
+        className={`dm-shell${shake ? ' dm-confirming' : ''}`}
+        onAnimationEnd={handleShellAnimationEnd}
+      >
         <div
-          ref={cardRef}
-          className={`dm-card${shake ? ' dm-confirming' : ''}`}
+          ref={setCardRefs}
+          className="dm-card"
+          data-done={isDone}
           tabIndex={-1}
           role="alertdialog"
           aria-modal="true"
           aria-labelledby="dm-title"
           aria-describedby="dm-body"
-          onAnimationEnd={handleCardAnimationEnd}
         >
           <button
             type="button"
             className="dm-close"
+            data-proximity
             aria-label="Close"
             onClick={() => phase === 'idle' && onClose?.()}
           >
@@ -200,7 +222,7 @@ export function DeleteModal({
             style={{ '--icon-c': isDone ? 'var(--brand-primary-500)' : '#EF4444' } as React.CSSProperties}
             data-done={isDone}
           >
-            <span className="material-symbols-outlined" aria-hidden="true">
+            <span className="material-symbols-outlined dm-badge-icon" aria-hidden="true">
               {isDone ? 'check_circle' : 'delete'}
             </span>
           </div>
@@ -213,34 +235,37 @@ export function DeleteModal({
             {bodyContent}
           </p>
 
-          {!isDone && (
-            <div className="dm-actions">
-              <button
-                type="button"
-                className="dm-btn btn-discuss"
-                disabled={phase !== 'idle'}
-                onClick={() => phase === 'idle' && onClose?.()}
-              >
-                <span className={iconClass('arrow_back')} aria-hidden="true">
-                  arrow_back
+          {/* Always mounted -- never conditionally unmounted on isDone, so the
+              exit fade below can actually play (a removed subtree cannot
+              animate) and the card's reserved height never snaps shorter. */}
+          <div className={`dm-actions${isDone ? ' dm-actions--done' : ''}`}>
+            <button
+              type="button"
+              className="dm-btn btn-discuss"
+              data-proximity
+              disabled={phase !== 'idle'}
+              onClick={() => phase === 'idle' && onClose?.()}
+            >
+              <span className={iconClass('arrow_back')} aria-hidden="true">
+                arrow_back
+              </span>
+              {cancelLabel}
+            </button>
+            <button
+              type="button"
+              className="dm-btn btn-delete"
+              data-proximity
+              disabled={phase !== 'idle'}
+              onClick={handleConfirm}
+            >
+              {phase === 'idle' && (
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  delete
                 </span>
-                {cancelLabel}
-              </button>
-              <button
-                type="button"
-                className="dm-btn btn-delete"
-                disabled={phase !== 'idle'}
-                onClick={handleConfirm}
-              >
-                {phase === 'idle' && (
-                  <span className="material-symbols-outlined" aria-hidden="true">
-                    delete
-                  </span>
-                )}
-                {confirmContent}
-              </button>
-            </div>
-          )}
+              )}
+              {confirmContent}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -254,13 +279,15 @@ export function DeleteModal({
 // ---------------------------------------------------------------------------
 function DeleteModalPreview() {
   const [open, setOpen] = useState(false)
+  const triggerProxRef = useProximityGroup<HTMLDivElement>()
 
   return (
     <>
-      <div className="dm-preview-trigger">
+      <div className="dm-preview-trigger" ref={triggerProxRef}>
         <button
           type="button"
           className="btn-delete dm-preview-btn"
+          data-proximity
           onClick={() => setOpen(true)}
         >
           <span className="material-symbols-outlined" aria-hidden="true">

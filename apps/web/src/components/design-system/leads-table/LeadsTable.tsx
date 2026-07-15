@@ -6,6 +6,8 @@
 
 import { useState, useMemo, useCallback, useRef } from 'react'
 import '../../../../design-system/preview/_leads-table.css'
+import './LeadsTable.css'
+import { useProximityGroup } from '@/lib/hooks'
 import type { Lead, LeadStage, SourceKey } from './leadsData'
 import LeadPopover from './LeadPopover'
 import {
@@ -92,7 +94,7 @@ function LeadRow({ lead, isActive, onClick }: { lead: Lead; isActive: boolean; o
 
   return (
     <div className={`lt-rowwrap${isActive ? ' active' : ''}`} data-id={lead.id}>
-      <div className="lt-row lt-grid" onClick={onClick} style={{ cursor: 'pointer' }}>
+      <div className="lt-row lt-grid" data-proximity onClick={onClick} style={{ cursor: 'pointer' }}>
         {/* Lead cell */}
         <div className="lt-td lt-lead">
           <span className="lt-av" style={{ background: healthAv(h) }} />
@@ -196,6 +198,7 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
   const [page, setPage]           = useState(1)
   const [compact, setCompact]     = useState(false)
   const [openId, setOpenId]       = useState<number | null>(null)
+  const mainProxRef = useProximityGroup<HTMLDivElement>()
   // 7B: selected lead for the details popover
   const [popoverLead, setPopoverLead] = useState<Lead | null>(null)
   const [toast, setToast]         = useState<string | null>(null)
@@ -375,7 +378,7 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
 
   return (
     <div className={`lt-app${compact ? ' compact' : ''}`} data-screen-label="Leads table">
-      <div className="lt-main">
+      <div className="lt-main" ref={mainProxRef}>
 
         {/* Header */}
         <div className="lt-header">
@@ -394,6 +397,7 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
               className="lt-iconbtn"
               aria-label="Row density"
               title="Row density"
+              data-proximity
               onClick={() => { setCompact(c => !c); showToast('Density toggled') }}
             >
               <span className="material-symbols-outlined">density_medium</span>
@@ -403,6 +407,7 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
               className="lt-iconbtn"
               aria-label="Columns"
               title="Configure columns"
+              data-proximity
               onClick={() => showToast('Column picker -- coming soon')}
             >
               <span className="material-symbols-outlined">tune</span>
@@ -427,6 +432,7 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
             <button
               type="button"
               className="lt-btn"
+              data-proximity
               onClick={() => search ? showToast(`AI parsing: "${search}"...`) : document.getElementById('ltSearch')?.focus()}
             >
               <span className="material-symbols-outlined">filter_alt</span>Filter
@@ -434,6 +440,7 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
             <button
               type="button"
               className="lt-btn lt-btn-ai"
+              data-proximity
               onClick={() => showToast('Running full pipeline analysis...')}
             >
               <span className="material-symbols-outlined">bolt</span>Ask AI
@@ -445,6 +452,7 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
               type="button"
               className={`lt-qf${qf === 'hot' ? ' on' : ''}`}
               data-qf="hot"
+              data-proximity
               style={{ '--qf-c': '#F97316' } as React.CSSProperties}
               onClick={() => handleQf('hot')}
             >
@@ -458,6 +466,7 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
               type="button"
               className={`lt-qf${qf === 'value' ? ' on' : ''}`}
               data-qf="value"
+              data-proximity
               style={{ '--qf-c': 'var(--brand-primary-500)' } as React.CSSProperties}
               onClick={() => handleQf('value')}
             >
@@ -471,6 +480,7 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
               type="button"
               className={`lt-qf${qf === 'earn' ? ' on' : ''}`}
               data-qf="earn"
+              data-proximity
               style={{ '--qf-c': '#EAB308' } as React.CSSProperties}
               onClick={() => handleQf('earn')}
             >
@@ -484,6 +494,7 @@ export default function LeadsTable({ onOpenLead }: LeadsTableProps) {
               type="button"
               className={`lt-clear${showClear ? ' show' : ''}`}
               id="ltClear"
+              data-proximity
               onClick={clearAll}
             >
               <span className="material-symbols-outlined">close</span>Clear

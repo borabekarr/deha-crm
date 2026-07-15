@@ -3,6 +3,8 @@ import './Calendar.css'
 
 import { useState, useCallback, useRef, Fragment } from 'react'
 import { iconClass } from '../../../lib/iconClass'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
+import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
@@ -486,12 +488,18 @@ function CalWidgetBody({ id, metrics }: { id: string; metrics: CalEventMetrics }
   }
 }
 
+function CalMetricTray({ children }: { children: React.ReactNode }) {
+  const trayRef = useSquircle<HTMLDivElement>()
+  return <div className="cal-ep-w-tray" ref={trayRef}>{children}</div>
+}
+
 function CalMetricCard({ id, metrics, act }: { id: string; metrics: CalEventMetrics; act: (l: string) => void }) {
   const acc = CAL_EP_ACC[id] ?? 'var(--brand-primary)'
   const meta = CAL_METRIC_META[id]
+  const shellRef = useSquircle<HTMLDivElement>()
   if (!meta) return null
   return (
-    <div className="cal-ep-w-shell" style={{ '--acc': acc } as React.CSSProperties}>
+    <div className="cal-ep-w-shell" ref={shellRef} style={{ '--acc': acc } as React.CSSProperties}>
       <section className="cal-ep-w" style={{ '--acc': acc } as React.CSSProperties}>
         <div className="cal-ep-w-head">
           <span className="cal-ep-w-ic"><span className="material-icons">{meta.icon}</span></span>
@@ -578,6 +586,9 @@ function CalEventPopoverCard({
     r.addEventListener('animationend', () => r.remove(), { once: true })
   }
 
+  const orgOuterRef = useSquircle<HTMLDivElement>()
+  const orgInnerRef = useSquircle<HTMLDivElement>()
+
   return (
     <div
       className="cal-ep-card"
@@ -611,8 +622,8 @@ function CalEventPopoverCard({
         </div>
 
         {/* Organiser card — grey shell wrapping the canonical inner-card */}
-        <div className="cal-ep-customer-outer">
-        <div className="cal-ep-customer" onClick={addRipple}>
+        <div className="cal-ep-customer-outer" ref={orgOuterRef}>
+        <div className="cal-ep-customer" ref={orgInnerRef} onClick={addRipple}>
           <span className="cal-ep-cust-av icon-badge" style={{ '--icon-c': orgColor } as React.CSSProperties}>
             <span className="material-icons">{orgInit}</span>
           </span>
@@ -651,9 +662,9 @@ function CalEventPopoverCard({
                 {gi === 0 && <span className="cal-ep-category-ts">updated just now</span>}
               </div>
               {group.ids.map(id => (
-                <div key={id} className="cal-ep-w-tray">
+                <CalMetricTray key={id}>
                   <CalMetricCard id={id} metrics={metrics} act={act} />
-                </div>
+                </CalMetricTray>
               ))}
             </Fragment>
           ))}
@@ -684,6 +695,7 @@ function CalEventPopoverCard({
 // ── Calendar ───────────────────────────────────────────────────────────────
 
 export default function Calendar() {
+  const shellSquircleRef = useSquircle<HTMLDivElement>()
   const [curYear, setCurYear] = useState(2026)
   const [curMonth, setCurMonth] = useState(4) // May = 4
   const [sel, setSel] = useState(4) // day 4 selected initially
@@ -810,6 +822,10 @@ export default function Calendar() {
     setPopOpen(false)
   }
 
+  // Proximity groups: day-cell grid (click to select) + events list (click to open)
+  const gridProximityRef = useProximityGroup<HTMLDivElement>()
+  const eventsProximityRef = useProximityGroup<HTMLDivElement>()
+
   const cells = buildCells(curYear, curMonth)
   const selKey = dateKey(curYear, curMonth, sel)
   const baseEvents = getEvents(curYear, curMonth, sel)
@@ -827,7 +843,7 @@ export default function Calendar() {
     (cnt === 1 ? ' EVENT' : ' EVENTS')
 
   return (
-    <div className="card cal-shell">
+    <div className="card cal-shell" ref={shellSquircleRef} data-squircle="on">
       <div className="cal-panel">
 
           {/* Header */}
@@ -865,7 +881,7 @@ export default function Calendar() {
           </div>
 
           {/* Calendar grid */}
-          <div className="cal-grid">
+          <div className="cal-grid" ref={gridProximityRef}>
             {cells.map((cell) => {
               const dots = cell.m === 'c' ? getDots(curYear, curMonth, cell.d) : []
               const isSelected = cell.m === 'c' && cell.d === sel
@@ -882,6 +898,7 @@ export default function Calendar() {
                   key={`${cell.m}-${cell.d}`}
                   className={className}
                   onClick={cell.m === 'c' ? () => setSel(cell.d) : undefined}
+                  data-proximity={cell.m === 'c' ? true : undefined}
                 >
                   <div className="cal-date-num">{cell.d}</div>
                   <div className="cal-dots">
@@ -906,7 +923,7 @@ export default function Calendar() {
           <div className="cal-events" data-scroll={evScrollState}>
             <div className="cal-ev-scroll-wrap">
               <div className="cal-ev-scroll" key={selKey} ref={evScrollRef}>
-                <div className="cal-events-container">
+                <div className="cal-events-container" ref={eventsProximityRef}>
                   <div className="cal-ev-label">{label}</div>
                   {cnt > 0 ? (
                     <>
@@ -917,6 +934,7 @@ export default function Calendar() {
                           className="cal-ev-item"
                           onClick={() => openEvPopover(item)}
                           aria-label={`${item.time} ${item.title}`}
+                          data-proximity
                         >
                           <div className="cev-left">
                             <div className="cev-dot" style={{ background: item.dot }} />
@@ -930,7 +948,7 @@ export default function Calendar() {
                           <span className="cev-chevron material-icons">chevron_right</span>
                         </button>
                       ))}
-                      <div className="cal-add-row" onClick={openPopover}>
+                      <div className="cal-add-row" onClick={openPopover} data-proximity>
                         <div className="cal-add-icon">
                           <span className="material-icons">add</span>
                         </div>
@@ -940,7 +958,7 @@ export default function Calendar() {
                   ) : (
                     <>
                       <div className="cal-no-events">No events scheduled.</div>
-                      <div className="cal-add-row" onClick={openPopover}>
+                      <div className="cal-add-row" onClick={openPopover} data-proximity>
                         <div className="cal-add-icon">
                           <span className="material-icons">add</span>
                         </div>

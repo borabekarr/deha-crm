@@ -14,7 +14,7 @@
   --buf-bg:    #F5F5F5;
 
   /* themeable surfaces (light = originals) */
-  --sp-shell:#D4DCE8; --sp-panel:#FFFFFF;
+  --sp-shell:#D9D9D9; --sp-panel:#FFFFFF;
   --sp-cell-bg:#FAFBFC; --sp-cell-border:#EEF1F5;
   --sp-card-bg:#FFFFFF; --sp-card-border:#D4D4D4;
   --sp-fg1:#111111; --sp-fg2:#4A4A4A; --sp-fg3:#6B6B6B; --sp-fg4:#A1A1A1;
@@ -52,13 +52,29 @@ html.dark {
 .sp-outer {
   background: var(--sp-shell);
   border-radius: 28px;
-  padding: 10px;
+  padding: 8px;
   box-shadow: 0 16px 56px rgba(17,17,17,0.14), 0 3px 10px rgba(17,17,17,0.07);
   display: inline-block;
   min-width: 880px;
   max-width: calc(100vw - 40px);
+  position: relative;
 }
+.sp-outer[data-squircle="on"] { border-radius: 0; }
+.sp-outer[data-squircle="on"]::before,
+.sp-outer[data-squircle="on"]::after {
+  content: none;
+}
+/* Canon: outer shell needs exactly one dark-mode line -- squircle-shared
+   superellipse ring via scoped ::before (no plain border, matches .sp-panel curve). */
 html.dark .sp-outer { box-shadow: 0 16px 56px rgba(0,0,0,0.5), 0 3px 10px rgba(0,0,0,0.3); }
+html.dark .sp-outer[data-squircle="on"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--card-border, #232323);
+  clip-path: var(--squircle-border-path);
+}
 .sp-panel {
   /* item 1: canonical card tokens — matches .card-inner in both themes */
   background: var(--card-bg, #FFFFFF);
@@ -66,15 +82,22 @@ html.dark .sp-outer { box-shadow: 0 16px 56px rgba(0,0,0,0.5), 0 3px 10px rgba(0
   border-radius: var(--card-radius, 20px);
   overflow: hidden;
   box-shadow: inset 0 1px 0 rgba(255,255,255,1);
-  width: 860px;
-  max-width: 100%;
-  margin: 0 auto;
+  width: 100%;
   position: relative;
 }
 html.dark .sp-panel {
   background: var(--card-bg, #1C1C1C);
   border-color: var(--card-border, #232323);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+/* useSquircle takes over corner rendering; shared [data-squircle="on"] recipe
+   in _shared-feedback.css resets border/box-shadow — .sp-panel only supplies
+   its own corner-radius binding (its padding is set inline by the caller). */
+.sp-panel[data-squircle="on"] {
+  --corner-radius: var(--card-radius, 20px);
+}
+html.dark .sp-panel[data-squircle="on"] {
+  box-shadow: none;
 }
 
 /* Hide scrollbars where needed */
@@ -91,7 +114,7 @@ html.dark .sp-panel {
   display: flex; align-items: flex-start; justify-content: center;
   padding-top: 14vh;
 }
-.palette-backdrop[data-open="true"]  { visibility: visible; opacity: 1; animation: fadeIn 180ms cubic-bezier(.22,1,.36,1); }
+.palette-backdrop[data-open="true"]  { visibility: visible; opacity: 1; animation: fadeIn 180ms var(--ease-out); }
 .palette-backdrop[data-open="false"] { visibility: hidden;  opacity: 0; }
 
 html.dark .palette-backdrop { background: rgba(2,6,12,0.6); }
@@ -123,9 +146,9 @@ html.dark .sp-palette-centered { background: rgba(2,6,12,0.7); }
 .ticket {
   position: relative;
   z-index: 1;
-  transition: box-shadow 200ms cubic-bezier(.22,1,.36,1),
-              border-color 200ms cubic-bezier(.22,1,.36,1),
-              transform 200ms cubic-bezier(.22,1,.36,1),
+  transition: box-shadow 200ms var(--ease-out),
+              border-color 200ms var(--ease-out),
+              transform 200ms var(--ease-out),
               background-color 180ms;
 }
 /* Hover preserves the dashed border + lifts above siblings */
@@ -208,7 +231,9 @@ html.dark .sp-day-scroll::-webkit-scrollbar-thumb:hover { background:#4A4A4A; }
 
 /* Command palette suggestion row — item 13: hover effect */
 .sugg-row {
-  transition: background-color 120ms, transform 100ms cubic-bezier(.22,1,.36,1);
+  transition: background-color 120ms, transform 100ms var(--ease-out),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 .sugg-row:hover, .sugg-row.active {
   background: var(--sp-kbd-bg);
@@ -225,7 +250,7 @@ html.dark .sugg-row:hover, html.dark .sugg-row.active {
   0%, 100% { transform: scale(1); opacity: 1; }
   50%      { transform: scale(1.15); opacity: 0.75; }
 }
-.sparkle-pulse { animation: sparkPulse 1100ms ease-in-out infinite; transform-origin: center; }
+.sparkle-pulse { animation: sparkPulse 1100ms var(--ease-in-out) infinite; transform-origin: center; }
 
 /* ---- Move micro-interactions (smooth, no bounce) ---- */
 @keyframes ticketWashP0 {
@@ -248,10 +273,10 @@ html.dark .sugg-row:hover, html.dark .sugg-row.active {
   72%  { background: var(--sp-wash-bufb); border-color: #6B6B6B; box-shadow: inset 0 0 0 1px rgba(100,116,139,0.18), inset 0 0 8px 0 rgba(100,116,139,0.10); }
   100% { background: var(--sp-card-bg);    border-color: var(--sp-card-border); box-shadow: inset 0 0 0 0 transparent; }
 }
-.ticket.success-p0     { animation: ticketWashP0     1800ms cubic-bezier(.22,1,.36,1) forwards; }
-.ticket.success-p1     { animation: ticketWashP1     1800ms cubic-bezier(.22,1,.36,1) forwards; }
-.ticket.success-p2     { animation: ticketWashP2     1800ms cubic-bezier(.22,1,.36,1) forwards; }
-.ticket.success-buffer { animation: ticketWashBuffer 1800ms cubic-bezier(.22,1,.36,1) forwards; }
+.ticket.success-p0     { animation: ticketWashP0     1800ms var(--ease-out) forwards; }
+.ticket.success-p1     { animation: ticketWashP1     1800ms var(--ease-out) forwards; }
+.ticket.success-p2     { animation: ticketWashP2     1800ms var(--ease-out) forwards; }
+.ticket.success-buffer { animation: ticketWashBuffer 1800ms var(--ease-out) forwards; }
 
 /* ---- Toast: morph in / morph out ---- */
 /* item 3: vertical stack — newest on top, gap between toasts */
@@ -282,8 +307,8 @@ html.dark .sugg-row:hover, html.dark .sugg-row.active {
   0%   { opacity: 1; transform: scale(1)    translateY(0);    filter: blur(0); }
   100% { opacity: 0; transform: scale(0.6)  translateY(10px); filter: blur(5px); }
 }
-.sp-toast-layer .sp-toast.sp-toast-in  { animation: toastMorphIn  320ms cubic-bezier(.34,1.16,.64,1) both; }
-.sp-toast-layer .sp-toast.sp-toast-out { animation: toastMorphOut 240ms cubic-bezier(.4,0,1,1) both; }
+.sp-toast-layer .sp-toast.sp-toast-in  { animation: toastMorphIn  320ms var(--ease-toast-pop) both; }
+.sp-toast-layer .sp-toast.sp-toast-out { animation: toastMorphOut 240ms var(--ease-accel) both; }
 
 /* Stat badge + Ask AI button */
 .sp-stat-badge, .sp-ask-ai {
@@ -330,7 +355,9 @@ html.dark .sugg-row:hover, html.dark .sugg-row.active {
 .sp-ask-ai {
   background: var(--sp-askai);
   cursor: pointer;
-  transition: transform 130ms cubic-bezier(.22,1,.36,1), background 150ms;
+  transition: transform 130ms var(--ease-out), background 150ms,
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 .sp-ask-ai:hover  { background: var(--sp-askai-hover); }
 .sp-ask-ai:active { transform: scale(0.97); }
@@ -392,6 +419,18 @@ html.dark .sp-palette-dialog {
   border-color: var(--card-border, #232323) !important;
   box-shadow: 0 24px 56px -16px rgba(0,0,0,0.5), 0 8px 20px -8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06) !important;
 }
+/* useSquircle geometry: shared [data-squircle="on"] recipe resets
+   border/box-shadow; these dialogs supply corner-radius + the padding-box
+   +1px offset fix. !important beats the base rules above at equal
+   attribute-selector specificity. */
+.sp-palette-dialog[data-squircle="on"] {
+  --corner-radius: var(--card-radius, 20px);
+  padding: 1px !important;
+  box-shadow: none !important;
+}
+html.dark .sp-palette-dialog[data-squircle="on"] {
+  box-shadow: none !important;
+}
 
 /* item 13: AddTicketModal dialog — inner-card look */
 .sp-modal-dialog {
@@ -404,6 +443,14 @@ html.dark .sp-modal-dialog {
   background: var(--card-bg, #1C1C1C) !important;
   border-color: var(--card-border, #232323) !important;
   box-shadow: 0 24px 56px -16px rgba(0,0,0,0.5), 0 8px 20px -8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06) !important;
+}
+.sp-modal-dialog[data-squircle="on"] {
+  --corner-radius: var(--card-radius, 20px);
+  padding: 23px !important;
+  box-shadow: none !important;
+}
+html.dark .sp-modal-dialog[data-squircle="on"] {
+  box-shadow: none !important;
 }
 
 /* item 16: remove top-side light line on .ticket in dark mode */
@@ -429,7 +476,9 @@ html.dark .ticket {
   letter-spacing: 0.04em;
   cursor: pointer;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 2px 6px rgba(17,17,17,0.28);
-  transition: background-color calc(180ms * var(--anim-mult, 1)), transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1);
+  transition: background-color calc(180ms * var(--anim-mult, 1)), transform calc(160ms * var(--anim-mult, 1)) var(--ease-spring-snap),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
   background-image:
     linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
@@ -468,7 +517,7 @@ html.dark .sp-add-ticket-btn:disabled {
   50%       { opacity: 0.9; }
 }
 .sugg-row.is-loading {
-  animation: spSuggLoadPulse calc(700ms * var(--anim-mult, 1)) ease-in-out infinite;
+  animation: spSuggLoadPulse calc(700ms * var(--anim-mult, 1)) var(--ease-in-out) infinite;
   pointer-events: none;
 }
 /* loading spinner dot inside sugg-row */
@@ -501,5 +550,5 @@ html.dark .sugg-row-spinner {
   justify-content: center;
 }
 html.dark .sp-modal-backdrop { background: rgba(2,6,12,0.7); }
-.sp-modal-backdrop[data-open="true"]  { visibility: visible; opacity: 1; animation: fadeIn calc(180ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
+.sp-modal-backdrop[data-open="true"]  { visibility: visible; opacity: 1; animation: fadeIn calc(180ms * var(--anim-mult, 1)) var(--ease-out); }
 .sp-modal-backdrop[data-open="false"] { visibility: hidden;  opacity: 0; }

@@ -96,6 +96,8 @@ export function mountStage(
     const d = document.createElement('div') as HTMLDivElement
     d.className = 'ms-dot intro'
     d.dataset.i = String(i)
+    // Proximity hover glow (see Multisteps.css) — dots are click-navigable.
+    d.setAttribute('data-proximity', '')
     // Stagger the intro animation delay (matches original prototype)
     d.style.animationDelay = `${i * 90}ms`
     const idx = i

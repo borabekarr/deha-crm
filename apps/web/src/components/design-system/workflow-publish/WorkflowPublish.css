@@ -10,7 +10,14 @@
    explicit visible prevents any future accidental addition of clip). */
 .wp-btn-anchor {
   position: relative;
-  display: inline-block;
+  /* Right-align within the page's demo canvas: was inline-block, which left
+     the anchor (and therefore the Publish button) pinned to the container's
+     left edge. display:block + width:fit-content lets margin-left:auto push
+     it to the right edge without affecting the popover's own positioning
+     context (still `position: relative` on this same element). */
+  display: block;
+  width: fit-content;
+  margin-left: auto;
   overflow: visible;
 }
 
@@ -33,15 +40,24 @@
     inset 0 1px 0 rgba(255,255,255,0.10),
     inset 0 -2px 0 rgba(0,0,0,0.25),
     0 2px 6px rgba(17,17,17,0.20);
-  transition: background calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  transition: background calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) var(--ease-out);
   letter-spacing: -0.01em;
 }
 .wp-btn:hover { background: #1C1C1C; }
 .wp-btn:active { transform: scale(0.97); }
 
+/* Proximity: append scale/filter channels (existing transition untouched). */
+.wp-btn[data-proximity] {
+  transition:
+    background calc(150ms * var(--anim-mult, 1)),
+    transform calc(120ms * var(--anim-mult, 1)) var(--ease-out),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
+
 .wp-btn .wp-chevron {
   font-size: 18px;
-  transition: transform calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  transition: transform calc(300ms * var(--anim-mult, 1)) var(--ease-out);
 }
 .wp-btn.open .wp-chevron { transform: rotate(180deg); }
 
@@ -58,7 +74,7 @@
   top: calc(100% + 8px);
   right: 0;
   z-index: 50;
-  background: var(--shell-bg, #D4DCE8);
+  background: var(--shell-bg, #D9D9D9);
   border-radius: 28px;
   padding: 10px;
   overflow: visible;
@@ -68,11 +84,33 @@
     inset 0 0 0 1px rgba(255,255,255,.04);
   /* Enter animation — same easing as exit, no bounce overshoot */
   transform-origin: top right;
-  animation: wp-popIn calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) forwards;
+  animation: wp-popIn calc(300ms * var(--anim-mult, 1)) var(--ease-out) forwards;
 }
 /* Exit animation — identical easing/timing curve reversed */
 .wp-bezel.closing {
-  animation: wp-popOut calc(220ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) forwards;
+  animation: wp-popOut calc(220ms * var(--anim-mult, 1)) var(--ease-out) forwards;
+}
+
+/* Squircle conversion (Step 7): concentric outer/inner pair, mirrors
+   .dp-outer/.dp-panel — the popIn/popOut keyframes only transform
+   scaleX/scaleY (never width/height/border-radius) so useSquircle's
+   ResizeObserver-driven clip-path never fights the enter/exit motion. Outer
+   bezel border/hairline paint is cancelled (decorative frame only) and
+   re-enabled dark-only as a solid ring. */
+.wp-bezel[data-squircle="on"] {
+  --corner-radius: 28px;
+}
+.wp-bezel[data-squircle="on"]::before,
+.wp-bezel[data-squircle="on"]::after {
+  content: none;
+}
+html.dark .wp-bezel[data-squircle="on"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: #232323;
+  clip-path: var(--squircle-border-path);
 }
 
 /* ── Enter + exit keyframes — rigid, no bounce ───────────────────────────── */
@@ -97,7 +135,6 @@
   width: 360px;
   background: var(--card-bg, #FFFFFF);
   border: 1px solid var(--card-border, #D4D4D4);
-  border-top-color: rgba(255,255,255,0.9);
   border-radius: var(--card-radius, 20px);
   overflow: hidden;
   box-shadow:
@@ -105,6 +142,19 @@
     0 4px 12px rgba(17,17,17,0.06),
     inset 0 1px 0 rgba(255,255,255,1),
     inset 0 0 0 1px rgba(17,17,17,0.04);
+}
+/* Squircle conversion (Step 7): inner of the .wp-bezel/.wp-popover pair.
+   Depth shadow migrates to filter:drop-shadow (clip-path clips box-shadow). */
+.wp-popover[data-squircle="on"] {
+  --corner-radius: var(--card-radius, 20px);
+  filter:
+    drop-shadow(0 12px 40px rgba(17,17,17,0.12))
+    drop-shadow(0 4px 12px rgba(17,17,17,0.06));
+}
+html.dark .wp-popover[data-squircle="on"] {
+  filter:
+    drop-shadow(0 12px 40px rgba(0,0,0,0.50))
+    drop-shadow(0 4px 12px rgba(0,0,0,0.30));
 }
 
 /* Header */
@@ -161,11 +211,20 @@
     inset 0 1px 0 rgba(255,255,255,0.10),
     inset 0 -2px 0 rgba(0,0,0,0.25);
   letter-spacing: -0.01em;
-  transition: background calc(150ms * var(--anim-mult, 1)), transform calc(100ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  transition: background calc(150ms * var(--anim-mult, 1)), transform calc(100ms * var(--anim-mult, 1)) var(--ease-out);
 }
 .wp-update-btn:hover { background: #1C1C1C; }
-.wp-update-btn:active { transform: scale(0.98); }
+.wp-update-btn:active { transform: scale(0.97); }
 .wp-update-btn .material-icons { font-size: 18px; }
+
+/* Proximity: append scale/filter channels (existing transition untouched). */
+.wp-update-btn[data-proximity] {
+  transition:
+    background calc(150ms * var(--anim-mult, 1)),
+    transform calc(100ms * var(--anim-mult, 1)) var(--ease-out),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
 
 /* Last edited row */
 .wp-edited {
@@ -175,9 +234,18 @@
   padding: 14px 18px;
   border-top: 1px solid #F5F5F5;
   cursor: pointer;
-  transition: background calc(140ms * var(--anim-mult, 1));
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out);
 }
-.wp-edited:hover { background: #FAFAFA; }
+.wp-edited:hover { background: var(--fp-hover); }
+.wp-edited:active { transform: scale(0.97); }
+
+/* Proximity: append scale/filter channels (existing transition untouched). */
+.wp-edited[data-proximity] {
+  transition:
+    background calc(var(--duration-fast) * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
 
 .wp-edited-left {
   display: flex;
@@ -204,16 +272,22 @@
   justify-content: space-between;
   padding: 11px 18px;
   cursor: pointer;
-  transition: background calc(140ms * var(--anim-mult, 1));
+  background: transparent;
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out);
 }
-/* Grey watermark hover — subtle dot-grid texture over the light hover fill */
 .wp-action:hover {
-  background-color: #FAFAFA;
-  background-image: radial-gradient(circle, rgba(0,0,0,0.045) 1px, transparent 1px);
-  background-size: 10px 10px;
+  background: var(--fp-hover);
 }
-.wp-action:active { background: #F5F5F5; }
+.wp-action:active { transform: scale(0.97); }
 .wp-action:last-child { margin-bottom: 6px; }
+
+/* Proximity: append scale/filter channels (existing transition untouched). */
+.wp-action[data-proximity] {
+  transition:
+    background calc(var(--duration-fast) * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
 
 .wp-action-left {
   display: flex;
@@ -263,7 +337,9 @@ html.dark .wp-btn:hover { background: #ECECEC; }
 html.dark .wp-bezel { background: #0A0A0A; }
 
 html.dark .wp-popover {
-  border-top-color: rgba(255,255,255,0.22);
+  /* border-color inherits from var(--card-border) (theme-aware, resolves to
+     #232323 here) -- the old border-top-color: rgba(255,255,255,.22) highlight
+     override was the asymmetric-ring anti-pattern; removed for a uniform rim. */
   box-shadow: 0 12px 40px rgba(0,0,0,0.50), 0 4px 12px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
 }
 
@@ -288,12 +364,9 @@ html.dark .wp-edited .wp-arrow { color: #4A4A4A; }
 
 html.dark .wp-div { background: #232323; }
 
-/* Dark watermark hover — lighter dot-grid on the dark hover fill */
 html.dark .wp-action:hover {
-  background-color: #242424;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
-  background-size: 10px 10px;
+  background: var(--fp-hover);
 }
-html.dark .wp-action:active { background: #232323; }
+html.dark .wp-action:active { transform: scale(0.97); }
 html.dark .wp-action-label { color: #F5F5F5; }
 html.dark .wp-action .wp-arrow { color: #4A4A4A; }

@@ -8,9 +8,9 @@ import { btnRootRef, cleanupBtnRoot, runApplyBtn } from './buttons-hook'
 
 // ---------------------------------------------------------------------------
 // ApplyButton — stateful apply specimen mirroring the pipeline-card pattern.
-// States: default → is-done (~1800ms) → default.
-// Skips loading; transitions directly to check confirmation, then resets.
-// NO card removal; the page-variant just returns to rest.
+// States: default → loading (~3000ms) → done (~4500ms) → default.
+// Runs the full loading spinner before flipping to the check confirmation,
+// then resets. NO card removal; the page-variant just returns to rest.
 // ---------------------------------------------------------------------------
 
 function ApplyButton() {

@@ -3,6 +3,9 @@ import '../../../../design-system/preview/_darkmode.css'
 import './MotionTabs.css'
 import { useState } from 'react'
 import { mtRootRef, cleanupMtRoot } from './motion-tabs-hook'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
+import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
+import { usePillSpring } from '../../../lib/motion-spring'
 
 // ---------------------------------------------------------------------------
 // MotionTabs — Morphing icon-to-label tabs with slide-up popup panels
@@ -18,11 +21,13 @@ interface TabDef {
   lw: number
 }
 
+// lw = live-measured .mt-label bounding-box width (rounded up), so the pill's
+// symmetric edge padding reads identical left/right in every tab.
 const TABS: TabDef[] = [
-  { key: 'leads',    label: 'Leads',    icon: 'groups',          lw: 50 },
-  { key: 'pipeline', label: 'Pipeline', icon: 'account_tree',    lw: 64 },
-  { key: 'calls',    label: 'Calls',    icon: 'call',            lw: 44 },
-  { key: 'profile',  label: 'Profile',  icon: 'account_circle',  lw: 56 },
+  { key: 'leads',    label: 'Leads',    icon: 'groups',          lw: 53 },
+  { key: 'pipeline', label: 'Pipeline', icon: 'account_tree',    lw: 68 },
+  { key: 'calls',    label: 'Calls',    icon: 'call',            lw: 47 },
+  { key: 'profile',  label: 'Profile',  icon: 'account_circle',  lw: 59 },
 ]
 
 // Gap between tabs in px (matches CSS --tab-gap)
@@ -67,6 +72,14 @@ export default function MotionTabs() {
   const [dir, setDir]           = useState<number>(0)
   const [prevView, setPrevView] = useState<string>('default')
 
+  // Concentric squircle pair: outer .mt-dock (grey shell) + inner
+  // .mt-dock-inner (white card), mirrors Cards.css .concentric-demo.
+  const mtDockRef = useSquircle<HTMLDivElement>()
+  const mtDockInnerRef = useSquircle<HTMLDivElement>()
+  // Proximity: tab buttons only — the sliding .mt-ind indicator is a MOVING
+  // element and must never be wired (it would chase itself).
+  const mtTabwrapProximityRef = useProximityGroup<HTMLDivElement>()
+
   function close(): void {
     setPrevView('default')
     setDir(0)
@@ -107,11 +120,10 @@ export default function MotionTabs() {
   const activeIndex = TABS.findIndex((t) => t.key === active)
 
   // Width of each tab slot: base + label expansion for the active tab
-  // Active pill width matches CSS: .mt-tab.active = 20 + 24 + 8 + lw + 14 = 66 + lw.
-  // Collapsed tab = TAB_BASE (48). So active adds (66 + lw) - 48 = lw + 18.
-  // lw values are generously padded to prevent right-edge clipping at any font render.
+  // Active pill width matches CSS: .mt-tab.active = 16 + 24 + 6 + lw + 16 = 62 + lw.
+  // Collapsed tab = TAB_BASE (48). So active adds (62 + lw) - 48 = lw + 14.
   function tabSlotWidth(i: number): number {
-    return TAB_BASE + (i === activeIndex ? TABS[i].lw + 18 : 0)
+    return TAB_BASE + (i === activeIndex ? TABS[i].lw + 14 : 0)
   }
 
   // indX = sum of (slot widths + gap) for all tabs before active
@@ -120,6 +132,8 @@ export default function MotionTabs() {
     0,
   )
   const indW = tabSlotWidth(activeIndex)
+
+  const mtIndRef = usePillSpring<HTMLDivElement>(indX, indW)
 
   const isOpen = view !== 'default'
 
@@ -141,8 +155,8 @@ export default function MotionTabs() {
             />
 
             {/* Dock — grey external wrapper around white inner card */}
-            <div className={`mt-dock${isOpen ? ' open' : ''}`}>
-              <div className="mt-dock-inner">
+            <div className={`mt-dock${isOpen ? ' open' : ''}`} ref={mtDockRef}>
+              <div className="mt-dock-inner" ref={mtDockInnerRef}>
 
               {/* Height-morph via grid-rows */}
               <div className="mt-panels-wrap">
@@ -189,15 +203,10 @@ export default function MotionTabs() {
               <div className="mt-toolbar">
                 <div
                   className="mt-tabwrap"
-                  style={
-                    {
-                      '--ind-x': `${indX}px`,
-                      '--ind-w': `${indW}px`,
-                    } as React.CSSProperties
-                  }
+                  ref={mtTabwrapProximityRef}
                 >
                 {/* Single gliding indicator */}
-                <div className="mt-ind" />
+                <div className="mt-ind" ref={mtIndRef} />
 
                 {TABS.map((tab, i) => {
                   const isActiveTab = active === tab.key
@@ -211,6 +220,7 @@ export default function MotionTabs() {
                       aria-pressed={isActiveTab}
                       aria-label={tab.label}
                       data-tab-index={i}
+                      data-proximity
                     >
                       <span className="mt-hold" />
                       <span className="mt-iconbox">

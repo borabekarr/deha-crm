@@ -156,7 +156,10 @@ Mobile-first; design the 375px case first.
   in new component code.
 - Do keep one accent color per view — `--brand-primary` is the only brand color.
 - Don't invent a new hex, radius, or duration value — every value here traces back to
-  `colors_and_type.css` or `design-system.md` §10.
+  `colors_and_type.css` or `design-system.md` §10. **Carve-out (2026-07-13):** proximity hover
+  is exempt — `hover-tokens.css` legitimately animates `scale`/`filter` and defines its 6 hover
+  tokens outside `colors_and_type.css`; see `design-system.md` §10 and
+  `design-system-extended.md` §17.
 - Don't animate layout properties; don't use bounce/elastic easing; don't skip
   `prefers-reduced-motion`.
 - Don't ship an interactive element missing hover/focus/active/disabled states.

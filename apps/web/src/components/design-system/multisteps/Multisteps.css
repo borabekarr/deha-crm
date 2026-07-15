@@ -235,23 +235,57 @@
 }
 .ms-btn--back:active { transform: translateY(1px) scale(0.985); }
 
-/* Stationary slots — keep hover trigger fixed while buttons lift */
+/* Stationary slots — keep hover trigger fixed while buttons lift.
+   Multisteps previously shipped a hover-transform flicker bug: the
+   translateY()+filter lift below moved the button rect under the pointer,
+   which the proximity engine (stale-rect-until-resize model) can't track
+   mid-hover. Both buttons are now wired with data-proximity, so the lift
+   is REMOVED (not overridden) for .ms-btn--back/.ms-btn--primary — they
+   scale+glow via hover-tokens.css's --prox mapping instead. The primary
+   button's colored glow box-shadow is kept (box-shadow doesn't collide
+   with the engine's filter/scale channels). */
 .ms-btn-slot { display: flex; }
 .ms-btn-slot--back { flex: 0 0 auto; width: max-content; }
 .ms-btn-slot--primary { flex: 1 1 auto; }
 .ms-btn-slot--primary .ms-btn--primary { width: 100%; }
-.ms-btn-slot:hover .ms-btn--back { filter: brightness(0.97); transform: translateY(-5px); }
 .ms-btn-slot:hover .ms-btn--primary {
-  transform: translateY(-6px);
   box-shadow:
     0 18px 40px -12px color-mix(in srgb, var(--brand-primary-500) 70%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.5),
     inset 0 -2px 0 rgba(0, 0, 0, 0.22),
     inset 0 0 0 1px rgba(255, 255, 255, 0.15);
-  filter: brightness(1.04);
 }
 .ms-btn-slot:hover .ms-btn--back:active { transform: translateY(1px) scale(0.985); }
 .ms-btn-slot:hover .ms-btn--primary:active { transform: translateY(1px) scale(0.99); }
+
+/* Proximity — scale channel appended (transform/filter/box-shadow already
+   listed on .ms-btn above) so hover-tokens.css's --prox mapping doesn't
+   snap. Doubled class (0,3,0) beats .ms-btn's own 0,1,0 transition rule
+   regardless of load order; stationary anchor preserved (no transform). */
+.ms-btn.ms-btn[data-proximity] {
+  transition:
+    transform   calc(320ms * var(--anim-mult, 1)) cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter      calc(200ms * var(--anim-mult, 1)) ease,
+    box-shadow  calc(320ms * var(--anim-mult, 1)) cubic-bezier(0.34, 1.56, 0.64, 1),
+    width       calc(480ms * var(--anim-mult, 1)) cubic-bezier(0.34, 1.4, 0.5, 1),
+    opacity     calc(300ms * var(--anim-mult, 1)) ease,
+    margin      calc(480ms * var(--anim-mult, 1)) cubic-bezier(0.34, 1.4, 0.5, 1),
+    scale       calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
+
+/* Proximity — dots keep their positional transform (translate(-50%,-50%),
+   a static anchor, not hover-driven) and gain scale+filter channels so the
+   glow animates instead of snapping. */
+.ms-dot.ms-dot[data-proximity] {
+  transition:
+    left        calc(540ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1),
+    width       calc(260ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1),
+    height      calc(260ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1),
+    background  calc(360ms * var(--anim-mult, 1)) ease,
+    box-shadow  calc(300ms * var(--anim-mult, 1)) ease,
+    scale       calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter      calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
 
 /* Primary / Next button */
 .ms-btn--primary {

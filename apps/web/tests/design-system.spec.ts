@@ -97,7 +97,6 @@ const SLUGS = [
   'task-board',
   'sprint-planner-core',
   // AI
-  'ai-memory-card',
   'ai-caveat',
   'ai-message-box',
   // Misc
@@ -106,6 +105,16 @@ const SLUGS = [
   'theme-editor',
   'onboarding-completion',
   'dynamic-island-reader',
+  'smooth-drawer',
+  'prize-sheet',
+  // New coverage (slug-coverage-batch, 2026-07-14)
+  'toast',
+  'pinned-list',
+  'funnel-chart',
+  'workflow-nodes',
+  'workflow-template-cards',
+  'animated-list',
+  'datetime-wheel-picker',
 ] as const
 
 // ---------------------------------------------------------------------------

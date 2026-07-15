@@ -3,6 +3,8 @@ import '../../../../design-system/preview/_darkmode.css'
 import './SprintPlannerCore.css'
 import { useState, useRef, useMemo, useCallback } from 'react'
 import { iconClass } from '@/lib/iconClass'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
+import { useProximityGroup } from '@/lib/hooks'
 import {
   spcRootRef,
   cleanupSpcRoot,
@@ -227,6 +229,7 @@ function Ticket({ ticket, onDragStart, onDragEnd, dragging, onDelete, successKin
       <button
         type="button"
         className="sp-del"
+        data-proximity
         onClick={() => onDelete(ticket.id)}
         title="Remove"
         aria-label="Remove ticket"
@@ -295,6 +298,7 @@ function DayCell({ idx, dayLabel, date, isToday, tickets, onDragStart, onDragEnd
   const [over, setOver] = useState(false)
   const [canScrollDown, setCanScrollDown] = useState(false)
   const [canScrollUp, setCanScrollUp] = useState(false)
+  const dayCellRef = useProximityGroup<HTMLDivElement>()
 
   // Callback ref for scroll-state init (replaces DOM-measure-on-mount pattern)
   const scrollCallbackRef = useCallback((el: HTMLElement | null) => {
@@ -312,6 +316,7 @@ function DayCell({ idx, dayLabel, date, isToday, tickets, onDragStart, onDragEnd
 
   return (
     <div
+      ref={dayCellRef}
       className={`day-cell ${over ? 'drop-target' : ''} ${isToday ? 'today' : ''}`}
       onDragOver={(e) => { e.preventDefault(); if (!over) setOver(true) }}
       onDragLeave={() => setOver(false)}
@@ -348,12 +353,13 @@ function DayCell({ idx, dayLabel, date, isToday, tickets, onDragStart, onDragEnd
           onClick={() => onAdd(idx)}
           title="Add ticket"
           aria-label="Add ticket"
+          data-proximity
           style={{
             width: 22, height: 22, padding: 0,
             background: 'transparent', border: '1px solid transparent',
             color: '#D4D4D4', cursor: 'pointer',
             borderRadius: 6, display: 'grid', placeItems: 'center',
-            transition: 'color 150ms, border-color 150ms, background 150ms',
+            transition: 'color 150ms, border-color 150ms, background 150ms, scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear, filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear',
           }}
           onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--brand-primary-500)'; e.currentTarget.style.background = 'var(--sp-addhover-bg)' }}
           onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--sp-faint)'; e.currentTarget.style.background = 'transparent' }}
@@ -493,6 +499,8 @@ function CommandPalette({ open, onClose, onRun, tickets }: {
   // item 11: loading row id while click delay plays
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const paletteDialogRef = useSquircle<HTMLDialogElement>()
+  const paletteProxRef = useProximityGroup<HTMLDivElement>()
 
   // Detect open→true transition during render; reset all input state in the same batch.
   if (prevOpen !== open) {
@@ -568,7 +576,7 @@ function CommandPalette({ open, onClose, onRun, tickets }: {
 
   return (
     <div
-      ref={paletteCallbackRef}
+      ref={(el) => { paletteCallbackRef(el); paletteProxRef(el) }}
       className="palette-backdrop sp-palette-centered"
       data-open={open ? 'true' : 'false'}
       onClick={(e) => {
@@ -578,6 +586,7 @@ function CommandPalette({ open, onClose, onRun, tickets }: {
     >
       {/* item 13: inner-card look via sp-palette-dialog class */}
       <dialog
+        ref={paletteDialogRef}
         open={open}
         aria-label="Ask AI"
         className="sp-palette-dialog"
@@ -614,7 +623,7 @@ function CommandPalette({ open, onClose, onRun, tickets }: {
               letterSpacing: '-0.005em',
             }}
           />
-          <button type="button" onClick={onClose} style={{
+          <button type="button" onClick={onClose} data-proximity style={{
             fontFamily: 'var(--font-display, Montserrat)', fontSize: 11, fontWeight: 700,
             color: '#6B6B6B', background: 'var(--sp-chip)',
             border: 'none', padding: '4px 10px', borderRadius: 6,
@@ -638,6 +647,7 @@ function CommandPalette({ open, onClose, onRun, tickets }: {
               key={s.id}
               type="button"
               className={`sugg-row ${i === active ? 'active' : ''} ${loadingId === s.id ? 'is-loading' : ''}`}
+              data-proximity
               onMouseEnter={() => !loadingId && setActive(i)}
               onClick={() => triggerSuggestion(s)}
               style={{
@@ -704,6 +714,7 @@ function Toast({ message, kind = 'success', onUndo, onClose, phase, stackOffset 
   phase: 'in' | 'out'
   stackOffset?: number
 }) {
+  const toastRef = useProximityGroup<HTMLOutputElement>()
   if (!message) return null
   const cfg = {
     success: { bg: 'var(--brand-primary-500)', label: 'Done',    icon: 'check_circle' },
@@ -713,6 +724,7 @@ function Toast({ message, kind = 'success', onUndo, onClose, phase, stackOffset 
 
   return (
     <output
+      ref={toastRef}
       className={`sp-toast ${phase === 'out' ? 'sp-toast-out' : 'sp-toast-in'}`}
       style={{
         marginBottom: stackOffset > 0 ? stackOffset * 8 : 0,
@@ -762,6 +774,7 @@ function Toast({ message, kind = 'success', onUndo, onClose, phase, stackOffset 
         <button
           type="button"
           onClick={onUndo}
+          data-proximity
           style={{
             display: 'inline-flex', alignItems: 'center', gap: 5,
             background: '#111111',
@@ -786,6 +799,7 @@ function Toast({ message, kind = 'success', onUndo, onClose, phase, stackOffset 
         type="button"
         onClick={onClose}
         aria-label="Dismiss"
+        data-proximity
         style={{
           width: 22, height: 22, padding: 0, flexShrink: 0,
           background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)',
@@ -806,8 +820,9 @@ function SprintHeader({ range, onAskAI }: {
   range: string
   onAskAI: () => void
 }) {
+  const headerProxRef = useProximityGroup<HTMLElement>()
   return (
-    <header style={{
+    <header ref={headerProxRef} style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       padding: '0 2px',
       marginBottom: 14,
@@ -833,7 +848,7 @@ function SprintHeader({ range, onAskAI }: {
         }}>{range}</span>
       </div>
 
-      <button onClick={onAskAI} className="sp-ask-ai" type="button">
+      <button onClick={onAskAI} className="sp-ask-ai" type="button" data-proximity>
         <span className={iconClass('neurology')} style={{ fontSize: 14, lineHeight: 1 }}>neurology</span>
         Ask AI
         <span className="kbd-pill">&#8984;K</span>
@@ -894,6 +909,8 @@ function AddTicketModal({ open, day, onClose, onSubmit }: {
   const [priority, setPriority] = useState('P1')
   const inputRef = useRef<HTMLInputElement>(null)
   const focusInput = useCallback(() => { inputRef.current?.focus() }, [])
+  const modalDialogRef = useSquircle<HTMLDialogElement>()
+  const modalProxRef = useProximityGroup<HTMLDivElement>()
 
   if (prevOpen !== open) {
     setPrevOpen(open)
@@ -921,13 +938,14 @@ function AddTicketModal({ open, day, onClose, onSubmit }: {
 
   return (
     <div
-      ref={modalCallbackRef}
+      ref={(el) => { modalCallbackRef(el); modalProxRef(el) }}
       className="sp-modal-backdrop"
       data-open={open ? 'true' : 'false'}
       onClick={(e) => { if ((e.target as HTMLElement).classList.contains('sp-modal-backdrop')) onClose() }}
     >
       {/* item 4: dialog centered on the component via translate(-50%,-50%), inner-card look */}
       <dialog
+        ref={modalDialogRef}
         open={open}
         aria-label={`Add ticket to ${dayName}`}
         className="sp-modal-dialog"
@@ -972,7 +990,7 @@ function AddTicketModal({ open, day, onClose, onSubmit }: {
         {/* item 5: priority pills match default view */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
           {(['P0', 'P1', 'P2'] as const).map((p) => (
-            <button key={p} type="button" onClick={() => setPriority(p)} style={{
+            <button key={p} type="button" onClick={() => setPriority(p)} data-proximity style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
               padding: '5px 12px', borderRadius: 9999,
               border: '1px solid ' + (priority === p ? PRIORITY[p].color : 'var(--sp-sep)'),
@@ -990,7 +1008,7 @@ function AddTicketModal({ open, day, onClose, onSubmit }: {
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           {/* item 9: Cancel button with leading icon */}
-          <button type="button" onClick={onClose} style={{
+          <button type="button" onClick={onClose} data-proximity style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
             padding: '8px 14px', border: '1px solid var(--sp-sep)', background: 'var(--sp-card-bg)',
             color: 'var(--sp-fg3)', fontFamily: 'var(--font-display, Montserrat)', fontSize: 12, fontWeight: 800,
@@ -1001,7 +1019,7 @@ function AddTicketModal({ open, day, onClose, onSubmit }: {
             Cancel
           </button>
           {/* item 8: "Add ticket" button — grid background + icon (mirrors pc-apply) */}
-          <button type="button" onClick={submit} disabled={!title.trim()} className="sp-add-ticket-btn">
+          <button type="button" onClick={submit} disabled={!title.trim()} data-proximity className="sp-add-ticket-btn">
             <span className={iconClass('add_task')} style={{ fontSize: 14, lineHeight: 1 }}>add_task</span>
             Add ticket
           </button>
@@ -1020,6 +1038,8 @@ export default function SprintPlannerCore() {
   const [addOpen, setAddOpen] = useState(false)
   const [addDay, setAddDay] = useState(0)
   const [draggingId, setDraggingId] = useState<string | null>(null)
+  const panelRef = useSquircle<HTMLDivElement>()
+  const outerSquircleRef = useSquircle<HTMLDivElement>()
   // item 3: toast stack — array of active toasts, newest on top
   const [toasts, setToasts] = useState<Array<{ id: string; message: string; kind: 'success' | 'danger' | 'info'; undo: boolean; phase: 'in' | 'out' }>>([])
   const [successMap, setSuccessMap] = useState<Map<string, string>>(new Map())
@@ -1151,9 +1171,14 @@ export default function SprintPlannerCore() {
     }
   }, [showToast])
 
+  const outerRef = useCallback((el: HTMLDivElement | null) => {
+    outerSquircleRef(el)
+    rootCallbackRef(el)
+  }, [outerSquircleRef, rootCallbackRef])
+
   return (
-    <div ref={rootCallbackRef} className="sp-outer">
-      <div className="sp-panel" style={{ padding: '18px 18px 18px' }}>
+    <div ref={outerRef} className="sp-outer" data-squircle="on" style={{ '--corner-radius': '28px' } as React.CSSProperties}>
+      <div ref={panelRef} className="sp-panel" style={{ padding: '18px 18px 18px' }}>
         <SprintHeader
           range="May 18 — May 29"
           onAskAI={() => setPaletteOpen(true)}

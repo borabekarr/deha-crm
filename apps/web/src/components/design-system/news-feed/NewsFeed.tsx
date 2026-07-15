@@ -3,6 +3,7 @@ import './NewsFeed.css'
 
 import { useCallback, useRef } from 'react'
 import { mountCard, getCardApi } from './news-feed-hook'
+import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -34,6 +35,8 @@ function NfCard({
   'data-comment-anchor': anchor,
 }: NfCardProps) {
   const cleanupRef = useRef<CleanupFn>(undefined)
+  // Proximity: prev/next story arrows in the card header (clickable pair)
+  const headProximityRef = useProximityGroup<HTMLElement>()
 
   const cardRef = useCallback((el: HTMLElement | null) => {
     // Teardown previous mount
@@ -57,20 +60,20 @@ function NfCard({
         <div className="nf-glow" />
         <div className="nf-grid" />
         <div className="nf-real" style={{ display: 'contents' }}>
-          <header className="nf-head">
+          <header className="nf-head" ref={headProximityRef}>
             <span className="nf-head-ic">
               <span className="material-icons">{icon}</span>
             </span>
             <div className="nf-head-txt">
               <div className="nf-kicker">{kicker}</div>
             </div>
-            <button type="button" className="nf-arrow nf-arrow-prev" aria-label="Previous story">
+            <button type="button" className="nf-arrow nf-arrow-prev" aria-label="Previous story" data-proximity>
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 12H5" />
                 <path d="M12 19l-7-7 7-7" />
               </svg>
             </button>
-            <button type="button" className="nf-arrow nf-arrow-next" aria-label="Next story">
+            <button type="button" className="nf-arrow nf-arrow-next" aria-label="Next story" data-proximity>
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14" />
                 <path d="M12 5l7 7-7 7" />
@@ -106,6 +109,8 @@ function NfCard({
 // ---------------------------------------------------------------------------
 
 function NfControls({ rowRef }: { rowRef: React.RefObject<HTMLDivElement | null> }) {
+  const controlsProximityRef = useProximityGroup<HTMLDivElement>()
+
   function callAll(method: 'load' | 'skeleton' | 'empty') {
     if (!rowRef.current) return
     rowRef.current.querySelectorAll<HTMLElement>('.nf-card').forEach((el) => {
@@ -115,14 +120,14 @@ function NfControls({ rowRef }: { rowRef: React.RefObject<HTMLDivElement | null>
   }
 
   return (
-    <div className="nf-controls">
-      <button type="button" className="nf-btn" onClick={() => { callAll('load') }}>
+    <div className="nf-controls" ref={controlsProximityRef}>
+      <button type="button" className="nf-btn" onClick={() => { callAll('load') }} data-proximity>
         <span className="material-icons">replay</span>Replay load
       </button>
-      <button type="button" className="nf-btn" onClick={() => { callAll('skeleton') }}>
+      <button type="button" className="nf-btn" onClick={() => { callAll('skeleton') }} data-proximity>
         <span className="material-icons">hourglass_empty</span>Loading state
       </button>
-      <button type="button" className="nf-btn" onClick={() => { callAll('empty') }}>
+      <button type="button" className="nf-btn" onClick={() => { callAll('empty') }} data-proximity>
         <span className="material-icons">inbox</span>Empty state
       </button>
     </div>

@@ -16,6 +16,7 @@
  */
 
 import React, { useState } from 'react'
+import { useSquircle } from '../../../lib/hooks'
 import './WorkflowTemplateCards.css'
 
 // ---------------------------------------------------------------------------
@@ -196,6 +197,10 @@ function TemplateCard({
   expanded: boolean
   onToggle: () => void
 }): React.ReactElement {
+  // Per-item refs: the outer shell's box-shadow migrated to filter:drop-shadow
+  // (squircle.ts note -- clip-path would otherwise clip the real box-shadow).
+  const outerSquircleRef = useSquircle<HTMLDivElement>()
+  const innerSquircleRef = useSquircle<HTMLDivElement>()
   return (
     // eslint-disable-next-line jsx-a11y/prefer-tag-over-role -- wraps a nested <button> (Use template); a native <button> cannot contain interactive children
     <div
@@ -205,8 +210,9 @@ function TemplateCard({
       tabIndex={0}
       aria-expanded={expanded}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggle() } }}
+      ref={outerSquircleRef}
     >
-      <div className="wtc-card">
+      <div className="wtc-card" ref={innerSquircleRef}>
         {/* Preview area with flow diagram */}
         <div className="wtc-preview">
           <div className="wtc-flow" aria-label={`${card.title} workflow preview`}>
@@ -256,9 +262,14 @@ function TemplateCard({
 
 export default function WorkflowTemplateCards(): React.ReactElement {
   const [expandedId, setExpandedId] = useState<number | null>(null)
+  // This root used to be `display:contents`, relying on an ancestor page
+  // grid to lay its .wtc-outer children out in 2 columns -- no such ancestor
+  // exists in the live route (the route wrapper carries no grid class), so
+  // the cards rendered as full-width stacked blocks. `.wtc-grid` now owns the
+  // grid itself (see WorkflowTemplateCards.css).
 
   return (
-    <>
+    <div className="wtc-grid">
       {TEMPLATES.map((card) => (
         <TemplateCard
           key={card.id}
@@ -267,6 +278,6 @@ export default function WorkflowTemplateCards(): React.ReactElement {
           onToggle={() => setExpandedId((prev) => (prev === card.id ? null : card.id))}
         />
       ))}
-    </>
+    </div>
   )
 }

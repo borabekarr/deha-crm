@@ -4,6 +4,7 @@ import './StackedList.css'
 
 import { useMemo, useState, useRef } from 'react'
 import { dirSearchRef, cleanupDirSearch } from './stacked-list-hook'
+import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 
 /* ----------------------------- data ----------------------------- */
 const ROLES = {
@@ -52,7 +53,7 @@ interface MemberItemProps {
 
 function MemberItem({ m }: MemberItemProps) {
   return (
-    <div className="sl-item">
+    <div className="sl-item" data-proximity>
       <div className="sl-ava-wrap">
         <div className="sl-ava" style={{ backgroundColor: m.color }}>{m.initials}</div>
         {m.online && <span className="sl-online" />}
@@ -124,6 +125,9 @@ export default function StackedList({
   const stack = MEMBERS.slice(0, 3)
   const remaining = MEMBERS.length - stack.length
 
+  // Proximity group: expanded directory rows are interactive (member items).
+  const dirListProximityRef = useProximityGroup<HTMLDivElement>()
+
   return (
     <div className={'sl-panel' + (mono ? ' is-mono' : '')}>
 
@@ -179,7 +183,7 @@ export default function StackedList({
               />
             </div>
           </div>
-          <div className="sl-bar-list">
+          <div className="sl-bar-list" ref={dirListProximityRef}>
             {expanded && (dirList.length > 0
               ? dirList.map((m) => (
                   <MemberItem key={'d-' + m.id} m={m} />

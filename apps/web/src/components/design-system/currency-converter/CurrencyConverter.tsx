@@ -5,6 +5,8 @@ import './CurrencyConverter.css'
 
 import { useState, useRef, useCallback } from 'react'
 import { iconClass } from '@/lib/iconClass'
+import { useProximityGroup } from '@/lib/hooks'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
 import { useClockTick, useWindowKey, nowHM } from './currency-converter-hook'
 
 // ---------------------------------------------------------------------------
@@ -259,6 +261,7 @@ function CurrencyPill({ currency, onClick }: { currency: Currency; onClick: () =
     <button
       type="button"
       className="cc-pill"
+      data-proximity
       onClick={onClick}
       aria-label={`Change currency, currently ${currency.code}`}
     >
@@ -339,6 +342,10 @@ function CurrencyPicker({
 }) {
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
+  const headerProxRef = useProximityGroup<HTMLDivElement>()
+  /* Squircle conversion (Step 12): cc-pop-shell/cc-pop nested overlay pair. */
+  const popShellSquircleRef = useSquircle<HTMLDivElement>()
+  const popSquircleRef = useSquircle<HTMLDialogElement>()
 
   // Keyboard Escape handler via callback-ref (replaces window.addEventListener)
   const onEsc = useCallback(
@@ -346,6 +353,55 @@ function CurrencyPicker({
     [open, onClose]
   )
   const keyRef = useWindowKey(onEsc)
+
+  // Pixel-snap callback ref: on attach, measures the wrap's rendered position
+  // and writes the device-grid remainder as CSS vars, so translate(-50%,-50%)
+  // can't land the squircle shell frame on a fractional device pixel (the
+  // cause of the anti-aliased hairline seams). Accumulates onto any snap
+  // already applied (rect already reflects it) instead of replacing, so
+  // StrictMode's synthetic double-invoke re-measures a zero residual and
+  // writes back a no-op rather than wiping the first call's correction.
+  const snapRef = useCallback((node: HTMLDivElement | null) => {
+    if (!node) return
+    const dpr = window.devicePixelRatio || 1
+    const applied = (axis: 'x' | 'y') =>
+      parseFloat(node.style.getPropertyValue(`--cc-pop-snap-${axis}`)) || 0
+    const r = node.getBoundingClientRect()
+    const dx = applied('x') + Math.round(r.left * dpr) / dpr - r.left
+    const dy = applied('y') + Math.round(r.top * dpr) / dpr - r.top
+    node.style.setProperty('--cc-pop-snap-x', `${dx}px`)
+    node.style.setProperty('--cc-pop-snap-y', `${dy}px`)
+  }, [])
+
+  // Sub-pixel size snap on the shell: rounds its content-driven width/height
+  // to the nearest whole device pixel so top+bottom (and left+right) land on
+  // grid TOGETHER -- the wrap's position-only snap above can align one edge
+  // of a dimension but not both when that dimension's rendered size isn't a
+  // device-pixel multiple. Absolute (not incremental) set, so re-measuring an
+  // already-snapped size is naturally idempotent under StrictMode's double
+  // invoke: Math.round of an already-on-grid value returns the same value.
+  // Reads getComputedStyle (transform-independent layout size), NOT
+  // getBoundingClientRect -- popMorphIn animates transform:scale on this
+  // node, and at attach (animation start, scale < 1) the bounding rect is
+  // the scaled-down box, which would freeze the shell too small.
+  const shellSizeSnapRef = useCallback((node: HTMLDivElement | null) => {
+    if (!node) return
+    const dpr = window.devicePixelRatio || 1
+    const cs = getComputedStyle(node)
+    const w = parseFloat(cs.width)
+    const h = parseFloat(cs.height)
+    node.style.width = `${Math.round(w * dpr) / dpr}px`
+    node.style.height = `${Math.round(h * dpr) / dpr}px`
+  }, [])
+  // Compose with the squircle ref: size snap runs first so the squircle's
+  // synchronous initial measurement already sees the on-grid dimensions.
+  const shellRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      shellSizeSnapRef(node)
+      popShellSquircleRef(node)
+    },
+    [shellSizeSnapRef, popShellSquircleRef]
+  )
 
   // Focus input on open via callback-ref
   const focusRef = useCallback(
@@ -359,12 +415,19 @@ function CurrencyPicker({
 
   if (!open) return null
 
+  // Header proximity group — Esc close button is its only wired member.
+  // cc-pop-row list items are NOT wired: the list scrolls (overflow: auto),
+  // and the proximity engine only remeasures rects on ResizeObserver, so
+  // scroll-shifted rows would drift out of sync with a stale rect (same
+  // stationary-anchor concern as wheel-picker items).
+
   // Position wrapper: fixed at the converter's center; translate(-50%,-50%)
   // lives HERE (positioning only) so the shell can own a pure scale/opacity
   // entrance animation without the two transforms clobbering each other.
+  const snapTranslate = 'translate(-50%, -50%) translate(var(--cc-pop-snap-x, 0px), var(--cc-pop-snap-y, 0px))'
   const wrapStyle: React.CSSProperties = anchor
-    ? { position: 'fixed', left: anchor.centerX, top: anchor.centerY, transform: 'translate(-50%, -50%)', margin: 0 }
-    : { position: 'fixed', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', margin: 0 }
+    ? { position: 'fixed', left: Math.round(anchor.centerX), top: Math.round(anchor.centerY), transform: snapTranslate, margin: 0 }
+    : { position: 'fixed', left: '50%', top: '50%', transform: snapTranslate, margin: 0 }
 
   const filtered = CURRENCIES.filter((c) => {
     const q = query.toLowerCase()
@@ -392,18 +455,22 @@ function CurrencyPicker({
         onWheel={(e) => e.stopPropagation()}
         onTouchMove={(e) => e.stopPropagation()}
       >
-        <div className="cc-pop-wrap" style={wrapStyle}>
-        <div className="cc-pop-shell">
+        <div className="cc-pop-wrap" style={wrapStyle} ref={snapRef}>
+        <div className="cc-pop-shell" ref={shellRef}>
         <dialog
           open
           className="cc-pop"
+          ref={popSquircleRef}
           aria-label="Pick currency"
           style={{ padding: 0, position: 'static' }}
         >
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 10,
-            padding: '14px 16px', borderBottom: '1px solid var(--cc-hairline)',
-          }}>
+          <div
+            ref={headerProxRef}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: '14px 16px', borderBottom: '1px solid var(--cc-hairline)',
+            }}
+          >
             <span
               className="material-symbols-outlined"
               style={{ fontSize: 17, color: '#A1A1A1', fontVariationSettings: '"opsz" 24, "wght" 500' }}
@@ -426,6 +493,7 @@ function CurrencyPicker({
             />
             <button
               type="button"
+              data-proximity
               onClick={onClose}
               aria-label="Close currency picker"
               style={{
@@ -504,14 +572,23 @@ export default function CurrencyConverter() {
 
   // Clock tick: callback-ref on root element (replaces setInterval mount side-effect)
   const clockRef = useClockTick(() => setNow(nowHM()))
+  // Single group over the panel — the two currency pills + swap button are
+  // its wired members (locked convention: radius 80, dy×3).
+  const proxRef = useProximityGroup<HTMLDivElement>()
+  /* Squircle conversion (Step 12): cc-outer/cc-panel canonical grey-shell/
+     white-panel concentric pair (mirrors .te-outer/.te-panel, .dp-outer/.dp-panel). */
+  const outerSquircleRef = useSquircle<HTMLDivElement>()
+  const panelSquircleRef = useSquircle<HTMLDivElement>()
 
-  // Compose root ref: clock + swap timer teardown + converterRef
+  // Compose root ref: clock + swap timer teardown + converterRef + proximity + squircle
   const rootRef = useCallback(
     (node: HTMLDivElement | null) => {
       converterRef.current = node
       clockRef(node)
+      proxRef(node)
+      panelSquircleRef(node)
     },
-    [clockRef]
+    [clockRef, proxRef, panelSquircleRef]
   )
 
   // Derived state — conversion recomputed every render (no side-effect)
@@ -563,7 +640,7 @@ export default function CurrencyConverter() {
 
   return (
     <>
-      <div className="cc-outer">
+      <div className="cc-outer" ref={outerSquircleRef}>
       <div ref={rootRef} className="cc-panel" style={{ padding: '22px 22px 18px' }}>
 
         {/* Header */}
@@ -629,6 +706,7 @@ export default function CurrencyConverter() {
               <button
                 type="button"
                 className="cc-swap"
+                data-proximity
                 onClick={onSwap}
                 aria-label="Swap currencies"
               >

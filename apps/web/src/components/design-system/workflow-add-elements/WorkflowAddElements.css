@@ -52,7 +52,7 @@
    to the viewport left edge on close (the "close-spawn-left jump" bug). */
 .wae-pop-outer {
   position: absolute;
-  background: #D4DCE8;
+  background: var(--shell-bg, #D9D9D9);
   border-radius: 24px;
   padding: 10px;
   box-shadow:
@@ -64,8 +64,8 @@
   transform-origin: top center;
   pointer-events: none;
   transition:
-    opacity calc(180ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
-    transform calc(180ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
+    opacity calc(180ms * var(--anim-mult, 1)) var(--ease-out),
+    transform calc(180ms * var(--anim-mult, 1)) var(--ease-out);
 }
 
 .wae-pop-outer.visible {
@@ -200,12 +200,18 @@
   padding: 8px 9px;
   border-radius: 9px;
   cursor: pointer;
-  transition: background calc(100ms * var(--anim-mult, 1));
+  transition:
+    background calc(var(--duration-fast) * var(--anim-mult, 1)),
+    transform calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 
 .wae-ae-item:hover,
 .wae-ae-item.hovered {
-  background: #F5F5F5;
+  background: var(--fp-hover);
+}
+
+.wae-ae-item:active {
+  transform: scale(0.97);
 }
 
 .wae-ae-item.hovered .wae-ae-chevron {
@@ -251,7 +257,20 @@
 }
 
 .wae-ae-footer .btn-green:hover {
-  transform: scale(1.015);
+  transform: translateY(-1px);
+}
+
+/* Proximity: .btn-green's global :hover uses `transform: scale(1.03)`
+   (_shared-feedback.css) which was already softened above to translateY;
+   append scale/filter transition channels here so hover-tokens.css's
+   --prox mapping (locked scale 1.02 / brightness 1.02) doesn't snap. */
+.wae-ae-footer .btn-green[data-proximity] {
+  transition:
+    background-color calc(180ms * var(--anim-mult, 1)),
+    transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
+    box-shadow calc(200ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 
 /* Item 1: minimize the neurology glyph inside the footer button. */
@@ -411,11 +430,17 @@ html.dark .wae-nodes-header .material-icons {
   padding: 7px 8px;
   border-radius: 8px;
   cursor: pointer;
-  transition: background calc(100ms * var(--anim-mult, 1));
+  transition:
+    background calc(var(--duration-fast) * var(--anim-mult, 1)),
+    transform calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 
 .wae-node-item:hover {
-  background: #F5F5F5;
+  background: var(--fp-hover);
+}
+
+.wae-node-item:active {
+  transform: scale(0.97);
 }
 
 .wae-node-item:hover .wae-node-add-btn {
@@ -484,7 +509,7 @@ html.dark .wae-nodes-header .material-icons {
   position: relative;
   width: 1200px;
   height: 800px;
-  background: var(--shell-bg, #C8D0DC);
+  background: var(--shell-bg, #D9D9D9);
   border-radius: 28px;
   overflow: visible;
 }
@@ -569,7 +594,7 @@ html.dark .wae-ae-search input {
 
 html.dark .wae-ae-item:hover,
 html.dark .wae-ae-item.hovered {
-  background: #242424;
+  background: var(--fp-hover);
 }
 
 html.dark .wae-ae-item.hovered .wae-ae-chevron {
@@ -601,7 +626,7 @@ html.dark .wae-nodes-list::-webkit-scrollbar-thumb {
 }
 
 html.dark .wae-node-item:hover {
-  background: #242424;
+  background: var(--fp-hover);
 }
 
 html.dark .wae-node-name {
@@ -659,7 +684,7 @@ html.dark .wae-search-cat-header .wae-badge-icon .material-symbols-outlined {
 }
 
 .wae-ae-list {
-  animation: wae-list-morph-in calc(420ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
+  animation: wae-list-morph-in calc(420ms * var(--anim-mult, 1)) var(--ease-out);
 }
 
 /* ── Item 1: search-results flyout morph (enter + reversible exit) ───────────
@@ -702,12 +727,12 @@ html.dark .wae-search-cat-header .wae-badge-icon .material-symbols-outlined {
 
 /* Applied to the nodes flyout (.wae-pop-outer) when search results appear. */
 .wae-search-entering {
-  animation: wae-search-morph-in calc(320ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1) both;
+  animation: wae-search-morph-in calc(320ms * var(--anim-mult, 1)) var(--ease-out) both;
 }
 
 /* Applied when search is cleared so the flyout plays exit animation before unmounting. */
 .wae-search-leaving {
-  animation: wae-search-morph-out calc(220ms * var(--anim-mult, 1)) cubic-bezier(.4, 0, 1, 1) both;
+  animation: wae-search-morph-out calc(220ms * var(--anim-mult, 1)) var(--ease-accel) both;
   pointer-events: none;
 }
 
@@ -733,7 +758,7 @@ html.dark .wae-search-cat-header .wae-badge-icon .material-symbols-outlined {
   transform-origin: center;
   pointer-events: none;
   transition:
-    opacity calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
+    opacity calc(160ms * var(--anim-mult, 1)) var(--ease-out),
     transform calc(220ms * var(--anim-mult, 1)) cubic-bezier(.34, 1.56, .64, 1),
     background calc(120ms * var(--anim-mult, 1));
   padding: 0;

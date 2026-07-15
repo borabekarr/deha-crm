@@ -20,6 +20,7 @@
 import { useState, useCallback, useRef } from 'react'
 import './WorkflowAddElements.css'
 import { iconClass } from '../../../lib/iconClass'
+import { useProximityGroup } from '../../../lib/hooks'
 import { segRef, cleanupSeg, clampAEPosition, clampNodesPosition } from './workflow-add-elements-hook'
 
 // ---------------------------------------------------------------------------
@@ -161,6 +162,11 @@ export default function WorkflowAddElements() {
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Timer for search-panel exit animation before unmounting (Item 1)
   const searchLeaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Proximity group: only the AI Recommendations footer button carries
+  // data-proximity now (Step 18); category/node rows use plain background
+  // hover instead. Shell ref stays wired (no-op for rows).
+  const proximityRef = useProximityGroup<HTMLDivElement>()
 
   // ── Derived data ──────────────────────────────────────────────────────────
   const allCats = state.activeTab === 'general' ? GENERAL_CATS : INTEGRATION_CATS
@@ -426,7 +432,7 @@ export default function WorkflowAddElements() {
     // Outer shell: full viewport canvas with dot grid
      
     <div
-      ref={shellRef}
+      ref={(el) => { shellRef.current = el; proximityRef(el) }}
       className="wae-shell"
       onContextMenu={handleContextMenu}
       onMouseDown={handleDocMouseDown}
@@ -535,7 +541,7 @@ export default function WorkflowAddElements() {
           {/* Footer */}
           <div className="wae-ae-sep" />
           <div className="wae-ae-footer">
-            <button type="button" className="btn-green">
+            <button type="button" className="btn-green" data-proximity>
               <span className={iconClass('neurology')}>neurology</span>
               AI Recommendations
             </button>

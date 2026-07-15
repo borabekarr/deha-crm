@@ -43,7 +43,7 @@ html.dark .sgc-grid {
   display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 9999px;
   background: #111111; color: #fff; font-family: 'Montserrat'; font-size: 12px; font-weight: 800;
   box-shadow: 0 10px 30px rgba(17,17,17,0.3); pointer-events: none;
-  transition: opacity calc(240ms * var(--anim-mult, 1)), transform calc(320ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1);
+  transition: opacity calc(240ms * var(--anim-mult, 1)), transform calc(320ms * var(--anim-mult, 1)) var(--ease-spring);
 }
 html.dark .sgc-toast { background: rgb(255 255 255); color: #111111; }
 .sgc-toast .material-symbols-outlined { font-size: 15px; }
@@ -58,20 +58,39 @@ html.dark .sgc-toast { background: rgb(255 255 255); color: #111111; }
   position: relative; width: 100%; height: 364px; box-sizing: border-box;
   border-radius: var(--card-radius); overflow: hidden; font-family: 'Montserrat';
   /* grey outer shell -- inner card surface lives on .sg-inner */
-  background: var(--shell-bg, #F5F5F5);
+  background: var(--shell-bg, #D9D9D9);
   opacity: 1; transform: none;
 }
 .sg-card.acc-good { --accent:var(--brand-primary-500); --accent-deep:var(--brand-primary-600); --accent-text:var(--brand-primary-700); --glow:color-mix(in srgb, var(--brand-primary-500) 42%, transparent); --ring:color-mix(in srgb, var(--brand-primary-500) 22%, transparent); --glow2:color-mix(in srgb, var(--brand-primary-500) 78%, transparent); --ctaglow:var(--brand-glow); --flashc:color-mix(in srgb, var(--brand-primary-500) 24%, transparent); }
 .sg-card.acc-warn { --accent:#EAB308; --accent-deep:#CA8A04; --accent-text:#A16207; --glow:rgba(234,179,8,0.42); --ring:rgba(234,179,8,0.22); --glow2:rgba(234,179,8,0.78); --ctaglow:rgba(234,179,8,0.55); --flashc:rgba(234,179,8,0.24); }
 .sg-card.acc-risk { --accent:#EF4444; --accent-deep:#DC2626; --accent-text:#B91C1C; --glow:rgba(239,68,68,0.42); --ring:rgba(239,68,68,0.22); --glow2:rgba(239,68,68,0.78); --ctaglow:rgba(239,68,68,0.55); --flashc:rgba(239,68,68,0.24); }
 html.dark .sg-card {
-  /* dark grey outer shell */
-  background: #0D1B2E;
+  /* dark grey outer shell -- was a stale blue-tinted #0D1B2E, not the
+     canonical --shell-bg dark value */
+  background: #0A0A0A;
 }
 /* lighter, sparser AA-safe label colors in dark mode */
 html.dark .sg-card.acc-good { --accent-text:var(--brand-primary-400); }
 html.dark .sg-card.acc-warn { --accent-text:#FACC15; }
 html.dark .sg-card.acc-risk { --accent-text:#F87171; }
+
+/* Squircle conversion (Step 15): sg-card/sg-inner is a concentric outer/inner
+   pair (grey shell + white inner, 9px inset) mirroring .gc-outer/.gc-card and
+   .dp-outer/.dp-panel. No outward box-shadow on .sg-card to migrate. */
+.sg-card[data-squircle="on"] {
+  --corner-radius: var(--card-radius, 20px);
+}
+/* Dark-mode outer hairline -- .sg-card has no border of its own in dark mode,
+   so this is a net-new external hairline satisfying the outer-shell
+   dark-mode requirement (mirrors .gc-outer/.dp-outer's dark ::before). */
+html.dark .sg-card[data-squircle="on"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--card-border, #232323);
+  clip-path: var(--squircle-border-path);
+}
 
 /* sparse dot texture on the inner card surface (clipped by .sg-inner overflow:hidden) */
 .sg-inner::before {
@@ -97,7 +116,7 @@ html.dark .sg-inner::before {
 }
 .sg-dot::after {
   content: ''; position: absolute; inset: -4px; border-radius: 50%;
-  border: 2px solid var(--accent); opacity: 0.6; animation: sg-ping calc(1.9s * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) infinite;
+  border: 2px solid var(--accent); opacity: 0.6; animation: sg-ping calc(1.9s * var(--anim-mult, 1)) var(--ease-out) infinite;
 }
 @keyframes sg-ping { 0% { transform: scale(0.7); opacity: 0.65; } 70%,100% { transform: scale(2.1); opacity: 0; } }
 
@@ -107,15 +126,29 @@ html.dark .sg-inner::before {
   display: flex; flex-direction: column;
   background: var(--card-bg, #FFFFFF);
   border: 1px solid var(--card-border, #D4D4D4);
-  border-radius: calc(var(--card-radius, 20px) - 4px);
+  border-radius: calc(var(--card-radius, 20px) - 9px);
   box-shadow: inset 0 0 0 1px rgba(17,17,17,0.04);
   overflow: hidden;
 }
 html.dark .sg-inner {
   background: var(--card-bg, #111111);
-  border-color: #232323;
-  border-top-color: rgba(255,255,255,.22);
+  /* border-color inherits the uniform var(--card-border) ring; the old
+     border-top-color: rgba(255,255,255,.22) highlight was the asymmetric-ring
+     anti-pattern, removed for a uniform rim. */
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
+}
+
+/* Squircle conversion (Step 15): inner of the .sg-card/.sg-inner concentric
+   pair. box-shadow here is inset-only (not clipped by clip-path), so no
+   drop-shadow migration is needed; border stays a real CSS border per the
+   .gc-card/.dp-panel precedent. */
+.sg-inner[data-squircle="on"] {
+  --corner-radius: calc(var(--card-radius, 20px) - 9px);
+}
+/* Canon (corrected): inner line-less in both themes -- the unscoped
+   html.dark .sg-inner rule above wins on specificity over the shared reset. */
+html.dark .sg-inner[data-squircle="on"] {
+  box-shadow: none;
 }
 
 /* flex content wrapper -- z-index 3 keeps text above chart (z-index 0) and dot/flash (z-index 1) */
@@ -146,9 +179,11 @@ html.dark .sg-avatar { color: #ECECEC; background: rgba(255,255,255,0.07); box-s
   font-size: 11.5px; font-weight: 700; color: var(--fg3, #6B6B6B);
   background: transparent; border: none; font-family: 'Montserrat'; padding: 3px 5px; border-radius: 9px;
   line-height: 1;
-  transition: transform calc(140ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1);
+  transition: transform calc(140ms * var(--anim-mult, 1)) var(--ease-spring),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
-.sg-sync .material-symbols-outlined { font-size: 15px; line-height: 1; transition: transform calc(700ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
+.sg-sync .material-symbols-outlined { font-size: 15px; line-height: 1; transition: transform calc(700ms * var(--anim-mult, 1)) var(--ease-out); }
 .sg-sync:hover { color: var(--fg1, #111111); }
 .sg-sync:active { transform: scale(0.93); }
 .sg-sync.spin .material-symbols-outlined { transform: rotate(360deg); }
@@ -177,14 +212,14 @@ html.dark .sg-card.filters-open .sg-scrim { background: rgba(2,6,23,0.40); }
   transform: translate(-50%, calc(-50% + 12px)) scale(0.95);
   transform-origin: 50% 50%;
   pointer-events: none; visibility: hidden;
-  transition: opacity calc(240ms * var(--anim-mult, 1)) cubic-bezier(.16,1,.3,1), transform calc(360ms * var(--anim-mult, 1)) cubic-bezier(.16,1,.3,1), visibility 0s linear calc(360ms * var(--anim-mult, 1));
+  transition: opacity calc(240ms * var(--anim-mult, 1)) var(--ease-out-soft), transform calc(360ms * var(--anim-mult, 1)) var(--ease-out-soft), visibility 0s linear calc(360ms * var(--anim-mult, 1));
 }
 html.dark .sg-rangepop {
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
 }
 .sg-card.filters-open .sg-rangepop {
   opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; visibility: visible;
-  transition: opacity calc(240ms * var(--anim-mult, 1)) cubic-bezier(.16,1,.3,1), transform calc(360ms * var(--anim-mult, 1)) cubic-bezier(.16,1,.3,1);
+  transition: opacity calc(240ms * var(--anim-mult, 1)) var(--ease-out-soft), transform calc(360ms * var(--anim-mult, 1)) var(--ease-out-soft);
 }
 .sg-poplabel {
   display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -203,15 +238,17 @@ html.dark .sg-rangepop {
 .sg-rangepop .seg.vert { flex-direction: column; align-items: stretch; width: auto; border-radius: 14px; padding: 10px 4px !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.06); gap: 6px; }
 .sg-rangepop .seg.vert .seg-pill {
   left: 4px; right: 4px; width: auto; top: 10px; bottom: auto; height: 0; border-radius: 9999px;
-  transition: top calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), height calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  transition: top calc(300ms * var(--anim-mult, 1)) var(--ease-out), height calc(300ms * var(--anim-mult, 1)) var(--ease-out);
 }
-.sg-rangepop .seg.vert button { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 8px 16px; text-align: center; border-radius: 9999px; font-size: 12px; transition: color calc(200ms * var(--anim-mult, 1)), background calc(160ms * var(--anim-mult, 1)), transform calc(110ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
+.sg-rangepop .seg.vert button { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 8px 16px; text-align: center; border-radius: 9999px; font-size: 12px; transition: color calc(200ms * var(--anim-mult, 1)), background calc(160ms * var(--anim-mult, 1)), transform calc(110ms * var(--anim-mult, 1)) var(--ease-out),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear; }
 .sg-rangepop .seg.vert button .material-symbols-outlined { font-size: 16px; }
 .sg-rangepop .seg.vert button:not(.active):hover { color: var(--fg1, #111111); background: rgba(17,17,17,0.05); }
 html.dark .sg-rangepop .seg.vert button:not(.active):hover { color: #fff; background: rgba(255,255,255,0.07); }
 .sg-rangepop .seg.vert button:active { transform: scale(0.96); }
 /* brief highlight pulse on the just-picked option */
-.sg-rangepop .seg.vert button.just-picked { animation: sg-pick calc(460ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1); }
+.sg-rangepop .seg.vert button.just-picked { animation: sg-pick calc(460ms * var(--anim-mult, 1)) var(--ease-spring); }
 @keyframes sg-pick { 0%{ transform: scale(0.96);} 45%{ transform: scale(1.04);} 100%{ transform: scale(1);} }
 
 /* "applying…" loader bar — collapses to zero height when idle so it adds no bottom space */
@@ -220,7 +257,7 @@ html.dark .sg-rangepop .seg.vert button:not(.active):hover { color: #fff; backgr
 html.dark .sg-poploader { background: rgba(255,255,255,0.08); }
 .sg-poploader::after { content: ''; display: block; height: 100%; width: 0; border-radius: inherit; background: var(--accent); }
 .sg-rangepop.loading .sg-poploader { height: 3px; margin: 9px 6px 3px; opacity: 1; }
-.sg-rangepop.loading .sg-poploader::after { animation: sg-load calc(430ms * var(--anim-mult, 1)) cubic-bezier(.4,0,.2,1) forwards; }
+.sg-rangepop.loading .sg-poploader::after { animation: sg-load calc(430ms * var(--anim-mult, 1)) var(--ease-standard) forwards; }
 @keyframes sg-load { from { width: 0; } to { width: 100%; } }
 
 /* vertical range opener tab — selected-pill aesthetic (dark fill, white label)
@@ -236,7 +273,9 @@ html.dark .sg-poploader { background: rgba(255,255,255,0.08); }
   padding: 4px 9px; line-height: 1;
   box-shadow: 0 1px 2px rgba(0,0,0,0.18);
   /* overshoot bounce on press -- same cubic as canonical .seg-pill transition */
-  transition: transform calc(140ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1), box-shadow calc(160ms * var(--anim-mult, 1)), background calc(160ms * var(--anim-mult, 1));
+  transition: transform calc(140ms * var(--anim-mult, 1)) var(--ease-spring), box-shadow calc(160ms * var(--anim-mult, 1)), background calc(160ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 /* Fix 2 dark-mode counterpart: invert to light pill on dark surface (mirrors html.dark .seg .seg-pill = #F5F5F5, active text = #111111) */
 html.dark .sg-rangechip {
@@ -246,12 +285,14 @@ html.dark .sg-rangechip {
 .sg-rangechip .material-symbols-outlined {
   /* Fix 1: tight icon size, no align-self override needed in row layout */
   font-size: 14px; line-height: 1;
-  transition: transform calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  transition: transform calc(300ms * var(--anim-mult, 1)) var(--ease-out);
 }
 /* leading icon -- fixed size, no rotation, line-height 1 for optical vertical centre */
 .sg-rangechip .sg-rangechip-icon { font-size: 13px; transition: none; line-height: 1; }
-.sg-rangechip:hover { filter: brightness(1.12); }
-html.dark .sg-rangechip:hover { filter: brightness(0.92); }
+/* filter:brightness hover removed on wiring proximity here -- hover-tokens.css's
+   tripled [data-proximity]x3 selector (0,3,0) outranks this rule's own filter
+   declaration outright once wired, so the custom brightness would be dead
+   code; --prox now drives the highlight instead. */
 .sg-rangechip:active { transform: scale(0.93); }
 /* chevron flips when popup is open — target only the trailing expand_more, not the leading icon */
 .sg-card.filters-open .sg-rangechip .material-symbols-outlined:not(.sg-rangechip-icon) { transform: rotate(180deg); }
@@ -259,7 +300,7 @@ html.dark .sg-rangechip:hover { filter: brightness(0.92); }
 .sg-spacer { flex: 1 1 auto; min-height: 30px; }
 
 /* ITEM 2+7 — Montserrat 900 for both labels; vlabel is now a black pill */
-.sg-vlabel { display: inline-flex; align-items: center; font-family: 'Montserrat', var(--font-display); font-size: 10px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; color: #ffffff; background: #111111; border-radius: 9999px; padding: 3px 9px; margin-bottom: 5px; }
+.sg-vlabel { display: inline-flex; align-self: flex-start; align-items: center; font-family: 'Montserrat', var(--font-display); font-size: 10px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; color: #ffffff; background: #111111; border-radius: 9999px; padding: 3px 7px 3px 9px; margin-bottom: 5px; }
 .sg-value { font-size: 34px; font-weight: 800; letter-spacing: -0.025em; line-height: 1; color: var(--fg1, #111111); font-variant-numeric: tabular-nums; }
 
 /* delta pill — matches metric-card .m-delta exactly (white text on solid color = AA-safe) */
@@ -289,7 +330,7 @@ html.dark .sg-meter-track { background: rgba(255,255,255,0.08); box-shadow: inse
   background-image: linear-gradient(rgba(255,255,255,0.20) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.20) 1px, transparent 1px);
   background-size: 7px 7px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -1px 0 rgba(0,0,0,0.14);
-  transition: width calc(750ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), background-color calc(300ms * var(--anim-mult, 1));
+  transition: width calc(750ms * var(--anim-mult, 1)) var(--ease-out), background-color calc(300ms * var(--anim-mult, 1));
 }
 /* four tick segments for an at-a-glance read */
 .sg-meter-track::after {
@@ -309,10 +350,17 @@ html.dark .sg-meter-track::after { background-image: linear-gradient(90deg, rgba
   background-image: radial-gradient(ellipse at top right, rgba(255,255,255,0.18) 0%, transparent 55%), linear-gradient(rgba(255,255,255,0.10) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.10) 1px, transparent 1px);
   background-size: cover, 14px 14px, 14px 14px;
   box-shadow: 0 8px 22px -8px var(--ctaglow), inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -2px 0 rgba(0,0,0,0.22), inset 0 0 0 1px rgba(255,255,255,0.14);
-  transition: filter calc(200ms * var(--anim-mult, 1)), transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1), box-shadow calc(200ms * var(--anim-mult, 1));
+  transition: filter calc(200ms * var(--anim-mult, 1)), transform calc(160ms * var(--anim-mult, 1)) var(--ease-spring), box-shadow calc(200ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+  /* note: filter already listed above (200ms channel) covers the incoming
+     --prox brightness/drop-shadow filter -- no separate filter-instant
+     channel needed here, unlike other wired elements. */
 }
 .sg-cta .material-symbols-outlined { font-size: 18px; }
-.sg-cta:hover { filter: brightness(1.05); box-shadow: 0 12px 28px -8px var(--ctaglow), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -2px 0 rgba(0,0,0,0.22), inset 0 0 0 1px rgba(255,255,255,0.18); }
+/* filter:brightness dropped from hover on wiring proximity -- hover-tokens.css's
+   tripled [data-proximity]x3 selector owns filter outright once wired; box-shadow
+   feedback kept. */
+.sg-cta:hover { box-shadow: 0 12px 28px -8px var(--ctaglow), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -2px 0 rgba(0,0,0,0.22), inset 0 0 0 1px rgba(255,255,255,0.18); }
 .sg-cta:active { transform: scale(0.97); }
 .sg-cta:focus-visible, .sg-sync:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
@@ -336,20 +384,20 @@ html.dark .sg-meter-track::after { background-image: linear-gradient(90deg, rgba
 @keyframes sg-rot { to { transform: rotate(360deg); } }
 .sg-cta.done::after { display: none; }
 .sg-check { width: 16px; height: 16px; flex-shrink: 0; display: grid; place-items: center; }
-.sg-check .material-symbols-outlined { font-size: 17px; animation: sg-pop calc(360ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1); }
+.sg-check .material-symbols-outlined { font-size: 17px; animation: sg-pop calc(360ms * var(--anim-mult, 1)) var(--ease-spring); }
 @keyframes sg-pop { 0% { transform: scale(0.2); opacity: 0; } 60% { transform: scale(1.18); } 100% { transform: scale(1); opacity: 1; } }
 
 /* morphing step text — each line slides up + de-blurs into place */
 .sg-step {
   display: inline-block; font-variant-numeric: tabular-nums; white-space: nowrap;
 }
-.sg-step.morph { animation: sg-morph calc(340ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
+.sg-step.morph { animation: sg-morph calc(340ms * var(--anim-mult, 1)) var(--ease-out); }
 @keyframes sg-morph {
   0%   { opacity: 0; transform: translateY(8px); filter: blur(3px); }
   100% { opacity: 1; transform: translateY(0);   filter: blur(0); }
 }
 
-.sg-ripple { position: absolute; border-radius: 50%; transform: scale(0); background: rgba(255,255,255,0.4); pointer-events: none; animation: sg-rip calc(520ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
+.sg-ripple { position: absolute; border-radius: 50%; transform: scale(0); background: rgba(255,255,255,0.4); pointer-events: none; animation: sg-rip calc(520ms * var(--anim-mult, 1)) var(--ease-out); }
 @keyframes sg-rip { to { transform: scale(2.6); opacity: 0; } }
 
 .sg-flash { position: absolute; inset: 0; z-index: 1; pointer-events: none; border-radius: 24px; opacity: 0;
@@ -366,6 +414,11 @@ html.dark .sg-meter-track::after { background-image: linear-gradient(90deg, rgba
   max-width: 80%;
   margin: 0 auto;
 }
+/* scoped: kill the shared _surfaces.css .shell real border so only the
+   .sg-card ::before squircle ring paints the outer line (avoids the
+   diverging double-line at corners); other .shell users unaffected */
+.sgc-grid .shell.zoom { border: none; }
+html.dark .sgc-grid .shell.zoom { border: none; }
 .shell.zoom:hover .sg-line { stroke-width: 3; filter: drop-shadow(0 1px 9px var(--glow2)); }
 
 /* imperative tap class applied by onCardClick for genuine card-body presses */

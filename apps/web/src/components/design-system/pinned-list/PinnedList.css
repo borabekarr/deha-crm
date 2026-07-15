@@ -122,9 +122,9 @@
   overflow: hidden;
   opacity: 1;
   transition:
-    opacity calc(240ms * var(--anim-mult, 1)) ease,
-    padding calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
-    margin calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+    opacity calc(240ms * var(--anim-mult, 1)) var(--ease-fade),
+    padding calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out),
+    margin calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out);
 }
 
 .pl-sec.pinned.empty .pl-head {
@@ -137,13 +137,14 @@
 .pl-sec.all .pl-head { margin-top: var(--space-3, 12px); }
 .pl-sec.all.solo .pl-head {
   margin-top: var(--space-1, 4px);
-  transition: margin calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  transition: margin calc(360ms * var(--anim-mult, 1)) var(--ease-out);
 }
 
 .pl-items {
   display: flex;
   flex-direction: column;
   gap: var(--space-2, 8px);
+  isolation: isolate;
 }
 
 /* ── Item card ────────────────────────────────────────────────────────── */
@@ -159,13 +160,16 @@
   box-shadow: var(--pl-cardshadow);
   will-change: transform;
 }
+.pl-item[data-squircle="on"] {
+  --corner-radius: 19px;
+}
 
 /* entrance animation helpers (applied programmatically by hook) */
 .pl-item.pl-preanim { opacity: 0; transform: translateY(-7px) scale(0.96); }
 .pl-item.pl-anim {
   transition:
-    opacity calc(360ms * var(--anim-mult, 1)) ease,
-    transform calc(420ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.38,1);
+    opacity calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(420ms * var(--anim-mult, 1)) var(--ease-out);
 }
 
 /* pinned look */
@@ -188,8 +192,8 @@
     inset 0 1px 0 rgba(255,255,255,0.9),
     inset 0 0 0 1px rgba(17,17,17,0.04);
   transition:
-    background calc(260ms * var(--anim-mult, 1)) ease,
-    color calc(260ms * var(--anim-mult, 1)) ease;
+    background calc(260ms * var(--anim-mult, 1)) var(--ease-fade),
+    color calc(260ms * var(--anim-mult, 1)) var(--ease-fade);
 }
 
 .pl-ico span { font-size: 21px; }
@@ -252,14 +256,14 @@
     inset 0 1px 0 rgba(255,255,255,0.7),
     inset 0 0 0 1px rgba(17,17,17,0.04);
   transition:
-    background calc(200ms * var(--anim-mult, 1)) ease,
-    color calc(200ms * var(--anim-mult, 1)) ease,
-    box-shadow calc(200ms * var(--anim-mult, 1)) ease;
+    background calc(200ms * var(--anim-mult, 1)) var(--ease-fade),
+    color calc(200ms * var(--anim-mult, 1)) var(--ease-fade),
+    box-shadow calc(200ms * var(--anim-mult, 1)) var(--ease-fade);
 }
 
 .pl-pin span {
   font-size: 18px;
-  transition: transform calc(280ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1);
+  transition: transform calc(280ms * var(--anim-mult, 1)) var(--ease-spring);
 }
 
 .pl-pin:hover { color: var(--fg2); }
