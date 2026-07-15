@@ -144,7 +144,7 @@ html.dark .wtc-outer[data-squircle="on"]::before {
     0 2px 8px rgba(17,17,17,0.24),
     inset 0 1px 0 rgba(255,255,255,0.08),
     inset 0 -1px 0 rgba(0,0,0,0.18);
-  transition: opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-fast) * var(--anim-mult, 1));
+  transition: opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-fast) * var(--anim-mult, 1)), scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear, filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 .wtc-outer:hover .wtc-use {
   opacity: 1;

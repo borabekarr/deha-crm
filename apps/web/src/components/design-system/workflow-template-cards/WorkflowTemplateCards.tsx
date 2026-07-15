@@ -16,7 +16,7 @@
  */
 
 import React, { useState } from 'react'
-import { useSquircle } from '../../../lib/hooks'
+import { useProximityGroup, useSquircle } from '../../../lib/hooks'
 import './WorkflowTemplateCards.css'
 
 // ---------------------------------------------------------------------------
@@ -229,6 +229,7 @@ function TemplateCard({
             className="wtc-use"
             aria-label={`Use template: ${card.title}`}
             onClick={(e) => { e.stopPropagation(); /* no-op: use template */ }}
+            data-proximity
           >
             Use template →
           </button>
@@ -268,8 +269,13 @@ export default function WorkflowTemplateCards(): React.ReactElement {
   // the cards rendered as full-width stacked blocks. `.wtc-grid` now owns the
   // grid itself (see WorkflowTemplateCards.css).
 
+  // Proximity group: only the per-card "Use template" CTAs carry
+  // data-proximity (wf-connect pattern) -- the card shells scale on their
+  // own hover transition and would stale the cached hitbox mid-reveal.
+  const proximityRef = useProximityGroup<HTMLDivElement>()
+
   return (
-    <div className="wtc-grid">
+    <div className="wtc-grid" ref={proximityRef}>
       {TEMPLATES.map((card) => (
         <TemplateCard
           key={card.id}

@@ -102,7 +102,7 @@ function makeScaleEntranceRef(_animKey: string, isUnpin = false): (el: HTMLEleme
     // Unpin: slide under siblings for the duration of the entrance.
     // z-index 0 + position:relative (set in CSS) keeps the unpinning element
     // BELOW siblings whose will-change:transform stacking context paints later.
-    if (isUnpin) aug.style.zIndex = '-1'
+    if (isUnpin) aug.style.zIndex = '0'
 
     // Force reflow so the browser registers the start state before transitioning
     void aug.offsetHeight
