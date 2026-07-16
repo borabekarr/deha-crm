@@ -3,6 +3,7 @@ import '../../../../design-system/preview/_darkmode.css'
 import './DynamicIslandReader.css'
 import { useState, useCallback, useMemo, useRef } from 'react'
 import type { CSSProperties } from 'react'
+import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 import {
   RM,
   type DiMode,
@@ -354,7 +355,7 @@ function DynamicIsland({
   const showCloseBadge = closing && !complete
 
   return (
-    <div style={{
+    <div className="di-drop" style={{
       position: 'absolute', top: 11, left: '50%', transform: 'translateX(-50%)',
       zIndex: 50,
     }}>
@@ -551,6 +552,10 @@ const TWEAK_DEFAULTS: Tweaks = {
 // Main component
 // ---------------------------------------------------------------------------
 export default function DynamicIslandReader() {
+  // Proximity: tweak-panel controls only (accent/readout/pill-style buttons).
+  // The .di-drop / .di-pill island itself is a single moving element carrying
+  // the Step 1 SCOPE_ANOMALY edit — left untouched.
+  const tweaksPanelProximityRef = useProximityGroup<HTMLDivElement>()
   const [tweaks, setTweaks] = useState<Tweaks>(TWEAK_DEFAULTS)
   const setTweak = <K extends TweakKey>(key: K, val: Tweaks[K]) =>
     setTweaks((prev) => ({ ...prev, [key]: val }))
@@ -646,7 +651,7 @@ export default function DynamicIslandReader() {
       {/* Tweaks panel — static style lives in CSS (di-tweaks-panel) so the
           backdrop-filter blur isn't re-applied from a fresh inline object on
           every scroll-driven re-render of this component. */}
-      <div className="di-tweaks-panel">
+      <div className="di-tweaks-panel" ref={tweaksPanelProximityRef}>
         <span style={{ fontSize: 10, fontWeight: 700, color: '#6B6B6B', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 2 }}>Indicator</span>
 
         <label htmlFor="dir-dark-island" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, cursor: 'pointer' }}>
@@ -664,6 +669,7 @@ export default function DynamicIslandReader() {
                 type="button"
                 onClick={() => setTweak('accent', ac)}
                 aria-label={ac}
+                data-proximity
                 style={{
                   width: 22, height: 22, borderRadius: '50%',
                   border: tweaks.accent === ac ? '2px solid #fff' : '2px solid transparent',
@@ -683,6 +689,7 @@ export default function DynamicIslandReader() {
                 key={v}
                 type="button"
                 onClick={() => setTweak('showMode', v)}
+                data-proximity
                 style={{
                   fontSize: 10, padding: '3px 7px', borderRadius: 6,
                   background: tweaks.showMode === v ? 'var(--brand-primary-500)' : 'rgba(255,255,255,0.08)',
@@ -703,6 +710,7 @@ export default function DynamicIslandReader() {
                 key={v}
                 type="button"
                 onClick={() => setTweak('pillStyle', v)}
+                data-proximity
                 style={{
                   fontSize: 10, padding: '3px 7px', borderRadius: 6,
                   background: tweaks.pillStyle === v ? 'var(--brand-primary-500)' : 'rgba(255,255,255,0.08)',

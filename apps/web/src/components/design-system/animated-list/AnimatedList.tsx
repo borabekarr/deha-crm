@@ -3,6 +3,7 @@ import '../../../../design-system/preview/_darkmode.css'
 import './AnimatedList.css'
 
 import { useState } from 'react'
+import { useProximityGroup, useSquircle } from '@/lib/hooks'
 import { makeRowRef, buildTransition, useAnimatedListStore, type AnimVariant } from './animated-list-hook'
 
 /* =========================================================================
@@ -198,10 +199,13 @@ function seed(n: number): PaymentEvent[] {
   return Array.from({ length: n }, makeEvent).reverse()
 }
 
-function renderEvent(it: PaymentEvent): React.ReactNode {
+// Real component (not a plain render function) so useSquircle gets one stable
+// hook slot per row id -- the .al-row wrapper above keys each mounted subtree.
+function AlEvItem({ it }: { it: PaymentEvent }): React.ReactElement {
   const r = RISK_META[it.risk]
+  const squircleRef = useSquircle<HTMLDivElement>()
   return (
-    <div className={`al-ev al-ev--${it.risk}`}>
+    <div className={`al-ev al-ev--${it.risk}`} ref={squircleRef}>
       <span className="al-ev-ico material-symbols-outlined">{it.risk === 'low' ? 'verified_user' : it.risk === 'elevated' ? 'bolt' : it.risk === 'review' ? 'flag' : 'block'}</span>
       <div className="al-ev-main">
         <div className="al-ev-amt-row">
@@ -218,12 +222,17 @@ function renderEvent(it: PaymentEvent): React.ReactNode {
   )
 }
 
+function renderEvent(it: PaymentEvent): React.ReactNode {
+  return <AlEvItem it={it} />
+}
+
 type AnimMode = 'scale' | 'slide' | 'fade' | 'bounce'
 const ANIM_MODES: AnimMode[] = ['scale', 'slide', 'fade', 'bounce']
 
 export default function AnimatedListDemo() {
   const [items, setItems] = useState<PaymentEvent[]>(() => seed(5))
   const [anim, setAnim] = useState<AnimMode>('scale')
+  const controlsRef = useProximityGroup<HTMLDivElement>()
 
   function pushEvent(): void {
     setItems((prev) => [makeEvent(), ...prev].slice(0, 8))
@@ -243,20 +252,21 @@ export default function AnimatedListDemo() {
         </span>
       </div>
 
-      <div className="al-controls">
+      <div className="al-controls" ref={controlsRef}>
         <div className="al-anim-pills">
           {ANIM_MODES.map((m) => (
             <button
               key={m}
               type="button"
               className={'al-anim-pill' + (m === anim ? ' al-active' : '')}
+              data-proximity
               onClick={() => setAnim(m)}
             >
               {m.charAt(0).toUpperCase() + m.slice(1)}
             </button>
           ))}
         </div>
-        <button type="button" className="al-push-btn" onClick={pushEvent}>
+        <button type="button" className="al-push-btn" data-proximity onClick={pushEvent}>
           Push event
         </button>
       </div>

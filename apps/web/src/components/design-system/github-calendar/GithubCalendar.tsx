@@ -6,6 +6,7 @@ import './GithubCalendar.css'
 import { useMemo, useState } from 'react'
 import { gcCardRef, cleanupGcCard } from './github-calendar-hook'
 import { iconClass } from '../../../lib/iconClass'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
 
 /* =========================================================================
    GitHub Calendar — Deha Design System
@@ -196,17 +197,23 @@ export default function GithubCalendar({
   }
 
   const levelClass = ['gc-l0', 'gc-l1', 'gc-l2', 'gc-l3', 'gc-l4'] as const
+  const outerSquircleRef = useSquircle<HTMLDivElement>()
+  const cardSquircleRef = useSquircle<HTMLElement>()
 
   const DOW_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
   return (
     <>
-      <div className="gc-outer">
+      <div className="gc-outer" ref={outerSquircleRef}>
       <article
         className="gc-card"
         ref={(el) => {
           gcCardRef(el)
-          return () => cleanupGcCard(el)
+          cardSquircleRef(el)
+          return () => {
+            cleanupGcCard(el)
+            cardSquircleRef(null)
+          }
         }}
         style={vars}
         data-glow={glow ? 'on' : 'off'}

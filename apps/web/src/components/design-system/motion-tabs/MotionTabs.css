@@ -49,7 +49,7 @@ html.dark .frame {
   justify-content: flex-end;
   flex: 1;
   min-height: 320px;
-  --ease: cubic-bezier(.22,1,.36,1);
+  --ease: var(--ease-out);
   --dur: calc(300ms * var(--anim-mult, 1));
   --dur-fast: calc(220ms * var(--anim-mult, 1));
   font-family: 'Montserrat', sans-serif;
@@ -82,10 +82,10 @@ html.dark .frame {
   z-index: 1;
   width: var(--dock-w, 360px);
   box-sizing: border-box;
-  /* Grey external surface — slate-100 in light, slate-900 in dark */
-  background: #F5F5F5;
+  /* Grey external surface — dock canon: var(--shell-bg) both themes */
+  background: var(--shell-bg, #D9D9D9);
   border: 1px solid var(--card-border, #D4D4D4);
-  border-radius: calc(var(--card-radius, 20px) + 8px);
+  border-radius: 36px;
   padding: 8px;
   overflow: hidden;
   box-shadow:
@@ -93,23 +93,47 @@ html.dark .frame {
     0 2px 8px rgba(17,17,17,0.06);
 }
 html.dark .mt-dock {
-  background: #111111;
+  background: var(--shell-bg, #0A0A0A);
   border-color: var(--card-border, #232323);
   box-shadow:
     0 24px 60px -12px rgba(0,0,0,0.50);
 }
+/* Outer shell (concentric pair): keeps its own 1px border in both themes, so
+   the ring pseudo is re-enabled (unlike Cards.css's borderless outer) --
+   lift shadow migrates to filter since box-shadow is clipped away. */
+.mt-dock[data-squircle="on"] {
+  --corner-radius: 36px;
+  padding: calc(8px + 1px);
+  border: 0;
+  box-shadow: none;
+  filter: drop-shadow(0 18px 50px rgba(17,17,17,0.18)) drop-shadow(0 2px 8px rgba(17,17,17,0.06));
+}
+html.dark .mt-dock[data-squircle="on"] {
+  filter: drop-shadow(0 24px 60px rgba(0,0,0,0.50));
+}
+/* Canon (corrected): outer shell needs exactly one dark-mode line -- the
+   real border was dropped for squircle mode with nothing re-adding it. */
+html.dark .mt-dock[data-squircle="on"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--card-border);
+  clip-path: var(--squircle-border-path);
+}
 
 /* White inner card — consumes the shared card tokens exactly like .card-inner */
 .mt-dock-inner {
+  position: relative;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 5px;
   /* Asymmetric padding: less top, more bottom — optically lifts the toolbar */
   padding: 4px 8px 12px;
   background: var(--card-bg, #FFFFFF);
   border: 1px solid var(--card-border, #D4D4D4);
-  border-radius: var(--card-radius, 20px);
+  border-radius: 28px;
   overflow: hidden;
   box-shadow: inset 0 0 0 1px rgba(17,17,17,0.04);
 }
@@ -119,6 +143,19 @@ html.dark .mt-dock-inner {
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.05),
     inset 0 0 0 1px rgba(255,255,255,0.04);
+}
+/* useSquircle takes over corner rendering: shared [data-squircle="on"]
+   recipe (_shared-feedback.css) drops the real border/box-shadow for
+   clip-path + ring pseudo-elements. Padding gets the +1px padding-box/
+   border-box offset (see Cards.css .card-inner). html.dark's box-shadow
+   above beats the shared reset's box-shadow:none on specificity, so it's
+   re-cancelled explicitly. */
+.mt-dock-inner[data-squircle="on"] {
+  padding: calc(4px + 1px) calc(8px + 1px) calc(12px + 1px);
+  --corner-radius: 28px;
+}
+html.dark .mt-dock-inner[data-squircle="on"] {
+  box-shadow: none;
 }
 
 /* ── Height morph via CSS grid-rows ─────────────────────────────────────── */
@@ -140,8 +177,9 @@ html.dark .mt-dock-inner {
   display: block;
   height: 1px;
   background: var(--card-border, #D4D4D4);
-  /* Extend to inner card edges: dock-inner has 8px padding, negate it */
-  margin: 0 -8px;
+  /* Extend to inner card edges: dock-inner has 8px padding, negate it.
+     Symmetric 8px vertical margin balances panel-option spacing above/below. */
+  margin: 8px -8px;
   flex-shrink: 0;
 }
 html.dark .mt-divider {
@@ -338,7 +376,7 @@ html.dark .mt-row-ic--black .material-symbols-outlined {
   justify-content: center;
   font-size: 11px;
   font-weight: 900;
-  color: #FFFFFF;
+  color: var(--brand-on-primary);
   background: var(--brand-primary-500);
   background-image:
     linear-gradient(rgba(255,255,255,var(--mt-grid-alpha,0.07)) 1px, transparent 1px),
@@ -357,11 +395,10 @@ html.dark .mt-row-ic--black .material-symbols-outlined {
 }
 
 /* ── Toolbar ─────────────────────────────────────────────────────────────── */
-/* Symmetric spacing: when divider is present (open state), push toolbar top
-   spacing from flex gap(8px) to 12px — matching dock-inner padding-bottom (12px). */
-.mt-divider + .mt-toolbar {
-  margin-top: 4px;
-}
+/* Symmetric spacing: dock-inner's flex gap (5px) + divider's own 8px margin
+   on each side yields a 13px gap on both sides of the divider, which also
+   equalises the toolbar's top gap with its bottom gap to the dock-inner
+   edge (padding-bottom 13px). No extra margin needed on the toolbar itself. */
 .mt-toolbar {
   position: relative;
   display: flex;
@@ -394,11 +431,13 @@ html.dark .mt-row-ic--black .material-symbols-outlined {
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.14),
     0 2px 6px rgba(17,17,17,0.28);
-  width: var(--ind-w, 48px);
-  transform: translateX(var(--ind-x, 0));
+  /* Position (transform x/width) is spring-driven by usePillSpring
+     (motion-spring.ts) per design-system.md §10 — no CSS transition on
+     transform/width here, or it would fight the per-frame inline writes. */
+  transform-origin: center;
   transition:
-    transform calc(300ms * var(--anim-mult, 1)) var(--ease),
-    width calc(300ms * var(--anim-mult, 1)) var(--ease);
+    scale calc(180ms * var(--anim-mult, 1)) var(--ease),
+    filter calc(180ms * var(--anim-mult, 1)) var(--ease);
   pointer-events: none;
   z-index: 0;
 }
@@ -434,6 +473,16 @@ html.dark .mt-label  { color: #111111; }
     width calc(300ms * var(--anim-mult, 1)) var(--ease),
     transform calc(180ms * var(--anim-mult, 1)) var(--ease);
 }
+/* Proximity: own `width`/`transform` transition (0,1,0) beats hover-tokens.css's
+   [data-proximity]x3 fallback; scale + filter channels added here so the
+   engine's --prox mapping doesn't snap. */
+.mt-tab[data-proximity] {
+  transition:
+    width calc(300ms * var(--anim-mult, 1)) var(--ease),
+    transform calc(180ms * var(--anim-mult, 1)) var(--ease),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
 /* Hover: grey rounded background (primary signal) + subtle lift — active press overrides to 0.96 */
 .mt-tab:hover {
   transform: scale(1.03);
@@ -443,15 +492,20 @@ html.dark .mt-label  { color: #111111; }
 /* Active pill hover: scale the WHOLE pill (indicator + button content) together.
    Uses :has() so the sibling .mt-ind scales in sync with the button content. */
 .mt-tabwrap:has(.mt-tab.active:hover) .mt-ind {
-  transform: translateX(var(--ind-x, 0)) scale(1.03);
+  scale: 1.03;
+  filter: brightness(1.08) drop-shadow(0 3px 7px rgba(17,17,17,0.28));
 }
-/* Active pill: increased edge padding so icon+text have breathing room inside the pill.
-   Width = left pad (20) + icon (24) + icon↔text gap (8) + label (lw) + right pad (14). */
+html.dark .mt-tabwrap:has(.mt-tab.active:hover) .mt-ind {
+  filter: brightness(1.08) drop-shadow(0 3px 8px rgba(0,0,0,0.40));
+}
+/* Active pill: symmetric edge padding so icon+text have even breathing room inside the pill.
+   Width = left pad (16) + icon (24) + icon↔text gap (6) + label (lw) + right pad (16). */
 .mt-tab.active {
-  width: calc(20px + 24px + 8px + var(--lw, 46px) + 14px);
-  padding: 0 14px 0 20px;
+  width: calc(16px + 24px + 6px + var(--lw, 46px) + 16px);
+  padding: 0 16px;
   justify-content: flex-start;
-  gap: 8px;
+  gap: 6px;
+  transform-origin: center;
 }
 
 /* hold-feedback circle */

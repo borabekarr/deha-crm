@@ -12,11 +12,13 @@
 
 import type { BrainStageController } from './brain-hook'
 import { BRAIN_SECTIONS } from './leadMetrics'
+import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export function DetailPanel({ stage }: { stage: BrainStageController }) {
   const section = BRAIN_SECTIONS.find(s => s.id === stage.activeId)
+  const backProxRef = useProximityGroup<HTMLDivElement>()
 
   // --active drives width/opacity transition; driven by panelOpen so the panel
   // animates shut BEFORE activeId clears (mounted-through-exit pattern).
@@ -40,13 +42,14 @@ export function DetailPanel({ stage }: { stage: BrainStageController }) {
   const { thinking, typed } = stage.typewriter
 
   return (
-    <div className={cls}>
+    <div className={cls} ref={backProxRef}>
       {/* Back arrow — outside the bezel so CSS can pin it at panel top-left */}
       <button
         type="button"
         className="ldx-dp-back"
         aria-label="Back"
         onClick={stage.clearSelection}
+        data-proximity
       >
         <span className="material-symbols-outlined">arrow_back</span>
       </button>

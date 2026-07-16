@@ -55,6 +55,12 @@ step in the scale ENCODES A ROLE — use the role, not the raw hex, in component
 Dark mode swaps roles, not hexes: `--fg1` becomes `#F1F5F9`, `--bg-app` becomes `#0F172A`. Never
 invent a new hex; every color in a component must resolve to a token above.
 
+**Primary theme palettes:** the design system ships five extra primary palettes (sunflower,
+bloodymary, petalglow, sexyblue, richgold), remapped via `:root[data-primary=...]` attribute
+selectors in `colors_and_type.css` and cycled by the gallery's PrimaryThemeSwitcher; emerald is
+the default with no attribute set. `--brand-on-primary` flips on-primary text to `#111111` for
+the light-primary themes (sunflower, richgold).
+
 ## Typography
 
 - Font: `'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif` (`--font-display`),
@@ -150,7 +156,10 @@ Mobile-first; design the 375px case first.
   in new component code.
 - Do keep one accent color per view — `--brand-primary` is the only brand color.
 - Don't invent a new hex, radius, or duration value — every value here traces back to
-  `colors_and_type.css` or `design-system.md` §10.
+  `colors_and_type.css` or `design-system.md` §10. **Carve-out (2026-07-13):** proximity hover
+  is exempt — `hover-tokens.css` legitimately animates `scale`/`filter` and defines its 6 hover
+  tokens outside `colors_and_type.css`; see `design-system.md` §10 and
+  `design-system-extended.md` §17.
 - Don't animate layout properties; don't use bounce/elastic easing; don't skip
   `prefers-reduced-motion`.
 - Don't ship an interactive element missing hover/focus/active/disabled states.

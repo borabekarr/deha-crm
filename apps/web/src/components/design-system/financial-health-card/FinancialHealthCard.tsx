@@ -4,6 +4,7 @@ import './FinancialHealthCard.css'
 
 import { useRef, useState, useCallback } from 'react'
 import { useAutoHeight } from '@/lib/hooks/use-auto-height'
+import { useProximityGroup } from '@/lib/hooks'
 import {
   ZONES,
   type FhcRefs,
@@ -36,6 +37,7 @@ export default function FinancialHealthCard() {
   const tabRef    = useRef<HTMLButtonElement | null>(null)
 
   const scoreRef = useRef(INITIAL_SCORE)   // tracks current score for tween origin
+  const proximityRef = useProximityGroup<HTMLDivElement>()
 
   // measured-height spam-proof expand/collapse for the why/recommendation panel
   const { ref: infoBodyRef } = useAutoHeight<HTMLDivElement>({
@@ -117,7 +119,7 @@ export default function FinancialHealthCard() {
   }
 
   return (
-    <div className="fhc-frame">
+    <div className="fhc-frame" ref={proximityRef}>
 
       <div className="shell fhc-shell" style={{ borderRadius: 42 }}>
         <div
@@ -159,6 +161,7 @@ export default function FinancialHealthCard() {
               ref={tabRef}
               type="button"
               className="fhc-info-tab"
+              data-proximity
               aria-expanded={isOpen}
               onClick={e => { e.stopPropagation(); setIsOpen(prev => !prev); if (tabRef.current) retriggerClass(tabRef.current, 'tab-bounce') }}
             >
@@ -195,16 +198,16 @@ export default function FinancialHealthCard() {
 
       {/* Demo controls (chrome — outside the component shell) */}
       <div className="fhc-controls">
-        <button type="button" className="fhc-btn" onClick={handleReplay}>
+        <button type="button" className="fhc-btn" data-proximity onClick={handleReplay}>
           <span className="material-icons">replay</span>Replay load
         </button>
-        <button type="button" className="fhc-btn" onClick={() => handleSetScore(34)}>
+        <button type="button" className="fhc-btn" data-proximity onClick={() => handleSetScore(34)}>
           <span className="material-icons">south</span>Score 34
         </button>
-        <button type="button" className="fhc-btn" onClick={() => handleSetScore(62)}>
+        <button type="button" className="fhc-btn" data-proximity onClick={() => handleSetScore(62)}>
           <span className="material-icons">remove</span>Score 62
         </button>
-        <button type="button" className="fhc-btn" onClick={() => handleSetScore(90)}>
+        <button type="button" className="fhc-btn" data-proximity onClick={() => handleSetScore(90)}>
           <span className="material-icons">north</span>Score 90
         </button>
       </div>

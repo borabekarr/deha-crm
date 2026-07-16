@@ -3,6 +3,8 @@ import '../../../../design-system/preview/_darkmode.css'
 import './MessageDropdown.css'
 import { useState, useRef, useCallback } from 'react'
 import { mdRootRef, cleanupMdRoot } from './message-dropdown-hook'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
+import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 
 // Helper: read a CSS custom property value as a number of milliseconds.
 // Falls back to the provided default if the var is absent or unparseable.
@@ -88,6 +90,18 @@ export default function MessageDropdown({
 
   const triggerRef = useRef<HTMLButtonElement | null>(null)
   const itemEls = useRef<Array<HTMLLIElement | null>>([])
+  // Squircle conversion is gated to the OPEN steady state only: .md-panel-bg's
+  // border-radius is what the closed<->open MORPH animation (Fix 1/2) drives,
+  // so registering the clip-path recipe unconditionally would replace that
+  // animated circle-to-card radius with a fixed squircle radius even while
+  // closed. Conditionally attaching the ref keeps the closed trigger circle
+  // untouched (motion contract) while the opened panel gets the real squircle.
+  const panelBgSquircleRef = useSquircle<HTMLDivElement>()
+
+  // Proximity group: dropdown items live inside a click-opened popover, but the
+  // engine registers per-container at mount, so wiring the always-mounted
+  // .md-panel-content dialog works the same whether open or closed.
+  const panelContentProximityRef = useProximityGroup<HTMLDialogElement>()
 
   const setOpen = useCallback((v: boolean) => {
     openRef.current = v       // update ref synchronously in handler, not during render
@@ -176,7 +190,7 @@ export default function MessageDropdown({
       {/* Gooey shape layer — only the dark blobs live here */}
       <div className={`md-goo-wrap${gooey ? ' gooey' : ''}`} aria-hidden="true">
         <div className="md-trigger-bg" />
-        <div className="md-panel-bg" />
+        <div className="md-panel-bg" ref={open ? panelBgSquircleRef : undefined} />
       </div>
 
       {/* Real interactive trigger — above the goo layer.
@@ -212,6 +226,7 @@ export default function MessageDropdown({
         className="md-panel-content"
         aria-label={label}
         open={open || undefined}
+        ref={panelContentProximityRef}
       >
         <ul className="md-list" role="list">
           {messages.map((m, i) => (
@@ -222,6 +237,7 @@ export default function MessageDropdown({
               tabIndex={open ? 0 : -1}
               onKeyDown={(e) => onItemKeyDown(e, i)}
               style={{ '--md-item-i': i } as React.CSSProperties}
+              data-proximity
             >
               <div
                 className="md-avatar"
@@ -246,7 +262,7 @@ export default function MessageDropdown({
         </ul>
 
         <div className="md-footer">
-          <button type="button" tabIndex={open ? 0 : -1}>
+          <button type="button" tabIndex={open ? 0 : -1} data-proximity>
             <span className="material-symbols-outlined" aria-hidden="true">arrow_outward</span>
             <span className="md-btn-label">{viewAllLabel}</span>
           </button>
@@ -257,6 +273,7 @@ export default function MessageDropdown({
             onClick={handleMarkAllRead}
             disabled={markState !== 'idle'}
             aria-label="Mark all messages as read"
+            data-proximity
           >
             <span className="material-symbols-outlined" aria-hidden="true">done_all</span>
             <span className="md-btn-label">Mark all as read</span>

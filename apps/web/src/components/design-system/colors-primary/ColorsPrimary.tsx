@@ -74,12 +74,12 @@ export default function ColorsPrimary() {
         <div className="cp-lr-title cp-lr-title-sm">Rich Gold</div>
       </div>
       <div className="cp-swatches">
-        <div className="cp-sw lite" style={{ background: 'oklch(77.2% 0.177 91.5)' }}>1<br />77.2/.177/91.5</div>
-        <div className="cp-sw lite" style={{ background: 'oklch(80.5% 0.163 93.4)' }}>2<br />80.5/.163/93.4</div>
-        <div className="cp-sw lite" style={{ background: 'oklch(83.9% 0.148 95.3)' }}>3<br />83.9/.148/95.3</div>
-        <div className="cp-sw lite" style={{ background: 'oklch(87.2% 0.132 97.2)' }}>4<br />87.2/.132/97.2</div>
-        <div className="cp-sw lite" style={{ background: 'oklch(90.6% 0.113 99.1)' }}>5<br />90.6/.113/99.1</div>
-        <div className="cp-sw lite" style={{ background: 'oklch(93.9% 0.094 101.0)' }}>6<br />93.9/.094/101.0</div>
+        <div className="cp-sw lite" style={{ background: 'oklch(77.2% 0.185 91.5)' }}>1<br />77.2/.185/91.5</div>
+        <div className="cp-sw lite" style={{ background: 'oklch(80.5% 0.175 93.4)' }}>2<br />80.5/.175/93.4</div>
+        <div className="cp-sw lite" style={{ background: 'oklch(83.9% 0.168 95.3)' }}>3<br />83.9/.168/95.3</div>
+        <div className="cp-sw lite" style={{ background: 'oklch(87.2% 0.152 97.2)' }}>4<br />87.2/.152/97.2</div>
+        <div className="cp-sw lite" style={{ background: 'oklch(90.6% 0.130 99.1)' }}>5<br />90.6/.130/99.1</div>
+        <div className="cp-sw lite" style={{ background: 'oklch(93.9% 0.108 101.0)' }}>6<br />93.9/.108/101.0</div>
       </div>
 
       <div className="cp-usage">

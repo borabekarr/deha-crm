@@ -17,11 +17,17 @@ interface GroupState {
   containerBox: { left: number; top: number; right: number; bottom: number } | null;
   resizeObserver: ResizeObserver | null;
   dirty: boolean;
+  remeasureTimer: number | null;
+  onTransformSettle: (() => void) | null;
 }
 
 const DEFAULT_RADIUS = 80;
 const DEFAULT_SELECTOR = '[data-proximity]';
 const EPSILON = 0.005;
+// Debounces a group re-measure after transitionend/animationend so bursts of
+// child animations (staggered entrances, spam hover) coalesce into one
+// remeasure instead of thrashing getBoundingClientRect per event.
+const GROUP_REMEASURE_DEBOUNCE_MS = 50;
 
 const groups = new Map<HTMLElement, GroupState>();
 
@@ -202,6 +208,8 @@ export function registerProximityGroup(container: HTMLElement, opts: ProximityOp
     containerBox: null,
     resizeObserver: null,
     dirty: true,
+    remeasureTimer: null,
+    onTransformSettle: null,
   };
 
   if (typeof ResizeObserver !== 'undefined') {
@@ -211,6 +219,23 @@ export function registerProximityGroup(container: HTMLElement, opts: ProximityOp
     });
     state.resizeObserver.observe(container);
   }
+
+  // Transform-only movement (entrance keyframes, translate morphs, fixed-position
+  // containing-block resolution) never triggers ResizeObserver, so rects captured
+  // mid-animation stay stale at rest. Delegated transitionend/animationend on the
+  // group container catches settle points for any descendant; debounced so a burst
+  // of child animations coalesces into a single re-measure.
+  const onTransformSettle = () => {
+    if (state.remeasureTimer !== null) return;
+    state.remeasureTimer = window.setTimeout(() => {
+      state.remeasureTimer = null;
+      state.dirty = true;
+      scheduleFrame();
+    }, GROUP_REMEASURE_DEBOUNCE_MS);
+  };
+  state.onTransformSettle = onTransformSettle;
+  container.addEventListener('transitionend', onTransformSettle, { passive: true });
+  container.addEventListener('animationend', onTransformSettle, { passive: true });
 
   groups.set(container, state);
 
@@ -223,6 +248,13 @@ export function registerProximityGroup(container: HTMLElement, opts: ProximityOp
     const existing = groups.get(container);
     if (!existing) return;
     existing.resizeObserver?.disconnect();
+    if (existing.remeasureTimer !== null) {
+      window.clearTimeout(existing.remeasureTimer);
+    }
+    if (existing.onTransformSettle) {
+      container.removeEventListener('transitionend', existing.onTransformSettle);
+      container.removeEventListener('animationend', existing.onTransformSettle);
+    }
     zeroGroup(existing);
     groups.delete(container);
     if (groups.size === 0) {

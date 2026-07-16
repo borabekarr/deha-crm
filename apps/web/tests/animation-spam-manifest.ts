@@ -9,9 +9,9 @@ export interface SpamTarget {
   /** Selector clicked to open (and, for symmetric toggles, to close too). */
   trigger: string
   /**
-   * Deviation from the plan's literal shape: ai-memory-card's open button
-   * goes `pointer-events: none` while editing, so closing needs this
-   * separate selector. Omitted for symmetric toggles (trigger flips both
+   * Set when a target's open button goes `pointer-events: none` while
+   * expanded, so closing needs a separate selector than the one that opened
+   * it (see pinned-list). Omitted for symmetric toggles (trigger flips both
    * ways there): financial-health-card, status-card, motion-tabs.
    */
   closeTrigger?: string
@@ -35,13 +35,6 @@ export interface SpamTarget {
 // toggle. animation-spam.spec.ts covers it with a dedicated test instead.
 export const SPAM_TARGETS: SpamTarget[] = [
   {
-    slug: 'ai-memory-card',
-    trigger: '.mem-edit-btn',
-    closeTrigger: '.mem-block-close-btn',
-    expandable: '.mem-edit-zone',
-    durationMs: 380,
-  },
-  {
     slug: 'pinned-list',
     trigger: '.pl-item:has-text("Inbox") .pl-pin',
     closeTrigger: '.pl-item:has-text("Inbox") .pl-pin',
@@ -55,7 +48,6 @@ export const SPAM_TARGETS: SpamTarget[] = [
 ]
 
 // Finished-status slugs with an expandable interaction, per component-
-// registry.ts. Empty today (none of SPAM_TARGETS is Finished yet, all
-// 'Proceeding'); the gate test asserts membership implies manifest coverage,
-// which holds vacuously until a Task-1 component flips to Finished.
-export const EXPANDABLE_FINISHED_SLUGS: string[] = []
+// registry.ts. financial-health-card is the first to flip to Finished; the
+// gate test asserts membership implies manifest coverage, which it has here.
+export const EXPANDABLE_FINISHED_SLUGS: string[] = ['financial-health-card']

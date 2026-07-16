@@ -131,7 +131,9 @@
   background: transparent;
   transition:
     background calc(150ms * var(--anim-mult, 1)) ease,
-    transform calc(120ms * var(--anim-mult, 1)) ease;
+    transform calc(120ms * var(--anim-mult, 1)) ease,
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 
   /* Entrance: staggered rise + fade (funnel-chart approach). `backwards` fill
      hides each row through its own delay, then reverts to base styles so the

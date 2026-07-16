@@ -6,6 +6,7 @@
  * and inline-discuss panels. The inverted popover detail overlay is React state.
  */
 import { useState, useRef, useCallback } from 'react'
+import { useProximityGroup } from '@/lib/hooks'
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_pipeline-card.css'
 import '../../../../design-system/preview/_darkmode.css'
@@ -284,6 +285,7 @@ interface LeftPanelProps {
 
 function LeftPanel({ d, priority, whyOpen, onToggleWhy }: LeftPanelProps) {
   const T = TYPES[d.type]
+  const leftProxRef = useProximityGroup<HTMLDivElement>()
 
   // Callback ref: runs count-up tween on the impact number element
   const impactRef = useCallback((el: HTMLSpanElement | null) => {
@@ -300,9 +302,11 @@ function LeftPanel({ d, priority, whyOpen, onToggleWhy }: LeftPanelProps) {
   }, [d.potential])
 
   return (
+    <div ref={leftProxRef} style={{ display: 'contents' }}>
     <div
       className={`pc-left pri-${priority}${d.isError ? ' is-error' : ''}${whyOpen ? ' why-open' : ''}`}
       onClick={(e) => { e.stopPropagation(); onToggleWhy() }}
+      data-proximity
     >
       <div className="pc-pri"><span className="pc-pri-dot"></span>{PRI[priority].label}</div>
       <div className="pc-ghost"><span className="material-symbols-outlined">{T.icon}</span></div>
@@ -340,6 +344,7 @@ function LeftPanel({ d, priority, whyOpen, onToggleWhy }: LeftPanelProps) {
         </div>
       </div>
     </div>
+    </div>
   )
 }
 
@@ -371,9 +376,13 @@ function RightPanel({
   const inputRef = useRef<HTMLInputElement | null>(null)
   const discussLogRef = useRef<HTMLDivElement | null>(null)
   const sendBtnRef = useRef<HTMLButtonElement | null>(null)
+  const headToolsRef = useProximityGroup<HTMLDivElement>()
+  const discussInProxRef = useProximityGroup<HTMLDivElement>()
+  const actionsRef = useProximityGroup<HTMLDivElement>()
 
   // Callback ref: wire discuss input to the first-message-only flow
   const discussInRef = useCallback((el: HTMLDivElement | null) => {
+    discussInProxRef(el)
     if (!el) return
     const fi = el.querySelector<HTMLInputElement>('[data-discuss-in]')
     const fs = el.querySelector<HTMLButtonElement>('[data-discuss-send]')
@@ -382,7 +391,7 @@ function RightPanel({
     const scrollLog = () => { log.scrollTop = log.scrollHeight }
     // fix #5: pass onCloseDiscuss so the panel collapses after first send
     wireDiscussInput(fi, fs, log, scrollLog, onCloseDiscuss)
-  }, [onCloseDiscuss])
+  }, [onCloseDiscuss, discussInProxRef])
 
   return (
     <div
@@ -395,27 +404,28 @@ function RightPanel({
       {/* Header row */}
       <div className="pc-r-head">
         <CatTag d={d} />
-        <div className="pc-head-tools">
+        <div className="pc-head-tools" ref={headToolsRef}>
           <div className="pc-snooze-wrap">
             <button
               type="button"
               className={`pc-snooze${snoozeOpen ? ' open' : ''}`}
               aria-haspopup="menu"
               aria-label="Snooze options"
+              data-proximity
               onClick={(e) => { e.stopPropagation(); onToggleSnooze() }}
             >
               <span className="material-symbols-outlined">more_horiz</span>
             </button>
             <div className={`pc-pop${snoozeOpen ? ' open' : ''}`} role="menu">
-              <button type="button" className="pc-pop-item" role="menuitem" onClick={(e) => { e.stopPropagation(); onSnoozeItem('tomorrow') }}>
+              <button type="button" className="pc-pop-item" role="menuitem" data-proximity onClick={(e) => { e.stopPropagation(); onSnoozeItem('tomorrow') }}>
                 <span className="material-symbols-outlined">bedtime</span>Snooze to tomorrow
               </button>
-              <button type="button" className="pc-pop-item" role="menuitem" onClick={(e) => { e.stopPropagation(); onSnoozeItem('low') }}>
+              <button type="button" className="pc-pop-item" role="menuitem" data-proximity onClick={(e) => { e.stopPropagation(); onSnoozeItem('low') }}>
                 <span className="material-symbols-outlined">south</span>Lower priority
               </button>
             </div>
           </div>
-          <button type="button" className="pc-expand" aria-label="Open details" aria-haspopup="dialog" onClick={(e) => { e.stopPropagation(); onOpenDetail() }}>
+          <button type="button" className="pc-expand" aria-label="Open details" aria-haspopup="dialog" data-proximity onClick={(e) => { e.stopPropagation(); onOpenDetail() }}>
             <span className="material-symbols-outlined">open_in_full</span>
           </button>
         </div>
@@ -441,6 +451,7 @@ function RightPanel({
                 type="button"
                 key={s}
                 className="pc-sugg"
+                data-proximity
                 onClick={(e) => {
                   e.stopPropagation()
                   // Inject the suggestion as if the user typed it
@@ -481,6 +492,7 @@ function RightPanel({
               type="button"
               ref={sendBtnRef}
               data-discuss-send
+              data-proximity
               className="pc-discuss-send"
               aria-label="Send"
               onClick={(e) => e.stopPropagation()}
@@ -493,10 +505,11 @@ function RightPanel({
 
       {/* Footer actions */}
       <div className="pc-foot">
-        <div className="pc-actions">
+        <div className="pc-actions" ref={actionsRef}>
           <button
             type="button"
             className={`pc-discuss-btn${discussOpen ? ' open' : ''}`}
+            data-proximity
             onClick={(e) => {
               e.stopPropagation()
               onToggleDiscuss()
@@ -509,6 +522,7 @@ function RightPanel({
             type="button"
             ref={applyRef}
             className="pc-apply"
+            data-proximity
             onClick={(e) => { e.stopPropagation(); if (applyRef.current) onApply(e, applyRef.current) }}
           >
             <span className="pc-apply-label">

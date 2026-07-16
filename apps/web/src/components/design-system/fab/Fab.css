@@ -18,16 +18,14 @@ body { background: #FAFAFA; }
   --fp-fg:        #111111;
   --fp-sub:       #6B6B6B;
   --fp-sep:       rgba(17,17,17,0.07);
-  --fp-hover:     rgba(17,17,17,0.05);
+  /* --fp-hover now defined globally in styles/hover-tokens.css (:root / html.dark) */
   --fp-close-bg:  rgba(17,17,17,0.07);
   --fp-close-fg:  #6B6B6B;
-  --fp-shadow:
-    0 0 0 1px rgba(17,17,17,0.09),
-    0 30px 70px -12px rgba(17,17,17,0.25),
-    inset 0 1px 0 rgba(255,255,255,0.9);
-  /* FIX 4: bezel tokens (light) */
-  --fp-bezel-bg:  #D4DCE8;
-  --fp-bezel-pad: 10px;
+  /* FIX 4: bezel tokens (light) — bezel matches the canonical .shell surface */
+  --fp-bezel-bg:  var(--shell-bg);
+  /* Round-3 parity fix: 8px matches the cards-page concentric-demo gap
+     exactly (36 outer / 28 inner radius, 8px inset), ground-truth probe. */
+  --fp-bezel-pad: 8px;
 }
 html.dark .fab-screen {
   background: #1C1C1C;
@@ -35,16 +33,18 @@ html.dark .fab-screen {
   --fp-fg:        #F5F5F5;
   --fp-sub:       #A1A1A1;
   --fp-sep:       #232323;
-  --fp-hover:     #242424;
   --fp-close-bg:  #232323;
   --fp-close-fg:  #A1A1A1;
-  --fp-shadow:
-    0 0 0 1px #232323,
-    0 30px 70px -12px rgba(0,0,0,0.65),
-    inset 0 1px 0 rgba(255,255,255,0.06);
-  /* FIX 4: bezel tokens (dark) */
-  --fp-bezel-bg:  #111111;
+  /* FIX 4: bezel tokens (dark) — bezel matches the canonical .shell surface */
+  --fp-bezel-bg:  var(--shell-bg);
 }
+/* Round-3 fix: once the popover is open, the screen's own backdrop needs to
+   read as the true --shell-bg (matching the cards-page ground truth, where
+   the outer bezel sits directly on a page bg of the same value) so the
+   dark-mode hairline ring painted on the outer shell has the same contrast
+   the cards reference build gets. Closed state keeps the #1C1C1C "phone
+   screen" look untouched. */
+html.dark .fab-screen.open { background: var(--shell-bg); }
 
 /* ── Backdrop content ──────────────────────────────────────────── */
 .sc-content { padding: 26px 22px 0; }
@@ -54,7 +54,7 @@ html.dark .fab-screen {
 html.dark .sc-name { color: #F5F5F5; }
 .sc-avatar {
   width: 42px; height: 42px; border-radius: 50%;
-  background: var(--brand-primary-500); color: #fff; display: grid; place-items: center;
+  background: var(--brand-primary-500); color: var(--brand-on-primary); display: grid; place-items: center;
   font-size: 14px; font-weight: 800;
   background-image: linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
   background-size: 8px 8px;
@@ -69,7 +69,7 @@ html.dark .sc-name { color: #F5F5F5; }
 .sc-hero-row { display: flex; align-items: baseline; gap: 10px; }
 .sc-hero-num { font-size: 36px; font-weight: 900; letter-spacing: -0.03em; }
 .sc-hero-pill {
-  font-size: 11px; font-weight: 800; color: #fff; padding: 3px 9px; border-radius: 16px;
+  font-size: 11px; font-weight: 800; color: var(--brand-on-primary); padding: 3px 9px; border-radius: 16px;
   background: var(--brand-primary-500); display: inline-flex; align-items: center; gap: 3px;
 }
 .sc-hero-pill .material-icons { font-size: 12px; }
@@ -116,7 +116,9 @@ html.dark .sc-it-amt { color: #D4D4D4; }
     border-radius calc(440ms * var(--anim-mult, 1)) cubic-bezier(.34,1.2,.5,1),
     background-color calc(300ms * var(--anim-mult, 1)) ease,
     background-size calc(300ms * var(--anim-mult, 1)) ease,
-    box-shadow calc(300ms * var(--anim-mult, 1)) ease;
+    box-shadow calc(300ms * var(--anim-mult, 1)) ease,
+    scale calc(140ms * var(--anim-mult, 1)),
+    filter calc(140ms * var(--anim-mult, 1));
 }
 
 /* FIX 2: tactile press — only when the screen is NOT open (collapsed state only) */
@@ -129,31 +131,50 @@ html.dark .sc-it-amt { color: #D4D4D4; }
     border-radius calc(440ms * var(--anim-mult, 1)) cubic-bezier(.34,1.2,.5,1),
     background-color calc(300ms * var(--anim-mult, 1)) ease,
     background-size calc(300ms * var(--anim-mult, 1)) ease,
-    box-shadow calc(300ms * var(--anim-mult, 1)) ease;
+    box-shadow calc(300ms * var(--anim-mult, 1)) ease,
+    scale calc(140ms * var(--anim-mult, 1)),
+    filter calc(140ms * var(--anim-mult, 1));
 }
 
 /* ── Expanded panel: thinner dots, NO border-radius transition on open ── */
 .fab-screen.open .fab {
   width: calc(100% - 32px); height: 460px;
-  border-radius: 26px;  /* snaps instantly — no radius animation on open */
+  /* Round-3 parity fix: outer radius = inner radius (--card-radius, 20px) + the
+     8px bezel gap, mirroring the cards-page concentric law exactly
+     (36 outer = 28 inner + 8px gap). Snaps instantly — no radius animation on open. */
+  border-radius: 28px;
   /* FIX 4: grey bezel background; inner content sits on --fp-bg via .fab-menu padding */
   background-color: var(--fp-bezel-bg);
   /* clear the inherited base grid-line linear-gradients — open background is a clean bezel */
   background-image: none;
-  box-shadow: var(--fp-shadow);
-  /* omit border-radius from transition so it snaps to 26px immediately */
+  /* Round-3 fix: outer shell clones the cards-page mechanism exactly — light
+     mode paints NO ring/hairline (fill contrast only, no stray highlight
+     pixels); elevation comes from filter:drop-shadow on this non-clipped
+     shell itself (see ground-truth probe), not an inset box-shadow highlight.
+     box-shadow is explicitly reset to none: without this the collapsed .fab
+     circle's glossy box-shadow (brand-glow underglow + bright white inset
+     highlights) cascades straight through onto the open bezel, since this
+     rule previously left box-shadow undeclared. That leaked gloss was the
+     actual cause of the "washed white margin" reported in round 2. */
+  border: none;
+  box-shadow: none;
+  filter: drop-shadow(0 10px 15px rgba(17,17,17,.12)) drop-shadow(0 2px 4px rgba(17,17,17,.06));
+  /* omit border-radius from transition so it snaps to 28px immediately */
   transition:
     width calc(500ms * var(--anim-mult, 1)) cubic-bezier(.34,1.2,.5,1),
     height calc(500ms * var(--anim-mult, 1)) cubic-bezier(.34,1.2,.5,1),
     background-color calc(300ms * var(--anim-mult, 1)) ease,
-    box-shadow calc(300ms * var(--anim-mult, 1)) ease;
+    border-color calc(300ms * var(--anim-mult, 1)) ease;
 }
+/* Dark-only external hairline ring on the outer shell, matching --card-border
+   exactly (cards-page ground truth); light mode intentionally omits it. */
+html.dark .fab-screen.open .fab { border: 1px solid var(--card-border); }
 
 /* ── Plus glyph ────────────────────────────────────────────────── */
 .fab-plus {
   position: absolute; inset: 0; display: grid; place-items: center;
   color: #fff;
-  transition: opacity calc(180ms * var(--anim-mult, 1)) ease, transform calc(280ms * var(--anim-mult, 1)) cubic-bezier(.4,0,.2,1);
+  transition: opacity calc(180ms * var(--anim-mult, 1)) ease, transform calc(280ms * var(--anim-mult, 1)) var(--ease-standard);
 }
 .fab-plus .material-icons { font-size: 28px; -webkit-text-stroke: 1px rgba(255,255,255,0.9); }
 .fab-screen.open .fab-plus { opacity: 0; transform: rotate(45deg) scale(0.6); }
@@ -172,23 +193,30 @@ html.dark .sc-it-amt { color: #D4D4D4; }
 .fab-screen.open .fab-menu {
   pointer-events: auto;
   background: var(--card-bg);
-  margin: var(--fp-bezel-pad, 10px);
+  margin: var(--fp-bezel-pad, 8px);
   border-radius: var(--card-radius);
-  border: 1px solid var(--card-border);
-  border-top-color: rgba(255,255,255,0.9);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(17,17,17,0.04);
+  /* Round-3 fix: inner card clones the cards-page mechanism exactly. It is
+     never squircle-converted (plain border-radius only, permanent skip), so
+     it owns its hairline locally with a real border — the same fallback
+     pattern .card-inner uses for non-squircle surfaces. Light mode paints no
+     ring at all (fill contrast only); previously this was delegated to the
+     shared _surfaces.css :is() groups, which applied a border in BOTH themes
+     and conflicted with the light-mode "no ring" canon, so membership was
+     removed there in favour of this theme-conditional local rule. */
+  border: none;
 }
-html.dark .fab-screen.open .fab-menu {
-  border-color: var(--card-border);
-  border-top-color: rgba(255,255,255,0.22);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
-}
+/* Dark also gives the OUTER shell (.fab) its own 1px border (see below), which
+   eats 1px of border-box space that the inner card's margin measures from --
+   without compensating, the visible gap would read 9px instead of the
+   cards-page's 8px. Trim the margin by 1px here so the total visible gap
+   (outer border-width + inner margin) still lands on 8px in both themes. */
+html.dark .fab-screen.open .fab-menu { border: 1px solid var(--card-border); margin: calc(var(--fp-bezel-pad, 8px) - 1px); }
 
 /* Header row: title left, close right — shown together */
 .fab-menu-hd {
   display: flex; align-items: flex-start; gap: 8px;
   opacity: 0; transform: translateY(10px);
-  transition: opacity calc(220ms * var(--anim-mult, 1)) ease, transform calc(320ms * var(--anim-mult, 1)) cubic-bezier(.32,1.32,.5,1);
+  transition: opacity calc(220ms * var(--anim-mult, 1)) ease, transform calc(320ms * var(--anim-mult, 1)) var(--ease-spring-soft);
 }
 .fab-screen.open .fab-menu-hd { opacity: 1; transform: none; transition-delay: calc(120ms * var(--anim-mult, 1)); }
 
@@ -203,9 +231,10 @@ html.dark .fab-screen.open .fab-menu {
   background: var(--fp-close-bg); border: none; cursor: pointer;
   display: grid; place-items: center; color: var(--fp-close-fg);
   opacity: 0; transform: scale(0.5); pointer-events: none;
-  transition: opacity calc(200ms * var(--anim-mult, 1)) ease, transform calc(240ms * var(--anim-mult, 1)) cubic-bezier(.32,1.32,.5,1), background calc(150ms * var(--anim-mult, 1));
+  transition: opacity calc(200ms * var(--anim-mult, 1)) ease, transform calc(240ms * var(--anim-mult, 1)) var(--ease-spring-soft), background calc(150ms * var(--anim-mult, 1)), scale calc(var(--duration-instant) * var(--anim-mult, 1)), filter calc(var(--duration-instant) * var(--anim-mult, 1));
 }
-.fab-close:hover { filter: brightness(1.12); }
+/* .fab-close:hover brightness rule removed -- proximity engine now supplies hover
+   brightness via [data-proximity]'s --prox mapping in hover-tokens.css. */
 .fab-close .material-icons { font-size: 15px; }
 .fab-screen.open .fab-close { opacity: 1; transform: scale(1); pointer-events: auto; transition-delay: calc(160ms * var(--anim-mult, 1)); }
 
@@ -233,43 +262,54 @@ html.dark .fab-screen.open .fab-menu {
   transition:
     opacity calc(200ms * var(--anim-mult, 1)) ease,
     transform calc(340ms * var(--anim-mult, 1)) cubic-bezier(.32,1.32,.5,1),
-    background calc(80ms * var(--anim-mult, 1)) ease 0ms;
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade) 0ms,
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 /* FIX 1: hover background — no delay property needed here (baseline is 0ms) */
 .fab-item:hover { background: var(--fp-hover); }
 /* FIX 3: press feedback on menu items, distinct from hover background */
 .fab-item:active { transform: scale(0.97); }
 .fab-screen.open .fab-item { opacity: 1; transform: none; }
-/* FIX 1: nth-child stagger delays apply ONLY to opacity+transform, not background */
+/* FIX 1: nth-child stagger delays apply ONLY to opacity+transform, not background;
+   background leg matches --duration-fast so hover fill still clears promptly */
 .fab-screen.open .fab-item:nth-child(3){
   transition:
     opacity calc(200ms * var(--anim-mult, 1)) ease calc(175ms * var(--anim-mult, 1)),
     transform calc(340ms * var(--anim-mult, 1)) cubic-bezier(.32,1.32,.5,1) calc(175ms * var(--anim-mult, 1)),
-    background calc(80ms * var(--anim-mult, 1)) ease 0ms;
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) ease 0ms,
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 .fab-screen.open .fab-item:nth-child(4){
   transition:
     opacity calc(200ms * var(--anim-mult, 1)) ease calc(225ms * var(--anim-mult, 1)),
     transform calc(340ms * var(--anim-mult, 1)) cubic-bezier(.32,1.32,.5,1) calc(225ms * var(--anim-mult, 1)),
-    background calc(80ms * var(--anim-mult, 1)) ease 0ms;
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) ease 0ms,
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 .fab-screen.open .fab-item:nth-child(5){
   transition:
     opacity calc(200ms * var(--anim-mult, 1)) ease calc(275ms * var(--anim-mult, 1)),
     transform calc(340ms * var(--anim-mult, 1)) cubic-bezier(.32,1.32,.5,1) calc(275ms * var(--anim-mult, 1)),
-    background calc(80ms * var(--anim-mult, 1)) ease 0ms;
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) ease 0ms,
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 .fab-screen.open .fab-item:nth-child(6){
   transition:
     opacity calc(200ms * var(--anim-mult, 1)) ease calc(325ms * var(--anim-mult, 1)),
     transform calc(340ms * var(--anim-mult, 1)) cubic-bezier(.32,1.32,.5,1) calc(325ms * var(--anim-mult, 1)),
-    background calc(80ms * var(--anim-mult, 1)) ease 0ms;
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) ease 0ms,
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 
 /* ── Icon tiles — each item has its own --ic-bg ── */
 .fab-item-ic {
   width: 44px; height: 44px; border-radius: 13px; flex-shrink: 0;
-  display: grid; place-items: center; color: #fff;
+  display: grid; place-items: center; color: var(--brand-on-primary);
   background-color: var(--ic-bg, var(--brand-primary-500));
   background-image:
     radial-gradient(ellipse at top right, rgba(255,255,255,0.22) 0%, transparent 55%),

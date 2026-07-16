@@ -63,7 +63,7 @@ html.dark .ie-field {
 
 /* saved flash on the field ring */
 .ie-field[data-saved="true"] {
-  animation: ieSaved calc(.62s * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  animation: ieSaved calc(.62s * var(--anim-mult, 1)) var(--ease-out);
 }
 
 @keyframes ieSaved {
@@ -146,12 +146,14 @@ html.dark .ie-input::selection {
   cursor: pointer;
   background: none;
   transition:
-    background-color calc(.26s * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
+    background-color calc(.26s * var(--anim-mult, 1)) var(--ease-out),
     color            calc(.26s * var(--anim-mult, 1)),
     box-shadow       calc(.26s * var(--anim-mult, 1)),
     border-color     calc(.26s * var(--anim-mult, 1)),
     transform        calc(.12s * var(--anim-mult, 1)) ease,
-    opacity          calc(.22s * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+    opacity          calc(.22s * var(--anim-mult, 1)) var(--ease-out),
+    scale            calc(.14s * var(--anim-mult, 1)),
+    filter           calc(.14s * var(--anim-mult, 1));
 }
 
 .ie-act:active { transform: scale(.9); }
@@ -168,11 +170,13 @@ html.dark .ie-input::selection {
 .ie-act.is-confirming {
   transform: scale(.86);
   transition:
-    background-color calc(.26s * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
+    background-color calc(.26s * var(--anim-mult, 1)) var(--ease-out),
     color            calc(.26s * var(--anim-mult, 1)),
     box-shadow       calc(.26s * var(--anim-mult, 1)),
     border-color     calc(.26s * var(--anim-mult, 1)),
-    transform        calc(.18s * var(--anim-mult, 1)) cubic-bezier(.4,0,1,1);
+    transform        calc(.18s * var(--anim-mult, 1)) var(--ease-accel),
+    scale            calc(.14s * var(--anim-mult, 1)),
+    filter           calc(.14s * var(--anim-mult, 1));
 }
 
 /* pen state */
@@ -198,7 +202,7 @@ html.dark .ie-act[data-mode="edit"]:hover {
 
 /* check / save state — mirrors .btn-green pill treatment */
 .ie-act[data-mode="save"] {
-  color: #fff;
+  color: var(--brand-on-primary);
   background-color: var(--brand-primary, var(--brand-primary-500));
   background-image:
     linear-gradient(rgba(255,255,255,.12) 1px, transparent 1px),
@@ -238,10 +242,12 @@ html.dark .ie-act[data-mode="edit"]:hover {
   pointer-events: none;
   transform: scale(0.7);
   transition:
-    opacity   calc(.22s * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
-    transform calc(.28s * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
+    opacity   calc(.22s * var(--anim-mult, 1)) var(--ease-out),
+    transform calc(.28s * var(--anim-mult, 1)) var(--ease-spring),
     background-color calc(.2s * var(--anim-mult, 1)),
-    color     calc(.2s * var(--anim-mult, 1));
+    color     calc(.2s * var(--anim-mult, 1)),
+    scale     calc(.14s * var(--anim-mult, 1)),
+    filter    calc(.14s * var(--anim-mult, 1));
 }
 
 html.dark .ie-cancel {
@@ -300,19 +306,19 @@ html.dark .ie-cancel:hover {
 @media (prefers-reduced-motion: no-preference) {
   /* edit icon exits (shrink+fade) when entering save mode */
   .ie-act[data-ie-ready][data-mode="save"] .ie-ic--edit {
-    animation: ieIcOut calc(.2s * var(--anim-mult, 1)) cubic-bezier(.4,0,1,1) forwards;
+    animation: ieIcOut calc(.2s * var(--anim-mult, 1)) var(--ease-accel) forwards;
   }
   /* edit icon re-enters (grow+fade) when returning to edit mode */
   .ie-act[data-ie-ready][data-mode="edit"] .ie-ic--edit {
-    animation: ieIcIn calc(.36s * var(--anim-mult, 1)) cubic-bezier(.34,1.4,.5,1) forwards;
+    animation: ieIcIn calc(.36s * var(--anim-mult, 1)) var(--ease-spring-soft-2) forwards;
   }
   /* save icon exits (shrink+fade) when returning to edit mode */
   .ie-act[data-ie-ready][data-mode="edit"] .ie-ic--save {
-    animation: ieIcOut calc(.2s * var(--anim-mult, 1)) cubic-bezier(.4,0,1,1) forwards;
+    animation: ieIcOut calc(.2s * var(--anim-mult, 1)) var(--ease-accel) forwards;
   }
   /* save icon enters (grow+fade) when entering save mode */
   .ie-act[data-ie-ready][data-mode="save"] .ie-ic--save {
-    animation: ieIcIn calc(.36s * var(--anim-mult, 1)) cubic-bezier(.34,1.4,.5,1) forwards;
+    animation: ieIcIn calc(.36s * var(--anim-mult, 1)) var(--ease-spring-soft-2) forwards;
   }
 }
 

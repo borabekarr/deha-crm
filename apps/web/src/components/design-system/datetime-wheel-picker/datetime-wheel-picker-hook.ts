@@ -2,7 +2,9 @@
  * DatetimeWheelPicker hook — DOM-side behavior for the five-wheel iOS
  * date + time picker. Wheel mechanics (snap, settle, depth-fade, aligning
  * guard, committed-index reconciliation) are modeled on date-picker-hook.ts;
- * the sheet enter/exit + scrim chrome is modeled on model-selection-sheet.
+ * the sheet enter/exit + scrim chrome reuses the shared sheet chrome timing
+ * pattern (local-var-flip + anim-mult; original component now in
+ * design-system-archive/).
  *
  * NO raw useEffect. All side-effects run through the exported callback ref.
  * The existing date-picker component is untouched — this extends the pattern

@@ -3,6 +3,8 @@ import '../../../../design-system/preview/_darkmode.css'
 import './StatisticsGraphCard.css'
 
 import { useState, type ReactNode } from 'react'
+import { useProximityGroup } from '@/lib/hooks'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
 import {
   type SgCardData,
   sgcCardRef,
@@ -145,6 +147,11 @@ interface CardItemProps {
 function CardItem({ data, cap }: CardItemProps) {
   // We keep a stable copy of the data object per card so the hook can mutate _series etc.
   const [d] = useState<SgCardData>(() => ({ ...data }))
+  const syncColRef = useProximityGroup<HTMLDivElement>()
+  const actionsRef = useProximityGroup<HTMLDivElement>()
+  const rangeFieldsetRef = useProximityGroup<HTMLFieldSetElement>()
+  const shellSquircleRef = useSquircle<HTMLDivElement>()
+  const innerSquircleRef = useSquircle<HTMLDivElement>()
 
   const avatarInner = d.icon
     ? <span className="material-symbols-outlined">{d.icon}</span>
@@ -160,6 +167,7 @@ function CardItem({ data, cap }: CardItemProps) {
         <div
           className={`sg-card lift acc-${d.stage}`}
           ref={(el) => {
+            shellSquircleRef(el)
             if (el) {
               sgcCardRef(el, d)
             } else {
@@ -168,7 +176,7 @@ function CardItem({ data, cap }: CardItemProps) {
           }}
         >
           {/* inner card: white surface with chart + content stacked inside */}
-          <div className="sg-inner">
+          <div className="sg-inner" ref={innerSquircleRef}>
             {/* chart layer (z-index 0) and dot/flash (z-index 1) behind .sg-content */}
             <div className="sg-chart" />
             <div className="sg-dot" />
@@ -183,12 +191,12 @@ function CardItem({ data, cap }: CardItemProps) {
                     <div className="sg-name">{d.name}</div>
                   </div>
                 </div>
-                <div className="sg-sync-col">
-                  <button type="button" className="sg-sync" data-sync aria-label="Sync data">
+                <div className="sg-sync-col" ref={syncColRef}>
+                  <button type="button" className="sg-sync" data-sync data-proximity aria-label="Sync data">
                     <span className="material-symbols-outlined">sync</span>
                     <span className="sg-upd">2h ago</span>
                   </button>
-                  <button type="button" className="sg-rangechip" data-rangechip aria-label="Change trend range">
+                  <button type="button" className="sg-rangechip" data-rangechip data-proximity aria-label="Change trend range">
                     {/* icon slot — hook replaces innerHTML on range change via rangeIconHTML() */}
                     <span className="sg-rangechip-icon-slot">
                       <span className="material-symbols-outlined sg-rangechip-icon">calendar_month</span>
@@ -221,8 +229,8 @@ function CardItem({ data, cap }: CardItemProps) {
                 </div>
               </div>
 
-              <div className="sg-actions">
-                <button type="button" className="sg-cta" data-cta>
+              <div className="sg-actions" ref={actionsRef}>
+                <button type="button" className="sg-cta" data-cta data-proximity>
                   <span className="material-symbols-outlined">insights</span>
                   Get Optimization Report
                 </button>
@@ -237,23 +245,23 @@ function CardItem({ data, cap }: CardItemProps) {
               <span className="material-symbols-outlined">timeline</span>
               Trend range
             </div>
-            <fieldset className="seg vert" aria-label="Trend range" style={{ margin: 0, border: 0, padding: 0, minWidth: 0 }}>
+            <fieldset ref={rangeFieldsetRef} className="seg vert" aria-label="Trend range" style={{ margin: 0, border: 0, padding: 0, minWidth: 0 }}>
               <span className="seg-pill" />
-              <button type="button" data-r="Today">
+              <button type="button" data-r="Today" data-proximity>
                 <span className="material-symbols-outlined">today</span>Today
               </button>
-              <button type="button" data-r="Weekly">
+              <button type="button" data-r="Weekly" data-proximity>
                 <RangeIconSvgWeekly />
                 Weekly
               </button>
-              <button type="button" className="active" data-r="Monthly">
+              <button type="button" className="active" data-r="Monthly" data-proximity>
                 <span className="material-symbols-outlined">calendar_month</span>Monthly
               </button>
-              <button type="button" data-r="Quarterly">
+              <button type="button" data-r="Quarterly" data-proximity>
                 <RangeIconSvgQuarterly />
                 Quarterly
               </button>
-              <button type="button" data-r="Yearly">
+              <button type="button" data-r="Yearly" data-proximity>
                 <span className="material-symbols-outlined">event_repeat</span>Yearly
               </button>
             </fieldset>

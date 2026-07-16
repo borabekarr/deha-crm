@@ -4,6 +4,8 @@ import './OnboardingCompletion.css'
 
 import { useState, useCallback, useRef } from 'react'
 import { ocRootRef, cleanupOc, scheduleComplete, clearOcTimers, type StatusMap } from './onboarding-completion-hook'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
+import { useProximityGroup } from '@/lib/hooks'
 
 // ── SVG icon helpers (no icon-font dependency) ────────────────────────────────
 
@@ -135,7 +137,7 @@ function ProgressRing({
           stroke={color} strokeWidth={stroke}
           strokeDasharray={circ} strokeDashoffset={offset}
           strokeLinecap="round"
-          style={{ transition: 'stroke-dashoffset calc(400ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1)' }}
+          style={{ transition: 'stroke-dashoffset calc(400ms * var(--anim-mult, 1)) var(--ease-out)' }}
         />
       </svg>
     </span>
@@ -246,7 +248,7 @@ function RippleButton({
   }
 
   return (
-    <button ref={ref} type="button" className={className} onClick={fire} disabled={disabled}>
+    <button ref={ref} type="button" className={className} data-proximity onClick={fire} disabled={disabled}>
       {ripples.map((rp) => (
         <span key={rp.id} className="oc-ripple" style={{ left: rp.x, top: rp.y }} />
       ))}
@@ -280,6 +282,7 @@ function StepRow({
       ref={ref}
       type="button"
       className={`oc-row${done ? ' is-done' : ''}${processing ? ' is-processing' : ''}`}
+      data-proximity
       onPointerDown={onDown}
       onClick={() => !done && !processing && onComplete(step.id)}
       disabled={done || processing}
@@ -325,7 +328,7 @@ function Success({ n, onReset, fire }: { n: number; onReset: () => void; fire: b
         <RippleButton className="oc-cta" onClick={() => {}}>
           <span>View Dashboard</span><span className="oc-cta-ico"><ArrowRight size={20} /></span>
         </RippleButton>
-        <button type="button" className="oc-replay" onClick={onReset}>
+        <button type="button" className="oc-replay" data-proximity onClick={onReset}>
           <RefreshIcon size={15} />
           Replay
         </button>
@@ -340,37 +343,20 @@ function Success({ n, onReset, fire }: { n: number; onReset: () => void; fire: b
 
 // ── Inline CSS overrides for all 6 feedback fixes ────────────────────────────
 const OC_OVERRIDES = `
-  /* FIX 1 — Option cards use inner-card tokens (grey outer bg + white inner card) */
-  .oc-card {
-    background: var(--card-bg, #FFFFFF);
-    border: 1px solid var(--card-border, #D4D4D4);
-    border-radius: var(--card-radius, 20px);
-    box-shadow: none;
-  }
-  html.dark .oc-card {
-    background: var(--card-bg, #1C1C1C);
-    border-color: var(--card-border, #232323);
-    box-shadow: none;
-  }
-  /* Checklist rows: white card on grey outer surface */
-  .oc-row {
-    background: #FFFFFF;
-    border: 1px solid #ECECEC;
-  }
-  html.dark .oc-row {
-    background: color-mix(in srgb, #fff 8%, var(--card-bg, #1C1C1C));
-    border-color: var(--card-border, #232323);
-  }
-  .oc-row:hover:not(:disabled) { background: #FAFAFA; }
-  html.dark .oc-row:hover:not(:disabled) { background: color-mix(in srgb, #fff 13%, var(--card-bg, #1C1C1C)); border-color: color-mix(in srgb, #fff 18%, transparent); }
-  html.dark .oc-row.is-done { background: color-mix(in srgb, var(--oc-accent) 18%, var(--card-bg, #1C1C1C)); }
-  .oc-row.is-done { background: color-mix(in srgb, var(--oc-accent) 10%, #FFFFFF); }
+  /* FIX 1 — Option cards / checklist rows: canon inner-card recipe now lives
+     in OnboardingCompletion.css (.oc-card, .oc-prompt, .oc-row share the
+     --card-bg/--card-border/--card-radius + inset hairline tokens with
+     .card-inner). This block previously duplicated a partial version of
+     that fix here with equal cascade specificity, silently shadowing the
+     base CSS; removed so the .css file is the single source of truth.
+     useSquircle's --corner-radius binding for .oc-card still lives there
+     too (OnboardingCompletion.css .oc-card[data-squircle="on"] rule). */
   /* Focus card body in card variant */
   .oc-focus { background: transparent; }
 
   /* FIX 2 — Step transitions: smoother easing, longer, no abrupt cut */
-  .oc-card { animation: ocCardIn calc(580ms * var(--anim-mult, 1)) cubic-bezier(.16,1,.3,1); }
-  .oc-focus { animation: ocFocusIn calc(620ms * var(--anim-mult, 1)) cubic-bezier(.16,1,.3,1); }
+  .oc-card { animation: ocCardIn calc(580ms * var(--anim-mult, 1)) var(--ease-out-soft); }
+  .oc-focus { animation: ocFocusIn calc(620ms * var(--anim-mult, 1)) var(--ease-out-soft); }
   @keyframes ocCardIn {
     from { opacity: 0; transform: translateY(14px) scale(.98); }
     to   { opacity: 1; transform: none; }
@@ -379,7 +365,7 @@ const OC_OVERRIDES = `
     from { opacity: 0; transform: translateY(16px); }
     to   { opacity: 1; transform: none; }
   }
-  .oc-prompt { animation: ocCardIn calc(580ms * var(--anim-mult, 1)) cubic-bezier(.16,1,.3,1); }
+  .oc-prompt { animation: ocCardIn calc(580ms * var(--anim-mult, 1)) var(--ease-out-soft); }
 
   /* FIX 3 — Remove drop-shadow from all glyph icons; color/bg handled in TSX */
   .oc-glyph svg, .oc-prompt-ico svg { filter: none !important; }
@@ -398,7 +384,7 @@ const OC_OVERRIDES = `
         color-mix(in srgb, var(--oc-accent) 10%, transparent) 45%,
         transparent 70%
       );
-    animation: ocGlowFade calc(800ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) both;
+    animation: ocGlowFade calc(800ms * var(--anim-mult, 1)) var(--ease-out) both;
   }
   @keyframes ocGlowFade {
     from { opacity: 0; transform: scale(.7); }
@@ -412,7 +398,7 @@ const OC_OVERRIDES = `
         transparent 65%
       );
     border-radius: 0;
-    animation: ocBloom calc(700ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) both;
+    animation: ocBloom calc(700ms * var(--anim-mult, 1)) var(--ease-out) both;
   }
   /* Ensure body content sits above the glow */
   .oc-success-body { z-index: 1; }
@@ -439,8 +425,13 @@ export default function OnboardingCompletion() {
   const [fire, setFire] = useState(false)
   const [variant, setVariant] = useState<Variant>('checklist')
 
+  // Squircle ref: shared between the two mutually-exclusive .oc-card mounts
+  // (card / checklist variants) — only one is in the DOM at a time.
+  const ocCardSquircleRef = useSquircle<HTMLDivElement>()
+
   // Root element ref — timers are stored on the DOM node
   const rootElRef = useRef<HTMLElement | null>(null)
+  const proximityRef = useProximityGroup<HTMLElement>()
   // setFire is stable (from useState) — safe to close over in timer callbacks
   const setFireStable = useRef(setFire)
 
@@ -477,6 +468,7 @@ export default function OnboardingCompletion() {
   // reattaches it on every render; the todo→processing re-render would cancel
   // the pending processing→done timer, stranding the step in 'processing'.
   const setRootRef = useCallback((el: HTMLElement | null) => {
+    proximityRef(el)
     if (el) {
       rootElRef.current = el
       ocRootRef(el)
@@ -484,13 +476,13 @@ export default function OnboardingCompletion() {
       cleanupOc(rootElRef.current)
       rootElRef.current = null
     }
-  }, [])
+  }, [proximityRef])
 
   return (
     <div
       className="oc-stage"
       style={{ '--oc-accent': accent } as React.CSSProperties}
-      ref={setRootRef}
+      ref={setRootRef as unknown as React.Ref<HTMLDivElement>}
     >
       {/* eslint-disable-next-line no-restricted-syntax -- OC_OVERRIDES is a static component-authored CSS constant (no interpolation, no external/user input); injected as a late <style> for cascade precedence over the imported stylesheet */}
       <style dangerouslySetInnerHTML={{ __html: OC_OVERRIDES }} />
@@ -506,12 +498,12 @@ export default function OnboardingCompletion() {
                 <span className="oc-prompt-title">You&apos;re all set</span>
                 <span className="oc-prompt-sub">{n}/{n} Completed</span>
               </span>
-              <button type="button" className="oc-icon-btn" onClick={reset} aria-label="Start over">
+              <button type="button" className="oc-icon-btn" data-proximity onClick={reset} aria-label="Start over">
                 <RefreshIcon size={20} />
               </button>
             </div>
           ) : (
-            <button type="button" className="oc-prompt" onClick={() => complete(focused.id)}>
+            <button type="button" className="oc-prompt" data-proximity onClick={() => complete(focused.id)}>
               <ProgressRing value={doneCount} total={n} size={46} stroke={4} color="var(--oc-accent)" />
               <span className="oc-prompt-text">
                 <span className="oc-prompt-title-row">
@@ -529,7 +521,7 @@ export default function OnboardingCompletion() {
 
         {/* ── CARD ── */}
         {variant === 'card' && (
-          <div className="oc-card">
+          <div className="oc-card" ref={ocCardSquircleRef}>
             {showSuccess ? (
               <Success n={n} onReset={reset} fire={fire} />
             ) : (
@@ -569,7 +561,7 @@ export default function OnboardingCompletion() {
 
         {/* ── CHECKLIST ── */}
         {variant === 'checklist' && (
-          <div className="oc-card">
+          <div className="oc-card" ref={ocCardSquircleRef}>
             {showSuccess ? (
               <Success n={n} onReset={reset} fire={fire} />
             ) : (
@@ -610,6 +602,7 @@ export default function OnboardingCompletion() {
               role="tab"
               aria-selected={variant === id}
               className={`oc-seg-btn${variant === id ? ' is-on' : ''}`}
+              data-proximity
               onClick={() => setVariant(id)}
             >
               {v}

@@ -3,6 +3,8 @@ import '../../../../design-system/preview/_darkmode.css'
 import './ThemeEditor.css'
 
 import { useState } from 'react'
+import { useProximityGroup } from '@/lib/hooks'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
 
 // ── Swatch colours (verbatim from prototype) ─────────────────────────────────
 const SWATCHES = ['var(--brand-primary-500)', '#EF4444', '#EAB308', '#F97316', '#232323']
@@ -27,12 +29,21 @@ export default function ThemeEditor() {
 
   // Startup toggle (initial state: on — sw-base sw-on in prototype)
   const [startupOn, setStartupOn] = useState(true)
+  const teProxRef = useProximityGroup<HTMLDivElement>()
+  const teOuterSquircleRef = useSquircle<HTMLDivElement>()
+  const tePanelSquircleRef = useSquircle<HTMLDivElement>()
 
   return (
     <div className="card" style={{ padding: 0 }}>
       <div className="te-bg">
-        <div className="te-outer">
-          <div className="te-panel">
+        <div className="te-outer" ref={teOuterSquircleRef}>
+          <div
+            className="te-panel"
+            ref={(el) => {
+              teProxRef(el)
+              tePanelSquircleRef(el)
+            }}
+          >
 
             {/* Top bar */}
             <div className="te-topbar">
@@ -40,7 +51,7 @@ export default function ThemeEditor() {
                 <span className="material-icons">search</span>
                 <input type="text" placeholder="Search..." aria-label="Search theme tokens" />
               </label>
-              <button type="button" className="te-save">
+              <button type="button" className="te-save" data-proximity>
                 <span className="material-icons" style={{ fontSize: 14 }}>save</span>
                 Save
               </button>
@@ -59,6 +70,7 @@ export default function ThemeEditor() {
                 {/* Default mode card */}
                 <div
                   className={`te-mode${windowMode === 'default' ? ' sel' : ''}`}
+                  data-proximity
                   onClick={() => setWindowMode('default')}
                 >
                   <div className="te-thumb">
@@ -88,6 +100,7 @@ export default function ThemeEditor() {
                 {/* Compact mode card */}
                 <div
                   className={`te-mode${windowMode === 'compact' ? ' sel' : ''}`}
+                  data-proximity
                   onClick={() => setWindowMode('compact')}
                 >
                   <div className="te-thumb te-thumb-compact">
@@ -123,6 +136,7 @@ export default function ThemeEditor() {
                       type="button"
                       key={color}
                       className={`te-sw${selectedSwatch === i ? ' sel' : ''}`}
+                      data-proximity
                       style={{ '--c': color } as React.CSSProperties}
                       onClick={() => setSelectedSwatch(i)}
                       aria-label={`Select theme color ${i + 1}`}
@@ -187,6 +201,7 @@ export default function ThemeEditor() {
                 <button
                   type="button"
                   className={`te-tog${startupOn ? ' on' : ''}`}
+                  data-proximity
                   onClick={() => setStartupOn((v) => !v)}
                   aria-label="Toggle startup"
                   aria-pressed={startupOn}

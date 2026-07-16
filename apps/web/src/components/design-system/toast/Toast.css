@@ -67,12 +67,12 @@ html.dark .tst-demo {
   background: var(--bg-card-solid);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 6px -3px rgba(17,17,17, 0.18);
   transition:
-    transform calc(140ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1),
-    filter calc(140ms * var(--anim-mult, 1));
+    transform calc(140ms * var(--anim-mult, 1)) var(--ease-out),
+    filter calc(140ms * var(--anim-mult, 1)),
+    scale calc(140ms * var(--anim-mult, 1));
 }
-.tst-trigger:hover {
-  filter: brightness(1.03);
-}
+/* .tst-trigger:hover brightness rule removed -- proximity engine now supplies
+   hover brightness via [data-proximity]'s --prox mapping in hover-tokens.css. */
 .tst-trigger:active {
   transform: scale(0.95);
 }
@@ -138,10 +138,10 @@ html.dark .tst-demo {
     0 2px 6px rgba(17,17,17, 0.05);
   overflow: hidden;
   transition:
-    width calc(260ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1),
-    border-radius calc(260ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1),
-    padding calc(260ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1),
-    transform calc(220ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1),
+    width calc(260ms * var(--anim-mult, 1)) var(--ease-out),
+    border-radius calc(260ms * var(--anim-mult, 1)) var(--ease-out),
+    padding calc(260ms * var(--anim-mult, 1)) var(--ease-out),
+    transform calc(220ms * var(--anim-mult, 1)) var(--ease-out),
     opacity calc(220ms * var(--anim-mult, 1));
 }
 /* hairline accent rail down the left edge */
@@ -182,7 +182,7 @@ html.dark .tst-demo {
     inset 0 -2px 0 rgba(17,17,17, 0.22),
     inset 0 0 0 1px rgba(17,17,17, 0.12),
     0 2px 6px rgba(0, 0, 0, 0.12);
-  transition: border-radius calc(260ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1);
+  transition: border-radius calc(260ms * var(--anim-mult, 1)) var(--ease-out);
 }
 .tst-ic .material-icons {
   font-size: 18px;
@@ -230,7 +230,9 @@ html.dark .tst-demo {
   transition:
     background calc(140ms * var(--anim-mult, 1)),
     color calc(140ms * var(--anim-mult, 1)),
-    transform calc(100ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1);
+    transform calc(100ms * var(--anim-mult, 1)) var(--ease-out),
+    scale calc(140ms * var(--anim-mult, 1)),
+    filter calc(140ms * var(--anim-mult, 1));
 }
 .tst-x:hover {
   background: var(--bg-chip);
@@ -333,11 +335,11 @@ html.dark .tst-demo {
     0 2px 6px -2px var(--acc);
   transition:
     filter calc(160ms * var(--anim-mult, 1)),
-    transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1);
+    transform calc(160ms * var(--anim-mult, 1)) var(--ease-out),
+    scale calc(160ms * var(--anim-mult, 1));
 }
-.tst-act:hover {
-  filter: brightness(1.05);
-}
+/* .tst-act:hover brightness rule removed -- proximity engine now supplies
+   hover brightness via [data-proximity]'s --prox mapping in hover-tokens.css. */
 .tst-act:active {
   transform: scale(0.96);
 }
@@ -474,7 +476,7 @@ html.dark .tst-demo {
 
 /* ── live enter / exit choreography ── */
 .tst.tst-enter {
-  animation: tst-in calc(280ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: tst-in calc(280ms * var(--anim-mult, 1)) var(--ease-out) both;
 }
 @keyframes tst-in {
   from {
@@ -488,7 +490,7 @@ html.dark .tst-demo {
 }
 .tst.tst-leaving {
   pointer-events: none;
-  animation: tst-out calc(280ms * var(--anim-mult, 1)) cubic-bezier(0.4, 0, 1, 1) forwards;
+  animation: tst-out calc(280ms * var(--anim-mult, 1)) var(--ease-accel) forwards;
 }
 @keyframes tst-out {
   to {
@@ -499,7 +501,7 @@ html.dark .tst-demo {
 }
 .tst.tst-leaving-left {
   pointer-events: none;
-  animation: tst-out-left calc(280ms * var(--anim-mult, 1)) cubic-bezier(0.4, 0, 1, 1) forwards;
+  animation: tst-out-left calc(280ms * var(--anim-mult, 1)) var(--ease-accel) forwards;
 }
 @keyframes tst-out-left {
   to {
@@ -510,7 +512,7 @@ html.dark .tst-demo {
 }
 .tst.tst-leaving-right {
   pointer-events: none;
-  animation: tst-out-right calc(280ms * var(--anim-mult, 1)) cubic-bezier(0.4, 0, 1, 1) forwards;
+  animation: tst-out-right calc(280ms * var(--anim-mult, 1)) var(--ease-accel) forwards;
 }
 @keyframes tst-out-right {
   to {

@@ -638,6 +638,18 @@ html.dark .dc-left {
 }
 .dc-cell.dim { color: var(--dc-fg-dimmer); font-weight: 500; }
 .dc-cell:hover { background: rgba(255,255,255,0.08); transform: scale(1.05); }
+/* Proximity: own transition (0,1,0) beats hover-tokens.css's [data-proximity]x3
+   fallback; scale + filter channels added here so the engine's --prox mapping
+   doesn't snap. */
+.dc-cell[data-proximity] {
+  transition:
+    background calc(160ms * var(--anim-mult, 1)),
+    transform calc(180ms * var(--anim-mult, 1)) var(--dc-spring),
+    color calc(160ms * var(--anim-mult, 1)),
+    box-shadow calc(200ms * var(--anim-mult, 1)) var(--dc-out),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
 .dc-cell.has-event::after {
   content: '';
   position: absolute;

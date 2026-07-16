@@ -3,6 +3,7 @@ import '../../../../design-system/preview/_darkmode.css'
 import './MorphSurface.css'
 
 import { useState, useCallback, useRef } from 'react'
+import { useProximityGroup } from '@/lib/hooks'
 import { useTextareaRef, useClickOutside, useSuccessFlash } from './morph-surface-hook'
 
 export interface MorphSurfaceProps {
@@ -37,7 +38,15 @@ export default function MorphSurface({
 
   /* callback-refs — no useEffect */
   const textareaCallbackRef = useTextareaRef(open)
-  const rootRef = useClickOutside(open, close)
+  const clickOutsideRef = useClickOutside(open, close)
+  const proximityRef = useProximityGroup<HTMLDivElement>()
+  const rootRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      clickOutsideRef(el)
+      proximityRef(el)
+    },
+    [clickOutsideRef, proximityRef],
+  )
 
   /* compose the autofocus callback-ref with the stable element ref */
   const textareaRef = useCallback(
@@ -118,6 +127,7 @@ export default function MorphSurface({
           <button
             type="button"
             className="ms2-trigger"
+            data-proximity
             tabIndex={open ? -1 : 0}
             onClick={(e) => { e.stopPropagation(); setOpen(true) }}
           >
@@ -129,7 +139,7 @@ export default function MorphSurface({
         <form className="ms2-form" onSubmit={submit}>
           <div className="ms2-form-head">
             <span className="ms2-form-title">{triggerLabel}</span>
-            <button type="submit" className="ms2-submit" tabIndex={open ? 0 : -1}>
+            <button type="submit" className="ms2-submit" data-proximity tabIndex={open ? 0 : -1}>
               <kbd>⌘</kbd>
               <kbd>Enter</kbd>
             </button>

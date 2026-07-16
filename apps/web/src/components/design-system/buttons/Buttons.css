@@ -120,6 +120,14 @@ html.dark .btn-text { color: var(--brand-primary-400); }
    Only additive overrides go here. */
 .btn-apply {
   min-width: 104px;
+  /* Rest width: falls back to `auto` (min-width + content) until the first
+     click, at which point buttons-hook.ts pins the measured pixel width
+     onto this var -- see runApplyBtn. That gives the width transition a
+     concrete number on both ends (compact AND extend), instead of relying
+     on the CSS keyword `auto`, which was true even before this step's
+     duration changes and previously made the extend-back transition snap
+     instantly rather than animate. */
+  width: var(--btn-apply-rest-w, auto);
   position: relative;
   overflow: visible;
   isolation: isolate;
@@ -129,13 +137,23 @@ html.dark .btn-text { color: var(--brand-primary-400); }
   --color-3: 210 100% 63%;
   --color-4: 195 100% 63%;
   --color-5: 90 100% 63%;
-  transition:
-    width    calc(340ms * var(--anim-mult, 1)) var(--ease-spring),
-    padding  calc(340ms * var(--anim-mult, 1)) var(--ease-spring),
-    background-color calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring),
-    transform calc(240ms * var(--anim-mult, 1)) var(--ease-out),
-    box-shadow calc(240ms * var(--anim-mult, 1)) var(--ease-out),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+  /* Property list + easings are fixed across all three phases; only
+     transition-duration is overridden per state class below, because
+     phase-1 (compact) and phase-3 (extend) need different width/padding
+     timing -- see the .is-loading / .is-done overrides further down.
+     Order: width, padding, background-color, transform, box-shadow, scale. */
+  transition-property: width, padding, background-color, transform, box-shadow, scale;
+  transition-timing-function: var(--ease-spring), var(--ease-spring), var(--ease-spring), var(--ease-out), var(--ease-out), linear;
+  /* Resting / phase-3 duration set: width+padding extend back over
+     ~460ms (deliberately slower than the ~440ms compact so returning to
+     rest doesn't feel abrupt); background-color reverts over ~360ms. */
+  transition-duration:
+    calc(var(--duration-expand) * var(--anim-mult, 1)),
+    calc(var(--duration-expand) * var(--anim-mult, 1)),
+    calc(var(--duration-sweep) * var(--anim-mult, 1)),
+    calc(240ms * var(--anim-mult, 1)),
+    calc(240ms * var(--anim-mult, 1)),
+    calc(var(--duration-instant) * var(--anim-mult, 1));
 }
 
 @keyframes btn-rainbow-scroll {
@@ -188,41 +206,88 @@ html.dark .btn-text { color: var(--brand-primary-400); }
   pointer-events: none;
 }
 
+/* Row 4 — proximity wrapper for the locked DeleteButton. Scoped to
+   .btn-page-root .btn-prox-wrap only; does not touch [data-proximity]::after
+   globally, which would overwrite .btn-apply::after's rainbow underglow. */
+.btn-page-root .btn-prox-wrap { display: inline-flex; align-items: center; position: relative; }
+.btn-page-root .btn-prox-wrap::after {
+  content: ''; position: absolute; inset: 50%;
+  width: max(100%, 40px); height: max(100%, 40px);
+  transform: translate(-50%, -50%); pointer-events: none;
+}
+
+/* On-primary text override for the locked DeleteButton's "done" state
+   (source: delete-button/DeleteButton.css .db[data-state='done'], locked). */
+.btn-page-root .btn-prox-wrap .db[data-state='done'] { color: var(--brand-on-primary); }
+html.dark .btn-page-root .btn-prox-wrap .db[data-state='done'] { color: var(--brand-on-primary); }
+
 /* Active state scoped to .btn-apply; hover is raised via .btn-page-root below */
 .btn-apply:active { transform: scale(0.985); }
 
 /* ── Apply state machine — compress-from-right + loading bar ── */
 
-/* Label: always-mounted, morphs out (scale+fade) when loading/done — shared spring timing */
+/* Label: always-mounted, morphs out (scale+fade) when loading/done.
+   Split enter/exit timing -- the structural stagger fix: exit is fast and
+   undelayed so it visibly clears the stage first; enter (phase-3, done ->
+   default) is a slower spring with a ~120ms delay so it doesn't overlap
+   the outgoing check mark. */
 .btn-apply .btn-apply-label {
   display: inline-flex; align-items: center; gap: 7px;
   transition:
-    opacity   calc(200ms * var(--anim-mult, 1)) var(--ease-spring),
-    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring);
+    opacity   calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring) calc(var(--duration-fast) * var(--anim-mult, 1)),
+    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring) calc(var(--duration-fast) * var(--anim-mult, 1));
 }
 .btn-apply.is-loading .btn-apply-label,
 .btn-apply.is-done    .btn-apply-label {
   opacity: 0;
   transform: scale(0.82);
   pointer-events: none;
+  /* Exit (phase-1, default -> loading): fast, no delay -- outgoing layer
+     clears before the spinner fades in. */
+  transition:
+    opacity   calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out);
 }
 
-/* Loading: compress to a narrow pill holding the bar */
+/* Loading: compress to a narrow pill holding the bar.
+   Phase-1 (default -> loading) duration override: width/padding compact
+   over ~440ms -- keeps --ease-spring (from the base rule) so the 1.56
+   overshoot still delivers the requested bounce. */
 .btn-apply.is-loading {
   min-width: unset;
   width: 72px;
   padding: 0 10px;
+  transition-duration:
+    calc(var(--duration-compact) * var(--anim-mult, 1)),
+    calc(var(--duration-compact) * var(--anim-mult, 1)),
+    calc(var(--duration-sweep) * var(--anim-mult, 1)),
+    calc(240ms * var(--anim-mult, 1)),
+    calc(240ms * var(--anim-mult, 1)),
+    calc(var(--duration-instant) * var(--anim-mult, 1));
 }
 
-/* Done: compressed pill turns green */
+/* Done: compressed pill turns green.
+   Phase-2 (loading -> done) duration override: background-color sweeps to
+   green over ~360ms (up from 220ms) so the fill visibly travels instead of
+   snapping; width/padding hold their compact value (no visual change). */
 .btn-apply.is-done {
   min-width: unset;
   width: 72px;
   padding: 0 10px;
   background: var(--brand-primary-500);
+  color: var(--brand-on-primary);
+  transition-duration:
+    calc(var(--duration-compact) * var(--anim-mult, 1)),
+    calc(var(--duration-compact) * var(--anim-mult, 1)),
+    calc(var(--duration-sweep) * var(--anim-mult, 1)),
+    calc(240ms * var(--anim-mult, 1)),
+    calc(240ms * var(--anim-mult, 1)),
+    calc(var(--duration-instant) * var(--anim-mult, 1));
 }
 
 /* ── Radial spinner (replaces loading bar) ── */
+/* Spinner: hidden by default -- also the phase-2 exit target (loading ->
+   done), so it fades out fast with no delay. */
 .btn-apply-spinner {
   position: absolute;
   inset: 0;
@@ -232,10 +297,18 @@ html.dark .btn-text { color: var(--brand-primary-400); }
   transform: scale(0.82);
   pointer-events: none;
   transition:
-    opacity   calc(200ms * var(--anim-mult, 1)) var(--ease-spring),
-    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring);
+    opacity   calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
+    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
 }
-.btn-apply.is-loading .btn-apply-spinner { opacity: 1; transform: scale(1); }
+/* Enter (phase-1, default -> loading): ~120ms delay so it arrives only
+   after the label has visibly cleared -- the stagger fix. */
+.btn-apply.is-loading .btn-apply-spinner {
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity   calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring) calc(var(--duration-fast) * var(--anim-mult, 1)),
+    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring) calc(var(--duration-fast) * var(--anim-mult, 1));
+}
 
 .btn-apply-spin-svg {
   width: 24px;
@@ -265,16 +338,19 @@ html.dark .btn-text { color: var(--brand-primary-400); }
   to { transform: rotate(360deg); }
 }
 
-/* ── Check mark (done state) ── */
+/* ── Check mark (done state) ──
+   Split enter/exit -- also part of the stagger fix: enter (phase-2,
+   loading -> done) delays ~120ms behind the spinner's exit and scale-pops
+   in over ~300ms; exit (phase-3, done -> default) is fast and undelayed
+   so it clears before the label re-enters. */
 .btn-apply-check {
   position: absolute; inset: 0;
   display: grid; place-items: center;
   opacity: 0; transform: scale(0.82);
   pointer-events: none;
-  /* Shared spring timing — morph in + out symmetrically */
   transition:
-    opacity   calc(200ms * var(--anim-mult, 1)) var(--ease-spring),
-    transform calc(260ms * var(--anim-mult, 1)) var(--ease-spring);
+    opacity   calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out);
 }
 .btn-apply-check-ic {
   font-size: 22px;
@@ -282,6 +358,9 @@ html.dark .btn-text { color: var(--brand-primary-400); }
 }
 .btn-apply.is-done .btn-apply-check {
   opacity: 1; transform: scale(1);
+  transition:
+    opacity   calc(var(--duration-slow)   * var(--anim-mult, 1)) var(--ease-spring) calc(var(--duration-fast) * var(--anim-mult, 1)),
+    transform calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-spring) calc(var(--duration-fast) * var(--anim-mult, 1));
 }
 
 /* Bold apply icon */
@@ -381,7 +460,9 @@ html.dark .btn-delete {
     color calc(150ms * var(--anim-mult, 1)),
     background calc(150ms * var(--anim-mult, 1)),
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
-    box-shadow calc(var(--duration-base) * var(--anim-mult, 1));
+    box-shadow calc(var(--duration-base) * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 .btn-task:hover {
   filter: brightness(1.08);
@@ -434,7 +515,8 @@ html.dark .btn-delete {
   transition:
     filter calc(200ms * var(--anim-mult, 1)),
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring),
-    box-shadow calc(200ms * var(--anim-mult, 1));
+    box-shadow calc(200ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 .btn-cta:hover {
   filter: brightness(1.07);
@@ -484,3 +566,19 @@ html.dark .btn-page-root .btn-apply:hover {
    wash the gradient ring + glow. Doubled class beats hover-tokens.css's
    [data-proximity]x3 (0,4,0 > 0,3,0) regardless of CSS load order. */
 .btn-page-root .btn-apply.btn-apply[data-proximity] { filter: none; }
+
+/* Row 3 (Colorful pills) proximity transition — locked _shared-feedback.css
+   (btn-green L37-51, btn-yellow L57-71, btn-red L77-91) only lists
+   background-color/transform/box-shadow; scale + filter channels added here
+   so hover-tokens.css's --prox mapping doesn't snap. :not(.btn-apply) keeps
+   row 2's Ask Jeru rainbow/scale-only transition untouched. */
+.btn-page-root .btn-green[data-proximity]:not(.btn-apply),
+.btn-page-root .btn-yellow[data-proximity],
+.btn-page-root .btn-red[data-proximity] {
+  transition:
+    background-color calc(180ms * var(--anim-mult, 1)),
+    transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
+    box-shadow calc(200ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}

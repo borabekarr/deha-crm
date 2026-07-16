@@ -170,7 +170,7 @@
   padding: 0 6px;
   border-radius: var(--radius-circle, 9999px);
   background: var(--brand-primary);
-  color: #fff;
+  color: var(--brand-on-primary);
   background-image:
     linear-gradient(to right, rgba(255, 255, 255, 0.13) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.13) 1px, transparent 1px);
@@ -258,6 +258,16 @@
   transition:
     box-shadow calc(140ms * var(--anim-mult, 1)),
     transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* Proximity: own `box-shadow`/`transform` transition (0,1,0) beats
+   hover-tokens.css's [data-proximity]x3 fallback; scale + filter channels
+   added here so the engine's --prox mapping doesn't snap. */
+.cal2-ev[data-proximity] {
+  transition:
+    box-shadow calc(140ms * var(--anim-mult, 1)),
+    transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(0.22, 1, 0.36, 1),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 .cal2-ev::before {
   content: '';
@@ -695,7 +705,7 @@
 }
 .cal2-sh-meet-logo {
   font-size: 16px !important;
-  color: #fff;
+  color: var(--brand-on-primary);
   width: 26px;
   height: 26px;
   display: grid !important;

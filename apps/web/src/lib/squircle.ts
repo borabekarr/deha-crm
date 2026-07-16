@@ -26,6 +26,14 @@ interface Shape {
   segments: Segment[];
 }
 
+/** Per-corner radii, in CSS border-radius order (top-left, top-right, bottom-right, bottom-left). */
+export interface CornerRadii {
+  tl: number;
+  tr: number;
+  br: number;
+  bl: number;
+}
+
 const STEPS_PER_CORNER = 22;
 const KAPPA = 0.5522847498307936;
 
@@ -109,10 +117,62 @@ function superellipseShape(w: number, h: number, r: number, smoothing: number): 
   };
 }
 
-function buildShape(width: number, height: number, radius: number, smoothing: number): Shape {
+// Generic kappa-bezier corner arc (same construction as circularCornerShape's
+// four hard-coded corners, generalized to an arbitrary center/radius).
+function circularCornerArc(cx: number, cy: number, r: number, a0: number, a1: number): Segment {
+  const c = r * KAPPA;
+  const entry: Point = [cx + r * Math.cos(a0), cy + r * Math.sin(a0)];
+  const exit: Point = [cx + r * Math.cos(a1), cy + r * Math.sin(a1)];
+  return {
+    type: 'C',
+    c1: [entry[0] + c * -Math.sin(a0), entry[1] + c * Math.cos(a0)],
+    c2: [exit[0] - c * -Math.sin(a1), exit[1] - c * Math.cos(a1)],
+    to: exit,
+  };
+}
+
+// Per-corner variant: each corner gets its own radius (0 = sharp), same
+// perimeter wrap order (TR -> BR -> BL -> TL) as the uniform branches.
+function buildShapePerCorner(w: number, h: number, radii: CornerRadii, smoothing: number): Shape {
+  const max = Math.min(w, h) / 2;
+  const tl = clamp(radii.tl, 0, max);
+  const tr = clamp(radii.tr, 0, max);
+  const br = clamp(radii.br, 0, max);
+  const bl = clamp(radii.bl, 0, max);
+  const s = clamp(smoothing, 0, 1);
+  const circular = s <= 0.001;
+  const exponent = 2 + s * 3.35;
+
+  const corners: [number, number, number, number, number][] = [
+    [w - tr, tr, tr, -Math.PI / 2, 0],
+    [w - br, h - br, br, 0, Math.PI / 2],
+    [bl, h - bl, bl, Math.PI / 2, Math.PI],
+    [tl, tl, tl, Math.PI, Math.PI * 1.5],
+  ];
+  const edgeEnds: Point[] = [[w - tr, 0], [w, h - br], [bl, h], [0, tl]];
+
+  const segments: Segment[] = [];
+  corners.forEach(([cx, cy, r, a0, a1], i) => {
+    segments.push({ type: 'L', to: edgeEnds[i] });
+    if (r <= 0) return;
+    if (circular) {
+      segments.push(circularCornerArc(cx, cy, r, a0, a1));
+    } else {
+      for (const to of superellipseCornerPoints(cx, cy, r, exponent, a0, a1).slice(1)) {
+        segments.push({ type: 'L', to });
+      }
+    }
+  });
+
+  return { start: [tl, 0], segments };
+}
+
+function buildShape(width: number, height: number, radius: number | CornerRadii, smoothing: number): Shape {
   const w = Math.max(0, width);
   const h = Math.max(0, height);
   if (!w || !h) return { start: [0, 0], segments: [] };
+
+  if (typeof radius !== 'number') return buildShapePerCorner(w, h, radius, smoothing);
 
   const r = clamp(radius, 0, Math.min(w, h) / 2);
   if (!r) return rectShape(w, h);
@@ -150,8 +210,9 @@ function shapeToPath(shape: Shape, origin: Point = [0, 0]): string {
   return `${d}Z`;
 }
 
-/** Corner-smoothed rounded-rect outline, forward winding. */
-export function squirclePath(width: number, height: number, radius: number, smoothing = 0.6): string {
+/** Corner-smoothed rounded-rect outline, forward winding. Accepts a single
+ *  uniform radius (unchanged output) or per-corner CornerRadii (0 = sharp). */
+export function squirclePath(width: number, height: number, radius: number | CornerRadii, smoothing = 0.6): string {
   return shapeToPath(buildShape(width, height, radius, smoothing));
 }
 

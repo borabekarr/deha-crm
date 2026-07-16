@@ -48,7 +48,7 @@ html.dark {
 .btn-green:hover { transform: scale(1.03); box-shadow: 0 8px 20px rgba(17,17,17,0.32), inset 0 1px 0 rgba(255,255,255,0.2); }
 .btn-green:active { transform: scale(0.96); }
 .btn-green:focus-visible { outline: 2px solid var(--brand-primary-500); outline-offset: 2px; }
-html.dark .btn-green { background: var(--brand-primary-500); box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 8px color-mix(in srgb, var(--brand-primary-500) 34%, transparent); }
+html.dark .btn-green { background: var(--brand-primary-500); color: var(--brand-on-primary); box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 8px color-mix(in srgb, var(--brand-primary-500) 34%, transparent); }
 
 /* --------------------------------------------------------------------------
  * .btn-yellow -- canonical yellow pill button (mirrors .btn-green structure)
@@ -269,4 +269,51 @@ html.dark .sem.hot     { background: #2a1506 !important; color: #FDBA74 !importa
 .db-press    { animation: db-bounce    calc(360ms * var(--anim-mult, 1)) var(--ease-spring) both; }
 .db-slide-in  { animation: db-slide-in  calc(260ms * var(--anim-mult, 1)) var(--ease-out)    both; }
 .db-slide-out { animation: db-slide-out calc(200ms * var(--anim-mult, 1)) var(--ease-out)    both; }
+
+/* ============================================================
+   SQUIRCLE INNER-SURFACE RECIPE (shared, scoped opt-in)
+   Any surface driven by useSquircle() (lib/hooks/use-squircle.ts)
+   carries data-squircle="on" once its clip-path + ring custom
+   properties (--squircle-border-path / --squircle-hairline-path,
+   written by lib/squircle.ts) are computed. This block is the
+   shared "inner-card" treatment: the real border/box-shadow are
+   dropped in favour of two clip-path pseudo-elements that trace
+   the squircle outline.
+
+   Adopting components keep their own `padding` declaration --
+   `padding: calc(<their pad var> + 1px)` (the padding-box/
+   border-box offset + unpainted-crescent fix) -- since the pad
+   amount is component-specific; only the shared reset + ring
+   painting live here. Surface colors trace to the canonical
+   inner-card token (--card-border) so every adopter matches the
+   DS value truth.
+
+   Shadowed surfaces: box-shadow is clipped by clip-path, so a
+   surface that used box-shadow for depth must migrate that
+   shadow to filter: drop-shadow(...) on a wrapping element
+   instead (see .concentric-demo in Cards.css for the pattern).
+
+   Canon (corrected): the recipe defaults every squircle surface to
+   line-less in both modes. Only a dark-mode OUTER shell should ever
+   show the 1px --card-border ring; it opts in on its own scoped
+   selector (e.g. html.dark .tf-shell[data-squircle="on"]::before),
+   which fully redeclares content/position/background/clip-path and
+   wins on specificity over the default below (see .concentric-demo-outer
+   in Cards.css for the reference pattern).
+   ============================================================ */
+/* `html` prefix is a specificity bump, not a scoping change: at equal
+   attribute-only specificity, a component's own base rule (e.g. .card-inner's
+   border/box-shadow) loads after this shared block in the bundle and would
+   otherwise win the cascade purely on source order. The extra element
+   selector keeps this reset order-independent without adding a class. */
+html [data-squircle="on"] {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+/* Default: no ring, no hairline, anywhere. */
+[data-squircle="on"]::before,
+[data-squircle="on"]::after {
+  content: none;
+}
 

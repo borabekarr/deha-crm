@@ -4,6 +4,7 @@ import './PipelineView.css'
 
 import { useCallback, useState } from 'react'
 import { iconClass } from '../../../lib/iconClass'
+import { useProximityGroup } from '@/lib/hooks'
 import { pvRootRef } from './pipeline-view-hook'
 
 /* =========================================================================
@@ -122,6 +123,7 @@ function PipelineRow({
       type="button"
       className={`pv-row${stage.muted ? ' pv-row--muted' : ''}${isOpen ? ' is-open' : ''}`}
       style={{ '--i': index, '--pv-stage': stage.color } as React.CSSProperties}
+      data-proximity
       onClick={onToggle}
       aria-expanded={isOpen}
       aria-label={`${stage.label} stage details`}
@@ -166,6 +168,7 @@ function PipelineRow({
 export default function PipelineView() {
   // Only one popover open at a time; null == all closed.
   const [openKey, setOpenKey] = useState<string | null>(null)
+  const listRef = useProximityGroup<HTMLUListElement>()
 
   // Callback ref (React 19 cleanup form) — wires outside-click / Escape
   // dismissal via the hook. setOpenKey is stable, so [] deps are correct and
@@ -180,7 +183,7 @@ export default function PipelineView() {
     <div className="pipeline-view" ref={rootRef}>
       <div className="pv-shell">
         <div className="pv-group-header">Pipeline</div>
-        <ul className="pv-inset">
+        <ul className="pv-inset" ref={listRef}>
           {DEMO_STAGES.map((stage, i) => {
             const isOpen = openKey === stage.key
             return (

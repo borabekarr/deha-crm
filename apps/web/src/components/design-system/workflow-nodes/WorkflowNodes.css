@@ -8,14 +8,15 @@
 .wn-shell {
   position: relative;
   /* The dot-grid card surface */
-  /* Extra right padding to give the tool buttons (28px wide + 8px gap) room to
-     appear outside the rightmost node column without being clipped. */
-  padding: 24px 80px 24px 24px;
+  /* Right-column .wf-outer shells grow their real width by 36px on hover
+     (toolbar reveal, see .wf-tools) — right padding reserves that room so
+     the expanding shell never touches this canvas's own right edge. */
+  padding: 24px 56px 24px 24px;
   background: var(--card-bg, #FFFFFF);
   background-image: radial-gradient(circle at 1px 1px, #DDE3EA 1px, transparent 1px);
   background-size: 16px 16px;
   border-radius: 28px;
-  /* overflow: visible so .wf-tools can appear to the right of right-column nodes */
+  /* overflow: visible so a hovered .wf-outer can grow past its grid track */
   overflow: visible;
 }
 
@@ -32,97 +33,105 @@
 /* ── Node grid ────────────────────────────────────────────────────────────── */
 .wn-grid {
   display: grid;
-  /* Each column matches the 440px .wf-outer width (420px inner + 2x10px padding),
-     mirroring the model-selector open panel reference (.ms-outer = 440px effective) */
+  /* Each column matches the 440px .wf-outer rest-state width (420px .wf-body
+     + 2x10px padding), mirroring the model-selector open panel reference
+     (.ms-outer = 440px effective). Column gap is widened to 56px (36px
+     hover-width growth + buffer) so a left-column .wf-outer growing
+     rightward on hover never overlaps the right-column node. */
   grid-template-columns: repeat(2, minmax(0, 440px));
   justify-content: center;
-  gap: 32px 28px;
+  gap: 32px 56px;
   position: relative;
   z-index: 1;
 }
 
-/* ── Gray outer shell (canonical: 28px radius, 10px pad, drop shadow) ────── */
+/* ── Gray outer shell (canonical concentric pairing: 36px outer / 28px inner
+   card radius, per apps/web/src/components/design-system/cards/Cards.css'
+   .concentric-demo-outer/-inner reference) ────── */
 .wf-outer {
-  background: var(--shell-bg, #D4DCE8);
-  /* Canonical shell border-radius: 28px; uniform 10px padding so inner card
-     sits with equal gaps on all sides (canonical: padding = 10px). */
-  border-radius: 28px;
+  background: var(--shell-bg, #D9D9D9);
+  border-radius: 36px;
   padding: 10px;
   box-shadow: 0 12px 40px rgba(17,17,17, 0.10), 0 2px 8px rgba(17,17,17, 0.06);
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  /* Size to content, not the 440px grid track — rest-state content (.wf-body
+     420px + 0 tools + 20px padding) already equals 440px, so this is a
+     visual no-op at rest. On hover .wf-tools grows 36px and the shell's real
+     box grows past 440px into the reserved gap/canvas padding. */
+  justify-self: start;
   position: relative;
 }
+.wf-outer[data-squircle="on"] {
+  --corner-radius: 36px;
+  box-shadow: none;
+  filter:
+    drop-shadow(0 12px 40px rgba(17,17,17, 0.10))
+    drop-shadow(0 2px 8px rgba(17,17,17, 0.06));
+}
+.wf-outer[data-squircle="on"]::before,
+.wf-outer[data-squircle="on"]::after {
+  content: none;
+}
 
-/* ── Hover-expand: shell grows RIGHTWARD to cover the toolbar on hover ────── */
-/* ::after extends from the shell's centre to its right edge at rest (same bg,
-   invisible). On hover, `right` goes negative to encompass the toolbar:
-     8px gap + 28px toolbar buttons + 10px right gap = 46px.
-   The 10px right gap mirrors the shell's 10px left pad → symmetric gaps. */
-.wf-outer::after {
-  content: '';
+/* ── Card content column — fixed width so it never reflows while .wf-tools
+   grows/shrinks the shell around it (only the toolbar rail's own size
+   changes). ─────────────────────────────────────────────────────────── */
+.wf-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 420px;
+  flex-shrink: 0;
+}
+
+/* ── Stationary hover hit-strip pinned to .wf-body's fixed right edge ──────
+   Overlaps the card's rightmost 36px. Because .wf-body itself never resizes,
+   this strip never slides out from under the pointer while the shell
+   animates (hover-transform-needs-stationary-anchor). Driving both the
+   shell's width extension and the toolbar reveal from :has() on this one
+   stable element keeps the whole interaction flicker-free. */
+.wf-hover-strip {
   position: absolute;
   top: 0;
   bottom: 0;
-  /* Start well inside the shell so we seamlessly cover the right rounded corner */
-  left: 50%;
-  /* At rest: stays within the shell bounds (same bg, invisible) */
-  right: 0;
-  background: var(--shell-bg, #D4DCE8);
-  border-radius: 0 28px 28px 0;
-  /* Behind toolbar (z-index 25) but above grid content (z-index 1) */
-  z-index: 10;
-  pointer-events: none;
-  transition:
-    right calc(200ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
-}
-
-/* Trigger expansion via :has() — same hover conditions as the toolbar reveal */
-.wf-outer:has(.wf-hover-wedge:hover)::after,
-.wf-outer:has(.wf-tools:hover)::after {
-  /* 8px gap to toolbar + 28px button column + 10px right gap = 46px */
-  right: -46px;
-}
-
-/* ── Invisible triangular hover wedge on the right side of each node ───────
-   The wedge sits at left:100% of .wf-outer, spans the full node height plus
-   a small vertical overhang, and tapers from the node's right edge (full
-   width) to a point at the far right — forming a right-pointing triangle.
-   clip-path: polygon(left-top, left-bottom, right-center-point)
-   When :hover on .wf-hover-wedge (or .wf-tools:hover), .wf-tools reveals. */
-.wf-hover-wedge {
-  position: absolute;
-  top: -10px;                  /* overhang so wedge covers top/bottom edges */
-  left: 100%;
-  width: 64px;                 /* how far the wedge reaches to the right */
-  bottom: -10px;
-  clip-path: polygon(0% 0%, 0% 100%, 100% 50%);
-  background: transparent;     /* invisible — hit-test only */
-  z-index: 24;
+  right: -8px;
+  width: 44px;
+  z-index: 5;
   cursor: default;
 }
 
-/* ── Hover toolbar — vertical column floating outside the node's right edge ── */
+/* ── Hover toolbar — collapsed rail inside the shell's right side ─────────
+   max-width/margin-left animate 0 -> 28px/8px (36px total), which is exactly
+   the shell's real width growth on hover. Bounce via --ease-spring-open,
+   the same token ModelSelector.css uses for its shell-expand transform. */
 .wf-tools {
-  position: absolute;
-  top: 50%;
-  left: calc(100% + 8px);
-  z-index: 25;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
+  max-width: 0;
+  margin-left: 0;
   opacity: 0;
-  transform: translateY(-50%) translateX(-4px) scale(0.96);
+  /* overflow stays visible (not hidden) — the button tooltip pops out to the
+     LEFT of .wf-tools and would get clipped by a hidden overflow box. The
+     collapsed rail is fully hidden by opacity:0 + pointer-events:none, and
+     (when squircle is active) by the shell's own clip-path. */
   pointer-events: none;
-  transition: opacity calc(150ms * var(--anim-mult, 1)) ease, transform calc(200ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
+  transition:
+    max-width calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring-open),
+    margin-left calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring-open),
+    opacity calc(150ms * var(--anim-mult, 1)) ease;
 }
 
-/* Reveal when hovering the wedge zone OR when hovering the tools themselves */
-.wf-hover-wedge:hover ~ .wf-tools,
-.wf-tools:hover {
+/* Reveal + extend when hovering the strip OR the toolbar itself (keeps it
+   open while the pointer travels from the strip onto the buttons). */
+.wf-outer:has(.wf-hover-strip:hover) .wf-tools,
+.wf-outer:has(.wf-tools:hover) .wf-tools {
+  max-width: 28px;
+  margin-left: 8px;
   opacity: 1;
-  transform: translateY(-50%) translateX(0) scale(1);
   pointer-events: auto;
 }
 
@@ -140,7 +149,7 @@
   padding: 0;
   position: relative;
   box-shadow: 0 3px 8px rgba(17,17,17, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.85);
-  transition: background calc(140ms * var(--anim-mult, 1)), color calc(140ms * var(--anim-mult, 1)), border-color calc(140ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
+  transition: background calc(140ms * var(--anim-mult, 1)), color calc(140ms * var(--anim-mult, 1)), border-color calc(140ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) var(--ease-out);
 }
 
 .wf-tool:hover  { transform: translateY(-1px); }
@@ -186,7 +195,7 @@
   pointer-events: none;
   z-index: 40;
   box-shadow: 0 6px 16px rgba(17,17,17, 0.22);
-  transition: opacity calc(130ms * var(--anim-mult, 1)) ease, transform calc(130ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
+  transition: opacity calc(130ms * var(--anim-mult, 1)) ease, transform calc(130ms * var(--anim-mult, 1)) var(--ease-out);
 }
 
 .wf-tool::before {
@@ -242,12 +251,26 @@
 .wf-card {
   background: var(--card-bg, #FFFFFF);
   border: 1px solid var(--card-border, #D4D4D4);
-  border-radius: var(--card-radius, 20px);
+  /* Concentric pairing with the 36px .wf-outer shell (canon delta 8, matching
+     Cards.css .concentric-demo-inner) -- was var(--card-radius, 20px), which
+     read as a mismatched, "wrong" corner curve against the 28px shell. */
+  border-radius: 28px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), inset 0 -1px 0 rgba(17,17,17, 0.03);
   /* Bottom padding moved to .wf-foot margin-bottom so the footer/.wf-warn block
      sits INSIDE the content box with a real bottom gap (equal to its top gap),
      instead of being flush against the content-box inner bottom. */
   padding: 14px 12px 0;
+}
+/* Squircle conversion: concentric inner pairing with the now-also-squircled
+   .wf-outer (the .wn-shell dot-grid canvas itself is intentionally NOT
+   converted -- overflow:visible lets a hovered .wf-outer grow past its own
+   grid track, which a clip-path on .wn-shell would clip away). box-shadow
+   here is inset-only (unaffected by clip-path); border stays a real CSS
+   border per the .gc-card/.dp-panel precedent -- line-less per the shared
+   squircle recipe's default (only the dark-mode .wf-outer ring opts back in,
+   per Step-4 canon). */
+.wf-card[data-squircle="on"] {
+  --corner-radius: 28px;
 }
 
 .wf-head {
@@ -372,11 +395,22 @@
   gap: 6px;
   cursor: pointer;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), inset 0 -1px 0 rgba(17,17,17, 0.04);
-  transition: background calc(150ms * var(--anim-mult, 1)), transform calc(100ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
+  transition: background calc(150ms * var(--anim-mult, 1)), transform calc(100ms * var(--anim-mult, 1)) var(--ease-out);
 }
 
 .wf-connect:hover  { background: #FAFAFA; }
 .wf-connect:active { transform: scale(0.985); }
+
+/* Proximity: append scale/filter channels (existing background/transform
+   transition untouched; :active scale is unaffected since it's a separate
+   pseudo-class, not hover). */
+.wf-connect[data-proximity] {
+  transition:
+    background calc(150ms * var(--anim-mult, 1)),
+    transform calc(100ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
 .wf-connect .ic { font-size: 14px; color: #232323; }
 
 /* ── Description text ────────────────────────────────────────────────────── */
@@ -482,7 +516,7 @@ html.dark .wn-shell {
   background-size: 16px 16px !important;
 }
 
-html.dark .wf-outer {
+html.dark .wf-outer:not([data-squircle="on"]) {
   background: #0A0A0A;
   /* Canonical dark rim on outer shell (external line visible against dark canvas) */
   box-shadow:
@@ -491,9 +525,18 @@ html.dark .wf-outer {
     inset 0 1px 0 rgba(255, 255, 255, .05),
     inset 0 0 0 1px rgba(255, 255, 255, .04);
 }
-
-/* Hover-expand shell extension — dark mode background */
-html.dark .wf-outer::after { background: #0A0A0A; }
+html.dark .wf-outer[data-squircle="on"] { background: #0A0A0A; }
+/* Squircle canon: only the outer shell opts back into the 1px --card-border
+   ring (dark mode only); .wf-card stays line-less (default recipe). Mirrors
+   .concentric-demo-outer in Cards.css / .tf-shell in AdjustTimeframe.css. */
+html.dark .wf-outer[data-squircle="on"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--card-border, #232323);
+  clip-path: var(--squircle-border-path);
+}
 
 html.dark .wf-tool {
   background: #1C1C1C;

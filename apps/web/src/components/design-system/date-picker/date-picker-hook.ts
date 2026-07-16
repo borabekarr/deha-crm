@@ -76,11 +76,20 @@ export function pickerRef(el: HTMLDivElement | null): void {
   const scrollMonth = el.querySelector<HTMLDivElement>('#dp-scroll-month')
   const scrollYear  = el.querySelector<HTMLDivElement>('#dp-scroll-year')
   const panel       = el.querySelector<HTMLDivElement>('#dp-panel')
+  const outer       = el.querySelector<HTMLDivElement>('.dp-outer')
   const openBtn     = el.querySelector<HTMLButtonElement>('#dp-open-btn')
   const closeBtn    = el.querySelector<HTMLButtonElement>('#dp-close-btn')
   const confirmBtn  = el.querySelector<HTMLButtonElement>('#dp-confirm-btn')
+  // Fix (2): clipped white-copy mask layers (one per wheel)
+  const maskDayInner   = el.querySelector<HTMLDivElement>('#dp-mask-day-inner')
+  const maskMonthInner = el.querySelector<HTMLDivElement>('#dp-mask-month-inner')
+  const maskYearInner  = el.querySelector<HTMLDivElement>('#dp-mask-year-inner')
 
-  if (!scrollDay || !scrollMonth || !scrollYear || !panel || !openBtn || !closeBtn || !confirmBtn) return
+  if (
+    !scrollDay || !scrollMonth || !scrollYear || !panel || !outer ||
+    !openBtn || !closeBtn || !confirmBtn ||
+    !maskDayInner || !maskMonthInner || !maskYearInner
+  ) return
 
   const triggerLabel = openBtn.querySelector<HTMLSpanElement>('.dp-trigger-label')
   if (!triggerLabel) return
@@ -90,7 +99,11 @@ export function pickerRef(el: HTMLDivElement | null): void {
   const $month = scrollMonth
   const $year  = scrollYear
   const $panel = panel
+  const $outer = outer
   const $label = triggerLabel
+  const $maskDay   = maskDayInner
+  const $maskMonth = maskMonthInner
+  const $maskYear  = maskYearInner
 
   // ── Selected state (item 5: default to today) ─────────────────────────────
   const today = new Date()
@@ -126,11 +139,21 @@ export function pickerRef(el: HTMLDivElement | null): void {
     return arr
   }
 
+  // Fix (2): the mask copy needs identical markup (same spacer heights + item
+  // text/order) as its base scroll column so translateY(-scrollTop) lines up
+  // pixel-for-pixel -- clone rather than re-implement renderColumn.
+  function syncMaskContent(scrollEl: HTMLDivElement, maskInnerEl: HTMLDivElement): void {
+    maskInnerEl.innerHTML = scrollEl.innerHTML
+  }
+
   function renderAll(): void {
     // Item 2: day wheel uses static DAY_VALUES (1–31) — rendered once, never rebuilt
     renderColumn($day,   DAY_VALUES, sel.day)
     renderColumn($month, MONTHS,     MONTHS[sel.month])
     renderColumn($year,  getYearValues(), sel.year)
+    syncMaskContent($day,   $maskDay)
+    syncMaskContent($month, $maskMonth)
+    syncMaskContent($year,  $maskYear)
   }
 
   function snapTo(scrollEl: HTMLDivElement, index: number): void {
@@ -146,42 +169,6 @@ export function pickerRef(el: HTMLDivElement | null): void {
   function setActiveIndex(scrollEl: HTMLDivElement, idx: number): void {
     const items = scrollEl.querySelectorAll<HTMLDivElement>('.dp-item')
     for (let i = 0; i < items.length; i++) items[i].classList.toggle('active', i === idx)
-  }
-
-  // (d) Active-value morph — old center value morphs out, new morphs in.
-  // Only fires on actual index change; keeps callback-ref pattern (no useEffect).
-  function morphActiveItem(scrollEl: HTMLDivElement, newIdx: number): void {
-    const items = scrollEl.querySelectorAll<HTMLDivElement>('.dp-item')
-    if (!items.length) return
-
-    // Find the currently active item
-    let oldIdx = -1
-    for (let i = 0; i < items.length; i++) {
-      if (items[i].classList.contains('active')) { oldIdx = i; break }
-    }
-
-    if (oldIdx === newIdx) return // no change — skip animation
-
-    // Morph out the old active item
-    if (oldIdx >= 0) {
-      const oldItem = items[oldIdx]
-      oldItem.classList.remove('active', 'dp-morph-in')
-      oldItem.classList.add('dp-morph-out')
-      const t1 = setTimeout(() => { oldItem.classList.remove('dp-morph-out') }, Math.round(160 * animMult))
-      allTimers.push(t1)
-    }
-
-    // Morph in the new active item and all others
-    for (let i = 0; i < items.length; i++) {
-      if (i === newIdx) {
-        items[i].classList.remove('dp-morph-out')
-        items[i].classList.add('active', 'dp-morph-in')
-        const t2 = setTimeout(() => { items[i].classList.remove('dp-morph-in') }, Math.round(210 * animMult))
-        allTimers.push(t2)
-      } else if (i !== oldIdx) {
-        items[i].classList.remove('active')
-      }
-    }
   }
 
   // Programmatic snap that defeats CSS scroll-snap (mandatory) snapping the
@@ -210,10 +197,14 @@ export function pickerRef(el: HTMLDivElement | null): void {
 
   // ── Depth-fade pass ───────────────────────────────────────────────────────
   // FIX: centerIndex = scrollTop / ROW_H (NOT (scrollTop + PADDING) / ROW_H)
-  function fadePass(scrollEl: HTMLDivElement): void {
+  // Fix (2): also mirrors the same per-item scale/opacity plus a
+  // translateY(-scrollTop) onto the clipped white-copy mask layer so it
+  // tracks the base layer's motion exactly, with zero transition of its own.
+  function fadePass(scrollEl: HTMLDivElement, maskInnerEl?: HTMLDivElement): void {
     const items = scrollEl.querySelectorAll<HTMLDivElement>('.dp-item')
     if (!items.length) return
     const centerIndex = scrollEl.scrollTop / ROW_H  // FIXED: removed + PADDING
+    const maskItems = maskInnerEl ? maskInnerEl.querySelectorAll<HTMLDivElement>('.dp-item') : null
 
     for (let i = 0; i < items.length; i++) {
       const dist = Math.abs(i - centerIndex)
@@ -222,10 +213,22 @@ export function pickerRef(el: HTMLDivElement | null): void {
       const nextSlot = Math.min(slot + 1, SCALE_TABLE.length - 1)
       const scale   = SCALE_TABLE[slot]   + (SCALE_TABLE[nextSlot]   - SCALE_TABLE[slot])   * frac
       const opacity = OPACITY_TABLE[slot] + (OPACITY_TABLE[nextSlot] - OPACITY_TABLE[slot]) * frac
+      const transform = 'scale(' + scale + ')'
 
-      items[i].style.transform = 'scale(' + scale + ')'
+      items[i].style.transform = transform
       items[i].style.opacity   = String(opacity)
       // Active class is NOT toggled during scroll -- applied only on settle.
+
+      if (maskItems && maskItems[i]) {
+        maskItems[i].style.transform = transform
+        maskItems[i].style.opacity   = String(opacity)
+      }
+    }
+
+    if (maskInnerEl) {
+      // Recreates the base layer's scroll position without actually scrolling
+      // -- the mask layer is never scrollable (pointer-events:none, no hit-testing).
+      maskInnerEl.style.transform = 'translateY(' + (-scrollEl.scrollTop) + 'px)'
     }
   }
 
@@ -234,12 +237,12 @@ export function pickerRef(el: HTMLDivElement | null): void {
   const allTimers: ReturnType<typeof setTimeout>[] = []
   const allRafs:   number[] = []
 
-  function makeSettleHandler(scrollEl: HTMLDivElement, unit: 'day' | 'month' | 'year'): void {
+  function makeSettleHandler(scrollEl: HTMLDivElement, unit: 'day' | 'month' | 'year', maskInnerEl: HTMLDivElement): void {
     let rafId: number | null = null
     let timerId: ReturnType<typeof setTimeout> | null = null
 
     function onFrame(): void {
-      fadePass(scrollEl)
+      fadePass(scrollEl, maskInnerEl)
       rafId = null
     }
 
@@ -253,8 +256,8 @@ export function pickerRef(el: HTMLDivElement | null): void {
       const items = scrollEl.querySelectorAll<HTMLDivElement>('.dp-item')
       if (!items.length) return
       const idx = Math.round(scrollEl.scrollTop / ROW_H)
-      // (d) morph the active center value on settle
-      morphActiveItem(scrollEl, idx)
+      // Fix (2): instant class swap -- no morph animation
+      setActiveIndex(scrollEl, idx)
     }
 
     function onSettle(): void {
@@ -299,7 +302,7 @@ export function pickerRef(el: HTMLDivElement | null): void {
     if (sel.day > maxDay) {
       sel.day = maxDay
       snapTo($day, sel.day - 1)
-      fadePass($day)
+      fadePass($day, $maskDay)
       // Re-apply active class to the clamped item
       const items = $day.querySelectorAll<HTMLDivElement>('.dp-item')
       for (let i = 0; i < items.length; i++) {
@@ -339,8 +342,8 @@ export function pickerRef(el: HTMLDivElement | null): void {
       // Commit the value immediately (the settle handler will re-commit on
       // scrollend as well, but committing here gives instant label update)
       commitValue(unit, idx)
-      // (d) morph active value for instant visual feedback on click
-      morphActiveItem(scrollEl, idx)
+      // Fix (2): instant class swap for immediate visual feedback on click
+      setActiveIndex(scrollEl, idx)
     })
   }
 
@@ -354,11 +357,16 @@ export function pickerRef(el: HTMLDivElement | null): void {
 
   function alignAndFade(): void {
     alignAll()
-    fadePass($day)
-    fadePass($month)
-    fadePass($year)
+    fadePass($day,   $maskDay)
+    fadePass($month, $maskMonth)
+    fadePass($year,  $maskYear)
   }
 
+  // Fix (3): $outer (.dp-outer, the grey shell) mirrors every state class
+  // toggled on $panel so the shell closes/opens together with the white panel
+  // on the same tokens -- .dp-outer's className is a static JSX literal (never
+  // re-expressed by React across renders), so the imperative classList edits
+  // here are not at risk of being clobbered by a subsequent render.
   function openPanel(): void {
     // Remove hidden/closing states and add open
     if (closingTimer) {
@@ -366,9 +374,11 @@ export function pickerRef(el: HTMLDivElement | null): void {
       closingTimer = null
     }
     $panel.classList.remove('dp-panel--hidden', 'dp-panel--closing')
+    $outer.classList.remove('dp-panel--hidden', 'dp-panel--closing')
     // Trigger reflow so the open class transition fires from the base state
     void $panel.offsetHeight
     $panel.classList.add('dp-panel--open')
+    $outer.classList.add('dp-panel--open')
     panelOpen = true
     // Two-rAF settle (preserved from original) so wheels are scrollable
     const r1 = requestAnimationFrame(() => {
@@ -380,14 +390,32 @@ export function pickerRef(el: HTMLDivElement | null): void {
 
   function closePanel(): void {
     panelOpen = false
+    // Bake the entrance animation's finished transform/opacity in as plain
+    // inline styles BEFORE switching off dp-panel--open. CSS transitions do
+    // not fire for a property change caused by removing a CSS animation (the
+    // dp-panel-enter animation, fill:both) -- without this, opacity/transform
+    // snapped straight to the closed value instead of fading, defeating the
+    // "shell + panel close together" fix below. Freezing the value, removing
+    // the animation, then releasing the inline override (2 reflows) turns the
+    // drop into a plain style change the transition engine picks up normally.
+    $panel.style.transform = 'translateY(0) scale(1)'
+    $panel.style.opacity = '1'
+    void $panel.offsetHeight
     $panel.classList.remove('dp-panel--open')
     $panel.classList.add('dp-panel--closing')
+    $outer.classList.remove('dp-panel--open')
+    $outer.classList.add('dp-panel--closing')
+    void $panel.offsetHeight
+    $panel.style.transform = ''
+    $panel.style.opacity = ''
     // After exit transition completes, hide the panel
     const exitDuration = Math.round(PANEL_EXIT_MS * animMult * 1.1) // slight buffer, scaled by --anim-mult
     closingTimer = setTimeout(() => {
       closingTimer = null
       $panel.classList.remove('dp-panel--closing')
       $panel.classList.add('dp-panel--hidden')
+      $outer.classList.remove('dp-panel--closing')
+      $outer.classList.add('dp-panel--hidden')
     }, exitDuration)
     allTimers.push(closingTimer)
   }
@@ -424,14 +452,15 @@ export function pickerRef(el: HTMLDivElement | null): void {
   renderAll()
   updateLabel()
 
-  // Panel is OPEN on mount (add open class without transition to avoid flash).
+  // Panel + shell are OPEN on mount (add open class without transition to avoid flash).
   $panel.classList.add('dp-panel--open')
+  $outer.classList.add('dp-panel--open')
 
   // Wire settle handlers AFTER the initial DOM is in place so they don't
   // fire on DOM-insertion scroll events. (click-to-select is already wired above.)
-  makeSettleHandler(scrollDay,   'day')
-  makeSettleHandler(scrollMonth, 'month')
-  makeSettleHandler(scrollYear,  'year')
+  makeSettleHandler(scrollDay,   'day',   $maskDay)
+  makeSettleHandler(scrollMonth, 'month', $maskMonth)
+  makeSettleHandler(scrollYear,  'year',  $maskYear)
 
   // Defer two rAF ticks so the browser finishes its first layout pass before
   // setting scrollTop and running the depth-fade.

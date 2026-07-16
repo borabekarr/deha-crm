@@ -69,6 +69,8 @@ packages/*/node_modules
 # Playwright run artifacts
 apps/web/test-results/
 apps/web/playwright-report/
+test-results/
+probe3.mjs
 
 # rit3zh reference clones
 plans/archive/rit3zh-refs/*/node_modules/

@@ -5,6 +5,7 @@ import './Pipeline2.css'
 import { useCallback, useState } from 'react'
 import { iconClass } from '../../../lib/iconClass'
 import { p2RootRef } from './pipeline-2-hook'
+import { useProximityGroup } from '@/lib/hooks'
 
 /* =========================================================================
    Deha Design System — Pipeline 2
@@ -130,6 +131,7 @@ function Pipeline2Row({
       type="button"
       className={`p2-row${stage.muted ? ' p2-row--muted' : ''}${isOpen ? ' is-open' : ''}`}
       style={{ '--p2-stage': stage.color } as React.CSSProperties}
+      data-proximity
       onClick={onToggle}
       aria-expanded={isOpen}
       aria-label={`${stage.label} stage details`}
@@ -174,6 +176,7 @@ function Pipeline2Row({
 export default function Pipeline2() {
   // Only one popover open at a time; null == all closed.
   const [openKey, setOpenKey] = useState<string | null>(null)
+  const listRef = useProximityGroup<HTMLUListElement>()
 
   // Callback ref (React 19 cleanup form) — wires outside-click / Escape
   // dismissal via the hook. setOpenKey is stable, so [] deps are correct and
@@ -188,7 +191,7 @@ export default function Pipeline2() {
     <div className="pipeline-2" ref={rootRef}>
       <div className="p2-shell">
         <div className="p2-group-header">Pipeline</div>
-        <ul className="p2-inset">
+        <ul className="p2-inset" ref={listRef}>
           {STAGES.map((stage) => {
             const isOpen = openKey === stage.key
             return (

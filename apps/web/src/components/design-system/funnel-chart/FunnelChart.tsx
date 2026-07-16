@@ -5,6 +5,7 @@ import './FunnelChart.css'
 import { useState, useCallback } from 'react'
 import { hSegmentPath, funnelFmtCompact } from './funnel-chart-hook'
 import { iconClass } from '../../../lib/iconClass'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
 
 /* =========================================================================
    Deha Design System — Funnel Chart
@@ -265,10 +266,11 @@ export default function FunnelChart({
   const straight = edges === 'straight'
   const meta = showFooter ? deriveMeta(stages) : null
   const topValue = stages[0]?.value ?? 0
+  const cardSquircleRef = useSquircle<HTMLDivElement>()
 
   return (
     <div className="shell">
-      <div className="fc-card">
+      <div className="fc-card" ref={cardSquircleRef}>
         {/* ── Header ── */}
         <div className="fc-head">
           <div>

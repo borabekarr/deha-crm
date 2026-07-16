@@ -3,6 +3,8 @@ import '../../../../design-system/preview/_darkmode.css'
 import './MetricCard.css'
 
 import { useState } from 'react'
+import { useProximityGroup } from '@/lib/hooks'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
 import { expOverlayRef, cleanupExpOverlay } from './metric-card-hook'
 
 // ---------------------------------------------------------------------------
@@ -70,16 +72,17 @@ interface ExpandedCardProps {
 function ExpandedCard({ metricKey, onClose }: ExpandedCardProps) {
   const m = METRICS[metricKey]
   const arrowIcon = m.dir === 'up' ? 'trending_up' : 'trending_down'
+  const topRef = useProximityGroup<HTMLDivElement>()
 
   return (
     <>
-      <div className="exp-top">
+      <div className="exp-top" ref={topRef}>
         <div className="exp-crumb">
           Dashboard <span style={{ color: '#D4D4D4', margin: '0 1px' }}>/</span>{' '}
           <span className="material-symbols-outlined">{m.icon}</span>
           <strong>{m.label}</strong>
         </div>
-        <button type="button" className="exp-close" onClick={onClose} aria-label="Close">
+        <button type="button" className="exp-close" data-proximity onClick={onClose} aria-label="Close">
           <span className="material-icons">close</span>
         </button>
       </div>
@@ -140,6 +143,9 @@ function ExpandedCard({ metricKey, onClose }: ExpandedCardProps) {
 export default function MetricCard() {
   const [open, setOpen] = useState(false)
   const [activeKey, setActiveKey] = useState<string | null>(null)
+  const gridRef = useProximityGroup<HTMLDivElement>()
+  const expOuterRef = useSquircle<HTMLDivElement>()
+  const expCardRef = useSquircle<HTMLDivElement>()
 
   function toggle(value: boolean): void {
     setOpen(value)
@@ -159,10 +165,10 @@ export default function MetricCard() {
   return (
     <div className="card" style={{ padding: 0, background: '#FAFAFA' }}>
       <div className="frame mc-frame">
-        <div className="grid">
+        <div className="grid" ref={gridRef}>
 
           {/* New Leads card */}
-          <div className="shell zoom">
+          <div className="shell zoom" data-proximity>
             <div className="metric" onClick={() => openExpanded('leads')}>
               <div className="m-left">
                 <div className="m-label">
@@ -194,7 +200,7 @@ export default function MetricCard() {
           </div>
 
           {/* Predicted Value card */}
-          <div className="shell zoom">
+          <div className="shell zoom" data-proximity>
             <div className="metric" onClick={() => openExpanded('value')}>
               <div className="m-left">
                 <div className="m-label">
@@ -241,8 +247,8 @@ export default function MetricCard() {
           return () => cleanupExpOverlay(el)
         }}
       >
-        <div className="exp-outer">
-          <div className="exp-card">
+        <div className="exp-outer" ref={expOuterRef}>
+          <div className="exp-card" ref={expCardRef}>
             {activeKey && (
               <ExpandedCard metricKey={activeKey} onClose={() => toggle(false)} />
             )}

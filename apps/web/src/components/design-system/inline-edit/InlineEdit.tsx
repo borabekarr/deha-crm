@@ -4,6 +4,7 @@ import './InlineEdit.css'
 
 import { useState, useRef, useCallback } from 'react'
 import { ieRootRef, cleanupIeRoot, ieInputRef, registerSavedTimer, registerConfirmTimer, registerOutsideListener, cleanupOutsideListener } from './inline-edit-hook'
+import { useProximityGroup } from '@/lib/hooks'
 
 // ---------------------------------------------------------------------------
 // InlineEdit — inline-editable text handle field
@@ -54,6 +55,8 @@ export default function InlineEdit({
   // on the very first render so icons don't play ieIcIn from cold. State (not a
   // ref) so it can be read during render without tripping react-hooks/refs.
   const [hasToggled, setHasToggled] = useState(false)
+
+  const fieldGroupRef = useProximityGroup<HTMLDivElement>()
 
   // ----- handlers -----------------------------------------------------------
 
@@ -120,7 +123,8 @@ export default function InlineEdit({
       cleanupIeRoot(rootElRef.current)
       rootElRef.current = null
     }
-  }, [])
+    fieldGroupRef(el)
+  }, [fieldGroupRef])
 
   // ----- render -------------------------------------------------------------
   return (
@@ -165,6 +169,7 @@ export default function InlineEdit({
         <button
           type="button"
           className="ie-cancel"
+          data-proximity
           data-visible={String(editing)}
           aria-label="Vazgec"
           onMouseDown={(e) => {
@@ -179,6 +184,7 @@ export default function InlineEdit({
         <button
           type="button"
           className={`ie-act${confirming ? ' is-confirming' : ''}`}
+          data-proximity
           data-mode={editing ? 'save' : 'edit'}
           data-saved={String(saved)}
           data-ie-ready={hasToggled ? 'true' : undefined}

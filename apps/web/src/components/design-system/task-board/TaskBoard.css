@@ -1,6 +1,6 @@
 /* ===== Themeable tokens (light values identical to originals) ===== */
 :root{
-  --tb-shell:#D4DCE8;
+  --tb-shell:#D9D9D9; /* canonical --shell-bg value (ground-truth probe, 2026-07-14) */
   --tb-panel:#FFFFFF;
   --tb-col-bg:#FAFBFC;
   --tb-col-border:#EEF1F5;
@@ -50,62 +50,86 @@ html.dark{
 
 /* Outer gray shell + inner white panel (canonical inner-card shell pattern) */
 .tb-outer {
+  position: relative;
+  width: fit-content;
   background: var(--tb-shell);
   border-radius: 28px;
   padding: 10px;
-  box-shadow: 0 16px 56px rgba(17,17,17,0.14), 0 3px 10px rgba(17,17,17,0.07),
-              inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
+  box-shadow: 0 10px 15px rgba(17,17,17,0.12), 0 2px 4px rgba(17,17,17,0.06);
 }
-html.dark .tb-outer { box-shadow: 0 16px 56px rgba(0,0,0,0.5), 0 3px 10px rgba(0,0,0,0.3),
-                                  inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04); }
+/* :not([data-squircle="on"]) keeps this scoped to the brief pre-hydration
+   paint before the squircle ref attaches -- once squircle is on, the shared
+   `html [data-squircle="on"] { box-shadow: none }` reset must win outright
+   rather than lose the specificity fight to this class-stacked selector
+   (that fight was the source of the doubled/stale shadow). */
+html.dark .tb-outer:not([data-squircle="on"]) {
+  box-shadow: 0 10px 15px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.2);
+}
+/* Squircle conversion (Step 7): concentric outer/inner pair, mirrors
+   .concentric-demo-outer in Cards.css (canonical reference) -- depth shadow
+   migrates to filter:drop-shadow (clip-path clips box-shadow); same filter
+   values in both themes, matching the reference exactly. Outer hairline ring
+   is dark-mode only (light separates shell from panel by fill contrast
+   alone, same as the reference). */
+.tb-outer[data-squircle="on"] {
+  --corner-radius: 28px;
+  box-shadow: none;
+  filter:
+    drop-shadow(0 10px 15px rgba(17,17,17,0.12))
+    drop-shadow(0 2px 4px rgba(17,17,17,0.06));
+}
+.tb-outer[data-squircle="on"]::before,
+.tb-outer[data-squircle="on"]::after { content: none; }
+html.dark .tb-outer[data-squircle="on"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--card-border);
+  clip-path: var(--squircle-border-path);
+}
 .tb-panel {
   background: var(--tb-panel);
   border: 1px solid var(--tb-card-border);
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,1);
   width: 920px;
   max-width: calc(100vw - 80px);
   display: flex; flex-direction: column;
   position: relative;
 }
-html.dark .tb-panel { box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); }
+.tb-panel[data-squircle="on"] {
+  --corner-radius: 20px;
+}
+/* Canon (corrected): inner surfaces are line-less in both themes -- the
+   dark ring belongs to .tb-outer only (its own ::before above). This block
+   used to re-paint a second ring here (stale pre-Step-4 canon); removed. */
+.tb-panel[data-squircle="on"]::before,
+.tb-panel[data-squircle="on"]::after { content: none; }
 
 /* Task card hover */
 .tb-card {
   position: relative;
   z-index: 1;
-  transition: box-shadow 220ms cubic-bezier(.22,1,.36,1),
-              border-color 220ms cubic-bezier(.22,1,.36,1),
-              transform 220ms cubic-bezier(.22,1,.36,1),
-              background-color 180ms;
+  transition: box-shadow calc(220ms * var(--anim-mult, 1)) var(--ease-out),
+              border-color calc(220ms * var(--anim-mult, 1)) var(--ease-out),
+              transform calc(220ms * var(--anim-mult, 1)) var(--ease-out),
+              background-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade),
+              scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+              filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 /* Lift hovered card above siblings so its dashed border + lift shadow
    are never clipped by the column header or adjacent cards */
 .tb-card:hover { z-index: 3; }
-/* Hover: only restyle plain cards, NOT cards mid-success-animation
-   (otherwise the color wash disappears on mouseover) */
-.tb-card:not(.success-done):not(.success-progress):not(.success-review):hover {
-  border-color: rgba(17,17,17,0.16) !important;
-  background: var(--tb-card-bg) !important;
-  box-shadow: 0 6px 16px -4px rgba(17,17,17,0.10), 0 2px 4px -1px rgba(17,17,17,0.04) !important;
-  transform: translateY(-1px) scale(1.005);
-}
-html.dark .tb-card:not(.success-done):not(.success-progress):not(.success-review):hover {
-  border-color: #4A4A4A !important;
-  box-shadow: 0 6px 16px -4px rgba(0,0,0,0.4), 0 2px 4px -1px rgba(0,0,0,0.3) !important;
-}
-/* While the success wash plays, only lift the card — let the animated background through */
-.tb-card.success-done:hover,
-.tb-card.success-progress:hover,
-.tb-card.success-review:hover {
-  transform: translateY(-1px) scale(1.005);
-}
+/* Hover is proximity-driven: data-proximity on each .tb-card + useProximityGroup
+   on the column card-list. hover-tokens.css maps --prox to scale+brightness+
+   drop-shadow — an in-place scale, so cards never translate out from under the
+   pointer (no flicker loop) and the success wash is never interrupted. */
 .tb-card.dragging { opacity: 0.35; transform: scale(0.97); }
 
 .tb-column.drop-target {
   outline-offset: -1px;
-  transition: background 160ms, outline-color 160ms;
+  transition: background calc(160ms * var(--anim-mult, 1)), outline-color calc(160ms * var(--anim-mult, 1));
 }
 .tb-column.drop-target[data-col="todo"]     { background: #FAFAFA !important; outline: 1.5px dashed rgba(100,116,139,0.55); }
 .tb-column.drop-target[data-col="progress"] { background: #FFF7ED !important; outline: 1.5px dashed rgba(249,115,22,0.55); }
@@ -161,7 +185,7 @@ html.dark .tb-card:not(.success-done):not(.success-progress):not(.success-review
     inset 0 -1px 0 rgba(0,0,0,0.16),
     inset 0 0 0 1px rgba(0,0,0,0.06),
     0 8px 16px -4px rgba(17,17,17,0.30);
-  animation: badgeFly 1900ms cubic-bezier(.22,1,.36,1) forwards;
+  animation: badgeFly calc(1900ms * var(--anim-mult, 1)) var(--ease-out) forwards;
   z-index: 6; pointer-events: none;
   white-space: nowrap;
 }
@@ -190,7 +214,7 @@ html.dark .tb-card:not(.success-done):not(.success-progress):not(.success-review
   72%  { background: var(--tb-wash-done2); border-color: var(--brand-primary-500); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-primary-500) 25%, transparent), inset 0 0 8px 0 color-mix(in srgb, var(--brand-primary-500) 18%, transparent); }
   100% { background: var(--tb-card-bg);    border-color: var(--tb-card-border); box-shadow: inset 0 0 0 0 transparent, inset 0 0 0 0 transparent; }
 }
-.tb-card.success-done { animation: cardDone 1900ms cubic-bezier(.22,1,.36,1) forwards; }
+.tb-card.success-done { animation: cardDone calc(1900ms * var(--anim-mult, 1)) var(--ease-out) forwards; }
 
 /* → In Progress: hot orange inset wash */
 @keyframes cardProgress {
@@ -199,7 +223,7 @@ html.dark .tb-card:not(.success-done):not(.success-progress):not(.success-review
   72%  { background: var(--tb-wash-prog2); border-color: #F97316; box-shadow: inset 0 0 0 1px rgba(249,115,22,0.25), inset 0 0 8px 0 rgba(249,115,22,0.18); }
   100% { background: var(--tb-card-bg);    border-color: var(--tb-card-border); box-shadow: inset 0 0 0 0 transparent, inset 0 0 0 0 transparent; }
 }
-.tb-card.success-progress { animation: cardProgress 1900ms cubic-bezier(.22,1,.36,1) forwards; }
+.tb-card.success-progress { animation: cardProgress calc(1900ms * var(--anim-mult, 1)) var(--ease-out) forwards; }
 
 /* → Review: warning yellow inset wash */
 @keyframes cardReview {
@@ -208,7 +232,7 @@ html.dark .tb-card:not(.success-done):not(.success-progress):not(.success-review
   72%  { background: var(--tb-wash-rev2); border-color: #FBBF24; box-shadow: inset 0 0 0 1px rgba(251,191,36,0.30), inset 0 0 8px 0 rgba(251,191,36,0.20); }
   100% { background: var(--tb-card-bg);    border-color: var(--tb-card-border); box-shadow: inset 0 0 0 0 transparent, inset 0 0 0 0 transparent; }
 }
-.tb-card.success-review { animation: cardReview 1900ms cubic-bezier(.22,1,.36,1) forwards; }
+.tb-card.success-review { animation: cardReview calc(1900ms * var(--anim-mult, 1)) var(--ease-out) forwards; }
 
 @keyframes confettiFlow {
   0%   { transform: translate(-50%,-50%) translate(0, 0)       rotate(0deg)              scale(0.6); opacity: 0; }
@@ -247,8 +271,8 @@ html.dark .tb-card:not(.success-done):not(.success-progress):not(.success-review
   0%   { opacity: 1; transform: scale(1)    translateY(0);    filter: blur(0); }
   100% { opacity: 0; transform: scale(0.6)  translateY(10px); filter: blur(5px); }
 }
-.tb-toast-layer .tb-toast.tb-toast-in  { animation: toastMorphIn  320ms cubic-bezier(.34,1.32,.64,1) both; }
-.tb-toast-layer .tb-toast.tb-toast-out { animation: toastMorphOut 240ms cubic-bezier(.4,0,1,1) both; }
+.tb-toast-layer .tb-toast.tb-toast-in  { animation: toastMorphIn  calc(320ms * var(--anim-mult, 1)) var(--ease-bounce-soft) both; }
+.tb-toast-layer .tb-toast.tb-toast-out { animation: toastMorphOut calc(240ms * var(--anim-mult, 1)) var(--ease-accel) both; }
 
 /* ---- Column scrollbar — visible (slim, design-system grey) ---- */
 .tb-column-scroll {
@@ -260,7 +284,7 @@ html.dark .tb-card:not(.success-done):not(.success-progress):not(.success-review
 .tb-column-scroll::-webkit-scrollbar-thumb {
   background: #D4D4D4;
   border-radius: 3px;
-  transition: background 200ms;
+  transition: background calc(200ms * var(--anim-mult, 1));
 }
 .tb-column-scroll::-webkit-scrollbar-thumb:hover { background: #A1A1A1; }
 
@@ -270,8 +294,8 @@ html.dark .tb-card:not(.success-done):not(.success-progress):not(.success-review
   55%  { transform: scale(1.05); opacity: 1; }
   100% { transform: scale(1);    opacity: 1; }
 }
-.sync-btn { animation: syncMorphBounce 460ms cubic-bezier(.34,1.7,.46,1) both; }
-.sync-btn:hover:not([disabled]) { filter: brightness(1.10); }
+.sync-btn { animation: syncMorphBounce calc(460ms * var(--anim-mult, 1)) var(--ease-bounce) both; }
+/* :hover filter removed — proximity engine drives hover (see hover-tokens.css) */
 .sync-btn:active:not([disabled]) { transform: scale(0.97) !important; }
 
 /* ===== Dark mode (class-based surfaces) ===== */
@@ -299,6 +323,7 @@ html.dark .tb-column-scroll::-webkit-scrollbar-thumb:hover{ background:#4A4A4A; 
   60%  { opacity: 1; transform: scale(1.18); }
   100% { opacity: 1; transform: scale(1); }
 }
+.tb-check-pop { animation: checkPop calc(360ms * var(--anim-mult, 1)) var(--ease-bounce-soft); }
 @keyframes panelIn {
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -306,8 +331,8 @@ html.dark .tb-column-scroll::-webkit-scrollbar-thumb:hover{ background:#4A4A4A; 
 
 /* Scroll-fade morph — transform-only slide */
 .tb-fade { opacity: 1; will-change: transform; }
-.tb-fade-top { animation: tbFadeTopIn .34s cubic-bezier(.22,1,.36,1); }
-.tb-fade-bot { animation: tbFadeBotIn .34s cubic-bezier(.22,1,.36,1); }
+.tb-fade-top { animation: tbFadeTopIn calc(.34s * var(--anim-mult, 1)) var(--ease-out); }
+.tb-fade-bot { animation: tbFadeBotIn calc(.34s * var(--anim-mult, 1)) var(--ease-out); }
 @keyframes tbFadeTopIn { from { transform: translateY(-9px); } to { transform: translateY(0); } }
 @keyframes tbFadeBotIn { from { transform: translateY(9px); } to { transform: translateY(0); } }
 
@@ -317,13 +342,13 @@ html.dark .tb-column-scroll::-webkit-scrollbar-thumb:hover{ background:#4A4A4A; 
   overflow: hidden;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 280ms var(--ease-out),
-              visibility 0ms linear 280ms;
+  transition: opacity calc(280ms * var(--anim-mult, 1)) var(--ease-out),
+              visibility 0ms linear calc(280ms * var(--anim-mult, 1));
 }
 .tb-sync-feed.tb-sync-feed--visible {
   opacity: 1;
   visibility: visible;
-  transition: opacity 280ms var(--ease-out),
+  transition: opacity calc(280ms * var(--anim-mult, 1)) var(--ease-out),
               visibility 0ms linear 0ms;
 }
 

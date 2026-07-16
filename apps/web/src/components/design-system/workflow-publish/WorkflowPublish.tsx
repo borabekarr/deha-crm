@@ -19,6 +19,8 @@
 
 import { useState } from 'react'
 import { iconClass } from '../../../lib/iconClass'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
+import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 import './WorkflowPublish.css'
 
 // ---------------------------------------------------------------------------
@@ -44,6 +46,11 @@ const ACTIONS: ActionItem[] = [
 export default function WorkflowPublish(): React.ReactElement {
   const [open, setOpen] = useState(false)
   const [closing, setClosing] = useState(false)
+  const bezelSquircleRef = useSquircle<HTMLDivElement>()
+  const popoverSquircleRef = useSquircle<HTMLDialogElement>()
+  // One group covers the trigger + popover buttons below (both are DOM
+  // descendants of .wp-btn-anchor regardless of the popover's absolute position).
+  const proximityRef = useProximityGroup<HTMLDivElement>()
 
   function handleToggle(): void {
     if (open && !closing) {
@@ -68,7 +75,7 @@ export default function WorkflowPublish(): React.ReactElement {
 
   return (
     /* wp-btn-anchor is the positioning context for the absolutely-placed bezel */
-    <div className="wp-btn-anchor">
+    <div className="wp-btn-anchor" ref={proximityRef}>
       {/* Publish trigger button */}
       <button
         type="button"
@@ -76,6 +83,7 @@ export default function WorkflowPublish(): React.ReactElement {
         aria-expanded={open}
         aria-haspopup="true"
         onClick={handleToggle}
+        data-proximity
       >
         <span className="material-icons">rocket_launch</span>
         Publish
@@ -84,9 +92,10 @@ export default function WorkflowPublish(): React.ReactElement {
 
       {/* Grey bezel (outer shell) + white popover card animate as one rigid unit */}
       {open && (
-        <div className={bezelClass} onAnimationEnd={handleAnimationEnd}>
+        <div ref={bezelSquircleRef} className={bezelClass} onAnimationEnd={handleAnimationEnd}>
           {/* Dropdown popover — animated via wp-popIn / wp-popOut on the bezel */}
           <dialog
+            ref={popoverSquircleRef}
             className="wp-popover"
             aria-label="Publish workflow options"
             style={{ margin: 0, maxWidth: 'none', maxHeight: 'none' }}
@@ -101,13 +110,13 @@ export default function WorkflowPublish(): React.ReactElement {
             </div>
 
             {/* Primary CTA: Update Workflow */}
-            <button type="button" className="wp-update-btn">
+            <button type="button" className="wp-update-btn" data-proximity>
               <span className="material-icons">sync</span>
               Update Workflow
             </button>
 
             {/* Last-edited attribution row */}
-            <button type="button" className="wp-edited" style={{ width: '100%', textAlign: 'left', font: 'inherit', color: 'inherit', background: 'none', border: 0, cursor: 'pointer' }}>
+            <button type="button" className="wp-edited" data-proximity style={{ width: '100%', textAlign: 'left', font: 'inherit', color: 'inherit', border: 0, cursor: 'pointer' }}>
               <div className="wp-edited-left">
                 <span className="material-icons">schedule</span>
                 12m ago by Ethan Walker
@@ -120,7 +129,7 @@ export default function WorkflowPublish(): React.ReactElement {
 
             {/* Action rows */}
             {ACTIONS.map((action) => (
-              <button key={action.label} type="button" className="wp-action" style={{ width: '100%', textAlign: 'left', font: 'inherit', color: 'inherit', background: 'none', border: 0, cursor: 'pointer' }}>
+              <button key={action.label} type="button" className="wp-action" data-proximity style={{ width: '100%', textAlign: 'left', font: 'inherit', color: 'inherit', border: 0, cursor: 'pointer' }}>
                 <div className="wp-action-left">
                   {/* Colored semantic-pill icon square with Deha gloss treatment */}
                   <div

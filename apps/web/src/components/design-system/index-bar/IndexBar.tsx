@@ -4,6 +4,7 @@ import './IndexBar.css'
 
 import { useCallback, useRef } from 'react'
 import { iconClass } from '../../../lib/iconClass'
+import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 import {
   METRICS,
   STAGES,
@@ -72,6 +73,10 @@ function MetricCard({ index, onPlay }: MetricCardProps) {
 // ── IndexBar ─────────────────────────────────────────────────────────────────
 
 export default function IndexBar() {
+  // Proximity group: the Replay button is the only interactive element in this
+  // component (metric cards, bars, and stage ticks are static readouts).
+  const replayProximityRef = useProximityGroup<HTMLDivElement>()
+
   // Collect per-metric play callbacks
   const metricPlayers = useRef<Array<() => void>>([])
 
@@ -176,8 +181,8 @@ export default function IndexBar() {
         </div>
       </div>
 
-      <div className="replay">
-        <button type="button" onClick={play}>
+      <div className="replay" ref={replayProximityRef}>
+        <button type="button" onClick={play} data-proximity>
           <span className="material-symbols-outlined">replay</span>
           Replay
         </button>

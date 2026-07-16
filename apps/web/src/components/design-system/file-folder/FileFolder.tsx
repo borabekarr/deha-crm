@@ -3,7 +3,9 @@ import '../../../../design-system/preview/_controls.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './FileFolder.css'
 
+import { useCallback } from 'react'
 import { FILES, useFileFolder } from './file-folder-hook'
+import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 
 /* ── Paper helper ─────────────────────────────────────────────────────────── */
 function Paper({ variant }: { variant: 'back' | 'mid' | 'front' }) {
@@ -62,7 +64,17 @@ function FolderIcon({
     .join(' ')
 
   return (
-    <div className={classes} id={id} ref={folderRef} onClick={onClick}>
+    // eslint-disable-next-line jsx-a11y/prefer-tag-over-role -- wraps a nested <button> (folder menu); a native <button> cannot contain interactive children
+    <div
+      className={classes}
+      id={id}
+      ref={folderRef}
+      onClick={onClick}
+      data-proximity
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } }}
+    >
       <div className="ff-clip">
         <div className="ff-grad" />
         <div className="ff-papers">
@@ -151,7 +163,14 @@ function extColorClass(ext: string): string {
 /* ── File row / grid cell ─────────────────────────────────────────────────── */
 function FileRow({ file, onClick }: { file: (typeof FILES)[number]; onClick: () => void }) {
   return (
-    <div className="ff-file" onClick={onClick}>
+    <div
+      className="ff-file"
+      onClick={onClick}
+      data-proximity
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } }}
+    >
       <span className={`ff-file-ic ${extColorClass(file.ext)}`}>{file.ext}</span>
       <span className="ff-file-meta">
         <span className="ff-file-name">{file.name}</span>
@@ -184,9 +203,21 @@ export default function FileFolder() {
     handleMenuAction,
   } = useFileFolder()
 
+  // Proximity: folder pair (click to open) + file rows inside the popover.
+  // Merged with the hook's own popBodyCallbackRef (scroll-mask attribute).
+  const foldersProximityRef = useProximityGroup<HTMLDivElement>()
+  const filesProximityRef = useProximityGroup<HTMLDivElement>()
+  const popBodyRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      popBodyCallbackRef(el)
+      filesProximityRef(el)
+    },
+    [popBodyCallbackRef, filesProximityRef],
+  )
+
   return (
     <div className="card" ref={cardCallbackRef}>
-      <div className="ff-stage">
+      <div className="ff-stage" ref={foldersProximityRef}>
         {/* NORMAL · BLUE */}
         <div className="ff-col">
           <FolderIcon
@@ -269,7 +300,7 @@ export default function FileFolder() {
 
           <div
             className="ff-pop-body"
-            ref={popBodyCallbackRef}
+            ref={popBodyRef}
             onScroll={handlePopBodyScroll}
           >
             {FILES.map((f) => (

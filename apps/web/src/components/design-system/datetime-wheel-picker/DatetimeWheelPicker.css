@@ -2,7 +2,8 @@
  * Layout follows the Claude Design export spec (44px rows, 220px wheels,
  * emerald 0.07 hairline band, iOS Cancel/title/Done header, 28px-top sheet,
  * blurred slate-900 scrim). Wheel mechanics + timing reuse date-picker and
- * model-selection-sheet patterns. Colors are canonical tokens (var) or
+ * the shared sheet chrome timing pattern (local-var-flip + anim-mult;
+ * original component now in design-system-archive/). Colors are canonical tokens (var) or
  * canonical literals (emerald / slate-900 tints, white/black overlays).
  * Radius literals 28px (sheet) and 10px (band) have no exact token — flagged.
  */
@@ -61,12 +62,38 @@
   text-align: left;
   font-family: var(--font-display);
   transition:
-    transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
+    transform calc(160ms * var(--anim-mult, 1)) var(--ease-out),
     box-shadow calc(220ms * var(--anim-mult, 1)) ease;
 }
 .dtw-trigger:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(17,17,17, 0.14); }
 .dtw-trigger:active { transform: scale(0.98); }
 .dtw-trigger:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 3px; }
+
+/* Squircle: real depth shadows are clipped away by clip-path, so they
+   migrate to filter: drop-shadow; inset highlight stays a real box-shadow. */
+.dtw-trigger[data-squircle="on"] {
+  --corner-radius: var(--card-radius, 20px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+  filter:
+    drop-shadow(0 8px 24px rgba(17,17,17, 0.10))
+    drop-shadow(0 2px 6px rgba(17,17,17, 0.06));
+}
+.dtw-trigger[data-squircle="on"]:hover {
+  box-shadow: none;
+  filter: drop-shadow(0 14px 32px rgba(17,17,17, 0.14));
+}
+
+/* Proximity — scale+filter channels appended (transform/box-shadow already
+   listed above). translateY(-2px) hover-lift kept as-is: scale is a
+   separate CSS property that composes with transform rather than
+   overriding it, matching the precedent set on Buttons.css row 3/4. */
+.dtw-trigger.dtw-trigger[data-proximity] {
+  transition:
+    transform calc(160ms * var(--anim-mult, 1)) var(--ease-out),
+    box-shadow calc(220ms * var(--anim-mult, 1)) ease,
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
 
 .dtw-trigger-badge {
   position: absolute;
@@ -78,13 +105,13 @@
   height: 22px;
   border-radius: 9999px;
   background: var(--brand-primary);
-  color: #fff;
+  color: var(--brand-on-primary);
   font-size: 15px;
   box-shadow: 0 2px 6px color-mix(in srgb, var(--brand-primary-500) 40%, transparent);
   font-variation-settings: 'FILL' 1, 'wght' 700, 'GRAD' 0, 'opsz' 20;
 }
 .dtw-trigger-badge.pop {
-  animation: dtw-badge-pop calc(340ms * var(--anim-mult, 1)) cubic-bezier(.34, 1.4, .5, 1);
+  animation: dtw-badge-pop calc(340ms * var(--anim-mult, 1)) var(--ease-spring-soft-2);
 }
 @keyframes dtw-badge-pop {
   0%   { transform: scale(0.3); opacity: 0; }
@@ -136,7 +163,7 @@
   /* ── One-source-of-truth timing (scaled by --anim-mult) ── */
   --dtw-enter-raw: 280ms;
   --dtw-exit-raw:  200ms;
-  --dtw-ease: cubic-bezier(.22, 1, .36, 1);
+  --dtw-ease: var(--ease-out);
   --dtw-enter: calc(var(--dtw-enter-raw) * var(--anim-mult, 1));
   --dtw-exit:  calc(var(--dtw-exit-raw)  * var(--anim-mult, 1));
 
@@ -198,6 +225,17 @@
   opacity: 0;
   pointer-events: none;
 }
+
+/* Squircle: per-corner API rounds only the top corners (matches the
+   pre-existing 28px 28px 0 0 border-radius). Lift shadow migrates to
+   filter: drop-shadow (clip-path clips box-shadow); static both before and
+   after, same as the transform/opacity-only entrance transition, so it
+   doesn't fight the translate animation. */
+.dtw-sheet[data-squircle="on"] {
+  --corner-radius: 28px 28px 0 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  filter: drop-shadow(0 -8px 40px rgba(17,17,17, 0.18));
+}
 @media (prefers-reduced-motion: reduce) {
   .dtw-sheet,
   .dtw-sheet.dtw-sheet--closing { transition: opacity var(--dtw-exit) linear; }
@@ -253,7 +291,7 @@
   align-items: center;
   font-family: var(--font-display);
   border-radius: 8px;
-  transition: opacity calc(140ms * var(--anim-mult, 1)) ease, transform calc(140ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
+  transition: opacity calc(140ms * var(--anim-mult, 1)) ease, transform calc(140ms * var(--anim-mult, 1)) var(--ease-out);
 }
 .dtw-cancel {
   font-size: 15px;
@@ -271,6 +309,17 @@
 .dtw-done:active { transform: scale(0.94); }
 .dtw-cancel:focus-visible,
 .dtw-done:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 2px; }
+
+/* Proximity — scale+filter channels appended; no local transform/filter
+   hover rule to remove (hover only fades opacity). */
+.dtw-cancel.dtw-cancel[data-proximity],
+.dtw-done.dtw-done[data-proximity] {
+  transition:
+    opacity calc(140ms * var(--anim-mult, 1)) ease,
+    transform calc(140ms * var(--anim-mult, 1)) var(--ease-out),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
 
 /* ── Wheels ───────────────────────────────────────────────────────────────── */
 .dtw-wheels {
@@ -430,11 +479,21 @@
   font-weight: 700;
   letter-spacing: 0.01em;
   cursor: pointer;
-  transition: transform calc(140ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1), background calc(180ms * var(--anim-mult, 1)) ease;
+  transition: transform calc(140ms * var(--anim-mult, 1)) var(--ease-out), background calc(180ms * var(--anim-mult, 1)) ease;
 }
 .dtw-reset:hover { background: color-mix(in srgb, var(--brand-primary-500) 16%, transparent); }
 .dtw-reset:active { transform: scale(0.95); }
 .dtw-reset:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 2px; }
+
+/* Proximity — scale+filter channels appended; no local transform/filter
+   hover rule to remove (hover only recolors background). */
+.dtw-reset.dtw-reset[data-proximity] {
+  transition:
+    transform calc(140ms * var(--anim-mult, 1)) var(--ease-out),
+    background calc(180ms * var(--anim-mult, 1)) ease,
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
 .dtw-reset .material-symbols-outlined {
   font-size: 16px;
   font-variation-settings: 'FILL' 0, 'wght' 600, 'GRAD' 0, 'opsz' 20;
@@ -457,6 +516,20 @@ html.dark .dtw-sheet {
     inset 0 0 0 1px rgba(255, 255, 255, 0.04),
     0 -8px 40px rgba(0, 0, 0, 0.45);
 }
+/* Canon (corrected): standalone sheet acts as its own outer -- exactly one
+   dark-mode line via the proper #232323 ring, not the old faint white inset. */
+html.dark .dtw-sheet[data-squircle="on"] {
+  box-shadow: none;
+  filter: drop-shadow(0 -8px 40px rgba(0, 0, 0, 0.45));
+}
+html.dark .dtw-sheet[data-squircle="on"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--card-border);
+  clip-path: var(--squircle-border-path);
+}
 html.dark .dtw-band {
   background: color-mix(in srgb, var(--brand-primary-500) 7%, transparent);
   border-top-color: color-mix(in srgb, var(--brand-primary-500) 34%, transparent);
@@ -466,6 +539,10 @@ html.dark .dtw-trigger {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.05),
     0 8px 24px rgba(0, 0, 0, 0.40);
+}
+html.dark .dtw-trigger[data-squircle="on"] {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.40));
 }
 html.dark .dtw-reset {
   border-color: color-mix(in srgb, var(--brand-primary-500) 34%, transparent);

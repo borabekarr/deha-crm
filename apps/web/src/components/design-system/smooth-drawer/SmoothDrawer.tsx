@@ -26,6 +26,8 @@
 import { useState, useCallback } from 'react'
 import { iconClass } from '../../../lib/iconClass'
 import { useTimerRef, useSheetRef, useHandleRef, type DrawerSide } from './smooth-drawer-hook'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
+import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './SmoothDrawer.css'
@@ -33,6 +35,8 @@ import './SmoothDrawer.css'
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+const INNER_SHEET_STYLE: React.CSSProperties = {}
+
 export interface SmoothDrawerProps {
   title?: string
   description?: string
@@ -121,10 +125,20 @@ function DrawerInstance({
     side,
   })
 
+  // ---- squircle refs (geometry only — combined with sheetRef below) ----
+  const sheetSquircleRef = useSquircle<HTMLDivElement>()
+  const outerSquircleRef = useSquircle<HTMLDivElement>()
+  const combinedSheetRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      sheetRef(el)
+      sheetSquircleRef(el)
+    },
+    [sheetRef, sheetSquircleRef],
+  )
+
   // ---- derived inline styles for sheet + scrim ----
   // Drag offset and closed transform are on the same axis as the side
   const isVertical = side === 'bottom' || side === 'top'
-  const isLateral  = side === 'left'   || side === 'right'
   const closedTranslate =
     side === 'bottom' ? 'translateY(115%)' :
     side === 'top'    ? 'translateY(-115%)' :
@@ -143,11 +157,14 @@ function DrawerInstance({
       : 'transform calc(0.46s * var(--anim-mult, 1)) cubic-bezier(.32,1.45,.45,1)',
   }
 
-  // For left/right the outer shell and inner sheet animate as ONE unit:
-  // the transform lives on .sd-sheet-outer (so the shell is off-screen at rest),
-  // and .sd-sheet gets no transform of its own.
-  const outerShellStyle: React.CSSProperties = isLateral ? sheetStyle : {}
-  const innerSheetStyle: React.CSSProperties = isLateral ? {} : sheetStyle
+  // The outer bezel shell and inner card sheet always animate as ONE unit on
+  // every side: the transform lives on .sd-sheet-outer (so the shell is
+  // off-screen at rest, matching the canon bezel+card recipe), and .sd-sheet
+  // gets no transform of its own. This mirrors the left/right-only behavior
+  // that used to gate the outer transform on a side check before the bezel
+  // was added to bottom/top too; the numeric transform values are unchanged.
+  const outerShellStyle: React.CSSProperties = sheetStyle
+  const innerSheetStyle: React.CSSProperties = INNER_SHEET_STYLE
 
   // Scrim opacity fades as drag distance grows; use abs value for any axis
   const scrimStyle: React.CSSProperties = {
@@ -175,7 +192,7 @@ function DrawerInstance({
   return (
     <>
       {/* Trigger button to open / reopen */}
-      <button type="button" className="sd-trigger" onClick={openDrawer}>
+      <button type="button" className="sd-trigger" onClick={openDrawer} data-proximity>
         <span className={iconClass('play_arrow')} aria-hidden="true">
           play_arrow
         </span>
@@ -190,9 +207,13 @@ function DrawerInstance({
           onClick={closeDrawer}
           aria-hidden="true"
         />
-        <div className="sd-sheet-outer" style={outerShellStyle}>
         <div
-          ref={sheetRef}
+          className="sd-sheet-outer"
+          style={outerShellStyle}
+          ref={outerSquircleRef}
+        >
+        <div
+          ref={combinedSheetRef}
           className="sd-sheet"
           style={innerSheetStyle}
           aria-modal="true"
@@ -240,7 +261,7 @@ function DrawerInstance({
               }}
             >
               {/* Primary: global .btn-green — never redefine its styles here */}
-              <button type="button" className="btn-green sd-buy" onClick={closeDrawer}>
+              <button type="button" className="btn-green sd-buy" onClick={closeDrawer} data-proximity>
                 <span className="sd-buy-shimmer" aria-hidden="true" />
                 <span className="sd-buy-inner">
                   {primaryButtonText}
@@ -250,7 +271,7 @@ function DrawerInstance({
                 </span>
               </button>
 
-              <button type="button" className="sd-later" onClick={closeDrawer}>
+              <button type="button" className="sd-later" onClick={closeDrawer} data-proximity>
                 {secondaryButtonText}
               </button>
             </div>
@@ -268,9 +289,13 @@ function DrawerInstance({
 // ---------------------------------------------------------------------------
 export default function SmoothDrawer(props: SmoothDrawerProps) {
   const sides: DrawerSide[] = ['bottom', 'top', 'left', 'right']
+  // One group covers all 4 stages' triggers + sheet action buttons (overlay
+  // divs are always mounted per the mounted-through-exit pattern above, so
+  // they're valid DOM descendants of .sd-showcase even before a drawer opens).
+  const proximityRef = useProximityGroup<HTMLDivElement>()
 
   return (
-    <div className="sd-showcase">
+    <div className="sd-showcase" ref={proximityRef}>
       {sides.map((side) => (
         <div key={side} className="sd-showcase-card">
           <span className="sd-showcase-label">{side.charAt(0).toUpperCase() + side.slice(1)}</span>

@@ -14,6 +14,7 @@ import './TaskCard.css'
 import { useState, useRef, useCallback, Fragment } from 'react'
 import { useTween, useCountdownRef, useKeydownRef, fmtShort, competeCount } from './task-card-hook'
 import { iconClass } from '../../../lib/iconClass'
+import { useProximityGroup } from '@/lib/hooks'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -220,6 +221,7 @@ function buildTask(card: typeof TASK_CARDS[0]): Task {
 function SubSteps({ data }: { data: NonNullable<TaskMetrics['substeps']> }) {
   // Steps are local state; synced to props via key (parent sets key=task.id+':substeps')
   const [steps, setSteps] = useState<Step[]>(data.steps)
+  const stepsProxRef = useProximityGroup<HTMLUListElement>()
   const done = steps.filter(s => s.done).length
   const total = steps.length
   const pct = Math.round(done / total * 100)
@@ -235,7 +237,7 @@ function SubSteps({ data }: { data: NonNullable<TaskMetrics['substeps']> }) {
       >
         <span className="tp-donut-mid"><b>{done}/{total}</b></span>
       </span>
-      <ul className="tp-steps">
+      <ul className="tp-steps" ref={stepsProxRef}>
         {steps.map((s, i) => (
           <li key={s.t} className={s.done ? 'done' : ''}>
             <button
@@ -243,6 +245,7 @@ function SubSteps({ data }: { data: NonNullable<TaskMetrics['substeps']> }) {
               className="tp-step-tog"
               onClick={() => toggle(i)}
               aria-label={s.done ? 'Mark incomplete' : 'Mark complete'}
+              data-proximity
             >
               <span className="material-icons">{s.done ? 'check_circle' : 'radio_button_unchecked'}</span>
             </button>
@@ -512,6 +515,7 @@ function tipFor(id: string, data: Record<string, unknown>): Tip | null {
 function MetricCard({ schema, data, status, act, taskId }: WidgetProps) {
   const acc = TP_ACC[schema.id] ?? 'var(--brand-primary)'
   const tip = data ? tipFor(schema.id, data as Record<string, unknown>) : null
+  const tipProxRef = useProximityGroup<HTMLDivElement>()
   return (
     <div className="tp-w-shell" style={{ '--acc': acc } as React.CSSProperties}>
       <section className="tp-w" style={{ '--acc': acc } as React.CSSProperties}>
@@ -521,7 +525,7 @@ function MetricCard({ schema, data, status, act, taskId }: WidgetProps) {
         </div>
         {data && <WidgetBody schema={schema} data={data} status={status} act={act} taskId={taskId} />}
         {tip && (
-          <div className="tp-tip">
+          <div className="tp-tip" ref={tipProxRef}>
             <span className="material-icons">tips_and_updates</span>
             <span className="tp-tip-t">{tip.t}</span>
             {tip.cta && (
@@ -530,6 +534,7 @@ function MetricCard({ schema, data, status, act, taskId }: WidgetProps) {
                 className="tp-tip-cta"
                 style={{ '--cc': tip.cta.tone } as React.CSSProperties}
                 onClick={() => act(tip.cta!.label)}
+                data-proximity
               >
                 <span className="material-icons">{tip.cta.ic}</span>{tip.cta.label}
               </button>
@@ -546,6 +551,7 @@ function MetricCard({ schema, data, status, act, taskId }: WidgetProps) {
 interface Alert { tone: string; ic: string; t: string; cta: string }
 
 function AlertsStrip({ alerts, act }: { alerts: Alert[]; act: (l: string) => void }) {
+  const alertsProxRef = useProximityGroup<HTMLDivElement>()
   if (!alerts.length) return null
   const ctaIcon = (cta: string) => {
     if (cta === 'Reschedule') return 'event_repeat'
@@ -558,12 +564,12 @@ function AlertsStrip({ alerts, act }: { alerts: Alert[]; act: (l: string) => voi
       <div className="tp-alerts-k">
         <span className="material-icons">warning</span>Active alerts &middot; {alerts.length}
       </div>
-      <div className="tp-alerts-list">
+      <div className="tp-alerts-list" ref={alertsProxRef}>
         {alerts.map((a) => (
           <div key={a.t} className={'tp-alert ' + a.tone}>
             <span className="tp-alert-ic"><span className="material-icons">{a.ic}</span></span>
             <span className="tp-alert-t">{a.t}</span>
-            <button type="button" className="tp-alert-cta" onClick={() => act(a.cta)}>
+            <button type="button" className="tp-alert-cta" onClick={() => act(a.cta)} data-proximity>
               <span className="material-icons">{ctaIcon(a.cta)}</span>{a.cta}
             </button>
           </div>
@@ -596,6 +602,7 @@ function TaskDetailsPopover({
   const [now, setNow] = useState(Date.now)
   const [toast, setToast] = useState<string | null>(null)
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const tpCardRef = useProximityGroup<HTMLElement>()
 
   // Deadline computed once per task (title-keyed). Stored in state so it can
   // be read during render without a ref. The task key ref tracks which task
@@ -678,13 +685,14 @@ function TaskDetailsPopover({
     >
       <div className="tp-outer" onClick={e => e.stopPropagation()}>
         <aside
+          ref={tpCardRef}
           className="tp-card"
           style={{ '--ph': task.priority.color, '--sc': task.status.color } as React.CSSProperties}
         >
           <div className="tp-head">
             <div className="tp-head-top">
               <div className="tp-head-title">{task.title}</div>
-              <button type="button" className="tp-close" onClick={onClose} aria-label="Close">
+              <button type="button" className="tp-close" data-proximity onClick={onClose} aria-label="Close">
                 <span className="material-icons">close</span>
               </button>
             </div>
@@ -738,11 +746,11 @@ function TaskDetailsPopover({
                   </div>
                 </div>
                 <div className="tp-cust-actions">
-                  <button type="button" className="tp-cust-act" aria-label="Message"
+                  <button type="button" className="tp-cust-act" aria-label="Message" data-proximity
                     onClick={e => { e.stopPropagation(); act('Message') }}>
                     <span className="material-icons">chat</span>
                   </button>
-                  <button type="button" className="tp-cust-ask ask-ai"
+                  <button type="button" className="tp-cust-ask ask-ai" data-proximity
                     onClick={e => { e.stopPropagation(); act('Ask AI') }}>
                     <span className="material-icons">bolt</span>Ask AI
                   </button>
@@ -784,13 +792,13 @@ function TaskDetailsPopover({
             </div>
 
             <div className="tp-footer">
-              <button type="button" className="tp-foot-btn" style={{ '--fbtn': '#F97316' } as React.CSSProperties} onClick={() => act('Reschedule')}>
+              <button type="button" className="tp-foot-btn" style={{ '--fbtn': '#F97316' } as React.CSSProperties} data-proximity onClick={() => act('Reschedule')}>
                 <span className="material-icons">event_repeat</span>Reschedule
               </button>
-              <button type="button" className="tp-foot-btn" style={{ '--fbtn': '#3B82F6' } as React.CSSProperties} onClick={() => act('Reassign')}>
+              <button type="button" className="tp-foot-btn" style={{ '--fbtn': '#3B82F6' } as React.CSSProperties} data-proximity onClick={() => act('Reassign')}>
                 <span className="material-icons">person_add</span>Reassign
               </button>
-              <button type="button" className="tp-foot-btn primary" style={{ '--fbtn': 'var(--brand-primary-500)' } as React.CSSProperties} onClick={() => act('Open deal')}>
+              <button type="button" className="tp-foot-btn primary" style={{ '--fbtn': 'var(--brand-primary-500)' } as React.CSSProperties} data-proximity onClick={() => act('Open deal')}>
                 <span className="material-icons">open_in_new</span>View deal
               </button>
             </div>
@@ -810,6 +818,7 @@ function TaskDetailsPopover({
 export default function TaskCard() {
   const [activeTask, setActiveTask] = useState<Task | null>(null)
   const [popoverOpen, setPopoverOpen] = useState(false)
+  const columnRef = useProximityGroup<HTMLDivElement>()
 
   const openTask = (task: Task) => {
     setActiveTask(task)
@@ -821,7 +830,7 @@ export default function TaskCard() {
   return (
     <div className="card" style={{ padding: 0, background: 'var(--bg-app)' }}>
       <div className="frame">
-        <div className="column">
+        <div className="column" ref={columnRef}>
 
           <div className="col-head">
             <div className="col-title">
@@ -830,8 +839,8 @@ export default function TaskCard() {
               <h2>Prospect</h2>
             </div>
             <div className="col-actions">
-              <button type="button" className="col-btn"><span className="material-icons">add</span></button>
-              <button type="button" className="col-btn"><span className="material-icons">more_horiz</span></button>
+              <button type="button" className="col-btn" data-proximity><span className="material-icons">add</span></button>
+              <button type="button" className="col-btn" data-proximity><span className="material-icons">more_horiz</span></button>
             </div>
           </div>
 
@@ -842,53 +851,51 @@ export default function TaskCard() {
           {TASK_CARDS.map(card => (
             <div
               key={card.title}
-              className="task-wrap"
+              className={`task ${card.cls}`}
+              style={{ animationDelay: card.delay, '--tag': card.tag } as React.CSSProperties}
+              data-proximity
+              onClick={() => openTask(buildTask(card))}
             >
-              <div
-                className={`task ${card.cls}`}
-                style={{ animationDelay: card.delay, '--tag': card.tag } as React.CSSProperties}
-                onClick={() => openTask(buildTask(card))}
-              >
-                <div className="tag-banner">
-                  <span className={`material-icons bnr-ico`}>{card.bannerIcon}</span>
-                  {card.priority}
-                </div>
-                <div className="task-body">
-                  <div className="task-inner">
-                    <div className="t-ind">
-                      <span className="material-icons">{card.industry === 'Real Estate' ? 'apartment' : card.industry === 'Healthcare' ? 'medical_services' : card.industry === 'Finance' ? 'account_balance' : 'directions_car'}</span>
-                      {card.industry}
-                    </div>
-                    <div className="t-title">{card.title}</div>
-                    <div className="t-desc">{card.cardDesc}</div>
-                    <div className="entity">
-                      <span
-                        className="ent-round"
-                        style={{ background: card.entColor }}
-                      >
-                        {/\s/.test(card.entInit) || card.entInit.length > 3
-                          ? <span className="material-icons">{card.entInit}</span>
-                          : card.entInit}
-                      </span>
-                      <div className="ent-meta">
-                        <div className="ent-name">{card.entName}</div>
-                        <div className="ent-sub">{card.entSub}</div>
-                      </div>
-                    </div>
+              <div className="tag-banner">
+                <span className={`material-icons bnr-ico`}>{card.bannerIcon}</span>
+                {card.priority}
+              </div>
+              <div className="task-body">
+                <div className="task-inner">
+                  <div className="t-ind">
+                    <span className="material-icons">{card.industry === 'Real Estate' ? 'apartment' : card.industry === 'Healthcare' ? 'medical_services' : card.industry === 'Finance' ? 'account_balance' : 'directions_car'}</span>
+                    {card.industry}
                   </div>
-                  <div className="task-foot">
-                    <span className={`date ${card.dateClass}`}>
-                      <span className="material-icons">{card.dateIcon}</span>
-                      {card.dateText}
-                    </span>
-                    <button
-                      type="button"
-                      className="ask-ai"
-                      onClick={e => { e.stopPropagation(); openTask(buildTask(card)) }}
+                  <div className="t-title">{card.title}</div>
+                  <div className="t-desc">{card.cardDesc}</div>
+                  <div className="entity">
+                    <span
+                      className="ent-round"
+                      style={{ background: card.entColor }}
                     >
-                      <span className="material-icons">bolt</span>Ask AI
-                    </button>
+                      {/\s/.test(card.entInit) || card.entInit.length > 3
+                        ? <span className="material-icons">{card.entInit}</span>
+                        : card.entInit}
+                    </span>
+                    <div className="ent-meta">
+                      <div className="ent-name">{card.entName}</div>
+                      <div className="ent-sub">{card.entSub}</div>
+                    </div>
                   </div>
+                </div>
+                <div className="task-foot">
+                  <span className={`date ${card.dateClass}`}>
+                    <span className="material-icons">{card.dateIcon}</span>
+                    {card.dateText}
+                  </span>
+                  <button
+                    type="button"
+                    className="ask-ai"
+                    data-proximity
+                    onClick={e => { e.stopPropagation(); openTask(buildTask(card)) }}
+                  >
+                    <span className="material-icons">bolt</span>Ask AI
+                  </button>
                 </div>
               </div>
             </div>

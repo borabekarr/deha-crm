@@ -4,9 +4,11 @@ import './Fab.css'
 
 import { useState } from 'react'
 import { fabScreenRef, cleanupFabScreen } from './fab-hook'
+import { useProximityGroup } from '@/lib/hooks'
 
 export default function Fab() {
   const [open, setOpen] = useState(false)
+  const fabGroupRef = useProximityGroup<HTMLDivElement>()
 
   function toggle(value: boolean): void {
     setOpen(value)
@@ -31,6 +33,7 @@ export default function Fab() {
               ref={(el) => {
                 if (el) fabScreenRef(el, toggle)
                 else cleanupFabScreen(el)
+                fabGroupRef(el)
               }}
             >
 
@@ -104,6 +107,7 @@ export default function Fab() {
                     <button
                       type="button"
                       className="fab-close"
+                      data-proximity
                       onClick={(e) => { e.stopPropagation(); toggle(false) }}
                       aria-label="Close"
                     >
@@ -115,7 +119,7 @@ export default function Fab() {
 
                   {/* New lead — emerald */}
                   <div
-                    className="fab-item"
+                    className="fab-item" data-proximity
                     style={{ '--ic-bg': 'var(--brand-primary-500)' } as React.CSSProperties}
                     onClick={(e) => onPickItem(e)}
                   >
@@ -131,7 +135,7 @@ export default function Fab() {
 
                   {/* Log activity — blue */}
                   <div
-                    className="fab-item"
+                    className="fab-item" data-proximity
                     style={{ '--ic-bg': '#3B82F6' } as React.CSSProperties}
                     onClick={(e) => onPickItem(e)}
                   >
@@ -147,7 +151,7 @@ export default function Fab() {
 
                   {/* Create task — violet */}
                   <div
-                    className="fab-item"
+                    className="fab-item" data-proximity
                     style={{ '--ic-bg': '#8B5CF6' } as React.CSSProperties}
                     onClick={(e) => onPickItem(e)}
                   >
@@ -163,7 +167,7 @@ export default function Fab() {
 
                   {/* New deal — orange */}
                   <div
-                    className="fab-item"
+                    className="fab-item" data-proximity
                     style={{ '--ic-bg': '#F97316' } as React.CSSProperties}
                     onClick={(e) => onPickItem(e)}
                   >

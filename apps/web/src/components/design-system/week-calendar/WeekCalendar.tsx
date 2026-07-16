@@ -6,6 +6,7 @@ import type { CalEvent } from './calendar-events'
 
 import { useState, useRef, useCallback } from 'react'
 import { iconClass } from '../../../lib/iconClass'
+import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 import {
   nowLineRef,
   cleanupNowLine,
@@ -128,7 +129,15 @@ function EventCard({ event, top, height, onClick }: EventCardProps) {
 
   if (isShort) {
     return (
-      <div className="cal2-ev cal2-ev-short" style={style} onClick={onClick}>
+      <div
+        className="cal2-ev cal2-ev-short"
+        style={style}
+        onClick={onClick}
+        data-proximity
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } }}
+      >
         <span className="cal2-ev-dot" />
         <span className="cal2-ev-title">{event.title}</span>
         <span className="cal2-ev-mini-time">{event.startTime}</span>
@@ -137,7 +146,15 @@ function EventCard({ event, top, height, onClick }: EventCardProps) {
   }
   if (isMedium) {
     return (
-      <div className="cal2-ev cal2-ev-med" style={style} onClick={onClick}>
+      <div
+        className="cal2-ev cal2-ev-med"
+        style={style}
+        onClick={onClick}
+        data-proximity
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } }}
+      >
         <div className="cal2-ev-row">
           <span className="cal2-ev-dot" />
           <span className="cal2-ev-title">{event.title}</span>
@@ -147,7 +164,15 @@ function EventCard({ event, top, height, onClick }: EventCardProps) {
     )
   }
   return (
-    <div className="cal2-ev cal2-ev-full" style={style} onClick={onClick}>
+    <div
+      className="cal2-ev cal2-ev-full"
+      style={style}
+      onClick={onClick}
+      data-proximity
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } }}
+    >
       <div className="cal2-ev-body">
         <h4 className={'cal2-ev-title-lg' + (dur <= 60 ? ' is-truncate' : '')}>{event.title}</h4>
         <p className="cal2-ev-time">{timeStr}</p>
@@ -422,6 +447,10 @@ export default function WeekCalendar({ events = CALENDAR_EVENTS }: WeekCalendarP
 
   const openEvent = (ev: CalEvent) => { setSelected(ev); setSheetOpen(true) }
 
+  // Proximity group over all EventCards across every day column (single group,
+  // default [data-proximity] selector picks up every .cal2-ev regardless of column)
+  const bodyRowProximityRef = useProximityGroup<HTMLDivElement>()
+
   // Suppress the unused warning for nowRef/nowCleanupRef — combined ref handles both
   void nowRef
   void nowCleanupRef
@@ -477,7 +506,7 @@ export default function WeekCalendar({ events = CALENDAR_EVENTS }: WeekCalendarP
           </div>
 
           {/* Body row */}
-          <div className="cal2-body-row">
+          <div className="cal2-body-row" ref={bodyRowProximityRef}>
             <div className="cal2-hours">
               {HOURS_24.map((h) => (
                 <div key={h} className="cal2-hour-cell" style={{ height: HOUR_HEIGHT + 'px' }}>

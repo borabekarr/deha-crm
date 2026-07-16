@@ -40,4 +40,82 @@
    * part of this migration.
    */
   --ease-in-out: cubic-bezier(0.42, 0, 0.58, 1); /* standard ease-in-out; no literal instance existed in Buttons.css to extract from -- added to complete the easing set requested for this step, currently unused by Buttons.css */
+
+  /* Step-5 motion-token migration (plan: fix-all-debts) -- extracted verbatim
+   * from pre-existing literal curves in Fab.css / Toast.css / InlineEdit.css
+   * flagged by .claude-ext/hooks/motion-token-gate.sh. Byte-match the
+   * literals they replace; see debt/step9-proximity-motion-token-gate.md. */
+  --ease-standard:    cubic-bezier(.4, 0, .2, 1);    /* Fab.css .fab-plus transform */
+  --ease-accel:       cubic-bezier(.4, 0, 1, 1);     /* Toast.css exit anims; InlineEdit.css ieIcOut / .ie-act.is-confirming */
+  --ease-spring-soft: cubic-bezier(.32, 1.32, .5, 1); /* Fab.css .fab-menu-hd */
+  --ease-spring-soft-2: cubic-bezier(.34, 1.4, .5, 1); /* InlineEdit.css ieIcIn */
+
+  /* Step-7 motion-token migration (plan: fix-all-debts) -- extracted verbatim
+   * from pre-existing literal curves in TaskBoard.css / TaskBoard.tsx flagged
+   * by motion-token-gate.sh; no existing token byte-matched these curves. */
+  --ease-bounce-soft: cubic-bezier(.34, 1.32, .64, 1); /* TaskBoard toastMorphIn / checkPop */
+  --ease-bounce: cubic-bezier(.34, 1.7, .46, 1);       /* TaskBoard syncMorphBounce / itemBounce */
+  --ease-confetti: cubic-bezier(.34, .84, .36, 1);     /* TaskBoard confettiFlow (TSX inline) */
+
+  /* Step-8 motion-token migration (plan: fix-all-debts) -- extracted verbatim
+   * from pre-existing literal curves in the six squircle-rollout files
+   * flagged by motion-token-gate.sh; no existing token byte-matched these
+   * curves, so they are added here. */
+  --ease-out-soft: cubic-bezier(.16, 1, .3, 1);      /* StatisticsGraphCard .sg-rangepop enter/exit + sg-load animation */
+  --ease-spring-firm: cubic-bezier(.34, 1.3, .5, 1); /* StatusCard chip/copy transforms */
+  --ease-exit-soft: cubic-bezier(.5, 0, .75, .4);    /* StatusCard .sc-chip-copied.is-exiting scPopOut */
+  --ease-spring-tight: cubic-bezier(.34, 1.4, .6, 1); /* TaskCard .tp-w hover transform */
+
+  /* Step-7 shell-sweep motion-token migration (plan: reveal-shell-sweep) --
+   * extracted verbatim from pre-existing literal curves in PrizeSheet.css
+   * flagged by motion-token-gate.sh; no existing token byte-matched these
+   * curves, so they are added here. --ease-fade replaces the bare CSS
+   * `ease` keyword (its exact cubic-bezier expansion) used for opacity
+   * fades throughout the file. */
+  --ease-fade:          cubic-bezier(.25, .1, .25, 1);  /* PrizeSheet.css opacity fades (== bare `ease`) */
+  --ease-spring-loose:  cubic-bezier(.16, 1.16, .3, 1); /* PrizeSheet.css wontag/prize enter transforms */
+  --ease-spring-medium: cubic-bezier(.16, 1.5,  .3, 1); /* PrizeSheet.css claim-btn/success enter + check pop */
+  --ease-spring-wide:   cubic-bezier(.16, 1.3,  .3, 1); /* PrizeSheet.css .ps-modal-shell enter transform */
+  --ease-linear:        linear;                          /* bare `linear` keyword, token-wrapped for the motion gate */
+  --ease-bounce-glow:   cubic-bezier(.34, 1.18, .64, 1); /* AiMessageBox.css glow/bar/label enter animations */
+  --ease-draw:          cubic-bezier(.65, 0,    .35, 1); /* AiMessageBox.css .mb-done-check path draw-in */
+  --ease-spring-open:   cubic-bezier(.55, 1.35, .35, 1); /* ModelSelector.css .ms-shell.open expand */
+  --ease-slide-bounce:  cubic-bezier(.34, 1.3,  .64, 1); /* ModelSelector.css .ms-sel-indicator slide */
+  --ease-goo-collapse:  cubic-bezier(.55, .35,  .85, .3); /* MessageDropdown.css gooey blob collapse */
+  --ease-card-pop:      cubic-bezier(.34, 1.4,  .5,  1); /* NewsFeed.css .nf-card.anim-in enter */
+  --ease-avatar-swap:   cubic-bezier(.22, 1.4,  .4,  1); /* AvatarPicker.css apSwap keyframe */
+
+  /* Step-8 shell-sweep motion-token migration (plan: reveal-shell-sweep) --
+     extracted verbatim from a pre-existing literal curve in FileFolder.css
+     flagged by motion-token-gate.sh; no existing token byte-matched it. */
+  --ease-spring-strong: cubic-bezier(.34, 1.5, .64, 1); /* FileFolder.css .ff-pop-outer/.folder enter transform */
+  --ease-spring-pop:    cubic-bezier(.34, 1.2, .5,  1); /* Calendar.css .cal-cell.selected calSelPop keyframe */
+
+  /* Step-1 motion-token migration (plan: reveal-shell-debts) -- extracted
+     verbatim from pre-existing literal curves in SprintPlannerCore.css; no
+     existing token byte-matched these curves, so they are added here. */
+  --ease-toast-pop:   cubic-bezier(.34, 1.16, .64, 1); /* SprintPlannerCore.css toastMorphIn */
+  --ease-spring-snap: cubic-bezier(.34, 1.56, .64, 1); /* SprintPlannerCore.css proximity transform transition */
+
+  /* Step-11 retry motion-token migration (plan: reveal-shell-debts) --
+     extracted verbatim from a pre-existing literal curve in
+     OnboardingCompletion.css flagged by motion-token-gate.sh; no existing
+     token byte-matched this curve, so it is added here. */
+  --ease-confetti-fall: cubic-bezier(.3, .6, .5, 1); /* OnboardingCompletion.css ocConfettiFall keyframe */
+
+  /* Step-10 motion-token migration (plan: component-feedback-batch) --
+     extracted verbatim from a pre-existing literal curve in
+     DeleteModal.css dm-shake keyframe; no existing token byte-matched this
+     curve, so it is added here. */
+  --ease-shake: cubic-bezier(.36, .07, .19, .97); /* DeleteModal.css dm-shake keyframe */
+
+  /* Step-24 duration migration (plan: component-feedback-batch) -- the
+     ApplyButton morph choreography (buttons/Buttons.css) needed four
+     durations with no existing tier close enough to reuse without
+     flattening the requested stagger/bounce timing (the exact gap this
+     step exists to fix); added here rather than left as literals. */
+  --duration-slower: 300ms;  /* ApplyButton check-mark scale-pop transform (phase-2 enter) */
+  --duration-compact: 440ms; /* ApplyButton width/padding compact (phase-1, default -> loading) */
+  --duration-expand: 460ms;  /* ApplyButton width/padding extend (phase-3, done -> default) */
+  --duration-sweep: 360ms;   /* ApplyButton background-color sweep (phase-2/3, loading -> done -> default) */
 }

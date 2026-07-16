@@ -23,13 +23,43 @@
 }
 
 /* ── .dp-outer -- grey card wrapping white .dp-panel (inner-card pattern) */
+/* Fix (3): the shell mirrors .dp-panel's open/--closing/--hidden states
+   (date-picker-hook.ts queries .dp-outer and toggles the same classes onto it
+   everywhere it toggles them on #dp-panel) so the grey shell and white panel
+   enter/exit together on the same tokens. Base state is hidden-by-default
+   like .dp-panel -- JS adds dp-panel--open synchronously at mount, so there
+   is no flash. */
 .dp-outer {
+  position: relative;
   padding: 10px;
   background: var(--shell-bg, #d4dce8);
   border-radius: 28px;
   box-shadow:
     0 10px 30px rgba(17,17,17,0.12),
     0 2px 8px rgba(17,17,17,0.06);
+  transform: translateY(-16px) scale(0.95);
+  opacity: 0;
+  transition:
+    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
+    opacity   calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
+}
+
+.dp-outer.dp-panel--hidden {
+  transform: translateY(-16px) scale(0.95);
+  opacity: 0;
+}
+
+.dp-outer.dp-panel--open {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.dp-outer.dp-panel--closing {
+  transform: translateY(-16px) scale(0.95);
+  opacity: 0;
+  transition:
+    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
+    opacity   calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
 }
 
 /* Dark: canonical dark shell + external line (top rim: translucent white) */
@@ -37,6 +67,40 @@ html.dark .dp-outer {
   background: #0A0A0A;
   border: 1px solid #232323;
   border-top-color: rgba(255,255,255,.22) !important;
+}
+
+/* ── Squircle conversion (Step 5): dp-outer/dp-panel is a natural concentric
+   pair (28/20, gap 8) like Cards.css's .concentric-demo-outer/-inner. The
+   outer bezel only wants the corner-radius reset -- its border/hairline paint
+   is cancelled (content: none) since it's purely a decorative frame, matching
+   the .concentric-demo-outer precedent. Depth shadow migrates to
+   filter:drop-shadow (clip-path clips box-shadow). */
+.dp-outer[data-squircle="on"] {
+  --corner-radius: 28px;
+  filter:
+    drop-shadow(0 10px 30px rgba(17,17,17,0.12))
+    drop-shadow(0 2px 8px rgba(17,17,17,0.06));
+}
+.dp-outer[data-squircle="on"]::before,
+.dp-outer[data-squircle="on"]::after {
+  content: none;
+}
+/* Dark-mode outer hairline (mirrors .concentric-demo-outer's dark ::before
+   restore in Cards.css) -- simplified to a uniform ring since the squircle
+   ring path can't express the light-mode-only top-rim highlight nuance. */
+html.dark .dp-outer[data-squircle="on"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: #232323;
+  clip-path: var(--squircle-border-path);
+}
+/* Fix (1): leftover real border (base html.dark .dp-outer rule, incl. the
+   !important top-rim highlight) collides with the ::before ring above on
+   flat runs -- kill it so only the clip-path ring paints in squircle mode. */
+html.dark .dp-outer[data-squircle="on"] {
+  border-color: transparent !important;
 }
 
 /* ── Trigger button ───────────────────────────────────────────────────────── */
@@ -48,6 +112,22 @@ html.dark .dp-outer {
 
 .dp-trigger-label {
   letter-spacing: 0.01em;
+}
+
+/* Proximity — locked _shared-feedback.css .btn-green (L37-51) only lists
+   background-color/transform/box-shadow; scale + filter channels added
+   here so hover-tokens.css's --prox mapping doesn't snap. .btn-green:hover's
+   own transform:scale(1.03) is left as-is (composes with the standalone
+   `scale` property; scaling in place doesn't move the button under the
+   pointer, unlike a translate). */
+.dp-trigger[data-proximity],
+.dp-confirm[data-proximity] {
+  transition:
+    background-color calc(180ms * var(--anim-mult, 1)),
+    transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
+    box-shadow calc(200ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 
 /* ── Panel enter/exit ─────────────────────────────────────────────────────── */
@@ -77,8 +157,8 @@ html.dark .dp-outer {
   opacity: 0;
   pointer-events: none;
   transition:
-    transform calc(260ms * var(--anim-mult, 1)) ease-out,
-    opacity   calc(200ms * var(--anim-mult, 1)) ease-out;
+    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
+    opacity   calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
 }
 
 /* Fully-hidden state — pointer events off */
@@ -90,7 +170,7 @@ html.dark .dp-outer {
 
 /* Open state — prize-sheet bounce enter */
 .dp-panel.dp-panel--open {
-  animation: dp-panel-enter calc(360ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1) both;
+  animation: dp-panel-enter calc(360ms * var(--anim-mult, 1)) var(--ease-spring-snap) both;
   transform: translateY(0) scale(1);
   opacity: 1;
   pointer-events: auto;
@@ -103,8 +183,25 @@ html.dark .dp-outer {
   pointer-events: none;
   animation: none;
   transition:
-    transform calc(260ms * var(--anim-mult, 1)) ease-out,
-    opacity   calc(200ms * var(--anim-mult, 1)) ease-out;
+    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
+    opacity   calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
+}
+
+/* ── Squircle conversion (Step 5): inner of the dp-outer/dp-panel concentric
+   pair. The open/close animation here only transitions transform+opacity
+   (never width/height/border-radius), so useSquircle's ResizeObserver-driven
+   clip-path never fights the enter/exit motion. Depth shadow migrates to
+   filter:drop-shadow; the inset hairline is superseded by the shared
+   [data-squircle="on"] recipe's ::after ring (identical rgba(17,17,17,0.04)
+   value truth in light mode). */
+.dp-panel[data-squircle="on"] {
+  padding: 1px;
+  --corner-radius: var(--card-radius, 20px);
+  filter: drop-shadow(0 4px 16px rgba(17,17,17,0.08));
+}
+html.dark .dp-panel[data-squircle="on"] {
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.3));
+  box-shadow: none;
 }
 
 /* ── Panel header ─────────────────────────────────────────────────────────── */
@@ -147,9 +244,22 @@ html.dark .dp-outer {
   border: none;
   padding: 0;
   transition: background calc(120ms * var(--anim-mult, 1));
+  /* Fix (4): nudge up-right toward the head's top-right corner via layout
+     (align-self + negative margin), never transform -- proximity owns transform. */
+  align-self: flex-start;
+  margin: -2px -4px 0 0;
 }
 
 .dp-head-close:hover { background: var(--gray-200); }
+
+/* Proximity — scale+filter channels appended; no local transform/filter
+   hover rule on .dp-head-close to remove (hover only recolors). */
+.dp-head-close.dp-head-close[data-proximity] {
+  transition:
+    background calc(120ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
 
 .dp-head-close .material-symbols-outlined {
   font-size: 16px;
@@ -211,6 +321,43 @@ html.dark .dp-center-pill {
   background: #ffffff;
 }
 
+/* Fix (2): second, always-instant wheel layer for pixel-accurate color
+   splitting. The base .dp-item layer below stays grey year-round; this layer
+   duplicates the same rendered content (date-picker-hook.ts clones the base
+   scroll container's innerHTML into #dp-mask-*-inner), forces contrast-color
+   text, and is clip-path'd to exactly the .dp-center-pill rect -- so only the
+   text under the pill paints in the accent color, with zero transition.
+   date-picker-hook.ts fadePass() mirrors the same per-item scale/opacity plus
+   a translateY(-scrollTop) onto this copy every scroll frame so it tracks the
+   base layer exactly. pointer-events:none -- hit-testing/dragging stays on
+   the base .dp-wheel-scroll layer only. */
+.dp-wheel-mask {
+  position: absolute;
+  top: 42px; /* matches .dp-wheel-scroll's flow position: label margin-top(20) + height(18) + gap(4) */
+  left: 0;
+  right: 0;
+  height: 220px;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 3; /* above .dp-wheel-scroll (z-index:2) and its item content */
+  clip-path: inset(91px 0 91px 0); /* (220 - 38) / 2 = 91 -- leaves only the 38px pill band visible */
+}
+
+.dp-wheel-mask-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.dp-wheel-mask-inner .dp-item {
+  color: #ffffff;
+}
+
+html.dark .dp-wheel-mask-inner .dp-item {
+  color: #111111;
+}
+
 .dp-wheel-scroll {
   height: 220px;
   overflow-y: auto;
@@ -270,30 +417,17 @@ html.dark .dp-center-pill {
   cursor: pointer;
   scroll-snap-align: center;
   transform: translateY(4px);
-  /* Fix (3): slide transition for click-to-value — ease-out scroll feel */
-  transition:
-    transform calc(220ms * var(--anim-mult, 1)) ease-out;
-  /* color/font-weight intentionally NOT in transition — they snap instantly */
+  /* Fix (2): no transform transition -- fadePass() drives scale/opacity
+     directly every scroll frame via inline style; an eased transition here
+     fought that per-frame JS update and read as an unwanted bounce.
+     color/font-weight are not transitioned either -- they snap instantly. */
 }
 
 .dp-item.active {
   /* Item 3: background removed -- static .dp-center-pill provides the pill shape */
-  /* Only color differs from inactive; font-weight stays 900 */
-  color: #ffffff;
+  /* Fix (2): color role removed -- the .dp-wheel-mask copy owns pill-area
+     color now; .active only nudges the resting transform. */
   transform: translateY(0);
-  transition: transform calc(220ms * var(--anim-mult, 1)) ease-out;
-}
-
-/* Fix (2): while scrolling, freeze ALL transitions on items so active highlight
-   stays stable — no white-flash + second re-glow */
-.dp-wheel-scroll.scrolling .dp-item {
-  transition: none;
-}
-
-/* Keep active text locked during scroll -- pill background is static, no change needed */
-.dp-wheel-scroll.scrolling .dp-item.active {
-  color: #ffffff;
-  /* font-weight stays 900 (inherited from .dp-item) */
 }
 
 .dp-item:hover:not(.active) {
@@ -316,31 +450,6 @@ html.dark .dp-center-pill {
 .dp-confirm .material-symbols-outlined {
   font-size: 16px;
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
-}
-
-/* ── Active-value morph (d): old value morphs out, new morphs in on active change */
-@keyframes dp-morph-out {
-  from { opacity: 1; transform: scale(1)    translateY(0);   }
-  to   { opacity: 0; transform: scale(0.75) translateY(-6px); }
-}
-
-@keyframes dp-morph-in {
-  from { opacity: 0; transform: scale(0.75) translateY(6px); }
-  to   { opacity: 1; transform: scale(1)    translateY(0);   }
-}
-
-.dp-item.dp-morph-out {
-  animation: dp-morph-out calc(150ms * var(--anim-mult, 1)) ease-out forwards;
-}
-
-.dp-item.dp-morph-in {
-  animation: dp-morph-in calc(200ms * var(--anim-mult, 1)) ease-out both;
-}
-
-/* Suppress morph animations while wheel is scrolling (wheel scroll provides motion) */
-.dp-wheel-scroll.scrolling .dp-item.dp-morph-out,
-.dp-wheel-scroll.scrolling .dp-item.dp-morph-in {
-  animation: none;
 }
 
 /* ── Dark mode overrides (System A: html.dark) ────────────────────────────── */
@@ -389,20 +498,8 @@ html.dark .dp-wheel-scroll::after {
 /* Suppress per-item hover while wheel is scrolling */
 .dp-wheel-scroll.scrolling .dp-item:hover { color: inherit; }
 
-/* Dark: keep active text locked during scroll -- pill background is static */
-html.dark .dp-wheel-scroll.scrolling .dp-item.active {
-  color: #111111;
-}
-
 html.dark .dp-item {
   color: var(--gray-600);
-}
-
-html.dark .dp-item.active {
-  /* Item 3: background removed -- static .dp-center-pill provides white pill in dark */
-  /* Only color differs; font-weight stays 900 */
-  color: #111111;
-  transition: transform calc(220ms * var(--anim-mult, 1)) ease-out;
 }
 
 html.dark .dp-item:hover:not(.active) {

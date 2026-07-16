@@ -47,6 +47,13 @@ export interface RegistryEntry {
    * is kept only as a reference for legacy context.
    */
   sourceHtml: string
+  /**
+   * Buttons-only pilot: when set, the route-level reveal (see
+   * components.$slug.tsx) targets this selector instead of the default
+   * `:scope > *`, revealing each matched item individually rather than the
+   * component root as one block. Leave unset for every other entry.
+   */
+  revealSelector?: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Component: ReturnType<typeof lazy<ComponentType<any>>>
 }
@@ -239,6 +246,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Circular progress metric',
     viewport: { width: 700, height: 320 },
     sourceHtml: '/design-system/preview/components-metric-circle.html',
+    revealSelector: '.pill-shell',
     Component: lazy(() => import('@/components/design-system/metric-circle/MetricCircle')),
   },
   {
@@ -259,6 +267,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Daily Briefing cards — 4 AI signal types, inverted action popover',
     viewport: { width: 700, height: 1500 },
     sourceHtml: '/design-system/preview/components-pipeline-card.html',
+    revealSelector: '.shell',
     Component: lazy(() => import('@/components/design-system/pipeline-card/PipelineCard')),
   },
   {
@@ -281,17 +290,8 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Primary, inverse, glass, text',
     viewport: { width: 700, height: 140 },
     sourceHtml: '/design-system/preview/components-buttons.html',
+    revealSelector: '.btn-row > *',
     Component: lazy(() => import('@/components/design-system/buttons/Buttons')),
-  },
-  {
-    slug: 'buttons-proximity',
-    name: 'Buttons Proximity',
-    status: 'Proceeding',
-    category: 'Primitives',
-    subtitle: 'Proximity hover pilot',
-    viewport: { width: 700, height: 140 },
-    sourceHtml: '/design-system/preview/components-buttons.html',
-    Component: lazy(() => import('@/components/design-system/buttons-proximity/ButtonsProximity')),
   },
   {
     slug: 'pills',
@@ -301,6 +301,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Priority dots, stat badges, icon & event badges',
     viewport: { width: 700, height: 230 },
     sourceHtml: '/design-system/preview/components-pills.html',
+    revealSelector: '.pill-priority, .pill-tab, .badge, .badge-event, .icon-badge',
     Component: lazy(() => import('@/components/design-system/pills/Pills')),
   },
   {
@@ -311,6 +312,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Segmented control, toggle switch, slider',
     viewport: { width: 700, height: 240 },
     sourceHtml: '/design-system/preview/components-controls.html',
+    revealSelector: '.sw-base, .seg, .slider',
     Component: lazy(() => import('@/components/design-system/controls/Controls')),
   },
   {
@@ -321,12 +323,13 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Bottom-sheet with spring slide, staggered reveal, drag-to-dismiss + ESC',
     viewport: { width: 700, height: 560 },
     sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/smooth-drawer',
+    revealSelector: '.sd-trigger',
     Component: lazy(() => import('@/components/design-system/smooth-drawer/SmoothDrawer')),
   },
   {
     slug: 'inline-edit',
     name: 'Inline Edit',
-    status: 'Proceeding',
+    status: 'Finished',
     category: 'Auxiliary Elements',
     subtitle: 'Click-to-edit inline field with save / cancel controls',
     viewport: { width: 700, height: 240 },
@@ -366,7 +369,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: 'github-calendar',
     name: 'GitHub Calendar',
-    status: 'Proceeding',
+    status: 'Finished',
     category: 'Auxiliary Elements',
     subtitle: 'GitHub-style contribution heatmap calendar',
     viewport: { width: 900, height: 220 },
@@ -391,6 +394,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Two-way live converter with flag flip + digit roll',
     viewport: { width: 720, height: 720 },
     sourceHtml: '/design-system/preview/brand-currency-converter.html',
+    revealSelector: '.cc-pill, .cc-swap',
     Component: lazy(() => import('@/components/design-system/currency-converter/CurrencyConverter')),
   },
   {
@@ -411,6 +415,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Expandable issue card · tooltips · copy-link',
     viewport: { width: 520, height: 360 },
     sourceHtml: '/design-system/preview/brand-status-card.html',
+    revealSelector: '.sc-card',
     Component: lazy(() => import('@/components/design-system/status-card/StatusCard')),
   },
   {
@@ -451,6 +456,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Morphing icon-to-label tabs with a gliding indicator + slide-up panels',
     viewport: { width: 700, height: 440 },
     sourceHtml: '/design-system/preview/components-motion-tabs.html',
+    revealSelector: '.mt-tab',
     Component: lazy(() => import('@/components/design-system/motion-tabs/MotionTabs')),
   },
   {
@@ -461,7 +467,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Destructive action button with confirm state',
     viewport: { width: 700, height: 200 },
     sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/blob/main/delete-button/delete-button.html',
-    Component: lazy(() => import('@/components/design-system/delete-button/DeleteButton')),
+    Component: lazy(() => import('@/components/design-system/delete-button/DeleteButtonProximityDemo')),
   },
   {
     slug: 'avatar-picker',
@@ -486,7 +492,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: 'metric-card',
     name: 'Metric card',
-    status: 'Proceeding',
+    status: 'Finished',
     category: 'Components',
     subtitle: 'Numeral + delta + sparkline; click to expand',
     viewport: { width: 700, height: 320 },
@@ -501,12 +507,13 @@ export const registry: RegistryEntry[] = [
     subtitle: 'CRM deal pipeline widget — live value, trend chart & quick actions',
     viewport: { width: 700, height: 900 },
     sourceHtml: '/design-system/preview/components-statistics-graph-card.html',
+    revealSelector: '.sg-sync, .sg-rangechip, .sg-cta',
     Component: lazy(() => import('@/components/design-system/statistics-graph-card/StatisticsGraphCard')),
   },
   {
     slug: 'financial-health-card',
     name: 'Financial health card',
-    status: 'Proceeding',
+    status: 'Finished',
     category: 'Components',
     subtitle: 'Animated score card — glowing segmented health bar',
     viewport: { width: 700, height: 620 },
@@ -531,6 +538,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Winning row treatment + segmented filter with FLIP re-rank animation',
     viewport: { width: 700, height: 400 },
     sourceHtml: '/design-system/preview/components-leaderboard.html',
+    revealSelector: '.seg button, .row',
     Component: lazy(() => import('@/components/design-system/leaderboard/Leaderboard')),
   },
   {
@@ -576,7 +584,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: 'stacked-list',
     name: 'Stacked List',
-    status: 'Proceeding',
+    status: 'Finished',
     category: 'Components',
     subtitle: 'Stacked item list with avatars, labels and actions',
     viewport: { width: 700, height: 480 },
@@ -591,6 +599,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Kanban task cards — click to open AI-driven detail popover',
     viewport: { width: 700, height: 680 },
     sourceHtml: '/design-system/preview/components-task-card.html',
+    revealSelector: '.task',
     Component: lazy(() => import('@/components/design-system/task-card/TaskCard')),
   },
   {
@@ -651,6 +660,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'AI agent syncs tasks from Slack, GitHub, Notion',
     viewport: { width: 1100, height: 800 },
     sourceHtml: '/design-system/preview/brand-taskboard.html',
+    revealSelector: '.tb-column, .tb-card',
     Component: lazy(() => import('@/components/design-system/task-board/TaskBoard')),
   },
   {
@@ -661,17 +671,8 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Deha sprint planner with Ask AI command palette',
     viewport: { width: 1280, height: 900 },
     sourceHtml: '/design-system/preview/brand-sprint-planner-core.html',
+    revealSelector: '.ticket, .day-cell',
     Component: lazy(() => import('@/components/design-system/sprint-planner-core/SprintPlannerCore')),
-  },
-  {
-    slug: 'ai-memory-card',
-    name: 'AI memory card',
-    status: 'Proceeding',
-    category: 'Components',
-    subtitle: 'Memory added notification card for AI chatbot',
-    viewport: { width: 480, height: 620 },
-    sourceHtml: '/design-system/preview/components-ai-memory-card.html',
-    Component: lazy(() => import('@/components/design-system/ai-memory-card/AiMemoryCard')),
   },
   {
     slug: 'todo-list',
@@ -691,6 +692,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Color picker + window mode + brightness settings panel',
     viewport: { width: 480, height: 620 },
     sourceHtml: '/design-system/preview/components-theme-editor.html',
+    revealSelector: '.te-mode, .te-sw',
     Component: lazy(() => import('@/components/design-system/theme-editor/ThemeEditor')),
   },
   {
@@ -721,6 +723,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Prompt · Card · Checklist → success morph',
     viewport: { width: 480, height: 620 },
     sourceHtml: '/design-system/preview/brand-onboarding-completion.html',
+    revealSelector: '.oc-row',
     Component: lazy(() => import('@/components/design-system/onboarding-completion/OnboardingCompletion')),
   },
   {

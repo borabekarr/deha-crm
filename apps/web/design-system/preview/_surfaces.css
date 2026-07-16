@@ -19,6 +19,10 @@
  *   • prize-sheet (.ps-device, .sheet)
  *   • leaderboard  (.lb-outer, .lb, .row) — already the visual reference,
  *                   left untouched so it remains the canonical baseline
+ *   • [data-squircle="on"] surfaces — excluded via :not() below; the squircle
+ *                   recipe in _shared-feedback.css owns their external line
+ *                   (clip-path ring pseudo-elements), a real border here would
+ *                   render as a square outline clipped at the corners
  *
  * CONVENTION
  *   Literal hex values only — no var() tokens (tokens are unreliable on the
@@ -27,6 +31,7 @@
 
 /* ─── LIGHT ─────────────────────────────────────────────────────────────── */
 /* Outer shells / popover trays */
+:is(
 .shell,
 .te-outer,
 .ms-outer,
@@ -34,11 +39,13 @@
 .wf-outer,
 .wtc-outer,
 .wae-pop-outer,
+.wae-canvas,
 .mem-outer,
 .cal-outer,
 .pcx-outer,
 .tp-outer,
 .ldx-outer,
+.tb-outer,
 /* Main / inner / popover / nested cards */
 .card-inner,
 .metric,
@@ -56,40 +63,55 @@
 .streak,
 .fhc,
 .task,
-.todo {
-  border: 1px solid #CBD5E1;
+.todo,
+.tb-panel
+):not([data-squircle="on"]) {
+  /* Canonical inner-card hairline (matches --card-border light value from
+     the /components/cards ground-truth probe, 2026-07-14). */
+  border: 1px solid #D4D4D4;
 }
 
 /* ─── DARK ───────────────────────────────────────────────────────────────── */
-html.dark .shell,
-html.dark .te-outer,
-html.dark .ms-outer,
-html.dark .exp-outer,
-html.dark .wf-outer,
-html.dark .wtc-outer,
-html.dark .wae-pop-outer,
-html.dark .mem-outer,
-html.dark .cal-outer,
-html.dark .pcx-outer,
-html.dark .tp-outer,
-html.dark .ldx-outer,
-html.dark .card-inner,
-html.dark .metric,
-html.dark .exp-card,
-html.dark .pcx-card,
-html.dark .tp-card,
-html.dark .ldx-card,
-html.dark .ms-panel,
-html.dark .te-panel,
-html.dark .wtc-card,
-html.dark .mem-card,
-html.dark .cal-panel,
-html.dark .tp-w,
-html.dark .wae-pop-inner,
-html.dark .streak,
-html.dark .fhc,
-html.dark .task,
-html.dark .todo {
-  border: 1px solid #334155;
-  border-top-color: rgba(255, 255, 255, 0.22) !important;
+html.dark :is(
+.shell,
+.te-outer,
+.ms-outer,
+.exp-outer,
+.wf-outer,
+.wtc-outer,
+.wae-pop-outer,
+.wae-canvas,
+.mem-outer,
+.cal-outer,
+.pcx-outer,
+.tp-outer,
+.ldx-outer,
+.tb-outer,
+.card-inner,
+.metric,
+.exp-card,
+.pcx-card,
+.tp-card,
+.ldx-card,
+.ms-panel,
+.te-panel,
+.wtc-card,
+.mem-card,
+.cal-panel,
+.tp-w,
+.wae-pop-inner,
+.streak,
+.fhc,
+.task,
+.todo,
+.tb-panel
+):not([data-squircle="on"]) {
+  /* fab-menu (FAB popover inner card) is excluded from this shared group:
+     it needs a theme-conditional ring (dark only, none in light) that this
+     :is() block cannot express, so it is styled locally in Fab.css. */
+  /* Canonical inner-card hairline (matches --card-border dark value); uniform
+     on all four edges, no top-highlight override -- the squircle ring recipe
+     that owns the actual reference surface (cards page) paints a solid ring,
+     not an asymmetric highlight, so this stays visually consistent with it. */
+  border: 1px solid #232323;
 }

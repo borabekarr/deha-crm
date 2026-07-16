@@ -1,11 +1,24 @@
 {
   "$schema": "https://react.doctor/schema.json",
-  "$comment": "no-tiny-text override for design-system showcase: 10px Micro Label is a documented, sanctioned step of the type scale (see TypeScale.tsx), not an accessibility bug. Suppression approved by Bora 2026-07-12. Scoped to this directory only via ignore.overrides so genuinely-too-small text elsewhere still gets flagged.",
+  "$comment": "no-tiny-text override for design-system showcase: 10px Micro Label is a documented, sanctioned step of the type scale (see TypeScale.tsx), not an accessibility bug. Suppression approved by Bora 2026-07-12. Scoped to this directory only via ignore.overrides so genuinely-too-small text elsewhere still gets flagged. TaskBoard is the visual-locked flagship board; split deferred by Bora 2026-07-16 (regression risk on animation wiring outweighs readability gain). div+role=\"button\" a11y pattern follows the WTC in-repo precedent; real <button> conversion rejected 2026-07-16 (visual-locked DS, nested-interactive semantics); keyboard parity implemented via onKeyDown.",
   "ignore": {
     "overrides": [
       {
         "files": ["src/components/design-system/**"],
         "rules": ["react-doctor/no-tiny-text"]
+      },
+      {
+        "files": ["src/components/design-system/task-board/TaskBoard.tsx"],
+        "rules": ["react-doctor/no-giant-component"]
+      },
+      {
+        "files": [
+          "src/components/design-system/calendar/Calendar.tsx",
+          "src/components/design-system/file-folder/FileFolder.tsx",
+          "src/components/design-system/leads-table/LeadsTable.tsx",
+          "src/components/design-system/week-calendar/WeekCalendar.tsx"
+        ],
+        "rules": ["react-doctor/prefer-tag-over-role"]
       }
     ]
   }

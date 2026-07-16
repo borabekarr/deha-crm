@@ -3,10 +3,14 @@
 // element, mirroring use-proximity-group.ts's register-on-attach/cleanup-on-
 // detach structure. No lifecycle effect needed for either concern.
 import { useCallback, useRef } from 'react';
-import { squirclePath, squircleRingPath } from '../squircle';
+import { squirclePath, squircleRingPath, type CornerRadii } from '../squircle';
 
 const DEFAULT_SMOOTHING = 0.6;
 const BORDER_WIDTH = 1;
+// Ring paths must not touch the clip-path boundary or the outermost sub-pixel
+// gets antialiased away (pseudo-elements are clipped by the host's own
+// clip-path, which shares the ring's outer edge). Inset the ring 0.5px in.
+const RING_INSET = 0.5;
 
 interface ElementState {
   el: HTMLElement;
@@ -28,10 +32,19 @@ function supportsSquircle(): boolean {
   return capable;
 }
 
-function readRadius(computed: CSSStyleDeclaration): number {
+// `--corner-radius` accepts one value (existing behavior, unchanged) or four
+// space-separated values in border-radius order (tl tr br bl).
+function readRadius(computed: CSSStyleDeclaration): number | CornerRadii {
   const custom = computed.getPropertyValue('--corner-radius').trim();
-  const parsed = custom ? parseFloat(custom) : NaN;
-  if (!Number.isNaN(parsed)) return parsed;
+  if (custom) {
+    const parts = custom.split(/\s+/);
+    if (parts.length >= 4) {
+      const [tl, tr, br, bl] = parts.map((v) => parseFloat(v) || 0);
+      return { tl, tr, br, bl };
+    }
+    const parsed = parseFloat(custom);
+    if (!Number.isNaN(parsed)) return parsed;
+  }
   const fallback = parseFloat(computed.borderTopLeftRadius);
   return Number.isNaN(fallback) ? 0 : fallback;
 }
@@ -49,25 +62,42 @@ function applySquircle(el: HTMLElement, width: number, height: number): void {
   const smoothing = readSmoothing(computed);
 
   el.style.clipPath = `path("${squirclePath(width, height, radius, smoothing)}")`;
-  el.style.setProperty(
-    '--squircle-border-path',
-    `path("${squircleRingPath(width, height, radius, BORDER_WIDTH, smoothing)}")`
-  );
-  const hairlineInnerW = width - BORDER_WIDTH * 2;
-  const hairlineInnerH = height - BORDER_WIDTH * 2;
-  const hairlineRadius = Math.max(radius - BORDER_WIDTH, 0);
-  el.style.setProperty(
-    '--squircle-hairline-path',
-    `path("${squircleRingPath(hairlineInnerW, hairlineInnerH, hairlineRadius, BORDER_WIDTH, smoothing, [
-      BORDER_WIDTH,
-      BORDER_WIDTH,
-    ])}")`
-  );
+
+  // Ring/hairline vars are only meaningful for the uniform-radius engine
+  // (squircleRingPath doesn't take per-corner radii); per-corner consumers
+  // rely on their own real CSS border and skip these custom properties.
+  if (typeof radius === 'number') {
+    el.style.setProperty(
+      '--squircle-border-path',
+      `path("${squircleRingPath(
+        width - RING_INSET * 2,
+        height - RING_INSET * 2,
+        Math.max(radius - RING_INSET, 0),
+        BORDER_WIDTH,
+        smoothing,
+        [RING_INSET, RING_INSET]
+      )}")`
+    );
+    const hairlineOffset = BORDER_WIDTH + RING_INSET;
+    const hairlineInnerW = width - hairlineOffset * 2;
+    const hairlineInnerH = height - hairlineOffset * 2;
+    const hairlineRadius = Math.max(radius - hairlineOffset, 0);
+    el.style.setProperty(
+      '--squircle-hairline-path',
+      `path("${squircleRingPath(hairlineInnerW, hairlineInnerH, hairlineRadius, BORDER_WIDTH, smoothing, [
+        hairlineOffset,
+        hairlineOffset,
+      ])}")`
+    );
+  }
   el.dataset.squircle = 'on';
 }
 
 function measureAndApply(el: HTMLElement): void {
-  applySquircle(el, el.offsetWidth, el.offsetHeight);
+  // getBoundingClientRect is fractional (offsetWidth/Height round to
+  // integers), matching what the ResizeObserver's borderBoxSize reports.
+  const rect = el.getBoundingClientRect();
+  applySquircle(el, rect.width, rect.height);
 }
 
 function ensureObserver(): ResizeObserver | null {

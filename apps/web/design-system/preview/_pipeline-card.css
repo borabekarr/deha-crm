@@ -85,7 +85,8 @@ html.dark .brief-stat-n { color: #F8FAFC; }
     linear-gradient(to bottom, rgba(255,255,255,0.07) 1px, transparent 1px);
   background-size: 22px 22px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -2px 0 var(--lp-edge), inset 0 0 0 1px rgba(255,255,255,0.14);
-  transition: background-color calc(420ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), filter calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), transform calc(150ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  transition: background-color calc(420ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), filter calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1), transform calc(150ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
   transform-origin: right center;
 }
 .pc-left:active { transform: scale(0.985); }
@@ -490,7 +491,10 @@ html.dark .pcx-ghost-link { color: #94A3B8; } html.dark .pcx-ghost-link:hover { 
 
 html.dark .frame { background: transparent !important; background-image: none !important; }
 html.dark .sec, html.dark .cap { color: #94A3B8; } html.dark .cap b { color: #E2E8F0; }
-.shell.zoom:hover .pc-left { filter: brightness(1.06) saturate(1.03); }
+/* .shell.zoom:hover .pc-left brightness/saturate rule removed (Step 15 proximity
+   wiring): .pc-left is now [data-proximity]; hover-tokens.css's own
+   filter:brightness(...) drives the highlight instead, so the old whole-card
+   hover filter would have doubled up on top of it. */
 
 /* ═══════════════════════════════════════════════════════════════════════════
    v2 — Bora review revisions (overrides + additions, last-wins cascade)

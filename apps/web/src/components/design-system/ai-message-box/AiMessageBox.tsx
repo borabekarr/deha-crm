@@ -3,11 +3,16 @@ import './AiMessageBox.css'
 
 import { useRef, useCallback } from 'react'
 import { mbStartGenerating, mbCleanup } from './ai-message-box-hook'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
+import { useProximityGroup } from '@/lib/hooks'
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function AiMessageBox() {
   const mbRef = useRef<HTMLDivElement | null>(null)
+  const squircleRef = useSquircle<HTMLDivElement>()
+  const shellRef = useSquircle<HTMLDivElement>()
+  const toolbarRef = useProximityGroup<HTMLDivElement>()
 
   // Callback ref: keeps mbRef in sync; cleanup on unmount
   const mbCallbackRef = useCallback((el: HTMLDivElement | null) => {
@@ -15,7 +20,8 @@ export default function AiMessageBox() {
       mbCleanup(mbRef.current)
     }
     mbRef.current = el
-  }, [])
+    squircleRef(el)
+  }, [squircleRef])
 
   function handleAiBtnClick() {
     mbStartGenerating(mbRef.current)
@@ -23,7 +29,7 @@ export default function AiMessageBox() {
 
   return (
     <div className="card">
-      <div className="mb-shell">
+      <div className="mb-shell" ref={shellRef}>
       <div className="mb" ref={mbCallbackRef}>
         <div className="mb-stack">
           <div
@@ -40,9 +46,9 @@ export default function AiMessageBox() {
             <div className="skel-bar w3"></div>
           </div>
         </div>
-        <div className="mb-toolbar">
+        <div className="mb-toolbar" ref={toolbarRef}>
           <div className="mb-tools-left">
-            <button type="button" className="mb-btn">
+            <button type="button" className="mb-btn" data-proximity>
               <span className="material-icons">file_upload</span>
               Upload Instructions
             </button>
@@ -53,6 +59,7 @@ export default function AiMessageBox() {
                 type="button"
                 className="mb-ai-btn"
                 id="mbAiBtn"
+                data-proximity
                 onClick={handleAiBtnClick}
               >
                 <span className="material-symbols-outlined mb-gradient-icon">neurology</span>
@@ -81,7 +88,7 @@ export default function AiMessageBox() {
                 Done
               </span>
             </div>
-            <button type="button" className="mb-send">
+            <button type="button" className="mb-send" data-proximity>
               <span className="material-icons">arrow_upward</span>
             </button>
           </div>

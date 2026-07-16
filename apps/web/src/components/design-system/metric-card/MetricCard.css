@@ -15,13 +15,20 @@ html.dark .frame.mc-frame { background-image: none; }
   cursor: pointer;
   user-select: none;
   /* Press feedback transition - transform only, does not conflict with shell.zoom scale */
-  transition: transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  transition: transform calc(120ms * var(--anim-mult, 1)) var(--ease-out),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
+/* Deliberate override of _surfaces.css's dark-mode top highlight for .metric
+   (0.22 -> 0.06): _surfaces.css is a locked shared partial in this run, so the
+   card-view-parity correction lives here instead. Equal specificity + !important
+   + later source order (component CSS loads after global.css) wins the cascade. */
+html.dark .metric { border-top-color: rgba(255, 255, 255, 0.06) !important; }
 /* Hover motion is handled by the wrapping .shell.zoom (grey + card move as one). */
 /* Tactile press: shell takes primary squeeze so bezel + card move as one unit.
    Inner card adds a tiny additional compress; composed total ≈ 0.98 × 0.99 ≈ 0.970,
    matching the old inner-only feel while the grey bezel now moves with it. */
-.shell.zoom:active { transform: scale(0.98); transition: transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
+.shell.zoom:active { transform: scale(0.98); transition: transform calc(120ms * var(--anim-mult, 1)) var(--ease-out); }
 .metric:active { transform: scale(0.99); }
 
 .m-left { display:flex; flex-direction:column; gap: 12px; }
@@ -51,36 +58,59 @@ html.dark .frame.mc-frame { background-image: none; }
   display: flex; align-items: center; justify-content: center;
   z-index: 300;
   opacity: 0; pointer-events: none;
-  transition: opacity calc(220ms * var(--anim-mult, 1));
+  transition: opacity calc(220ms * var(--anim-mult, 1)) var(--ease-out);
 }
 .exp-overlay.open { opacity: 1; pointer-events: all; }
 
 /* ── GRAY OUTER SHELL ── */
 .exp-outer {
-  background: #D4DCE8;
-  border-radius: 30px;
-  padding: 10px;
+  position: relative;
+  background: var(--shell-bg);
+  border-radius: 36px;
+  padding: 8px;
   width: 480px;
-  box-shadow:
-    0 32px 80px rgba(0,0,0,0.24),
-    0 6px 20px rgba(0,0,0,0.12);
   transform: translateY(16px) scale(0.95);
   /* Closed/exit: smooth ease-out, no overshoot (avoids jitter on the way out). */
-  transition: transform calc(260ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  transition: transform calc(260ms * var(--anim-mult, 1)) var(--ease-out);
+}
+/* useSquircle drops the plain border-radius fallback above; depth moves to
+   filter (clip-path clips box-shadow) and only the dark-mode outer hairline
+   is restored, mirroring .concentric-demo-outer in Cards.css. */
+.exp-outer[data-squircle="on"] {
+  border-radius: 0;
+  --corner-radius: 36px;
+  filter: drop-shadow(0 32px 80px rgba(0,0,0,0.24)) drop-shadow(0 6px 20px rgba(0,0,0,0.12));
+}
+.exp-outer[data-squircle="on"]::before,
+.exp-outer[data-squircle="on"]::after { content: none; }
+html.dark .exp-outer[data-squircle="on"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--card-border);
+  clip-path: var(--squircle-border-path);
 }
 /* Open/enter: slight bounce + morph pop. */
 .exp-overlay.open .exp-outer {
   transform: translateY(0) scale(1);
-  transition: transform calc(360ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1);
+  transition: transform calc(360ms * var(--anim-mult, 1)) var(--ease-spring);
 }
 
 /* ── WHITE INNER CARD ── */
 .exp-card {
-  background: #FFFFFF;
-  border-radius: 22px;
+  position: relative;
+  background: var(--card-bg);
+  border-radius: 28px;
   overflow: hidden;
   font-family: 'Montserrat';
   box-shadow: inset 0 1px 0 rgba(255,255,255,1);
+}
+/* Shared [data-squircle="on"] recipe paints the ::before/::after rings; the
+   inner card wants both (matches .card-inner), so nothing is cancelled here. */
+.exp-card[data-squircle="on"] {
+  --corner-radius: 28px;
+  padding: 1px;
 }
 
 .exp-top {
@@ -99,7 +129,9 @@ html.dark .exp-top { border-bottom-color: #232323; }
   width: 26px; height: 26px; border-radius: 50%;
   background: #F5F5F5; border: none; cursor: pointer;
   display: grid; place-items: center; color: #6B6B6B;
-  transition: background calc(150ms * var(--anim-mult, 1));
+  transition: background calc(150ms * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
   flex-shrink: 0;
 }
 .exp-close:hover { background: #ECECEC; }

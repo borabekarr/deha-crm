@@ -3,6 +3,8 @@ import '../../../../design-system/preview/_darkmode.css'
 import './DatetimeWheelPicker.css'
 
 import { useCallback, useRef } from 'react'
+import { useProximityGroup } from '@/lib/hooks'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
 import {
   datetimePickerRef,
   cleanupDatetimePicker,
@@ -14,7 +16,8 @@ import {
 // DatetimeWheelPicker — five-wheel iOS date + time picker.
 // Wheel mechanics reuse date-picker's snap/settle/aligning-guard discipline;
 // sheet chrome (scrim, handle, Cancel/title/Done header) reuses the
-// model-selection-sheet local-var-flip + anim-mult timing patterns.
+// shared sheet chrome timing pattern (local-var-flip + anim-mult;
+// original component now in design-system-archive/).
 // NO raw useEffect — behavior lives in datetime-wheel-picker-hook.ts.
 // ---------------------------------------------------------------------------
 
@@ -29,22 +32,29 @@ const _timeLabel = formatTime(_sel)
 
 export default function DatetimeWheelPicker() {
   const elRef = useRef<HTMLDivElement | null>(null)
+  // Single group over the whole shell — trigger/cancel/done/reset are its
+  // only wired members. The dtw-item wheel values are NOT wired: they
+  // translate during scroll, which would violate the stationary-anchor rule.
+  const proxRef = useProximityGroup<HTMLDivElement>()
+  const triggerSquircleRef = useSquircle<HTMLButtonElement>()
+  const sheetSquircleRef = useSquircle<HTMLDialogElement>()
 
   const shellRef = useCallback((el: HTMLDivElement | null) => {
     if (el) {
       elRef.current = el
       datetimePickerRef(el)
+      proxRef(el)
     } else {
       cleanupDatetimePicker(elRef.current)
       elRef.current = null
     }
-  }, [])
+  }, [proxRef])
 
   return (
     <div className="dtw-shell" ref={shellRef}>
 
       {/* Trigger card — shows the applied date + time */}
-      <button type="button" className="dtw-trigger" id="dtw-open-btn" aria-label="Open date and time picker">
+      <button type="button" className="dtw-trigger" id="dtw-open-btn" ref={triggerSquircleRef} data-proximity aria-label="Open date and time picker">
         <span className="dtw-trigger-badge material-symbols-outlined" aria-hidden="true">check</span>
         <span className="dtw-trigger-label">Scheduled for</span>
         <span className="dtw-trigger-date">{_dateLabel}</span>
@@ -58,6 +68,7 @@ export default function DatetimeWheelPicker() {
       <dialog
         className="dtw-sheet"
         id="dtw-sheet"
+        ref={sheetSquircleRef}
         open
         aria-label="Select date and time"
       >
@@ -66,12 +77,12 @@ export default function DatetimeWheelPicker() {
 
         {/* iOS header: Cancel · title/summary · Done (no duplicate close) */}
         <div className="dtw-head">
-          <button type="button" className="dtw-cancel" id="dtw-cancel-btn">Cancel</button>
+          <button type="button" className="dtw-cancel" id="dtw-cancel-btn" data-proximity>Cancel</button>
           <div className="dtw-head-mid">
             <div className="dtw-title">Date &amp; Time</div>
             <div className="dtw-summary" id="dtw-summary" aria-live="polite" />
           </div>
-          <button type="button" className="dtw-done" id="dtw-done-btn">Done</button>
+          <button type="button" className="dtw-done" id="dtw-done-btn" data-proximity>Done</button>
         </div>
 
         {/* Wheels: day · month · year — divider — hour : minute */}
@@ -102,7 +113,7 @@ export default function DatetimeWheelPicker() {
 
         {/* Reset-to-now pill */}
         <div className="dtw-reset-row">
-          <button type="button" className="dtw-reset" id="dtw-reset-btn">
+          <button type="button" className="dtw-reset" id="dtw-reset-btn" data-proximity>
             <span className="material-symbols-outlined" aria-hidden="true">restart_alt</span>
             Reset to now
           </button>

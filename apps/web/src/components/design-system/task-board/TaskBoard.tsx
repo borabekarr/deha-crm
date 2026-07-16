@@ -4,6 +4,8 @@ import '../../../../design-system/preview/_darkmode.css';
 import './TaskBoard.css';
 import { iconClass } from '@/lib/iconClass';
 import { useAutoHeight } from '@/lib/hooks/use-auto-height';
+import { useSquircle } from '@/lib/hooks/use-squircle';
+import { useProximityGroup } from '@/lib/hooks';
 import { makeTaskBoardTimers, type SyncPhase, type TaskBoardTimers } from './task-board-hook';
 
 // ---------------------------------------------------------------------------
@@ -165,7 +167,7 @@ function Confetti() {
             ['--dx' as string]: p.dx,
             ['--dy' as string]: p.dy,
             ['--rot' as string]: p.rot,
-            animation: `confettiFlow ${p.duration}ms cubic-bezier(.34,.84,.36,1) ${p.delay}ms forwards`,
+            animation: `confettiFlow calc(${p.duration}ms * var(--anim-mult, 1)) var(--ease-confetti) calc(${p.delay}ms * var(--anim-mult, 1)) forwards`,
             boxShadow: '0 1px 2px rgba(17,17,17,0.10)',
           }}
         />
@@ -214,8 +216,10 @@ function Toast({
   onClose: () => void;
 }) {
   const cfg = MOVE_CONFIG[kind] ?? { bg: '#6B6B6B', icon: 'info', label: '' };
+  const toastRef = useProximityGroup<HTMLDivElement>();
   return (
     <div
+      ref={toastRef}
       className={`tb-toast ${phase === 'out' ? 'tb-toast-out' : 'tb-toast-in'}`}
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 10,
@@ -238,6 +242,7 @@ function Toast({
         <button
           type="button"
           onClick={onUndo}
+          data-proximity
           style={{
             padding: '3px 9px', borderRadius: 8,
             background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.30)',
@@ -251,6 +256,7 @@ function Toast({
         type="button"
         onClick={onClose}
         aria-label="Dismiss"
+        data-proximity
         style={{
           width: 22, height: 22, padding: 0, flexShrink: 0,
           background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)',
@@ -315,6 +321,7 @@ function TaskCard({
       draggable
       onDragStart={(e) => onDragStart(e, task.id)}
       onDragEnd={onDragEnd}
+      data-proximity
       className={`tb-card ${dragging ? 'dragging' : ''} ${successClass ?? ''}`}
       style={{
         position: 'relative',
@@ -393,6 +400,7 @@ function Column({
   const [canScrollDown, setCanScrollDown] = React.useState(false);
   const [canScrollUp, setCanScrollUp] = React.useState(false);
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
+  const cardsProxRef = useProximityGroup<HTMLDivElement>();
 
   const checkScroll = () => {
     const el = scrollRef.current;
@@ -459,6 +467,7 @@ function Column({
         <div
           ref={(el) => {
             scrollRef.current = el;
+            cardsProxRef(el);
             if (el) checkScroll();
           }}
           onScroll={checkScroll}
@@ -567,11 +576,10 @@ function Header({ total }: { total: number }) {
 function SourcePill({ source, state }: { source: string; state: string }) {
   if (state === 'done') {
     return (
-      <div style={{
+      <div className="tb-check-pop" style={{
         width: 22, height: 22, borderRadius: '50%',
         background: 'var(--brand-primary-500)', display: 'grid', placeItems: 'center',
         boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.12)',
-        animation: 'checkPop 360ms cubic-bezier(.34,1.32,.64,1)',
       }}>
         <CheckIcon size={11} color="#fff" />
       </div>
@@ -621,7 +629,7 @@ function UpdateItem({ item }: { item: FeedItem }) {
       display: 'flex', alignItems: 'flex-start', gap: 12,
       padding: '11px 16px',
       borderBottom: '1px dashed var(--tb-col-border)',
-      animation: `itemBounce 380ms cubic-bezier(.34,1.7,.46,1) both`,
+      animation: `itemBounce calc(380ms * var(--anim-mult, 1)) var(--ease-bounce) both`,
     }}>
       <span style={{
         marginTop: 6, width: 7, height: 7, borderRadius: '50%',
@@ -695,12 +703,13 @@ function StatusBar({
 }) {
   const isDone = phase === 'done';
   const isClickable = phase === 'idle' || phase === 'done';
+  const statusBarRef = useProximityGroup<HTMLDivElement>();
 
   // Morphing button config — color/text/icon morph on each phase change
   const btnCfg = SYNC_BTN_PHASE[phase] ?? SYNC_BTN_PHASE.idle;
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px 12px', gap: 16 }}>
+    <div ref={statusBarRef} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px 12px', gap: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
         {isDone ? (
           <div style={{ display: 'flex', gap: 6 }}>
@@ -711,7 +720,7 @@ function StatusBar({
                   width: 22, height: 22, borderRadius: '50%',
                   background: 'var(--brand-primary-500)', display: 'grid', placeItems: 'center',
                   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.12)',
-                  animation: `checkPop 360ms cubic-bezier(.34,1.32,.64,1) ${i * 90}ms both`,
+                  animation: `checkPop calc(360ms * var(--anim-mult, 1)) var(--ease-bounce-soft) calc(${i * 90}ms * var(--anim-mult, 1)) both`,
                 }}
               >
                 <CheckIcon size={11} color="#fff" />
@@ -743,6 +752,7 @@ function StatusBar({
         type="button"
         onClick={isClickable ? onSync : undefined}
         disabled={!isClickable}
+        data-proximity
         className="sync-btn"
         style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
@@ -1030,8 +1040,13 @@ export default function TaskBoard() {
 
   const feedVisible = phase !== 'idle' && phase !== 'connecting';
 
-  // ---- Callback ref: wires up timers API + handles phase reactions ----
+  const outerSquircleRef = useSquircle<HTMLDivElement>();
+  const panelSquircleRef = useSquircle<HTMLDivElement>();
+
+  // ---- Callback ref: wires up timers API + handles phase reactions, plus the
+  // squircle engine (composed since both need the same outer element) ----
   const boardRef = React.useCallback((el: HTMLDivElement | null) => {
+    outerSquircleRef(el);
     if (el) {
       timersApiRef.current = makeTaskBoardTimers(el);
     } else {
@@ -1042,7 +1057,7 @@ export default function TaskBoard() {
         recentMoveTimerRef.current = null;
       }
     }
-  }, []);
+  }, [outerSquircleRef]);
 
   // setPhaseWithFlash is called inside setTimeout step fns (not during render),
   // so calling timersApiRef.current here is safe — it runs after mount.
@@ -1053,7 +1068,7 @@ export default function TaskBoard() {
 
   return (
     <div ref={boardRef} className="tb-outer">
-      <div className="tb-panel">
+      <div ref={panelSquircleRef} className="tb-panel">
         <Header total={tasks.length} />
 
         <div style={{ position: 'relative' }}>

@@ -3,6 +3,7 @@ import '../../../../design-system/preview/_darkmode.css'
 import './StreakCard.css'
 
 import { useRef, useState, useCallback } from 'react'
+import { useProximityGroup } from '@/lib/hooks'
 import {
   streakCardRef,
   cleanupStreakCard,
@@ -155,6 +156,7 @@ export default function StreakCard() {
   const stepsValRef = useRef<HTMLSpanElement | null>(null)
   const stepsPctRef = useRef<HTMLDivElement | null>(null)
   const flameRef = useRef<HTMLDivElement | null>(null)
+  const controlsRef = useProximityGroup<HTMLDivElement>()
 
   // ---------------------------------------------------------------------------
   // Callback ref for the .streak element — wires entrance animation via hook.
@@ -345,17 +347,17 @@ export default function StreakCard() {
           </div>
 
           {/* Demo controls */}
-          <div className="sc-controls">
-            <button type="button" className="sc-btn" onClick={handleReplay}>
+          <div className="sc-controls" ref={controlsRef}>
+            <button type="button" className="sc-btn" data-proximity onClick={handleReplay}>
               <span className="material-icons">replay</span>Replay
             </button>
-            <button type="button" className="sc-btn" onClick={handleMarkDone}>
+            <button type="button" className="sc-btn" data-proximity onClick={handleMarkDone}>
               <span className="material-icons">check</span>Mark done
             </button>
-            <button type="button" className="sc-btn" onClick={handleNextDay}>
+            <button type="button" className="sc-btn" data-proximity onClick={handleNextDay}>
               <span className="material-icons">arrow_forward</span>Next day
             </button>
-            <button type="button" className="sc-btn" onClick={handleAddSteps}>
+            <button type="button" className="sc-btn" data-proximity onClick={handleAddSteps}>
               <span className="material-icons">directions_walk</span>+1,250 steps
             </button>
           </div>

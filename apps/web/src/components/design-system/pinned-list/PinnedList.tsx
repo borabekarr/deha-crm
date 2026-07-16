@@ -16,6 +16,8 @@ import { useState, useCallback, useRef } from 'react'
 import { iconClass } from '../../../lib/iconClass'
 import { useAutoHeight } from '../../../lib/hooks/use-auto-height'
 import { useEntranceRef, useFLIPRefs } from './pinned-list-hook'
+import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './PinnedList.css'
@@ -142,6 +144,9 @@ interface PinItemProps {
 function PinItem({ item, onToggle, entranceDelay, animKey, isUnpin }: PinItemProps) {
   // Stable entrance ref for initial mount stagger (only fires once on mount)
   const entranceRef = useEntranceRef(entranceDelay)
+  // One squircle registration per row -- .pl-item is a fixed-size list card,
+  // so the shared ResizeObserver fires once at mount, not on every animation frame.
+  const squircleRef = useSquircle<HTMLDivElement>()
 
   // Combined callback ref: runs entrance stagger on first mount,
   // and plays scale entrance on the toggled item when animKey is set.
@@ -149,11 +154,12 @@ function PinItem({ item, onToggle, entranceDelay, animKey, isUnpin }: PinItemPro
   const combinedRef = useCallback(
     (el: HTMLDivElement | null) => {
       entranceRef(el)
+      squircleRef(el)
       if (animKey && el) {
         makeScaleEntranceRef(animKey, isUnpin)(el)
       }
     },
-    [entranceRef, animKey, isUnpin],
+    [entranceRef, squircleRef, animKey, isUnpin],
   )
 
   function handlePin(e: React.MouseEvent) {
@@ -165,6 +171,7 @@ function PinItem({ item, onToggle, entranceDelay, animKey, isUnpin }: PinItemPro
     <div
       ref={combinedRef}
       className={'pl-item' + (item.pinned ? ' is-pinned' : '')}
+      data-proximity
     >
       <span className="pl-ico">
         <span className={iconClass(item.icon)}>{item.icon}</span>
@@ -215,6 +222,10 @@ export default function PinnedList({ items: initialItems = DEFAULT_ITEMS }: Pinn
     const pinnedOrder = items.filter((it) => it.pinned).map((it) => it.id)
     return { items, pinnedOrder, justToggled: null, toggleGen: 0 }
   })
+
+  // Proximity groups: pinned rows and all-items rows are separate DOM containers.
+  const pinnedItemsProximityRef = useProximityGroup<HTMLDivElement>()
+  const allItemsProximityRef = useProximityGroup<HTMLDivElement>()
 
   // FLIP: node registry + snap/play helpers (no useEffect)
   const { snapRects, getFlipRef } = useFLIPRefs()
@@ -338,7 +349,7 @@ export default function PinnedList({ items: initialItems = DEFAULT_ITEMS }: Pinn
           Pinned
           <span className="pl-count">{np}</span>
         </div>
-        <div className="pl-items">{pinned.map(renderItem)}</div>
+        <div className="pl-items" ref={pinnedItemsProximityRef}>{pinned.map(renderItem)}</div>
       </div>
 
       {/* All section */}
@@ -353,7 +364,7 @@ export default function PinnedList({ items: initialItems = DEFAULT_ITEMS }: Pinn
           All items
           <span className="pl-count">{na}</span>
         </div>
-        <div className="pl-items">{all.map(renderItem)}</div>
+        <div className="pl-items" ref={allItemsProximityRef}>{all.map(renderItem)}</div>
         <div className="pl-empty">
           <span className={`pl-empty-icon ${iconClass('push_pin')}`}>push_pin</span>
           <span className="pl-empty-label">Everything is pinned</span>

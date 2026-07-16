@@ -3,19 +3,16 @@ body { background: #FAFAFA; }
 html.dark .frame { background: transparent !important; background-image: none !important; }
 /* Gray outer shell (matches the theme-editor .te-outer bezel) */
 .lb-outer {
-  background: #D4DCE8;
+  background: var(--shell-bg, #D9D9D9);
   border-radius: 28px;
   padding: 10px;
   box-shadow: 0 16px 56px rgba(17,17,17,0.14), 0 3px 10px rgba(17,17,17,0.07);
-  border: 1px solid #ECECEC;
-  outline: 1px solid rgba(17,17,17,0.10);
   max-width: 50%;
   margin: 0 auto;
 }
 html.dark .lb-outer {
   background: #0A0A0A;
-  border-color: #232323;
-  outline-color: rgba(255,255,255,0.05);
+  border: 1px solid var(--card-border);
   box-shadow: 0 16px 56px rgba(0,0,0,0.40), 0 3px 10px rgba(0,0,0,0.25);
 }
 .lb {
@@ -61,7 +58,7 @@ html.dark .h-title .h-title-icon { color: #FFFFFF; }
   box-shadow: 0 1px 2px rgba(0,0,0,0.18); z-index: 0;
   transition:
     left calc(300ms * var(--anim-mult, 1)) cubic-bezier(.34,1.3,.64,1),
-    width calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+    width calc(300ms * var(--anim-mult, 1)) var(--ease-out);
 }
 .seg button {
   position: relative; z-index: 1;
@@ -71,7 +68,7 @@ html.dark .h-title .h-title-icon { color: #FFFFFF; }
   color: #6B6B6B; cursor: pointer; font-family: 'Montserrat', sans-serif;
   transition:
     color calc(240ms * var(--anim-mult, 1)),
-    transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+    transform calc(120ms * var(--anim-mult, 1)) var(--ease-out);
 }
 .seg button .material-icons { font-size: 14px; line-height: 1; }
 .seg button.active { color: #FFFFFF; font-weight: 900; }
@@ -81,7 +78,7 @@ html.dark .h-title .h-title-icon { color: #FFFFFF; }
 .colhead { display:flex; font-size:10px; font-weight:800; color: #A1A1A1; text-transform: uppercase; letter-spacing: 0.1em; padding: 0 8px; margin-bottom: 6px; }
 .colhead .l { flex: 1; }
 .col-metric { overflow: hidden; }
-.cm-anim { display:inline-block; animation: cmIn calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1); }
+.cm-anim { display:inline-block; animation: cmIn calc(300ms * var(--anim-mult, 1)) var(--ease-out); }
 @keyframes cmIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
 
 .rows { display:flex; flex-direction:column; gap: 6px; }
@@ -116,15 +113,15 @@ html.dark .h-title .h-title-icon { color: #FFFFFF; }
 /* ── Entering states: rows slide in with per-row stagger (~160ms across 4 rows) */
 /* Neutral enter (initial mount, no direction) — simple opacity fade */
 .rows.lb-entering {
-  animation: lb-enter-neutral calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) both;
+  animation: lb-enter-neutral calc(300ms * var(--anim-mult, 1)) var(--ease-out) both;
 }
 /* dir > 0 → rows arrive from the left (travel right) */
 .rows.lb-entering-right .row {
-  animation: lb-enter-from-left calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) both;
+  animation: lb-enter-from-left calc(300ms * var(--anim-mult, 1)) var(--ease-out) both;
 }
 /* dir < 0 → rows arrive from the right (travel left) */
 .rows.lb-entering-left .row {
-  animation: lb-enter-from-right calc(300ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) both;
+  animation: lb-enter-from-right calc(300ms * var(--anim-mult, 1)) var(--ease-out) both;
 }
 /* Per-row stagger: each successive row enters 40ms after the previous.
    4 rows × 40ms = ~160ms total stagger. */
@@ -143,16 +140,19 @@ html.dark .h-title .h-title-icon { color: #FFFFFF; }
 /* ── Exiting states: faster container-level exit (200ms, no stagger) ───────
    Plays BEFORE content switches so old rows animate out cleanly. */
 .rows.lb-exiting-left {
-  animation: lb-exit-travel-left calc(200ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) both;
+  animation: lb-exit-travel-left calc(200ms * var(--anim-mult, 1)) var(--ease-out) both;
 }
 .rows.lb-exiting-right {
-  animation: lb-exit-travel-right calc(200ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) both;
+  animation: lb-exit-travel-right calc(200ms * var(--anim-mult, 1)) var(--ease-out) both;
 }
 .row {
   display:flex; align-items:center; justify-content:space-between;
   padding: 10px 14px; border-radius: 16px; gap: 10px;
   cursor: pointer; will-change: transform;
-  transition: transform calc(560ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
+  transition:
+    transform calc(560ms * var(--anim-mult, 1)) var(--ease-out),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
   border: 1px solid #ECECEC;
 }
 .row:not(.win):hover { background: rgba(17,17,17,0.04); }
@@ -197,6 +197,6 @@ html.dark .row:not(.win):hover {
     inset 0 0 0 1px rgba(17,17,17,0.05);
 }
 .name { font-weight: 800; font-size: 14px; color: #111111; }
-.sub  { display:inline-flex; align-items:center; gap:6px; margin-top: 4px; padding: 1px 8px; border-radius: 9999px; background: var(--brand-primary-500); color: #fff; font-size: 11px; font-weight: 900; font-family: 'Montserrat'; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.14), inset 0 -1px 0 rgba(255,255,255,0.15); }
+.sub  { display:inline-flex; align-items:center; gap:6px; margin-top: 4px; padding: 1px 8px; border-radius: 9999px; background: var(--brand-primary-500); color: var(--brand-on-primary); font-size: 11px; font-weight: 900; font-family: 'Montserrat'; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.14), inset 0 -1px 0 rgba(255,255,255,0.15); }
 .sub .material-icons { font-size: 14px; font-variation-settings: 'wght' 700; }
 .rev  { font-weight: 900; font-size: 16px; color: #111111; font-variant-numeric: tabular-nums; }

@@ -150,7 +150,9 @@ html.dark .al-live.al-paused {
     background calc(160ms * var(--anim-mult,1)),
     color      calc(160ms * var(--anim-mult,1)),
     transform  calc(140ms * var(--anim-mult,1)) cubic-bezier(.34,1.4,.5,1),
-    box-shadow calc(160ms * var(--anim-mult,1));
+    box-shadow calc(160ms * var(--anim-mult,1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 .al-push-btn:hover {
   background: #FAFAFA;
@@ -186,16 +188,18 @@ html.dark .al-push-btn:hover {
   transition:
     background calc(140ms * var(--anim-mult,1)),
     color      calc(140ms * var(--anim-mult,1)),
-    border-color calc(140ms * var(--anim-mult,1));
+    border-color calc(140ms * var(--anim-mult,1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 .al-anim-pill.al-active {
-  color: #fff;
+  color: var(--brand-on-primary);
   background: var(--brand-primary-500);
   border-color: transparent;
   box-shadow: 0 2px 8px -2px var(--brand-glow);
 }
 html.dark .al-anim-pill { border-color: rgba(255,255,255,0.12); color: var(--fg3, #A1A1A1); }
-html.dark .al-anim-pill.al-active { color: #fff; background: var(--brand-primary-600); }
+html.dark .al-anim-pill.al-active { color: var(--brand-on-primary); background: var(--brand-primary-600); }
 
 /* ── Feed area ────────────────────────────────────────────────────── */
 .al-feed { min-height: 220px; }
@@ -212,6 +216,9 @@ html.dark .al-anim-pill.al-active { color: #fff; background: var(--brand-primary
     inset 0 -2px 0 rgba(17,17,17,0.05),
     0 4px 12px -6px rgba(17,17,17,0.14)
   );
+}
+.al-ev[data-squircle="on"] {
+  --corner-radius: 18px;
 }
 html.dark .al-ev {
   background: var(--card-bg, #242424);
@@ -272,7 +279,7 @@ html.dark .al-ev--review   .al-ev-ico { background: rgba(249,115,22,0.16); color
 }
 
 .al-ev--low .al-ev-pill {
-  color: #fff; background: var(--brand-primary-500);
+  color: var(--brand-on-primary); background: var(--brand-primary-500);
   background-image:
     linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);

@@ -50,12 +50,12 @@
   --sexyblue-5:   oklch(82.4% 0.091 231.0);
   --sexyblue-6:   oklch(88.3% 0.051 224.5);
 
-  --richgold-1:   oklch(77.2% 0.177 91.5);
-  --richgold-2:   oklch(80.5% 0.163 93.4);
-  --richgold-3:   oklch(83.9% 0.148 95.3);
-  --richgold-4:   oklch(87.2% 0.132 97.2);
-  --richgold-5:   oklch(90.6% 0.113 99.1);
-  --richgold-6:   oklch(93.9% 0.094 101.0);
+  --richgold-1:   oklch(77.2% 0.185 91.5);
+  --richgold-2:   oklch(80.5% 0.175 93.4);
+  --richgold-3:   oklch(83.9% 0.168 95.3);
+  --richgold-4:   oklch(87.2% 0.152 97.2);
+  --richgold-5:   oklch(90.6% 0.130 99.1);
+  --richgold-6:   oklch(93.9% 0.108 101.0);
 
   /* ---------- Neutrals (Gray) — Theme Palette Lab, chroma-0 (2026-07-10) ---------- */
   --gray-50:              #FAFAFA;
@@ -250,6 +250,7 @@
   --bg-accent:            var(--sunflower-4);
   --fg-brand:             var(--sunflower-4);
   --brand-glow:           color-mix(in oklch, var(--sunflower-4), transparent 50%);
+  --brand-on-primary:     #111111;
 }
 
 :root[data-primary="bloodymary"] {
