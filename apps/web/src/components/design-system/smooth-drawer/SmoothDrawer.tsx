@@ -27,7 +27,7 @@ import { useState, useCallback } from 'react'
 import { iconClass } from '../../../lib/iconClass'
 import { useTimerRef, useSheetRef, useHandleRef, type DrawerSide } from './smooth-drawer-hook'
 import { useSquircle } from '../../../lib/hooks/use-squircle'
-import { useProximityGroup } from '../../../lib/hooks'
+import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './SmoothDrawer.css'
@@ -35,6 +35,8 @@ import './SmoothDrawer.css'
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+const INNER_SHEET_STYLE: React.CSSProperties = {}
+
 export interface SmoothDrawerProps {
   title?: string
   description?: string
@@ -162,7 +164,7 @@ function DrawerInstance({
   // that used to gate the outer transform on a side check before the bezel
   // was added to bottom/top too; the numeric transform values are unchanged.
   const outerShellStyle: React.CSSProperties = sheetStyle
-  const innerSheetStyle: React.CSSProperties = {}
+  const innerSheetStyle: React.CSSProperties = INNER_SHEET_STYLE
 
   // Scrim opacity fades as drag distance grows; use abs value for any axis
   const scrimStyle: React.CSSProperties = {

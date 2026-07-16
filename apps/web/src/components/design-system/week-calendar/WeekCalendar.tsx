@@ -129,7 +129,15 @@ function EventCard({ event, top, height, onClick }: EventCardProps) {
 
   if (isShort) {
     return (
-      <div className="cal2-ev cal2-ev-short" style={style} onClick={onClick} data-proximity>
+      <div
+        className="cal2-ev cal2-ev-short"
+        style={style}
+        onClick={onClick}
+        data-proximity
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } }}
+      >
         <span className="cal2-ev-dot" />
         <span className="cal2-ev-title">{event.title}</span>
         <span className="cal2-ev-mini-time">{event.startTime}</span>
@@ -138,7 +146,15 @@ function EventCard({ event, top, height, onClick }: EventCardProps) {
   }
   if (isMedium) {
     return (
-      <div className="cal2-ev cal2-ev-med" style={style} onClick={onClick} data-proximity>
+      <div
+        className="cal2-ev cal2-ev-med"
+        style={style}
+        onClick={onClick}
+        data-proximity
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } }}
+      >
         <div className="cal2-ev-row">
           <span className="cal2-ev-dot" />
           <span className="cal2-ev-title">{event.title}</span>
@@ -148,7 +164,15 @@ function EventCard({ event, top, height, onClick }: EventCardProps) {
     )
   }
   return (
-    <div className="cal2-ev cal2-ev-full" style={style} onClick={onClick} data-proximity>
+    <div
+      className="cal2-ev cal2-ev-full"
+      style={style}
+      onClick={onClick}
+      data-proximity
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } }}
+    >
       <div className="cal2-ev-body">
         <h4 className={'cal2-ev-title-lg' + (dur <= 60 ? ' is-truncate' : '')}>{event.title}</h4>
         <p className="cal2-ev-time">{timeStr}</p>

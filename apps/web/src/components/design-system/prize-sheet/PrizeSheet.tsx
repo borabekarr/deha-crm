@@ -16,7 +16,7 @@ import './PrizeSheet.css'
 import { useCallback, useRef } from 'react'
 import { setupPanelScope } from './prize-sheet-hook'
 import { useSquircle } from '../../../lib/hooks/use-squircle'
-import { useProximityGroup } from '../../../lib/hooks'
+import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 
 // ── Shared prize content ────────────────────────────────────────────────────
 

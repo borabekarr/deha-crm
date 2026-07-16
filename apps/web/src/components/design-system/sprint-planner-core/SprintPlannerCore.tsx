@@ -194,6 +194,36 @@ const kbd: React.CSSProperties = {
   fontFamily: 'Montserrat',
 }
 
+const ESC_BUTTON_STYLE: React.CSSProperties = {
+  fontFamily: 'var(--font-display, Montserrat)', fontSize: 11, fontWeight: 700,
+  color: '#6B6B6B', background: 'var(--sp-chip)',
+  border: 'none', padding: '4px 10px', borderRadius: 6,
+  cursor: 'pointer', letterSpacing: '0.04em',
+}
+
+const CANCEL_BUTTON_STYLE: React.CSSProperties = {
+  display: 'inline-flex', alignItems: 'center', gap: 6,
+  padding: '8px 14px', border: '1px solid var(--sp-sep)', background: 'var(--sp-card-bg)',
+  color: 'var(--sp-fg3)', fontFamily: 'var(--font-display, Montserrat)', fontSize: 12, fontWeight: 800,
+  letterSpacing: '0.04em', textTransform: 'uppercase',
+  cursor: 'pointer', borderRadius: 9999,
+}
+
+const PRIORITY_PILL_ACTIVE_STYLE: React.CSSProperties = {
+  display: 'inline-flex', alignItems: 'center', gap: 6,
+  padding: '5px 12px', borderRadius: 9999,
+  fontFamily: 'var(--font-display, Montserrat)', fontSize: 11.5, fontWeight: 700,
+  letterSpacing: '0.02em',
+  cursor: 'pointer', transition: 'all calc(150ms * var(--anim-mult, 1))',
+}
+
+const PRIORITY_PILL_IDLE_STYLE: React.CSSProperties = {
+  ...PRIORITY_PILL_ACTIVE_STYLE,
+  border: '1px solid var(--sp-sep)',
+  background: 'var(--sp-card-bg)',
+  color: 'var(--sp-fg3)',
+}
+
 // ---------------------------------------------------------------------------
 // Ticket card
 // ---------------------------------------------------------------------------
@@ -623,12 +653,7 @@ function CommandPalette({ open, onClose, onRun, tickets }: {
               letterSpacing: '-0.005em',
             }}
           />
-          <button type="button" onClick={onClose} data-proximity style={{
-            fontFamily: 'var(--font-display, Montserrat)', fontSize: 11, fontWeight: 700,
-            color: '#6B6B6B', background: 'var(--sp-chip)',
-            border: 'none', padding: '4px 10px', borderRadius: 6,
-            cursor: 'pointer', letterSpacing: '0.04em',
-          }}>Esc</button>
+          <button type="button" onClick={onClose} data-proximity style={ESC_BUTTON_STYLE}>Esc</button>
         </div>
 
         {/* Suggestions — items 10 + 11 + 14 */}
@@ -990,16 +1015,11 @@ function AddTicketModal({ open, day, onClose, onSubmit }: {
         {/* item 5: priority pills match default view */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
           {(['P0', 'P1', 'P2'] as const).map((p) => (
-            <button key={p} type="button" onClick={() => setPriority(p)} data-proximity style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              padding: '5px 12px', borderRadius: 9999,
-              border: '1px solid ' + (priority === p ? PRIORITY[p].color : 'var(--sp-sep)'),
-              background: priority === p ? PRIORITY[p].bg : 'var(--sp-card-bg)',
-              color: priority === p ? PRIORITY[p].color : 'var(--sp-fg3)',
-              fontFamily: 'var(--font-display, Montserrat)', fontSize: 11.5, fontWeight: 700,
-              letterSpacing: '0.02em',
-              cursor: 'pointer', transition: 'all calc(150ms * var(--anim-mult, 1))',
-            }}>
+            <button key={p} type="button" onClick={() => setPriority(p)} data-proximity style={
+              priority === p
+                ? { ...PRIORITY_PILL_ACTIVE_STYLE, border: '1px solid ' + PRIORITY[p].color, background: PRIORITY[p].bg, color: PRIORITY[p].color }
+                : PRIORITY_PILL_IDLE_STYLE
+            }>
               <span style={{ width: 7, height: 7, borderRadius: '50%', background: PRIORITY[p].color }} />
               {p}
             </button>
@@ -1008,13 +1028,7 @@ function AddTicketModal({ open, day, onClose, onSubmit }: {
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           {/* item 9: Cancel button with leading icon */}
-          <button type="button" onClick={onClose} data-proximity style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            padding: '8px 14px', border: '1px solid var(--sp-sep)', background: 'var(--sp-card-bg)',
-            color: 'var(--sp-fg3)', fontFamily: 'var(--font-display, Montserrat)', fontSize: 12, fontWeight: 800,
-            letterSpacing: '0.04em', textTransform: 'uppercase',
-            cursor: 'pointer', borderRadius: 9999,
-          }}>
+          <button type="button" onClick={onClose} data-proximity style={CANCEL_BUTTON_STYLE}>
             <span className={iconClass('close')} style={{ fontSize: 13, lineHeight: 1 }}>close</span>
             Cancel
           </button>

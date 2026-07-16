@@ -576,11 +576,10 @@ function Header({ total }: { total: number }) {
 function SourcePill({ source, state }: { source: string; state: string }) {
   if (state === 'done') {
     return (
-      <div style={{
+      <div className="tb-check-pop" style={{
         width: 22, height: 22, borderRadius: '50%',
         background: 'var(--brand-primary-500)', display: 'grid', placeItems: 'center',
         boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.12)',
-        animation: 'checkPop calc(360ms * var(--anim-mult, 1)) var(--ease-bounce-soft)',
       }}>
         <CheckIcon size={11} color="#fff" />
       </div>

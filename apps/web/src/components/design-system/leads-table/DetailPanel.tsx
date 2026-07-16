@@ -12,7 +12,7 @@
 
 import type { BrainStageController } from './brain-hook'
 import { BRAIN_SECTIONS } from './leadMetrics'
-import { useProximityGroup } from '../../../lib/hooks'
+import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 
 // ── Component ─────────────────────────────────────────────────────────────────
 

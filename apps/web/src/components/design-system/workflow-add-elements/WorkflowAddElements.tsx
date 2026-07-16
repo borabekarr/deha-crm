@@ -20,7 +20,7 @@
 import { useState, useCallback, useRef } from 'react'
 import './WorkflowAddElements.css'
 import { iconClass } from '../../../lib/iconClass'
-import { useProximityGroup } from '../../../lib/hooks'
+import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 import { segRef, cleanupSeg, clampAEPosition, clampNodesPosition } from './workflow-add-elements-hook'
 
 // ---------------------------------------------------------------------------

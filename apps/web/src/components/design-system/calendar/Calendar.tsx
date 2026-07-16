@@ -623,7 +623,15 @@ function CalEventPopoverCard({
 
         {/* Organiser card — grey shell wrapping the canonical inner-card */}
         <div className="cal-ep-customer-outer" ref={orgOuterRef}>
-        <div className="cal-ep-customer" ref={orgInnerRef} onClick={addRipple}>
+        <div
+          className="cal-ep-customer"
+          ref={orgInnerRef}
+          onClick={addRipple}
+          role="button"
+          tabIndex={0}
+          aria-label={`Organiser ${orgName}`}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); addRipple(e as unknown as React.MouseEvent<HTMLDivElement>) } }}
+        >
           <span className="cal-ep-cust-av icon-badge" style={{ '--icon-c': orgColor } as React.CSSProperties}>
             <span className="material-icons">{orgInit}</span>
           </span>
@@ -948,7 +956,14 @@ export default function Calendar() {
                           <span className="cev-chevron material-icons">chevron_right</span>
                         </button>
                       ))}
-                      <div className="cal-add-row" onClick={openPopover} data-proximity>
+                      <div
+                        className="cal-add-row"
+                        onClick={openPopover}
+                        data-proximity
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPopover() } }}
+                      >
                         <div className="cal-add-icon">
                           <span className="material-icons">add</span>
                         </div>
@@ -958,7 +973,14 @@ export default function Calendar() {
                   ) : (
                     <>
                       <div className="cal-no-events">No events scheduled.</div>
-                      <div className="cal-add-row" onClick={openPopover} data-proximity>
+                      <div
+                        className="cal-add-row"
+                        onClick={openPopover}
+                        data-proximity
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPopover() } }}
+                      >
                         <div className="cal-add-icon">
                           <span className="material-icons">add</span>
                         </div>

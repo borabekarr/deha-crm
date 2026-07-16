@@ -64,7 +64,17 @@ function FolderIcon({
     .join(' ')
 
   return (
-    <div className={classes} id={id} ref={folderRef} onClick={onClick} data-proximity>
+    // eslint-disable-next-line jsx-a11y/prefer-tag-over-role -- wraps a nested <button> (folder menu); a native <button> cannot contain interactive children
+    <div
+      className={classes}
+      id={id}
+      ref={folderRef}
+      onClick={onClick}
+      data-proximity
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } }}
+    >
       <div className="ff-clip">
         <div className="ff-grad" />
         <div className="ff-papers">
@@ -153,7 +163,14 @@ function extColorClass(ext: string): string {
 /* ── File row / grid cell ─────────────────────────────────────────────────── */
 function FileRow({ file, onClick }: { file: (typeof FILES)[number]; onClick: () => void }) {
   return (
-    <div className="ff-file" onClick={onClick} data-proximity>
+    <div
+      className="ff-file"
+      onClick={onClick}
+      data-proximity
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } }}
+    >
       <span className={`ff-file-ic ${extColorClass(file.ext)}`}>{file.ext}</span>
       <span className="ff-file-meta">
         <span className="ff-file-name">{file.name}</span>

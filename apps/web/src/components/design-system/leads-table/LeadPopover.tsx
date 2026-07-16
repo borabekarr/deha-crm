@@ -35,7 +35,7 @@ import { FilterColumn } from './FilterColumn'
 import { InteractiveBrain } from './InteractiveBrain'
 import { DetailPanel } from './DetailPanel'
 import { useSquircle } from '../../../lib/hooks/use-squircle'
-import { useProximityGroup } from '../../../lib/hooks'
+import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 import { usePillSpring } from '../../../lib/motion-spring'
 
 // ── Constants ─────────────────────────────────────────────────────────────────

@@ -323,6 +323,7 @@ html.dark .tb-column-scroll::-webkit-scrollbar-thumb:hover{ background:#4A4A4A; 
   60%  { opacity: 1; transform: scale(1.18); }
   100% { opacity: 1; transform: scale(1); }
 }
+.tb-check-pop { animation: checkPop calc(360ms * var(--anim-mult, 1)) var(--ease-bounce-soft); }
 @keyframes panelIn {
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }

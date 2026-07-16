@@ -16,7 +16,8 @@
  */
 
 import React, { useState } from 'react'
-import { useProximityGroup, useSquircle } from '../../../lib/hooks'
+import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
 import './WorkflowTemplateCards.css'
 
 // ---------------------------------------------------------------------------

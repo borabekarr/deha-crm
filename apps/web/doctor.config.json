@@ -1,11 +1,15 @@
 {
   "$schema": "https://react.doctor/schema.json",
-  "$comment": "no-tiny-text override for design-system showcase: 10px Micro Label is a documented, sanctioned step of the type scale (see TypeScale.tsx), not an accessibility bug. Suppression approved by Bora 2026-07-12. Scoped to this directory only via ignore.overrides so genuinely-too-small text elsewhere still gets flagged.",
+  "$comment": "no-tiny-text override for design-system showcase: 10px Micro Label is a documented, sanctioned step of the type scale (see TypeScale.tsx), not an accessibility bug. Suppression approved by Bora 2026-07-12. Scoped to this directory only via ignore.overrides so genuinely-too-small text elsewhere still gets flagged. TaskBoard is the visual-locked flagship board; split deferred by Bora 2026-07-16 (regression risk on animation wiring outweighs readability gain).",
   "ignore": {
     "overrides": [
       {
         "files": ["src/components/design-system/**"],
         "rules": ["react-doctor/no-tiny-text"]
+      },
+      {
+        "files": ["src/components/design-system/task-board/TaskBoard.tsx"],
+        "rules": ["react-doctor/no-giant-component"]
       }
     ]
   }

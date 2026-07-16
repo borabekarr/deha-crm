@@ -94,7 +94,15 @@ function LeadRow({ lead, isActive, onClick }: { lead: Lead; isActive: boolean; o
 
   return (
     <div className={`lt-rowwrap${isActive ? ' active' : ''}`} data-id={lead.id}>
-      <div className="lt-row lt-grid" data-proximity onClick={onClick} style={{ cursor: 'pointer' }}>
+      <div
+        className="lt-row lt-grid"
+        data-proximity
+        onClick={onClick}
+        style={{ cursor: 'pointer' }}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } }}
+      >
         {/* Lead cell */}
         <div className="lt-td lt-lead">
           <span className="lt-av" style={{ background: healthAv(h) }} />

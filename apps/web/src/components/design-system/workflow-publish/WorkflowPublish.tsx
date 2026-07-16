@@ -20,7 +20,7 @@
 import { useState } from 'react'
 import { iconClass } from '../../../lib/iconClass'
 import { useSquircle } from '../../../lib/hooks/use-squircle'
-import { useProximityGroup } from '../../../lib/hooks'
+import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 import './WorkflowPublish.css'
 
 // ---------------------------------------------------------------------------

@@ -20,7 +20,7 @@
 
 import { useCallback, useRef } from 'react'
 import './WorkflowNodes.css'
-import { useProximityGroup } from '../../../lib/hooks'
+import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 import { useSquircle } from '../../../lib/hooks/use-squircle'
 import { mountCanvas } from './workflow-nodes-hook'
 
