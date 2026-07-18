@@ -93,10 +93,15 @@
    stable element keeps the whole interaction flicker-free. */
 .wf-hover-strip {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  right: -8px;
-  width: 44px;
+  /* Hit area extended ~10px past the toolbar rail's visual bounds on every
+     side (top/bottom/right) so the hover stays engaged a bit outside the
+     rail — the extra reach lands in the canvas's reserved right padding /
+     row gap, which has nothing else to click, so it never steals clicks
+     meant for adjacent cards (pinned-list z-index precedent, 043bbb2). */
+  top: -10px;
+  bottom: -10px;
+  right: -18px;
+  width: 54px;
   z-index: 5;
   cursor: default;
 }

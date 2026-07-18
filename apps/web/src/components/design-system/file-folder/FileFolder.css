@@ -342,17 +342,18 @@ html.dark .ff-pop {
   display:flex; align-items:center; gap:10px; padding:8px; border-radius:12px;
   background:var(--ff-row); border:1px solid var(--ff-row-bd); cursor:pointer;
   box-shadow:inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -1px 0 rgba(17,17,17,0.06);
-  transition:background calc(140ms * var(--anim-mult, 1)) ease, transform calc(160ms * var(--anim-mult, 1)) var(--ease-out);
+  transition:background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade) 0ms;
 }
-.ff-file:hover { background:var(--ff-row-hover); transform:translateX(2px); }
-.ff-file:active { transform:scale(0.98); }
-/* Proximity: own transition (0,1,0) beats hover-tokens.css's [data-proximity]x3
+/* Option hover converged on the global option pattern (fab/Fab.css .fab-item):
+   background var(--fp-hover) fill, zero-delay ~150ms transition, press scale(0.97). */
+.ff-file:hover { background:var(--fp-hover); }
+.ff-file:active { transform:scale(0.97); }
+/* Proximity: own transition beats hover-tokens.css's [data-proximity]x3
    fallback; scale + filter channels added here so the engine's --prox mapping
-   doesn't snap. */
+   doesn't snap. Background matches the base rule's zero-delay leg. */
 .ff-file[data-proximity] {
   transition:
-    background calc(140ms * var(--anim-mult, 1)) ease,
-    transform calc(160ms * var(--anim-mult, 1)) var(--ease-out),
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade) 0ms,
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }

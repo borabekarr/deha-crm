@@ -5,9 +5,18 @@ import './ThemeEditor.css'
 import { useState } from 'react'
 import { useProximityGroup } from '@/lib/hooks'
 import { useSquircle } from '../../../lib/hooks/use-squircle'
+import type { PrimaryTheme } from '@/lib/primary-themes'
 
-// ── Swatch colours (verbatim from prototype) ─────────────────────────────────
-const SWATCHES = ['var(--brand-primary-500)', '#EF4444', '#EAB308', '#F97316', '#232323']
+// ── Palette swatches (demo-only: mirrors colors-primary's data-primary set,
+// applied to the te-preview subtree only, never document root) ──────────────
+const PALETTE_SWATCHES: { theme: PrimaryTheme; css: string }[] = [
+  { theme: 'emerald', css: 'var(--brand-primary-500)' },
+  { theme: 'sunflower', css: 'var(--sunflower-4)' },
+  { theme: 'bloodymary', css: 'var(--bloodymary-3)' },
+  { theme: 'petalglow', css: 'var(--petalglow-4)' },
+  { theme: 'sexyblue', css: 'var(--sexyblue-3)' },
+  { theme: 'richgold', css: 'var(--richgold-3)' },
+]
 
 // ── Range background helper (mirrors updateRange / updateBrightness JS) ──────
 function rangeGradient(value: number): string {
@@ -15,20 +24,20 @@ function rangeGradient(value: number): string {
 }
 
 export default function ThemeEditor() {
-  // Window mode: 'default' | 'compact'
-  const [windowMode, setWindowMode] = useState<'default' | 'compact'>('default')
+  // Preview-only theme selection (mirrors colors-primary's 5 alt palettes + emerald default)
+  const [selectedTheme, setSelectedTheme] = useState<PrimaryTheme>('emerald')
 
-  // Theme swatch index (0 = emerald, initial sel)
-  const [selectedSwatch, setSelectedSwatch] = useState(0)
-
-  // Text size slider (initial value 55 from prototype)
+  // Text size slider (initial value 55 from prototype) — scales the preview area only
   const [textSize, setTextSize] = useState(55)
 
-  // Brightness slider (initial value 68 from prototype)
+  // Brightness slider (initial value 68 from prototype) — filters the preview area only
   const [brightness, setBrightness] = useState(68)
 
   // Startup toggle (initial state: on — sw-base sw-on in prototype)
   const [startupOn, setStartupOn] = useState(true)
+
+  // Motion toggle (on = normal speed). Off sets --anim-mult: 0 on the preview subtree only.
+  const [motionOn, setMotionOn] = useState(true)
   const teProxRef = useProximityGroup<HTMLDivElement>()
   const teOuterSquircleRef = useSquircle<HTMLDivElement>()
   const tePanelSquircleRef = useSquircle<HTMLDivElement>()
@@ -47,78 +56,9 @@ export default function ThemeEditor() {
 
             {/* Top bar */}
             <div className="te-topbar">
-              <label className="te-search">
-                <span className="material-icons">search</span>
-                <input type="text" placeholder="Search..." aria-label="Search theme tokens" />
-              </label>
-              <button type="button" className="te-save" data-proximity>
-                <span className="material-icons" style={{ fontSize: 14 }}>save</span>
-                Save
-              </button>
-            </div>
-
-            <div className="te-divider" />
-
-            {/* Window mode */}
-            <div className="te-section">
-              <div className="te-s-head">
-                <span className="te-s-title">Window mode</span>
-                <span className="material-icons">chevron_right</span>
-              </div>
-              <div className="te-modes">
-
-                {/* Default mode card */}
-                <div
-                  className={`te-mode${windowMode === 'default' ? ' sel' : ''}`}
-                  data-proximity
-                  onClick={() => setWindowMode('default')}
-                >
-                  <div className="te-thumb">
-                    <div className="tw-row">
-                      <div className="tw-block" />
-                      <div className="tw-lines">
-                        <div className="tw-line" style={{ width: '85%' }} />
-                        <div className="tw-line" style={{ width: '60%' }} />
-                      </div>
-                    </div>
-                    <div className="tw-row">
-                      <div className="tw-block" />
-                      <div className="tw-lines">
-                        <div className="tw-line" style={{ width: '90%' }} />
-                        <div className="tw-line" style={{ width: '50%' }} />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="te-mode-foot">
-                    <span className="te-mode-name">Default</span>
-                    <span className={`te-checkmark${windowMode === 'default' ? ' active' : ''}`}>
-                      {windowMode === 'default' && <span className="material-icons">check</span>}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Compact mode card */}
-                <div
-                  className={`te-mode${windowMode === 'compact' ? ' sel' : ''}`}
-                  data-proximity
-                  onClick={() => setWindowMode('compact')}
-                >
-                  <div className="te-thumb te-thumb-compact">
-                    <div className="tw-line" style={{ width: '100%' }} />
-                    <div className="tw-line" style={{ width: '75%' }} />
-                    <div className="tw-line" style={{ width: '95%' }} />
-                    <div className="tw-line" style={{ width: '60%' }} />
-                    <div className="tw-line" style={{ width: '85%' }} />
-                    <div className="tw-line" style={{ width: '70%' }} />
-                  </div>
-                  <div className="te-mode-foot">
-                    <span className="te-mode-name">Compact</span>
-                    <span className={`te-checkmark${windowMode === 'compact' ? ' active' : ''}`}>
-                      {windowMode === 'compact' && <span className="material-icons">check</span>}
-                    </span>
-                  </div>
-                </div>
-
+              <div className="te-header">
+                <span className="material-icons te-header-icon">palette</span>
+                <span className="te-header-text">Theme Editor</span>
               </div>
             </div>
 
@@ -127,19 +67,20 @@ export default function ThemeEditor() {
             {/* Theme + Text size + Brightness */}
             <div className="te-section">
 
-              {/* Theme row */}
+              {/* Theme row (demo-only: mirrors colors-primary's palette picker, applies to the preview subtree below) */}
               <div className="te-row">
                 <span className="te-label">Theme</span>
                 <div className="te-swatches">
-                  {SWATCHES.map((color, i) => (
+                  {PALETTE_SWATCHES.map(({ theme, css }) => (
                     <button
                       type="button"
-                      key={color}
-                      className={`te-sw${selectedSwatch === i ? ' sel' : ''}`}
+                      key={theme}
+                      className={`te-sw${selectedTheme === theme ? ' sel' : ''}`}
                       data-proximity
-                      style={{ '--c': color } as React.CSSProperties}
-                      onClick={() => setSelectedSwatch(i)}
-                      aria-label={`Select theme color ${i + 1}`}
+                      style={{ '--c': css } as React.CSSProperties}
+                      onClick={() => setSelectedTheme(theme)}
+                      aria-label={`Preview ${theme} theme`}
+                      aria-pressed={selectedTheme === theme}
                     />
                   ))}
                 </div>
@@ -182,17 +123,42 @@ export default function ThemeEditor() {
                 </div>
               </div>
 
+              {/* Live preview — demo-only scope: theme/text-size/brightness/motion
+                  apply to this subtree only, never document root, no localStorage */}
+              <div
+                className="te-preview"
+                data-primary={selectedTheme === 'emerald' ? undefined : selectedTheme}
+                style={{
+                  fontSize: 12 + (textSize / 100) * 10,
+                  filter: `brightness(${(0.6 + (brightness / 100) * 0.8).toFixed(2)})`,
+                  '--anim-mult': motionOn ? 1 : 0,
+                } as React.CSSProperties}
+              >
+                <span className="te-preview-badge">Preview</span>
+                <p className="te-preview-text">The quick brown fox jumps over the lazy dog.</p>
+                <button type="button" className="te-preview-btn" data-proximity>
+                  Sample action
+                </button>
+              </div>
+
             </div>
 
             <div className="te-divider" />
 
-            {/* Hotkey + Startup */}
+            {/* Motion + Startup */}
             <div className="te-section">
 
-              {/* Hotkey row */}
+              {/* Motion toggle row — off sets --anim-mult: 0 on the preview subtree (speeds up the CRM) */}
               <div className="te-row">
-                <span className="te-label">Hotkey</span>
-                <div className="te-hotkey">⌘ Space</div>
+                <span className="te-label">Motion</span>
+                <button
+                  type="button"
+                  className={`te-tog${motionOn ? ' on' : ''}`}
+                  data-proximity
+                  onClick={() => setMotionOn((v) => !v)}
+                  aria-label="Toggle preview motion"
+                  aria-pressed={motionOn}
+                />
               </div>
 
               {/* Startup toggle row */}
@@ -208,6 +174,13 @@ export default function ThemeEditor() {
                 />
               </div>
 
+            </div>
+
+            <div className="te-footer">
+              <button type="button" className="te-save" data-proximity>
+                <span className="material-icons" style={{ fontSize: 14 }}>save</span>
+                Save
+              </button>
             </div>
 
           </div>

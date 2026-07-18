@@ -358,25 +358,12 @@
   /* Selected without stats (Auto): just show check */
   .ms-row.sel .ms-check { opacity: 1; transform: scale(1); }
 
-  /* Selected WITH stats: animate check/stats morph */
+  /* Selected WITH stats: show stats statically, hide the check */
   .ms-row.sel.has-stats .ms-check {
-    position: absolute; right: 0; top: 50%;
-    transform: translateY(-50%) scale(1);
-    animation: morphCheck calc(6s * var(--anim-mult, 1)) var(--ease-in-out) infinite;
+    display: none;
   }
   .ms-row.sel.has-stats .ms-stats {
-    animation: morphStats calc(6s * var(--anim-mult, 1)) var(--ease-in-out) infinite;
-  }
-
-  @keyframes morphCheck {
-    0%, 42%   { opacity: 1; transform: translateY(-50%) scale(1) rotate(0); filter: blur(0); }
-    50%, 92%  { opacity: 0; transform: translateY(-50%) scale(0.5) rotate(-20deg); filter: blur(4px); }
-    100%      { opacity: 1; transform: translateY(-50%) scale(1) rotate(0); filter: blur(0); }
-  }
-  @keyframes morphStats {
-    0%, 42%   { opacity: 0; transform: scale(0.82) translateX(-5px); filter: blur(3px); }
-    50%, 92%  { opacity: 1; transform: scale(1) translateX(0); filter: blur(0); }
-    100%      { opacity: 0; transform: scale(0.82) translateX(10px); filter: blur(3px); }
+    opacity: 1; transform: none; filter: none;
   }
 
   /* Badge */

@@ -588,10 +588,13 @@ function CalEventPopoverCard({
 
   const orgOuterRef = useSquircle<HTMLDivElement>()
   const orgInnerRef = useSquircle<HTMLDivElement>()
+  const epCardRef = useSquircle<HTMLDivElement>()
 
   return (
     <div
       className="cal-ep-card"
+      ref={epCardRef}
+      data-squircle="on"
       style={{ '--ep-color': event.color } as React.CSSProperties}
     >
       {/* Head — color header matching event.color */}
@@ -704,9 +707,26 @@ function CalEventPopoverCard({
 
 export default function Calendar() {
   const shellSquircleRef = useSquircle<HTMLDivElement>()
+  const panelSquircleRef = useSquircle<HTMLDivElement>()
+  const epOuterRef = useSquircle<HTMLDivElement>()
   const [curYear, setCurYear] = useState(2026)
   const [curMonth, setCurMonth] = useState(4) // May = 4
   const [sel, setSel] = useState(4) // day 4 selected initially
+
+  // Direction-aware header switch (motion-tabs pattern): monthDir sign picks
+  // the travel direction; exitingMonth holds the outgoing grid's snapshot so
+  // it can render as a departing overlay while the new grid enters in-flow.
+  const [monthDir, setMonthDir] = useState(0)
+  const [exitingMonth, setExitingMonth] = useState<{ cells: Cell[]; year: number; month: number } | null>(null)
+  const gridExitCleanupRef = useRef<(() => void) | null>(null)
+  const gridExitOverlayRef = useCallback((el: HTMLDivElement | null) => {
+    gridExitCleanupRef.current?.()
+    gridExitCleanupRef.current = null
+    if (!el) return
+    const handler = () => setExitingMonth(null)
+    el.addEventListener('animationend', handler)
+    gridExitCleanupRef.current = () => el.removeEventListener('animationend', handler)
+  }, [])
 
   // Event-detail popover state
   const [selectedEvent, setSelectedEvent] = useState<CalEvent | null>(null)
@@ -775,6 +795,8 @@ export default function Calendar() {
   const isViewingToday = curYear === 2026 && curMonth === 4 && sel === 26
 
   function prevMonth() {
+    setExitingMonth({ cells, year: curYear, month: curMonth })
+    setMonthDir(-1)
     if (curMonth === 0) {
       setCurMonth(11)
       setCurYear((y) => y - 1)
@@ -785,6 +807,8 @@ export default function Calendar() {
   }
 
   function nextMonth() {
+    setExitingMonth({ cells, year: curYear, month: curMonth })
+    setMonthDir(1)
     if (curMonth === 11) {
       setCurMonth(0)
       setCurYear((y) => y + 1)
@@ -835,6 +859,47 @@ export default function Calendar() {
   const eventsProximityRef = useProximityGroup<HTMLDivElement>()
 
   const cells = buildCells(curYear, curMonth)
+
+  // Shared cell renderer — reused for the live grid and the departing
+  // exit-overlay so the two never diverge in markup. `interactive` disables
+  // click/proximity/selection on the overlay copy (pointer-events: none
+  // anyway, but keeps state derivation honest for the outgoing month).
+  function renderCells(arr: Cell[], y: number, m: number, interactive: boolean) {
+    return arr.map((cell) => {
+      const dots = cell.m === 'c' ? getDots(y, m, cell.d) : []
+      const isSelected = interactive && cell.m === 'c' && cell.d === sel
+      const className = [
+        'cal-cell',
+        cell.m !== 'c' ? 'other-month' : '',
+        isSelected ? 'selected' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')
+
+      return (
+        <div
+          key={`${cell.m}-${cell.d}`}
+          className={className}
+          onClick={interactive && cell.m === 'c' ? () => setSel(cell.d) : undefined}
+          data-proximity={interactive && cell.m === 'c' ? true : undefined}
+        >
+          <div className="cal-date-num">{cell.d}</div>
+          <div className="cal-dots">
+            {(() => {
+              const shown = dots.length > 3 ? dots.slice(0, 3) : dots
+              const seen: Record<string, number> = {}
+              return shown.map((clr) => {
+                seen[clr] = (seen[clr] ?? 0) + 1
+                return <div key={`${clr}-${seen[clr]}`} className="cal-dot" style={{ background: clr }} />
+              })
+            })()}
+            {dots.length > 3 && <span className="cal-dot-more">+</span>}
+          </div>
+        </div>
+      )
+    })
+  }
+
   const selKey = dateKey(curYear, curMonth, sel)
   const baseEvents = getEvents(curYear, curMonth, sel)
   const events = [...baseEvents, ...(extraEvents[selKey] ?? [])].sort((a, b) => a.time.localeCompare(b.time))
@@ -852,7 +917,7 @@ export default function Calendar() {
 
   return (
     <div className="card cal-shell" ref={shellSquircleRef} data-squircle="on">
-      <div className="cal-panel">
+      <div className="cal-panel" ref={panelSquircleRef} data-squircle="on">
 
           {/* Header */}
           <div className="cal-header">
@@ -888,41 +953,25 @@ export default function Calendar() {
             <div className="cal-dow">Sat</div>
           </div>
 
-          {/* Calendar grid */}
-          <div className="cal-grid" ref={gridProximityRef}>
-            {cells.map((cell) => {
-              const dots = cell.m === 'c' ? getDots(curYear, curMonth, cell.d) : []
-              const isSelected = cell.m === 'c' && cell.d === sel
-              const className = [
-                'cal-cell',
-                cell.m !== 'c' ? 'other-month' : '',
-                isSelected ? 'selected' : '',
-              ]
-                .filter(Boolean)
-                .join(' ')
-
-              return (
-                <div
-                  key={`${cell.m}-${cell.d}`}
-                  className={className}
-                  onClick={cell.m === 'c' ? () => setSel(cell.d) : undefined}
-                  data-proximity={cell.m === 'c' ? true : undefined}
-                >
-                  <div className="cal-date-num">{cell.d}</div>
-                  <div className="cal-dots">
-                    {(() => {
-                      const shown = dots.length > 3 ? dots.slice(0, 3) : dots
-                      const seen: Record<string, number> = {}
-                      return shown.map((clr) => {
-                        seen[clr] = (seen[clr] ?? 0) + 1
-                        return <div key={`${clr}-${seen[clr]}`} className="cal-dot" style={{ background: clr }} />
-                      })
-                    })()}
-                    {dots.length > 3 && <span className="cal-dot-more">+</span>}
-                  </div>
-                </div>
-              )
-            })}
+          {/* Calendar grid — direction-aware month switch (motion-tabs pattern):
+              the departing month renders as an absolute exit-overlay while the
+              live grid enters in normal flow, both reading --gdx for travel sign. */}
+          <div
+            className="cal-grid-stack"
+            style={{ '--gdx': `${monthDir < 0 ? -18 : 18}px` } as React.CSSProperties}
+          >
+            {exitingMonth && (
+              <div className="cal-grid cal-grid-exit" ref={gridExitOverlayRef}>
+                {renderCells(exitingMonth.cells, exitingMonth.year, exitingMonth.month, false)}
+              </div>
+            )}
+            <div
+              className={`cal-grid${monthDir !== 0 ? ' cal-grid-enter' : ''}`}
+              key={`${curYear}-${curMonth}`}
+              ref={gridProximityRef}
+            >
+              {renderCells(cells, curYear, curMonth, true)}
+            </div>
           </div>
 
           <div className="cal-divider" />
@@ -1009,7 +1058,7 @@ export default function Calendar() {
         aria-label={selectedEvent ? selectedEvent.title : 'Event details'}
         tabIndex={-1}
       >
-        <div className="cal-ep-outer" onClick={(e) => e.stopPropagation()}>
+        <div className="cal-ep-outer" ref={epOuterRef} data-squircle="on" onClick={(e) => e.stopPropagation()}>
           {selectedEvent
             ? <CalEventPopoverCard event={selectedEvent} year={curYear} month={curMonth} day={sel} onClose={closeEvPopover} />
             : <div className="cal-ep-card" />}

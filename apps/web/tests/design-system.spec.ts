@@ -110,7 +110,6 @@ const SLUGS = [
   // New coverage (slug-coverage-batch, 2026-07-14)
   'toast',
   'pinned-list',
-  'funnel-chart',
   'workflow-nodes',
   'workflow-template-cards',
   'animated-list',
@@ -166,11 +165,9 @@ async function waitForStableBox(loc: import('@playwright/test').Locator) {
 //   animations disabled); no wait fixes it.
 // - adjust-timeframe: 208 px single-run jitter observed on CI 2026-07-15
 //   (passed retry; same-DOM antialiasing drift).
-// - funnel-chart: 1 px jitter observed on CI 2026-07-15 (both attempts).
 const SLUG_MAX_DIFF_PIXELS: Record<string, number> = {
   'stacked-list': 25000,
   'adjust-timeframe': 500,
-  'funnel-chart': 50,
 }
 
 for (const slug of SLUGS) {

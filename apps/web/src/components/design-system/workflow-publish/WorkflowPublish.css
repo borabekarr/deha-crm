@@ -55,6 +55,16 @@
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 
+/* Calmer proximity: local caps below the ambient hover-tokens.css ramp,
+   same override mechanism as Leaderboard's .row --hover-scale-max. */
+.wp-btn[data-proximity],
+.wp-update-btn[data-proximity],
+.wp-edited[data-proximity],
+.wp-action[data-proximity] {
+  --hover-scale-max: 1.02;
+  --hover-brightness-max: 1.025;
+}
+
 .wp-btn .wp-chevron {
   font-size: 18px;
   transition: transform calc(300ms * var(--anim-mult, 1)) var(--ease-out);

@@ -5,6 +5,7 @@ import './IndexBar.css'
 import { useCallback, useRef } from 'react'
 import { iconClass } from '../../../lib/iconClass'
 import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
 import {
   METRICS,
   STAGES,
@@ -77,6 +78,15 @@ export default function IndexBar() {
   // component (metric cards, bars, and stage ticks are static readouts).
   const replayProximityRef = useProximityGroup<HTMLDivElement>()
 
+  // Concentric squircle pair: outer .idx-outer (grey shell, 36) + inner
+  // .idx-card (white card, 28), mirrors Cards.css .concentric-demo.
+  const idxOuterRef = useSquircle<HTMLDivElement>()
+  const idxCardRef = useSquircle<HTMLDivElement>()
+
+  // Drawer background derives from the funnel's active stage color so it
+  // re-themes automatically if the active stage ever changes.
+  const currentStage = STAGES.find((s) => s.name === 'Moderate') ?? STAGES[3]
+
   // Collect per-metric play callbacks
   const metricPlayers = useRef<Array<() => void>>([])
 
@@ -136,10 +146,14 @@ export default function IndexBar() {
         Three live pipeline metrics over a color-graded stage index. The bars draw in, numbers count up, and the current stage glows.
       </p>
 
-      <div className="idx-outer">
+      <div
+        className="idx-outer"
+        ref={idxOuterRef}
+        style={{ '--idx-stage-color': currentStage.color } as React.CSSProperties}
+      >
         <div className="idx zoom">
             {/* WHITE SURFACE */}
-            <div className="idx-card">
+            <div className="idx-card" ref={idxCardRef}>
               <div className="idx-metrics">
                 {METRICS.map((m, i) => (
                   <MetricCard key={m.title} index={i} onPlay={registerPlayer(i)} />

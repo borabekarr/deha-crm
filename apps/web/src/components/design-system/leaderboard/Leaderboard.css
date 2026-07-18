@@ -12,7 +12,11 @@ html.dark .frame { background: transparent !important; background-image: none !i
 }
 html.dark .lb-outer {
   background: #0A0A0A;
-  border: 1px solid var(--card-border);
+  /* --card-border has no :root definition in this app (only in the HTML
+     prototype's _shared-feedback.css); every other usage in the codebase
+     carries a fallback -- this one was missing it, making the shorthand
+     invalid at computed-value time and dropping the border entirely. */
+  border: 1px solid var(--card-border, #232323);
   box-shadow: 0 16px 56px rgba(0,0,0,0.40), 0 3px 10px rgba(0,0,0,0.25);
 }
 .lb {
@@ -84,8 +88,8 @@ html.dark .h-title .h-title-icon { color: #FFFFFF; }
 .rows { display:flex; flex-direction:column; gap: 6px; }
 
 /* ── Direction-aware enter/exit keyframes ───────────────────────────────────
-   SPEC: dir > 0 (revenue→growth) → rows travel LEFT  (+→ exiting-left, ←→ entering-right).
-         dir < 0 (growth→revenue) → rows travel RIGHT (←→ exiting-right, →→ entering-left).
+   SPEC: dir > 0 (revenue→growth) → rows travel RIGHT (exiting-right, entering-right).
+         dir < 0 (growth→revenue) → rows travel LEFT  (exiting-left,  entering-left).
    Keyframe names describe the DIRECTION OF TRAVEL (matches MotionTabs convention).
    travel-left  (−x): exit goes left, entering panel arrives from the right.
    travel-right (+x): exit goes right, entering panel arrives from the left. */
@@ -146,22 +150,31 @@ html.dark .h-title .h-title-icon { color: #FFFFFF; }
   animation: lb-exit-travel-right calc(200ms * var(--anim-mult, 1)) var(--ease-out) both;
 }
 .row {
+  /* Calmer proximity hover: overrides the global 1.02 cap (hover-tokens.css)
+     down to the inner-card benchmark (Cards.css .concentric-demo), on the
+     shared --duration-slow/--ease-out pair instead of the snappy instant
+     default, so the row swells modestly rather than popping. */
+  --hover-scale-max: 1.007;
   display:flex; align-items:center; justify-content:space-between;
   padding: 10px 14px; border-radius: 16px; gap: 10px;
   cursor: pointer; will-change: transform;
   transition:
     transform calc(560ms * var(--anim-mult, 1)) var(--ease-out),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    scale calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
+    filter calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
+    box-shadow calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
   border: 1px solid #ECECEC;
 }
-.row:not(.win):hover { background: rgba(17,17,17,0.04); }
+.row:not(.win):hover {
+  background: rgba(17,17,17,0.04);
+  box-shadow: 0 2px 6px rgba(17,17,17,0.06);
+}
 .row.win {
   background: rgba(236,253,245,0.6); border: 1px solid var(--brand-primary-100);
   position: relative; overflow: hidden;
 }
 html.dark .row {
-  border: 1px solid #232323;
+  border: 1px solid var(--card-border, #232323);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
   background: rgba(255,255,255,0.03);
 }
@@ -172,7 +185,7 @@ html.dark .row.win {
 }
 html.dark .row:not(.win):hover {
   background: rgba(255,255,255,0.08);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 2px 6px rgba(0,0,0,0.20);
 }
 /* row.win::before (left-edge colored tag) intentionally removed */
 .who { display:flex; align-items:center; gap:10px; }

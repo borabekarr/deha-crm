@@ -22,6 +22,9 @@
   --tb-wash-done:var(--brand-primary-50); --tb-wash-done2:#F0FDF9;
   --tb-wash-prog:#FFF7ED; --tb-wash-prog2:#FFFAF2;
   --tb-wash-rev:#FEFCE8;  --tb-wash-rev2:#FFFCEE;
+  /* Column dashed external line (Change 4) — mirrors task-card's .column dashed
+     treatment (task-card/TaskCard.css), var(--card-border)-derived in both modes. */
+  --tb-col-dash: 1.5px dashed var(--card-border);
 }
 html.dark{
   --tb-shell:#0A0A0A;
@@ -46,6 +49,9 @@ html.dark{
   --tb-wash-done:#0E2A20; --tb-wash-done2:#0F2D22;
   --tb-wash-prog:#2A1E12; --tb-wash-prog2:#2D2014;
   --tb-wash-rev:#2A2410;  --tb-wash-rev2:#2D2612;
+  /* Dark line is a translucent hairline (matches task-card's dark .column
+     override) rather than raw --card-border, for contrast against --tb-col-bg. */
+  --tb-col-dash: 1px dashed rgba(255,255,255,0.14);
 }
 
 /* Outer gray shell + inner white panel (canonical inner-card shell pattern) */
@@ -297,6 +303,99 @@ html.dark .tb-outer[data-squircle="on"]::before {
 .sync-btn { animation: syncMorphBounce calc(460ms * var(--anim-mult, 1)) var(--ease-bounce) both; }
 /* :hover filter removed — proximity engine drives hover (see hover-tokens.css) */
 .sync-btn:active:not([disabled]) { transform: scale(0.97) !important; }
+
+/* ---- StatusBar button color states (Change 1) ----
+   idle/notion/done reuse the shared .btn-green class (buttons page,
+   design-system/preview/_shared-feedback.css, locked/not editable here) --
+   its black-light/brand-primary-dark fill matches those phases exactly.
+   The remaining phases mirror that same recipe's structure token-for-token
+   (height/radius/shadow/hover/active), since the shared set has no
+   gray/orange/amber variant and .btn-green is black in light mode (wrong for
+   the always-green notion/done phases, hence .tb-btn-solid-green). */
+.tb-btn-gray, .tb-btn-orange, .tb-btn-amber, .tb-btn-solid-green {
+  position: relative; overflow: hidden; height: 36px; min-width: 104px; padding: 0 17px; gap: 7px;
+  border-radius: 9999px; border: none; cursor: pointer;
+  font-size: 12px; font-weight: 800; font-family: 'Montserrat';
+  display: inline-flex; align-items: center; justify-content: center;
+  transition:
+    background-color calc(180ms * var(--anim-mult, 1)),
+    transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
+    box-shadow calc(200ms * var(--anim-mult, 1));
+}
+.tb-btn-gray { background: #6B6B6B; color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 2px 6px rgba(107,107,107,0.30); }
+.tb-btn-gray:hover { transform: scale(1.03); box-shadow: 0 8px 20px rgba(107,107,107,0.34), inset 0 1px 0 rgba(255,255,255,0.24); }
+.tb-btn-gray:focus-visible { outline: 2px solid #6B6B6B; outline-offset: 2px; }
+
+.tb-btn-orange { background: #F97316; color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 2px 6px rgba(249,115,22,0.30); }
+.tb-btn-orange:hover { transform: scale(1.03); box-shadow: 0 8px 20px rgba(249,115,22,0.34), inset 0 1px 0 rgba(255,255,255,0.28); }
+.tb-btn-orange:focus-visible { outline: 2px solid #F97316; outline-offset: 2px; }
+
+.tb-btn-amber { background: #FBBF24; color: #451A03; box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), 0 2px 6px rgba(251,191,36,0.32); }
+.tb-btn-amber:hover { transform: scale(1.03); box-shadow: 0 8px 20px rgba(251,191,36,0.36), inset 0 1px 0 rgba(255,255,255,0.36); }
+.tb-btn-amber:focus-visible { outline: 2px solid #FBBF24; outline-offset: 2px; }
+
+.tb-btn-solid-green { background: var(--brand-primary-500); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 2px 6px color-mix(in srgb, var(--brand-primary-500) 30%, transparent); }
+.tb-btn-solid-green:hover { transform: scale(1.03); box-shadow: 0 8px 20px color-mix(in srgb, var(--brand-primary-500) 34%, transparent), inset 0 1px 0 rgba(255,255,255,0.28); }
+.tb-btn-solid-green:focus-visible { outline: 2px solid var(--brand-primary-500); outline-offset: 2px; }
+
+/* ---- Importance badges (Change 2) -- token-for-token mirror of
+   pills/Pills.css .badge base + .danger recipe (locked, not editable here). ---- */
+.tb-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 2px 9px; border-radius: 9999px;
+  font-size: 10.5px; font-weight: 900; font-family: 'Montserrat';
+  color: #fff;
+  box-shadow: inset 0 -2px 5px rgba(0,0,0,0.14), inset 0 -1px 0 rgba(255,255,255,0.15);
+}
+.tb-badge-ui        { background: #EF4444; }
+.tb-badge-urgent    { background: #F97316; }
+.tb-badge-important { background: #3B82F6; }
+
+/* ---- Week pill row (Change 3) -- mirrors todo-list's .td-daybtn recipe
+   (todo-list/TodoList.css), local tb- names. ---- */
+.tb-week {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
+  padding: 0 16px; margin: 0 0 8px;
+}
+.tb-daybtn {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 0 9px; border-radius: 9999px; cursor: pointer;
+  border: 1px solid var(--tb-col-border);
+  background: var(--tb-col-bg);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+  font-family: 'Montserrat';
+  transition: transform calc(200ms * var(--anim-mult, 1)) var(--ease-spring-snap),
+              background calc(180ms * var(--anim-mult, 1)),
+              border-color calc(180ms * var(--anim-mult, 1)),
+              box-shadow calc(180ms * var(--anim-mult, 1));
+}
+html.dark .tb-daybtn { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
+.tb-daybtn .dow { font-size: 8.5px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tb-fg4); }
+.tb-daybtn .dnum { font-size: 14px; font-weight: 800; color: var(--tb-fg3); font-variant-numeric: tabular-nums; }
+.tb-daybtn:hover { transform: translateY(-1px); border-color: var(--tb-fg4); }
+.tb-daybtn:active { transform: scale(.95); transition: transform calc(120ms * var(--anim-mult, 1)) var(--ease-out); }
+.tb-daybtn.active {
+  background: #111111; border-color: transparent;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 5px 13px -5px rgba(17,17,17,0.45);
+}
+.tb-daybtn.active:hover { background: #1C1C1C; transform: translateY(-1px); }
+.tb-daybtn.active .dow { color: rgba(255,255,255,0.65); }
+.tb-daybtn.active .dnum { color: #fff; font-weight: 900; }
+
+/* Badge-filter pill row -- mirrors todo-list's .td-filt/.fdot recipe. */
+.tb-filters { display: flex; gap: 7px; flex-wrap: wrap; padding: 0 16px; margin: 0 0 14px; }
+.tb-filt {
+  flex: none; display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 13px; border-radius: 9999px; cursor: pointer; border: 1px solid var(--tb-col-border);
+  background: var(--tb-col-bg); color: var(--tb-fg3); font-family: 'Montserrat';
+  font-size: 11px; font-weight: 800; letter-spacing: 0.02em; white-space: nowrap;
+  transition: background calc(160ms * var(--anim-mult, 1)), color calc(160ms * var(--anim-mult, 1)), border-color calc(160ms * var(--anim-mult, 1)), transform calc(160ms * var(--anim-mult, 1)) var(--ease-spring-snap);
+}
+.tb-filt .fdot { width: 8px; height: 8px; border-radius: 50%; background: var(--fcolor, var(--tb-fg4)); flex: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); }
+.tb-filt:hover { transform: translateY(-1px); color: var(--tb-fg1); }
+.tb-filt:active { transform: scale(0.95); }
+.tb-filt.on { background: #111111; color: #fff; border-color: transparent; box-shadow: 0 5px 13px -5px rgba(17,17,17,0.45), inset 0 1px 0 rgba(255,255,255,0.14); }
+html.dark .tb-filt.on { background: #0A0A0A; }
 
 /* ===== Dark mode (class-based surfaces) ===== */
 html.dark .tb-column.drop-target[data-col="todo"]     { background:#202020 !important; outline-color: rgba(161,161,161,0.5); }

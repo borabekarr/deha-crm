@@ -144,7 +144,7 @@
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 
-  /* Entrance: staggered rise + fade (funnel-chart approach). `backwards` fill
+  /* Entrance: staggered rise + fade. `backwards` fill
      hides each row through its own delay, then reverts to base styles so the
      :active press transform below is never clobbered by a forwards fill. */
   animation: p2RowIn calc(500ms * var(--anim-mult, 1)) var(--ease-out) backwards;

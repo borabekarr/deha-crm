@@ -14,7 +14,8 @@ import { makeTaskBoardTimers, type SyncPhase, type TaskBoardTimers } from './tas
 interface Task {
   id: string;
   title: string;
-  priority: 'P0' | 'P1' | 'P2';
+  importance: 'ui' | 'urgent' | 'important';
+  day: number;   // 0=Mon … 6=Sun, week-pill filter dimension
   col: string;
 }
 
@@ -28,25 +29,41 @@ const COLUMNS = [
   { id: 'done',     label: 'Done' },
 ];
 
-const PRIORITY: Record<string, { color: string; bg: string; label: string; rank: number }> = {
-  P0: { color: '#EF4444', bg: '#FEF2F2', label: 'P0', rank: 0 },
-  P1: { color: '#F97316', bg: '#FFF7ED', label: 'P1', rank: 1 },
-  P2: { color: '#3B82F6', bg: '#EFF6FF', label: 'P2', rank: 2 },
+// Importance badges — per pills/Pills.css .badge/.danger recipe (Change 2),
+// mirrored token-for-token in TaskBoard.css as .tb-badge/.tb-badge-*.
+const IMPORTANCE: Record<string, { label: string; color: string; cls: string }> = {
+  ui:        { label: 'Urgent & Important', color: '#EF4444', cls: 'tb-badge-ui' },
+  urgent:    { label: 'Urgent',              color: '#F97316', cls: 'tb-badge-urgent' },
+  important: { label: 'Important',           color: '#3B82F6', cls: 'tb-badge-important' },
 };
+const IMPORTANCE_KEYS = Object.keys(IMPORTANCE) as Array<keyof typeof IMPORTANCE>;
+
+const DOW = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+
+// Current Mon–Sun week + today's index — computed once at module level
+// (todo-list's weekDays/activeIdx pattern), Mon=0…Sun=6.
+const TODAY_IDX = (new Date().getDay() + 6) % 7;
+const WEEK_DAYS: Date[] = (() => {
+  const monday = new Date();
+  monday.setDate(monday.getDate() - TODAY_IDX);
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday); d.setDate(monday.getDate() + i); return d;
+  });
+})();
 
 const INITIAL_TASKS: Task[] = [
-  { id: 't1',  title: 'Investigate billing webhook timeout',        priority: 'P0', col: 'todo' },
-  { id: 't2',  title: 'Add empty states for analytics dashboard',   priority: 'P1', col: 'todo' },
-  { id: 't3',  title: 'Update API rate limits in docs',             priority: 'P2', col: 'todo' },
-  { id: 't4',  title: 'Onboarding flow polish pass',                priority: 'P1', col: 'todo' },
-  { id: 't5',  title: 'Implement OAuth flow for Slack integration',  priority: 'P1', col: 'progress' },
-  { id: 't6',  title: 'Refactor settings provider',                 priority: 'P2', col: 'progress' },
-  { id: 't7',  title: 'Migrate to Next.js 16 app router',           priority: 'P1', col: 'progress' },
-  { id: 't8',  title: 'Fix dark mode flicker on initial load',      priority: 'P0', col: 'review' },
-  { id: 't9',  title: 'Audit a11y on settings page',                priority: 'P1', col: 'review' },
-  { id: 't10', title: 'Ship release notes for v0.42',               priority: 'P1', col: 'done' },
-  { id: 't11', title: 'Document API rate limits',                   priority: 'P2', col: 'done' },
-  { id: 't12', title: 'Triage inbound bug reports',                 priority: 'P0', col: 'done' },
+  { id: 't1',  title: 'Investigate billing webhook timeout',        importance: 'ui',        day: 0, col: 'todo' },
+  { id: 't2',  title: 'Add empty states for analytics dashboard',   importance: 'urgent',    day: 1, col: 'todo' },
+  { id: 't3',  title: 'Update API rate limits in docs',             importance: 'important', day: 2, col: 'todo' },
+  { id: 't4',  title: 'Onboarding flow polish pass',                importance: 'ui',        day: 3, col: 'todo' },
+  { id: 't5',  title: 'Implement OAuth flow for Slack integration',  importance: 'urgent',    day: 4, col: 'progress' },
+  { id: 't6',  title: 'Refactor settings provider',                 importance: 'important', day: 5, col: 'progress' },
+  { id: 't7',  title: 'Migrate to Next.js 16 app router',           importance: 'ui',        day: 6, col: 'progress' },
+  { id: 't8',  title: 'Fix dark mode flicker on initial load',      importance: 'urgent',    day: 0, col: 'review' },
+  { id: 't9',  title: 'Audit a11y on settings page',                importance: 'important', day: 1, col: 'review' },
+  { id: 't10', title: 'Ship release notes for v0.42',               importance: 'ui',        day: 2, col: 'done' },
+  { id: 't11', title: 'Document API rate limits',                   importance: 'urgent',    day: 3, col: 'done' },
+  { id: 't12', title: 'Triage inbound bug reports',                 importance: 'important', day: 4, col: 'done' },
 ];
 
 const MOVE_CONFIG: Record<string, { bg: string; icon: string; label: string }> = {
@@ -55,14 +72,17 @@ const MOVE_CONFIG: Record<string, { bg: string; icon: string; label: string }> =
   'success-review':   { bg: '#FBBF24', icon: 'visibility', label: 'Review' },
 };
 
-// Phase-specific config for the single morphing sync button
-const SYNC_BTN_PHASE: Record<string, { bg: string; color: string; icon: string; label: string; spin: boolean }> = {
-  idle:       { bg: 'var(--tb-syncbtn)', color: '#fff',    icon: 'autorenew', label: 'Sync with Agent', spin: false },
-  connecting: { bg: '#6B6B6B',           color: '#fff',    icon: 'sync',      label: 'Connecting…',     spin: true  },
-  slack:      { bg: '#F97316',           color: '#fff',    icon: 'autorenew', label: 'Reading Slack…',  spin: true  },
-  github:     { bg: '#FBBF24',           color: '#451A03', icon: 'autorenew', label: 'Reading GitHub…', spin: true  },
-  notion:     { bg: 'var(--brand-primary-500)',           color: '#fff',    icon: 'autorenew', label: 'Reading Notion…', spin: true  },
-  done:       { bg: 'var(--brand-primary-500)',           color: '#fff',    icon: 'task_alt',  label: 'Synced!',         spin: false },
+// Phase-specific config for the single morphing sync button. `cls` selects the
+// canonical color-state class: shared .btn-green (buttons page, Change 1) where
+// the color matches exactly (black/brand-primary), or a TaskBoard.css mirror of
+// that same recipe for phases the shared set doesn't cover.
+const SYNC_BTN_PHASE: Record<string, { cls: string; icon: string; label: string; spin: boolean }> = {
+  idle:       { cls: 'btn-green',        icon: 'autorenew', label: 'Sync with Agent',  spin: false },
+  connecting: { cls: 'tb-btn-gray',      icon: 'sync',       label: 'Connecting…',      spin: true  },
+  slack:      { cls: 'tb-btn-orange',    icon: 'autorenew',  label: 'Reading Slack…',   spin: true  },
+  github:     { cls: 'tb-btn-amber',     icon: 'autorenew',  label: 'Reading GitHub…',  spin: true  },
+  notion:     { cls: 'tb-btn-solid-green', icon: 'autorenew', label: 'Reading Notion…', spin: true  },
+  done:       { cls: 'tb-btn-solid-green', icon: 'task_alt',  label: 'Synced!',         spin: false },
 };
 
 const COL_TAG: Record<string, { bg: string; fg: string; icon: string; label: string }> = {
@@ -312,7 +332,7 @@ function TaskCard({
   highlight: boolean;
   successClass: string | null;
 }) {
-  const p = PRIORITY[task.priority];
+  const imp = IMPORTANCE[task.importance];
   const showConfetti = successClass === 'success-done';
 
   return (
@@ -342,22 +362,7 @@ function TaskCard({
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 4,
-          padding: '2px 7px 2px 5px',
-          borderRadius: 9999,
-          background: p.bg,
-          border: `1px solid ${p.color}22`,
-        }}>
-          <span style={{
-            width: 5, height: 5, borderRadius: '50%',
-            background: p.color, display: 'inline-block',
-            boxShadow: `0 0 0 3px ${p.bg}`,
-          }} />
-          <span style={{ fontSize: 10.5, fontWeight: 700, color: p.color, letterSpacing: '0.02em' }}>
-            {p.label}
-          </span>
-        </div>
+        <span className={`tb-badge ${imp.cls}`}>{imp.label}</span>
       </div>
 
       <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -447,7 +452,7 @@ function Column({
       }}
       style={{
         background: 'var(--tb-col-bg)',
-        border: '1px solid var(--tb-col-border)',
+        border: 'var(--tb-col-dash)',
         borderRadius: 12,
         padding: 10,
         display: 'flex', flexDirection: 'column', gap: 14,
@@ -566,6 +571,59 @@ function Header({ total }: { total: number }) {
           AI Sync
         </span>
       </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Week pill row (Change 3) — mirrors todo-list's weekDays + activeIdx pattern
+// and .td-daybtn recipe (todo-list/TodoList.tsx / TodoList.css), local tb- names.
+// ---------------------------------------------------------------------------
+function WeekRow({ activeIdx, onSelect }: { activeIdx: number; onSelect: (i: number) => void }) {
+  return (
+    <div className="tb-week">
+      {WEEK_DAYS.map((d, i) => (
+        <button
+          key={d.toISOString().slice(0, 10)}
+          type="button"
+          data-proximity
+          className={`tb-daybtn${i === activeIdx ? ' active' : ''}`}
+          onClick={() => onSelect(i)}
+        >
+          <span className="dow">{DOW[i]}</span>
+          <span className="dnum">{d.getDate()}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// Badge-filter pill row — All (default) + the three importance badges,
+// mirrors todo-list's .td-filt/.fdot recipe.
+function BadgeFilterRow({ active, onSelect }: { active: string; onSelect: (k: string) => void }) {
+  return (
+    <div className="tb-filters">
+      <button
+        type="button"
+        data-proximity
+        className={`tb-filt${active === 'all' ? ' on' : ''}`}
+        onClick={() => onSelect('all')}
+      >
+        All
+      </button>
+      {IMPORTANCE_KEYS.map((k) => (
+        <button
+          key={k}
+          type="button"
+          data-proximity
+          className={`tb-filt${active === k ? ' on' : ''}`}
+          style={{ ['--fcolor' as string]: IMPORTANCE[k].color }}
+          onClick={() => onSelect(k)}
+        >
+          <span className="fdot" />
+          {IMPORTANCE[k].label}
+        </button>
+      ))}
     </div>
   );
 }
@@ -753,16 +811,8 @@ function StatusBar({
         onClick={isClickable ? onSync : undefined}
         disabled={!isClickable}
         data-proximity
-        className="sync-btn"
-        style={{
-          display: 'inline-flex', alignItems: 'center', gap: 8,
-          padding: '9px 18px', borderRadius: 999,
-          background: btnCfg.bg, color: btnCfg.color,
-          border: 'none',
-          fontSize: 12.5, fontWeight: 700, letterSpacing: '-0.005em',
-          cursor: isClickable ? 'pointer' : 'not-allowed',
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.22), inset 0 0 0 1px rgba(0,0,0,0.12), 0 6px 16px -6px rgba(17,17,17,0.45)',
-        }}
+        className={`sync-btn ${btnCfg.cls}`}
+        style={{ gap: 8, cursor: isClickable ? 'pointer' : 'not-allowed' }}
         onMouseDown={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(0.97)'; }}
         onMouseUp={(e)   => { (e.currentTarget as HTMLButtonElement).style.transform = ''; }}
       >
@@ -837,6 +887,9 @@ export default function TaskBoard() {
   const [syncBtnAnim, setSyncBtnAnim]   = React.useState<string | null>(null);
   // hasUndo tracks whether undoRef holds a value — avoids reading .current during render
   const [hasUndo, setHasUndo]           = React.useState(false);
+  // Week-day + badge filters (Change 3) — today active by default, both compose (AND)
+  const [activeDayIdx, setActiveDayIdx] = React.useState(TODAY_IDX);
+  const [activeBadge, setActiveBadge]   = React.useState<'all' | keyof typeof IMPORTANCE>('all');
 
   // Refs for mutable state that timers need to read without stale closures
   const undoRef            = React.useRef<{ id: string; from: string; fromIdx: number } | null>(null);
@@ -1031,12 +1084,16 @@ export default function TaskBoard() {
     });
   };
 
-  // Derived
+  // Derived — day + badge filters compose (AND) before grouping by column
+  const filteredTasks = React.useMemo(
+    () => tasks.filter((t) => t.day === activeDayIdx && (activeBadge === 'all' || t.importance === activeBadge)),
+    [tasks, activeDayIdx, activeBadge],
+  );
   const tasksByCol = React.useMemo(() => {
     const map = Object.fromEntries(COLUMNS.map((c) => [c.id, [] as Task[]]));
-    tasks.forEach((t) => { (map[t.col] || (map[t.col] = [])).push(t); });
+    filteredTasks.forEach((t) => { (map[t.col] || (map[t.col] = [])).push(t); });
     return map;
-  }, [tasks]);
+  }, [filteredTasks]);
 
   const feedVisible = phase !== 'idle' && phase !== 'connecting';
 
@@ -1070,6 +1127,9 @@ export default function TaskBoard() {
     <div ref={boardRef} className="tb-outer">
       <div ref={panelSquircleRef} className="tb-panel">
         <Header total={tasks.length} />
+
+        <WeekRow activeIdx={activeDayIdx} onSelect={setActiveDayIdx} />
+        <BadgeFilterRow active={activeBadge} onSelect={setActiveBadge} />
 
         <div style={{ position: 'relative' }}>
           <div style={{

@@ -11,8 +11,9 @@ body { background: var(--bg-app); }
 
 /* ── Kanban column — canonical grey outer shell (matches card view) ── */
 .column {
-  width: 336px;
+  width: 396px;
   background: var(--shell-bg);
+  border: 1.5px dashed var(--card-border);
   border-radius: 28px;
   padding: 10px;
   box-shadow:
@@ -63,12 +64,22 @@ body { background: var(--bg-app); }
   cursor: pointer;
   font-family: var(--font-display);
   box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 -2px 0 rgba(17,17,17,0.08), 0 1px 2px rgba(17,17,17,0.05);
-  animation: task-in calc(460ms * var(--anim-mult, 1)) var(--ease-out) both;
-  transition:transform calc(120ms * var(--anim-mult, 1)) var(--ease-out),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+  /* backwards (not "both"): holds the pre-delay offset for the stagger, but
+     releases transform back to the normal cascade once the entrance ends --
+     "both" would otherwise pin transform at animation priority forever,
+     silently blocking the :hover/:active rules below. */
+  animation: task-in calc(460ms * var(--anim-mult, 1)) var(--ease-out) backwards;
+  transition:transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
+    filter calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
 }
-.task:active { transform: scale(0.97); }
+/* Hover calmed to the inner-card benchmark (cards/Cards.css .concentric-demo):
+   scale(1.007) + a modest drop-shadow ramp instead of the exaggerated
+   proximity-engine max (data-proximity removed from the card in TaskCard.tsx). */
+.task:hover {
+  transform: scale(1.007);
+  filter: drop-shadow(0 10px 15px rgba(17,17,17,0.10)) drop-shadow(0 2px 4px rgba(17,17,17,0.05));
+}
+.task:active { transform: scale(1.003); }
 @keyframes task-in { 0% { transform: translateY(8px); } 100% { transform: translateY(0); } }
 
 /* ── Priority banner — icon + glow ────────────────────────────────── */
@@ -164,15 +175,30 @@ body { background: var(--bg-app); }
   transition:opacity calc(220ms * var(--anim-mult, 1)) ease, visibility 0s,
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear; }
-.tp-outer { background: var(--shell-bg); border-radius: 30px; padding: 10px;
+/* Outer shell -- calendar popover canon (Calendar.css .cal-ep-outer): squircle
+   36, dark-only ::before ring, no light-mode line. */
+.tp-outer { position: relative; background: var(--shell-bg); border-radius: 36px; padding: 10px;
   width: min(540px, calc(100vw - 28px)); max-height: calc(100vh - 36px); display: flex; flex-direction: column;
   box-shadow: 0 32px 80px rgba(0,0,0,0.28), 0 6px 20px rgba(0,0,0,0.12);
   opacity: 0; transform: translateY(16px) scale(0.95);
   transition:transform calc(320ms * var(--anim-mult, 1)) var(--ease-spring), opacity calc(240ms * var(--anim-mult, 1)) ease,
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear; }
+.tp-outer[data-squircle="on"] { --corner-radius: 36px; }
+/* Dark-only external ring -- shared recipe defaults ::before to content:none;
+   this re-enables it, mirroring Calendar.css .cal-ep-outer. */
+html.dark .tp-outer[data-squircle="on"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--card-border);
+  clip-path: var(--squircle-border-path);
+}
 .tp-overlay.open .tp-outer { opacity: 1; transform: none; }
-.tp-card { background: var(--bg-card-solid); border-radius: 22px; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+/* Inner card -- squircle 28, no strict hard frame in either mode. */
+.tp-card { background: var(--bg-card-solid); border-radius: 28px; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+.tp-card[data-squircle="on"] { --corner-radius: 28px; }
 
 /* sticky colored header (priority color) */
 .tp-head { position: relative; flex-shrink: 0; padding: 15px 17px 14px; color: var(--brand-on-primary); background-color: var(--ph, var(--brand-primary-500));
@@ -295,14 +321,9 @@ html.dark .tp-w { box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
 .tp-rev { display: flex; align-items: center; gap: 9px; }
 .tp-rev-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 900; color: var(--brand-on-primary);
   padding: 6px 12px; border-radius: 9999px; background: var(--brand-primary-500); text-shadow: 0 1px 1px rgba(0,0,0,0.2);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand-primary-500) 40%, transparent), 0 0 16px -2px color-mix(in srgb, var(--brand-primary-500) 70%, transparent), inset 0 1px 0 rgba(255,255,255,0.4);
-  animation: tp-glow calc(2200ms * var(--anim-mult, 1)) var(--ease-in-out) infinite; }
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand-primary-500) 40%, transparent), 0 0 16px -2px color-mix(in srgb, var(--brand-primary-500) 70%, transparent), inset 0 1px 0 rgba(255,255,255,0.4); }
 .tp-rev-pill .material-icons { font-size: 15px; }
 .tp-rev-cap { font-size: 10.5px; font-weight: 600; color: var(--fg4); }
-@keyframes tp-glow {
-  0%,100% { box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand-primary-500) 40%, transparent), 0 0 14px -3px color-mix(in srgb, var(--brand-primary-500) 60%, transparent), inset 0 1px 0 rgba(255,255,255,0.4); }
-  50%     { box-shadow: 0 0 0 1px var(--brand-glow), 0 0 24px 0 color-mix(in srgb, var(--brand-primary-500) 90%, transparent), inset 0 1px 0 rgba(255,255,255,0.4); }
-}
 
 /* 8 · dependency chain */
 .tp-chain { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
@@ -685,13 +706,8 @@ html.dark .tp-w { box-shadow: 0 1px 2px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,
     linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px) !important;
   background-size: 15px 15px !important;
-  animation: col-head-glow calc(2800ms * var(--anim-mult, 1)) var(--ease-in-out) infinite;
 }
 html.dark .col-head { background-color: #1E40AF !important; }
-@keyframes col-head-glow {
-  0%,100% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -2px 0 rgba(0,0,0,0.3), 0 4px 14px -6px rgba(37,99,235,0.4); }
-  50%      { box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -2px 0 rgba(0,0,0,0.3), 0 4px 22px -4px rgba(37,99,235,0.85); }
-}
 
 /* industry indicator removed */
 .t-ind { display: none !important; }

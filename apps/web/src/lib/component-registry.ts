@@ -521,16 +521,6 @@ export const registry: RegistryEntry[] = [
     Component: lazy(() => import('@/components/design-system/financial-health-card/FinancialHealthCard')),
   },
   {
-    slug: 'funnel-chart',
-    name: 'Funnel Chart',
-    status: 'Proceeding',
-    category: 'Components',
-    subtitle: 'Horizontal funnel with emerald halo rings, staggered entrance, hover dim',
-    viewport: { width: 700, height: 480 },
-    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/funnel-chart',
-    Component: lazy(() => import('@/components/design-system/funnel-chart/FunnelChart')),
-  },
-  {
     slug: 'leaderboard',
     name: 'Leaderboard',
     status: 'Proceeding',
@@ -544,7 +534,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: 'news-feed',
     name: 'News Feed',
-    status: 'Proceeding',
+    status: 'Finished',
     category: 'Components',
     subtitle: 'Crypto news feed — bullish/bearish cards, light + dark',
     viewport: { width: 500, height: 460 },

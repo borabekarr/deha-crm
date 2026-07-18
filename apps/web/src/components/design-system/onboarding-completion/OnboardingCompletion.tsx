@@ -268,6 +268,7 @@ function StepRow({
   const processing = status === 'processing'
   const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([])
   const ref = useRef<HTMLButtonElement>(null)
+  const squircleRef = useSquircle<HTMLButtonElement>()
 
   const onDown = (e: React.PointerEvent<HTMLButtonElement>) => {
     if (done || processing || !ref.current) return
@@ -277,9 +278,14 @@ function StepRow({
     setTimeout(() => setRipples((rs) => rs.filter((x) => x.id !== id)), 620)
   }
 
+  const setRowRef = useCallback((el: HTMLButtonElement | null) => {
+    ref.current = el
+    squircleRef(el)
+  }, [squircleRef])
+
   return (
     <button
-      ref={ref}
+      ref={setRowRef}
       type="button"
       className={`oc-row${done ? ' is-done' : ''}${processing ? ' is-processing' : ''}`}
       data-proximity
@@ -425,9 +431,11 @@ export default function OnboardingCompletion() {
   const [fire, setFire] = useState(false)
   const [variant, setVariant] = useState<Variant>('checklist')
 
-  // Squircle ref: shared between the two mutually-exclusive .oc-card mounts
-  // (card / checklist variants) — only one is in the DOM at a time.
-  const ocCardSquircleRef = useSquircle<HTMLDivElement>()
+  // Squircle refs: outer shell (36) is always mounted; inner ref (28) is
+  // shared between the three mutually-exclusive prompt/card/checklist
+  // mounts — only one is in the DOM at a time.
+  const ocOuterSquircleRef = useSquircle<HTMLDivElement>()
+  const ocCardSquircleRef = useSquircle<HTMLElement>()
 
   // Root element ref — timers are stored on the DOM node
   const rootElRef = useRef<HTMLElement | null>(null)
@@ -486,12 +494,12 @@ export default function OnboardingCompletion() {
     >
       {/* eslint-disable-next-line no-restricted-syntax -- OC_OVERRIDES is a static component-authored CSS constant (no interpolation, no external/user input); injected as a late <style> for cascade precedence over the imported stylesheet */}
       <style dangerouslySetInnerHTML={{ __html: OC_OVERRIDES }} />
-      <div className={`oc-panel-wrap${compact ? ' is-compact' : ''}`}>
+      <div className={`oc-panel-wrap${compact ? ' is-compact' : ''}`} ref={ocOuterSquircleRef}>
 
         {/* ── PROMPT ── */}
         {variant === 'prompt' && (
           showSuccess ? (
-            <div className="oc-prompt is-success">
+            <div className="oc-prompt is-success" ref={ocCardSquircleRef}>
               <Confetti fire={true} count={26} />
               <span className="oc-prompt-tick"><DrawCheck size={20} play stroke={3.6} /></span>
               <span className="oc-prompt-text">
@@ -503,7 +511,7 @@ export default function OnboardingCompletion() {
               </button>
             </div>
           ) : (
-            <button type="button" className="oc-prompt" data-proximity onClick={() => complete(focused.id)}>
+            <button type="button" className="oc-prompt" data-proximity ref={ocCardSquircleRef} onClick={() => complete(focused.id)}>
               <ProgressRing value={doneCount} total={n} size={46} stroke={4} color="var(--oc-accent)" />
               <span className="oc-prompt-text">
                 <span className="oc-prompt-title-row">

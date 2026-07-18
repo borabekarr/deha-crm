@@ -34,3 +34,14 @@
  * definition in colors_and_type.css. */
 :root { --anim-mult: 1; }
 :root[data-anim-slow="true"] { --anim-mult: 4; }
+
+/* Repo-wide reduced-motion fallback. Per-component reduced-motion
+ * guards remain valid but are now redundant. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

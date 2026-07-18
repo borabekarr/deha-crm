@@ -5,7 +5,7 @@ body { background: #E4E8ED; font-family: 'Montserrat', sans-serif; }
 .cal-shell {
   position: relative;
   background: var(--shell-bg, #D4DCE8);
-  border-radius: 28px;
+  border-radius: 36px;
   padding: 10px;
   box-shadow: 0 10px 30px rgba(17,17,17,0.12), 0 2px 8px rgba(17,17,17,0.06);
   background-image: none;
@@ -19,9 +19,11 @@ html.dark .cal-shell {
 }
 /* Squircle conversion (Step 7): outer shell is a decorative frame only —
    default ::before/::after cancelled, dark-only ring re-enabled as a solid
-   line (mirrors .cal-ep-customer-outer, css:420-434). */
+   line (mirrors .cal-ep-customer-outer, css:420-434).
+   Corner pair (Step 5): concentric outer/inner canon, mirrors Cards.css
+   .concentric-demo-outer/-inner — outer 36 / inner 28 (.cal-panel below). */
 .cal-shell[data-squircle="on"] {
-  --corner-radius: 28px;
+  --corner-radius: 36px;
 }
 .cal-shell[data-squircle="on"]::before,
 .cal-shell[data-squircle="on"]::after {
@@ -42,9 +44,16 @@ html.dark .cal-shell[data-squircle="on"]::before {
 .cal-panel {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-radius: var(--card-radius);
+  border-radius: 28px;
   box-shadow: inset 0 0 0 1px rgba(17,17,17,0.04);
   overflow: hidden;
+}
+/* Squircle conversion (Step 5): inner half of the concentric 36/28 pair;
+   shared [data-squircle="on"] recipe in _shared-feedback.css drops the
+   border/box-shadow and default-suppresses ::before/::after — no line in
+   either mode. */
+.cal-panel[data-squircle="on"] {
+  --corner-radius: 28px;
 }
 
 /* ── Header (inside panel) ── */
@@ -74,21 +83,46 @@ html.dark .cal-shell[data-squircle="on"]::before {
 /* ── Grid ── */
 .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); padding: 4px 4px 8px; }
 
+/* ── Direction-aware header switch (motion-tabs pattern) ──
+   .cal-grid-stack carries --gdx (travel distance+sign, set inline from
+   monthDir); the departing month is an absolute exit-overlay reading the
+   same --gdx so both travel together, sequenced not crossfaded (enter
+   delayed until the exit is most of the way through). */
+.cal-grid-stack { position: relative; }
+.cal-grid-exit {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  animation: cal-grid-exit-travel calc(220ms * var(--anim-mult, 1)) var(--ease-out) both;
+}
+.cal-grid-enter {
+  animation: cal-grid-enter-travel calc(280ms * var(--anim-mult, 1)) var(--ease-out) calc(130ms * var(--anim-mult, 1)) both;
+}
+@keyframes cal-grid-enter-travel {
+  from { opacity: 0; transform: translateX(var(--gdx, 18px)); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes cal-grid-exit-travel {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(calc(var(--gdx, 18px) * -1)); }
+}
+
 /* ── Cell ── */
 .cal-cell {
   display: flex; flex-direction: column; align-items: center;
   padding: 3px 2px 5px; cursor: pointer; border-radius: 10px; user-select: none;
 }
-/* No background on the whole cell — hover scoped to number only */
+/* No background on the whole cell — hover scoped to number only.
+   Fill token matches the global option hover (fab/Fab.css .fab-item):
+   var(--fp-hover), 150ms, zero delay, resolves per-mode on its own. */
 .cal-date-num {
   width: 30px; height: 30px; border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
   font-size: 14px; font-weight: 600; color: #111111;
-  transition: background calc(140ms * var(--anim-mult, 1)), transform calc(110ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: background calc(150ms * var(--anim-mult, 1)) var(--ease-fade) 0ms, transform calc(110ms * var(--anim-mult, 1)) var(--ease-out);
 }
 .cal-cell.other-month .cal-date-num { color: #D4D4D4; font-weight: 500; }
 /* Hover: only non-selected, non-other-month cells */
-.cal-cell:not(.other-month):not(.selected):hover .cal-date-num { background: #F5F5F5; }
+.cal-cell:not(.other-month):not(.selected):hover .cal-date-num { background: var(--fp-hover); }
 /* Click animation */
 .cal-cell:active .cal-date-num { transform: scale(0.85); background: #ECECEC !important; }
 .cal-cell.selected:active .cal-date-num { background: #111111 !important; }
@@ -113,8 +147,16 @@ html.dark .cal-dot-more { color: #6B6B6B; }
 /* ── Events ── */
 .cal-events { padding: 14px 12px 10px; position: relative; }
 .cal-ev-label { font-size: 10px; font-weight: 700; color: #A1A1A1; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
-.cal-ev-item { display: flex; align-items: center; width: 100%; padding: 10px 2px; border: 0; border-bottom: 1px solid #FAFAFA; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; appearance: none; transition: transform calc(120ms * var(--anim-mult, 1)) var(--ease-out); }
-.cal-ev-item:active { transform: scale(0.985); }
+/* ROOT CAUSE (broken hover): background never appeared in the transition
+   list below, so the :hover fill (previously #FAFAFA, set further down)
+   snapped in/out instantly instead of fading — reads as glitchy next to
+   every other option's smooth fill. Fix: border-radius promoted to a base
+   property (was hover-only, causing a corner-radius pop) and the option
+   converges on the global hover (fab/Fab.css .fab-item): background
+   var(--fp-hover), 150ms zero-delay fade, press scale(0.97). */
+.cal-ev-item { display: flex; align-items: center; width: 100%; padding: 10px 2px; border: 0; border-bottom: 1px solid #FAFAFA; border-radius: 8px; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; appearance: none; transition: transform calc(120ms * var(--anim-mult, 1)) var(--ease-out), background calc(150ms * var(--anim-mult, 1)) var(--ease-fade) 0ms; }
+.cal-ev-item:hover { background: var(--fp-hover); }
+.cal-ev-item:active { transform: scale(0.97); }
 .cal-ev-item:last-of-type { border-bottom: none; }
 /* Proximity: own `transform` transition (0,1,0) beats hover-tokens.css's
    [data-proximity]x3 fallback; scale + filter channels added here so the
@@ -122,6 +164,7 @@ html.dark .cal-dot-more { color: #6B6B6B; }
 .cal-ev-item[data-proximity] {
   transition:
     transform calc(120ms * var(--anim-mult, 1)) var(--ease-out),
+    background calc(150ms * var(--anim-mult, 1)) var(--ease-fade) 0ms,
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
@@ -143,9 +186,13 @@ html.dark .cal-dot-more { color: #6B6B6B; }
 }
 .cev-badge .material-icons { font-size: 12px; color: rgba(255,255,255,0.85); }
 .cal-no-events { font-size: 13px; font-weight: 500; color: #D4D4D4; padding: 6px 0 4px; }
-.cal-add-row { display: flex; align-items: center; gap: 10px; padding: 10px 2px 4px; cursor: pointer; opacity: 0.7; border-radius: 8px; transition: opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade), background calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade); }
-.cal-add-row:hover { opacity: 1; background: #FAFAFA; }
-html.dark .cal-add-row:hover { background: rgba(255,255,255,0.05); }
+/* Bottom option of .cal-events — converges on the global option hover
+   (fab/Fab.css .fab-item): background var(--fp-hover), 150ms zero-delay
+   fade, press scale(0.97). The idle 0.7 opacity ghost-affordance is kept
+   (pre-existing, not part of the broken-hover report). */
+.cal-add-row { display: flex; align-items: center; gap: 10px; padding: 10px 2px 4px; cursor: pointer; opacity: 0.7; border-radius: 8px; transition: opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade), background calc(150ms * var(--anim-mult, 1)) var(--ease-fade) 0ms; }
+.cal-add-row:hover { opacity: 1; background: var(--fp-hover); }
+.cal-add-row:active { transform: scale(0.97); }
 /* Proximity: own `opacity` transition (0,1,0) beats hover-tokens.css's
    [data-proximity]x3 fallback; scale + filter channels appended so the
    engine's --prox mapping doesn't snap (mirrors .cal-ev-item[data-proximity]). */
@@ -154,7 +201,7 @@ html.dark .cal-add-row:hover { background: rgba(255,255,255,0.05); }
     opacity calc(150ms * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    background calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade);
+    background calc(150ms * var(--anim-mult, 1)) var(--ease-fade) 0ms;
 }
 .cal-add-icon { width: 26px; height: 26px; border-radius: 50%; background: #F5F5F5; display: grid; place-items: center; color: #A1A1A1; }
 .cal-add-icon .material-icons { font-size: 16px; }
@@ -176,7 +223,7 @@ html.dark .cal-nav-btn:hover{ background:var(--gray-900); }
 html.dark .cal-nav-btn .material-icons{ color:var(--gray-400); }
 html.dark .cal-date-num{ color:var(--gray-100); }
 html.dark .cal-cell.other-month .cal-date-num{ color:var(--gray-600); }
-html.dark .cal-cell:not(.other-month):not(.selected):hover .cal-date-num{ background:rgba(255,255,255,.07); }
+/* dark day-cell hover now resolves via --fp-hover (hover-tokens.css html.dark) — no local override needed */
 html.dark .cal-cell:active .cal-date-num{ background:var(--gray-700) !important; }
 /* FIX 2: dark selected = white chip, black text, subtle shadow — no green */
 html.dark .cal-cell.selected .cal-date-num{ background:#FFFFFF; color:#111111; box-shadow:0 2px 8px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,1), inset 0 -2px 0 rgba(0,0,0,.08); }
@@ -297,10 +344,14 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
   transition: opacity calc(220ms * var(--anim-mult, 1)) ease, visibility 0s;
 }
 
-/* Gray bezel outer shell — pop entrance via var(--ease-spring) */
+/* Gray bezel outer shell — pop entrance via var(--ease-spring). This popover
+   is the canon task-card popovers copy (Step 7): no strict hard frames,
+   concentric squircle 36/28 pair, dark-only ::before ring on the OUTER
+   shell (per cards/Cards.css .concentric-demo-outer, lines 132-143). */
 .cal-ep-outer {
+  position: relative;
   background: var(--shell-bg);
-  border-radius: 30px;
+  border-radius: 36px;
   padding: 10px;
   width: min(540px, calc(100vw - 28px));
   max-height: calc(100vh - 36px);
@@ -310,20 +361,38 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
   transition: transform calc(320ms * var(--anim-mult, 1)) var(--ease-spring),
               opacity calc(240ms * var(--anim-mult, 1)) ease;
 }
+.cal-ep-outer[data-squircle="on"] {
+  --corner-radius: 36px;
+}
+/* Dark-only external ring — shared recipe defaults ::before to content:none;
+   this re-enables it, mirroring Cards.css .concentric-demo-outer. */
+html.dark .cal-ep-outer[data-squircle="on"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--card-border);
+  clip-path: var(--squircle-border-path);
+}
 .cal-ep-overlay.open .cal-ep-outer {
   opacity: 1; transform: none;
 }
 html.dark .cal-ep-outer { background: #111111; }
 
-/* Card surface — matches .tp-card (1px solid card-border, 22px radius) */
+/* Card surface — inner half of the outer/inner canon pair (no strict hard
+   frame; border kept only as the pre-squircle fallback, dropped once
+   [data-squircle="on"] is live via the shared recipe). */
 .cal-ep-card {
   --ep-color: #3B82F6;
   background: var(--bg-card-solid);
   border: 1px solid var(--card-border);
-  border-radius: 22px;
+  border-radius: 28px;
   overflow: hidden;
   display: flex; flex-direction: column;
   min-height: 0;
+}
+.cal-ep-card[data-squircle="on"] {
+  --corner-radius: 28px;
 }
 html.dark .cal-ep-card { background: #1C1C1C; }
 
@@ -852,9 +921,8 @@ html.dark .cal-ep-foot-btn.primary .material-icons { color: #04231a; }
 /* ── Card must be position:relative for toast absolute positioning ── */
 .cal-ep-card { position: relative; }
 
-/* Event item gets pointer + chevron cue */
+/* Event item gets pointer cue (hover fill lives on the base .cal-ev-item rule above) */
 .cal-ev-item { cursor: pointer; }
-.cal-ev-item:hover { background: #FAFAFA; border-radius: 8px; }
 .cev-chevron { font-size: 16px; color: #D4D4D4; flex-shrink: 0; margin-left: auto; }
 
 /* Dark mode for event-detail popover */
@@ -871,7 +939,7 @@ html.dark .cal-ep-foot-btn.primary:hover { filter: brightness(0.96); background:
 html.dark .cal-ep-row-val { color: var(--gray-100); }
 html.dark .cal-ep-row-detail { color: #A1A1A1; }
 /* Fix #3: removed stale slate-700 override — dark non-primary footer btns stay emerald (set at .cal-ep-foot-btn dark rule above) */
-html.dark .cal-ev-item:hover { background: rgba(255,255,255,0.05); }
+/* dark .cal-ev-item hover now resolves via --fp-hover (hover-tokens.css html.dark) — no local override needed */
 
 /* Dark mode for task popover */
 html.dark .cal-popover { background: var(--gray-800); box-shadow: 0 24px 80px rgba(0,0,0,.5), 0 4px 16px rgba(0,0,0,.3); }

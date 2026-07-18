@@ -6,11 +6,12 @@
   user-select: none; -webkit-user-select: none;
 }
 .oc-panel-wrap {
+  position: relative;
   width: 100%; height: 462px;
   padding: 10px;
   background: var(--card-bg, #FFFFFF);
   border: 1px solid var(--card-border, #D4D4D4);
-  border-radius: var(--card-radius, 20px);
+  border-radius: 36px;
   box-shadow: 0 16px 56px rgba(17,17,17,.14), 0 3px 10px rgba(17,17,17,.07);
   transition:height calc(460ms * var(--anim-mult, 1)) var(--ease-out),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
@@ -18,6 +19,26 @@
 }
 html.dark .oc-panel-wrap { box-shadow: 0 16px 56px rgba(0,0,0,.4), 0 3px 10px rgba(0,0,0,.3); }
 .oc-panel-wrap.is-compact { height: 92px; }
+/* Outer shell -- squircle 36, elevation migrates to filter:drop-shadow
+   (clip-path clips box-shadow); dark-only ring, no light-mode line
+   (mirrors task-card .tp-outer / cards .concentric-demo-outer). */
+.oc-panel-wrap[data-squircle="on"] {
+  --corner-radius: 36px;
+  box-shadow: none;
+  filter: drop-shadow(0 16px 56px rgba(17,17,17,.14)) drop-shadow(0 3px 10px rgba(17,17,17,.07));
+}
+html.dark .oc-panel-wrap[data-squircle="on"] {
+  box-shadow: none;
+  filter: drop-shadow(0 16px 56px rgba(0,0,0,.4)) drop-shadow(0 3px 10px rgba(0,0,0,.3));
+}
+html.dark .oc-panel-wrap[data-squircle="on"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--card-border);
+  clip-path: var(--squircle-border-path);
+}
 
 /* ===================== Card shell ===================== */
 .oc-card {
@@ -34,7 +55,7 @@ html.dark .oc-card { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 
 /* Canon (corrected): inner line-less in both themes -- the unscoped rule
    above wins on specificity over the shared [data-squircle="on"] reset. */
 html.dark .oc-card[data-squircle="on"] { box-shadow: none; }
-.oc-card[data-squircle="on"] { --corner-radius: var(--card-radius); }
+.oc-card[data-squircle="on"] { --corner-radius: 28px; }
 @keyframes ocCardIn { from { transform: translateY(8px) scale(.99); } to { transform: none; } }
 
 .oc-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; }
@@ -86,6 +107,9 @@ html.dark .oc-card[data-squircle="on"] { box-shadow: none; }
   animation: ocCardIn calc(420ms * var(--anim-mult, 1)) var(--ease-out);
 }
 html.dark .oc-prompt { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04); }
+/* Inner surface -- squircle 28, canon line-less in both modes (matches .oc-card). */
+.oc-prompt[data-squircle="on"] { --corner-radius: 28px; }
+html.dark .oc-prompt[data-squircle="on"] { box-shadow: none; }
 .oc-prompt:hover { background: var(--gray-50); }
 html.dark .oc-prompt:hover { background: color-mix(in srgb, #fff 4%, var(--bg-card-solid)); }
 .oc-prompt:active { transform: scale(.992); }
@@ -165,9 +189,16 @@ html.dark .oc-prompt:focus-visible { box-shadow: inset 0 1px 0 rgba(255,255,255,
   animation: ocRowRipple calc(620ms * var(--anim-mult, 1)) ease-out forwards;
 }
 @keyframes ocRowRipple { to { transform: translate(-50%, -50%) scale(22); opacity: 0; } }
-.oc-row:hover:not(:disabled) { background: var(--gray-50); transform: translateX(2px); }
+/* Checklist option row hover -- matches inner-card hover (scale <= 1.01),
+   no translateX drift. */
+.oc-row:hover:not(:disabled) { background: var(--gray-50); transform: scale(1.008); }
 .oc-row:active:not(:disabled) { transform: scale(.985); }
 .oc-row:disabled { cursor: default; }
+/* Nested inner surface -- squircle 28, same tier as .oc-card/.oc-prompt.
+   Default shared recipe keeps it line-less; no ring stacks over the outer
+   shell's ring. */
+.oc-row[data-squircle="on"] { --corner-radius: 28px; }
+html.dark .oc-row[data-squircle="on"] { box-shadow: none; }
 html.dark .oc-row { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04); }
 html.dark .oc-row:hover:not(:disabled) { background: color-mix(in srgb, #fff 8%, var(--bg-card-solid)); }
 html.dark .oc-row.is-done { background: color-mix(in srgb, var(--oc-accent) 17%, var(--bg-card-solid)); }

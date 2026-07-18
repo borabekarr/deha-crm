@@ -11,10 +11,14 @@
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
-  /* Softer, no-overshoot deceleration for the open/close shape morph -- the
-     previous bespoke cubic-bezier(0.32, 1.22, 0.4, 1) overshot past its target
-     size before settling back, reading as an "edgy" bounce. */
   --ms2-ease: var(--ease-out);
+  /* width/height/border-radius share one duration+curve (dynamic-island-style
+     morph -- see dynamic-island-reader's .di-pill) so the radius never desyncs
+     from the box size mid-morph; that desync was what made the pill's corners
+     visually flatten out during open/close. Gentle spring overshoot, not the
+     "edgy" bounce the previous bespoke curve produced. */
+  --ms2-morph-ease: cubic-bezier(0.34, 1.18, 0.5, 1);
+  --ms2-morph-dur: 380ms;
   --ms2-surface-bg: var(--card-bg, var(--bg-card-solid, #ffffff));
 }
 
@@ -34,10 +38,15 @@
     0 10px 28px -14px rgba(17,17,17, 0.22);
   cursor: pointer;
   transition:
-    width calc(440ms * var(--anim-mult, 1)) var(--ms2-ease),
-    height calc(440ms * var(--anim-mult, 1)) var(--ms2-ease),
-    border-radius calc(380ms * var(--anim-mult, 1)) var(--ms2-ease),
+    width calc(var(--ms2-morph-dur) * var(--anim-mult, 1)) var(--ms2-morph-ease),
+    height calc(var(--ms2-morph-dur) * var(--anim-mult, 1)) var(--ms2-morph-ease),
+    border-radius calc(var(--ms2-morph-dur) * var(--anim-mult, 1)) var(--ms2-morph-ease),
     box-shadow calc(320ms * var(--anim-mult, 1)) ease;
+}
+
+/* Exit reverses the same morph, just faster -- deliberate open, snappy close. */
+.ms2-surface:not(.ms2-open) {
+  --ms2-morph-dur: 300ms;
 }
 
 .ms2-surface:not(.ms2-open):hover {
@@ -185,17 +194,23 @@
   flex-direction: column;
   padding: 6px;
   opacity: 0;
+  filter: blur(4px);
   pointer-events: none;
   transition:
     opacity calc(180ms * var(--anim-mult, 1)) ease,
+    filter calc(180ms * var(--anim-mult, 1)) ease,
     pointer-events 0ms calc(180ms * var(--anim-mult, 1));
 }
 
+/* Content only starts fading/blurring in once the pill has begun expanding,
+   so it never appears "inside" a still-collapsed bar. */
 .ms2-surface.ms2-open .ms2-form {
   opacity: 1;
+  filter: blur(0);
   pointer-events: auto;
   transition:
-    opacity calc(180ms * var(--anim-mult, 1)) ease calc(90ms * var(--anim-mult, 1));
+    opacity calc(180ms * var(--anim-mult, 1)) ease calc(90ms * var(--anim-mult, 1)),
+    filter calc(180ms * var(--anim-mult, 1)) ease calc(90ms * var(--anim-mult, 1));
 }
 
 .ms2-form-head {

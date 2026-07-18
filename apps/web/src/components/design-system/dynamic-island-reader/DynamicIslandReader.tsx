@@ -444,7 +444,7 @@ function DynamicIsland({
                     <span style={{
                       position: 'absolute', top: 0, bottom: 0, left: '-30%', width: 36,
                       background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
-                      animation: 'diShine 1.8s ease-in-out infinite',
+                      animation: 'diShine calc(1800ms * var(--anim-mult, 1)) var(--ease-in-out) infinite',
                     }} />
                   </div>
                 )}
@@ -467,15 +467,18 @@ function DynamicIsland({
                       style={RM ? {} : {
                         strokeDasharray: 28,
                         strokeDashoffset: 28,
-                        animation: 'diCheckDraw 360ms 120ms cubic-bezier(.65,0,.35,1) forwards',
+                        animation: 'diCheckDraw calc(360ms * var(--anim-mult, 1)) calc(120ms * var(--anim-mult, 1)) var(--ease-draw) forwards',
                       }}
                     />
                   </svg>
                 </div>
                 {celebrate && <Confetti accent={accent} />}
               </div>
-            ) : showMode === 'off' ? null : (
-              <span style={{
+            ) : showMode === 'off' || closing ? null : (
+              // Mounts only once the reverse Done badge (`closing`) has fully
+              // exited — di-pct-enter plays the entrance from that point,
+              // never overlapping the Done exit.
+              <span className={RM ? '' : 'di-pct-enter'} style={{
                 flexShrink: 0, minWidth: showMode === 'time' ? 54 : 38, textAlign: 'right',
                 fontSize: 14, fontWeight: 800, color: labelColor,
                 letterSpacing: '-0.01em', fontVariantNumeric: 'tabular-nums',

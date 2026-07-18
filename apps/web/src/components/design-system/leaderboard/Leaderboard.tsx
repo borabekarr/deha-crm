@@ -137,8 +137,8 @@ export default function Leaderboard() {
   // Metric switch: play exit animation on current rows, then switch content and
   // trigger the direction-aware enter animation.
   //
-  // dir > 0  (revenue → growth):  rows travel left  → exit lb-exiting-left,  enter lb-entering-right
-  // dir < 0  (growth → revenue):  rows travel right → exit lb-exiting-right, enter lb-entering-left
+  // dir > 0  (revenue → growth):  rows travel right → exit lb-exiting-right, enter lb-entering-right
+  // dir < 0  (growth → revenue):  rows travel left  → exit lb-exiting-left,  enter lb-entering-left
   //
   // The 200ms timer matches the lb-exiting-* CSS duration; content switches only
   // after the exit completes so the old rows are fully gone before new ones appear.
@@ -153,7 +153,7 @@ export default function Leaderboard() {
     }
 
     if (newDir !== 0) {
-      const exitClass: RowsAnim  = newDir > 0 ? 'lb-exiting-left'    : 'lb-exiting-right'
+      const exitClass: RowsAnim  = newDir > 0 ? 'lb-exiting-right'   : 'lb-exiting-left'
       const enterClass: RowsAnim = newDir > 0 ? 'lb-entering-right'   : 'lb-entering-left'
       // Stash enter class so useLayoutEffect([metric]) picks it up after the switch
       pendingEnterClassRef.current = enterClass

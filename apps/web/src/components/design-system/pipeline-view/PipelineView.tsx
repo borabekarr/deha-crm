@@ -17,7 +17,7 @@ import { pvRootRef } from './pipeline-view-hook'
    Terminal "Lost" row reads muted (desaturated slate) with a red trend.
    Structure carries `--i` per row so step 2 can add CSS-only stagger.
    No framer-motion. Fully static — zero effect hooks of any kind.
-   Stage palette reused from funnel-chart. Emerald == var(--brand-primary-500).
+   Stage palette: emerald == var(--brand-primary-500), rest fixed hex dots.
    ========================================================================= */
 
 /* ── Types ────────────────────────────────────────────────────────────────── */
@@ -25,7 +25,7 @@ interface PipelineStage {
   key: string
   /** Stage name, rendered in Montserrat. */
   label: string
-  /** Palette dot color (funnel-chart stage palette). */
+  /** Palette dot color (stage palette). */
   color: string
   /** Deal count in this stage. */
   count: number
