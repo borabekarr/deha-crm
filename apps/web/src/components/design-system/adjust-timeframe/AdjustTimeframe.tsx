@@ -77,8 +77,20 @@ export default function AdjustTimeframe() {
 
   /* ── Derived display values ──────────────────────────────────────────── */
   const ppd     = trackW > 0 ? trackW / clamp(daysVisible, MIN_DAYS, totalDays) : 6
-  const stripW  = totalDays * ppd
+  /* criterion_3 fix: .tf-handle is a 22px-wide hit box centered on its index's
+     pixel position, so at either domain edge (index 0 or todayIdx) half the
+     handle overhangs past the strip's true (date-accurate) content width.
+     EDGE_PAD (18px, > the handle's 11px half-width) already gave the LEFT
+     overhang room via minScroll's -EDGE_PAD allowance. The right side had no
+     equivalent, so a selection ending at "today" always clipped the right
+     handle against .tf-track's overflow:hidden edge, at every zoom level.
+     Symmetric fix: widen stripW itself by EDGE_PAD on the right (the ruler's
+     ticks + edge mask extend into it automatically since both read stripW),
+     so the headroom is real strip content -- not a blank gap -- and
+     criterion_2's "no blank region right of the strip" still holds because
+     maxScroll is still defined as exactly stripW - trackW. */
   const EDGE_PAD = 18
+  const stripW  = totalDays * ppd + EDGE_PAD
   const maxScroll = Math.max(0, stripW - trackW)
   const minScroll = -EDGE_PAD
 
@@ -105,6 +117,13 @@ export default function AdjustTimeframe() {
   /* Item 6: live-scroll ref so drag math always sees current scroll.
      Updated via setScrollLive (wraps setScroll) — never written during render. */
   const scrollRef   = useRef(0)
+  /* Drag-clamp fix: the move-drag's onMove closure is registered once at
+     pointerdown and outlives re-renders, so a plain `daysVisible` read
+     inside it would be stale once the auto zoom-out below changes it
+     mid-gesture. Synced during render (no effect) so onMove always sees
+     the latest value. */
+  const daysVisibleRef = useRef(daysVisible)
+  daysVisibleRef.current = daysVisible
 
   /* ── Proximity groups (hover glow, locked convention: radius 80, dy×3) ─
      tf-month / tf-handle / tf-lens-hit live inside .tf-strip, which
@@ -171,7 +190,7 @@ export default function AdjustTimeframe() {
     if (!didInit.current) {
       // First-time: derive ppd from initial daysVisible and center the selection
       const nppd = w / clamp(105, MIN_DAYS, totalDays)
-      const nStrip = totalDays * nppd
+      const nStrip = totalDays * nppd + EDGE_PAD // keep in sync with stripW's right-edge headroom
       const nMaxScroll = Math.max(0, nStrip - w)
       // startIdx/endIdx at this point are the initial preset values
       // We use functional state to compute the right center scroll
@@ -190,7 +209,7 @@ export default function AdjustTimeframe() {
       // with a stale upper bound.
       lastTrackW.current = w
       setTrackW(w)
-      setScrollLive((s) => clamp(s, -EDGE_PAD, Math.max(0, totalDays * (w / clamp(105, MIN_DAYS, totalDays)) - w)))
+      setScrollLive((s) => clamp(s, -EDGE_PAD, Math.max(0, totalDays * (w / clamp(105, MIN_DAYS, totalDays)) + EDGE_PAD - w)))
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // intentionally empty — only fires from ResizeObserver, not from React re-renders
@@ -255,11 +274,30 @@ export default function AdjustTimeframe() {
           setPickedPreset(hitId)
           requestAnimationFrame(() => measureGlider(hitId))
         }
-        // Item 4: auto zoom-out whenever focal point is off-screen (edge condition),
+        // Item 4/2: auto zoom-out whenever focal point is off-screen (edge condition),
         // regardless of whether scroll moved — drive off focal check alone.
+        // The zoom-out changes ppd for the NEXT render, but this onMove closure
+        // (registered once at pointerdown) keeps using snapPpd/snapTrackW for the
+        // rest of the gesture. Left uncorrected, a scroll value clamped against
+        // the OLD ppd's maxScroll no longer matches the NEW (smaller) stripW,
+        // exposing blank track past today on a fast rightward drag. Fix: clamp
+        // scroll against the NEW ppd/maxScroll at this same update source,
+        // right when daysVisible changes — not just at the render-derived value.
         const focalPx = focusIdx * snapPpd - scrollRef.current
         if (focalPx < 26 || focalPx > snapTrackW - 26) {
-          setDaysVisible((prev) => clamp(Math.round(prev * 1.5), MIN_DAYS, totalDays))
+          const prevDv = daysVisibleRef.current
+          const nextDv = clamp(Math.round(prevDv * 1.5), MIN_DAYS, totalDays)
+          if (nextDv !== prevDv) {
+            daysVisibleRef.current = nextDv
+            const nppd   = snapTrackW / nextDv
+            const nStrip = totalDays * nppd + EDGE_PAD // keep in sync with stripW's right-edge headroom
+            setDaysVisible(nextDv)
+            setScrollLive(clamp(
+              focusIdx * nppd - snapTrackW / 2,
+              minScroll,
+              Math.max(0, nStrip - snapTrackW),
+            ))
+          }
         }
       },
       onUp: () => {
@@ -305,22 +343,42 @@ export default function AdjustTimeframe() {
     requestAnimationFrame(() => measureGlider(pid))
   }
 
-  /* Item 5: zoom anchors on the current on-screen viewport center, not the
-     selection lens — keeps the visible frame fixed across the zoom stage. */
+  /* Item 5/3: zoom anchors on the current on-screen viewport center, not the
+     selection lens — keeps the visible frame fixed across the zoom stage.
+     That anchor alone can still push the selection (and its handles) partly
+     outside the track after a zoom step, in either direction. So after
+     computing the center-anchored scroll, fit-check it against .tf-sel's new
+     pixel bounds (+ handle half-width padding) and nudge it back in if the
+     zoom step would otherwise clip either edge. */
   function zoom(dir: number) {
     const next =
       dir < 0
         ? Math.min(Math.round(daysVisible * 1.5), totalDays)
         : Math.max(Math.round(daysVisible / 1.5), MIN_DAYS)
     if (next === daysVisible) return
-    const nppd   = trackW / next
-    const nStrip = totalDays * nppd
+    const nppd      = trackW / next
+    const nStrip    = totalDays * nppd + EDGE_PAD // keep in sync with stripW's right-edge headroom
+    const nMaxScroll = Math.max(0, nStrip - trackW)
     /* viewport-center anchor: index currently centered on-screen, measured
        with the pre-zoom ppd, kept centered after ppd changes */
     const viewCenterIdx = (scroll + trackW / 2) / ppd
+    let targetScroll = clamp(viewCenterIdx * nppd - trackW / 2, minScroll, nMaxScroll)
+
+    /* Fit pass: HANDLE_PAD covers the .tf-handle grip (22px wide, centered on
+       the selection edge) so the handle itself never straddles the viewport
+       boundary, not just the bare .tf-sel edge. */
+    const HANDLE_PAD  = 12
+    const selLeftNew  = startIdx * nppd - HANDLE_PAD
+    const selRightNew = endIdx * nppd + HANDLE_PAD
+    if (selLeftNew < targetScroll) {
+      targetScroll = Math.max(minScroll, selLeftNew)
+    } else if (selRightNew > targetScroll + trackW) {
+      targetScroll = Math.min(nMaxScroll, selRightNew - trackW)
+    }
+
     setAnim(true)
     setDaysVisible(next)
-    setScrollLive(clamp(viewCenterIdx * nppd - trackW / 2, minScroll, Math.max(0, nStrip - trackW)))
+    setScrollLive(targetScroll)
   }
 
   function selectMonth(m: MonthInfo) {

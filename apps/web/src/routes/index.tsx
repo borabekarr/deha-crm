@@ -34,29 +34,6 @@ function ShowcasePage() {
             </p>
           </header>
 
-          {/* Live (app routes, not registry previews) */}
-          <section className="mb-10">
-            <h2 className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Live
-            </h2>
-            <div ref={makeRevealRef()} className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              <Link
-                to="/leads"
-                className="group flex flex-col rounded-lg border border-emerald-200 bg-emerald-50 p-4 transition-colors hover:bg-emerald-100 dark:border-emerald-900 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60"
-              >
-                <span className="flex items-center justify-between text-sm font-semibold text-emerald-900 dark:text-emerald-200">
-                  Leads Table
-                  <svg className="size-3.5 opacity-60 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </span>
-                <span className="mt-1 text-xs text-emerald-800/80 dark:text-emerald-300/70">
-                  Full leads data table at /leads
-                </span>
-              </Link>
-            </div>
-          </section>
-
           {/* Registry components grouped by status → subcategory */}
           {[...grouped.entries()].map(([status, sub]) => (
             <section key={status} className="mb-12">

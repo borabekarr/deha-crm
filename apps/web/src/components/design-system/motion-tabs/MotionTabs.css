@@ -234,33 +234,32 @@ html.dark .mt-divider {
   pointer-events: auto;
   animation:
     mt-enter-travel-right
-    calc(300ms * var(--anim-mult, 1))
+    calc(var(--duration-fast) * var(--anim-mult, 1))
     var(--ease)
-    calc(160ms * var(--anim-mult, 1))
     both;
 }
 .mt-panel[data-panel-state="entering-left"] {
   pointer-events: auto;
   animation:
     mt-enter-travel-left
-    calc(300ms * var(--anim-mult, 1))
+    calc(var(--duration-fast) * var(--anim-mult, 1))
     var(--ease)
-    calc(160ms * var(--anim-mult, 1))
     both;
 }
-/* Exiting panels: slide out immediately, faster than enter.
-   Same travel direction as the entering panel so both move together. */
+/* Exiting panels: slide out immediately, same fast tier as enter so the
+   switch reads as near-instant (was 220ms exit trailing a 160ms-delayed
+   300ms enter -- the delay is gone too, both panels now start together). */
 .mt-panel[data-panel-state="exiting-left"] {
   animation:
     mt-exit-travel-right
-    calc(220ms * var(--anim-mult, 1))
+    calc(var(--duration-fast) * var(--anim-mult, 1))
     var(--ease)
     both;
 }
 .mt-panel[data-panel-state="exiting-right"] {
   animation:
     mt-exit-travel-left
-    calc(220ms * var(--anim-mult, 1))
+    calc(var(--duration-fast) * var(--anim-mult, 1))
     var(--ease)
     both;
 }

@@ -140,14 +140,13 @@ export default function MotionTabs() {
   return (
     <div className="card" style={{ padding: 0, background: '#FAFAFA' }}>
       <div className="frame">
-        <div className="shell">
-          <div
-            className="mt-root"
-            ref={(el: HTMLElement | null) => {
-              if (el) mtRootRef(el, close)
-              else cleanupMtRoot(el)
-            }}
-          >
+        <div
+          className="mt-root"
+          ref={(el: HTMLElement | null) => {
+            if (el) mtRootRef(el, close)
+            else cleanupMtRoot(el)
+          }}
+        >
             {/* Overlay: tap outside to close */}
             <div
               className={`mt-overlay${isOpen ? ' open' : ''}`}
@@ -241,7 +240,6 @@ export default function MotionTabs() {
               </div>{/* /.mt-dock-inner */}
             </div>{/* /.mt-dock */}
           </div>{/* /.mt-root */}
-        </div>{/* /.shell */}
         <div className="hint">
           Tap the <b>active</b> tab to open · tap another to switch · tap outside to close
         </div>

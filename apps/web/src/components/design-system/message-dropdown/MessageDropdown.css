@@ -22,8 +22,10 @@
   width: 100%;
   /* Fix (2): trigger top + badge + hover scale live in absolutely-positioned
      children (top:0), so padding on this element would not create clearance —
-     margin-top pushes the whole stack down inside .md-card instead. */
-  margin-top: 18px;
+     margin-top pushes the whole stack down inside .md-card instead.
+     Step 19: bumped 18px -> 50px (+32px) so the trigger sits lower on the
+     preview page per feedback. */
+  margin-top: 50px;
 }
 
 /* ---- Grey external shell ---- */
@@ -130,7 +132,10 @@
   transition: transform calc(220ms * var(--anim-mult, 1)) var(--ease-out);
 }
 /* hovering the trigger zooms the whole button (circle), not just the icon */
-.md-root:not(.open):has(.md-trigger:hover) .md-trigger-bg { transform: translateX(-50%) scale(1.06); }
+/* Step 19: dialed hover scale down from 1.06 to the calm-family value (1.03,
+   matches the proximity-hover engine's proportionate default) to stop the
+   trigger reading as an outlier next to the rest of the library. */
+.md-root:not(.open):has(.md-trigger:hover) .md-trigger-bg { transform: translateX(-50%) scale(1.03); }
 
 /* Panel background — starts as brand-green disk inside trigger (so gooey merge works),
    then crossfades to white as the shape reaches the open position.
@@ -233,7 +238,8 @@ html.dark .md-panel-bg[data-squircle="on"]::before {
   transition: transform calc(220ms * var(--anim-mult, 1)) var(--ease-out);
   -webkit-tap-highlight-color: transparent;
 }
-.md-root:has(.md-trigger:hover) .md-trigger { transform: translateX(-50%) scale(1.04); }
+/* Step 19: same calm-family dial-down as .md-trigger-bg above (1.04 -> 1.02). */
+.md-root:has(.md-trigger:hover) .md-trigger { transform: translateX(-50%) scale(1.02); }
 .md-trigger:active { transform: translateX(-50%) scale(0.94); }
 .md-trigger:focus-visible {
   outline: 2px solid var(--brand-primary-500);
@@ -295,7 +301,8 @@ dialog.md-panel-content {
   left: 50%; transform: translateX(-50%);
   width: 336px;
   box-sizing: border-box;
-  padding: 18px 20px 14px;
+  /* Step 19: canon spacing tokens (was hardcoded 18px 20px 14px) */
+  padding: var(--pad-card) var(--space-5) var(--space-3);
   z-index: 9000;         /* TOP interactive layer: above Agentation dev toolbar */
   pointer-events: none;
   opacity: 0;
@@ -313,11 +320,11 @@ dialog.md-panel-content {
 .md-list {
   list-style: none; margin: 0; padding: 0;
   display: flex; flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
 }
 .md-item {
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 12px;
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-3);
   margin-inline: -4px; /* Fix (3): extend hover fill wider than list content column */
   border-radius: 12px;
   cursor: pointer;
@@ -382,7 +389,7 @@ dialog.md-panel-content {
 }
 .md-row1 {
   display: flex; align-items: baseline; justify-content: space-between;
-  gap: 8px;
+  gap: var(--space-2);
 }
 .md-sender {
   font-size: 13.5px; font-weight: 700;
@@ -406,11 +413,11 @@ dialog.md-panel-content {
 .md-unread .md-preview { color: #4A4A4A; }
 
 .md-footer {
-  margin-top: 16px;
-  padding-top: 20px; /* Fix (4): symmetric perceived gaps — item-content→divider = 10+16=26px; divider→button-content = 20+6=26px */
+  margin-top: var(--gap-stack);
+  padding-top: var(--space-5); /* Fix (4): symmetric perceived gaps — item-content→divider = 10+16=26px; divider→button-content = 20+6=26px */
   border-top: 1px solid #ECECEC;
   display: flex; justify-content: stretch; align-items: stretch;
-  gap: 8px;
+  gap: var(--space-2);
 }
 /* Fix (6): Restyle footer buttons to canonical .btn-task look —
    pill radius 9999px, font-weight 800, colored fill + white text,
@@ -565,7 +572,10 @@ dialog.md-panel-content {
 }
 
 /* ---- Slow-down toggle via global --anim-mult ---- */
-.md-root { --md-dur: calc(560ms * var(--anim-mult, 1)); }
+/* Step 19: one tier faster open -- 560ms -> var(--duration-expand) (460ms),
+   the closest existing duration token below the prior literal. Easing curves
+   and the --anim-mult multiplier are untouched. */
+.md-root { --md-dur: calc(var(--duration-expand) * var(--anim-mult, 1)); }
 
 /* Reduce motion */
 @media (prefers-reduced-motion: reduce) {

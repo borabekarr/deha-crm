@@ -77,7 +77,7 @@ html.dark .sc-card[data-squircle="on"] {
 /* Step 9 (whole-composite hover/press): scale the stationary outer .sc-stage
    itself (not just .sc-header) so the grey shell + white card + ring all
    move as one unit. :has() reaches up from the pressed inner card. */
-.sc-stage:hover { transform: scale(1.006); }
+.sc-stage:hover { transform: scale(1.007); }
 .sc-stage:has(.sc-card.is-pressed) { transform: scale(.985); transition-duration: calc(90ms * var(--anim-mult, 1)); }
 
 /* ---- header ---- */
@@ -151,7 +151,7 @@ html.dark .sc-ripple { background: rgba(100,116,139,.30); }
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
-.sc-chip:hover { background: var(--gray-50); border-color: var(--gray-300); transform: translateY(-1px); }
+.sc-chip:hover { background: var(--gray-50); border-color: var(--gray-300); }
 html.dark .sc-chip:hover { background: color-mix(in srgb, #fff 8%, var(--card-bg)); border-color: color-mix(in srgb, #fff 18%, transparent); }
 .sc-chip:active { transform: translateY(0) scale(.97); }
 .sc-chip-ico { display: grid; place-items: center; color: var(--fg4); transition: color calc(160ms * var(--anim-mult, 1)); }

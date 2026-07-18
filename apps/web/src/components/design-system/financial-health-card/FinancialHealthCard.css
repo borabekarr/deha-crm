@@ -226,7 +226,7 @@ html.dark .fhc-frame { background: #0A0A0A; background-image: none; }
 /* ─────────────────────────────────────────────────────────────────────
    LOAD ANIMATION (added via .anim-in once mounted)
    ───────────────────────────────────────────────────────────────────── */
-.fhc.anim-in { animation: fhcCardIn calc(620ms * var(--anim-mult, 1)) var(--ease-spring-soft-2) both; }
+.fhc.anim-in { animation: fhcCardIn calc(460ms * var(--anim-mult, 1)) var(--ease-spring-pop) both; }
 @keyframes fhcCardIn { 0%{ opacity:0; transform: scale(.85) translateY(10px); } 100%{ opacity:1; transform: scale(1) translateY(0); } }
 
 .anim-in .fhc-eyebrow { animation: fhcFade calc(460ms * var(--anim-mult, 1)) ease-out calc(120ms * var(--anim-mult, 1)) both; }

@@ -65,7 +65,11 @@
 html.dark .pill-priority { background: #1C1C1C; border-color: #232323; color: #D4D4D4; }
 html.dark .pill-tab { background: #1C1C1C; border-color: #232323; color: #A1A1A1; }
 html.dark .pill-tab.active { background: var(--brand-primary-500); color: var(--brand-on-primary); border-color: transparent; }
-html.dark .pill-tab.dark { background: #0A0A0A; color: #fff; border-color: transparent; }
+html.dark .pill-tab.dark { background: #FFFFFF; color: #111111; border-color: transparent; }
 html.dark .badge.tag { background: #1C1C1C; color: #D4D4D4; border-color: #232323; }
 html.dark .badge.tag .material-icons { color: #A1A1A1; }
 html.dark .pills-label { color: #A1A1A1; }
+html.dark .badge-event[data-tone="black"] { background-color: #FFFFFF !important; color: #111111 !important; text-shadow: none; }
+html.dark .badge-event[data-tone="black"] .material-icons { color: #111111 !important; text-shadow: none; }
+html.dark .icon-badge[data-tone="black"] { background-color: #FFFFFF !important; }
+html.dark .icon-badge[data-tone="black"] .material-icons { color: #111111 !important; text-shadow: none; }

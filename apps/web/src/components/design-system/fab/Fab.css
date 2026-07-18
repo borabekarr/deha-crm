@@ -309,8 +309,8 @@ html.dark .fab-screen.open .fab-menu { border: 1px solid var(--card-border); mar
 /* ── Icon tiles — each item has its own --ic-bg ── */
 .fab-item-ic {
   width: 44px; height: 44px; border-radius: 13px; flex-shrink: 0;
-  display: grid; place-items: center; color: var(--brand-on-primary);
-  background-color: var(--ic-bg, var(--brand-primary-500));
+  display: grid; place-items: center; color: #FFFFFF;
+  background-color: var(--ic-bg, #10B981);
   background-image:
     radial-gradient(ellipse at top right, rgba(255,255,255,0.22) 0%, transparent 55%),
     linear-gradient(rgba(255,255,255,0.12) 1px, transparent 1px),

@@ -63,7 +63,12 @@
   .ms-header {
     display: flex; align-items: center; gap: 8px;
     width: 100%;
-    padding: 10px 14px;
+    /* Step 14: symmetric 14px -> 12px padding. The chevron is pinned flush
+       to this padding via margin-left:auto (see .ms-t-chevron), so left
+       inset (icon-tag) and right inset (chevron) both equal this value
+       regardless of the header's total width; .ms-panel's width-fit change
+       keeps the header/panel concentric under .ms-shell's 10px padding. */
+    padding: 10px 12px;
     background: var(--card-bg, rgba(255,255,255,0.92));
     backdrop-filter: blur(20px);
     border: 1px solid var(--card-border, #D4D4D4);
@@ -114,7 +119,15 @@
   .ms-t-sep     { width: 1px; height: 16px; background: #ECECEC; flex-shrink: 0; }
   .ms-t-label   { font-size: 13px; font-weight: 600; color: #A1A1A1; }
   .ms-t-chevron {
-    font-size: 18px; color: #A1A1A1; flex-shrink: 0; margin-left: -3px;
+    font-size: 18px; color: #A1A1A1; flex-shrink: 0;
+    /* Step 14 real fix: the header's content packed left with no rule pinning
+       the chevron to the right edge, so it landed wherever content ended --
+       ~194px short of the header's right edge on the old fixed-width header.
+       margin-left:auto consumes all remaining flex space and pins the
+       chevron flush against padding-right, so the right inset always equals
+       padding-right, matching the icon-tag's left inset (= padding-left)
+       regardless of the header's total width. */
+    margin-left: auto;
     transition: transform calc(300ms * var(--anim-mult, 1)) var(--ease-out);
   }
 
@@ -170,9 +183,23 @@
       inset 0 1px 0 rgba(255,255,255,1),
       inset 0 -1px 0 rgba(17,17,17,0.04),
       inset 0 0 0 1px rgba(17,17,17,0.04);
-    width: 420px;
+    /* Step 14 real fix: a fixed 420px was arbitrarily wider than the content
+       needed, which is what let the header's chevron land ~194px short of
+       the right edge. width:max-content derives the panel's width from its
+       widest row (icon + text + meta), so the whole shell/header/panel trim
+       together and stay concentric (.ms-shell's 10px padding untouched;
+       .ms-header keeps width:100% and follows whatever this settles to). */
+    width: max-content;
+    max-width: 420px;
     /* Row height: icon 38px + padding 12px top + 12px bottom = 62px */
     --ms-row-h: 62px;
+    /* Step 14: per-component proximity/hover power reduction (option rows
+       feel calmer). Overrides the shared :root default from hover-tokens.css
+       via custom-property inheritance -- the global constant itself
+       (src/styles/hover-tokens.css) is untouched, so no other component is
+       affected. */
+    --hover-scale-max: 1.01;
+    --hover-brightness-max: 1.01;
   }
   /* Squircle conversion (Step 12): inner of the .ms-shell/.ms-panel pair.
      box-shadow here is inset-only (unaffected by clip-path); border stays a

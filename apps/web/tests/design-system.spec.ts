@@ -23,7 +23,7 @@
  *
  * Do NOT run --update-snapshots locally for new slugs.
  * Do NOT commit locally generated PNGs as baselines.
- * This is the same procedure used for leads-table (wave-1 reference).
+ * This is the same procedure used historically for wave-1 slugs.
  */
 
 import { test, expect } from '@playwright/test'
@@ -70,10 +70,8 @@ const SLUGS = [
   'controls',
   'fab',
   'message-dropdown',
-  'delete-button',
   'inline-edit',
   // Data
-  'leads-table',
   'adjust-timeframe',
   'currency-converter',
   'dynamic-calendar',
@@ -108,12 +106,10 @@ const SLUGS = [
   'smooth-drawer',
   'prize-sheet',
   // New coverage (slug-coverage-batch, 2026-07-14)
-  'toast',
   'pinned-list',
   'workflow-nodes',
   'workflow-template-cards',
   'animated-list',
-  'datetime-wheel-picker',
 ] as const
 
 // ---------------------------------------------------------------------------

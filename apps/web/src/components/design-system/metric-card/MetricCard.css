@@ -5,11 +5,18 @@ body { background: #FAFAFA; }
 html.dark .frame.mc-frame { background-image: none; }
 .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
+/* Shell parity: default tile shells (`.shell.zoom`, shared class from _base.css)
+   must match the popover's outer radius (36, `.exp-outer`). Scoped to `.mc-frame`
+   (unique to this component) so the shared class is not touched globally. */
+.mc-frame .shell.zoom { border-radius: 36px; }
+
 .metric {
   background: rgba(255,255,255,0.7); backdrop-filter: blur(40px);
   border: 1px solid #D4D4D4;
   box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 -2px 0 rgba(17,17,17,0.14), inset 0 0 0 1px rgba(17,17,17,0.07);
-  border-radius: 20px; padding: 18px;
+  /* concentricRadius(36 outer shell, 10 shell padding) = 26 — keeps the tile's
+     inner corner concentric with the shell.zoom outer radius above. */
+  border-radius: 26px; padding: 18px;
   display: flex; justify-content: space-between; align-items: center;
   font-family: 'Montserrat';
   cursor: pointer;

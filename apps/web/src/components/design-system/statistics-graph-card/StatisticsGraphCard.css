@@ -132,10 +132,10 @@ html.dark .sg-inner::before {
 }
 html.dark .sg-inner {
   background: var(--card-bg, #111111);
-  /* border-color inherits the uniform var(--card-border) ring; the old
-     border-top-color: rgba(255,255,255,.22) highlight was the asymmetric-ring
-     anti-pattern, removed for a uniform rim. */
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
+  /* Canon (corrected): inner surfaces carry no external line in dark mode --
+     the single ring lives on .sg-card's own dark ::before above. */
+  border: none;
+  box-shadow: none;
 }
 
 /* Squircle conversion (Step 15): inner of the .sg-card/.sg-inner concentric

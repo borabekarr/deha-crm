@@ -2,7 +2,6 @@ import { useState } from 'react'
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './Buttons.css'
-import DeleteButton from '@/components/design-system/delete-button/DeleteButton'
 import { useProximityGroup } from '@/lib/hooks'
 import { btnRootRef, cleanupBtnRoot, runApplyBtn } from './buttons-hook'
 
@@ -53,9 +52,8 @@ export default function Buttons() {
   const row1Ref = useProximityGroup<HTMLDivElement>()
   const row2Ref = useProximityGroup<HTMLDivElement>()
   const row3Ref = useProximityGroup<HTMLDivElement>()
-  const row4Ref = useProximityGroup<HTMLDivElement>()
   const row5Ref = useProximityGroup<HTMLDivElement>()
-const row6Ref = useProximityGroup<HTMLDivElement>()
+  const row6Ref = useProximityGroup<HTMLDivElement>()
 
   return (
     <div className="btn-page-root card card--flat">
@@ -96,13 +94,6 @@ const row6Ref = useProximityGroup<HTMLDivElement>()
           <span className="material-icons" style={{ fontSize: 16 }}>cancel</span>
           Reject
         </button>
-      </div>
-
-      <span className="btn-label" style={{ marginTop: 20 }}>Delete (morphing three-state)</span>
-      <div className="btn-row" ref={row4Ref}>
-        <span className="btn-prox-wrap" data-proximity>
-          <DeleteButton onDelete={() => undefined} />
-        </span>
       </div>
 
       <span className="btn-label" style={{ marginTop: 20 }}>Task footer (--fbtn color token)</span>

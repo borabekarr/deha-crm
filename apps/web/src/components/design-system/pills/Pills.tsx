@@ -11,7 +11,7 @@ const EVENT_BADGES = [
   { color: '#F97316', icon: 'call', label: 'Call' },
   { color: 'var(--brand-primary-500)', icon: 'task_alt', label: 'Done' },
   { color: '#EF4444', icon: 'warning', label: 'Urgent' },
-  { color: '#111111', icon: 'lock', label: 'Private' },
+  { color: '#111111', icon: 'lock', label: 'Private', tone: 'black' },
   { color: '#EAB308', icon: 'star', label: 'Featured' },
 ]
 
@@ -21,7 +21,7 @@ const ICON_BADGES = [
   { color: '#F97316', icon: 'schedule' },
   { color: '#3B82F6', icon: 'insights' },
   { color: '#EAB308', icon: 'lock' },
-  { color: '#111111', icon: 'dark_mode' },
+  { color: '#111111', icon: 'dark_mode', tone: 'black' },
 ]
 
 export default function Pills() {
@@ -57,8 +57,8 @@ export default function Pills() {
 
       <span className="pills-label" style={{ marginTop: 16 }}>Event badges</span>
       <div className="pills-row">
-        {EVENT_BADGES.map(({ color, icon, label }) => (
-          <span key={label} className="badge-event" style={{ backgroundColor: color }}>
+        {EVENT_BADGES.map(({ color, icon, label, tone }) => (
+          <span key={label} className="badge-event" data-tone={tone} style={{ backgroundColor: color }}>
             <span className="material-icons">{icon}</span> {label}
           </span>
         ))}
@@ -66,8 +66,8 @@ export default function Pills() {
 
       <span className="pills-label" style={{ marginTop: 16 }}>Icon badges</span>
       <div className="pills-row">
-        {ICON_BADGES.map(({ color, icon }) => (
-          <div key={icon} className="icon-badge icon-badge--lg" style={{ '--icon-c': color } as React.CSSProperties}>
+        {ICON_BADGES.map(({ color, icon, tone }) => (
+          <div key={icon} className="icon-badge icon-badge--lg" data-tone={tone} style={{ '--icon-c': color } as React.CSSProperties}>
             <span className="material-icons">{icon}</span>
           </div>
         ))}

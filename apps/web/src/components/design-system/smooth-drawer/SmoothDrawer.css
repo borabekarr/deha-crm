@@ -464,10 +464,23 @@
 /* Primary CTA — extends .btn-green; local overrides only for size/shimmer */
 .sd-buy {
   position: relative;
+  z-index: 0;
   height: 46px;
   width: 100%;
   border-radius: 14px;
   overflow: hidden;
+}
+
+/* Stacking fix: .sd-actions lays .sd-buy/.sd-later out with a gap, and the
+   proximity engine's native `scale` (hover-tokens.css) plus each button's own
+   drop-shadow/box-shadow paint past the button's own box on hover/press. With
+   no stacking promotion the later DOM sibling (.sd-later) always paints over
+   .sd-buy's hover edge, and .sd-buy's own shimmer/box-shadow reads as clipped
+   underneath it. Bump the interacting button's stacking context above its
+   neighbor so the full hover/press silhouette is visible. */
+.sd-buy:hover,
+.sd-buy:active {
+  z-index: 2;
 }
 
 /* Proximity: .btn-green's global :hover sets `transform: scale(1.03)`
@@ -545,6 +558,8 @@
 
 /* Secondary button */
 .sd-later {
+  position: relative;
+  z-index: 0;
   height: 46px;
   width: 100%;
   border: none;
@@ -564,7 +579,34 @@
     transform calc(140ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
 }
 
-.sd-later:active { transform: scale(0.98); }
+.sd-later:hover,
+.sd-later:active {
+  /* Same stacking fix as .sd-buy above: put the hovered/pressed neighbor on
+     top so its full silhouette (native proximity `scale` + shadow) is never
+     read as underlapping .sd-buy. */
+  z-index: 2;
+}
+
+.sd-later:active {
+  transform: scale(0.98);
+}
+
+/* Snap press, ease release (asymmetric timing — see emil-design-eng review
+   checklist: "Symmetric timing on press/hold interaction" should slow the
+   deliberate phase and snap the response). Root cause of the live-probe FAIL:
+   `.sd-later[data-proximity]` below redeclares the full `transition` shorthand
+   (adding the native `scale` channel for the hover engine) at EQUAL
+   specificity (0,2,0) to `.sd-later:active`, and — because every `.sd-later`
+   always carries `data-proximity` — it wins the cascade on `transition-
+   duration` for the `transform` channel regardless of source order, holding
+   press to the 140ms eased duration. A probe reading getComputedStyle right
+   after :active engages then samples mid-transition-startup and still sees
+   the identity matrix for 100ms+ before any visible movement. `[data-
+   proximity]:active` raises specificity to (0,3,0) so the snap wins
+   deterministically; release still eases via the base 140ms transition. */
+.sd-later[data-proximity]:active {
+  transition-duration: 0ms;
+}
 
 /* Proximity: the brightness(0.97) hover filter was removed (conflicted with
    hover-tokens.css's own filter on the same property); scale channel added

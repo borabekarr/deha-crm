@@ -216,11 +216,6 @@ html.dark .btn-text { color: var(--brand-primary-400); }
   transform: translate(-50%, -50%); pointer-events: none;
 }
 
-/* On-primary text override for the locked DeleteButton's "done" state
-   (source: delete-button/DeleteButton.css .db[data-state='done'], locked). */
-.btn-page-root .btn-prox-wrap .db[data-state='done'] { color: var(--brand-on-primary); }
-html.dark .btn-page-root .btn-prox-wrap .db[data-state='done'] { color: var(--brand-on-primary); }
-
 /* Active state scoped to .btn-apply; hover is raised via .btn-page-root below */
 .btn-apply:active { transform: scale(0.985); }
 
@@ -406,10 +401,7 @@ html.dark .btn-apply.is-done .btn-apply-check-ic { color: var(--brand-primary-50
 html.dark .btn-discuss { color: #F5F5F5; border-color: rgba(255,255,255,0.18); }
 html.dark .btn-discuss:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.35); }
 
-/* Delete button — mirrors three-state .db (delete-button source).
-   Rendered via <DeleteButton> in the specimen; these rules back the
-   standalone .btn-delete fallback for contexts that can't import the
-   component. */
+/* Standalone .btn-delete fallback for contexts needing a plain delete CTA. */
 .btn-delete {
   display: inline-flex; align-items: center; justify-content: center;
   height: 40px; padding: 0 20px; gap: var(--gap-icon-text, 8px);

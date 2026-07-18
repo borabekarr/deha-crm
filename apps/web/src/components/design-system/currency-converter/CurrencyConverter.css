@@ -268,10 +268,11 @@ html.dark .cc-panel:not([data-squircle="on"]) {
   width: 51px;
   height: 51px;
   border-radius: 50%;
-  background: var(--cc-shell);
+  background: var(--shell-bg, #D4DCE8);
 }
 
 html.dark .cc-swap-shell {
+  background: #0A0A0A;
   border: 1px solid #232323;
 }
 

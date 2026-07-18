@@ -130,6 +130,21 @@ html.dark .dp-outer[data-squircle="on"] {
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 
+/* Contain the trigger's hover shadow: locked .btn-green:hover's canon shadow
+   is tall enough to slide under the panel below. Reduced canon-family
+   variant (smaller blur/spread/offset) + raised stacking context so it
+   never reaches the neighbor. #dp-open-btn's ID specificity beats
+   .btn-green:hover without !important. */
+#dp-open-btn:hover {
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 3px 8px -4px color-mix(in srgb, var(--brand-primary-500) 40%, transparent), inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: box-shadow var(--duration-fast) var(--ease-out);
+}
+html.dark #dp-open-btn:hover {
+  box-shadow: 0 3px 8px -4px rgba(52,211,153,0.45), inset 0 1px 0 rgba(255,255,255,0.22);
+}
+
 /* ── Panel enter/exit ─────────────────────────────────────────────────────── */
 /* Enter: translateY(-16px) scale(.95) → 0/1 — panel slides in from top downward */
 /* Exit: same shape in reverse, 260ms ease-out (no bounce -- animation:none cancels spring) */
