@@ -6,18 +6,39 @@
   user-select: none; -webkit-user-select: none;
 }
 .oc-panel-wrap {
+  position: relative;
   width: 100%; height: 462px;
   padding: 10px;
   background: var(--card-bg, #FFFFFF);
   border: 1px solid var(--card-border, #D4D4D4);
-  border-radius: var(--card-radius, 20px);
+  border-radius: 36px;
   box-shadow: 0 16px 56px rgba(17,17,17,.14), 0 3px 10px rgba(17,17,17,.07);
-  transition:height calc(460ms * var(--anim-mult, 1)) var(--ease-out),
+  transition:height calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-out),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 html.dark .oc-panel-wrap { box-shadow: 0 16px 56px rgba(0,0,0,.4), 0 3px 10px rgba(0,0,0,.3); }
 .oc-panel-wrap.is-compact { height: 92px; }
+/* Outer shell -- squircle 36, elevation migrates to filter:drop-shadow
+   (clip-path clips box-shadow); dark-only ring, no light-mode line
+   (mirrors task-card .tp-outer / cards .concentric-demo-outer). */
+.oc-panel-wrap[data-squircle="on"] {
+  --corner-radius: 36px;
+  box-shadow: none;
+  filter: drop-shadow(0 16px 56px rgba(17,17,17,.14)) drop-shadow(0 3px 10px rgba(17,17,17,.07));
+}
+html.dark .oc-panel-wrap[data-squircle="on"] {
+  box-shadow: none;
+  filter: drop-shadow(0 16px 56px rgba(0,0,0,.4)) drop-shadow(0 3px 10px rgba(0,0,0,.3));
+}
+html.dark .oc-panel-wrap[data-squircle="on"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--card-border);
+  clip-path: var(--squircle-border-path);
+}
 
 /* ===================== Card shell ===================== */
 .oc-card {
@@ -28,13 +49,13 @@ html.dark .oc-panel-wrap { box-shadow: 0 16px 56px rgba(0,0,0,.4), 0 3px 10px rg
   border-radius: var(--card-radius);
   box-shadow: inset 0 0 0 1px rgba(17,17,17,0.04);
   overflow: hidden;
-  animation: ocCardIn calc(420ms * var(--anim-mult, 1)) var(--ease-out);
+  animation: ocCardIn calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out);
 }
 html.dark .oc-card { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04); }
 /* Canon (corrected): inner line-less in both themes -- the unscoped rule
    above wins on specificity over the shared [data-squircle="on"] reset. */
 html.dark .oc-card[data-squircle="on"] { box-shadow: none; }
-.oc-card[data-squircle="on"] { --corner-radius: var(--card-radius); }
+.oc-card[data-squircle="on"] { --corner-radius: 28px; }
 @keyframes ocCardIn { from { transform: translateY(8px) scale(.99); } to { transform: none; } }
 
 .oc-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; }
@@ -60,7 +81,7 @@ html.dark .oc-card[data-squircle="on"] { box-shadow: none; }
     inset 0 1px 0 rgba(255,255,255,.55),
     inset 0 -2px 0 rgba(17,17,17,.20),
     inset 0 0 0 1px rgba(17,17,17,.12);
-  transition:transform calc(300ms * var(--anim-mult, 1)) var(--ease-spring-soft-2), opacity calc(300ms * var(--anim-mult, 1)) ease,
+  transition:transform calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-spring-soft-2), opacity calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
@@ -80,12 +101,15 @@ html.dark .oc-card[data-squircle="on"] { box-shadow: none; }
   border-radius: var(--card-radius);
   box-shadow: inset 0 0 0 1px rgba(17,17,17,0.04);
   cursor: pointer; text-align: left; font-family: inherit;
-  transition:background calc(180ms * var(--anim-mult, 1)) ease, transform calc(120ms * var(--anim-mult, 1)) var(--ease-spring-firm),
+  transition:background calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-spring-firm),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
-  animation: ocCardIn calc(420ms * var(--anim-mult, 1)) var(--ease-out);
+  animation: ocCardIn calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out);
 }
 html.dark .oc-prompt { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04); }
+/* Inner surface -- squircle 28, canon line-less in both modes (matches .oc-card). */
+.oc-prompt[data-squircle="on"] { --corner-radius: 28px; }
+html.dark .oc-prompt[data-squircle="on"] { box-shadow: none; }
 .oc-prompt:hover { background: var(--gray-50); }
 html.dark .oc-prompt:hover { background: color-mix(in srgb, #fff 4%, var(--bg-card-solid)); }
 .oc-prompt:active { transform: scale(.992); }
@@ -121,12 +145,12 @@ html.dark .oc-prompt:focus-visible { box-shadow: inset 0 1px 0 rgba(255,255,255,
     inset 0 1px 0 rgba(255,255,255,.55),
     inset 0 -2px 0 rgba(17,17,17,.22),
     inset 0 0 0 1px rgba(17,17,17,.14);
-  animation: ocBadgePop .5s var(--ease-spring) both;
+  animation: ocBadgePop calc(500ms * var(--anim-mult, 1)) var(--ease-spring) both;
 }
 .oc-icon-btn {
   flex: none; width: 34px; height: 34px; border: none; background: transparent;
   border-radius: 50%; display: grid; place-items: center; color: var(--gray-400);
-  cursor: pointer; transition:background calc(150ms * var(--anim-mult, 1)), color calc(150ms * var(--anim-mult, 1)),
+  cursor: pointer; transition:background calc(var(--duration-150) * var(--anim-mult, 1)), color calc(var(--duration-150) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
@@ -162,16 +186,23 @@ html.dark .oc-prompt:focus-visible { box-shadow: inset 0 1px 0 rgba(255,255,255,
 .oc-row-ripple {
   position: absolute; width: 16px; height: 16px; border-radius: 50%; z-index: 0;
   transform: translate(-50%, -50%) scale(0); pointer-events: none;
-  animation: ocRowRipple calc(620ms * var(--anim-mult, 1)) ease-out forwards;
+  animation: ocRowRipple calc(620ms * var(--anim-mult, 1)) var(--ease-out-native) forwards;
 }
 @keyframes ocRowRipple { to { transform: translate(-50%, -50%) scale(22); opacity: 0; } }
-.oc-row:hover:not(:disabled) { background: var(--gray-50); transform: translateX(2px); }
+/* Checklist option row hover -- matches inner-card hover (scale <= 1.01),
+   no translateX drift. */
+.oc-row:hover:not(:disabled) { background: var(--gray-50); transform: scale(1.008); }
 .oc-row:active:not(:disabled) { transform: scale(.985); }
 .oc-row:disabled { cursor: default; }
+/* Nested inner surface -- squircle 28, same tier as .oc-card/.oc-prompt.
+   Default shared recipe keeps it line-less; no ring stacks over the outer
+   shell's ring. */
+.oc-row[data-squircle="on"] { --corner-radius: 28px; }
+html.dark .oc-row[data-squircle="on"] { box-shadow: none; }
 html.dark .oc-row { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04); }
 html.dark .oc-row:hover:not(:disabled) { background: color-mix(in srgb, #fff 8%, var(--bg-card-solid)); }
 html.dark .oc-row.is-done { background: color-mix(in srgb, var(--oc-accent) 17%, var(--bg-card-solid)); }
-.oc-row-title { flex: 1; min-width: 0; font-size: 16px; font-weight: var(--weight-semibold); color: var(--fg1); transition:color calc(300ms * var(--anim-mult, 1)),
+.oc-row-title { flex: 1; min-width: 0; font-size: 16px; font-weight: var(--weight-semibold); color: var(--fg1); transition:color calc(var(--duration-slower) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear; }
 .oc-row-end { flex: none; display: grid; place-items: center; width: 24px; height: 24px; }
@@ -181,7 +212,7 @@ html.dark .oc-row.is-done { background: color-mix(in srgb, var(--oc-accent) 17%,
   width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; color: #fff;
   background: var(--oc-accent);
   box-shadow: 0 2px 6px -2px color-mix(in srgb, var(--oc-accent) 60%, transparent);
-  animation: ocBadgePop calc(420ms * var(--anim-mult, 1)) var(--ease-spring) both;
+  animation: ocBadgePop calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-spring) both;
 }
 
 /* ===================== CTA (hero accent card style) ===================== */
@@ -202,7 +233,7 @@ html.dark .oc-row.is-done { background: color-mix(in srgb, var(--oc-accent) 17%,
     inset 0 1px 0 rgba(255,255,255,.5),
     inset 0 -2px 0 rgba(0,0,0,.22),
     inset 0 0 0 1px rgba(255,255,255,.15);
-  transition:filter calc(180ms * var(--anim-mult, 1)) ease, transform calc(120ms * var(--anim-mult, 1)) var(--ease-spring-firm), box-shadow calc(200ms * var(--anim-mult, 1)),
+  transition:filter calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-spring-firm), box-shadow calc(var(--duration-200) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
@@ -221,7 +252,7 @@ html.dark .oc-row.is-done { background: color-mix(in srgb, var(--oc-accent) 17%,
 .oc-ripple {
   position: absolute; width: 14px; height: 14px; border-radius: 50%;
   background: rgba(255,255,255,.55); transform: translate(-50%, -50%) scale(0);
-  pointer-events: none; animation: ocRipple calc(600ms * var(--anim-mult, 1)) ease-out forwards;
+  pointer-events: none; animation: ocRipple calc(600ms * var(--anim-mult, 1)) var(--ease-out-native) forwards;
 }
 @keyframes ocRipple { to { transform: translate(-50%, -50%) scale(26); opacity: 0; } }
 
@@ -250,10 +281,10 @@ html.dark .oc-row.is-done { background: color-mix(in srgb, var(--oc-accent) 17%,
     0 14px 30px -10px color-mix(in srgb, var(--oc-accent) 70%, transparent);
   animation: ocBadgePop calc(600ms * var(--anim-mult, 1)) var(--ease-spring) calc(80ms * var(--anim-mult, 1)) both;
 }
-.oc-success-title { margin: 4px 0 0; font-size: 24px; font-weight: var(--weight-black); letter-spacing: -.025em; color: var(--fg1); animation: ocFadeUp calc(500ms * var(--anim-mult, 1)) ease calc(200ms * var(--anim-mult, 1)) both; }
-.oc-success-desc { margin: 0; font-size: 15px; line-height: 1.5; font-weight: var(--weight-medium); color: var(--fg3); max-width: 250px; text-wrap: pretty; animation: ocFadeUp calc(500ms * var(--anim-mult, 1)) ease calc(300ms * var(--anim-mult, 1)) both; }
-.oc-success-foot { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; animation: ocFadeUp calc(500ms * var(--anim-mult, 1)) ease calc(400ms * var(--anim-mult, 1)) both; }
-.oc-replay { display: inline-flex; align-items: center; gap: 5px; border: none; background: transparent; color: var(--fg4); font-family: inherit; font-size: 13px; font-weight: var(--weight-semibold); cursor: pointer; padding: 5px 10px; border-radius: 8px; transition:color calc(150ms * var(--anim-mult, 1)), background calc(150ms * var(--anim-mult, 1)),
+.oc-success-title { margin: 4px 0 0; font-size: 24px; font-weight: var(--weight-black); letter-spacing: -.025em; color: var(--fg1); animation: ocFadeUp calc(500ms * var(--anim-mult, 1)) var(--ease-fade) calc(var(--duration-200) * var(--anim-mult, 1)) both; }
+.oc-success-desc { margin: 0; font-size: 15px; line-height: 1.5; font-weight: var(--weight-medium); color: var(--fg3); max-width: 250px; text-wrap: pretty; animation: ocFadeUp calc(500ms * var(--anim-mult, 1)) var(--ease-fade) calc(var(--duration-slower) * var(--anim-mult, 1)) both; }
+.oc-success-foot { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; animation: ocFadeUp calc(500ms * var(--anim-mult, 1)) var(--ease-fade) calc(400ms * var(--anim-mult, 1)) both; }
+.oc-replay { display: inline-flex; align-items: center; gap: 5px; border: none; background: transparent; color: var(--fg4); font-family: inherit; font-size: 13px; font-weight: var(--weight-semibold); cursor: pointer; padding: 5px 10px; border-radius: 8px; transition:color calc(var(--duration-150) * var(--anim-mult, 1)), background calc(var(--duration-150) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear; }
 .oc-replay:hover { color: var(--fg2); background: var(--gray-100); }
@@ -275,7 +306,7 @@ html.dark .oc-row.is-done { background: color-mix(in srgb, var(--oc-accent) 17%,
 }
 
 /* ===================== Spinner / check draws ===================== */
-.oc-spin { animation: ocSpin calc(800ms * var(--anim-mult, 1)) linear infinite; }
+.oc-spin { animation: ocSpin calc(800ms * var(--anim-mult, 1)) var(--ease-linear) infinite; }
 @keyframes ocSpin { to { transform: rotate(360deg); } }
 .oc-check-path { stroke-dasharray: 30; stroke-dashoffset: 30; }
 .oc-check-path.play { animation: ocDraw calc(450ms * var(--anim-mult, 1)) var(--ease-draw) calc(40ms * var(--anim-mult, 1)) forwards; }
@@ -294,7 +325,7 @@ html.dark .oc-row.is-done { background: color-mix(in srgb, var(--oc-accent) 17%,
   position: absolute; top: 3px; bottom: 3px; width: calc((100% - 6px) / 3);
   background: var(--bg-card-solid); border-radius: 10px;
   box-shadow: 0 1px 2px rgba(17,17,17,.14), 0 2px 6px -2px rgba(17,17,17,.18);
-  transition:left calc(260ms * var(--anim-mult, 1)) var(--ease-spring-firm),
+  transition:left calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-spring-firm),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
@@ -302,7 +333,7 @@ html.dark .oc-row.is-done { background: color-mix(in srgb, var(--oc-accent) 17%,
   position: relative; z-index: 1; appearance: none; border: none; background: transparent;
   font-family: inherit; font-size: 14px; font-weight: var(--weight-semibold);
   color: var(--fg3); padding: 9px 22px; border-radius: 10px; cursor: pointer;
-  transition:color calc(200ms * var(--anim-mult, 1)) ease,
+  transition:color calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }

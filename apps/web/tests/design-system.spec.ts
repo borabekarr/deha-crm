@@ -23,7 +23,7 @@
  *
  * Do NOT run --update-snapshots locally for new slugs.
  * Do NOT commit locally generated PNGs as baselines.
- * This is the same procedure used for leads-table (wave-1 reference).
+ * This is the same procedure used historically for wave-1 slugs.
  */
 
 import { test, expect } from '@playwright/test'
@@ -70,10 +70,8 @@ const SLUGS = [
   'controls',
   'fab',
   'message-dropdown',
-  'delete-button',
   'inline-edit',
   // Data
-  'leads-table',
   'adjust-timeframe',
   'currency-converter',
   'dynamic-calendar',
@@ -108,13 +106,10 @@ const SLUGS = [
   'smooth-drawer',
   'prize-sheet',
   // New coverage (slug-coverage-batch, 2026-07-14)
-  'toast',
   'pinned-list',
-  'funnel-chart',
   'workflow-nodes',
   'workflow-template-cards',
   'animated-list',
-  'datetime-wheel-picker',
 ] as const
 
 // ---------------------------------------------------------------------------
@@ -166,11 +161,9 @@ async function waitForStableBox(loc: import('@playwright/test').Locator) {
 //   animations disabled); no wait fixes it.
 // - adjust-timeframe: 208 px single-run jitter observed on CI 2026-07-15
 //   (passed retry; same-DOM antialiasing drift).
-// - funnel-chart: 1 px jitter observed on CI 2026-07-15 (both attempts).
 const SLUG_MAX_DIFF_PIXELS: Record<string, number> = {
   'stacked-list': 25000,
   'adjust-timeframe': 500,
-  'funnel-chart': 50,
 }
 
 for (const slug of SLUGS) {

@@ -213,7 +213,7 @@ html.dark .sem.hot     { background: #2a1506 !important; color: #FDBA74 !importa
  * -------------------------------------------------------------------------- */
 :root {
   --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
-  --ease-out:    cubic-bezier(.22, 1,    .36, 1);
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
 }
 
 /* Fade + rise — enter/exit pair */
@@ -316,4 +316,35 @@ html [data-squircle="on"] {
 [data-squircle="on"]::after {
   content: none;
 }
+
+/* ============================================================
+   CANON HOVER — single shared hover recipe for card/tile surfaces
+   Source of truth: .concentric-demo / .concentric-demo:hover in
+   cards/Cards.css (the inner-card reference pattern). Card and tile
+   surfaces converging on the library-wide hover should apply this
+   class (or match its values 1:1) instead of redeclaring their own.
+   Scope: hover + active transform/shadow ONLY -- does not touch
+   layout, color, or entrance. JS-spring/proximity-driven surfaces
+   (use-proximity-group, hover-tokens.css [data-proximity]) already
+   own their transform via inline style and must NOT adopt this
+   class -- it would double up the animation.
+   ============================================================ */
+:root {
+  --canon-hover-scale:  1.007;
+  --canon-active-scale: 1.003;
+  --canon-shadow-rest:  drop-shadow(0 10px 15px rgba(17,17,17,0.12)) drop-shadow(0 2px 4px rgba(17,17,17,0.06));
+  --canon-shadow-hover: drop-shadow(0 16px 25px rgba(17,17,17,0.13)) drop-shadow(0 3px 4.5px rgba(17,17,17,0.07));
+}
+.canon-hover {
+  transition:
+    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
+    filter    calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
+  filter: var(--canon-shadow-rest);
+}
+/* Literal values repeated here (not just via custom property) so the
+   canon-hover recipe is grep-able and diff-able at a glance: hover
+   resolves to scale(1.007), active to scale(1.003) -- must match
+   --canon-hover-scale / --canon-active-scale above. */
+.canon-hover:hover  { transform: scale(1.007); filter: var(--canon-shadow-hover); }
+.canon-hover:active { transform: scale(1.003); }
 

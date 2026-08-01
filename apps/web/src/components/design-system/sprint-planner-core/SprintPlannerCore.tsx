@@ -214,7 +214,7 @@ const PRIORITY_PILL_ACTIVE_STYLE: React.CSSProperties = {
   padding: '5px 12px', borderRadius: 9999,
   fontFamily: 'var(--font-display, Montserrat)', fontSize: 11.5, fontWeight: 700,
   letterSpacing: '0.02em',
-  cursor: 'pointer', transition: 'all calc(150ms * var(--anim-mult, 1))',
+  cursor: 'pointer', transition: 'all calc(var(--duration-150) * var(--anim-mult, 1))',
 }
 
 const PRIORITY_PILL_IDLE_STYLE: React.CSSProperties = {
@@ -389,7 +389,7 @@ function DayCell({ idx, dayLabel, date, isToday, tickets, onDragStart, onDragEnd
             background: 'transparent', border: '1px solid transparent',
             color: '#D4D4D4', cursor: 'pointer',
             borderRadius: 6, display: 'grid', placeItems: 'center',
-            transition: 'color 150ms, border-color 150ms, background 150ms, scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear, filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear',
+            transition: 'color calc(var(--duration-150) * var(--anim-mult, 1)), border-color calc(var(--duration-150) * var(--anim-mult, 1)), background calc(var(--duration-150) * var(--anim-mult, 1)), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear)',
           }}
           onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--brand-primary-500)'; e.currentTarget.style.background = 'var(--sp-addhover-bg)' }}
           onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--sp-faint)'; e.currentTarget.style.background = 'transparent' }}
@@ -625,7 +625,7 @@ function CommandPalette({ open, onClose, onRun, tickets }: {
           overflow: 'hidden',
           position: 'absolute', left: '50%', top: '50%',
           transform: 'translate(-50%, -50%)',
-          animation: open ? `paletteInCentered calc(220ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1)` : 'none',
+          animation: open ? `paletteInCentered calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out)` : 'none',
           margin: 0, padding: 0,
         }}
       >
@@ -977,7 +977,7 @@ function AddTicketModal({ open, day, onClose, onSubmit }: {
         style={{
           width: 'min(480px, 92vw)',
           padding: 22,
-          animation: open ? 'paletteIn calc(220ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1)' : 'none',
+          animation: open ? 'paletteIn calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out)' : 'none',
           margin: 0,
           position: 'absolute', left: '50%', top: '50%',
           transform: 'translate(-50%, -50%)',

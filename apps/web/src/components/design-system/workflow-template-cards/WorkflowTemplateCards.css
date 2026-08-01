@@ -62,6 +62,10 @@ html.dark .wtc-outer[data-squircle="on"]::before {
   border-radius: var(--card-radius);
   overflow: hidden;
   box-shadow: inset 0 1px 0 rgba(255,255,255,1);
+  /* .wtc-outer stretches to the tallest card in its grid row; without this
+     the shorter-copy card in a row leaves whitespace below itself inside
+     the outer's padding instead of matching the row's bottom rhythm. */
+  height: 100%;
 }
 .wtc-card[data-squircle="on"] {
   --corner-radius: var(--card-radius);
@@ -144,7 +148,7 @@ html.dark .wtc-outer[data-squircle="on"]::before {
     0 2px 8px rgba(17,17,17,0.24),
     inset 0 1px 0 rgba(255,255,255,0.08),
     inset 0 -1px 0 rgba(0,0,0,0.18);
-  transition: opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-fast) * var(--anim-mult, 1)), scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear, filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+  transition: opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-fast) * var(--anim-mult, 1)), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .wtc-outer:hover .wtc-use {
   opacity: 1;
@@ -228,8 +232,10 @@ html.dark .wtc-outer {
 /* Inner card */
 html.dark .wtc-card { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
 
-/* Preview area */
-html.dark .wtc-preview { background: #0A0A0A; }
+/* Preview area — icon section reads as a darker tinted band vs the card
+   body, mirroring the light-mode #F5F5F5-vs-white relationship. Token-driven
+   so the tint tracks --card-bg instead of a hardcoded hex. */
+html.dark .wtc-preview { background: color-mix(in srgb, var(--card-bg) 40%, black); }
 
 /* Connector line */
 html.dark .wtc-conn { border-top-color: #4A4A4A; }
@@ -256,7 +262,7 @@ html.dark .wtc-badge-pro { background-color: #4A4A4A; }
 .wtc-expand-wrap {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows calc(280ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: grid-template-rows calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out);
 }
 .wtc-outer.wtc-expanded .wtc-expand-wrap {
   grid-template-rows: 1fr;
@@ -269,8 +275,8 @@ html.dark .wtc-badge-pro { background-color: #4A4A4A; }
   opacity: 0;
   transform: translateY(-6px);
   transition:
-    opacity calc(220ms * var(--anim-mult, 1)) var(--ease-out) calc(60ms * var(--anim-mult, 1)),
-    transform calc(220ms * var(--anim-mult, 1)) var(--ease-out) calc(60ms * var(--anim-mult, 1));
+    opacity calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out) calc(60ms * var(--anim-mult, 1)),
+    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out) calc(60ms * var(--anim-mult, 1));
 }
 .wtc-outer.wtc-expanded .wtc-expand-body {
   opacity: 1;

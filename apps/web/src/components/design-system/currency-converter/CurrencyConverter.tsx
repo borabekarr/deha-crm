@@ -715,7 +715,7 @@ export default function CurrencyConverter() {
                   style={{
                     display: 'block',
                     transform: `rotate(${rotation}deg)`,
-                    transition: 'transform var(--dur) cubic-bezier(.5,0,.3,1)',
+                    transition: 'transform var(--dur) var(--ease-swap)',
                   }}
                 >
                   <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">

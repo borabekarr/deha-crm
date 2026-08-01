@@ -18,7 +18,7 @@
     linear-gradient(to bottom, rgba(255,255,255,0.07) 1px, transparent 1px);
   background-size: 14px 14px;
   cursor: pointer;
-  transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear, filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+  transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 /* richgold uses dark on-primary text; the dark text-shadow would muddy it */
 :root[data-primary="richgold"] .btn-primary { text-shadow: none; }
@@ -43,7 +43,7 @@
     inset 0 1px 0 rgba(255,255,255,0.7),
     inset 0 -2px 0 rgba(17,17,17,0.14);
   cursor: pointer;
-  transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear, filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+  transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .btn-inverse:hover {
   transform: translateY(-1px);
@@ -69,7 +69,7 @@
     inset 0 -2px 0 rgba(17,17,17,0.12);
   backdrop-filter: blur(20px);
   cursor: pointer;
-  transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-base) * var(--anim-mult, 1)), scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear, filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+  transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-base) * var(--anim-mult, 1)), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .btn-glass:hover {
   transform: translateY(-1px);
@@ -93,8 +93,8 @@
     opacity calc(140ms * var(--anim-mult, 1)),
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
     box-shadow calc(var(--duration-base) * var(--anim-mult, 1)),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .btn-text:hover { opacity: 0.8; transform: translateY(-1px); box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--brand-primary-500) 40%, transparent); }
 .btn-text:active { opacity: 0.55; transform: translateY(0); }
@@ -143,7 +143,7 @@ html.dark .btn-text { color: var(--brand-primary-400); }
      timing -- see the .is-loading / .is-done overrides further down.
      Order: width, padding, background-color, transform, box-shadow, scale. */
   transition-property: width, padding, background-color, transform, box-shadow, scale;
-  transition-timing-function: var(--ease-spring), var(--ease-spring), var(--ease-spring), var(--ease-out), var(--ease-out), linear;
+  transition-timing-function: var(--ease-spring), var(--ease-spring), var(--ease-spring), var(--ease-out), var(--ease-out), var(--ease-linear);
   /* Resting / phase-3 duration set: width+padding extend back over
      ~460ms (deliberately slower than the ~440ms compact so returning to
      rest doesn't feel abrupt); background-color reverts over ~360ms. */
@@ -151,8 +151,8 @@ html.dark .btn-text { color: var(--brand-primary-400); }
     calc(var(--duration-expand) * var(--anim-mult, 1)),
     calc(var(--duration-expand) * var(--anim-mult, 1)),
     calc(var(--duration-sweep) * var(--anim-mult, 1)),
-    calc(240ms * var(--anim-mult, 1)),
-    calc(240ms * var(--anim-mult, 1)),
+    calc(var(--duration-fast) * var(--anim-mult, 1)),
+    calc(var(--duration-fast) * var(--anim-mult, 1)),
     calc(var(--duration-instant) * var(--anim-mult, 1));
 }
 
@@ -179,7 +179,7 @@ html.dark .btn-text { color: var(--brand-primary-400); }
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
-  animation: btn-rainbow-scroll calc(3s * var(--anim-mult, 1)) linear infinite;
+  animation: btn-rainbow-scroll calc(3s * var(--anim-mult, 1)) var(--ease-linear) infinite;
   pointer-events: none;
 }
 
@@ -202,7 +202,7 @@ html.dark .btn-text { color: var(--brand-primary-400); }
   background-size: 200% 100%;
   filter: blur(10px);
   opacity: 0.7;
-  animation: btn-rainbow-scroll calc(3s * var(--anim-mult, 1)) linear infinite;
+  animation: btn-rainbow-scroll calc(3s * var(--anim-mult, 1)) var(--ease-linear) infinite;
   pointer-events: none;
 }
 
@@ -215,11 +215,6 @@ html.dark .btn-text { color: var(--brand-primary-400); }
   width: max(100%, 40px); height: max(100%, 40px);
   transform: translate(-50%, -50%); pointer-events: none;
 }
-
-/* On-primary text override for the locked DeleteButton's "done" state
-   (source: delete-button/DeleteButton.css .db[data-state='done'], locked). */
-.btn-page-root .btn-prox-wrap .db[data-state='done'] { color: var(--brand-on-primary); }
-html.dark .btn-page-root .btn-prox-wrap .db[data-state='done'] { color: var(--brand-on-primary); }
 
 /* Active state scoped to .btn-apply; hover is raised via .btn-page-root below */
 .btn-apply:active { transform: scale(0.985); }
@@ -330,7 +325,7 @@ html.dark .btn-page-root .btn-prox-wrap .db[data-state='done'] { color: var(--br
   stroke-linecap: round;
   fill: none;
   stroke-dasharray: 23 46;
-  animation: btn-spin-rotate calc(800ms * var(--anim-mult, 1)) linear infinite;
+  animation: btn-spin-rotate calc(800ms * var(--anim-mult, 1)) var(--ease-linear) infinite;
   transform-origin: 16px 16px;
 }
 
@@ -393,8 +388,8 @@ html.dark .btn-apply.is-done .btn-apply-check-ic { color: var(--brand-primary-50
     background-color calc(var(--duration-base) * var(--anim-mult, 1)),
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
     box-shadow calc(var(--duration-base) * var(--anim-mult, 1)),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .btn-discuss:hover {
   background: var(--r-btn-hover, rgba(17,17,17,0.06));
@@ -406,10 +401,7 @@ html.dark .btn-apply.is-done .btn-apply-check-ic { color: var(--brand-primary-50
 html.dark .btn-discuss { color: #F5F5F5; border-color: rgba(255,255,255,0.18); }
 html.dark .btn-discuss:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.35); }
 
-/* Delete button — mirrors three-state .db (delete-button source).
-   Rendered via <DeleteButton> in the specimen; these rules back the
-   standalone .btn-delete fallback for contexts that can't import the
-   component. */
+/* Standalone .btn-delete fallback for contexts needing a plain delete CTA. */
 .btn-delete {
   display: inline-flex; align-items: center; justify-content: center;
   height: 40px; padding: 0 20px; gap: var(--gap-icon-text, 8px);
@@ -461,8 +453,8 @@ html.dark .btn-delete {
     background calc(150ms * var(--anim-mult, 1)),
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
     box-shadow calc(var(--duration-base) * var(--anim-mult, 1)),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .btn-task:hover {
   filter: brightness(1.08);
@@ -516,7 +508,7 @@ html.dark .btn-delete {
     filter calc(200ms * var(--anim-mult, 1)),
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring),
     box-shadow calc(200ms * var(--anim-mult, 1)),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .btn-cta:hover {
   filter: brightness(1.07);
@@ -577,8 +569,8 @@ html.dark .btn-page-root .btn-apply:hover {
 .btn-page-root .btn-red[data-proximity] {
   transition:
     background-color calc(180ms * var(--anim-mult, 1)),
-    transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
+    transform calc(160ms * var(--anim-mult, 1)) var(--ease-spring),
     box-shadow calc(200ms * var(--anim-mult, 1)),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }

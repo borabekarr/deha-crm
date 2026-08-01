@@ -72,25 +72,18 @@ html.dark .te-outer[data-squircle="on"]::before {
   align-items: center;
   padding: 16px 16px 14px;
 }
-.te-search {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #F5F5F5;
-  border: 1px solid #ECECEC;
-  border-radius: 9999px;
-  padding: 9px 14px;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-  cursor: text;
+.te-header { display: flex; align-items: center; gap: 8px; flex: 1; }
+.te-header-icon { font-size: 18px; color: var(--brand-primary-500); }
+.te-header-text {
+  font-family: var(--font-display);  /* resolves to Montserrat */
+  font-weight: 900;
+  font-size: 15px;
+  color: #111111;
+  letter-spacing: -0.01em;
 }
-.te-search .material-icons { font-size: 16px; color: #A1A1A1; flex-shrink: 0; }
-.te-search input {
-  border: none; background: transparent; outline: none;
-  font-family: 'Montserrat'; font-size: 13px; font-weight: 500;
-  color: #6B6B6B; width: 100%;
-}
-.te-search input::placeholder { color: #A1A1A1; }
+
+/* Save button relocated to the card footer (bottom-right) */
+.te-footer { display: flex; justify-content: flex-end; padding: 4px 16px 16px; }
 
 .te-save {
   background: #111111;
@@ -119,100 +112,6 @@ html.dark .te-outer[data-squircle="on"]::before {
 /* Canonical hairline token so this internal divider stays visible in dark
    mode too (was a hardcoded light-only #ECECEC, invisible against #1C1C1C). */
 .te-divider { height: 1px; background: var(--card-border, #ECECEC); }
-
-.te-s-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-.te-s-title { font-size: 13px; font-weight: 800; color: #111111; letter-spacing: -0.01em; }
-.te-s-head .material-icons { font-size: 16px; color: #D4D4D4; }
-
-/* ── Window mode cards ── */
-.te-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px; }
-
-.te-mode {
-  background: #FAFAFA;
-  border: 1.5px solid #ECECEC;
-  border-radius: 16px;
-  padding: 10px 10px 10px;
-  cursor: pointer;
-  transition: border-color calc(180ms * var(--anim-mult, 1)), box-shadow calc(180ms * var(--anim-mult, 1)), background calc(180ms * var(--anim-mult, 1)), transform calc(130ms * var(--anim-mult, 1)) var(--ease-out),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
-  user-select: none;
-}
-.te-mode:active { transform: scale(0.95); }
-.te-mode.sel {
-  background: #fff;
-  border-color: var(--brand-primary-500);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-primary-500) 12%, transparent);
-}
-.te-mode:not(.sel):hover { border-color: #D4D4D4; background: #fff; }
-
-/* Thumbnail wireframe */
-.te-thumb {
-  background: #E9EEF4;
-  border-radius: 10px;
-  height: 62px;
-  padding: 8px 8px;
-  margin-bottom: 9px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  overflow: hidden;
-  transition: background calc(180ms * var(--anim-mult, 1));
-}
-.te-mode.sel .te-thumb { background: color-mix(in srgb, var(--brand-primary-500) 9%, transparent); }
-
-/* Default: 2-column card-like layout */
-.tw-row { display: flex; gap: 5px; align-items: center; }
-.tw-block {
-  width: 10px; height: 10px;
-  border-radius: 3px;
-  background: #D4D4D4;
-  flex-shrink: 0;
-  transition: background calc(180ms * var(--anim-mult, 1));
-}
-.te-mode.sel .tw-block { background: var(--brand-glow); }
-.tw-lines { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-.tw-line {
-  height: 4px; border-radius: 2px;
-  background: #D4D4D4;
-  transition: background calc(180ms * var(--anim-mult, 1));
-}
-.te-mode.sel .tw-line { background: color-mix(in srgb, var(--brand-primary-500) 35%, transparent); }
-
-/* Compact: dense stacked lines, no icons */
-.te-thumb-compact { gap: 4px; justify-content: center; }
-.te-thumb-compact .tw-line { height: 3px; }
-
-.te-mode-foot {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.te-mode-name { font-size: 12px; font-weight: 700; color: #111111; }
-
-.te-checkmark {
-  width: 22px; height: 22px;
-  border-radius: 7px;
-  border: 1.5px solid #D4D4D4;
-  background: #fff;
-  display: grid; place-items: center;
-  transition: all calc(180ms * var(--anim-mult, 1));
-  flex-shrink: 0;
-}
-.te-checkmark.active {
-  background: var(--brand-primary-500);
-  border-color: var(--brand-primary-500);
-  background-image: linear-gradient(rgba(255,255,255,0.14) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(255,255,255,0.14) 1px, transparent 1px);
-  background-size: 5px 5px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -2px 0 rgba(17,17,17,0.15);
-}
-.te-checkmark .material-icons { font-size: 14px; color: #fff; font-weight: 700; -webkit-text-stroke: 0.6px #fff; }
 
 /* ── Rows ── */
 .te-row {
@@ -300,17 +199,66 @@ input[type=range].te-range::-moz-range-thumb {
 .te-bright-row { display: flex; align-items: center; gap: 8px; }
 .te-bright-pct { font-size: 12px; font-weight: 800; color: #232323; min-width: 32px; text-align: right; letter-spacing: -0.01em; }
 
-/* ── Hotkey ── */
-.te-hotkey {
-  background: #fff;
+/* ── Live preview (demo-only: theme/text-size/brightness/motion controls above
+   scope to this subtree via CSS custom-property overrides, never document root) ── */
+.te-preview {
+  margin-top: 14px;
+  background: #FAFAFA;
   border: 1.5px solid #ECECEC;
-  border-radius: 12px;
-  padding: 8px 16px;
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: filter calc(180ms * var(--anim-mult, 1));
+}
+.te-preview-badge {
+  align-self: flex-start;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--brand-primary-500);
+}
+.te-preview-text { color: #6B6B6B; font-weight: 500; line-height: 1.4; }
+.te-preview-btn {
+  align-self: flex-start;
+  background: var(--brand-primary-500);
+  color: #fff;
+  border: none;
+  border-radius: 9999px;
+  padding: 7px 14px;
+  font-family: var(--font-display);  /* resolves to Montserrat */
   font-size: 12px;
-  font-weight: 700;
-  color: #232323;
-  box-shadow: inset 0 -2px 0 rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
-  letter-spacing: 0.01em;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) var(--ease-out),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+}
+.te-preview-btn:hover { background: color-mix(in srgb, var(--brand-primary-500) 85%, #000); }
+.te-preview-btn:active { transform: scale(0.96); }
+
+/* Demo-scoped palette remaps — mirror colors_and_type.css's :root[data-primary]
+   rules but scoped to the preview subtree only (no :root selector, no localStorage) */
+.te-preview[data-primary="sunflower"] {
+  --brand-primary-500: var(--sunflower-4);
+  --brand-glow: color-mix(in oklch, var(--sunflower-4), transparent 50%);
+}
+.te-preview[data-primary="bloodymary"] {
+  --brand-primary-500: var(--bloodymary-3);
+  --brand-glow: color-mix(in oklch, var(--bloodymary-3), transparent 50%);
+}
+.te-preview[data-primary="petalglow"] {
+  --brand-primary-500: var(--petalglow-4);
+  --brand-glow: color-mix(in oklch, var(--petalglow-4), transparent 50%);
+}
+.te-preview[data-primary="sexyblue"] {
+  --brand-primary-500: var(--sexyblue-3);
+  --brand-glow: color-mix(in oklch, var(--sexyblue-3), transparent 50%);
+}
+.te-preview[data-primary="richgold"] {
+  --brand-primary-500: var(--richgold-3);
+  --brand-glow: color-mix(in oklch, var(--richgold-3), transparent 50%);
 }
 
 /* ── Toggle ── */

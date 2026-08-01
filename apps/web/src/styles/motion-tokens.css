@@ -77,6 +77,7 @@
   --ease-spring-medium: cubic-bezier(.16, 1.5,  .3, 1); /* PrizeSheet.css claim-btn/success enter + check pop */
   --ease-spring-wide:   cubic-bezier(.16, 1.3,  .3, 1); /* PrizeSheet.css .ps-modal-shell enter transform */
   --ease-linear:        linear;                          /* bare `linear` keyword, token-wrapped for the motion gate */
+  --ease-out-native:    ease-out;                         /* native `ease-out` keyword (cubic-bezier(0,0,.58,1)) -- token-wrapped for the gate; NOT the same curve as --ease-out. Sweep: DynamicCalendar dcPulse, StatisticsGraphCard sg-flash, OnboardingCompletion ocRipple/ocRowRipple */
   --ease-bounce-glow:   cubic-bezier(.34, 1.18, .64, 1); /* AiMessageBox.css glow/bar/label enter animations */
   --ease-draw:          cubic-bezier(.65, 0,    .35, 1); /* AiMessageBox.css .mb-done-check path draw-in */
   --ease-spring-open:   cubic-bezier(.55, 1.35, .35, 1); /* ModelSelector.css .ms-shell.open expand */
@@ -96,6 +97,22 @@
      existing token byte-matched these curves, so they are added here. */
   --ease-toast-pop:   cubic-bezier(.34, 1.16, .64, 1); /* SprintPlannerCore.css toastMorphIn */
   --ease-spring-snap: cubic-bezier(.34, 1.56, .64, 1); /* SprintPlannerCore.css proximity transform transition */
+
+  /* Step-1 motion-token migration (plan: ds-motion-parity) -- extracted
+     verbatim from a pre-existing literal curve in MotionTabs.css .mt-ic
+     transform transition; no existing token byte-matched it (closest was
+     --ease-spring-snap, whose last control point is .64 vs .5 here) --
+     softer-settle sibling of --ease-spring-snap. */
+  --ease-spring-snap-soft: cubic-bezier(.34, 1.56, .5, 1); /* MotionTabs.css .mt-ic transform transition */
+
+  /* Step-2 motion-gate-pilot-fix migration (plan: motion-gate-pilot-fix) --
+     mints the un-mintable curves left raw in MorphSurface.css plus the
+     promoted CurrencyConverter local token, so downstream steps can route
+     through tokens instead of literals; no existing token byte-matched
+     these curves. */
+  --ease-morph:      cubic-bezier(0.34, 1.18, 0.5, 1); /* MorphSurface.css .ms2-wrap --ms2-morph-ease (dynamic-island morph) */
+  --ease-check-pop:  cubic-bezier(0.32, 1.5, 0.5, 1);  /* MorphSurface.css .ms2-check transform enter */
+  --ease-swap:       cubic-bezier(.5, 0, .3, 1);        /* promoted from CurrencyConverter --cc-ease-swap (swap-icon rotate) */
 
   /* Step-11 retry motion-token migration (plan: reveal-shell-debts) --
      extracted verbatim from a pre-existing literal curve in
@@ -118,4 +135,40 @@
   --duration-compact: 440ms; /* ApplyButton width/padding compact (phase-1, default -> loading) */
   --duration-expand: 460ms;  /* ApplyButton width/padding extend (phase-3, done -> default) */
   --duration-sweep: 360ms;   /* ApplyButton background-color sweep (phase-2/3, loading -> done -> default) */
+
+  /* Step-1 motion-token migration (plan: motion-sweep-top10) -- new duration
+     tiers minted at exact library-wide recurring values (>=20 uses), per
+     Bora's verbatim-mint decision (rounding to the nearest existing tier
+     would change rendered timing). Component steps in this plan reference
+     these; no existing token was modified. */
+  --duration-140: 140ms;   /* library sweep: 53 uses, no prior tier between fast(120) and base(160) */
+  --duration-150: 150ms;   /* library sweep: 81 uses */
+  --duration-180: 180ms;   /* library sweep: 68 uses */
+  --duration-200: 200ms;   /* library sweep: 123 uses -- single most common value in the library */
+  --duration-240: 240ms;   /* library sweep: 32 uses */
+  --duration-260: 260ms;   /* library sweep: 28 uses */
+  --duration-280: 280ms;   /* library sweep: 20 uses */
+  --duration-320: 320ms;   /* library sweep: 35 uses */
+  --duration-420: 420ms;   /* library sweep: 28 uses */
+
+  /* Step-1 easing migration (plan: motion-sweep-top10) -- extracted verbatim
+     from curves in the top-10 component files with no byte-matching token
+     in this file or _shared-feedback.css. */
+  --ease-todo-fade-exit: cubic-bezier(.22,1,.38,1);   /* TodoList.css:274 .task.anim transform exit */
+  --ease-todo-badge-pop: cubic-bezier(.34,1.7,.5,1);  /* TodoList.css:335 .t-badge.pop badge-pop keyframe */
+  --ease-todo-settle:    cubic-bezier(.4,0,.06,1);    /* TodoList.css:276 .task.settling transform */
+  --ease-week-slide:     cubic-bezier(.4,0,.6,1);     /* TodoList.tsx:199 week nav transform transition */
+  --ease-dc-cell-pop:    cubic-bezier(.34,1.38,.4,1); /* DynamicCalendar.css:811 dcCellPop keyframe */
+  --ease-dc-spring:      cubic-bezier(.5, 1.5, .35, 1); /* DynamicCalendar.css:8 --dc-spring var */
+
+  /* Step-1 motion-token migration (plan: ds-motion-parity) -- extracted
+     verbatim from a pre-existing literal curve in DynamicIslandReader.css
+     (.di-pill width/height/border-radius morph transition); no existing
+     token byte-matched this curve, so it is added here. */
+  --ease-island-morph: cubic-bezier(.34, 1.32, .5, 1); /* DynamicIslandReader.css:21-23 .di-pill morph transition */
+
+  /* Step-1 motion-token migration (plan: ds-motion-parity) -- native
+     `ease-in` keyword, token-wrapped to mirror --ease-out-native above;
+     NOT the same curve as --ease-in-out or any --ease-* cubic-bezier here. */
+  --ease-in-native: ease-in; /* native `ease-in` keyword (cubic-bezier(.42,0,1,1)) */
 }

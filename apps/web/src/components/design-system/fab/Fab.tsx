@@ -120,7 +120,7 @@ export default function Fab() {
                   {/* New lead — emerald */}
                   <div
                     className="fab-item" data-proximity
-                    style={{ '--ic-bg': 'var(--brand-primary-500)' } as React.CSSProperties}
+                    style={{ '--ic-bg': '#10B981' } as React.CSSProperties}
                     onClick={(e) => onPickItem(e)}
                   >
                     <div className="fab-item-ic">

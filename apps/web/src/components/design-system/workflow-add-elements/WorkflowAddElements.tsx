@@ -14,14 +14,15 @@
  *  - "✦ AI Recommendations" button → no-op placeholder (matches source).
  *
  * NO raw useEffect in this file. All DOM measurements are done in callback refs
- * or event handlers. The shared segRef from controls-hook.ts wires the seg pill.
+ * or event handlers. The seg pill is driven by usePillSpring (motion-spring.ts).
  */
 
 import { useState, useCallback, useRef } from 'react'
 import './WorkflowAddElements.css'
 import { iconClass } from '../../../lib/iconClass'
 import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
-import { segRef, cleanupSeg, clampAEPosition, clampNodesPosition } from './workflow-add-elements-hook'
+import { usePillSpring } from '../../../lib/motion-spring'
+import { clampAEPosition, clampNodesPosition } from './workflow-add-elements-hook'
 
 // ---------------------------------------------------------------------------
 // Data (verbatim from source)
@@ -103,6 +104,13 @@ interface MenuState {
   searchPanelMounted: boolean
   /** Item 1: search results panel is playing exit animation (wae-search-leaving). */
   searchPanelLeaving: boolean
+  /** Fix 5: a query changed while the results panel was already open — briefly
+   *  blur+shimmer the stale result set instead of snapping to the new layout. */
+  searchPending: boolean
+  /** Fix 3: outgoing tab, kept mounted (as a ghost layer) through its exit animation. */
+  listLeavingTab: Tab | null
+  /** Fix 3: direction of the last tab switch, +1 (general→integrations) or -1. */
+  listDir: number
 }
 
 // Category ids whose brand color is near-black and becomes unreadable in dark mode.
@@ -129,6 +137,9 @@ const INITIAL: MenuState = {
   search: '',
   searchPanelMounted: false,
   searchPanelLeaving: false,
+  searchPending: false,
+  listLeavingTab: null,
+  listDir: 0,
 }
 
 // Coords-only reset — preserves last aeLeft/aeTop so the panel
@@ -142,8 +153,15 @@ function closedState(s: MenuState): MenuState {
     search: '',
     searchPanelMounted: false,
     searchPanelLeaving: false,
+    searchPending: false,
+    listLeavingTab: null,
+    listDir: 0,
   }
 }
+
+// Direction-aware tab order for the seg switch (Fix 3): index difference sign
+// gives the travel direction, mirroring motion-tabs' index-based `dir`.
+const TAB_ORDER: Tab[] = ['general', 'integrations']
 
 // ---------------------------------------------------------------------------
 // Component
@@ -162,11 +180,33 @@ export default function WorkflowAddElements() {
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Timer for search-panel exit animation before unmounting (Item 1)
   const searchLeaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Fix 5: timer that closes the brief pending/shimmer window on each keystroke.
+  const searchPendingTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Fix 3: timer that unmounts the outgoing tab's ghost list after its exit plays.
+  const listLeaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Proximity group: only the AI Recommendations footer button carries
-  // data-proximity now (Step 18); category/node rows use plain background
-  // hover instead. Shell ref stays wired (no-op for rows).
+  // Proximity group registered on the shell: every descendant carrying
+  // data-proximity (category rows, node rows, the footer button) gets the
+  // proximity ramp from a single shared listener.
   const proximityRef = useProximityGroup<HTMLDivElement>()
+
+  // Fix 4: seg pill geometry, measured off the wrapper (buttons are `flex: 1`
+  // so both are always equal width — no per-label width table needed) and
+  // driven by usePillSpring instead of the shared CSS-transition segRef.
+  const [pillGeo, setPillGeo] = useState({ x: 0, w: 0 })
+  const segWrapRef = useRef<HTMLDivElement | null>(null)
+  const measurePill = useCallback((tab: Tab) => {
+    const wrap = segWrapRef.current
+    if (!wrap) return
+    const inner = wrap.clientWidth - 6 // 3px padding each side (.seg rule)
+    const w = inner / 2
+    setPillGeo({ x: 3 + TAB_ORDER.indexOf(tab) * w, w })
+  }, [])
+  const segSpringCallbackRef = useCallback((el: HTMLDivElement | null) => {
+    segWrapRef.current = el
+    if (el) measurePill(el.dataset.activeTab as Tab)
+  }, [measurePill])
+  const segPillRef = usePillSpring<HTMLSpanElement>(pillGeo.x, pillGeo.w)
 
   // ── Derived data ──────────────────────────────────────────────────────────
   const allCats = state.activeTab === 'general' ? GENERAL_CATS : INTEGRATION_CATS
@@ -208,6 +248,8 @@ export default function WorkflowAddElements() {
   function closeAll() {
     if (hideTimer.current) clearTimeout(hideTimer.current)
     if (searchLeaveTimer.current) clearTimeout(searchLeaveTimer.current)
+    if (searchPendingTimer.current) clearTimeout(searchPendingTimer.current)
+    if (listLeaveTimer.current) clearTimeout(listLeaveTimer.current)
     // Use closedState (not INITIAL) to preserve aeLeft/aeTop so the fade-out
     // stays in place instead of jumping to the viewport left edge.
     setState((s) => closedState(s))
@@ -216,20 +258,37 @@ export default function WorkflowAddElements() {
   /** Item 1+6: clear search input and play reverse morph before unmounting panel. */
   const handleSearchClear = useCallback(() => {
     if (searchLeaveTimer.current) clearTimeout(searchLeaveTimer.current)
+    if (searchPendingTimer.current) clearTimeout(searchPendingTimer.current)
     // Trigger exit animation
-    setState((s) => ({ ...s, search: '', searchPanelLeaving: true, hoveredId: null, nodesVisible: false }))
+    setState((s) => ({ ...s, search: '', searchPanelLeaving: true, hoveredId: null, nodesVisible: false, searchPending: false }))
     // Unmount panel after exit animation completes (220ms * anim-mult; use 300ms as safe upper bound)
     searchLeaveTimer.current = setTimeout(() => {
       setState((s) => ({ ...s, searchPanelMounted: false, searchPanelLeaving: false }))
     }, 300)
   }, [])
 
-  /** Item 1: search input change — mount panel and trigger enter morph when text is typed. */
+  /** Item 1: search input change — mount panel and trigger enter morph when text is typed.
+   *  Fix 5: a query change while the panel is ALREADY open never unmounts the results —
+   *  it instead gets a brief pending window (blur + shimmer over the current layout),
+   *  which masks the result-set/height swap per the "blur masks imperfect transitions"
+   *  pattern instead of animating height/width per keystroke. */
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value
     if (val) {
       if (searchLeaveTimer.current) clearTimeout(searchLeaveTimer.current)
-      setState((s) => ({ ...s, search: val, hoveredId: null, nodesVisible: false, searchPanelMounted: true, searchPanelLeaving: false }))
+      if (searchPendingTimer.current) clearTimeout(searchPendingTimer.current)
+      setState((s) => ({
+        ...s,
+        search: val,
+        hoveredId: null,
+        nodesVisible: false,
+        searchPanelMounted: true,
+        searchPanelLeaving: false,
+        searchPending: s.searchPanelMounted, // skip pending on the very first keystroke (entering morph covers it)
+      }))
+      searchPendingTimer.current = setTimeout(() => {
+        setState((s) => ({ ...s, searchPending: false }))
+      }, 200)
     } else {
       handleSearchClear()
     }
@@ -301,14 +360,13 @@ export default function WorkflowAddElements() {
     if (e.key === 'Escape') closeAll()
   }, [])
 
-  /** Hover over a category row → show the nodes flyout. */
+  /** Hover over a category row → show the nodes flyout, anchored to the AE panel. */
   function handleCatMouseEnter(cat: Category) {
     if (hideTimer.current) clearTimeout(hideTimer.current)
 
     const aeOuter = aeOuterRef.current
     const nodesOuter = nodesOuterRef.current
-    const itemEl = itemEls.current.get(cat.id)
-    if (!aeOuter || !nodesOuter || !itemEl) {
+    if (!aeOuter || !nodesOuter) {
       // Nodes panel not in DOM yet; show with placeholder position and let rAF fix it
       setState((s) => ({
         ...s,
@@ -321,7 +379,7 @@ export default function WorkflowAddElements() {
     }
 
     // Compute position synchronously — all elements are in the DOM
-    const pos = clampNodesPosition(aeOuter, itemEl, nodesOuter, shellRef.current)
+    const pos = clampNodesPosition(aeOuter, nodesOuter, shellRef.current)
     setState((s) => ({
       ...s,
       nodesVisible: true,
@@ -343,88 +401,110 @@ export default function WorkflowAddElements() {
     if (hideTimer.current) clearTimeout(hideTimer.current)
   }
 
-  /** After nodes panel mounts/updates with a new hoveredId, clamp its position. */
+  /** After nodes panel mounts/updates, keep it pinned immediately right of and
+   *  top-aligned with the AE panel — hover- and search-driven content share the
+   *  same anchor now (Fix 1: a per-row anchor drifted the flyout down the page). */
   // This is a callback ref on the nodes outer element that fires on each render.
   const nodesOuterCallbackRef = useCallback((el: HTMLDivElement | null) => {
     nodesOuterRef.current = el
     if (!el) return
     const aeOuter = aeOuterRef.current
     if (!aeOuter) return
-
-    // Hover-driven positioning: align flyout to the hovered category row.
-    // Search-driven positioning: align to the top of the AE panel (no hovered row).
     const shell = shellRef.current
-    const hovId = state.hoveredId
-    if (hovId) {
-      const itemEl = itemEls.current.get(hovId)
-      if (!itemEl) return
-      const pos = clampNodesPosition(aeOuter, itemEl, el, shell)
-      // Apply directly to DOM to avoid a second setState render cycle
-      el.style.left = `${pos.left}px`
-      el.style.top = `${pos.top}px`
-    } else if (state.search) {
-      // No hovered row — Search Results always sit to the RIGHT of the AE card,
-      // top-aligned. All coords are shell-relative (position: absolute inside shell).
-      // Item 1 fix: ALWAYS write the best-known final position to el.style FIRST,
-      // before any setState/early-return. The old code returned early when the AE
-      // card needed to slide left, leaving the flyout at its stale inline-style
-      // coords (state.nodesLeft/Top, often 0 or a prior hover row) for a full
-      // render cycle — that is the "results appear at the bottom, then snap" jump
-      // on the very first typed letter. Now the flyout is correctly placed on the
-      // same frame; the AE shift is recomputed against the new aeLeft in a rAF.
-      const placeRight = () => {
-        const aeRect = aeOuter.getBoundingClientRect()
-        const shellRect = shell ? shell.getBoundingClientRect() : { left: 0, top: 0 }
-        const shInner = shell ? shell.offsetHeight : window.innerHeight
-        const nh = el.offsetHeight
-        let nx = (aeRect.right - shellRect.left) + 8
-        if (nx < 10) nx = 10
-        let ny = aeRect.top - shellRect.top
-        if (ny + nh > shInner - 10) ny = shInner - nh - 10
-        if (ny < 10) ny = 10
-        el.style.left = `${nx}px`
-        el.style.top = `${ny}px`
-      }
 
-      // Place the flyout at its final position on this frame (no jump).
-      placeRight()
-
-      // If the right-placed flyout overflows the shell, slide the AE card left so
-      // the flyout still fits to its right — never flip the flyout to the left.
+    // ALWAYS write the best-known final position to el.style FIRST, before any
+    // setState/early-return, so the flyout is correctly placed on this very
+    // frame instead of showing a stale position for a full render cycle.
+    const placeRight = () => {
       const aeRect = aeOuter.getBoundingClientRect()
       const shellRect = shell ? shell.getBoundingClientRect() : { left: 0, top: 0 }
-      const sw = shell ? shell.offsetWidth : window.innerWidth
-      const nw = el.offsetWidth
-      const aeLeftShell = aeRect.left - shellRect.left
-      const nx0 = (aeRect.right - shellRect.left) + 8
-      const overflow = nx0 + nw - (sw - 10)
-      if (overflow > 0.5) {
-        const newAeLeft = Math.max(10, aeLeftShell - overflow)
-        if (Math.abs(newAeLeft - aeLeftShell) > 0.5) {
-          setState((s) => ({ ...s, aeLeft: newAeLeft }))
-          // Re-place the flyout against the shifted AE card next frame so it
-          // tracks the new right edge — the flyout never visibly jumps because
-          // placeRight() above already set a valid position for this frame.
-          requestAnimationFrame(placeRight)
-        }
+      const shInner = shell ? shell.offsetHeight : window.innerHeight
+      const nh = el.offsetHeight
+      let nx = (aeRect.right - shellRect.left) + 8
+      if (nx < 10) nx = 10
+      let ny = aeRect.top - shellRect.top
+      if (ny + nh > shInner - 10) ny = shInner - nh - 10
+      if (ny < 10) ny = 10
+      el.style.left = `${nx}px`
+      el.style.top = `${ny}px`
+    }
+
+    // Place the flyout at its final position on this frame (no jump).
+    placeRight()
+
+    // If the right-placed flyout overflows the shell, slide the AE card left so
+    // the flyout still fits to its right — never flip the flyout to the left.
+    const aeRect = aeOuter.getBoundingClientRect()
+    const shellRect = shell ? shell.getBoundingClientRect() : { left: 0, top: 0 }
+    const sw = shell ? shell.offsetWidth : window.innerWidth
+    const nw = el.offsetWidth
+    const aeLeftShell = aeRect.left - shellRect.left
+    const nx0 = (aeRect.right - shellRect.left) + 8
+    const overflow = nx0 + nw - (sw - 10)
+    if (overflow > 0.5) {
+      const newAeLeft = Math.max(10, aeLeftShell - overflow)
+      if (Math.abs(newAeLeft - aeLeftShell) > 0.5) {
+        setState((s) => ({ ...s, aeLeft: newAeLeft }))
+        // Re-place the flyout against the shifted AE card next frame so it
+        // tracks the new right edge — the flyout never visibly jumps because
+        // placeRight() above already set a valid position for this frame.
+        requestAnimationFrame(placeRight)
       }
     }
-  }, [state.hoveredId, state.search])
-
-  /** Callback ref for the segmented control — wires the sliding pill. */
-  const segCallbackRef = useCallback((el: HTMLDivElement | null) => {
-    if (el) {
-      segRef(el)
-    } else {
-      cleanupSeg(el)
-    }
   }, [])
 
-  /** After tab or search change we need to re-position the seg pill. */
-  const segRerenderRef = useCallback((el: HTMLDivElement | null) => {
-    if (!el) return
-    segRef(el)
-  }, [])
+  /** Fix 3: switch the General/Integrations pill — direction-aware, sequenced
+   *  exit/enter for the category list, mirroring motion-tabs' index-derived
+   *  `dir` (see MotionTabs.tsx onTab). The outgoing tab stays mounted as a
+   *  ghost layer until its exit animation completes. */
+  function switchTab(tab: Tab) {
+    if (tab === state.activeTab) return
+    if (listLeaveTimer.current) clearTimeout(listLeaveTimer.current)
+    const dir = Math.sign(TAB_ORDER.indexOf(tab) - TAB_ORDER.indexOf(state.activeTab))
+    setState((s) => ({
+      ...s,
+      activeTab: tab,
+      listLeavingTab: s.activeTab,
+      listDir: dir,
+      hoveredId: null,
+      nodesVisible: false,
+    }))
+    measurePill(tab)
+    // Unmount the ghost layer once its exit animation (180ms * anim-mult) settles.
+    listLeaveTimer.current = setTimeout(() => {
+      setState((s) => ({ ...s, listLeavingTab: null }))
+    }, 260)
+  }
+
+  /** Fix 2: category rows. `interactive=false` renders a non-interactive ghost
+   *  copy for the outgoing tab's exit layer (Fix 3) — no proximity/hover/refs. */
+  function renderCatItems(cats: Category[], interactive: boolean) {
+    return cats.map((cat) => (
+      <div
+        key={cat.id}
+        {...(interactive
+          ? {
+              ref: (el: HTMLDivElement | null) => {
+                if (el) itemEls.current.set(cat.id, el)
+                else itemEls.current.delete(cat.id)
+              },
+              onMouseEnter: () => handleCatMouseEnter(cat),
+              'data-proximity': true,
+            }
+          : {})}
+        className={`wae-ae-item${interactive && state.hoveredId === cat.id ? ' hovered' : ''}`}
+      >
+        <div
+          className={`wae-badge-icon wae-badge-lg${DARK_BADGE_IDS.has(cat.id) ? ' wae-badge--ink' : ''}`}
+          style={{ backgroundColor: cat.color }}
+        >
+          <span className="material-icons">{cat.icon}</span>
+        </div>
+        <span className="wae-ae-name">{cat.name}</span>
+        <span className="material-icons wae-ae-chevron">chevron_right</span>
+      </div>
+    ))
+  }
 
   // ── Render ────────────────────────────────────────────────────────────────
 
@@ -461,19 +541,22 @@ export default function WorkflowAddElements() {
               Add Elements
             </div>
 
-            {/* Segmented control — shared .seg from _controls.css */}
+            {/* Segmented control — .seg/.seg.fill sizing from _controls.css, but the
+                pill itself is driven by usePillSpring (Fix 4), not the shared segRef,
+                so data-seg-managed still opts this instance out of _controls.js auto-init. */}
             <div
-              ref={state.aeVisible ? segCallbackRef : segRerenderRef}
+              ref={segSpringCallbackRef}
               className="seg fill wae-seg-wrap"
               data-seg-managed
+              data-active-tab={state.activeTab}
             >
-              <span className="seg-pill" />
+              {/* GOTCHA: the spring writes inline `transform`, so any hover polish on
+                  this pill must live on the CSS `scale` property, never `transform`. */}
+              <span className="seg-pill" ref={segPillRef} style={{ transition: 'none' }} />
               <button
                 type="button"
                 className={state.activeTab === 'general' ? 'active' : ''}
-                onClick={() => {
-                  setState((s) => ({ ...s, activeTab: 'general', hoveredId: null, nodesVisible: false }))
-                }}
+                onClick={() => switchTab('general')}
               >
                 <span className="material-icons">apps</span>
                 General
@@ -481,9 +564,7 @@ export default function WorkflowAddElements() {
               <button
                 type="button"
                 className={state.activeTab === 'integrations' ? 'active' : ''}
-                onClick={() => {
-                  setState((s) => ({ ...s, activeTab: 'integrations', hoveredId: null, nodesVisible: false }))
-                }}
+                onClick={() => switchTab('integrations')}
               >
                 <span className="material-icons">hub</span>
                 Integrations
@@ -513,29 +594,31 @@ export default function WorkflowAddElements() {
             </div>
           </div>
 
-          {/* Category list — key={activeTab} remounts on tab switch so the whole
-              list morphs in as one unit (wae-list-morph-in) instead of rows spawning. */}
-          <div className="wae-ae-list" key={state.activeTab}>
-            {visibleCats.map((cat) => (
+          {/* Category list — direction-aware exit/enter on tab switch (Fix 3), mirroring
+              motion-tabs: the outgoing tab plays a ghost exit layer while the incoming
+              tab (key={activeTab} remount) enters from the opposite side. Options inside
+              register as a proximity group via data-proximity (Fix 2, default engine
+              mapping — the group itself is registered once, on the shell). */}
+          <div className="wae-ae-list-wrap">
+            {state.listLeavingTab && (
               <div
-                key={cat.id}
-                ref={(el) => {
-                  if (el) itemEls.current.set(cat.id, el)
-                  else itemEls.current.delete(cat.id)
-                }}
-                className={`wae-ae-item${state.hoveredId === cat.id ? ' hovered' : ''}`}
-                onMouseEnter={() => handleCatMouseEnter(cat)}
+                className={`wae-ae-list wae-ae-list-exit${state.listDir > 0 ? ' dir-fwd' : ' dir-back'}`}
+                aria-hidden="true"
               >
-                <div
-                  className={`wae-badge-icon wae-badge-lg${DARK_BADGE_IDS.has(cat.id) ? ' wae-badge--ink' : ''}`}
-                  style={{ backgroundColor: cat.color }}
-                >
-                  <span className="material-icons">{cat.icon}</span>
-                </div>
-                <span className="wae-ae-name">{cat.name}</span>
-                <span className="material-icons wae-ae-chevron">chevron_right</span>
+                {renderCatItems(
+                  (state.listLeavingTab === 'general' ? GENERAL_CATS : INTEGRATION_CATS).filter(
+                    (c) => !filter || c.name.toLowerCase().includes(filter)
+                  ),
+                  false
+                )}
               </div>
-            ))}
+            )}
+            <div
+              className={`wae-ae-list wae-ae-list-enter${state.listLeavingTab ? (state.listDir > 0 ? ' dir-fwd' : ' dir-back') : ''}`}
+              key={state.activeTab}
+            >
+              {renderCatItems(visibleCats, true)}
+            </div>
           </div>
 
           {/* Footer */}
@@ -565,11 +648,24 @@ export default function WorkflowAddElements() {
           onMouseEnter={handleNodesMouseEnter}
           onMouseLeave={handleNodesMouseLeave}
         >
-          <div className={`wae-pop-inner wae-nodes-inner${(filter || state.searchPanelMounted) ? ' wae-search-mode' : ''}`}>
+          <div
+            className={`wae-pop-inner wae-nodes-inner${(filter || state.searchPanelMounted) ? ' wae-search-mode' : ''}`}
+            data-pending={state.searchPending ? 'true' : undefined}
+          >
             <div className="wae-nodes-header">
               <span className="material-icons">widgets</span>
               {filter ? 'Search Results' : 'Nodes'}
             </div>
+
+            {/* Fix 5: pending window — blur+dim the stale result set behind a
+                shimmer placeholder instead of snapping the layout on each keystroke. */}
+            {state.searchPending && (
+              <div className="wae-search-shimmer" aria-hidden="true">
+                {[0, 1, 2, 3].map((i) => (
+                  <span key={i} className="wae-shimmer-row" style={{ animationDelay: `${i * 60}ms` }} />
+                ))}
+              </div>
+            )}
 
             {filter ? (
               /* Two-column grouped search view */
@@ -590,7 +686,7 @@ export default function WorkflowAddElements() {
                       <div className="wae-search-cat-nodes">
                         {nodes.map((node, i) => (
                           // eslint-disable-next-line react/no-array-index-key
-                          <div key={`${node.name}-${i}`} className="wae-node-item">
+                          <div key={`${node.name}-${i}`} className="wae-node-item" style={{ animationDelay: `${Math.min(i, 6) * 24}ms` }}>
                             <div
                               className={`wae-badge-icon wae-badge-sm${isInkColor(node.color) ? ' wae-badge--ink' : ''}`}
                               style={{ backgroundColor: node.color }}
@@ -627,7 +723,7 @@ export default function WorkflowAddElements() {
                       <div className="wae-search-cat-nodes">
                         {nodes.map((node, i) => (
                           // eslint-disable-next-line react/no-array-index-key
-                          <div key={`${node.name}-${i}`} className="wae-node-item">
+                          <div key={`${node.name}-${i}`} className="wae-node-item" style={{ animationDelay: `${Math.min(i, 6) * 24}ms` }}>
                             <div
                               className={`wae-badge-icon wae-badge-sm${isInkColor(node.color) ? ' wae-badge--ink' : ''}`}
                               style={{ backgroundColor: node.color }}
@@ -650,7 +746,7 @@ export default function WorkflowAddElements() {
               <div className="wae-nodes-list">
                 {activeNodes.map((node, i) => (
                   // eslint-disable-next-line react/no-array-index-key
-                  <div key={`${node.name}-${i}`} className="wae-node-item">
+                  <div key={`${node.name}-${i}`} className="wae-node-item" style={{ animationDelay: `${Math.min(i, 6) * 24}ms` }}>
                     <div
                       className={`wae-badge-icon wae-badge-sm${isInkColor(node.color) ? ' wae-badge--ink' : ''}`}
                       style={{ backgroundColor: node.color }}

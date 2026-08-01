@@ -91,7 +91,7 @@ html.dark .sc-it-amt { color: #D4D4D4; }
   background: rgba(17,17,17,0.28);
   -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
   opacity: 0; pointer-events: none;
-  transition: opacity calc(320ms * var(--anim-mult, 1)) ease;
+  transition: opacity calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .fab-screen.open .fab-veil { opacity: 1; pointer-events: auto; }
 
@@ -111,29 +111,29 @@ html.dark .sc-it-amt { color: #D4D4D4; }
     inset 0 0 0 1px rgba(255,255,255,0.15);
   cursor: pointer; overflow: hidden;
   transition:
-    width calc(500ms * var(--anim-mult, 1)) cubic-bezier(.34,1.2,.5,1),
-    height calc(500ms * var(--anim-mult, 1)) cubic-bezier(.34,1.2,.5,1),
-    border-radius calc(440ms * var(--anim-mult, 1)) cubic-bezier(.34,1.2,.5,1),
-    background-color calc(300ms * var(--anim-mult, 1)) ease,
-    background-size calc(300ms * var(--anim-mult, 1)) ease,
-    box-shadow calc(300ms * var(--anim-mult, 1)) ease,
-    scale calc(140ms * var(--anim-mult, 1)),
-    filter calc(140ms * var(--anim-mult, 1));
+    width calc(500ms * var(--anim-mult, 1)) var(--ease-spring-pop),
+    height calc(500ms * var(--anim-mult, 1)) var(--ease-spring-pop),
+    border-radius calc(var(--duration-compact) * var(--anim-mult, 1)) var(--ease-spring-pop),
+    background-color calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade),
+    background-size calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade),
+    box-shadow calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade),
+    scale calc(var(--duration-140) * var(--anim-mult, 1)),
+    filter calc(var(--duration-140) * var(--anim-mult, 1));
 }
 
 /* FIX 2: tactile press — only when the screen is NOT open (collapsed state only) */
 .fab-screen:not(.open) .fab:active {
   transform: scale(0.92);
   transition:
-    transform calc(80ms * var(--anim-mult, 1)) ease,
-    width calc(500ms * var(--anim-mult, 1)) cubic-bezier(.34,1.2,.5,1),
-    height calc(500ms * var(--anim-mult, 1)) cubic-bezier(.34,1.2,.5,1),
-    border-radius calc(440ms * var(--anim-mult, 1)) cubic-bezier(.34,1.2,.5,1),
-    background-color calc(300ms * var(--anim-mult, 1)) ease,
-    background-size calc(300ms * var(--anim-mult, 1)) ease,
-    box-shadow calc(300ms * var(--anim-mult, 1)) ease,
-    scale calc(140ms * var(--anim-mult, 1)),
-    filter calc(140ms * var(--anim-mult, 1));
+    transform calc(80ms * var(--anim-mult, 1)) var(--ease-fade),
+    width calc(500ms * var(--anim-mult, 1)) var(--ease-spring-pop),
+    height calc(500ms * var(--anim-mult, 1)) var(--ease-spring-pop),
+    border-radius calc(var(--duration-compact) * var(--anim-mult, 1)) var(--ease-spring-pop),
+    background-color calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade),
+    background-size calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade),
+    box-shadow calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade),
+    scale calc(var(--duration-140) * var(--anim-mult, 1)),
+    filter calc(var(--duration-140) * var(--anim-mult, 1));
 }
 
 /* ── Expanded panel: thinner dots, NO border-radius transition on open ── */
@@ -161,10 +161,10 @@ html.dark .sc-it-amt { color: #D4D4D4; }
   filter: drop-shadow(0 10px 15px rgba(17,17,17,.12)) drop-shadow(0 2px 4px rgba(17,17,17,.06));
   /* omit border-radius from transition so it snaps to 28px immediately */
   transition:
-    width calc(500ms * var(--anim-mult, 1)) cubic-bezier(.34,1.2,.5,1),
-    height calc(500ms * var(--anim-mult, 1)) cubic-bezier(.34,1.2,.5,1),
-    background-color calc(300ms * var(--anim-mult, 1)) ease,
-    border-color calc(300ms * var(--anim-mult, 1)) ease;
+    width calc(500ms * var(--anim-mult, 1)) var(--ease-spring-pop),
+    height calc(500ms * var(--anim-mult, 1)) var(--ease-spring-pop),
+    background-color calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade),
+    border-color calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade);
 }
 /* Dark-only external hairline ring on the outer shell, matching --card-border
    exactly (cards-page ground truth); light mode intentionally omits it. */
@@ -174,7 +174,7 @@ html.dark .fab-screen.open .fab { border: 1px solid var(--card-border); }
 .fab-plus {
   position: absolute; inset: 0; display: grid; place-items: center;
   color: #fff;
-  transition: opacity calc(180ms * var(--anim-mult, 1)) ease, transform calc(280ms * var(--anim-mult, 1)) var(--ease-standard);
+  transition: opacity calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-standard);
 }
 .fab-plus .material-icons { font-size: 28px; -webkit-text-stroke: 1px rgba(255,255,255,0.9); }
 .fab-screen.open .fab-plus { opacity: 0; transform: rotate(45deg) scale(0.6); }
@@ -216,9 +216,9 @@ html.dark .fab-screen.open .fab-menu { border: 1px solid var(--card-border); mar
 .fab-menu-hd {
   display: flex; align-items: flex-start; gap: 8px;
   opacity: 0; transform: translateY(10px);
-  transition: opacity calc(220ms * var(--anim-mult, 1)) ease, transform calc(320ms * var(--anim-mult, 1)) var(--ease-spring-soft);
+  transition: opacity calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-spring-soft);
 }
-.fab-screen.open .fab-menu-hd { opacity: 1; transform: none; transition-delay: calc(120ms * var(--anim-mult, 1)); }
+.fab-screen.open .fab-menu-hd { opacity: 1; transform: none; transition-delay: calc(var(--duration-fast) * var(--anim-mult, 1)); }
 
 .fab-head { flex: 1; min-width: 0; padding-top: 1px; padding-left: 8px; }
 .fab-head-title { font-size: 17px; font-weight: 900; color: var(--fp-fg); letter-spacing: -0.015em; display: flex; align-items: center; gap: 6px; }
@@ -231,19 +231,19 @@ html.dark .fab-screen.open .fab-menu { border: 1px solid var(--card-border); mar
   background: var(--fp-close-bg); border: none; cursor: pointer;
   display: grid; place-items: center; color: var(--fp-close-fg);
   opacity: 0; transform: scale(0.5); pointer-events: none;
-  transition: opacity calc(200ms * var(--anim-mult, 1)) ease, transform calc(240ms * var(--anim-mult, 1)) var(--ease-spring-soft), background calc(150ms * var(--anim-mult, 1)), scale calc(var(--duration-instant) * var(--anim-mult, 1)), filter calc(var(--duration-instant) * var(--anim-mult, 1));
+  transition: opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-spring-soft), background calc(var(--duration-150) * var(--anim-mult, 1)), scale calc(var(--duration-instant) * var(--anim-mult, 1)), filter calc(var(--duration-instant) * var(--anim-mult, 1));
 }
 /* .fab-close:hover brightness rule removed -- proximity engine now supplies hover
    brightness via [data-proximity]'s --prox mapping in hover-tokens.css. */
 .fab-close .material-icons { font-size: 15px; }
-.fab-screen.open .fab-close { opacity: 1; transform: scale(1); pointer-events: auto; transition-delay: calc(160ms * var(--anim-mult, 1)); }
+.fab-screen.open .fab-close { opacity: 1; transform: scale(1); pointer-events: auto; transition-delay: calc(var(--duration-base) * var(--anim-mult, 1)); }
 
 .fab-menu-sep {
   height: 1px; background: var(--fp-sep);
   margin: 10px 0 6px;
-  opacity: 0; transition: opacity calc(200ms * var(--anim-mult, 1)) ease;
+  opacity: 0; transition: opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade);
 }
-.fab-screen.open .fab-menu-sep { opacity: 1; transition-delay: calc(140ms * var(--anim-mult, 1)); }
+.fab-screen.open .fab-menu-sep { opacity: 1; transition-delay: calc(var(--duration-140) * var(--anim-mult, 1)); }
 
 /* Separator between each menu item */
 .fab-item + .fab-item {
@@ -260,11 +260,11 @@ html.dark .fab-screen.open .fab-menu { border: 1px solid var(--card-border); mar
   /* FIX 1: background has its own short transition with explicit 0ms delay so
      hover-background always clears instantly, independent of entrance stagger delays */
   transition:
-    opacity calc(200ms * var(--anim-mult, 1)) ease,
-    transform calc(340ms * var(--anim-mult, 1)) cubic-bezier(.32,1.32,.5,1),
+    opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(340ms * var(--anim-mult, 1)) var(--ease-spring-soft),
     background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade) 0ms,
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 /* FIX 1: hover background — no delay property needed here (baseline is 0ms) */
 .fab-item:hover { background: var(--fp-hover); }
@@ -275,42 +275,42 @@ html.dark .fab-screen.open .fab-menu { border: 1px solid var(--card-border); mar
    background leg matches --duration-fast so hover fill still clears promptly */
 .fab-screen.open .fab-item:nth-child(3){
   transition:
-    opacity calc(200ms * var(--anim-mult, 1)) ease calc(175ms * var(--anim-mult, 1)),
-    transform calc(340ms * var(--anim-mult, 1)) cubic-bezier(.32,1.32,.5,1) calc(175ms * var(--anim-mult, 1)),
-    background calc(var(--duration-fast) * var(--anim-mult, 1)) ease 0ms,
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade) calc(175ms * var(--anim-mult, 1)),
+    transform calc(340ms * var(--anim-mult, 1)) var(--ease-spring-soft) calc(175ms * var(--anim-mult, 1)),
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade) 0ms,
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .fab-screen.open .fab-item:nth-child(4){
   transition:
-    opacity calc(200ms * var(--anim-mult, 1)) ease calc(225ms * var(--anim-mult, 1)),
-    transform calc(340ms * var(--anim-mult, 1)) cubic-bezier(.32,1.32,.5,1) calc(225ms * var(--anim-mult, 1)),
-    background calc(var(--duration-fast) * var(--anim-mult, 1)) ease 0ms,
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade) calc(225ms * var(--anim-mult, 1)),
+    transform calc(340ms * var(--anim-mult, 1)) var(--ease-spring-soft) calc(225ms * var(--anim-mult, 1)),
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade) 0ms,
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .fab-screen.open .fab-item:nth-child(5){
   transition:
-    opacity calc(200ms * var(--anim-mult, 1)) ease calc(275ms * var(--anim-mult, 1)),
-    transform calc(340ms * var(--anim-mult, 1)) cubic-bezier(.32,1.32,.5,1) calc(275ms * var(--anim-mult, 1)),
-    background calc(var(--duration-fast) * var(--anim-mult, 1)) ease 0ms,
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade) calc(275ms * var(--anim-mult, 1)),
+    transform calc(340ms * var(--anim-mult, 1)) var(--ease-spring-soft) calc(275ms * var(--anim-mult, 1)),
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade) 0ms,
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .fab-screen.open .fab-item:nth-child(6){
   transition:
-    opacity calc(200ms * var(--anim-mult, 1)) ease calc(325ms * var(--anim-mult, 1)),
-    transform calc(340ms * var(--anim-mult, 1)) cubic-bezier(.32,1.32,.5,1) calc(325ms * var(--anim-mult, 1)),
-    background calc(var(--duration-fast) * var(--anim-mult, 1)) ease 0ms,
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade) calc(325ms * var(--anim-mult, 1)),
+    transform calc(340ms * var(--anim-mult, 1)) var(--ease-spring-soft) calc(325ms * var(--anim-mult, 1)),
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade) 0ms,
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 
 /* ── Icon tiles — each item has its own --ic-bg ── */
 .fab-item-ic {
   width: 44px; height: 44px; border-radius: 13px; flex-shrink: 0;
-  display: grid; place-items: center; color: var(--brand-on-primary);
-  background-color: var(--ic-bg, var(--brand-primary-500));
+  display: grid; place-items: center; color: #FFFFFF;
+  background-color: var(--ic-bg, #10B981);
   background-image:
     radial-gradient(ellipse at top right, rgba(255,255,255,0.22) 0%, transparent 55%),
     linear-gradient(rgba(255,255,255,0.12) 1px, transparent 1px),

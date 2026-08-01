@@ -23,20 +23,20 @@
   visibility: hidden;
   pointer-events: none;
   transition:
-    opacity calc(0.24s * var(--anim-mult, 1)) ease,
-    visibility 0s calc(0.24s * var(--anim-mult, 1));
+    opacity calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-fade),
+    visibility 0s calc(var(--duration-240) * var(--anim-mult, 1));
 }
 
 .dm-overlay[data-state='open'] {
   visibility: visible;
   pointer-events: auto;
   transition:
-    opacity calc(0.24s * var(--anim-mult, 1)) ease,
+    opacity calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-fade),
     visibility 0s 0s;
 }
 
 .dm-overlay.dm-anim {
-  animation: dm-ov-in calc(0.28s * var(--anim-mult, 1)) var(--ease-out);
+  animation: dm-ov-in calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out);
 }
 
 @keyframes dm-ov-in {
@@ -48,7 +48,7 @@
 }
 
 .dm-overlay[data-state='closing'] {
-  animation: dm-ov-out calc(0.24s * var(--anim-mult, 1)) ease forwards;
+  animation: dm-ov-out calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-fade) forwards;
 }
 
 @keyframes dm-ov-out {
@@ -89,6 +89,7 @@ html.dark .dm-shell {
    light-mode line anywhere on the shell (canon). */
 .dm-shell[data-squircle="on"] {
   border-radius: 0;
+  --corner-radius: 36px;
   filter: drop-shadow(0 16px 56px rgba(17,17,17, 0.16)) drop-shadow(0 3px 10px rgba(17,17,17, 0.07));
 }
 .dm-shell[data-squircle="on"]::before,
@@ -108,7 +109,7 @@ html.dark .dm-shell[data-squircle="on"]::before {
 }
 
 .dm-overlay.dm-anim .dm-shell {
-  animation: dm-card-in calc(0.42s * var(--anim-mult, 1)) var(--ease-spring);
+  animation: dm-card-in calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-spring);
 }
 
 @keyframes dm-card-in {
@@ -119,7 +120,7 @@ html.dark .dm-shell[data-squircle="on"]::before {
 }
 
 .dm-overlay[data-state='closing'] .dm-shell {
-  animation: dm-card-out calc(0.24s * var(--anim-mult, 1)) ease forwards;
+  animation: dm-card-out calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-fade) forwards;
 }
 
 @keyframes dm-card-out {
@@ -174,7 +175,7 @@ html.dark .dm-card[data-squircle="on"] {
    as one component (grey bezel + card move together), not just the inner
    card. Single layer: transform lives only on .dm-shell. */
 .dm-shell.dm-confirming {
-  animation: dm-shake calc(0.42s * var(--anim-mult, 1)) var(--ease-shake) both;
+  animation: dm-shake calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-shake) both;
 }
 
 @keyframes dm-shake {
@@ -212,11 +213,11 @@ html.dark .dm-card[data-squircle="on"] {
   place-items: center;
   color: #111111;
   transition:
-    background calc(0.15s * var(--anim-mult, 1)) ease,
-    color calc(0.15s * var(--anim-mult, 1)) ease,
-    transform calc(0.12s * var(--anim-mult, 1)) ease,
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
+    color calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 
 .dm-close:hover {
@@ -254,7 +255,7 @@ html.dark .dm-close:hover {
   height: 56px !important;
   border-radius: 16px !important;
   /* Smooth --icon-c color transition when phase flips to done */
-  transition: background-color calc(0.3s * var(--anim-mult, 1)) ease;
+  transition: background-color calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade);
 }
 
 .dm-badge .material-symbols-outlined {
@@ -272,10 +273,10 @@ html.dark .dm-close:hover {
   .dm-card[data-done='true'] .dm-badge-icon,
   .dm-card[data-done='true'] .dm-title,
   .dm-card[data-done='true'] .dm-body {
-    animation: dm-crossfade calc(0.6s * var(--anim-mult, 1)) var(--ease-out) both;
+    animation: dm-crossfade calc(600ms * var(--anim-mult, 1)) var(--ease-out) both;
   }
   .dm-badge--done {
-    animation: dm-badge-pop calc(0.5s * var(--anim-mult, 1)) var(--ease-spring) both;
+    animation: dm-badge-pop calc(500ms * var(--anim-mult, 1)) var(--ease-spring) both;
   }
 }
 
@@ -298,20 +299,20 @@ html.dark .dm-close:hover {
 /* ── Entrance animations (transform-only, opacity always 1) ──────────────── */
 @media (prefers-reduced-motion: no-preference) {
   .dm-overlay.dm-anim .dm-badge {
-    animation: dm-pop calc(0.56s * var(--anim-mult, 1)) var(--ease-spring)
-      calc(0.08s * var(--anim-mult, 1)) both;
+    animation: dm-pop calc(560ms * var(--anim-mult, 1)) var(--ease-spring)
+      calc(80ms * var(--anim-mult, 1)) both;
   }
   .dm-overlay.dm-anim .dm-title {
-    animation: dm-rise calc(0.46s * var(--anim-mult, 1)) var(--ease-out)
-      calc(0.15s * var(--anim-mult, 1)) both;
+    animation: dm-rise calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-out)
+      calc(var(--duration-150) * var(--anim-mult, 1)) both;
   }
   .dm-overlay.dm-anim .dm-body {
-    animation: dm-rise calc(0.46s * var(--anim-mult, 1)) var(--ease-out)
-      calc(0.21s * var(--anim-mult, 1)) both;
+    animation: dm-rise calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-out)
+      calc(210ms * var(--anim-mult, 1)) both;
   }
   .dm-overlay.dm-anim .dm-actions {
-    animation: dm-rise calc(0.46s * var(--anim-mult, 1)) var(--ease-out)
-      calc(0.27s * var(--anim-mult, 1)) both;
+    animation: dm-rise calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-out)
+      calc(270ms * var(--anim-mult, 1)) both;
   }
 }
 
@@ -400,7 +401,7 @@ html.dark .dm-body b {
   gap: 12px;
   width: 100%;
   opacity: 1;
-  transition: opacity calc(0.3s * var(--anim-mult, 1)) var(--ease-out);
+  transition: opacity calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out);
 }
 
 .dm-actions--done {
@@ -420,9 +421,9 @@ html.dark .dm-body b {
   padding: 0 18px !important;
   gap: 7px !important;
   transition:
-    background calc(0.16s * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
-    transform calc(0.16s * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
-    box-shadow calc(0.16s * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
+    background calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
+    box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out);
 }
 
 .dm-btn:disabled {
@@ -560,7 +561,7 @@ html.dark .dm-card .dm-btn.btn-delete .dm-ok {
   border: 3px solid rgba(255, 255, 255, 0.35);
   border-top-color: #fff;
   border-radius: 50%;
-  animation: dm-spin calc(0.7s * var(--anim-mult, 1)) linear infinite;
+  animation: dm-spin calc(700ms * var(--anim-mult, 1)) var(--ease-linear) infinite;
 }
 
 @keyframes dm-spin {
@@ -580,7 +581,7 @@ html.dark .dm-card .dm-btn.btn-delete .dm-ok {
   stroke-linejoin: round;
   stroke-dasharray: 28;
   stroke-dashoffset: 28;
-  animation: dm-check calc(0.45s * var(--anim-mult, 1)) ease forwards;
+  animation: dm-check calc(450ms * var(--anim-mult, 1)) var(--ease-fade) forwards;
 }
 
 @keyframes dm-check {

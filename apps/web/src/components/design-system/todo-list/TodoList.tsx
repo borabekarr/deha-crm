@@ -196,7 +196,7 @@ export default function TodoList() {
     const weekEl = weekElRef.current
     if (!weekEl) return
     const outX = dir > 0 ? -34 : 34
-    weekEl.style.transition = 'transform 200ms cubic-bezier(.4,0,.6,1), opacity 200ms ease'
+    weekEl.style.transition = 'transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-week-slide), opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade)'
     weekEl.style.transform = 'translateX(' + outX + 'px)'
     weekEl.style.opacity = '0'
     setTimeout(() => {
@@ -211,7 +211,7 @@ export default function TodoList() {
       weekEl.style.transform = 'translateX(' + (-outX) + 'px)'
       weekEl.style.opacity = '0'
       void weekEl.offsetWidth
-      weekEl.style.transition = 'transform 380ms cubic-bezier(.22,1,.36,1), opacity 300ms ease'
+      weekEl.style.transition = 'transform calc(380ms * var(--anim-mult, 1)) var(--ease-out), opacity calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade)'
       weekEl.style.transform = 'translateX(0)'
       weekEl.style.opacity = '1'
       setTimeout(() => { weekEl.style.transition = ''; weekEl.style.transform = '' }, 400)

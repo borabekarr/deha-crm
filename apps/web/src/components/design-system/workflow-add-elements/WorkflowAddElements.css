@@ -64,8 +64,8 @@
   transform-origin: top center;
   pointer-events: none;
   transition:
-    opacity calc(180ms * var(--anim-mult, 1)) var(--ease-out),
-    transform calc(180ms * var(--anim-mult, 1)) var(--ease-out);
+    opacity calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-out),
+    transform calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-out);
 }
 
 .wae-pop-outer.visible {
@@ -201,8 +201,10 @@
   border-radius: 9px;
   cursor: pointer;
   transition:
-    background calc(var(--duration-fast) * var(--anim-mult, 1)),
-    transform calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 
 .wae-ae-item:hover,
@@ -230,7 +232,7 @@
   font-size: 16px !important;
   line-height: 1 !important;
   color: #D1D5DB !important;
-  transition: color calc(100ms * var(--anim-mult, 1));
+  transition: color calc(var(--duration-instant) * var(--anim-mult, 1));
   display: block !important;
 }
 
@@ -266,11 +268,11 @@
    --prox mapping (locked scale 1.02 / brightness 1.02) doesn't snap. */
 .wae-ae-footer .btn-green[data-proximity] {
   transition:
-    background-color calc(180ms * var(--anim-mult, 1)),
-    transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
-    box-shadow calc(200ms * var(--anim-mult, 1)),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    background-color calc(var(--duration-180) * var(--anim-mult, 1)),
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring),
+    box-shadow calc(var(--duration-200) * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 
 /* Item 1: minimize the neurology glyph inside the footer button. */
@@ -279,13 +281,58 @@
 }
 
 /* ── Nodes flyout panel ──────────────────────────────────────────────────── */
+/* Fix 5: width is the one predetermined (known-start, known-end) dimension of
+   the resize, so it gets a CSS transition with a slight overshoot easing
+   (Emil's "prefer CSS for predetermined motion" call) rather than a JS spring —
+   the overshoot on the curve itself reads as the requested "slight bounce". */
 .wae-nodes-inner {
+  position: relative;
   width: 200px;
+  transition: width calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-spring-pop);
 }
 
 /* Search mode: wider panel to accommodate the two-column grouped layout. */
 .wae-nodes-inner.wae-search-mode {
   width: 460px;
+}
+
+/* Pending window (Fix 5): a query changed while the panel was already open —
+   blur+dim the stale results underneath the shimmer overlay below instead of
+   snapping the (possibly taller/shorter) new layout into place. */
+.wae-nodes-inner[data-pending="true"] .wae-search-cols,
+.wae-nodes-inner[data-pending="true"] .wae-nodes-list {
+  filter: blur(4px);
+  opacity: 0.45;
+}
+.wae-search-cols,
+.wae-nodes-list {
+  transition:
+    filter calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
+    opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out);
+}
+
+.wae-search-shimmer {
+  position: absolute;
+  inset: 40px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.wae-shimmer-row {
+  height: 34px;
+  border-radius: 9px;
+  background: linear-gradient(90deg, #F0F0F0 25%, #F8F8F8 50%, #F0F0F0 75%);
+  background-size: 200% 100%;
+  animation: wae-shimmer-sweep calc(1100ms * var(--anim-mult, 1)) var(--ease-linear) infinite;
+}
+@keyframes wae-shimmer-sweep {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+html.dark .wae-shimmer-row {
+  background: linear-gradient(90deg, #1C1C1C 25%, #262626 50%, #1C1C1C 75%);
+  background-size: 200% 100%;
 }
 
 /* Two-column grid: 1fr vertical-sep 1fr with equal gutters on both sides. */
@@ -431,8 +478,8 @@ html.dark .wae-nodes-header .material-icons {
   border-radius: 8px;
   cursor: pointer;
   transition:
-    background calc(var(--duration-fast) * var(--anim-mult, 1)),
-    transform calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 
 .wae-node-item:hover {
@@ -465,7 +512,7 @@ html.dark .wae-nodes-header .material-icons {
   justify-content: center;
   flex-shrink: 0;
   opacity: 0;
-  transition: opacity calc(120ms * var(--anim-mult, 1));
+  transition: opacity calc(var(--duration-fast) * var(--anim-mult, 1));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.45),
     inset 0 -1px 0 rgba(17,17,17, 0.18),
@@ -661,30 +708,51 @@ html.dark .wae-search-cat-header .wae-badge-icon .material-symbols-outlined {
   text-shadow: none;
 }
 
-/* ── Tab-switch list morph ────────────────────────────────────────────────────
+/* ── Tab-switch list morph — direction-aware (Fix 3) ─────────────────────────
    Applied to the LIST CONTAINER as one unit (not per item) so rows never appear
-   to spawn individually. Animates only transform/opacity/filter — never
-   height/width — so the panel footprint is unchanged during the morph.
-   Retriggered by the key={activeTab} remount in TSX. */
-@keyframes wae-list-morph-in {
-  0% {
-    opacity: 0;
-    filter: blur(6px);
-    transform: scale(0.98) translateY(4px);
-  }
-  60% {
-    opacity: 1;
-    filter: blur(0);
-  }
-  100% {
-    opacity: 1;
-    filter: blur(0);
-    transform: scale(1) translateY(0);
-  }
+   to spawn individually. Mirrors motion-tabs' index-derived travel direction:
+   dir>0 (general→integrations) travels rightward, dir<0 travels leftward. The
+   outgoing tab (.wae-ae-list-exit, a non-interactive ghost layer) and the
+   incoming tab (.wae-ae-list-enter, key={activeTab} remount) share one travel
+   direction so they read as a single sequenced swap, not two unrelated fades. */
+.wae-ae-list-wrap {
+  position: relative;
 }
 
-.wae-ae-list {
-  animation: wae-list-morph-in calc(420ms * var(--anim-mult, 1)) var(--ease-out);
+.wae-ae-list-exit {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+@keyframes wae-list-enter-fwd {
+  from { opacity: 0; filter: blur(4px); transform: translateX(14px); }
+  to   { opacity: 1; filter: blur(0);   transform: translateX(0); }
+}
+@keyframes wae-list-enter-back {
+  from { opacity: 0; filter: blur(4px); transform: translateX(-14px); }
+  to   { opacity: 1; filter: blur(0);   transform: translateX(0); }
+}
+@keyframes wae-list-exit-fwd {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(-14px); }
+}
+@keyframes wae-list-exit-back {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(14px); }
+}
+
+.wae-ae-list-enter.dir-fwd {
+  animation: wae-list-enter-fwd calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-out) both;
+}
+.wae-ae-list-enter.dir-back {
+  animation: wae-list-enter-back calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-out) both;
+}
+.wae-ae-list-exit.dir-fwd {
+  animation: wae-list-exit-fwd calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-accel) both;
+}
+.wae-ae-list-exit.dir-back {
+  animation: wae-list-exit-back calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-accel) both;
 }
 
 /* ── Item 1: search-results flyout morph (enter + reversible exit) ───────────
@@ -727,12 +795,12 @@ html.dark .wae-search-cat-header .wae-badge-icon .material-symbols-outlined {
 
 /* Applied to the nodes flyout (.wae-pop-outer) when search results appear. */
 .wae-search-entering {
-  animation: wae-search-morph-in calc(320ms * var(--anim-mult, 1)) var(--ease-out) both;
+  animation: wae-search-morph-in calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-out) both;
 }
 
 /* Applied when search is cleared so the flyout plays exit animation before unmounting. */
 .wae-search-leaving {
-  animation: wae-search-morph-out calc(220ms * var(--anim-mult, 1)) var(--ease-accel) both;
+  animation: wae-search-morph-out calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-accel) both;
   pointer-events: none;
 }
 
@@ -758,9 +826,9 @@ html.dark .wae-search-cat-header .wae-badge-icon .material-symbols-outlined {
   transform-origin: center;
   pointer-events: none;
   transition:
-    opacity calc(160ms * var(--anim-mult, 1)) var(--ease-out),
-    transform calc(220ms * var(--anim-mult, 1)) cubic-bezier(.34, 1.56, .64, 1),
-    background calc(120ms * var(--anim-mult, 1));
+    opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
+    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring),
+    background calc(var(--duration-fast) * var(--anim-mult, 1));
   padding: 0;
 }
 

@@ -102,7 +102,7 @@ html.dark .tf-card:not([data-squircle="on"]) {
 .tf-range .tf-seg.end { color: var(--fg1); }
 /* tiny pop when the range text changes (own class — `seg`/`dash` collide with the
    global preview control styles in _controls.css that paint a pill background) */
-.tf-range .tf-seg { display: inline-block; background: none; padding: 0; border-radius: 0; transition: transform calc(260ms * var(--anim-mult, 1)) var(--ease-spring-soft-2); }
+.tf-range .tf-seg { display: inline-block; background: none; padding: 0; border-radius: 0; transition: transform calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-spring-soft-2); }
 .tf-range.bump .tf-seg { animation: tfBump calc(340ms * var(--anim-mult, 1)) var(--ease-spring-soft-2); }
 @keyframes tfBump { 0%{ transform: translateY(2px); opacity:.5; } 100%{ transform: translateY(0); opacity:1; } }
 
@@ -113,30 +113,50 @@ html.dark .tf-card:not([data-squircle="on"]) {
   border-radius: 9999px; padding: 3px;
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
   font-family: 'Montserrat', sans-serif;
-  transition: opacity calc(200ms * var(--anim-mult, 1)) ease;
+  transition: opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade);
   /* fieldset reset */
   border: none; margin: 0; min-inline-size: unset;
 }
 html.dark .tf-presets { background: #0A0A0A; box-shadow: inset 0 2px 4px rgba(0,0,0,.4); }
 .tf-card[data-dragging="true"] .tf-presets { opacity: .5; }
 
-/* Sliding glider pill — mirrors .seg-pill (black light / white dark) */
+/* Sliding glider pill — mirrors .seg-pill (black light / white dark).
+   Item 4: the glider stays mounted through both directions of its
+   active <-> inactive transition (never unmounted) -- data-on drives a
+   spring+blur crossfade (opacity + filter blur + scale) mirroring the
+   blur-reveal pattern used elsewhere (e.g. ModelSelector label reveal),
+   instead of the flat opacity fade this used to be. */
 .tf-preset-glider {
   position: absolute; top: 3px; bottom: 3px; z-index: 0; border-radius: 9999px;
   background: #111111;
   box-shadow: 0 1px 2px rgba(0,0,0,0.18);
-  transition: left calc(300ms * var(--anim-mult, 1)) var(--ease-slide-bounce), width calc(300ms * var(--anim-mult, 1)) var(--ease-out), opacity calc(160ms * var(--anim-mult, 1)) ease;
+  opacity: 1;
+  filter: blur(0);
+  transform: scale(1);
+  transition:
+    left calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-slide-bounce),
+    width calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out),
+    opacity calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-spring-soft),
+    filter calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-spring-soft),
+    transform calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-spring-soft);
   pointer-events: none;
 }
-/* Glider hides only when NO pill is active (month select); stays put while strip extends */
-.tf-preset-glider[data-on="false"] { opacity: 0; }
+/* Glider hides only when NO pill is active (custom drag / month select);
+   stays put while strip extends. Fades away with blur+scale on the way out,
+   and the same transition list runs in reverse when a preset is picked
+   from the no-active state. */
+.tf-preset-glider[data-on="false"] {
+  opacity: 0;
+  filter: blur(6px);
+  transform: scale(0.9);
+}
 
 .tf-preset {
   position: relative; z-index: 1;
   appearance: none; border: none; background: transparent; cursor: pointer;
   font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 800;
   color: #6B6B6B; padding: 6px 10px; border-radius: 9999px; line-height: 1;
-  transition: color calc(240ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: color calc(var(--duration-240) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out);
   white-space: nowrap;
 }
 html.dark .tf-preset { color: #A1A1A1; }
@@ -152,10 +172,10 @@ html.dark .tf-preset.active { color: #111111; }
    load order. No local transform/filter hover rule to remove here. */
 .tf-preset.tf-preset[data-proximity] {
   transition:
-    color calc(240ms * var(--anim-mult, 1)),
-    transform calc(120ms * var(--anim-mult, 1)) var(--ease-out),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    color calc(var(--duration-240) * var(--anim-mult, 1)),
+    transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 
 .tf-divider { height: 1px; background: var(--card-border); }
@@ -173,7 +193,7 @@ html.dark .tf-preset.active { color: #111111; }
   /* Item 4: align button center to ruler centerline (ruler center ≈ 17.5px from track top).
      Button is 26px tall; half = 13px. Offset = 17.5 - 13 = 4.5px → 5px */
   margin-top: 5px; align-self: flex-start;
-  transition: background calc(150ms * var(--anim-mult, 1)) ease, color calc(150ms * var(--anim-mult, 1)) ease, opacity calc(200ms * var(--anim-mult, 1)) ease, transform calc(120ms * var(--anim-mult, 1)) ease;
+  transition: background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade), color calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade), opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .tf-pan:hover:not(:disabled) { background: var(--gray-100); color: var(--fg2); }
 .tf-pan:active:not(:disabled) { transform: scale(.9); }
@@ -183,12 +203,12 @@ html.dark .tf-preset.active { color: #111111; }
    hover rule on .tf-pan to remove (hover only recolors background). */
 .tf-pan.tf-pan[data-proximity] {
   transition:
-    background calc(150ms * var(--anim-mult, 1)) ease,
-    color calc(150ms * var(--anim-mult, 1)) ease,
-    opacity calc(200ms * var(--anim-mult, 1)) ease,
-    transform calc(120ms * var(--anim-mult, 1)) ease,
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
+    color calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
+    opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .tf-pan .material-symbols-outlined { font-size: 17px; }
 
@@ -219,7 +239,7 @@ html.dark .tf-preset.active { color: #111111; }
   font-size: 11px; font-weight: var(--weight-semibold); color: var(--fg4);
   letter-spacing: -0.01em; white-space: nowrap; cursor: pointer;
   padding: 2px 6px; border-radius: 7px;
-  transition: color calc(260ms * var(--anim-mult, 1)) ease, font-weight calc(260ms * var(--anim-mult, 1)) ease, background calc(150ms * var(--anim-mult, 1)) ease, left calc(400ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: color calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade), font-weight calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade), background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade), left calc(400ms * var(--anim-mult, 1)) var(--ease-out);
 }
 .tf-month:hover { color: var(--fg2); background: var(--gray-100); }
 .tf-month:active { transform: translateX(-50%) scale(.94); }
@@ -292,18 +312,24 @@ html.dark .tf-daycount { text-shadow: none; }
    Handle box: top=-7px in .tf-sel, height=34px, bottom=27px in .tf-sel.
    bottom:12px → stick bottom at 34-12=22px in handle = -7+22=15px in .tf-sel = 23px track.
    Stick top = 15-10=5px in .tf-sel = 13px track. Center = (13+23)/2=18px track. */
+/* Item (raw feedback "on default view, I can't see this div clearly. fix
+   it." (tf-handle)): base size/contrast raised so the grip reads clearly at
+   rest -- was 4x10 with no border, now 6x14 with a hairline ring on top of
+   the existing fill + shadow. Hover/drag states scaled up to match. */
 .tf-handle::before {
   content: ""; position: absolute;
   left: 50%; transform: translateX(-50%);
-  bottom: 12px;             /* centers stick on lens-hit midline (18px from track top) */
-  width: 4px; height: 10px; border-radius: 2px;
+  bottom: 11px;             /* centers stick on lens-hit midline (18px from track top) */
+  width: 6px; height: 14px; border-radius: 3px;
   background: var(--tf-accent);
-  box-shadow: 0 2px 6px -1px color-mix(in srgb, var(--tf-accent) 55%, transparent), inset 0 1px 0 rgba(255,255,255,.4);
-  transition: height calc(180ms * var(--anim-mult, 1)) var(--ease-spring-soft-2), width calc(180ms * var(--anim-mult, 1)) ease, box-shadow calc(180ms * var(--anim-mult, 1)) ease;
+  border: 1px solid rgba(255,255,255,.55);
+  box-shadow: 0 1px 3px rgba(17,17,17,.28), 0 2px 6px -1px color-mix(in srgb, var(--tf-accent) 55%, transparent), inset 0 1px 0 rgba(255,255,255,.4);
+  transition: height calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-spring-soft-2), width calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade), box-shadow calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade);
   pointer-events: none;
 }
-.tf-handle:hover::before { height: 12px; width: 5px; }
-.tf-card[data-dragging="true"] .tf-handle[data-active="true"]::before { height: 13px; width: 5px; }
+html.dark .tf-handle::before { border-color: rgba(0,0,0,.35); }
+.tf-handle:hover::before { height: 16px; width: 7px; }
+.tf-card[data-dragging="true"] .tf-handle[data-active="true"]::before { height: 17px; width: 7px; }
 .tf-handle:focus-visible { outline: none; }
 .tf-handle:focus-visible::before { box-shadow: 0 0 0 3px color-mix(in srgb, var(--tf-accent) 30%, transparent), 0 2px 6px -1px color-mix(in srgb, var(--tf-accent) 55%, transparent); height: 15px; }
 
@@ -313,6 +339,7 @@ html.dark .tf-daycount { text-shadow: none; }
 @media (prefers-reduced-motion: reduce) {
   .tf-strip[data-anim="true"], .tf-sel[data-anim="true"] { transition: none !important; }
   .tf-range.bump .seg { animation: none !important; }
+  .tf-preset-glider { transition-duration: 0ms !important; }
 }
 
 @media (max-width: 560px) {

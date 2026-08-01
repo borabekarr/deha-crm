@@ -14,7 +14,7 @@ import './TaskCard.css'
 import { useState, useRef, useCallback, Fragment } from 'react'
 import { useTween, useCountdownRef, useKeydownRef, fmtShort, competeCount } from './task-card-hook'
 import { iconClass } from '../../../lib/iconClass'
-import { useProximityGroup } from '@/lib/hooks'
+import { useProximityGroup, useSquircle } from '@/lib/hooks'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -602,7 +602,18 @@ function TaskDetailsPopover({
   const [now, setNow] = useState(Date.now)
   const [toast, setToast] = useState<string | null>(null)
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const tpCardRef = useProximityGroup<HTMLElement>()
+  // Calendar-popover canon (Step 5/7): outer shell squircle 36, inner card
+  // squircle 28 -- see .tp-outer / .tp-card in TaskCard.css.
+  const tpOuterRef = useSquircle<HTMLDivElement>()
+  const tpCardProximityRef = useProximityGroup<HTMLElement>()
+  const tpCardSquircleRef = useSquircle<HTMLElement>()
+  const tpCardRef = useCallback(
+    (el: HTMLElement | null) => {
+      tpCardProximityRef(el)
+      tpCardSquircleRef(el)
+    },
+    [tpCardProximityRef, tpCardSquircleRef],
+  )
 
   // Deadline computed once per task (title-keyed). Stored in state so it can
   // be read during render without a ref. The task key ref tracks which task
@@ -683,7 +694,7 @@ function TaskDetailsPopover({
       className={'tp-overlay' + (open ? ' open' : '')}
       onClick={onClose}
     >
-      <div className="tp-outer" onClick={e => e.stopPropagation()}>
+      <div className="tp-outer" ref={tpOuterRef} data-squircle="on" onClick={e => e.stopPropagation()}>
         <aside
           ref={tpCardRef}
           className="tp-card"
@@ -853,7 +864,6 @@ export default function TaskCard() {
               key={card.title}
               className={`task ${card.cls}`}
               style={{ animationDelay: card.delay, '--tag': card.tag } as React.CSSProperties}
-              data-proximity
               onClick={() => openTask(buildTask(card))}
             >
               <div className="tag-banner">

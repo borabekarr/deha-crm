@@ -28,10 +28,14 @@ handouts/
 memory/
 .archive/
 skills-lock.json
+# Knowledge vault (symlinked into claude-code-system, same as .claude/)
+knowledge
+MASTER-INDEX.md
 
 # Logs
 logs
 *.log
+debt/*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -70,6 +74,7 @@ packages/*/node_modules
 apps/web/test-results/
 apps/web/playwright-report/
 test-results/
+/test-results/
 probe3.mjs
 
 # rit3zh reference clones

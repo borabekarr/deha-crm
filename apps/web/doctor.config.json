@@ -1,6 +1,6 @@
 {
   "$schema": "https://react.doctor/schema.json",
-  "$comment": "no-tiny-text override for design-system showcase: 10px Micro Label is a documented, sanctioned step of the type scale (see TypeScale.tsx), not an accessibility bug. Suppression approved by Bora 2026-07-12. Scoped to this directory only via ignore.overrides so genuinely-too-small text elsewhere still gets flagged. TaskBoard is the visual-locked flagship board; split deferred by Bora 2026-07-16 (regression risk on animation wiring outweighs readability gain). div+role=\"button\" a11y pattern follows the WTC in-repo precedent; real <button> conversion rejected 2026-07-16 (visual-locked DS, nested-interactive semantics); keyboard parity implemented via onKeyDown.",
+  "$comment": "no-tiny-text override for design-system showcase: 10px Micro Label is a documented, sanctioned step of the type scale (see TypeScale.tsx), not an accessibility bug. Suppression approved by Bora 2026-07-12. Scoped to this directory only via ignore.overrides so genuinely-too-small text elsewhere still gets flagged. TaskBoard is the visual-locked flagship board; split deferred by Bora 2026-07-16 (regression risk on animation wiring outweighs readability gain). div+role=\"button\" a11y pattern follows the WTC in-repo precedent; real <button> conversion rejected 2026-07-16 (visual-locked DS, nested-interactive semantics); keyboard parity implemented via onKeyDown. 2026-08-01 (PR #59): render-helper no-render-in-render suppressed on Calendar/WorkflowAddElements (visual-locked flagship, child-component conversion risks key/animation regressions); no-long-transition-duration suppressed on DynamicIslandReader (1800ms diShine is a deliberate infinite ambient shimmer, not a one-shot transition); use-lazy-motion suppressed on DragDismissSheet (sole framer-motion consumer in the DS, LazyMotion provider not worth it for one showcase component); DragDismissSheet added to prefer-tag-over-role list for the decorative full-bleed scrim role=button.",
   "ignore": {
     "overrides": [
       {
@@ -16,9 +16,25 @@
           "src/components/design-system/calendar/Calendar.tsx",
           "src/components/design-system/file-folder/FileFolder.tsx",
           "src/components/design-system/leads-table/LeadsTable.tsx",
-          "src/components/design-system/week-calendar/WeekCalendar.tsx"
+          "src/components/design-system/week-calendar/WeekCalendar.tsx",
+          "src/components/design-system/drag-dismiss-sheet/DragDismissSheet.tsx"
         ],
         "rules": ["react-doctor/prefer-tag-over-role"]
+      },
+      {
+        "files": [
+          "src/components/design-system/calendar/Calendar.tsx",
+          "src/components/design-system/workflow-add-elements/WorkflowAddElements.tsx"
+        ],
+        "rules": ["react-doctor/no-render-in-render"]
+      },
+      {
+        "files": ["src/components/design-system/dynamic-island-reader/DynamicIslandReader.tsx"],
+        "rules": ["react-doctor/no-long-transition-duration"]
+      },
+      {
+        "files": ["src/components/design-system/drag-dismiss-sheet/DragDismissSheet.tsx"],
+        "rules": ["react-doctor/use-lazy-motion"]
       }
     ]
   }

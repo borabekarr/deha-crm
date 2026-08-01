@@ -104,8 +104,8 @@ html.dark .nf-shell {
   transition:
     transform calc(var(--duration-base, 160ms) * var(--anim-mult, 1)) var(--ease-spring, cubic-bezier(.34,1.56,.64,1)),
     box-shadow calc(var(--duration-base, 160ms) * var(--anim-mult, 1)) var(--ease-out, cubic-bezier(.22,1,.36,1)),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .nf-shuffle .material-symbols-outlined { font-size: 16px; }
 /* transform:scale(1.03) removed on wiring proximity here -- it would double

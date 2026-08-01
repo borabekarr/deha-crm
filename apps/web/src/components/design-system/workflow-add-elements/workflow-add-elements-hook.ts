@@ -8,13 +8,11 @@
  *  - Menu viewport clamping: open the Add Elements panel at the right-click
  *    position, clamped so it never bleeds off-screen.
  *  - Nodes flyout positioning: show the secondary panel to the right of the
- *    primary panel, aligned to the hovered category row, with viewport clamping.
- *  - Segmented control pill: wire the sliding pill via the shared segRef
- *    callback ref from controls-hook.ts (re-exported for convenience).
+ *    primary panel, top-aligned with it, with viewport clamping.
+ *  - Segmented control pill: the component drives it directly via
+ *    usePillSpring (src/lib/motion-spring.ts), not the shared CSS-transition
+ *    segRef — see WorkflowAddElements.tsx for the wiring.
  */
-
-// Re-export the shared seg pill wiring so the component only needs one import.
-export { segRef, cleanupSeg } from '../controls/controls-hook'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -72,20 +70,20 @@ export function clampAEPosition(
 
 /**
  * Compute shell-relative `{left, top}` for the Nodes flyout panel.
- * Places it to the right of the Add Elements outer element, vertically aligned
- * with the hovered category row. Matches the showNodes() logic in the source.
+ * Anchored immediately to the right of the Add Elements outer element,
+ * top-aligned with it (never row-relative — a per-row anchor drifted the
+ * flyout out of the "immediately adjacent, top-aligned" spec as the user
+ * hovered further down the list). Matches the showNodes() logic in the source.
  *
  * All returned coords are relative to shellEl (for `position: absolute`).
  * When shellEl is not provided, returns viewport-absolute coords (legacy).
  */
 export function clampNodesPosition(
   aeOuterEl: HTMLElement,
-  itemEl: HTMLElement,
   nodesEl: HTMLElement,
   shellEl?: HTMLElement | null,
 ): MenuPos {
   const aeRect = aeOuterEl.getBoundingClientRect()
-  const itemRect = itemEl.getBoundingClientRect()
   const nw = nodesEl.offsetWidth
   const nh = nodesEl.offsetHeight
 
@@ -93,13 +91,13 @@ export function clampNodesPosition(
   const sw = shellEl ? shellEl.offsetWidth : window.innerWidth
   const sh = shellEl ? shellEl.offsetHeight : window.innerHeight
 
-  // Shell-relative x: to the right of the AE panel
+  // Shell-relative x: immediately to the right of the AE panel
   let nx = (aeRect.right - shellRect.left) + 8
   if (nx + nw > sw - 10) nx = (aeRect.left - shellRect.left) - nw - 8
   if (nx < 10) nx = 10
 
-  // Shell-relative y: aligned with the hovered row
-  let ny = (itemRect.top - shellRect.top) - 10
+  // Shell-relative y: top-aligned with the AE panel
+  let ny = aeRect.top - shellRect.top
   if (ny + nh > sh - 10) ny = sh - nh - 10
   if (ny < 10) ny = 10
 

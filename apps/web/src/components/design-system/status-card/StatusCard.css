@@ -5,7 +5,7 @@
   background: var(--shell-bg, #D9D9D9);
   border-radius: 36px;
   box-shadow: 0 16px 56px rgba(17,17,17,.14), 0 3px 10px rgba(17,17,17,.07);
-  transition: transform calc(200ms * var(--anim-mult, 1)) var(--ease-spring-firm);
+  transition: transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-spring-firm);
 }
 html.dark .sc-stage { background: var(--shell-bg, #0A0A0A); box-shadow: 0 16px 56px rgba(0,0,0,.42), 0 3px 10px rgba(0,0,0,.3); }
 
@@ -19,8 +19,8 @@ html.dark .sc-stage { background: var(--shell-bg, #0A0A0A); box-shadow: 0 16px 5
   filter:
     drop-shadow(0 16px 56px rgba(17,17,17,.14))
     drop-shadow(0 3px 10px rgba(17,17,17,.07));
-  transition: filter calc(200ms * var(--anim-mult, 1)) var(--ease-spring-firm),
-    transform calc(200ms * var(--anim-mult, 1)) var(--ease-spring-firm);
+  transition: filter calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-spring-firm),
+    transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-spring-firm);
 }
 html.dark .sc-stage[data-squircle="on"] {
   filter:
@@ -77,7 +77,7 @@ html.dark .sc-card[data-squircle="on"] {
 /* Step 9 (whole-composite hover/press): scale the stationary outer .sc-stage
    itself (not just .sc-header) so the grey shell + white card + ring all
    move as one unit. :has() reaches up from the pressed inner card. */
-.sc-stage:hover { transform: scale(1.006); }
+.sc-stage:hover { transform: scale(1.007); }
 .sc-stage:has(.sc-card.is-pressed) { transform: scale(.985); transition-duration: calc(90ms * var(--anim-mult, 1)); }
 
 /* ---- header ---- */
@@ -87,7 +87,7 @@ html.dark .sc-card[data-squircle="on"] {
   width: 100%; padding: 13px 14px;
   background: transparent; border: none; cursor: pointer;
   font-family: inherit; text-align: left;
-  transition: transform calc(200ms * var(--anim-mult, 1)) var(--ease-spring-firm),
+  transition: transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-spring-firm),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
@@ -111,7 +111,7 @@ html.dark .sc-card[data-squircle="on"] {
 .sc-chev {
   flex: none; display: grid; place-items: center; color: var(--gray-400);
   width: 20px; height: 20px; border-radius: 6px;
-  transition: transform calc(340ms * var(--anim-mult, 1)) var(--ease-spring-firm), background calc(150ms * var(--anim-mult, 1)), color calc(150ms * var(--anim-mult, 1));
+  transition: transform calc(340ms * var(--anim-mult, 1)) var(--ease-spring-firm), background calc(var(--duration-150) * var(--anim-mult, 1)), color calc(var(--duration-150) * var(--anim-mult, 1));
 }
 .sc-card[data-open="true"] .sc-chev { transform: rotate(180deg); }
 .sc-header:hover .sc-chev { background: var(--gray-100); color: var(--fg2); }
@@ -127,7 +127,7 @@ html.dark .sc-ripple { background: rgba(100,116,139,.30); }
 @keyframes scRipple { to { transform: translate(-50%, -50%) scale(34); opacity: 0; } }
 
 /* ---- collapse ---- */
-.sc-collapse { display: grid; grid-template-rows: 0fr; transition: grid-template-rows calc(420ms * var(--anim-mult, 1)) var(--ease-spring-strong); }
+.sc-collapse { display: grid; grid-template-rows: 0fr; transition: grid-template-rows calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-spring-strong); }
 .sc-collapse[data-open="true"] { grid-template-rows: 1fr; }
 .sc-collapse-inner { overflow: hidden; min-height: 0; padding: 0 14px; }
 .sc-card[data-open="true"] .sc-collapse-inner { padding-bottom: 12px; }
@@ -147,21 +147,21 @@ html.dark .sc-ripple { background: rgba(100,116,139,.30); }
   background: var(--card-bg); border: 1px solid var(--border-hairline);
   color: var(--fg2); font-family: inherit; font-size: 11px; font-weight: var(--weight-semibold);
   cursor: pointer; white-space: nowrap;
-  transition: background calc(160ms * var(--anim-mult, 1)), border-color calc(160ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) var(--ease-spring-firm), color calc(160ms * var(--anim-mult, 1)),
+  transition: background calc(var(--duration-base) * var(--anim-mult, 1)), border-color calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-spring-firm), color calc(var(--duration-base) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
-.sc-chip:hover { background: var(--gray-50); border-color: var(--gray-300); transform: translateY(-1px); }
+.sc-chip:hover { background: var(--gray-50); border-color: var(--gray-300); }
 html.dark .sc-chip:hover { background: color-mix(in srgb, #fff 8%, var(--card-bg)); border-color: color-mix(in srgb, #fff 18%, transparent); }
 .sc-chip:active { transform: translateY(0) scale(.97); }
-.sc-chip-ico { display: grid; place-items: center; color: var(--fg4); transition: color calc(160ms * var(--anim-mult, 1)); }
+.sc-chip-ico { display: grid; place-items: center; color: var(--fg4); transition: color calc(var(--duration-base) * var(--anim-mult, 1)); }
 .sc-chip:hover .sc-chip-ico { color: var(--fg2); }
 .sc-chip.is-active:hover .sc-chip-ico { color: var(--chip-accent); }
 .sc-chip-lbl { font-variant-numeric: tabular-nums; }
 .sc-chip-trail {
   display: inline-flex; align-items: center; max-width: 0; opacity: 0; overflow: hidden;
   color: var(--chip-accent);
-  transition: max-width calc(200ms * var(--anim-mult, 1)) ease, opacity calc(200ms * var(--anim-mult, 1)) ease, margin-left calc(200ms * var(--anim-mult, 1)) ease;
+  transition: max-width calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade), opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade), margin-left calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .sc-chip.is-active:hover .sc-chip-trail { max-width: 20px; opacity: 1; margin-left: 2px; }
 .sc-chip.is-copied { border-color: color-mix(in srgb, var(--brand-primary) 45%, var(--border-hairline)); background: var(--brand-primary-50); }
@@ -169,9 +169,9 @@ html.dark .sc-chip:hover { background: color-mix(in srgb, #fff 8%, var(--card-bg
 .sc-chip-copied {
   position: absolute; inset: 0; display: inline-flex; align-items: center; justify-content: center; gap: 5px;
   color: var(--brand-primary); font-weight: var(--weight-bold);
-  animation: scPop calc(300ms * var(--anim-mult, 1)) var(--ease-spring);
+  animation: scPop calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-spring);
 }
-.sc-chip-copied.is-exiting { animation: scPopOut calc(300ms * var(--anim-mult, 1)) var(--ease-exit-soft) forwards; }
+.sc-chip-copied.is-exiting { animation: scPopOut calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-exit-soft) forwards; }
 @keyframes scPop { from { transform: scale(.8); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes scPopOut { from { transform: none; opacity: 1; } to { transform: scale(.8); opacity: 0; } }
 
@@ -193,7 +193,7 @@ html.dark .sc-chip.is-copied { background: color-mix(in srgb, var(--brand-primar
   padding: 6px 10px; border-radius: 8px; white-space: nowrap;
   opacity: 0; pointer-events: none; z-index: 6;
   box-shadow: 0 10px 24px -8px rgba(17,17,17,.45);
-  transition: opacity calc(160ms * var(--anim-mult, 1)) ease, transform calc(160ms * var(--anim-mult, 1)) var(--ease-spring-firm);
+  transition: opacity calc(var(--duration-base) * var(--anim-mult, 1)) ease, transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring-firm);
 }
 .sc-chip:hover .sc-tip { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
 .sc-tip-arrow { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: 0; height: 0; border: 5px solid transparent; border-top-color: var(--gray-900); }
@@ -207,7 +207,7 @@ html.dark .sc-tip-arrow { border-top-color: #232323; }
 .sk::after {
   content: ''; position: absolute; inset: 0; transform: translateX(-100%);
   background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gray-300) 60%, transparent), transparent);
-  animation: scShimmer 1.3s infinite;
+  animation: scShimmer calc(1.3s * var(--anim-mult, 1)) infinite;
 }
 @keyframes scShimmer { 100% { transform: translateX(100%); } }
 .sk-ico { width: 32px; height: 32px; border-radius: 9px; flex: none; }

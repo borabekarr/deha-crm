@@ -51,8 +51,18 @@
   transition:
     background calc(150ms * var(--anim-mult, 1)),
     transform calc(120ms * var(--anim-mult, 1)) var(--ease-out),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+}
+
+/* Calmer proximity: local caps below the ambient hover-tokens.css ramp,
+   same override mechanism as Leaderboard's .row --hover-scale-max. */
+.wp-btn[data-proximity],
+.wp-update-btn[data-proximity],
+.wp-edited[data-proximity],
+.wp-action[data-proximity] {
+  --hover-scale-max: 1.02;
+  --hover-brightness-max: 1.025;
 }
 
 .wp-btn .wp-chevron {
@@ -222,8 +232,8 @@ html.dark .wp-popover[data-squircle="on"] {
   transition:
     background calc(150ms * var(--anim-mult, 1)),
     transform calc(100ms * var(--anim-mult, 1)) var(--ease-out),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 
 /* Last edited row */
@@ -234,7 +244,7 @@ html.dark .wp-popover[data-squircle="on"] {
   padding: 14px 18px;
   border-top: 1px solid #F5F5F5;
   cursor: pointer;
-  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out);
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out);
 }
 .wp-edited:hover { background: var(--fp-hover); }
 .wp-edited:active { transform: scale(0.97); }
@@ -242,9 +252,9 @@ html.dark .wp-popover[data-squircle="on"] {
 /* Proximity: append scale/filter channels (existing transition untouched). */
 .wp-edited[data-proximity] {
   transition:
-    background calc(var(--duration-fast) * var(--anim-mult, 1)),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 
 .wp-edited-left {
@@ -273,7 +283,7 @@ html.dark .wp-popover[data-squircle="on"] {
   padding: 11px 18px;
   cursor: pointer;
   background: transparent;
-  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out);
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out);
 }
 .wp-action:hover {
   background: var(--fp-hover);
@@ -284,9 +294,9 @@ html.dark .wp-popover[data-squircle="on"] {
 /* Proximity: append scale/filter channels (existing transition untouched). */
 .wp-action[data-proximity] {
   transition:
-    background calc(var(--duration-fast) * var(--anim-mult, 1)),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 
 .wp-action-left {

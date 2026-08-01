@@ -5,7 +5,7 @@ body { background: #E4E8ED; font-family: 'Montserrat', sans-serif; }
 .cal-shell {
   position: relative;
   background: var(--shell-bg, #D4DCE8);
-  border-radius: 28px;
+  border-radius: 36px;
   padding: 10px;
   box-shadow: 0 10px 30px rgba(17,17,17,0.12), 0 2px 8px rgba(17,17,17,0.06);
   background-image: none;
@@ -19,9 +19,11 @@ html.dark .cal-shell {
 }
 /* Squircle conversion (Step 7): outer shell is a decorative frame only —
    default ::before/::after cancelled, dark-only ring re-enabled as a solid
-   line (mirrors .cal-ep-customer-outer, css:420-434). */
+   line (mirrors .cal-ep-customer-outer, css:420-434).
+   Corner pair (Step 5): concentric outer/inner canon, mirrors Cards.css
+   .concentric-demo-outer/-inner — outer 36 / inner 28 (.cal-panel below). */
 .cal-shell[data-squircle="on"] {
-  --corner-radius: 28px;
+  --corner-radius: 36px;
 }
 .cal-shell[data-squircle="on"]::before,
 .cal-shell[data-squircle="on"]::after {
@@ -42,9 +44,16 @@ html.dark .cal-shell[data-squircle="on"]::before {
 .cal-panel {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-radius: var(--card-radius);
+  border-radius: 28px;
   box-shadow: inset 0 0 0 1px rgba(17,17,17,0.04);
   overflow: hidden;
+}
+/* Squircle conversion (Step 5): inner half of the concentric 36/28 pair;
+   shared [data-squircle="on"] recipe in _shared-feedback.css drops the
+   border/box-shadow and default-suppresses ::before/::after — no line in
+   either mode. */
+.cal-panel[data-squircle="on"] {
+  --corner-radius: 28px;
 }
 
 /* ── Header (inside panel) ── */
@@ -57,12 +66,12 @@ html.dark .cal-shell[data-squircle="on"]::before {
 .cal-month-yr { font-size: 20px; font-weight: 900; color: #111111; letter-spacing: -0.02em; }
 .cal-count { background: #ECECEC; color: #6B6B6B; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 9999px; }
 .cal-actions { display: flex; gap: 5px; align-items: center; }
-.cal-today-btn { background: #111111; border: 1px solid transparent; border-radius: 9999px; padding: 6px 14px; font-family: 'Montserrat'; font-size: 12px; font-weight: 800; color: #fff; cursor: pointer; transition: background calc(150ms * var(--anim-mult, 1)), color calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) var(--ease-out); box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.22); }
+.cal-today-btn { background: #111111; border: 1px solid transparent; border-radius: 9999px; padding: 6px 14px; font-family: 'Montserrat'; font-size: 12px; font-weight: 800; color: #fff; cursor: pointer; transition: background calc(var(--duration-150) * var(--anim-mult, 1)), color calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out); box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.22); }
 .cal-today-btn:hover { background: #1C1C1C; }
 .cal-today-btn:active { transform: scale(0.94); }
 .cal-today-btn.is-today { background: #ECECEC; color: #111111; border-color: #D4D4D4; box-shadow: inset 0 2px 4px rgba(0,0,0,0.10), inset 0 1px 2px rgba(0,0,0,0.06); }
 .cal-today-btn.is-today:hover { background: #D8E0EA; }
-.cal-nav-btn { background: #fff; border: 1px solid #ECECEC; border-radius: 50%; width: 30px; height: 30px; display: grid; place-items: center; cursor: pointer; transition: background calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) var(--ease-out); box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgba(0,0,0,0.04); }
+.cal-nav-btn { background: #fff; border: 1px solid #ECECEC; border-radius: 50%; width: 30px; height: 30px; display: grid; place-items: center; cursor: pointer; transition: background calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out); box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgba(0,0,0,0.04); }
 .cal-nav-btn:hover { background: #FAFAFA; }
 .cal-nav-btn:active { transform: scale(0.88); }
 .cal-nav-btn .material-icons { font-size: 17px; color: #6B6B6B; }
@@ -74,21 +83,46 @@ html.dark .cal-shell[data-squircle="on"]::before {
 /* ── Grid ── */
 .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); padding: 4px 4px 8px; }
 
+/* ── Direction-aware header switch (motion-tabs pattern) ──
+   .cal-grid-stack carries --gdx (travel distance+sign, set inline from
+   monthDir); the departing month is an absolute exit-overlay reading the
+   same --gdx so both travel together, sequenced not crossfaded (enter
+   delayed until the exit is most of the way through). */
+.cal-grid-stack { position: relative; }
+.cal-grid-exit {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  animation: cal-grid-exit-travel calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out) both;
+}
+.cal-grid-enter {
+  animation: cal-grid-enter-travel calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out) calc(130ms * var(--anim-mult, 1)) both;
+}
+@keyframes cal-grid-enter-travel {
+  from { opacity: 0; transform: translateX(var(--gdx, 18px)); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes cal-grid-exit-travel {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(calc(var(--gdx, 18px) * -1)); }
+}
+
 /* ── Cell ── */
 .cal-cell {
   display: flex; flex-direction: column; align-items: center;
   padding: 3px 2px 5px; cursor: pointer; border-radius: 10px; user-select: none;
 }
-/* No background on the whole cell — hover scoped to number only */
+/* No background on the whole cell — hover scoped to number only.
+   Fill token matches the global option hover (fab/Fab.css .fab-item):
+   var(--fp-hover), 150ms, zero delay, resolves per-mode on its own. */
 .cal-date-num {
   width: 30px; height: 30px; border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
   font-size: 14px; font-weight: 600; color: #111111;
-  transition: background calc(140ms * var(--anim-mult, 1)), transform calc(110ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade) 0ms, transform calc(110ms * var(--anim-mult, 1)) var(--ease-out);
 }
 .cal-cell.other-month .cal-date-num { color: #D4D4D4; font-weight: 500; }
 /* Hover: only non-selected, non-other-month cells */
-.cal-cell:not(.other-month):not(.selected):hover .cal-date-num { background: #F5F5F5; }
+.cal-cell:not(.other-month):not(.selected):hover .cal-date-num { background: var(--fp-hover); }
 /* Click animation */
 .cal-cell:active .cal-date-num { transform: scale(0.85); background: #ECECEC !important; }
 .cal-cell.selected:active .cal-date-num { background: #111111 !important; }
@@ -113,17 +147,26 @@ html.dark .cal-dot-more { color: #6B6B6B; }
 /* ── Events ── */
 .cal-events { padding: 14px 12px 10px; position: relative; }
 .cal-ev-label { font-size: 10px; font-weight: 700; color: #A1A1A1; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
-.cal-ev-item { display: flex; align-items: center; width: 100%; padding: 10px 2px; border: 0; border-bottom: 1px solid #FAFAFA; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; appearance: none; transition: transform calc(120ms * var(--anim-mult, 1)) var(--ease-out); }
-.cal-ev-item:active { transform: scale(0.985); }
+/* ROOT CAUSE (broken hover): background never appeared in the transition
+   list below, so the :hover fill (previously #FAFAFA, set further down)
+   snapped in/out instantly instead of fading — reads as glitchy next to
+   every other option's smooth fill. Fix: border-radius promoted to a base
+   property (was hover-only, causing a corner-radius pop) and the option
+   converges on the global hover (fab/Fab.css .fab-item): background
+   var(--fp-hover), 150ms zero-delay fade, press scale(0.97). */
+.cal-ev-item { display: flex; align-items: center; width: 100%; padding: 10px 2px; border: 0; border-bottom: 1px solid #FAFAFA; border-radius: 8px; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; appearance: none; transition: transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade) 0ms; }
+.cal-ev-item:hover { background: var(--fp-hover); }
+.cal-ev-item:active { transform: scale(0.97); }
 .cal-ev-item:last-of-type { border-bottom: none; }
 /* Proximity: own `transform` transition (0,1,0) beats hover-tokens.css's
    [data-proximity]x3 fallback; scale + filter channels added here so the
    engine's --prox mapping doesn't snap. */
 .cal-ev-item[data-proximity] {
   transition:
-    transform calc(120ms * var(--anim-mult, 1)) var(--ease-out),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out),
+    background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade) 0ms,
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .cev-left { display: flex; align-items: center; gap: 8px; flex: 1; overflow: hidden; }
 .cev-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
@@ -143,18 +186,22 @@ html.dark .cal-dot-more { color: #6B6B6B; }
 }
 .cev-badge .material-icons { font-size: 12px; color: rgba(255,255,255,0.85); }
 .cal-no-events { font-size: 13px; font-weight: 500; color: #D4D4D4; padding: 6px 0 4px; }
-.cal-add-row { display: flex; align-items: center; gap: 10px; padding: 10px 2px 4px; cursor: pointer; opacity: 0.7; border-radius: 8px; transition: opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade), background calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade); }
-.cal-add-row:hover { opacity: 1; background: #FAFAFA; }
-html.dark .cal-add-row:hover { background: rgba(255,255,255,0.05); }
+/* Bottom option of .cal-events — converges on the global option hover
+   (fab/Fab.css .fab-item): background var(--fp-hover), 150ms zero-delay
+   fade, press scale(0.97). The idle 0.7 opacity ghost-affordance is kept
+   (pre-existing, not part of the broken-hover report). */
+.cal-add-row { display: flex; align-items: center; gap: 10px; padding: 10px 2px 4px; cursor: pointer; opacity: 0.7; border-radius: 8px; transition: opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade), background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade) 0ms; }
+.cal-add-row:hover { opacity: 1; background: var(--fp-hover); }
+.cal-add-row:active { transform: scale(0.97); }
 /* Proximity: own `opacity` transition (0,1,0) beats hover-tokens.css's
    [data-proximity]x3 fallback; scale + filter channels appended so the
    engine's --prox mapping doesn't snap (mirrors .cal-ev-item[data-proximity]). */
 .cal-add-row[data-proximity] {
   transition:
-    opacity calc(150ms * var(--anim-mult, 1)),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    background calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade);
+    opacity calc(var(--duration-150) * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade) 0ms;
 }
 .cal-add-icon { width: 26px; height: 26px; border-radius: 50%; background: #F5F5F5; display: grid; place-items: center; color: #A1A1A1; }
 .cal-add-icon .material-icons { font-size: 16px; }
@@ -176,7 +223,7 @@ html.dark .cal-nav-btn:hover{ background:var(--gray-900); }
 html.dark .cal-nav-btn .material-icons{ color:var(--gray-400); }
 html.dark .cal-date-num{ color:var(--gray-100); }
 html.dark .cal-cell.other-month .cal-date-num{ color:var(--gray-600); }
-html.dark .cal-cell:not(.other-month):not(.selected):hover .cal-date-num{ background:rgba(255,255,255,.07); }
+/* dark day-cell hover now resolves via --fp-hover (hover-tokens.css html.dark) — no local override needed */
 html.dark .cal-cell:active .cal-date-num{ background:var(--gray-700) !important; }
 /* FIX 2: dark selected = white chip, black text, subtle shadow — no green */
 html.dark .cal-cell.selected .cal-date-num{ background:#FFFFFF; color:#111111; box-shadow:0 2px 8px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,1), inset 0 -2px 0 rgba(0,0,0,.08); }
@@ -194,14 +241,14 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
 /* Morph-in when switching days (event panel rebuilds → fresh nodes replay this) */
 @keyframes calEvIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes calLabelIn { from { opacity: 0; transform: translateY(-5px); filter: blur(2px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
-.cal-events-container > * { animation: calEvIn calc(.42s * var(--anim-mult, 1)) var(--ease-out) both; }
+.cal-events-container > * { animation: calEvIn calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out) both; }
 .cal-events-container > .cal-ev-label { animation: calLabelIn calc(.34s * var(--anim-mult, 1)) var(--ease-out) both; }
 .cal-events-container > *:nth-child(2) { animation-delay: calc(.05s * var(--anim-mult, 1)); }
-.cal-events-container > *:nth-child(3) { animation-delay: calc(.10s * var(--anim-mult, 1)); }
-.cal-events-container > *:nth-child(4) { animation-delay: calc(.15s * var(--anim-mult, 1)); }
-.cal-events-container > *:nth-child(5) { animation-delay: calc(.20s * var(--anim-mult, 1)); }
+.cal-events-container > *:nth-child(3) { animation-delay: calc(var(--duration-instant) * var(--anim-mult, 1)); }
+.cal-events-container > *:nth-child(4) { animation-delay: calc(var(--duration-150) * var(--anim-mult, 1)); }
+.cal-events-container > *:nth-child(5) { animation-delay: calc(var(--duration-200) * var(--anim-mult, 1)); }
 .cal-events-container > *:nth-child(6) { animation-delay: calc(.25s * var(--anim-mult, 1)); }
-.cal-events-container > *:nth-child(7) { animation-delay: calc(.30s * var(--anim-mult, 1)); }
+.cal-events-container > *:nth-child(7) { animation-delay: calc(var(--duration-slower) * var(--anim-mult, 1)); }
 .cal-events-container > *:nth-child(8) { animation-delay: calc(.35s * var(--anim-mult, 1)); }
 /* Selected day pill gives a little morph pop when it moves — FIX#1: softer overshoot 1.12→1.06, lower bezier tension */
 @keyframes calSelPop { 0% { transform: scale(.7); } 60% { transform: scale(1.06); } 100% { transform: scale(1); } }
@@ -212,7 +259,7 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
   position: fixed; inset: 0; z-index: 100;
   background: rgba(17,17,17,0.35);
   display: flex; align-items: center; justify-content: center;
-  animation: calPopBackdropIn calc(160ms * var(--anim-mult, 1)) ease both;
+  animation: calPopBackdropIn calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade) both;
 }
 @keyframes calPopBackdropIn { from { opacity: 0; } to { opacity: 1; } }
 
@@ -225,7 +272,7 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
   box-shadow: 0 24px 80px rgba(17,17,17,0.22), 0 4px 16px rgba(17,17,17,0.08),
               inset 0 1px 0 rgba(255,255,255,0.8);
   display: flex; flex-direction: column; gap: 16px;
-  animation: calPopIn calc(240ms * var(--anim-mult, 1)) var(--ease-out) both;
+  animation: calPopIn calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-out) both;
 }
 @keyframes calPopIn {
   from { opacity: 0; transform: scale(.93) translateY(10px); }
@@ -243,7 +290,7 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
   background: #FAFAFA; border: 1px solid #ECECEC; border-radius: 10px;
   padding: 9px 12px; font-family: 'Montserrat', sans-serif;
   font-size: 14px; font-weight: 500; color: #111111;
-  outline: none; transition: border-color calc(120ms * var(--anim-mult, 1));
+  outline: none; transition: border-color calc(var(--duration-fast) * var(--anim-mult, 1));
   width: 100%; box-sizing: border-box;
 }
 .cal-pop-input:focus { border-color: var(--brand-primary-500); }
@@ -252,8 +299,8 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
 .cal-pop-colors { display: flex; gap: 10px; }
 .cal-pop-color-btn {
   width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent;
-  cursor: pointer; transition: transform calc(120ms * var(--anim-mult, 1)) var(--ease-out),
-                                border-color calc(100ms * var(--anim-mult, 1));
+  cursor: pointer; transition: transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out),
+                                border-color calc(var(--duration-instant) * var(--anim-mult, 1));
   outline: none;
 }
 .cal-pop-color-btn:hover { transform: scale(1.12); }
@@ -265,7 +312,7 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
   background: #F5F5F5; border: none; border-radius: 10px;
   padding: 9px 16px; font-family: 'Montserrat', sans-serif;
   font-size: 13px; font-weight: 700; color: #6B6B6B;
-  cursor: pointer; transition: background calc(120ms * var(--anim-mult, 1));
+  cursor: pointer; transition: background calc(var(--duration-fast) * var(--anim-mult, 1));
 }
 .cal-pop-cancel:hover { background: #ECECEC; }
 .cal-pop-add {
@@ -274,7 +321,7 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
   font-size: 13px; font-weight: 800; color: var(--brand-on-primary);
   cursor: pointer;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.3), inset 0 -2px 0 rgba(0,0,0,.18);
-  transition: filter calc(120ms * var(--anim-mult, 1)), transform calc(100ms * var(--anim-mult, 1));
+  transition: filter calc(var(--duration-fast) * var(--anim-mult, 1)), transform calc(var(--duration-instant) * var(--anim-mult, 1));
 }
 .cal-pop-add:hover { filter: brightness(1.08); }
 .cal-pop-add:active { transform: scale(.97); }
@@ -289,41 +336,63 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
   -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
   display: flex; align-items: center; justify-content: center;
   visibility: hidden; opacity: 0; pointer-events: none;
-  transition: opacity calc(220ms * var(--anim-mult, 1)) ease,
-              visibility 0s linear calc(220ms * var(--anim-mult, 1));
+  transition: opacity calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade),
+              visibility 0s var(--ease-linear) calc(var(--duration-slow) * var(--anim-mult, 1));
 }
 .cal-ep-overlay.open {
   visibility: visible; opacity: 1; pointer-events: auto;
-  transition: opacity calc(220ms * var(--anim-mult, 1)) ease, visibility 0s;
+  transition: opacity calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade), visibility 0s;
 }
 
-/* Gray bezel outer shell — pop entrance via var(--ease-spring) */
+/* Gray bezel outer shell — pop entrance via var(--ease-spring). This popover
+   is the canon task-card popovers copy (Step 7): no strict hard frames,
+   concentric squircle 36/28 pair, dark-only ::before ring on the OUTER
+   shell (per cards/Cards.css .concentric-demo-outer, lines 132-143). */
 .cal-ep-outer {
+  position: relative;
   background: var(--shell-bg);
-  border-radius: 30px;
+  border-radius: 36px;
   padding: 10px;
   width: min(540px, calc(100vw - 28px));
   max-height: calc(100vh - 36px);
   display: flex; flex-direction: column;
   box-shadow: 0 32px 80px rgba(0,0,0,0.28), 0 6px 20px rgba(0,0,0,0.12);
   opacity: 0; transform: translateY(16px) scale(0.95);
-  transition: transform calc(320ms * var(--anim-mult, 1)) var(--ease-spring),
-              opacity calc(240ms * var(--anim-mult, 1)) ease;
+  transition: transform calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-spring),
+              opacity calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-fade);
+}
+.cal-ep-outer[data-squircle="on"] {
+  --corner-radius: 36px;
+}
+/* Dark-only external ring — shared recipe defaults ::before to content:none;
+   this re-enables it, mirroring Cards.css .concentric-demo-outer. */
+html.dark .cal-ep-outer[data-squircle="on"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--card-border);
+  clip-path: var(--squircle-border-path);
 }
 .cal-ep-overlay.open .cal-ep-outer {
   opacity: 1; transform: none;
 }
 html.dark .cal-ep-outer { background: #111111; }
 
-/* Card surface — matches .tp-card (1px solid card-border, 22px radius) */
+/* Card surface — inner half of the outer/inner canon pair (no strict hard
+   frame; border kept only as the pre-squircle fallback, dropped once
+   [data-squircle="on"] is live via the shared recipe). */
 .cal-ep-card {
   --ep-color: #3B82F6;
   background: var(--bg-card-solid);
   border: 1px solid var(--card-border);
-  border-radius: 22px;
+  border-radius: 28px;
   overflow: hidden;
   display: flex; flex-direction: column;
   min-height: 0;
+}
+.cal-ep-card[data-squircle="on"] {
+  --corner-radius: 28px;
 }
 html.dark .cal-ep-card { background: #1C1C1C; }
 
@@ -372,7 +441,7 @@ html.dark .cal-ep-card { background: #1C1C1C; }
   width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%;
   background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.32);
   cursor: pointer; display: grid; place-items: center; color: #fff; padding: 0;
-  transition: background calc(160ms * var(--anim-mult, 1));
+  transition: background calc(var(--duration-base) * var(--anim-mult, 1));
 }
 .cal-ep-close:hover { background: rgba(255,255,255,0.34); }
 .cal-ep-close .material-icons { font-size: 17px; }
@@ -501,7 +570,7 @@ html.dark .cal-ep-cust-sub { color: var(--fg3) !important; }
 .cal-ep-cust-act {
   width: 32px; height: 32px; flex-shrink: 0; border-radius: 10px; cursor: pointer;
   display: grid; place-items: center; border: 1px solid var(--border-hairline); background: var(--bg-chip); color: var(--fg2);
-  transition: background calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1));
+  transition: background calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1));
 }
 .cal-ep-cust-act:hover { background: var(--bg-card-solid); }
 .cal-ep-cust-act:active { transform: scale(0.93); }
@@ -564,7 +633,7 @@ html.dark .cal-ep-alert { background: #1C1C1C !important; border: 1px solid #232
   background-size: 9px 9px !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -2px 0 rgba(0,0,0,0.3) !important;
   text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-  transition: filter calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1));
+  transition: filter calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1));
 }
 .cal-ep-alert-cta:hover { filter: brightness(1.1); }
 .cal-ep-alert-cta:active { transform: scale(0.96); }
@@ -663,7 +732,7 @@ html.dark .cal-ep-tip { background: color-mix(in srgb, var(--fg1) 5%, var(--bg-c
   background-size: 9px 9px;
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.25);
   text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-  transition: filter calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)); }
+  transition: filter calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1)); }
 .cal-ep-tip-cta:hover { filter: brightness(1.06); }
 .cal-ep-tip-cta:active { transform: scale(0.96); }
 .cal-ep-tip-cta .material-icons { font-size: 14px; }
@@ -690,7 +759,7 @@ html.dark .cal-ep-category-label { color: var(--fg1); }
 .cal-ep-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .cal-ep-steps li { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: var(--fg3); }
 .cal-ep-step-tog { display: grid; place-items: center; background: none; border: none; cursor: pointer; padding: 0; color: var(--fg4); }
-.cal-ep-step-tog .material-icons { font-size: 17px; transition: color calc(140ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)); }
+.cal-ep-step-tog .material-icons { font-size: 17px; transition: color calc(var(--duration-140) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1)); }
 .cal-ep-step-tog:active .material-icons { transform: scale(0.85); }
 .cal-ep-steps li.done .cal-ep-step-tog .material-icons { color: var(--brand-primary); }
 .cal-ep-step-t { font-size: 12px; font-weight: 600; }
@@ -748,7 +817,7 @@ html.dark .cal-ep-age-chip { box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0
 .cal-ep-age-chip .material-icons { font-size: 14px; }
 .cal-ep-age-of { font-size: 11px; font-weight: 600; color: var(--fg4); }
 .cal-ep-age-meter { height: 7px; border-radius: 9999px; background: var(--bg-chip); overflow: hidden; box-shadow: inset 0 1px 2px rgba(17,17,17,0.08); }
-.cal-ep-age-meter i { display: block; height: 100%; border-radius: 9999px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.4); transition: width calc(200ms * var(--anim-mult, 1)) linear; }
+.cal-ep-age-meter i { display: block; height: 100%; border-radius: 9999px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.4); transition: width calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-linear); }
 
 /* ── SyncScore time table ──────────────────────────────────────────── */
 .cal-ep-sync { display: flex; flex-direction: column; gap: 8px; }
@@ -760,7 +829,7 @@ html.dark .cal-ep-age-chip { box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0
 .cal-ep-sync-row.peak { background: color-mix(in srgb, var(--brand-primary-500) 8%, var(--bg-chip)); border-radius: 8px; padding: 2px 6px; margin: 0 -6px; }
 .cal-ep-sync-hh { font-size: 11px; font-weight: 800; color: var(--fg3); font-variant-numeric: tabular-nums; min-width: 38px; }
 .cal-ep-sync-bar { flex: 1; height: 7px; border-radius: 9999px; background: var(--bg-chip); overflow: hidden; }
-.cal-ep-sync-bar i { display: block; height: 100%; border-radius: 9999px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.4); transition: width calc(200ms * var(--anim-mult, 1)) linear; }
+.cal-ep-sync-bar i { display: block; height: 100%; border-radius: 9999px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.4); transition: width calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-linear); }
 .cal-ep-sync-pct { font-size: 10.5px; font-weight: 800; font-variant-numeric: tabular-nums; min-width: 30px; text-align: right; }
 
 /* ── Dependency chain ──────────────────────────────────────────────── */
@@ -826,7 +895,7 @@ html.dark .cal-ep-chain-step { box-shadow: inset 0 1px 0 rgba(255,255,255,0.07);
   border: 1px solid var(--fbtn, #111111);
   padding: 6px 14px; border-radius: 9999px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1.5px 0 rgba(0,0,0,0.18), 0 0 10px -3px var(--fbtn, #111111);
-  transition: border-color calc(150ms * var(--anim-mult, 1)), color calc(150ms * var(--anim-mult, 1)), background calc(150ms * var(--anim-mult, 1)), filter calc(150ms * var(--anim-mult, 1));
+  transition: border-color calc(var(--duration-150) * var(--anim-mult, 1)), color calc(var(--duration-150) * var(--anim-mult, 1)), background calc(var(--duration-150) * var(--anim-mult, 1)), filter calc(var(--duration-150) * var(--anim-mult, 1));
 }
 .cal-ep-foot-btn .material-icons { color: #fff; font-size: 16px; }
 .cal-ep-foot-btn:hover { background: var(--fbtn, var(--brand-primary)); border-color: var(--fbtn, var(--brand-primary)); color: var(--brand-on-primary); filter: brightness(1.08); }
@@ -845,16 +914,15 @@ html.dark .cal-ep-foot-btn.primary .material-icons { color: #04231a; }
 .cal-ep-toast { position: absolute; left: 50%; bottom: 16px; transform: translate(-50%, 14px); z-index: 5;
   display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 800; color: #fff; background: #111111;
   padding: 9px 15px; border-radius: 9999px; box-shadow: 0 10px 24px -8px rgba(0,0,0,0.5); opacity: 0; pointer-events: none;
-  transition: opacity calc(220ms * var(--anim-mult, 1)), transform calc(220ms * var(--anim-mult, 1)); white-space: nowrap; }
+  transition: opacity calc(var(--duration-slow) * var(--anim-mult, 1)), transform calc(var(--duration-slow) * var(--anim-mult, 1)); white-space: nowrap; }
 .cal-ep-toast.show { opacity: 1; transform: translate(-50%, 0); }
 .cal-ep-toast .material-icons { font-size: 16px; color: var(--brand-primary-400); }
 
 /* ── Card must be position:relative for toast absolute positioning ── */
 .cal-ep-card { position: relative; }
 
-/* Event item gets pointer + chevron cue */
+/* Event item gets pointer cue (hover fill lives on the base .cal-ev-item rule above) */
 .cal-ev-item { cursor: pointer; }
-.cal-ev-item:hover { background: #FAFAFA; border-radius: 8px; }
 .cev-chevron { font-size: 16px; color: #D4D4D4; flex-shrink: 0; margin-left: auto; }
 
 /* Dark mode for event-detail popover */
@@ -871,7 +939,7 @@ html.dark .cal-ep-foot-btn.primary:hover { filter: brightness(0.96); background:
 html.dark .cal-ep-row-val { color: var(--gray-100); }
 html.dark .cal-ep-row-detail { color: #A1A1A1; }
 /* Fix #3: removed stale slate-700 override — dark non-primary footer btns stay emerald (set at .cal-ep-foot-btn dark rule above) */
-html.dark .cal-ev-item:hover { background: rgba(255,255,255,0.05); }
+/* dark .cal-ev-item hover now resolves via --fp-hover (hover-tokens.css html.dark) — no local override needed */
 
 /* Dark mode for task popover */
 html.dark .cal-popover { background: var(--gray-800); box-shadow: 0 24px 80px rgba(0,0,0,.5), 0 4px 16px rgba(0,0,0,.3); }
@@ -902,7 +970,7 @@ html.dark .cal-popover-backdrop { background: rgba(0,0,0,.55); }
   content: '';
   position: absolute; left: 0; right: 0; height: 30px;
   pointer-events: none; z-index: 2; opacity: 0;
-  transition: opacity calc(180ms * var(--anim-mult, 1)) ease;
+  transition: opacity calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .cal-ev-scroll-wrap::before {
   top: 0;
@@ -924,7 +992,7 @@ html.dark .cal-popover-backdrop { background: rgba(0,0,0,.55); }
   width: 3px; border-radius: 9999px;
   background: rgba(0,0,0,0.06);
   opacity: 0;
-  transition: opacity calc(200ms * var(--anim-mult, 1));
+  transition: opacity calc(var(--duration-200) * var(--anim-mult, 1));
 }
 [data-scroll="top"]    .cal-ev-scrollbar,
 [data-scroll="mid"]    .cal-ev-scrollbar,
@@ -934,8 +1002,8 @@ html.dark .cal-popover-backdrop { background: rgba(0,0,0,.55); }
 .cal-ev-scrollbar-thumb {
   position: absolute; right: 0; left: auto; width: 3px; border-radius: 9999px;
   background: #A1A1A1;
-  transition: top calc(50ms * var(--anim-mult, 1)) linear,
-              height calc(50ms * var(--anim-mult, 1)) linear;
+  transition: top calc(50ms * var(--anim-mult, 1)) var(--ease-linear),
+              height calc(50ms * var(--anim-mult, 1)) var(--ease-linear);
 }
 html.dark .cal-ev-scrollbar { background: rgba(255,255,255,0.08); }
 html.dark .cal-ev-scrollbar-thumb { background: #4A4A4A; }

@@ -43,7 +43,7 @@ html.dark .sgc-grid {
   display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 9999px;
   background: #111111; color: #fff; font-family: 'Montserrat'; font-size: 12px; font-weight: 800;
   box-shadow: 0 10px 30px rgba(17,17,17,0.3); pointer-events: none;
-  transition: opacity calc(240ms * var(--anim-mult, 1)), transform calc(320ms * var(--anim-mult, 1)) var(--ease-spring);
+  transition: opacity calc(var(--duration-240) * var(--anim-mult, 1)), transform calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-spring);
 }
 html.dark .sgc-toast { background: rgb(255 255 255); color: #111111; }
 .sgc-toast .material-symbols-outlined { font-size: 15px; }
@@ -109,7 +109,7 @@ html.dark .sg-inner::before {
 .sg-chart svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .sg-line { fill: none; stroke: var(--accent); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
   filter: drop-shadow(0 1px 5px var(--glow));
-  transition: stroke-width calc(220ms * var(--anim-mult, 1)), filter calc(220ms * var(--anim-mult, 1)); }
+  transition: stroke-width calc(var(--duration-slow) * var(--anim-mult, 1)), filter calc(var(--duration-slow) * var(--anim-mult, 1)); }
 .sg-dot {
   position: absolute; width: 11px; height: 11px; border-radius: 50%; background: var(--accent); z-index: 1;
   transform: translate(-50%, -50%); box-shadow: 0 0 0 4px var(--ring), 0 0 14px var(--glow2);
@@ -132,10 +132,10 @@ html.dark .sg-inner::before {
 }
 html.dark .sg-inner {
   background: var(--card-bg, #111111);
-  /* border-color inherits the uniform var(--card-border) ring; the old
-     border-top-color: rgba(255,255,255,.22) highlight was the asymmetric-ring
-     anti-pattern, removed for a uniform rim. */
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
+  /* Canon (corrected): inner surfaces carry no external line in dark mode --
+     the single ring lives on .sg-card's own dark ::before above. */
+  border: none;
+  box-shadow: none;
 }
 
 /* Squircle conversion (Step 15): inner of the .sg-card/.sg-inner concentric
@@ -179,7 +179,7 @@ html.dark .sg-avatar { color: #ECECEC; background: rgba(255,255,255,0.07); box-s
   font-size: 11.5px; font-weight: 700; color: var(--fg3, #6B6B6B);
   background: transparent; border: none; font-family: 'Montserrat'; padding: 3px 5px; border-radius: 9px;
   line-height: 1;
-  transition: transform calc(140ms * var(--anim-mult, 1)) var(--ease-spring),
+  transition: transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-spring),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
@@ -193,7 +193,7 @@ html.dark .sg-avatar { color: #ECECEC; background: rgba(255,255,255,0.07); box-s
   position: absolute; inset: 0; z-index: 6; border-radius: 24px; pointer-events: none;
   opacity: 0; background: rgba(255,255,255,0.10);
   -webkit-backdrop-filter: blur(0px); backdrop-filter: blur(0px);
-  transition: opacity calc(240ms * var(--anim-mult, 1)) ease, backdrop-filter calc(280ms * var(--anim-mult, 1)) ease, -webkit-backdrop-filter calc(280ms * var(--anim-mult, 1)) ease;
+  transition: opacity calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-fade), backdrop-filter calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-fade), -webkit-backdrop-filter calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .sg-card.filters-open .sg-scrim {
   opacity: 1; pointer-events: auto;
@@ -212,14 +212,14 @@ html.dark .sg-card.filters-open .sg-scrim { background: rgba(2,6,23,0.40); }
   transform: translate(-50%, calc(-50% + 12px)) scale(0.95);
   transform-origin: 50% 50%;
   pointer-events: none; visibility: hidden;
-  transition: opacity calc(240ms * var(--anim-mult, 1)) var(--ease-out-soft), transform calc(360ms * var(--anim-mult, 1)) var(--ease-out-soft), visibility 0s linear calc(360ms * var(--anim-mult, 1));
+  transition: opacity calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-out-soft), transform calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out-soft), visibility 0s var(--ease-linear) calc(var(--duration-sweep) * var(--anim-mult, 1));
 }
 html.dark .sg-rangepop {
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
 }
 .sg-card.filters-open .sg-rangepop {
   opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; visibility: visible;
-  transition: opacity calc(240ms * var(--anim-mult, 1)) var(--ease-out-soft), transform calc(360ms * var(--anim-mult, 1)) var(--ease-out-soft);
+  transition: opacity calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-out-soft), transform calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out-soft);
 }
 .sg-poplabel {
   display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -238,9 +238,9 @@ html.dark .sg-rangepop {
 .sg-rangepop .seg.vert { flex-direction: column; align-items: stretch; width: auto; border-radius: 14px; padding: 10px 4px !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.06); gap: 6px; }
 .sg-rangepop .seg.vert .seg-pill {
   left: 4px; right: 4px; width: auto; top: 10px; bottom: auto; height: 0; border-radius: 9999px;
-  transition: top calc(300ms * var(--anim-mult, 1)) var(--ease-out), height calc(300ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: top calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out), height calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out);
 }
-.sg-rangepop .seg.vert button { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 8px 16px; text-align: center; border-radius: 9999px; font-size: 12px; transition: color calc(200ms * var(--anim-mult, 1)), background calc(160ms * var(--anim-mult, 1)), transform calc(110ms * var(--anim-mult, 1)) var(--ease-out),
+.sg-rangepop .seg.vert button { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 8px 16px; text-align: center; border-radius: 9999px; font-size: 12px; transition: color calc(var(--duration-200) * var(--anim-mult, 1)), background calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(110ms * var(--anim-mult, 1)) var(--ease-out),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear; }
 .sg-rangepop .seg.vert button .material-symbols-outlined { font-size: 16px; }
@@ -248,12 +248,12 @@ html.dark .sg-rangepop {
 html.dark .sg-rangepop .seg.vert button:not(.active):hover { color: #fff; background: rgba(255,255,255,0.07); }
 .sg-rangepop .seg.vert button:active { transform: scale(0.96); }
 /* brief highlight pulse on the just-picked option */
-.sg-rangepop .seg.vert button.just-picked { animation: sg-pick calc(460ms * var(--anim-mult, 1)) var(--ease-spring); }
+.sg-rangepop .seg.vert button.just-picked { animation: sg-pick calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-spring); }
 @keyframes sg-pick { 0%{ transform: scale(0.96);} 45%{ transform: scale(1.04);} 100%{ transform: scale(1);} }
 
 /* "applying…" loader bar — collapses to zero height when idle so it adds no bottom space */
 /* ITEM 5 — speed reduced to ~450ms to match hook setTimeout */
-.sg-poploader { height: 0; border-radius: 9999px; margin: 0 6px; background: var(--bg-chip, #F5F5F5); overflow: hidden; opacity: 0; transition: opacity calc(160ms * var(--anim-mult, 1)) ease, height calc(200ms * var(--anim-mult, 1)) ease, margin calc(200ms * var(--anim-mult, 1)) ease; }
+.sg-poploader { height: 0; border-radius: 9999px; margin: 0 6px; background: var(--bg-chip, #F5F5F5); overflow: hidden; opacity: 0; transition: opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade), height calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade), margin calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade); }
 html.dark .sg-poploader { background: rgba(255,255,255,0.08); }
 .sg-poploader::after { content: ''; display: block; height: 100%; width: 0; border-radius: inherit; background: var(--accent); }
 .sg-rangepop.loading .sg-poploader { height: 3px; margin: 9px 6px 3px; opacity: 1; }
@@ -273,7 +273,7 @@ html.dark .sg-poploader { background: rgba(255,255,255,0.08); }
   padding: 4px 9px; line-height: 1;
   box-shadow: 0 1px 2px rgba(0,0,0,0.18);
   /* overshoot bounce on press -- same cubic as canonical .seg-pill transition */
-  transition: transform calc(140ms * var(--anim-mult, 1)) var(--ease-spring), box-shadow calc(160ms * var(--anim-mult, 1)), background calc(160ms * var(--anim-mult, 1)),
+  transition: transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-spring), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)), background calc(var(--duration-base) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
@@ -285,7 +285,7 @@ html.dark .sg-rangechip {
 .sg-rangechip .material-symbols-outlined {
   /* Fix 1: tight icon size, no align-self override needed in row layout */
   font-size: 14px; line-height: 1;
-  transition: transform calc(300ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: transform calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out);
 }
 /* leading icon -- fixed size, no rotation, line-height 1 for optical vertical centre */
 .sg-rangechip .sg-rangechip-icon { font-size: 13px; transition: none; line-height: 1; }
@@ -330,7 +330,7 @@ html.dark .sg-meter-track { background: rgba(255,255,255,0.08); box-shadow: inse
   background-image: linear-gradient(rgba(255,255,255,0.20) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.20) 1px, transparent 1px);
   background-size: 7px 7px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -1px 0 rgba(0,0,0,0.14);
-  transition: width calc(750ms * var(--anim-mult, 1)) var(--ease-out), background-color calc(300ms * var(--anim-mult, 1));
+  transition: width calc(750ms * var(--anim-mult, 1)) var(--ease-out), background-color calc(var(--duration-slower) * var(--anim-mult, 1));
 }
 /* four tick segments for an at-a-glance read */
 .sg-meter-track::after {
@@ -350,7 +350,7 @@ html.dark .sg-meter-track::after { background-image: linear-gradient(90deg, rgba
   background-image: radial-gradient(ellipse at top right, rgba(255,255,255,0.18) 0%, transparent 55%), linear-gradient(rgba(255,255,255,0.10) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.10) 1px, transparent 1px);
   background-size: cover, 14px 14px, 14px 14px;
   box-shadow: 0 8px 22px -8px var(--ctaglow), inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -2px 0 rgba(0,0,0,0.22), inset 0 0 0 1px rgba(255,255,255,0.14);
-  transition: filter calc(200ms * var(--anim-mult, 1)), transform calc(160ms * var(--anim-mult, 1)) var(--ease-spring), box-shadow calc(200ms * var(--anim-mult, 1)),
+  transition: filter calc(var(--duration-200) * var(--anim-mult, 1)), transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring), box-shadow calc(var(--duration-200) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
   /* note: filter already listed above (200ms channel) covers the incoming
      --prox brightness/drop-shadow filter -- no separate filter-instant
@@ -371,7 +371,7 @@ html.dark .sg-meter-track::after { background-image: linear-gradient(90deg, rgba
 .sg-cta.thinking::after {
   content: ''; position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,0.32) 50%, transparent 80%);
-  background-size: 220% 100%; animation: sg-sweep calc(1900ms * var(--anim-mult, 1)) linear infinite;
+  background-size: 220% 100%; animation: sg-sweep calc(1900ms * var(--anim-mult, 1)) var(--ease-linear) infinite;
 }
 @keyframes sg-sweep { 0% { background-position: 140% 0; } 100% { background-position: -140% 0; } }
 
@@ -379,12 +379,12 @@ html.dark .sg-meter-track::after { background-image: linear-gradient(90deg, rgba
 .sg-spin {
   width: 16px; height: 16px; flex-shrink: 0; border-radius: 50%;
   border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff;
-  animation: sg-rot calc(1100ms * var(--anim-mult, 1)) linear infinite;
+  animation: sg-rot calc(1100ms * var(--anim-mult, 1)) var(--ease-linear) infinite;
 }
 @keyframes sg-rot { to { transform: rotate(360deg); } }
 .sg-cta.done::after { display: none; }
 .sg-check { width: 16px; height: 16px; flex-shrink: 0; display: grid; place-items: center; }
-.sg-check .material-symbols-outlined { font-size: 17px; animation: sg-pop calc(360ms * var(--anim-mult, 1)) var(--ease-spring); }
+.sg-check .material-symbols-outlined { font-size: 17px; animation: sg-pop calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-spring); }
 @keyframes sg-pop { 0% { transform: scale(0.2); opacity: 0; } 60% { transform: scale(1.18); } 100% { transform: scale(1); opacity: 1; } }
 
 /* morphing step text — each line slides up + de-blurs into place */
@@ -402,7 +402,7 @@ html.dark .sg-meter-track::after { background-image: linear-gradient(90deg, rgba
 
 .sg-flash { position: absolute; inset: 0; z-index: 1; pointer-events: none; border-radius: 24px; opacity: 0;
   background: radial-gradient(ellipse at 50% 60%, var(--flashc) 0%, transparent 70%); }
-.sg-flash.go { animation: sg-flash calc(720ms * var(--anim-mult, 1)) ease-out; }
+.sg-flash.go { animation: sg-flash calc(720ms * var(--anim-mult, 1)) var(--ease-out-native); }
 @keyframes sg-flash { 0% { opacity: 0; } 20% { opacity: 1; } 100% { opacity: 0; } }
 
 .sg-card.lift { cursor: pointer; }
@@ -424,7 +424,7 @@ html.dark .sgc-grid .shell.zoom { border: none; }
 /* imperative tap class applied by onCardClick for genuine card-body presses */
 .sg-card.tap .sg-inner {
   transform: scale(0.99);
-  transition: transform 120ms ease;
+  transition: transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -98,7 +98,7 @@ function makeScaleEntranceRef(_animKey: string, isUnpin = false): (el: HTMLEleme
     // Set initial state (invisible, scaled down and shifted up)
     aug.style.transition = 'none'
     aug.style.opacity = '0'
-    aug.style.transform = 'translateY(-22px) scale(0.96)'
+    aug.style.transform = 'translateY(-14px) scale(0.98)'
     // Unpin: slide under siblings for the duration of the entrance.
     // z-index 0 + position:relative (set in CSS) keeps the unpinning element
     // BELOW siblings whose will-change:transform stacking context paints later.
@@ -245,10 +245,12 @@ export default function PinnedList({ items: initialItems = DEFAULT_ITEMS }: Pinn
     if (!target) return
 
     // Select easing BEFORE mutating state:
-    // PIN uses bounce/overshoot; UNPIN uses smooth spring.
+    // PIN uses a damped spring (light settle, no visible oscillation);
+    // UNPIN uses smooth spring. Both toned down from the prior heavy-bounce
+    // curve per "reduce animation power" feedback (was cubic-bezier(.34,1.7,.46,1)).
     flipEaseRef.current = target.pinned
       ? 'cubic-bezier(.22,1,.36,1)'   // unpin: smooth
-      : 'cubic-bezier(.34,1.7,.46,1)' // pin: bounce/overshoot
+      : 'var(--ease-bounce-soft, cubic-bezier(.34,1.32,.64,1))' // pin: damped spring
 
     // Snapshot all item positions (First in FLIP) before state mutation.
     snapRects(nodeRefs.current)

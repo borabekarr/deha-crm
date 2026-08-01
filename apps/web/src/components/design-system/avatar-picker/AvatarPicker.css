@@ -209,6 +209,15 @@
   overflow-y: visible;
   padding: 8px;
   box-sizing: border-box;
+  transition:
+    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
+    filter calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
+}
+
+/* Canon hover (task-card benchmark): scale(1.007) + modest drop-shadow ramp. */
+.ap-strip-wrap:hover {
+  transform: scale(1.007);
+  filter: drop-shadow(0 10px 15px rgba(17,17,17,0.10)) drop-shadow(0 2px 4px rgba(17,17,17,0.05));
 }
 
 /*
@@ -286,9 +295,10 @@
   flex-shrink: 0;
 }
 
+/* Calm proportionate variant of the canon hover, scaled for a 30px control. */
 .ap-edge-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 4px 10px rgba(17,17,17, 0.18);
+  transform: scale(1.03);
+  box-shadow: 0 3px 8px rgba(17,17,17, 0.14);
 }
 
 .ap-edge-btn:active { transform: scale(0.92); }
@@ -306,7 +316,7 @@
  * Optical centering: Material Symbols arrow_back_ios / arrow_forward_ios have
  * an asymmetric side-bearing. Nudge each icon to align visually.
  */
-.ap-edge--left .ap-edge-btn .material-symbols-outlined { margin-left: 2px; }
+.ap-edge--left .ap-edge-btn .material-symbols-outlined { margin-left: 3px; }
 .ap-edge--right .ap-edge-btn .material-symbols-outlined { margin-left: -2px; }
 
 /* ── Thumbnail buttons ── */
@@ -333,7 +343,7 @@
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 
-.ap-thumb:hover { opacity: 1; transform: scale(1.06); }
+.ap-thumb:hover { opacity: 1; transform: scale(1.02); }
 /* Hover ring reach kept well under half the 10px track gap so it can never
    touch a neighboring active thumb's ring (see .ap-thumb--on below). */
 .ap-thumb:hover:not(.ap-thumb--on) {

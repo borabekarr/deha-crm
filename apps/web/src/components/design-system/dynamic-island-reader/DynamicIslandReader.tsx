@@ -31,6 +31,11 @@ const ACCENTS: Record<DiAccent, { base: string; bright: string; glow: string }> 
   amber:   { base: '#F59E0B', bright: '#FBBF24', glow: 'rgba(245,158,11,0.55)' },
 }
 
+const DI_PCT_BASE: CSSProperties = {
+  flexShrink: 0, textAlign: 'right', fontSize: 14, fontWeight: 800,
+  letterSpacing: '-0.01em', fontVariantNumeric: 'tabular-nums',
+}
+
 // ---- article content -------------------------------------------------------
 const ARTICLE = {
   category: 'Craft',
@@ -406,7 +411,7 @@ function DynamicIsland({
                     strokeDasharray={2 * Math.PI * 8}
                     strokeDashoffset={2 * Math.PI * 8 * (1 - progress)}
                     transform="rotate(-90 10 10)"
-                    style={{ transition: RM ? 'none' : 'stroke-dashoffset 200ms ease' }}
+                    style={{ transition: RM ? 'none' : 'stroke-dashoffset calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade)' }}
                   />
                 </svg>
               </>
@@ -444,7 +449,7 @@ function DynamicIsland({
                     <span style={{
                       position: 'absolute', top: 0, bottom: 0, left: '-30%', width: 36,
                       background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
-                      animation: 'diShine 1.8s ease-in-out infinite',
+                      animation: 'diShine calc(1800ms * var(--anim-mult, 1)) var(--ease-in-out) infinite',
                     }} />
                   </div>
                 )}
@@ -467,19 +472,18 @@ function DynamicIsland({
                       style={RM ? {} : {
                         strokeDasharray: 28,
                         strokeDashoffset: 28,
-                        animation: 'diCheckDraw 360ms 120ms cubic-bezier(.65,0,.35,1) forwards',
+                        animation: 'diCheckDraw calc(360ms * var(--anim-mult, 1)) calc(120ms * var(--anim-mult, 1)) var(--ease-draw) forwards',
                       }}
                     />
                   </svg>
                 </div>
                 {celebrate && <Confetti accent={accent} />}
               </div>
-            ) : showMode === 'off' ? null : (
-              <span style={{
-                flexShrink: 0, minWidth: showMode === 'time' ? 54 : 38, textAlign: 'right',
-                fontSize: 14, fontWeight: 800, color: labelColor,
-                letterSpacing: '-0.01em', fontVariantNumeric: 'tabular-nums',
-              }}>
+            ) : showMode === 'off' || closing ? null : (
+              // Mounts only once the reverse Done badge (`closing`) has fully
+              // exited — di-pct-enter plays the entrance from that point,
+              // never overlapping the Done exit.
+              <span className={RM ? '' : 'di-pct-enter'} style={{ ...DI_PCT_BASE, minWidth: showMode === 'time' ? 54 : 38, color: labelColor }}>
                 {showMode === 'time' ? `${minsLeft} min` : `${pct}%`}
               </span>
             )}

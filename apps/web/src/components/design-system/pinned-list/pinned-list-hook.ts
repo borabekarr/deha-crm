@@ -113,7 +113,7 @@ export function useFLIPRefs() {
    *
    * @param id   - item identifier matching the key used in snapRects
    * @param ease - CSS timing function for the slide-back animation.
-   *               Pass cubic-bezier(.34,1.7,.46,1) for a bounce (PIN),
+   *               Pass var(--ease-bounce-soft) for a damped spring (PIN),
    *               or cubic-bezier(.22,1,.36,1) for a smooth slide (UNPIN).
    */
   function getFlipRef(id: string, ease: string = 'cubic-bezier(.22,1,.36,1)') {
@@ -133,9 +133,10 @@ export function useFLIPRefs() {
       playedIds.current.add(id)
 
       // Invert: jump to First position with a slight shrink so the play step
-      // scales 0.96 -> 1 alongside the slide (animated-list scale pop pattern).
+      // scales 0.98 -> 1 alongside the slide (animated-list scale pop pattern,
+      // damped from 0.96 per "reduce animation power" feedback).
       el.style.transition = 'none'
-      el.style.transform = `translate(${dx}px,${dy}px) scale(0.96)`
+      el.style.transform = `translate(${dx}px,${dy}px) scale(0.98)`
 
       // Play: animate back to Last (natural) position using the caller-supplied easing.
       const e = el as ElementWithTimers
@@ -143,7 +144,8 @@ export function useFLIPRefs() {
         cancelAnimationFrame(e.__plFlipRaf)
       }
       e.__plFlipRaf = requestAnimationFrame(() => {
-        el.style.transition = `transform calc(540ms * var(--anim-mult, 1)) ${ease}`
+        // Duration shortened one tier (was 540ms) per "reduce animation power" feedback.
+        el.style.transition = `transform calc(440ms * var(--anim-mult, 1)) ${ease}`
         el.style.transform = ''
 
         const onEnd = (ev: TransitionEvent) => {
