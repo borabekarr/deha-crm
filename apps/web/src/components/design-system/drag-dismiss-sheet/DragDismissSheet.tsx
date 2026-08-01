@@ -109,6 +109,8 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max)
 }
 
+const springDuration = () => readDurationSeconds('--duration-slow', 220) * readAnimMult()
+
 export default function DragDismissSheet() {
   const [open, setOpen] = useState(false)
   const y = useMotionValue(DEFAULT_SHEET_TRAVEL)
@@ -116,8 +118,6 @@ export default function DragDismissSheet() {
   const animRef = useRef<ReturnType<typeof animate> | null>(null)
 
   const sheetTravel = () => (sheetRef.current?.offsetHeight ?? DEFAULT_SHEET_TRAVEL) + CLOSED_MARGIN
-
-  const springDuration = () => readDurationSeconds('--duration-slow', 220) * readAnimMult()
 
   const openSheet = () => {
     setOpen(true)
@@ -254,7 +254,14 @@ export default function DragDismissSheet() {
 
       {createPortal(
         <div className="dds-overlay" data-state={open ? 'open' : 'closed'} aria-hidden={!open}>
-          <div className="dds-scrim" onClick={closeSheet} />
+          <div
+            className="dds-scrim"
+            role="button"
+            tabIndex={0}
+            aria-label="Close sheet"
+            onClick={closeSheet}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); closeSheet() } }}
+          />
 
           <motion.div
             ref={sheetRef}

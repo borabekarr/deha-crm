@@ -31,6 +31,11 @@ const ACCENTS: Record<DiAccent, { base: string; bright: string; glow: string }> 
   amber:   { base: '#F59E0B', bright: '#FBBF24', glow: 'rgba(245,158,11,0.55)' },
 }
 
+const DI_PCT_BASE: CSSProperties = {
+  flexShrink: 0, textAlign: 'right', fontSize: 14, fontWeight: 800,
+  letterSpacing: '-0.01em', fontVariantNumeric: 'tabular-nums',
+}
+
 // ---- article content -------------------------------------------------------
 const ARTICLE = {
   category: 'Craft',
@@ -478,11 +483,7 @@ function DynamicIsland({
               // Mounts only once the reverse Done badge (`closing`) has fully
               // exited — di-pct-enter plays the entrance from that point,
               // never overlapping the Done exit.
-              <span className={RM ? '' : 'di-pct-enter'} style={{
-                flexShrink: 0, minWidth: showMode === 'time' ? 54 : 38, textAlign: 'right',
-                fontSize: 14, fontWeight: 800, color: labelColor,
-                letterSpacing: '-0.01em', fontVariantNumeric: 'tabular-nums',
-              }}>
+              <span className={RM ? '' : 'di-pct-enter'} style={{ ...DI_PCT_BASE, minWidth: showMode === 'time' ? 54 : 38, color: labelColor }}>
                 {showMode === 'time' ? `${minsLeft} min` : `${pct}%`}
               </span>
             )}
