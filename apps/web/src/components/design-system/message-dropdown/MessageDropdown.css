@@ -71,9 +71,9 @@
     height calc(var(--md-dur) * 0.85) var(--ease-out) 0s,
     top    calc(var(--md-dur) * 0.85) var(--ease-out) 0s,
     border-radius calc(var(--md-dur) * 0.85) var(--ease-out) 0s,
-    background-color 1ms var(--ease-fade) calc(var(--md-dur) * 0.08),
-    border-color 1ms var(--ease-fade) calc(var(--md-dur) * 0.08),
-    box-shadow calc(220ms * var(--anim-mult, 1)) var(--ease-fade) 0s;
+    background-color calc(1ms * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.08),
+    border-color calc(1ms * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.08),
+    box-shadow calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade) 0s;
 }
 .md-root.open .md-panel-shell {
   /* Fix (1): concentric shell — 36px radius, 8px inset around .md-panel-bg
@@ -99,9 +99,9 @@
     height var(--md-dur) var(--ease-spring-open) 0s,
     top    var(--md-dur) var(--ease-spring-open) 0s,
     border-radius var(--md-dur) var(--ease-spring-open) 0s,
-    background-color calc(200ms * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.35),
-    border-color 1ms var(--ease-fade) calc(var(--md-dur) * 0.35),
-    box-shadow calc(200ms * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.35);
+    background-color calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.35),
+    border-color calc(1ms * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.35),
+    box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.35);
 }
 
 /* ---- Gooey shape layer ---- */
@@ -129,7 +129,7 @@
   border-radius: 50%;
   background: #111111;
   pointer-events: none;
-  transition: transform calc(220ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
 }
 /* hovering the trigger zooms the whole button (circle), not just the icon */
 /* Step 19: dialed hover scale down from 1.06 to the calm-family value (1.03,
@@ -165,8 +165,8 @@
     height calc(var(--md-dur) * 0.85) var(--ease-out) 0s,
     top    calc(var(--md-dur) * 0.85) var(--ease-out) 0s,
     border-radius calc(var(--md-dur) * 0.85) var(--ease-out) 0s,
-    background-color 1ms var(--ease-fade) calc(var(--md-dur) * 0.08),
-    box-shadow calc(220ms * var(--anim-mult, 1)) var(--ease-fade) 0ms;
+    background-color calc(1ms * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.08),
+    box-shadow calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade) 0ms;
 }
 .md-root.open .md-panel-bg {
   /* Fix (1): 8px inset on all sides of the 352x286/36px shell -> 336x270/28px. */
@@ -188,8 +188,8 @@
     height var(--md-dur) var(--ease-spring-open) 0s,
     top    var(--md-dur) var(--ease-spring-open) 0s,
     border-radius var(--md-dur) var(--ease-spring-open) 0s,
-    background-color calc(200ms * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.35),
-    box-shadow calc(200ms * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.35);
+    background-color calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.35),
+    box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.35);
 }
 /* Squircle inner-card conversion (Step 5). The ref only attaches once the
    panel is open (see MessageDropdown.tsx), so this never fights the closed
@@ -235,7 +235,7 @@ html.dark .md-panel-bg[data-squircle="on"]::before {
   color: #fff;
   display: grid; place-items: center;
   z-index: 4;
-  transition: transform calc(220ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
   -webkit-tap-highlight-color: transparent;
 }
 /* Step 19: same calm-family dial-down as .md-trigger-bg above (1.04 -> 1.02). */
@@ -248,7 +248,7 @@ html.dark .md-panel-bg[data-squircle="on"]::before {
 .md-trigger .material-symbols-outlined {
   font-size: 25px;
   font-variation-settings: '"opsz" 24, "wght" 900, "FILL" 1';
-  transition: transform calc(360ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: transform calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out);
   text-shadow: 0 1px 2px rgba(0,0,0,0.25);
 }
 .md-root.open .md-trigger .material-symbols-outlined {
@@ -283,7 +283,7 @@ html.dark .md-panel-bg[data-squircle="on"]::before {
     linear-gradient(90deg, rgba(255,255,255,0.14) 1px, transparent 1px);
   background-size: 6px 6px;
   font-variant-numeric: tabular-nums;
-  transition: transform calc(220ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
 }
 .md-root.open .md-trigger-badge { transform: scale(0); }
 
@@ -307,7 +307,7 @@ dialog.md-panel-content {
   pointer-events: none;
   opacity: 0;
   display: block;
-  transition: opacity calc(180ms * var(--anim-mult, 1)) var(--ease-fade);
+  transition: opacity calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .md-root.open dialog.md-panel-content {
   opacity: 1;
@@ -331,8 +331,8 @@ dialog.md-panel-content {
   opacity: 0;
   transform: translateY(8px) scale(0.985);
   transition:
-    opacity calc(280ms * var(--anim-mult, 1)) var(--ease-fade),
-    transform calc(280ms * var(--anim-mult, 1)) var(--ease-out),
+    opacity calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out),
     background calc(45ms * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
@@ -448,11 +448,11 @@ dialog.md-panel-content {
   text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   letter-spacing: -0.005em;
   transition:
-    border-color calc(150ms * var(--anim-mult, 1)),
-    color calc(150ms * var(--anim-mult, 1)),
-    background calc(150ms * var(--anim-mult, 1)),
-    transform calc(160ms * var(--anim-mult, 1)) var(--ease-out),
-    box-shadow calc(160ms * var(--anim-mult, 1)),
+    border-color calc(var(--duration-150) * var(--anim-mult, 1)),
+    color calc(var(--duration-150) * var(--anim-mult, 1)),
+    background calc(var(--duration-150) * var(--anim-mult, 1)),
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
+    box-shadow calc(var(--duration-base) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
@@ -512,7 +512,7 @@ dialog.md-panel-content {
   );
   opacity: 0;
   pointer-events: none;
-  transition: opacity calc(220ms * var(--anim-mult, 1)) var(--ease-fade);
+  transition: opacity calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .md-tick-icon {
   font-size: 16px;
@@ -540,7 +540,7 @@ dialog.md-panel-content {
 .md-mark-state-sliding .md-item:nth-child(3) .md-tick-overlay,
 .md-mark-state-done    .md-item:nth-child(3) .md-tick-overlay {
   opacity: 1;
-  transition-delay: calc(160ms * var(--anim-mult, 1));
+  transition-delay: calc(var(--duration-base) * var(--anim-mult, 1));
 }
 
 /* Phase: sliding -- rows translate right and fade; clipped by .md-preview-wrap overflow:hidden */
@@ -568,7 +568,7 @@ dialog.md-panel-content {
   transition:
     transform var(--md-dur) var(--ease-goo-collapse),
     opacity calc(var(--md-dur) * 0.6) var(--ease-fade) !important;
-  transition-delay: calc(120ms * var(--anim-mult, 1)) !important;
+  transition-delay: calc(var(--duration-fast) * var(--anim-mult, 1)) !important;
 }
 
 /* ---- Slow-down toggle via global --anim-mult ---- */

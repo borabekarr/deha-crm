@@ -18,20 +18,20 @@
    cubic-bezier below is a gentle overshoot ("spring-ish") ease. */
 .di-pill {
   transition:
-    width   calc(320ms * var(--anim-mult, 1)) cubic-bezier(.34,1.32,.5,1),
-    height  calc(320ms * var(--anim-mult, 1)) cubic-bezier(.34,1.32,.5,1),
-    border-radius calc(320ms * var(--anim-mult, 1)) cubic-bezier(.34,1.32,.5,1),
-    box-shadow calc(320ms * var(--anim-mult, 1)) ease,
-    background calc(220ms * var(--anim-mult, 1)) ease;
+    width   calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-island-morph),
+    height  calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-island-morph),
+    border-radius calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-island-morph),
+    box-shadow calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-fade),
+    background calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade);
   will-change: width, height;
 }
 @media (prefers-reduced-motion: reduce) {
-  .di-pill { transition: width 120ms linear, height 120ms linear, border-radius 120ms linear; }
+  .di-pill { transition: width calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-linear), height calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-linear), border-radius calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-linear); }
 }
 
 /* Content cross-fade inside the pill (compact vs expanded) */
 .di-face {
-  transition: opacity calc(180ms * var(--anim-mult, 1)) ease, transform calc(220ms * var(--anim-mult, 1)) var(--ease-spring-pop);
+  transition: opacity calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring-pop);
 }
 
 /* Milestone pulse — brief scale bump on the whole pill (applied to inner) */
@@ -40,7 +40,7 @@
   38%  { transform: scale(1.05); }
   100% { transform: scale(1); }
 }
-.di-pulse { animation: diPulse calc(460ms * var(--anim-mult, 1)) var(--ease-di-pulse, cubic-bezier(.22,1,.36,1)); }
+.di-pulse { animation: diPulse calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-di-pulse, cubic-bezier(.22,1,.36,1)); }
 
 /* Fill milestone glow */
 @keyframes diFillGlow {
@@ -48,7 +48,7 @@
   40%  { filter: brightness(1.28) saturate(1.25); }
   100% { filter: brightness(1)   saturate(1); }
 }
-.di-fill-glow { animation: diFillGlow calc(560ms * var(--anim-mult, 1)) ease; }
+.di-fill-glow { animation: diFillGlow calc(560ms * var(--anim-mult, 1)) var(--ease-fade); }
 
 /* Moving shine — sweeps within the green fill only (parent clips it) */
 @keyframes diShine {
@@ -62,7 +62,7 @@
   55%  { transform: scale(1.15); opacity: 1; }
   100% { transform: scale(1); opacity: 1; }
 }
-.di-check-pop { animation: diCheckPop calc(420ms * var(--anim-mult, 1)) var(--ease-spring-soft-2) both; }
+.di-check-pop { animation: diCheckPop calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-spring-soft-2) both; }
 @keyframes diCheckDraw {
   to { stroke-dashoffset: 0; }
 }
@@ -74,7 +74,7 @@
   0%   { opacity: 0; transform: scale(0.9); }
   100% { opacity: 1; transform: scale(1); }
 }
-.di-pct-enter { animation: diPctEnter calc(220ms * var(--anim-mult, 1)) var(--ease-out-soft, cubic-bezier(.34,1.2,.5,1)) both; }
+.di-pct-enter { animation: diPctEnter calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out-soft, cubic-bezier(.34,1.2,.5,1)) both; }
 
 /* Confetti particles */
 @keyframes diConfetti {
@@ -92,7 +92,7 @@
   0%   { opacity: 0; transform: translateX(-50%) translateY(-10px) scale(0.9); }
   100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
 }
-.di-drop { animation: diDrop calc(420ms * var(--anim-mult, 1)) var(--ease-di-drop, cubic-bezier(.34,1.32,.5,1)) both; }
+.di-drop { animation: diDrop calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-di-drop, cubic-bezier(.34,1.32,.5,1)) both; }
 
 @media (prefers-reduced-motion: reduce) {
   .di-pulse, .di-fill-glow, .di-confetti-piece, .di-check-pop, .di-drop { animation: none !important; }

@@ -73,8 +73,8 @@
     inset 0 -2px 0 rgba(17,17,17, 0.08),
     0 4px 14px -8px rgba(17,17,17, 0.30);
   transition:
-    filter calc(180ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
-    transform calc(140ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
+    filter calc(var(--duration-180) * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
+    transform calc(var(--duration-140) * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
 }
 
 .sd-trigger:hover {
@@ -91,8 +91,8 @@
    filter/transform transition. */
 .sd-trigger[data-proximity] {
   transition:
-    filter calc(180ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
-    transform calc(140ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
+    filter calc(var(--duration-180) * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
+    transform calc(var(--duration-140) * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 
@@ -155,7 +155,7 @@
   background: rgba(17,17,17, 0.42);
   -webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
-  transition: opacity calc(0.4s * var(--anim-mult, 1)) ease;
+  transition: opacity calc(0.4s * var(--anim-mult, 1)) var(--ease-fade);
   cursor: pointer;
 }
 
@@ -342,7 +342,7 @@
   opacity: 0;
   transform: translateY(20px);
   transition:
-    opacity calc(0.5s * var(--anim-mult, 1)) ease,
+    opacity calc(0.5s * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(0.5s * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
 }
 
@@ -494,9 +494,9 @@
 
 .sd-buy[data-proximity] {
   transition:
-    background-color calc(180ms * var(--anim-mult, 1)),
-    transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
-    box-shadow calc(200ms * var(--anim-mult, 1)),
+    background-color calc(var(--duration-180) * var(--anim-mult, 1)),
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
+    box-shadow calc(var(--duration-200) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
@@ -575,8 +575,8 @@
     inset 0 0 0 1px rgba(17,17,17, 0.07),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
   transition:
-    filter calc(180ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
-    transform calc(140ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
+    filter calc(var(--duration-180) * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
+    transform calc(var(--duration-140) * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
 }
 
 .sd-later:hover,
@@ -613,8 +613,8 @@
    so --prox scale doesn't snap against the existing filter/transform transition. */
 .sd-later[data-proximity] {
   transition:
-    filter calc(180ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
-    transform calc(140ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
+    filter calc(var(--duration-180) * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
+    transform calc(var(--duration-140) * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 

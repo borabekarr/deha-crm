@@ -50,8 +50,8 @@ html.dark .frame {
   flex: 1;
   min-height: 320px;
   --ease: var(--ease-out);
-  --dur: calc(300ms * var(--anim-mult, 1));
-  --dur-fast: calc(220ms * var(--anim-mult, 1));
+  --dur: calc(var(--duration-slower) * var(--anim-mult, 1));
+  --dur-fast: calc(var(--duration-slow) * var(--anim-mult, 1));
   font-family: 'Montserrat', sans-serif;
   user-select: none;
   /* Grid texture alpha — single source of truth for both green pill surfaces */
@@ -162,7 +162,7 @@ html.dark .mt-dock-inner[data-squircle="on"] {
 .mt-panels-wrap {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows calc(320ms * var(--anim-mult, 1)) var(--ease);
+  transition: grid-template-rows calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease);
 }
 .mt-dock.open .mt-panels-wrap {
   grid-template-rows: 1fr;
@@ -289,7 +289,7 @@ html.dark .mt-divider {
   background: none;
   border: none;
   text-align: left;
-  transition: background calc(220ms * var(--anim-mult, 1)) var(--ease);
+  transition: background calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease);
 }
 /* Flat horizontal divider between rows: full-width, no gap artifacts */
 .mt-row + .mt-row {
@@ -435,8 +435,8 @@ html.dark .mt-row-ic--black .material-symbols-outlined {
      transform/width here, or it would fight the per-frame inline writes. */
   transform-origin: center;
   transition:
-    scale calc(180ms * var(--anim-mult, 1)) var(--ease),
-    filter calc(180ms * var(--anim-mult, 1)) var(--ease);
+    scale calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease),
+    filter calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease);
   pointer-events: none;
   z-index: 0;
 }
@@ -469,18 +469,18 @@ html.dark .mt-label  { color: #111111; }
   flex-shrink: 0;
   overflow: hidden;
   transition:
-    width calc(300ms * var(--anim-mult, 1)) var(--ease),
-    transform calc(180ms * var(--anim-mult, 1)) var(--ease);
+    width calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease),
+    transform calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease);
 }
 /* Proximity: own `width`/`transform` transition (0,1,0) beats hover-tokens.css's
    [data-proximity]x3 fallback; scale + filter channels added here so the
    engine's --prox mapping doesn't snap. */
 .mt-tab[data-proximity] {
   transition:
-    width calc(300ms * var(--anim-mult, 1)) var(--ease),
-    transform calc(180ms * var(--anim-mult, 1)) var(--ease),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    width calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease),
+    transform calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 /* Hover: grey rounded background (primary signal) + subtle lift — active press overrides to 0.96 */
 .mt-tab:hover {
@@ -520,8 +520,8 @@ html.dark .mt-tabwrap:has(.mt-tab.active:hover) .mt-ind {
   opacity: 0;
   transform: scale(0.68);
   transition:
-    opacity calc(220ms * var(--anim-mult, 1)) var(--ease),
-    transform calc(220ms * var(--anim-mult, 1)) var(--ease);
+    opacity calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease),
+    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease);
 }
 /* Active tab already shows the green pill — suppress the grey background there */
 .mt-tab.active .mt-hold { opacity: 0; }
@@ -537,8 +537,8 @@ html.dark .mt-tabwrap:has(.mt-tab.active:hover) .mt-ind {
   display: grid;
   place-items: center;
   transition:
-    width calc(300ms * var(--anim-mult, 1)) var(--ease),
-    transform calc(220ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.5,1);
+    width calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease),
+    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring-snap-soft);
 }
 /* Active tab: shrink iconbox to glyph width so the label hugs the icon
    (no more 48px centering gap). */
@@ -559,7 +559,7 @@ html.dark .mt-tabwrap:has(.mt-tab.active:hover) .mt-ind {
   inset: 0;
   display: grid;
   place-items: center;
-  transition: opacity calc(300ms * var(--anim-mult, 1)) var(--ease);
+  transition: opacity calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease);
 }
 .mt-ic .material-symbols-outlined { font-size: 24px; }
 .mt-ic.off { color: var(--fg3, #6B6B6B); opacity: 1; }
@@ -581,9 +581,9 @@ html.dark .mt-tabwrap:has(.mt-tab.active:hover) .mt-ind {
   font-weight: 800;
   letter-spacing: -0.01em;
   transition:
-    width calc(300ms * var(--anim-mult, 1)) var(--ease),
-    opacity calc(300ms * var(--anim-mult, 1)) var(--ease),
-    transform calc(300ms * var(--anim-mult, 1)) var(--ease);
+    width calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease),
+    opacity calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease),
+    transform calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease);
 }
 .mt-tab.active .mt-label {
   width: var(--lw, 46px);

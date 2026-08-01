@@ -30,7 +30,7 @@ html.dark .card:has(.folder) { background:transparent !important; background-ima
   color:var(--fg3); background:#FFFFFF; border:1px solid var(--border-hairline);
   padding:6px 12px; border-radius:9999px; cursor:pointer;
   box-shadow:0 2px 6px rgba(17,17,17,0.07), inset 0 1px 0 rgba(255,255,255,0.9);
-  transition:transform calc(130ms * var(--anim-mult, 1)) var(--ease-out), color calc(150ms * var(--anim-mult, 1));
+  transition:transform calc(130ms * var(--anim-mult, 1)) var(--ease-out), color calc(var(--duration-150) * var(--anim-mult, 1));
 }
 .ff-replay:hover { transform:translateY(-1px); color:var(--fg1); }
 .ff-replay:active { transform:scale(0.95); }
@@ -75,7 +75,7 @@ html.dark .card:has(.folder) { background:transparent !important; background-ima
   transform-origin: center 62%;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: transform calc(600ms * var(--anim-mult, 1)) var(--ease-spring-strong), box-shadow calc(380ms * var(--anim-mult, 1)) ease, opacity calc(480ms * var(--anim-mult, 1)) ease;
+  transition: transform calc(600ms * var(--anim-mult, 1)) var(--ease-spring-strong), box-shadow calc(380ms * var(--anim-mult, 1)) var(--ease-fade), opacity calc(480ms * var(--anim-mult, 1)) var(--ease-fade);
 }
 .folder * { box-sizing: border-box; }
 /* Proximity: own `transform`/`box-shadow`/`opacity` transition (0,1,0) beats
@@ -86,10 +86,10 @@ html.dark .card:has(.folder) { background:transparent !important; background-ima
 .folder[data-proximity] {
   transition:
     transform calc(600ms * var(--anim-mult, 1)) var(--ease-spring-strong),
-    box-shadow calc(380ms * var(--anim-mult, 1)) ease,
-    opacity calc(480ms * var(--anim-mult, 1)) ease,
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    box-shadow calc(380ms * var(--anim-mult, 1)) var(--ease-fade),
+    opacity calc(480ms * var(--anim-mult, 1)) var(--ease-fade),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 
 /* clip layer so gradient / papers / pocket respect the squircle */
@@ -100,7 +100,7 @@ html.dark .card:has(.folder) { background:transparent !important; background-ima
   position:absolute; top:var(--frame); left:var(--frame); right:var(--frame);
   height:58%;
   border-radius: 22px 22px 0 0;
-  transition: opacity calc(600ms * var(--anim-mult, 1)) ease;
+  transition: opacity calc(600ms * var(--anim-mult, 1)) var(--ease-fade);
   background: radial-gradient(125% 125% at 22% 2%, #9AC8F6 0%, #5594F1 34%, #2C66E0 68%, #2150CB 100%);
 }
 .ff-grad::before {     /* faint house-style grid texture */
@@ -126,7 +126,7 @@ html.dark .card:has(.folder) { background:transparent !important; background-ima
   border-radius: 12px;
   box-shadow: var(--ff-paper-shadow);
   transform: translate(var(--tx),var(--ty)) rotate(var(--rot)) scale(var(--sc));
-  transition: transform calc(560ms * var(--anim-mult, 1)) var(--ease-spring), opacity calc(440ms * var(--anim-mult, 1)) ease;
+  transition: transform calc(560ms * var(--anim-mult, 1)) var(--ease-spring), opacity calc(var(--duration-compact) * var(--anim-mult, 1)) var(--ease-fade);
   padding: 18px 16px;
 }
 .ff-paper .line { height:3px; border-radius:2px; background:var(--ff-line); margin-bottom:9px; }
@@ -153,7 +153,7 @@ html.dark .card:has(.folder) { background:transparent !important; background-ima
   position:absolute; left:26px; top:114px;
   font-size:19px; font-weight:800; letter-spacing:-0.01em; color:var(--ff-title);
   transform-origin:left center;
-  transition: transform calc(260ms * var(--anim-mult, 1)) var(--ease-out), text-shadow calc(260ms * var(--anim-mult, 1)) ease;
+  transition: transform calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-out), text-shadow calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .ff-sub {
   position:absolute; left:26px; top:139px;
@@ -164,7 +164,7 @@ html.dark .card:has(.folder) { background:transparent !important; background-ima
   color:var(--ff-sub); display:flex; align-items:center; gap:4px;
   padding:6px; margin:0; border:none; border-radius:9999px; background:transparent;
   cursor:pointer; -webkit-tap-highlight-color:transparent;
-  transition:background calc(140ms * var(--anim-mult, 1)) ease, color calc(140ms * var(--anim-mult, 1)) ease, transform calc(120ms * var(--anim-mult, 1)) ease;
+  transition:background calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-fade), color calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .ff-dots:hover { background:rgba(17,17,17,0.06); color:var(--ff-title); }
 html.dark .ff-dots:hover { background:rgba(255,255,255,0.08); }
@@ -182,8 +182,8 @@ html.dark .ff-dots.open { background:rgba(255,255,255,0.10); }
   box-shadow:0 18px 44px -12px rgba(17,17,17,0.40), inset 0 0 0 1px rgba(17,17,17,0.04);
   font-family:'Montserrat';
   opacity:0; transform:scale(0.94) translateY(-6px); transform-origin:top right; pointer-events:none;
-  transition:opacity calc(160ms * var(--anim-mult, 1)) ease,
-             transform calc(220ms * var(--anim-mult, 1)) var(--ease-spring);
+  transition:opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade),
+             transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring);
 }
 .ff-menu.show { opacity:1; transform:scale(1) translateY(0); pointer-events:auto; }
 html.dark .ff-menu {
@@ -194,7 +194,7 @@ html.dark .ff-menu {
   padding:8px 10px; margin:0; border:none; border-radius:9px; background:transparent;
   font-family:'Montserrat'; font-size:12.5px; font-weight:700; letter-spacing:-0.005em;
   color:var(--ff-title); text-align:left; cursor:pointer;
-  transition:background calc(130ms * var(--anim-mult, 1)) ease;
+  transition:background calc(130ms * var(--anim-mult, 1)) var(--ease-fade);
 }
 .ff-menu-item:hover { background:rgba(17,17,17,0.06); }
 html.dark .ff-menu-item { color:#F5F5F5; }
@@ -242,15 +242,15 @@ html.dark .ff-menu-item--danger .material-symbols-outlined { color:#FB7185; }
 /* ════════════════════ ENTRANCE — visible base, gated on .play ════════════════════ */
 @media (prefers-reduced-motion: no-preference) {
   .folder.play           { animation: ffIn calc(620ms * var(--anim-mult, 1)) var(--ease-spring-strong) backwards; }
-  .folder.play .ff-grad  { animation: ffFade calc(640ms * var(--anim-mult, 1)) ease backwards; }
+  .folder.play .ff-grad  { animation: ffFade calc(640ms * var(--anim-mult, 1)) var(--ease-fade) backwards; }
   .folder.play .ff-paper { animation: ffPaperIn calc(560ms * var(--anim-mult, 1)) var(--ease-spring) backwards; }
-  .folder.play .ff-paper--back  { animation-delay: calc(150ms * var(--anim-mult, 1)); }
-  .folder.play .ff-paper--front { animation-delay: calc(240ms * var(--anim-mult, 1)); }
+  .folder.play .ff-paper--back  { animation-delay: calc(var(--duration-150) * var(--anim-mult, 1)); }
+  .folder.play .ff-paper--front { animation-delay: calc(var(--duration-240) * var(--anim-mult, 1)); }
   .folder.play .ff-paper--mid   { animation-delay: calc(330ms * var(--anim-mult, 1)); }
-  .folder.play .ff-title { animation: ffRise calc(500ms * var(--anim-mult, 1)) ease calc(420ms * var(--anim-mult, 1)) backwards; }
-  .folder.play .ff-sub   { animation: ffRise calc(500ms * var(--anim-mult, 1)) ease calc(470ms * var(--anim-mult, 1)) backwards; }
-  .folder.play .ff-dots  { animation: ffRise calc(500ms * var(--anim-mult, 1)) ease calc(510ms * var(--anim-mult, 1)) backwards; }
-  .folder.play .ff-count { animation: ffRise calc(500ms * var(--anim-mult, 1)) ease calc(540ms * var(--anim-mult, 1)) backwards; }
+  .folder.play .ff-title { animation: ffRise calc(500ms * var(--anim-mult, 1)) var(--ease-fade) calc(var(--duration-420) * var(--anim-mult, 1)) backwards; }
+  .folder.play .ff-sub   { animation: ffRise calc(500ms * var(--anim-mult, 1)) var(--ease-fade) calc(470ms * var(--anim-mult, 1)) backwards; }
+  .folder.play .ff-dots  { animation: ffRise calc(500ms * var(--anim-mult, 1)) var(--ease-fade) calc(510ms * var(--anim-mult, 1)) backwards; }
+  .folder.play .ff-count { animation: ffRise calc(500ms * var(--anim-mult, 1)) var(--ease-fade) calc(540ms * var(--anim-mult, 1)) backwards; }
 
   /* ffHotGlow removed — red folder uses same static shadow as blue */
 }
@@ -269,7 +269,7 @@ html.dark .ff-menu-item--danger .material-symbols-outlined { color:#FB7185; }
 .ff-scrim {
   position:absolute; inset:0; z-index:40; border-radius:inherit;
   background:rgba(17,17,17,0.20); -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);
-  opacity:0; pointer-events:none; transition:opacity calc(220ms * var(--anim-mult, 1)) ease;
+  opacity:0; pointer-events:none; transition:opacity calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .ff-scrim.show { opacity:1; pointer-events:auto; }
 html.dark .ff-scrim { background:rgba(0,0,0,0.5); }
@@ -279,8 +279,8 @@ html.dark .ff-scrim { background:rgba(0,0,0,0.5); }
   position:absolute; z-index:50; width:320px; box-sizing:border-box;
   background:var(--shell-bg); border-radius:24px; padding:9px;
   opacity:0; transform:scale(0.9) translateY(8px); transform-origin:top center; pointer-events:none;
-  transition: opacity calc(220ms * var(--anim-mult, 1)) ease,
-              transform calc(320ms * var(--anim-mult, 1)) var(--ease-spring);
+  transition: opacity calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade),
+              transform calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-spring);
 }
 .ff-pop-outer.show { opacity:1; transform:scale(1) translateY(0); pointer-events:auto; }
 html.dark .ff-pop-outer { border:1px solid #232323; }
@@ -311,7 +311,7 @@ html.dark .ff-pop {
 .ff-pop-close {
   flex:none; width:26px; height:26px; border-radius:9999px; border:none; cursor:pointer;
   display:grid; place-items:center; background:var(--ff-row); color:var(--ff-pop-fg3);
-  transition:background calc(140ms * var(--anim-mult, 1)), color calc(140ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1));
+  transition:background calc(var(--duration-140) * var(--anim-mult, 1)), color calc(var(--duration-140) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1));
 }
 .ff-pop-close:hover { background:var(--ff-row-hover); color:var(--ff-pop-fg); }
 .ff-pop-close:active { transform:scale(0.9); }

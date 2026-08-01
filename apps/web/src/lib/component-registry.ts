@@ -327,6 +327,16 @@ export const registry: RegistryEntry[] = [
     Component: lazy(() => import('@/components/design-system/smooth-drawer/SmoothDrawer')),
   },
   {
+    slug: 'drag-dismiss-sheet',
+    name: 'Drag Dismiss Sheet',
+    status: 'Proceeding',
+    category: 'Animations',
+    subtitle: 'Bottom sheet with projected-endpoint drag-to-dismiss physics',
+    viewport: { width: 420, height: 640 },
+    sourceHtml: '/design-system/preview/components-drag-dismiss-sheet.html',
+    Component: lazy(() => import('@/components/design-system/drag-dismiss-sheet/DragDismissSheet')),
+  },
+  {
     slug: 'inline-edit',
     name: 'Inline Edit',
     status: 'Finished',

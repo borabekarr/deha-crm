@@ -459,7 +459,7 @@ function Column({
         height: 380,
         boxSizing: 'border-box',
         overflow: 'hidden',
-        transition: 'background 160ms, outline-color 160ms',
+        transition: 'background calc(var(--duration-base) * var(--anim-mult, 1)), outline-color calc(var(--duration-base) * var(--anim-mult, 1))',
       }}
     >
       {/* Column header */}
@@ -731,7 +731,7 @@ function SyncFeed({ items, visible }: { items: FeedItem[]; visible: boolean }) {
       <div ref={ref} style={{
         borderTop: '1px solid var(--tb-col-border)',
         background: 'var(--tb-feed-bg)',
-        animation: 'panelIn 360ms var(--ease-out)',
+        animation: 'panelIn calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out)',
       }}>
         {items.map((it) => (
           <UpdateItem key={it.id} item={it} />
@@ -778,7 +778,7 @@ function StatusBar({
                   width: 22, height: 22, borderRadius: '50%',
                   background: 'var(--brand-primary-500)', display: 'grid', placeItems: 'center',
                   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.12)',
-                  animation: `checkPop calc(360ms * var(--anim-mult, 1)) var(--ease-bounce-soft) calc(${i * 90}ms * var(--anim-mult, 1)) both`,
+                  animation: `checkPop calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-bounce-soft) calc(${i * 90}ms * var(--anim-mult, 1)) both`,
                 }}
               >
                 <CheckIcon size={11} color="#fff" />
@@ -820,7 +820,7 @@ function StatusBar({
           className={iconClass(btnCfg.icon)}
           style={{
             fontSize: 16, lineHeight: 1,
-            animation: btnCfg.spin ? 'spin 800ms linear infinite' : 'none',
+            animation: btnCfg.spin ? 'spin calc(800ms * var(--anim-mult, 1)) var(--ease-linear) infinite' : 'none',
           }}
         >{btnCfg.icon}</span>
         {btnCfg.label}

@@ -148,7 +148,7 @@ html.dark .wtc-outer[data-squircle="on"]::before {
     0 2px 8px rgba(17,17,17,0.24),
     inset 0 1px 0 rgba(255,255,255,0.08),
     inset 0 -1px 0 rgba(0,0,0,0.18);
-  transition: opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-fast) * var(--anim-mult, 1)), scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear, filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+  transition: opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-fast) * var(--anim-mult, 1)), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .wtc-outer:hover .wtc-use {
   opacity: 1;
@@ -262,7 +262,7 @@ html.dark .wtc-badge-pro { background-color: #4A4A4A; }
 .wtc-expand-wrap {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows calc(280ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: grid-template-rows calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out);
 }
 .wtc-outer.wtc-expanded .wtc-expand-wrap {
   grid-template-rows: 1fr;
@@ -275,8 +275,8 @@ html.dark .wtc-badge-pro { background-color: #4A4A4A; }
   opacity: 0;
   transform: translateY(-6px);
   transition:
-    opacity calc(220ms * var(--anim-mult, 1)) var(--ease-out) calc(60ms * var(--anim-mult, 1)),
-    transform calc(220ms * var(--anim-mult, 1)) var(--ease-out) calc(60ms * var(--anim-mult, 1));
+    opacity calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out) calc(60ms * var(--anim-mult, 1)),
+    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out) calc(60ms * var(--anim-mult, 1));
 }
 .wtc-outer.wtc-expanded .wtc-expand-body {
   opacity: 1;

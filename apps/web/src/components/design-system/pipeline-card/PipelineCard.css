@@ -12,32 +12,32 @@
  * glide, and (b) drop .pc-apply's own competing transform:scale(1.03) hover
  * (would double up with hover-tokens.css's own `scale` custom property). */
 .pc-expand {
-  transition: background-color calc(180ms * var(--anim-mult, 1)), color calc(180ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) var(--ease-spring),
+  transition: background-color calc(var(--duration-180) * var(--anim-mult, 1)), color calc(var(--duration-180) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-spring),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 .pc-snooze {
-  transition: opacity calc(180ms * var(--anim-mult, 1)), background-color calc(180ms * var(--anim-mult, 1)), color calc(180ms * var(--anim-mult, 1)),
+  transition: opacity calc(var(--duration-180) * var(--anim-mult, 1)), background-color calc(var(--duration-180) * var(--anim-mult, 1)), color calc(var(--duration-180) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 .pc-pop-item {
-  transition: background-color calc(140ms * var(--anim-mult, 1)),
+  transition: background-color calc(var(--duration-140) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 .pc-sugg {
-  transition: background-color calc(150ms * var(--anim-mult, 1)),
+  transition: background-color calc(var(--duration-150) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 .pc-discuss-btn {
-  transition: border-color calc(160ms * var(--anim-mult, 1)), background-color calc(160ms * var(--anim-mult, 1)),
+  transition: border-color calc(var(--duration-base) * var(--anim-mult, 1)), background-color calc(var(--duration-base) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 .pc-apply {
-  transition: background-color calc(180ms * var(--anim-mult, 1)), transform calc(160ms * var(--anim-mult, 1)) var(--ease-spring), box-shadow calc(200ms * var(--anim-mult, 1)), min-width calc(260ms * var(--anim-mult, 1)) var(--ease-out),
+  transition: background-color calc(var(--duration-180) * var(--anim-mult, 1)), transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring), box-shadow calc(var(--duration-200) * var(--anim-mult, 1)), min-width calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-out),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }

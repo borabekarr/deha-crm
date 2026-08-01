@@ -22,9 +22,9 @@ html.dark .frame.mc-frame { background-image: none; }
   cursor: pointer;
   user-select: none;
   /* Press feedback transition - transform only, does not conflict with shell.zoom scale */
-  transition: transform calc(120ms * var(--anim-mult, 1)) var(--ease-out),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+  transition: transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 /* Deliberate override of _surfaces.css's dark-mode top highlight for .metric
    (0.22 -> 0.06): _surfaces.css is a locked shared partial in this run, so the
@@ -35,7 +35,7 @@ html.dark .metric { border-top-color: rgba(255, 255, 255, 0.06) !important; }
 /* Tactile press: shell takes primary squeeze so bezel + card move as one unit.
    Inner card adds a tiny additional compress; composed total ≈ 0.98 × 0.99 ≈ 0.970,
    matching the old inner-only feel while the grey bezel now moves with it. */
-.shell.zoom:active { transform: scale(0.98); transition: transform calc(120ms * var(--anim-mult, 1)) var(--ease-out); }
+.shell.zoom:active { transform: scale(0.98); transition: transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out); }
 .metric:active { transform: scale(0.99); }
 
 .m-left { display:flex; flex-direction:column; gap: 12px; }
@@ -65,7 +65,7 @@ html.dark .metric { border-top-color: rgba(255, 255, 255, 0.06) !important; }
   display: flex; align-items: center; justify-content: center;
   z-index: 300;
   opacity: 0; pointer-events: none;
-  transition: opacity calc(220ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: opacity calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
 }
 .exp-overlay.open { opacity: 1; pointer-events: all; }
 
@@ -78,7 +78,7 @@ html.dark .metric { border-top-color: rgba(255, 255, 255, 0.06) !important; }
   width: 480px;
   transform: translateY(16px) scale(0.95);
   /* Closed/exit: smooth ease-out, no overshoot (avoids jitter on the way out). */
-  transition: transform calc(260ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: transform calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-out);
 }
 /* useSquircle drops the plain border-radius fallback above; depth moves to
    filter (clip-path clips box-shadow) and only the dark-mode outer hairline
@@ -101,7 +101,7 @@ html.dark .exp-outer[data-squircle="on"]::before {
 /* Open/enter: slight bounce + morph pop. */
 .exp-overlay.open .exp-outer {
   transform: translateY(0) scale(1);
-  transition: transform calc(360ms * var(--anim-mult, 1)) var(--ease-spring);
+  transition: transform calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-spring);
 }
 
 /* ── WHITE INNER CARD ── */
@@ -136,9 +136,9 @@ html.dark .exp-top { border-bottom-color: #232323; }
   width: 26px; height: 26px; border-radius: 50%;
   background: #F5F5F5; border: none; cursor: pointer;
   display: grid; place-items: center; color: #6B6B6B;
-  transition: background calc(150ms * var(--anim-mult, 1)),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+  transition: background calc(var(--duration-150) * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
   flex-shrink: 0;
 }
 .exp-close:hover { background: #ECECEC; }
@@ -186,8 +186,8 @@ html.dark .exp-top { border-bottom-color: #232323; }
   transform: translate(-50%, -50%);
   z-index: 3;
   animation:
-    exp-dot-pulse calc(2200ms * var(--anim-mult, 1)) ease-in-out infinite,
-    exp-dot-glow  calc(2200ms * var(--anim-mult, 1)) ease-in-out infinite;
+    exp-dot-pulse calc(2200ms * var(--anim-mult, 1)) var(--ease-in-out) infinite,
+    exp-dot-glow  calc(2200ms * var(--anim-mult, 1)) var(--ease-in-out) infinite;
   animation-delay: 0ms, calc(400ms * var(--anim-mult, 1));
 }
 

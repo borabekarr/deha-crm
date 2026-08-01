@@ -49,9 +49,9 @@
   overflow: hidden;
   cursor: pointer;
   user-select: none;
-  transition: transform calc(320ms * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(320ms * var(--anim-mult, 1)) var(--ease-out),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+  transition: transform calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-out),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
   will-change: transform;
 }
 
@@ -83,7 +83,7 @@ html.dark .fhc {
 html.dark .fhc-frame:hover .fhc-shell { box-shadow: 0 22px 56px -20px color-mix(in srgb, var(--brand-primary-500) 30%, transparent), 0 10px 22px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06); }
 .fhc-frame:hover .fhc { box-shadow: var(--fhc-shadow), var(--fhc-glow); }
 /* Subtle pipeline-card-style press: scale(0.985) release, no overshoot */
-.fhc.pop   { animation: fhcPop calc(280ms * var(--anim-mult, 1)) var(--ease-out); }
+.fhc.pop   { animation: fhcPop calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out); }
 @keyframes fhcPop { 0%{transform:scale(0.985);} 100%{transform:scale(1);} }
 /* :active press on card body -- excluded when the info-tab itself is pressed */
 .fhc:active:not(:has(.fhc-info-tab:active)) { transform: scale(0.985); }
@@ -121,7 +121,7 @@ html.dark .fhc-frame { background: #0A0A0A; background-image: none; }
   -webkit-background-clip: text; background-clip: text; color: transparent;
   filter: drop-shadow(0 1px 0 var(--fhc-num-hi)) drop-shadow(0 10px 22px var(--fhc-num-glow));
   display: inline-block; font-variant-numeric: tabular-nums;
-  transition: transform calc(220ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
 }
 .fhc-frame:hover .fhc-num { transform: scale(1.04); }
 .fhc-outof { margin-top: 0; font-size: 16px; font-weight: 600; color: var(--fhc-fg3); letter-spacing: 0.01em; }
@@ -188,7 +188,7 @@ html.dark .fhc-frame { background: #0A0A0A; background-image: none; }
   margin-top: 13px; padding: 0 2px;
   font-size: 12.5px; font-weight: 600; color: var(--fhc-fg3);
 }
-.fhc-zones span { transition: color calc(280ms * var(--anim-mult, 1)) ease, font-weight 0ms; }
+.fhc-zones span { transition: color calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-fade), font-weight 0ms; }
 .fhc-zones span.on { color: var(--fhc-fg1); font-weight: 800; }
 
 /* ── WHY / RECOMMENDATION — collapsible ── */
@@ -213,7 +213,7 @@ html.dark .fhc-frame { background: #0A0A0A; background-image: none; }
   65%  { transform: translateY(2px); }
   100% { transform: translateY(0); }
 }
-.fhc-info-tab.tab-bounce { animation: fhcTabBounce calc(420ms * var(--anim-mult, 1)) var(--ease-out) both; }
+.fhc-info-tab.tab-bounce { animation: fhcTabBounce calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out) both; }
 
 .fhc-sec-h {
   font-size: 15px; font-weight: 800; color: var(--fhc-fg1);
@@ -226,21 +226,21 @@ html.dark .fhc-frame { background: #0A0A0A; background-image: none; }
 /* ─────────────────────────────────────────────────────────────────────
    LOAD ANIMATION (added via .anim-in once mounted)
    ───────────────────────────────────────────────────────────────────── */
-.fhc.anim-in { animation: fhcCardIn calc(460ms * var(--anim-mult, 1)) var(--ease-spring-pop) both; }
+.fhc.anim-in { animation: fhcCardIn calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-spring-pop) both; }
 @keyframes fhcCardIn { 0%{ opacity:0; transform: scale(.85) translateY(10px); } 100%{ opacity:1; transform: scale(1) translateY(0); } }
 
-.anim-in .fhc-eyebrow { animation: fhcFade calc(460ms * var(--anim-mult, 1)) ease-out calc(120ms * var(--anim-mult, 1)) both; }
-.anim-in .fhc-num { animation: fhcNumPop calc(620ms * var(--anim-mult, 1)) var(--ease-spring) calc(200ms * var(--anim-mult, 1)) both; }
+.anim-in .fhc-eyebrow { animation: fhcFade calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-out-native) calc(var(--duration-fast) * var(--anim-mult, 1)) both; }
+.anim-in .fhc-num { animation: fhcNumPop calc(620ms * var(--anim-mult, 1)) var(--ease-spring) calc(var(--duration-200) * var(--anim-mult, 1)) both; }
 @keyframes fhcNumPop {
   0%{ opacity:0; transform: scale(.8) translateY(8px); }
   55%{ opacity:1; transform: scale(1.05); }
   78%{ transform: scale(0.985); }
   100%{ transform: scale(1); }
 }
-.anim-in .fhc-outof { animation: fhcFade calc(420ms * var(--anim-mult, 1)) ease-out calc(360ms * var(--anim-mult, 1)) both; }
+.anim-in .fhc-outof { animation: fhcFade calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out-native) calc(var(--duration-sweep) * var(--anim-mult, 1)) both; }
 
 /* bar sweeps in from the left */
-.anim-in .fhc-bar { animation: fhcBarIn calc(560ms * var(--anim-mult, 1)) var(--ease-out) calc(440ms * var(--anim-mult, 1)) both; transform-origin: left center; }
+.anim-in .fhc-bar { animation: fhcBarIn calc(560ms * var(--anim-mult, 1)) var(--ease-out) calc(var(--duration-compact) * var(--anim-mult, 1)) both; transform-origin: left center; }
 @keyframes fhcBarIn { 0%{ opacity:0; transform: scaleX(0.04); } 100%{ opacity:1; transform: scaleX(1); } }
 .anim-in .fhc-pin { animation: fhcPinIn calc(520ms * var(--anim-mult, 1)) var(--ease-spring) both; animation-delay: calc(560ms * var(--anim-mult, 1)); }
 @keyframes fhcPinIn {
@@ -248,10 +248,10 @@ html.dark .fhc-frame { background: #0A0A0A; background-image: none; }
   60%{ opacity:1; transform: translateX(-50%) translateY(2px) scale(1.12); }
   100%{ transform: translateX(-50%) translateY(0) scale(1); }
 }
-.anim-in .fhc-zones { animation: fhcFade calc(460ms * var(--anim-mult, 1)) ease-out calc(640ms * var(--anim-mult, 1)) both; }
+.anim-in .fhc-zones { animation: fhcFade calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-out-native) calc(640ms * var(--anim-mult, 1)) both; }
 /* Why + Recommendation slide in from below, staggered */
 .anim-in .fhc-sec { animation: fhcSecIn calc(520ms * var(--anim-mult, 1)) var(--ease-out) both; animation-delay: calc(var(--s) * calc(120ms * var(--anim-mult, 1)) + calc(720ms * var(--anim-mult, 1))); }
-.anim-in .fhc-info-divider { animation: fhcFade calc(400ms * var(--anim-mult, 1)) ease-out calc(820ms * var(--anim-mult, 1)) both; }
+.anim-in .fhc-info-divider { animation: fhcFade calc(400ms * var(--anim-mult, 1)) var(--ease-out-native) calc(820ms * var(--anim-mult, 1)) both; }
 @keyframes fhcSecIn { 0%{ opacity:0; transform: translateY(14px); } 100%{ opacity:1; transform: translateY(0); } }
 @keyframes fhcFade { from{ opacity:0; transform: translateY(6px); } to{ opacity:1; transform: translateY(0); } }
 
@@ -268,9 +268,9 @@ html.dark .fhc-frame { background: #0A0A0A; background-image: none; }
   background: rgba(255,255,255,0.85); color: #4A4A4A;
   border: 1px solid #ECECEC;
   box-shadow: 0 2px 8px rgba(17,17,17,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
-  transition: transform calc(140ms * var(--anim-mult, 1)) var(--ease-out), background calc(160ms * var(--anim-mult, 1)), color calc(160ms * var(--anim-mult, 1)), border-color calc(160ms * var(--anim-mult, 1)),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+  transition: transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-base) * var(--anim-mult, 1)), color calc(var(--duration-base) * var(--anim-mult, 1)), border-color calc(var(--duration-base) * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .fhc-btn .material-icons { font-size: 16px; }
 .fhc-btn:hover { transform: translateY(-1px); color: #111111; border-color: #D4D4D4; }

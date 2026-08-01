@@ -120,7 +120,7 @@ html.dark .al-live.al-paused {
   width: 7px; height: 7px; border-radius: 50%;
   background: var(--brand-primary-500);
   box-shadow: 0 0 0 0 var(--brand-glow);
-  animation: al-pulse calc(1.8s * var(--anim-mult,1)) ease-out infinite;
+  animation: al-pulse calc(1.8s * var(--anim-mult,1)) var(--ease-out-native) infinite;
 }
 .al-live.al-paused .al-live-dot {
   background: var(--fg4, #A1A1A1);

@@ -184,17 +184,17 @@ html.dark .dc-event-row.is-focus {
   cursor: pointer;
   /* CLOSING (returning to compact) — smooth, no bounce */
   transition:
-    width  calc(420ms * var(--anim-mult, 1)) var(--dc-out),
-    height calc(420ms * var(--anim-mult, 1)) var(--dc-out),
-    border-radius calc(420ms * var(--anim-mult, 1)) var(--dc-out);
+    width  calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out),
+    height calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out),
+    border-radius calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out);
 }
 /* OPENING (to preview/expanded) — bouncy spring */
 .dc-island.preview,
 .dc-island.expanded {
   transition:
-    width  calc(520ms * var(--anim-mult, 1)) var(--dc-spring),
-    height calc(520ms * var(--anim-mult, 1)) var(--dc-spring),
-    border-radius calc(520ms * var(--anim-mult, 1)) var(--dc-spring);
+    width  calc(520ms * var(--anim-mult, 1)) var(--ease-dc-spring),
+    height calc(520ms * var(--anim-mult, 1)) var(--ease-dc-spring),
+    border-radius calc(520ms * var(--anim-mult, 1)) var(--ease-dc-spring);
 }
 .dc-island:focus-visible {
   outline: 2px solid var(--dc-accent);
@@ -213,16 +213,16 @@ html.dark .dc-event-row.is-focus {
   pointer-events: none;
   /* exiting / default: fade out immediately */
   transition:
-    opacity calc(200ms * var(--anim-mult, 1)) var(--dc-out),
-    transform calc(360ms * var(--anim-mult, 1)) var(--dc-out);
+    opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out),
+    transform calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out);
 }
 .dc-layer.active {
   opacity: 1;
   pointer-events: auto;
   /* arriving: wait for the previous layer's exit (200ms) to complete */
   transition:
-    opacity calc(220ms * var(--anim-mult, 1)) var(--dc-out) calc(210ms * var(--anim-mult, 1)),
-    transform calc(360ms * var(--anim-mult, 1)) var(--dc-out) calc(210ms * var(--anim-mult, 1));
+    opacity calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out) calc(210ms * var(--anim-mult, 1)),
+    transform calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out) calc(210ms * var(--anim-mult, 1));
 }
 .dc-layer.behind { transform: scale(0.96); }
 
@@ -238,7 +238,7 @@ html.dark .dc-event-row.is-focus {
   padding: 7px 14px 7px 12px;
   gap: 6px;
   transition:
-    padding calc(420ms * var(--anim-mult, 1)) var(--dc-spring);
+    padding calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-dc-spring);
 }
 .dc-chip-layer.is-preview .dc-chip {
   /* preview: header at top, event detail below */
@@ -269,7 +269,7 @@ html.dark .dc-event-row.is-focus {
   border-radius: 50%;
   background: var(--dc-accent);
   box-shadow: 0 0 0 0 var(--brand-glow);
-  animation: dcPulse calc(2000ms * var(--anim-mult, 1)) ease-out infinite;
+  animation: dcPulse calc(2000ms * var(--anim-mult, 1)) var(--ease-out-native) infinite;
 }
 @keyframes dcPulse {
   0%   { box-shadow: 0 0 0 0   var(--brand-glow); }
@@ -288,8 +288,8 @@ html.dark .dc-event-row.is-focus {
   transform: translateY(6px);
   pointer-events: none;
   transition:
-    opacity calc(220ms * var(--anim-mult, 1)) var(--dc-out) calc(120ms * var(--anim-mult, 1)),
-    transform calc(360ms * var(--anim-mult, 1)) var(--dc-spring) calc(120ms * var(--anim-mult, 1));
+    opacity calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out) calc(var(--duration-fast) * var(--anim-mult, 1)),
+    transform calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-dc-spring) calc(var(--duration-fast) * var(--anim-mult, 1));
 }
 .dc-chip-layer.is-preview .dc-preview-event {
   opacity: 1;
@@ -408,7 +408,7 @@ html.dark .dc-left {
   background: linear-gradient(to bottom, rgba(15,15,18,0) 0%, rgba(15,15,18,0.85) 70%, rgba(15,15,18,1) 100%);
   pointer-events: none;
   opacity: 0;
-  transition: opacity calc(200ms * var(--anim-mult, 1)) var(--dc-out);
+  transition: opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out);
   border-radius: 0 0 8px 8px;
 }
 .dc-event-list-wrap.has-overflow::after { opacity: 1; }
@@ -420,7 +420,7 @@ html.dark .dc-left {
   border-radius: 9999px;
   border: none;
   cursor: pointer;
-  transition: filter calc(140ms * var(--anim-mult, 1)), transform calc(180ms * var(--anim-mult, 1)) var(--dc-out), box-shadow calc(200ms * var(--anim-mult, 1)) var(--dc-out);
+  transition: filter calc(var(--duration-140) * var(--anim-mult, 1)), transform calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out);
   min-width: 0;
   flex-shrink: 0;
   color: #fff;
@@ -572,7 +572,7 @@ html.dark .dc-left {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background calc(160ms * var(--anim-mult, 1)), border-color calc(160ms * var(--anim-mult, 1)), transform calc(140ms * var(--anim-mult, 1));
+  transition: background calc(var(--duration-base) * var(--anim-mult, 1)), border-color calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-140) * var(--anim-mult, 1));
 }
 .dc-today-btn:hover { background: color-mix(in srgb, var(--brand-primary-500) 18%, transparent); border-color: var(--brand-glow); }
 .dc-today-btn:active { transform: scale(0.96); }
@@ -589,7 +589,7 @@ html.dark .dc-left {
   color: var(--dc-fg-dim);
   cursor: pointer;
   display: inline-flex; align-items: center; justify-content: center;
-  transition: background calc(160ms * var(--anim-mult, 1)), color calc(160ms * var(--anim-mult, 1)), transform calc(140ms * var(--anim-mult, 1));
+  transition: background calc(var(--duration-base) * var(--anim-mult, 1)), color calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-140) * var(--anim-mult, 1));
   padding: 0;
 }
 .dc-nav-btn:hover { background: rgba(255,255,255,0.12); color: var(--dc-fg); }
@@ -634,7 +634,7 @@ html.dark .dc-left {
   position: relative;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.005em;
-  transition: background calc(160ms * var(--anim-mult, 1)), transform calc(180ms * var(--anim-mult, 1)) var(--dc-spring), color calc(160ms * var(--anim-mult, 1)), box-shadow calc(200ms * var(--anim-mult, 1)) var(--dc-out);
+  transition: background calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-dc-spring), color calc(var(--duration-base) * var(--anim-mult, 1)), box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out);
 }
 .dc-cell.dim { color: var(--dc-fg-dimmer); font-weight: 500; }
 .dc-cell:hover { background: rgba(255,255,255,0.08); transform: scale(1.05); }
@@ -643,12 +643,12 @@ html.dark .dc-left {
    doesn't snap. */
 .dc-cell[data-proximity] {
   transition:
-    background calc(160ms * var(--anim-mult, 1)),
-    transform calc(180ms * var(--anim-mult, 1)) var(--dc-spring),
-    color calc(160ms * var(--anim-mult, 1)),
-    box-shadow calc(200ms * var(--anim-mult, 1)) var(--dc-out),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    background calc(var(--duration-base) * var(--anim-mult, 1)),
+    transform calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-dc-spring),
+    color calc(var(--duration-base) * var(--anim-mult, 1)),
+    box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .dc-cell.has-event::after {
   content: '';
@@ -701,7 +701,7 @@ html.dark .dc-left {
   display: inline-flex; align-items: center; justify-content: center;
   padding: 0;
   z-index: 6;
-  transition: background calc(160ms * var(--anim-mult, 1)), color calc(160ms * var(--anim-mult, 1)), transform calc(140ms * var(--anim-mult, 1));
+  transition: background calc(var(--duration-base) * var(--anim-mult, 1)), color calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-140) * var(--anim-mult, 1));
 }
 .dc-close:hover { background: rgba(255,255,255,0.14); color: #fff; }
 .dc-close:active { transform: scale(0.92); }
@@ -727,7 +727,7 @@ html.dark .dc-left {
   font-size: 12.5px; font-weight: 800;
   letter-spacing: 0.02em;
   cursor: pointer;
-  transition: background calc(160ms * var(--anim-mult, 1)), border-color calc(160ms * var(--anim-mult, 1)), transform calc(140ms * var(--anim-mult, 1));
+  transition: background calc(var(--duration-base) * var(--anim-mult, 1)), border-color calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-140) * var(--anim-mult, 1));
 }
 .dc-add-task:hover { background: color-mix(in srgb, var(--brand-primary-500) 18%, transparent); border-color: var(--brand-glow); }
 .dc-add-task:active { transform: scale(0.96); }
@@ -784,7 +784,7 @@ html.dark .dc-left {
   text-decoration-color: rgba(255,255,255,0.20);
   text-underline-offset: 3px;
   padding: 3px 8px 4px;
-  transition: color calc(160ms * var(--anim-mult, 1)), text-decoration-color calc(160ms * var(--anim-mult, 1));
+  transition: color calc(var(--duration-base) * var(--anim-mult, 1)), text-decoration-color calc(var(--duration-base) * var(--anim-mult, 1));
 }
 .dc-preview-viewall:hover {
   color: var(--dc-fg);
@@ -802,13 +802,13 @@ html.dark .dc-left {
 }
 /* Applied by className; delay injected via --dc-delay custom prop on element */
 .dc-event-row {
-  animation: dcRise calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) var(--dc-delay, 120ms) both;
+  animation: dcRise calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out) var(--dc-delay, 120ms) both;
 }
 .dc-more {
-  animation: dcRise calc(360ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1) var(--dc-delay, 120ms) both;
+  animation: dcRise calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out) var(--dc-delay, 120ms) both;
 }
 .dc-cell {
-  animation: dcCellPop calc(360ms * var(--anim-mult, 1)) cubic-bezier(.34,1.38,.4,1) var(--dc-delay, 120ms) both;
+  animation: dcCellPop calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-dc-cell-pop) var(--dc-delay, 120ms) both;
 }
 
 /* Reduced motion */

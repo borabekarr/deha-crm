@@ -58,7 +58,7 @@ html.dark .stk-root .frame { background: #0A0A0A; background-image: none; }
   position: relative;
   cursor: pointer;
   user-select: none;
-  transition: transform calc(320ms * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(320ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: transform calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-out);
   will-change: transform;
 }
 
@@ -81,12 +81,12 @@ html.dark .stk-root .streak {
 }
 
 /* hover: the whole grey shell (bezel + card) lifts together with the glow */
-.stk-root .sc-shell { transition: transform calc(320ms * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(320ms * var(--anim-mult, 1)) var(--ease-out); filter: drop-shadow(0 10px 15px rgba(17,17,17,0.12)) drop-shadow(0 2px 4px rgba(17,17,17,0.06)); }
+.stk-root .sc-shell { transition: transform calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-out); filter: drop-shadow(0 10px 15px rgba(17,17,17,0.12)) drop-shadow(0 2px 4px rgba(17,17,17,0.06)); }
 html.dark .stk-root .sc-shell { filter: drop-shadow(0 16px 25px rgba(0,0,0,0.5)) drop-shadow(0 3px 4.5px rgba(0,0,0,0.3)); }
 .stk-root .frame:hover .sc-shell { transform: translateY(-3px); box-shadow: 0 20px 44px -20px color-mix(in srgb, var(--brand-primary-500) 22%, transparent), 0 8px 20px rgba(17,17,17,0.10); }
 html.dark .stk-root .frame:hover .sc-shell { box-shadow: 0 22px 50px -20px color-mix(in srgb, var(--brand-primary-500) 30%, transparent), 0 10px 22px rgba(0,0,0,0.5); }
 .stk-root .frame:hover .streak { box-shadow: var(--sc-shadow), var(--sc-glow); }
-.stk-root .sc-shell.pop   { animation: scPop calc(300ms * var(--anim-mult, 1)) var(--ease-out); }
+.stk-root .sc-shell.pop   { animation: scPop calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out); }
 @keyframes scPop { 0%{ transform: scale(.99);} 55%{ transform: scale(1.004);} 100%{ transform: scale(1);} }
 
 /* ── HEAD ── */
@@ -112,7 +112,7 @@ html.dark .stk-root .frame:hover .sc-shell { box-shadow: 0 22px 50px -20px color
   margin-left: auto; align-self: flex-start;
   color: var(--sc-fg3);
   display: grid; place-items: center;
-  transition: color calc(200ms * var(--anim-mult, 1)), filter calc(200ms * var(--anim-mult, 1));
+  transition: color calc(var(--duration-200) * var(--anim-mult, 1)), filter calc(var(--duration-200) * var(--anim-mult, 1));
 }
 .stk-root .sc-foot .material-symbols-outlined {
   font-size: 18px; font-variation-settings: 'FILL' 1, 'wght' 500, 'opsz' 24;
@@ -127,7 +127,7 @@ html.dark .stk-root .frame:hover .sc-shell { box-shadow: 0 22px 50px -20px color
 .stk-root .sc-dot {
   width: 24px; height: 24px; border-radius: 50%;
   display: grid; place-items: center; position: relative;
-  transition: transform calc(200ms * var(--anim-mult, 1)) var(--ease-spring), box-shadow calc(220ms * var(--anim-mult, 1));
+  transition: transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-spring), box-shadow calc(var(--duration-slow) * var(--anim-mult, 1));
 }
 .stk-root .sc-dot.empty { background: var(--sc-empty); box-shadow: var(--sc-empty-border); }
 .stk-root .sc-dot.done {
@@ -153,7 +153,7 @@ html.dark .stk-root .frame:hover .sc-shell { box-shadow: 0 22px 50px -20px color
 }
 .stk-root .sc-day-label {
   font-size: 9px; font-weight: 700; letter-spacing: 0.04em;
-  color: var(--sc-fg3); transition: color calc(200ms * var(--anim-mult, 1));
+  color: var(--sc-fg3); transition: color calc(var(--duration-200) * var(--anim-mult, 1));
 }
 .stk-root .sc-day.is-done .sc-day-label { color: var(--sc-fg2); }
 .stk-root .sc-day.is-active .sc-day-label { color: var(--brand-primary-500); }
@@ -194,35 +194,35 @@ html.dark .stk-root .frame:hover .sc-shell { box-shadow: 0 22px 50px -20px color
 /* ─────────────────────────────────────────────────────────────────────
    LOAD ANIMATION  (added via .anim-in once mounted)
    ───────────────────────────────────────────────────────────────────── */
-.stk-root .streak.anim-in { animation: scCardIn calc(620ms * var(--anim-mult, 1)) cubic-bezier(.34,1.4,.5,1) both; }
+.stk-root .streak.anim-in { animation: scCardIn calc(620ms * var(--anim-mult, 1)) var(--ease-card-pop) both; }
 @keyframes scCardIn {
   0%   { opacity: 0; transform: scale(.85) translateY(10px); }
   100% { opacity: 1; transform: scale(1) translateY(0); }
 }
-.stk-root .anim-in .sc-flame { animation: scFlame calc(900ms * var(--anim-mult, 1)) ease-out calc(80ms * var(--anim-mult, 1)) both; }
+.stk-root .anim-in .sc-flame { animation: scFlame calc(900ms * var(--anim-mult, 1)) var(--ease-out-native) calc(80ms * var(--anim-mult, 1)) both; }
 @keyframes scFlame {
   0%   { transform: scale(.7); filter: brightness(.6); }
   45%  { transform: scale(1.18); filter: brightness(1.35); }
   70%  { transform: scale(.96); }
   100% { transform: scale(1); filter: brightness(1); }
 }
-.stk-root .anim-in .sc-streak-num { animation: scNumPop calc(560ms * var(--anim-mult, 1)) var(--ease-spring) calc(220ms * var(--anim-mult, 1)) both; display: inline-block; }
+.stk-root .anim-in .sc-streak-num { animation: scNumPop calc(560ms * var(--anim-mult, 1)) var(--ease-spring) calc(var(--duration-slow) * var(--anim-mult, 1)) both; display: inline-block; }
 @keyframes scNumPop {
   0%   { opacity: 0; transform: scale(.5) translateY(6px); }
   60%  { opacity: 1; transform: scale(1.14); }
   100% { transform: scale(1); }
 }
 /* dots stagger in: checks slide up + pop, empties fade */
-.stk-root .anim-in .sc-day { animation: scDayIn calc(460ms * var(--anim-mult, 1)) var(--ease-spring) both; animation-delay: calc(var(--i) * calc(70ms * var(--anim-mult, 1)) + calc(360ms * var(--anim-mult, 1))); }
+.stk-root .anim-in .sc-day { animation: scDayIn calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-spring) both; animation-delay: calc(var(--i) * calc(70ms * var(--anim-mult, 1)) + calc(360ms * var(--anim-mult, 1))); }
 @keyframes scDayIn {
   0%   { opacity: 0; transform: translateY(10px) scale(.6); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
-.stk-root .anim-in .sc-steps { animation: scFade calc(500ms * var(--anim-mult, 1)) ease-out calc(560ms * var(--anim-mult, 1)) both; }
+.stk-root .anim-in .sc-steps { animation: scFade calc(500ms * var(--anim-mult, 1)) var(--ease-out-native) calc(560ms * var(--anim-mult, 1)) both; }
 @keyframes scFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
 /* update micro-states */
-.stk-root .sc-flame.flare { animation: scFlare calc(620ms * var(--anim-mult, 1)) ease-out; }
+.stk-root .sc-flame.flare { animation: scFlare calc(620ms * var(--anim-mult, 1)) var(--ease-out-native); }
 @keyframes scFlare {
   0%   { filter: brightness(1); transform: scale(1); }
   25%  { filter: brightness(1.6) hue-rotate(12deg); transform: scale(1.16); }
@@ -246,7 +246,7 @@ html.dark .stk-root .frame:hover .sc-shell { box-shadow: 0 22px 50px -20px color
   background: rgba(255,255,255,0.85); color: #4A4A4A;
   border: 1px solid #ECECEC;
   box-shadow: 0 2px 8px rgba(17,17,17,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
-  transition: transform calc(140ms * var(--anim-mult, 1)) var(--ease-out), background calc(160ms * var(--anim-mult, 1)), color calc(160ms * var(--anim-mult, 1)), border-color calc(160ms * var(--anim-mult, 1));
+  transition: transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-base) * var(--anim-mult, 1)), color calc(var(--duration-base) * var(--anim-mult, 1)), border-color calc(var(--duration-base) * var(--anim-mult, 1));
 }
 .stk-root .sc-btn .material-icons { font-size: 16px; }
 .stk-root .sc-btn:hover { transform: translateY(-1px); color: #111111; border-color: #D4D4D4; }
@@ -256,9 +256,9 @@ html.dark .stk-root .frame:hover .sc-shell { box-shadow: 0 22px 50px -20px color
    hover-tokens.css's fallback never kicks in and --prox snaps. Append the
    two channels here, scoped to [data-proximity] instances only. */
 .stk-root .sc-btn[data-proximity] {
-  transition: transform calc(140ms * var(--anim-mult, 1)) var(--ease-out), background calc(160ms * var(--anim-mult, 1)), color calc(160ms * var(--anim-mult, 1)), border-color calc(160ms * var(--anim-mult, 1)),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+  transition: transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-base) * var(--anim-mult, 1)), color calc(var(--duration-base) * var(--anim-mult, 1)), border-color calc(var(--duration-base) * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 html.dark .stk-root .sc-btn { background: rgba(28,28,28,0.7); color: #D4D4D4; border-color: #232323; box-shadow: 0 2px 10px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05); }
 html.dark .stk-root .sc-btn:hover { color: #F5F5F5; border-color: #4A4A4A; background: rgba(39,52,73,0.8); }

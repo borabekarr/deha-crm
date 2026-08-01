@@ -114,7 +114,7 @@ html.dark .sp-panel[data-squircle="on"] {
   display: flex; align-items: flex-start; justify-content: center;
   padding-top: 14vh;
 }
-.palette-backdrop[data-open="true"]  { visibility: visible; opacity: 1; animation: fadeIn 180ms var(--ease-out); }
+.palette-backdrop[data-open="true"]  { visibility: visible; opacity: 1; animation: fadeIn calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-out); }
 .palette-backdrop[data-open="false"] { visibility: hidden;  opacity: 0; }
 
 html.dark .palette-backdrop { background: rgba(2,6,12,0.6); }
@@ -146,10 +146,10 @@ html.dark .sp-palette-centered { background: rgba(2,6,12,0.7); }
 .ticket {
   position: relative;
   z-index: 1;
-  transition: box-shadow 200ms var(--ease-out),
-              border-color 200ms var(--ease-out),
-              transform 200ms var(--ease-out),
-              background-color 180ms;
+  transition: box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out),
+              border-color calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out),
+              transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out),
+              background-color calc(var(--duration-180) * var(--anim-mult, 1));
 }
 /* Hover preserves the dashed border + lifts above siblings */
 .ticket:not(.success-p0):not(.success-p1):not(.success-p2):not(.success-buffer):hover {
@@ -176,13 +176,13 @@ html.dark .ticket:not(.success-p0):not(.success-p1):not(.success-p2):not(.succes
 }
 .ticket .sp-del {
   opacity: 0;
-  transition: opacity 150ms;
+  transition: opacity calc(var(--duration-150) * var(--anim-mult, 1));
 }
 .ticket:hover .sp-del { opacity: 1; }
 
 /* Day cell drop hover */
 .day-cell {
-  transition: background 160ms, border-color 160ms, outline-color 160ms, box-shadow 160ms;
+  transition: background calc(var(--duration-base) * var(--anim-mult, 1)), border-color calc(var(--duration-base) * var(--anim-mult, 1)), outline-color calc(var(--duration-base) * var(--anim-mult, 1)), box-shadow calc(var(--duration-base) * var(--anim-mult, 1));
   box-shadow:
     inset 0 1px 2px rgba(17,17,17,0.04),
     inset 0 0 0 1px rgba(17,17,17,0.02);
@@ -192,7 +192,7 @@ html.dark .ticket:not(.success-p0):not(.success-p1):not(.success-p2):not(.succes
   background: var(--sp-addhover-bg) !important;
   outline: 2px solid rgba(17,17,17,0.70);
   outline-offset: 0px;
-  transition: outline-color 80ms;
+  transition: outline-color calc(80ms * var(--anim-mult, 1));
 }
 html.dark .day-cell.drop-target {
   outline-color: rgba(255,255,255,0.75);
@@ -222,7 +222,7 @@ html.dark .day-cell.today.drop-target { background: color-mix(in srgb, var(--bra
 .sp-day-scroll::-webkit-scrollbar-thumb {
   background: #D4D4D4;
   border-radius: 3px;
-  transition: background 200ms;
+  transition: background calc(var(--duration-200) * var(--anim-mult, 1));
 }
 .sp-day-scroll::-webkit-scrollbar-thumb:hover { background: #A1A1A1; }
 html.dark .sp-day-scroll { scrollbar-color:#232323 transparent; }
@@ -231,9 +231,9 @@ html.dark .sp-day-scroll::-webkit-scrollbar-thumb:hover { background:#4A4A4A; }
 
 /* Command palette suggestion row — item 13: hover effect */
 .sugg-row {
-  transition: background-color 120ms, transform 100ms var(--ease-out),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+  transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .sugg-row:hover, .sugg-row.active {
   background: var(--sp-kbd-bg);
@@ -250,7 +250,7 @@ html.dark .sugg-row:hover, html.dark .sugg-row.active {
   0%, 100% { transform: scale(1); opacity: 1; }
   50%      { transform: scale(1.15); opacity: 0.75; }
 }
-.sparkle-pulse { animation: sparkPulse 1100ms var(--ease-in-out) infinite; transform-origin: center; }
+.sparkle-pulse { animation: sparkPulse calc(1100ms * var(--anim-mult, 1)) var(--ease-in-out) infinite; transform-origin: center; }
 
 /* ---- Move micro-interactions (smooth, no bounce) ---- */
 @keyframes ticketWashP0 {
@@ -273,10 +273,10 @@ html.dark .sugg-row:hover, html.dark .sugg-row.active {
   72%  { background: var(--sp-wash-bufb); border-color: #6B6B6B; box-shadow: inset 0 0 0 1px rgba(100,116,139,0.18), inset 0 0 8px 0 rgba(100,116,139,0.10); }
   100% { background: var(--sp-card-bg);    border-color: var(--sp-card-border); box-shadow: inset 0 0 0 0 transparent; }
 }
-.ticket.success-p0     { animation: ticketWashP0     1800ms var(--ease-out) forwards; }
-.ticket.success-p1     { animation: ticketWashP1     1800ms var(--ease-out) forwards; }
-.ticket.success-p2     { animation: ticketWashP2     1800ms var(--ease-out) forwards; }
-.ticket.success-buffer { animation: ticketWashBuffer 1800ms var(--ease-out) forwards; }
+.ticket.success-p0     { animation: ticketWashP0     calc(1800ms * var(--anim-mult, 1)) var(--ease-out) forwards; }
+.ticket.success-p1     { animation: ticketWashP1     calc(1800ms * var(--anim-mult, 1)) var(--ease-out) forwards; }
+.ticket.success-p2     { animation: ticketWashP2     calc(1800ms * var(--anim-mult, 1)) var(--ease-out) forwards; }
+.ticket.success-buffer { animation: ticketWashBuffer calc(1800ms * var(--anim-mult, 1)) var(--ease-out) forwards; }
 
 /* ---- Toast: morph in / morph out ---- */
 /* item 3: vertical stack — newest on top, gap between toasts */
@@ -307,8 +307,8 @@ html.dark .sugg-row:hover, html.dark .sugg-row.active {
   0%   { opacity: 1; transform: scale(1)    translateY(0);    filter: blur(0); }
   100% { opacity: 0; transform: scale(0.6)  translateY(10px); filter: blur(5px); }
 }
-.sp-toast-layer .sp-toast.sp-toast-in  { animation: toastMorphIn  320ms var(--ease-toast-pop) both; }
-.sp-toast-layer .sp-toast.sp-toast-out { animation: toastMorphOut 240ms var(--ease-accel) both; }
+.sp-toast-layer .sp-toast.sp-toast-in  { animation: toastMorphIn  calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-toast-pop) both; }
+.sp-toast-layer .sp-toast.sp-toast-out { animation: toastMorphOut calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-accel) both; }
 
 /* Stat badge + Ask AI button */
 .sp-stat-badge, .sp-ask-ai {
@@ -355,9 +355,9 @@ html.dark .sugg-row:hover, html.dark .sugg-row.active {
 .sp-ask-ai {
   background: var(--sp-askai);
   cursor: pointer;
-  transition: transform 130ms var(--ease-out), background 150ms,
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+  transition: transform calc(130ms * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-150) * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .sp-ask-ai:hover  { background: var(--sp-askai-hover); }
 .sp-ask-ai:active { transform: scale(0.97); }
@@ -396,7 +396,7 @@ button { font-family: inherit; }
   background: var(--sp-chip);
   opacity: 0;
   border-radius: 10px;
-  transition: opacity calc(120ms * var(--anim-mult, 1));
+  transition: opacity calc(var(--duration-fast) * var(--anim-mult, 1));
   pointer-events: none;
 }
 .sugg-row:hover::before,
@@ -476,9 +476,9 @@ html.dark .ticket {
   letter-spacing: 0.04em;
   cursor: pointer;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 2px 6px rgba(17,17,17,0.28);
-  transition: background-color calc(180ms * var(--anim-mult, 1)), transform calc(160ms * var(--anim-mult, 1)) var(--ease-spring-snap),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+  transition: background-color calc(var(--duration-180) * var(--anim-mult, 1)), transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring-snap),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
   background-image:
     linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
@@ -528,7 +528,7 @@ html.dark .sp-add-ticket-btn:disabled {
   border: 2px solid rgba(17,17,17,0.15);
   border-top-color: var(--sp-fg1);
   border-radius: 50%;
-  animation: spRowSpin calc(600ms * var(--anim-mult, 1)) linear infinite;
+  animation: spRowSpin calc(600ms * var(--anim-mult, 1)) var(--ease-linear) infinite;
   flex-shrink: 0;
 }
 html.dark .sugg-row-spinner {
@@ -550,5 +550,5 @@ html.dark .sugg-row-spinner {
   justify-content: center;
 }
 html.dark .sp-modal-backdrop { background: rgba(2,6,12,0.7); }
-.sp-modal-backdrop[data-open="true"]  { visibility: visible; opacity: 1; animation: fadeIn calc(180ms * var(--anim-mult, 1)) var(--ease-out); }
+.sp-modal-backdrop[data-open="true"]  { visibility: visible; opacity: 1; animation: fadeIn calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-out); }
 .sp-modal-backdrop[data-open="false"] { visibility: hidden;  opacity: 0; }

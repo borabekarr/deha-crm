@@ -1,0 +1,40 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignoreExportsUsedInFile": true,
+  "workspaces": {
+    "apps/web": {
+      "entry": [
+        "src/main.tsx",
+        "src/routes/**/*.tsx",
+        "scripts/check-bundle-budget.mjs",
+        "vite.config.ts",
+        "eslint.config.js",
+        "playwright.config.ts"
+      ],
+      "project": ["src/**/*.{ts,tsx}"],
+      "ignore": [
+        "src/routeTree.gen.ts",
+        "**/design-system-archive/**",
+        "tests/**/*-snapshots/**"
+      ]
+    },
+    "packages/api": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.ts"]
+    },
+    "packages/core": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.ts"]
+    }
+  },
+  "ignore": [
+    ".claude*/**",
+    "memory/**",
+    "plans/**",
+    "debt/**",
+    "knowledge/**",
+    "**/design-system-archive/**",
+    "**/*-snapshots/**",
+    "pilot-sandbox/**"
+  ]
+}

@@ -66,12 +66,12 @@ html.dark .cal-shell[data-squircle="on"]::before {
 .cal-month-yr { font-size: 20px; font-weight: 900; color: #111111; letter-spacing: -0.02em; }
 .cal-count { background: #ECECEC; color: #6B6B6B; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 9999px; }
 .cal-actions { display: flex; gap: 5px; align-items: center; }
-.cal-today-btn { background: #111111; border: 1px solid transparent; border-radius: 9999px; padding: 6px 14px; font-family: 'Montserrat'; font-size: 12px; font-weight: 800; color: #fff; cursor: pointer; transition: background calc(150ms * var(--anim-mult, 1)), color calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) var(--ease-out); box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.22); }
+.cal-today-btn { background: #111111; border: 1px solid transparent; border-radius: 9999px; padding: 6px 14px; font-family: 'Montserrat'; font-size: 12px; font-weight: 800; color: #fff; cursor: pointer; transition: background calc(var(--duration-150) * var(--anim-mult, 1)), color calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out); box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.22); }
 .cal-today-btn:hover { background: #1C1C1C; }
 .cal-today-btn:active { transform: scale(0.94); }
 .cal-today-btn.is-today { background: #ECECEC; color: #111111; border-color: #D4D4D4; box-shadow: inset 0 2px 4px rgba(0,0,0,0.10), inset 0 1px 2px rgba(0,0,0,0.06); }
 .cal-today-btn.is-today:hover { background: #D8E0EA; }
-.cal-nav-btn { background: #fff; border: 1px solid #ECECEC; border-radius: 50%; width: 30px; height: 30px; display: grid; place-items: center; cursor: pointer; transition: background calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) var(--ease-out); box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgba(0,0,0,0.04); }
+.cal-nav-btn { background: #fff; border: 1px solid #ECECEC; border-radius: 50%; width: 30px; height: 30px; display: grid; place-items: center; cursor: pointer; transition: background calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out); box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgba(0,0,0,0.04); }
 .cal-nav-btn:hover { background: #FAFAFA; }
 .cal-nav-btn:active { transform: scale(0.88); }
 .cal-nav-btn .material-icons { font-size: 17px; color: #6B6B6B; }
@@ -92,10 +92,10 @@ html.dark .cal-shell[data-squircle="on"]::before {
 .cal-grid-exit {
   position: absolute; inset: 0;
   pointer-events: none;
-  animation: cal-grid-exit-travel calc(220ms * var(--anim-mult, 1)) var(--ease-out) both;
+  animation: cal-grid-exit-travel calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out) both;
 }
 .cal-grid-enter {
-  animation: cal-grid-enter-travel calc(280ms * var(--anim-mult, 1)) var(--ease-out) calc(130ms * var(--anim-mult, 1)) both;
+  animation: cal-grid-enter-travel calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out) calc(130ms * var(--anim-mult, 1)) both;
 }
 @keyframes cal-grid-enter-travel {
   from { opacity: 0; transform: translateX(var(--gdx, 18px)); }
@@ -118,7 +118,7 @@ html.dark .cal-shell[data-squircle="on"]::before {
   width: 30px; height: 30px; border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
   font-size: 14px; font-weight: 600; color: #111111;
-  transition: background calc(150ms * var(--anim-mult, 1)) var(--ease-fade) 0ms, transform calc(110ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade) 0ms, transform calc(110ms * var(--anim-mult, 1)) var(--ease-out);
 }
 .cal-cell.other-month .cal-date-num { color: #D4D4D4; font-weight: 500; }
 /* Hover: only non-selected, non-other-month cells */
@@ -154,7 +154,7 @@ html.dark .cal-dot-more { color: #6B6B6B; }
    property (was hover-only, causing a corner-radius pop) and the option
    converges on the global hover (fab/Fab.css .fab-item): background
    var(--fp-hover), 150ms zero-delay fade, press scale(0.97). */
-.cal-ev-item { display: flex; align-items: center; width: 100%; padding: 10px 2px; border: 0; border-bottom: 1px solid #FAFAFA; border-radius: 8px; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; appearance: none; transition: transform calc(120ms * var(--anim-mult, 1)) var(--ease-out), background calc(150ms * var(--anim-mult, 1)) var(--ease-fade) 0ms; }
+.cal-ev-item { display: flex; align-items: center; width: 100%; padding: 10px 2px; border: 0; border-bottom: 1px solid #FAFAFA; border-radius: 8px; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; appearance: none; transition: transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade) 0ms; }
 .cal-ev-item:hover { background: var(--fp-hover); }
 .cal-ev-item:active { transform: scale(0.97); }
 .cal-ev-item:last-of-type { border-bottom: none; }
@@ -163,10 +163,10 @@ html.dark .cal-dot-more { color: #6B6B6B; }
    engine's --prox mapping doesn't snap. */
 .cal-ev-item[data-proximity] {
   transition:
-    transform calc(120ms * var(--anim-mult, 1)) var(--ease-out),
-    background calc(150ms * var(--anim-mult, 1)) var(--ease-fade) 0ms,
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out),
+    background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade) 0ms,
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .cev-left { display: flex; align-items: center; gap: 8px; flex: 1; overflow: hidden; }
 .cev-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
@@ -190,7 +190,7 @@ html.dark .cal-dot-more { color: #6B6B6B; }
    (fab/Fab.css .fab-item): background var(--fp-hover), 150ms zero-delay
    fade, press scale(0.97). The idle 0.7 opacity ghost-affordance is kept
    (pre-existing, not part of the broken-hover report). */
-.cal-add-row { display: flex; align-items: center; gap: 10px; padding: 10px 2px 4px; cursor: pointer; opacity: 0.7; border-radius: 8px; transition: opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade), background calc(150ms * var(--anim-mult, 1)) var(--ease-fade) 0ms; }
+.cal-add-row { display: flex; align-items: center; gap: 10px; padding: 10px 2px 4px; cursor: pointer; opacity: 0.7; border-radius: 8px; transition: opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade), background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade) 0ms; }
 .cal-add-row:hover { opacity: 1; background: var(--fp-hover); }
 .cal-add-row:active { transform: scale(0.97); }
 /* Proximity: own `opacity` transition (0,1,0) beats hover-tokens.css's
@@ -198,10 +198,10 @@ html.dark .cal-dot-more { color: #6B6B6B; }
    engine's --prox mapping doesn't snap (mirrors .cal-ev-item[data-proximity]). */
 .cal-add-row[data-proximity] {
   transition:
-    opacity calc(150ms * var(--anim-mult, 1)),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    background calc(150ms * var(--anim-mult, 1)) var(--ease-fade) 0ms;
+    opacity calc(var(--duration-150) * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade) 0ms;
 }
 .cal-add-icon { width: 26px; height: 26px; border-radius: 50%; background: #F5F5F5; display: grid; place-items: center; color: #A1A1A1; }
 .cal-add-icon .material-icons { font-size: 16px; }
@@ -241,14 +241,14 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
 /* Morph-in when switching days (event panel rebuilds → fresh nodes replay this) */
 @keyframes calEvIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes calLabelIn { from { opacity: 0; transform: translateY(-5px); filter: blur(2px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
-.cal-events-container > * { animation: calEvIn calc(.42s * var(--anim-mult, 1)) var(--ease-out) both; }
+.cal-events-container > * { animation: calEvIn calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out) both; }
 .cal-events-container > .cal-ev-label { animation: calLabelIn calc(.34s * var(--anim-mult, 1)) var(--ease-out) both; }
 .cal-events-container > *:nth-child(2) { animation-delay: calc(.05s * var(--anim-mult, 1)); }
-.cal-events-container > *:nth-child(3) { animation-delay: calc(.10s * var(--anim-mult, 1)); }
-.cal-events-container > *:nth-child(4) { animation-delay: calc(.15s * var(--anim-mult, 1)); }
-.cal-events-container > *:nth-child(5) { animation-delay: calc(.20s * var(--anim-mult, 1)); }
+.cal-events-container > *:nth-child(3) { animation-delay: calc(var(--duration-instant) * var(--anim-mult, 1)); }
+.cal-events-container > *:nth-child(4) { animation-delay: calc(var(--duration-150) * var(--anim-mult, 1)); }
+.cal-events-container > *:nth-child(5) { animation-delay: calc(var(--duration-200) * var(--anim-mult, 1)); }
 .cal-events-container > *:nth-child(6) { animation-delay: calc(.25s * var(--anim-mult, 1)); }
-.cal-events-container > *:nth-child(7) { animation-delay: calc(.30s * var(--anim-mult, 1)); }
+.cal-events-container > *:nth-child(7) { animation-delay: calc(var(--duration-slower) * var(--anim-mult, 1)); }
 .cal-events-container > *:nth-child(8) { animation-delay: calc(.35s * var(--anim-mult, 1)); }
 /* Selected day pill gives a little morph pop when it moves — FIX#1: softer overshoot 1.12→1.06, lower bezier tension */
 @keyframes calSelPop { 0% { transform: scale(.7); } 60% { transform: scale(1.06); } 100% { transform: scale(1); } }
@@ -259,7 +259,7 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
   position: fixed; inset: 0; z-index: 100;
   background: rgba(17,17,17,0.35);
   display: flex; align-items: center; justify-content: center;
-  animation: calPopBackdropIn calc(160ms * var(--anim-mult, 1)) ease both;
+  animation: calPopBackdropIn calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade) both;
 }
 @keyframes calPopBackdropIn { from { opacity: 0; } to { opacity: 1; } }
 
@@ -272,7 +272,7 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
   box-shadow: 0 24px 80px rgba(17,17,17,0.22), 0 4px 16px rgba(17,17,17,0.08),
               inset 0 1px 0 rgba(255,255,255,0.8);
   display: flex; flex-direction: column; gap: 16px;
-  animation: calPopIn calc(240ms * var(--anim-mult, 1)) var(--ease-out) both;
+  animation: calPopIn calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-out) both;
 }
 @keyframes calPopIn {
   from { opacity: 0; transform: scale(.93) translateY(10px); }
@@ -290,7 +290,7 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
   background: #FAFAFA; border: 1px solid #ECECEC; border-radius: 10px;
   padding: 9px 12px; font-family: 'Montserrat', sans-serif;
   font-size: 14px; font-weight: 500; color: #111111;
-  outline: none; transition: border-color calc(120ms * var(--anim-mult, 1));
+  outline: none; transition: border-color calc(var(--duration-fast) * var(--anim-mult, 1));
   width: 100%; box-sizing: border-box;
 }
 .cal-pop-input:focus { border-color: var(--brand-primary-500); }
@@ -299,8 +299,8 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
 .cal-pop-colors { display: flex; gap: 10px; }
 .cal-pop-color-btn {
   width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent;
-  cursor: pointer; transition: transform calc(120ms * var(--anim-mult, 1)) var(--ease-out),
-                                border-color calc(100ms * var(--anim-mult, 1));
+  cursor: pointer; transition: transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out),
+                                border-color calc(var(--duration-instant) * var(--anim-mult, 1));
   outline: none;
 }
 .cal-pop-color-btn:hover { transform: scale(1.12); }
@@ -312,7 +312,7 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
   background: #F5F5F5; border: none; border-radius: 10px;
   padding: 9px 16px; font-family: 'Montserrat', sans-serif;
   font-size: 13px; font-weight: 700; color: #6B6B6B;
-  cursor: pointer; transition: background calc(120ms * var(--anim-mult, 1));
+  cursor: pointer; transition: background calc(var(--duration-fast) * var(--anim-mult, 1));
 }
 .cal-pop-cancel:hover { background: #ECECEC; }
 .cal-pop-add {
@@ -321,7 +321,7 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
   font-size: 13px; font-weight: 800; color: var(--brand-on-primary);
   cursor: pointer;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.3), inset 0 -2px 0 rgba(0,0,0,.18);
-  transition: filter calc(120ms * var(--anim-mult, 1)), transform calc(100ms * var(--anim-mult, 1));
+  transition: filter calc(var(--duration-fast) * var(--anim-mult, 1)), transform calc(var(--duration-instant) * var(--anim-mult, 1));
 }
 .cal-pop-add:hover { filter: brightness(1.08); }
 .cal-pop-add:active { transform: scale(.97); }
@@ -336,12 +336,12 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
   -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
   display: flex; align-items: center; justify-content: center;
   visibility: hidden; opacity: 0; pointer-events: none;
-  transition: opacity calc(220ms * var(--anim-mult, 1)) ease,
-              visibility 0s linear calc(220ms * var(--anim-mult, 1));
+  transition: opacity calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade),
+              visibility 0s var(--ease-linear) calc(var(--duration-slow) * var(--anim-mult, 1));
 }
 .cal-ep-overlay.open {
   visibility: visible; opacity: 1; pointer-events: auto;
-  transition: opacity calc(220ms * var(--anim-mult, 1)) ease, visibility 0s;
+  transition: opacity calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade), visibility 0s;
 }
 
 /* Gray bezel outer shell — pop entrance via var(--ease-spring). This popover
@@ -358,8 +358,8 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
   display: flex; flex-direction: column;
   box-shadow: 0 32px 80px rgba(0,0,0,0.28), 0 6px 20px rgba(0,0,0,0.12);
   opacity: 0; transform: translateY(16px) scale(0.95);
-  transition: transform calc(320ms * var(--anim-mult, 1)) var(--ease-spring),
-              opacity calc(240ms * var(--anim-mult, 1)) ease;
+  transition: transform calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-spring),
+              opacity calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .cal-ep-outer[data-squircle="on"] {
   --corner-radius: 36px;
@@ -441,7 +441,7 @@ html.dark .cal-ep-card { background: #1C1C1C; }
   width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%;
   background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.32);
   cursor: pointer; display: grid; place-items: center; color: #fff; padding: 0;
-  transition: background calc(160ms * var(--anim-mult, 1));
+  transition: background calc(var(--duration-base) * var(--anim-mult, 1));
 }
 .cal-ep-close:hover { background: rgba(255,255,255,0.34); }
 .cal-ep-close .material-icons { font-size: 17px; }
@@ -570,7 +570,7 @@ html.dark .cal-ep-cust-sub { color: var(--fg3) !important; }
 .cal-ep-cust-act {
   width: 32px; height: 32px; flex-shrink: 0; border-radius: 10px; cursor: pointer;
   display: grid; place-items: center; border: 1px solid var(--border-hairline); background: var(--bg-chip); color: var(--fg2);
-  transition: background calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1));
+  transition: background calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1));
 }
 .cal-ep-cust-act:hover { background: var(--bg-card-solid); }
 .cal-ep-cust-act:active { transform: scale(0.93); }
@@ -633,7 +633,7 @@ html.dark .cal-ep-alert { background: #1C1C1C !important; border: 1px solid #232
   background-size: 9px 9px !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -2px 0 rgba(0,0,0,0.3) !important;
   text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-  transition: filter calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1));
+  transition: filter calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1));
 }
 .cal-ep-alert-cta:hover { filter: brightness(1.1); }
 .cal-ep-alert-cta:active { transform: scale(0.96); }
@@ -732,7 +732,7 @@ html.dark .cal-ep-tip { background: color-mix(in srgb, var(--fg1) 5%, var(--bg-c
   background-size: 9px 9px;
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.25);
   text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-  transition: filter calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)); }
+  transition: filter calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1)); }
 .cal-ep-tip-cta:hover { filter: brightness(1.06); }
 .cal-ep-tip-cta:active { transform: scale(0.96); }
 .cal-ep-tip-cta .material-icons { font-size: 14px; }
@@ -759,7 +759,7 @@ html.dark .cal-ep-category-label { color: var(--fg1); }
 .cal-ep-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .cal-ep-steps li { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: var(--fg3); }
 .cal-ep-step-tog { display: grid; place-items: center; background: none; border: none; cursor: pointer; padding: 0; color: var(--fg4); }
-.cal-ep-step-tog .material-icons { font-size: 17px; transition: color calc(140ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)); }
+.cal-ep-step-tog .material-icons { font-size: 17px; transition: color calc(var(--duration-140) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1)); }
 .cal-ep-step-tog:active .material-icons { transform: scale(0.85); }
 .cal-ep-steps li.done .cal-ep-step-tog .material-icons { color: var(--brand-primary); }
 .cal-ep-step-t { font-size: 12px; font-weight: 600; }
@@ -817,7 +817,7 @@ html.dark .cal-ep-age-chip { box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0
 .cal-ep-age-chip .material-icons { font-size: 14px; }
 .cal-ep-age-of { font-size: 11px; font-weight: 600; color: var(--fg4); }
 .cal-ep-age-meter { height: 7px; border-radius: 9999px; background: var(--bg-chip); overflow: hidden; box-shadow: inset 0 1px 2px rgba(17,17,17,0.08); }
-.cal-ep-age-meter i { display: block; height: 100%; border-radius: 9999px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.4); transition: width calc(200ms * var(--anim-mult, 1)) linear; }
+.cal-ep-age-meter i { display: block; height: 100%; border-radius: 9999px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.4); transition: width calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-linear); }
 
 /* ── SyncScore time table ──────────────────────────────────────────── */
 .cal-ep-sync { display: flex; flex-direction: column; gap: 8px; }
@@ -829,7 +829,7 @@ html.dark .cal-ep-age-chip { box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0
 .cal-ep-sync-row.peak { background: color-mix(in srgb, var(--brand-primary-500) 8%, var(--bg-chip)); border-radius: 8px; padding: 2px 6px; margin: 0 -6px; }
 .cal-ep-sync-hh { font-size: 11px; font-weight: 800; color: var(--fg3); font-variant-numeric: tabular-nums; min-width: 38px; }
 .cal-ep-sync-bar { flex: 1; height: 7px; border-radius: 9999px; background: var(--bg-chip); overflow: hidden; }
-.cal-ep-sync-bar i { display: block; height: 100%; border-radius: 9999px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.4); transition: width calc(200ms * var(--anim-mult, 1)) linear; }
+.cal-ep-sync-bar i { display: block; height: 100%; border-radius: 9999px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.4); transition: width calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-linear); }
 .cal-ep-sync-pct { font-size: 10.5px; font-weight: 800; font-variant-numeric: tabular-nums; min-width: 30px; text-align: right; }
 
 /* ── Dependency chain ──────────────────────────────────────────────── */
@@ -895,7 +895,7 @@ html.dark .cal-ep-chain-step { box-shadow: inset 0 1px 0 rgba(255,255,255,0.07);
   border: 1px solid var(--fbtn, #111111);
   padding: 6px 14px; border-radius: 9999px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1.5px 0 rgba(0,0,0,0.18), 0 0 10px -3px var(--fbtn, #111111);
-  transition: border-color calc(150ms * var(--anim-mult, 1)), color calc(150ms * var(--anim-mult, 1)), background calc(150ms * var(--anim-mult, 1)), filter calc(150ms * var(--anim-mult, 1));
+  transition: border-color calc(var(--duration-150) * var(--anim-mult, 1)), color calc(var(--duration-150) * var(--anim-mult, 1)), background calc(var(--duration-150) * var(--anim-mult, 1)), filter calc(var(--duration-150) * var(--anim-mult, 1));
 }
 .cal-ep-foot-btn .material-icons { color: #fff; font-size: 16px; }
 .cal-ep-foot-btn:hover { background: var(--fbtn, var(--brand-primary)); border-color: var(--fbtn, var(--brand-primary)); color: var(--brand-on-primary); filter: brightness(1.08); }
@@ -914,7 +914,7 @@ html.dark .cal-ep-foot-btn.primary .material-icons { color: #04231a; }
 .cal-ep-toast { position: absolute; left: 50%; bottom: 16px; transform: translate(-50%, 14px); z-index: 5;
   display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 800; color: #fff; background: #111111;
   padding: 9px 15px; border-radius: 9999px; box-shadow: 0 10px 24px -8px rgba(0,0,0,0.5); opacity: 0; pointer-events: none;
-  transition: opacity calc(220ms * var(--anim-mult, 1)), transform calc(220ms * var(--anim-mult, 1)); white-space: nowrap; }
+  transition: opacity calc(var(--duration-slow) * var(--anim-mult, 1)), transform calc(var(--duration-slow) * var(--anim-mult, 1)); white-space: nowrap; }
 .cal-ep-toast.show { opacity: 1; transform: translate(-50%, 0); }
 .cal-ep-toast .material-icons { font-size: 16px; color: var(--brand-primary-400); }
 
@@ -970,7 +970,7 @@ html.dark .cal-popover-backdrop { background: rgba(0,0,0,.55); }
   content: '';
   position: absolute; left: 0; right: 0; height: 30px;
   pointer-events: none; z-index: 2; opacity: 0;
-  transition: opacity calc(180ms * var(--anim-mult, 1)) ease;
+  transition: opacity calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .cal-ev-scroll-wrap::before {
   top: 0;
@@ -992,7 +992,7 @@ html.dark .cal-popover-backdrop { background: rgba(0,0,0,.55); }
   width: 3px; border-radius: 9999px;
   background: rgba(0,0,0,0.06);
   opacity: 0;
-  transition: opacity calc(200ms * var(--anim-mult, 1));
+  transition: opacity calc(var(--duration-200) * var(--anim-mult, 1));
 }
 [data-scroll="top"]    .cal-ev-scrollbar,
 [data-scroll="mid"]    .cal-ev-scrollbar,
@@ -1002,8 +1002,8 @@ html.dark .cal-popover-backdrop { background: rgba(0,0,0,.55); }
 .cal-ev-scrollbar-thumb {
   position: absolute; right: 0; left: auto; width: 3px; border-radius: 9999px;
   background: #A1A1A1;
-  transition: top calc(50ms * var(--anim-mult, 1)) linear,
-              height calc(50ms * var(--anim-mult, 1)) linear;
+  transition: top calc(50ms * var(--anim-mult, 1)) var(--ease-linear),
+              height calc(50ms * var(--anim-mult, 1)) var(--ease-linear);
 }
 html.dark .cal-ev-scrollbar { background: rgba(255,255,255,0.08); }
 html.dark .cal-ev-scrollbar-thumb { background: #4A4A4A; }

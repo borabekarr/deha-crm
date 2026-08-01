@@ -406,7 +406,7 @@ function DynamicIsland({
                     strokeDasharray={2 * Math.PI * 8}
                     strokeDashoffset={2 * Math.PI * 8 * (1 - progress)}
                     transform="rotate(-90 10 10)"
-                    style={{ transition: RM ? 'none' : 'stroke-dashoffset 200ms ease' }}
+                    style={{ transition: RM ? 'none' : 'stroke-dashoffset calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade)' }}
                   />
                 </svg>
               </>

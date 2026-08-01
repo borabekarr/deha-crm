@@ -45,7 +45,7 @@
   width: 65%;
   background: var(--brand-primary-500);
   border-radius: 9999px;
-  transition: width calc(260ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: width calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-out);
 }
 .slider .thumb {
   position: absolute;
@@ -59,11 +59,11 @@
   border: 1.5px solid rgba(0, 0, 0, 0.08);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.10);
   cursor: grab;
-  transition: left calc(260ms * var(--anim-mult, 1)) var(--ease-out),
-              transform calc(180ms * var(--anim-mult, 1)) var(--ease-spring),
-              box-shadow calc(180ms * var(--anim-mult, 1)) var(--ease-out),
-              scale calc(180ms * var(--anim-mult, 1)) var(--ease-spring),
-              filter calc(180ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: left calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-out),
+              transform calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-spring),
+              box-shadow calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-out),
+              scale calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-spring),
+              filter calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-out);
 }
 .slider .thumb:hover {
   transform: translate(-50%, -50%) scale(1.14);
@@ -79,8 +79,8 @@
   transition: none;
 }
 .slider.dragging .thumb {
-  transition: transform calc(180ms * var(--anim-mult, 1)) var(--ease-spring),
-              box-shadow calc(180ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: transform calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-spring),
+              box-shadow calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-out);
   transform: translate(-50%, -50%) scale(1.22);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18), 0 4px 18px rgba(0, 0, 0, 0.12);
   cursor: grabbing;

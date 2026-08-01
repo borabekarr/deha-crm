@@ -123,9 +123,9 @@ html.dark .dp-outer[data-squircle="on"] {
 .dp-trigger[data-proximity],
 .dp-confirm[data-proximity] {
   transition:
-    background-color calc(180ms * var(--anim-mult, 1)),
-    transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
-    box-shadow calc(200ms * var(--anim-mult, 1)),
+    background-color calc(var(--duration-180) * var(--anim-mult, 1)),
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring),
+    box-shadow calc(var(--duration-200) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
@@ -147,7 +147,7 @@ html.dark #dp-open-btn:hover {
 
 /* ── Panel enter/exit ─────────────────────────────────────────────────────── */
 /* Enter: translateY(-16px) scale(.95) → 0/1 — panel slides in from top downward */
-/* Exit: same shape in reverse, 260ms ease-out (no bounce -- animation:none cancels spring) */
+/* Exit: same shape in reverse, --duration-slow ease-out (no bounce -- animation none cancels spring) */
 @keyframes dp-panel-enter {
   0%   { transform: translateY(-16px) scale(0.95); opacity: 0; }
   100% { transform: translateY(0)     scale(1);    opacity: 1; }
@@ -185,7 +185,7 @@ html.dark #dp-open-btn:hover {
 
 /* Open state — prize-sheet bounce enter */
 .dp-panel.dp-panel--open {
-  animation: dp-panel-enter calc(360ms * var(--anim-mult, 1)) var(--ease-spring-snap) both;
+  animation: dp-panel-enter calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-spring-snap) both;
   transform: translateY(0) scale(1);
   opacity: 1;
   pointer-events: auto;
@@ -258,7 +258,7 @@ html.dark .dp-panel[data-squircle="on"] {
   cursor: pointer;
   border: none;
   padding: 0;
-  transition: background calc(120ms * var(--anim-mult, 1));
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1));
   /* Fix (4): nudge up-right toward the head's top-right corner via layout
      (align-self + negative margin), never transform -- proximity owns transform. */
   align-self: flex-start;
