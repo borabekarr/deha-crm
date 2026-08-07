@@ -85,7 +85,10 @@ html.dark .stk-root .streak {
 html.dark .stk-root .sc-shell { filter: drop-shadow(0 16px 25px rgba(0,0,0,0.5)) drop-shadow(0 3px 4.5px rgba(0,0,0,0.3)); }
 .stk-root .frame:hover .sc-shell { transform: translateY(-3px); box-shadow: 0 20px 44px -20px color-mix(in srgb, var(--brand-primary-500) 22%, transparent), 0 8px 20px rgba(17,17,17,0.10); }
 html.dark .stk-root .frame:hover .sc-shell { box-shadow: 0 22px 50px -20px color-mix(in srgb, var(--brand-primary-500) 30%, transparent), 0 10px 22px rgba(0,0,0,0.5); }
-.stk-root .frame:hover .streak { box-shadow: var(--sc-shadow), var(--sc-glow); }
+/* Inner white shell keeps its resting (inset-only) shadow on hover too --
+   elevation + brand glow are owned by the OUTER .sc-shell (see hover rules
+   above); the inner shell must never cast its own outward/glow shadow. */
+.stk-root .frame:hover .streak { box-shadow: var(--sc-shadow); }
 .stk-root .sc-shell.pop   { animation: scPop calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out); }
 @keyframes scPop { 0%{ transform: scale(.99);} 55%{ transform: scale(1.004);} 100%{ transform: scale(1);} }
 
@@ -149,7 +152,7 @@ html.dark .stk-root .frame:hover .sc-shell { box-shadow: 0 22px 50px -20px color
 .stk-root .sc-dot.active { background: transparent; box-shadow: 0 0 7px color-mix(in srgb, var(--brand-primary-500) 26%, transparent); }
 .stk-root .sc-dot.active svg { width: 24px; height: 24px; display: block; transform: rotate(-90deg); }
 .stk-root .sc-dot.active .ring-prog {
-  transition: stroke-dashoffset calc(760ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: stroke-dashoffset calc(var(--duration-760) * var(--anim-mult, 1)) var(--ease-out);
 }
 .stk-root .sc-day-label {
   font-size: 9px; font-weight: 700; letter-spacing: 0.04em;
@@ -181,7 +184,7 @@ html.dark .stk-root .frame:hover .sc-shell { box-shadow: 0 22px 50px -20px color
     inset 0 1px 0 rgba(255,255,255,0.45),
     inset 0 -2px 0 rgba(6,78,59,0.25),
     0 0 14px color-mix(in srgb, var(--brand-primary-500) 65%, transparent);
-  transition: width calc(760ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: width calc(var(--duration-760) * var(--anim-mult, 1)) var(--ease-out);
   position: relative;
 }
 .stk-root .sc-bar-fill::after {
@@ -194,47 +197,47 @@ html.dark .stk-root .frame:hover .sc-shell { box-shadow: 0 22px 50px -20px color
 /* ─────────────────────────────────────────────────────────────────────
    LOAD ANIMATION  (added via .anim-in once mounted)
    ───────────────────────────────────────────────────────────────────── */
-.stk-root .streak.anim-in { animation: scCardIn calc(620ms * var(--anim-mult, 1)) var(--ease-card-pop) both; }
+.stk-root .streak.anim-in { animation: scCardIn calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-card-pop) both; }
 @keyframes scCardIn {
   0%   { opacity: 0; transform: scale(.85) translateY(10px); }
   100% { opacity: 1; transform: scale(1) translateY(0); }
 }
-.stk-root .anim-in .sc-flame { animation: scFlame calc(900ms * var(--anim-mult, 1)) var(--ease-out-native) calc(80ms * var(--anim-mult, 1)) both; }
+.stk-root .anim-in .sc-flame { animation: scFlame calc(var(--duration-900) * var(--anim-mult, 1)) var(--ease-out-native) calc(var(--duration-80) * var(--anim-mult, 1)) both; }
 @keyframes scFlame {
   0%   { transform: scale(.7); filter: brightness(.6); }
   45%  { transform: scale(1.18); filter: brightness(1.35); }
   70%  { transform: scale(.96); }
   100% { transform: scale(1); filter: brightness(1); }
 }
-.stk-root .anim-in .sc-streak-num { animation: scNumPop calc(560ms * var(--anim-mult, 1)) var(--ease-spring) calc(var(--duration-slow) * var(--anim-mult, 1)) both; display: inline-block; }
+.stk-root .anim-in .sc-streak-num { animation: scNumPop calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-spring) calc(var(--duration-slow) * var(--anim-mult, 1)) both; display: inline-block; }
 @keyframes scNumPop {
   0%   { opacity: 0; transform: scale(.5) translateY(6px); }
   60%  { opacity: 1; transform: scale(1.14); }
   100% { transform: scale(1); }
 }
 /* dots stagger in: checks slide up + pop, empties fade */
-.stk-root .anim-in .sc-day { animation: scDayIn calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-spring) both; animation-delay: calc(var(--i) * calc(70ms * var(--anim-mult, 1)) + calc(360ms * var(--anim-mult, 1))); }
+.stk-root .anim-in .sc-day { animation: scDayIn calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-spring) both; animation-delay: calc(var(--i) * calc(var(--duration-60) * var(--anim-mult, 1)) + calc(var(--duration-sweep) * var(--anim-mult, 1))); }
 @keyframes scDayIn {
   0%   { opacity: 0; transform: translateY(10px) scale(.6); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
-.stk-root .anim-in .sc-steps { animation: scFade calc(500ms * var(--anim-mult, 1)) var(--ease-out-native) calc(560ms * var(--anim-mult, 1)) both; }
+.stk-root .anim-in .sc-steps { animation: scFade calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-out-native) calc(var(--duration-560) * var(--anim-mult, 1)) both; }
 @keyframes scFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
 /* update micro-states */
-.stk-root .sc-flame.flare { animation: scFlare calc(620ms * var(--anim-mult, 1)) var(--ease-out-native); }
+.stk-root .sc-flame.flare { animation: scFlare calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out-native); }
 @keyframes scFlare {
   0%   { filter: brightness(1); transform: scale(1); }
   25%  { filter: brightness(1.6) hue-rotate(12deg); transform: scale(1.16); }
   100% { filter: brightness(1); transform: scale(1); }
 }
-.stk-root .sc-streak-num.elastic { animation: scElastic calc(640ms * var(--anim-mult, 1)) var(--ease-spring); display: inline-block; }
+.stk-root .sc-streak-num.elastic { animation: scElastic calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-spring); display: inline-block; }
 @keyframes scElastic {
   0%{transform:scale(.92);} 35%{transform:scale(1.05);} 65%{transform:scale(.98);} 100%{transform:scale(1);}
 }
-.stk-root .sc-steps-val.bump { animation: scBump calc(520ms * var(--anim-mult, 1)) var(--ease-spring); display: inline-block; }
+.stk-root .sc-steps-val.bump { animation: scBump calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-spring); display: inline-block; }
 @keyframes scBump { 0%{transform:scale(1);} 40%{transform:scale(1.08);} 100%{transform:scale(1);} }
-.stk-root .sc-dot.just-done { animation: scJustDone calc(520ms * var(--anim-mult, 1)) var(--ease-spring); }
+.stk-root .sc-dot.just-done { animation: scJustDone calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-spring); }
 @keyframes scJustDone { 0%{transform:scale(.4) rotate(-20deg);} 60%{transform:scale(1.18);} 100%{transform:scale(1);} }
 
 /* ── demo controls (chrome, lives outside the component shell) ── */

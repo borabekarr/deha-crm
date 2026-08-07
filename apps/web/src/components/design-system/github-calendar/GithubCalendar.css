@@ -326,8 +326,8 @@ html.dark .gc-legend-cell.gc-l4 { background: var(--dl4); }
 
 @media (prefers-reduced-motion: no-preference) {
   .gc-card[data-anim='in'] .gc-cell {
-    animation: gcPop calc(0.45s * var(--anim-mult, 1)) var(--ease-out) both;
-    animation-delay: calc(var(--d, 0ms) * var(--anim-mult, 1));
+    animation: gcPop calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-out) both;
+    animation-delay: calc(var(--d, 0ms) * var(--anim-mult, 1)); /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
   }
 }
 
@@ -348,7 +348,7 @@ html.dark .gc-legend-cell.gc-l4 { background: var(--dl4); }
   gap: 5px;
   align-items: baseline;
   box-shadow: 0 10px 24px -8px rgba(17,17,17, 0.5);
-  animation: gcTip calc(0.14s * var(--anim-mult, 1)) ease;
+  animation: gcTip calc(var(--duration-140) * var(--anim-mult, 1)) ease;
 }
 
 html.dark .gc-tip {

@@ -87,79 +87,34 @@ html.dark .h-title .h-title-icon { color: #FFFFFF; }
 
 .rows { display:flex; flex-direction:column; gap: 6px; }
 
-/* ── Direction-aware enter/exit keyframes ───────────────────────────────────
-   SPEC: dir > 0 (revenue→growth) → rows travel RIGHT (exiting-right, entering-right).
-         dir < 0 (growth→revenue) → rows travel LEFT  (exiting-left,  entering-left).
-   Keyframe names describe the DIRECTION OF TRAVEL (matches MotionTabs convention).
-   travel-left  (−x): exit goes left, entering panel arrives from the right.
-   travel-right (+x): exit goes right, entering panel arrives from the left. */
-@keyframes lb-enter-from-left {
-  from { opacity: 0; transform: translateX(-22px); }
-  to   { opacity: 1; transform: none; }
-}
-@keyframes lb-enter-from-right {
-  from { opacity: 0; transform: translateX(22px); }
-  to   { opacity: 1; transform: none; }
-}
-@keyframes lb-enter-neutral {
-  from { opacity: 0.65; }
-  to   { opacity: 1; }
-}
-@keyframes lb-exit-travel-left {
-  from { opacity: 1; transform: none; }
-  to   { opacity: 0; transform: translateX(-22px); }
-}
-@keyframes lb-exit-travel-right {
-  from { opacity: 1; transform: none; }
-  to   { opacity: 0; transform: translateX(22px); }
-}
-
-/* ── Entering states: rows slide in with per-row stagger (~160ms across 4 rows) */
-/* Neutral enter (initial mount, no direction) — simple opacity fade */
-.rows.lb-entering {
-  animation: lb-enter-neutral calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out) both;
-}
-/* dir > 0 → rows arrive from the left (travel right) */
-.rows.lb-entering-right .row {
-  animation: lb-enter-from-left calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out) both;
-}
-/* dir < 0 → rows arrive from the right (travel left) */
-.rows.lb-entering-left .row {
-  animation: lb-enter-from-right calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out) both;
-}
-/* Per-row stagger: each successive row enters 40ms after the previous.
-   4 rows × 40ms = ~160ms total stagger. */
-.rows.lb-entering-right .row:nth-child(1),
-.rows.lb-entering-left .row:nth-child(1)  { animation-delay: calc(0ms   * var(--anim-mult, 1)); }
-.rows.lb-entering-right .row:nth-child(2),
-.rows.lb-entering-left .row:nth-child(2)  { animation-delay: calc(40ms  * var(--anim-mult, 1)); }
-.rows.lb-entering-right .row:nth-child(3),
-.rows.lb-entering-left .row:nth-child(3)  { animation-delay: calc(80ms  * var(--anim-mult, 1)); }
-.rows.lb-entering-right .row:nth-child(4),
-.rows.lb-entering-left .row:nth-child(4)  { animation-delay: calc(120ms * var(--anim-mult, 1)); }
+/* ── Direction-aware enter/exit: driven by the shared usePanelDirection
+   vocabulary + global [data-panel-state] keyframes (motion-tokens.css).
+   Exit plays on the .rows container as one block (no stagger, matches the
+   global rule directly, no local override needed). Enter plays per-.row via
+   the same global rule; only the stagger delay is scoped locally here
+   (~160ms across 4 rows, preserved from the prior hand-rolled version). */
+.row[data-panel-state="entering-right"]:nth-child(1),
+.row[data-panel-state="entering-left"]:nth-child(1)  { animation-delay: calc(0ms   * var(--anim-mult, 1)); /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */ }
+.row[data-panel-state="entering-right"]:nth-child(2),
+.row[data-panel-state="entering-left"]:nth-child(2)  { animation-delay: calc(var(--duration-40)  * var(--anim-mult, 1)); }
+.row[data-panel-state="entering-right"]:nth-child(3),
+.row[data-panel-state="entering-left"]:nth-child(3)  { animation-delay: calc(var(--duration-80)  * var(--anim-mult, 1)); }
+.row[data-panel-state="entering-right"]:nth-child(4),
+.row[data-panel-state="entering-left"]:nth-child(4)  { animation-delay: calc(var(--duration-fast) * var(--anim-mult, 1)); }
 /* Safety net for any additional rows beyond 4 */
-.rows.lb-entering-right .row:nth-child(n+5),
-.rows.lb-entering-left .row:nth-child(n+5) { animation-delay: calc(160ms * var(--anim-mult, 1)); }
-
-/* ── Exiting states: faster container-level exit (200ms, no stagger) ───────
-   Plays BEFORE content switches so old rows animate out cleanly. */
-.rows.lb-exiting-left {
-  animation: lb-exit-travel-left calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out) both;
-}
-.rows.lb-exiting-right {
-  animation: lb-exit-travel-right calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out) both;
-}
+.row[data-panel-state="entering-right"]:nth-child(n+5),
+.row[data-panel-state="entering-left"]:nth-child(n+5) { animation-delay: calc(var(--duration-base) * var(--anim-mult, 1)); }
 .row {
   /* Calmer proximity hover: overrides the global 1.02 cap (hover-tokens.css)
-     down to the inner-card benchmark (Cards.css .concentric-demo), on the
-     shared --duration-slow/--ease-out pair instead of the snappy instant
-     default, so the row swells modestly rather than popping. */
-  --hover-scale-max: 1.007;
+     down further than the inner-card benchmark (Cards.css .concentric-demo),
+     on the shared --duration-slow/--ease-out pair instead of the snappy
+     instant default, so the row swells gently rather than popping. */
+  --hover-scale-max: 1.005;
   display:flex; align-items:center; justify-content:space-between;
   padding: 10px 14px; border-radius: 16px; gap: 10px;
   cursor: pointer; will-change: transform;
   transition:
-    transform calc(560ms * var(--anim-mult, 1)) var(--ease-out),
+    transform calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out),
     scale calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
     filter calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
     box-shadow calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
@@ -167,14 +122,14 @@ html.dark .h-title .h-title-icon { color: #FFFFFF; }
 }
 .row:not(.win):hover {
   background: rgba(17,17,17,0.04);
-  box-shadow: 0 2px 6px rgba(17,17,17,0.06);
+  box-shadow: 0 1px 4px rgba(17,17,17,0.05);
 }
 .row.win {
   background: rgba(236,253,245,0.6); border: 1px solid var(--brand-primary-100);
   position: relative; overflow: hidden;
 }
 html.dark .row {
-  border: 1px solid var(--card-border, #232323);
+  border: 1px solid rgba(255,255,255,0.14);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
   background: rgba(255,255,255,0.03);
 }

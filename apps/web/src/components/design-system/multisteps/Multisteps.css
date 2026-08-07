@@ -31,7 +31,7 @@
   0%   { opacity: 0; transform: scale(0.85); }
   100% { opacity: 1; transform: scale(1); }
 }
-.ms-surface.mounted { animation: ms-mount calc(620ms * var(--anim-mult, 1)) var(--ease-card-pop); }
+.ms-surface.mounted { animation: ms-mount calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-card-pop); }
 
 .ms-eyebrow {
   font-size: 10px;
@@ -52,7 +52,7 @@
 .ms-stage {
   position: relative;
   height: 38px;
-  transition: width calc(540ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: width calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out);
 }
 
 .ms-capsule {
@@ -72,8 +72,8 @@
     linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
   background-size: 7px 7px;
   transition:
-    width calc(540ms * var(--anim-mult, 1)) var(--ease-out),
-    left  calc(540ms * var(--anim-mult, 1)) var(--ease-out);
+    width calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out),
+    left  calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out);
 }
 
 /* Resting dot (upcoming step) */
@@ -88,7 +88,7 @@
   background: var(--gray-300);
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.6);
   transition:
-    left        calc(540ms * var(--anim-mult, 1)) var(--ease-out),
+    left        calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out),
     width       calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-out),
     height      calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-out),
     background  calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-fade),
@@ -208,11 +208,11 @@
     transform   calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-spring),
     filter      calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
     box-shadow  calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-spring),
-    width       calc(480ms * var(--anim-mult, 1)) var(--ease-card-pop),
+    width       calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-card-pop),
     opacity     calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade),
-    margin      calc(480ms * var(--anim-mult, 1)) var(--ease-card-pop);
+    margin      calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-card-pop);
 }
-.ms-btn:active { transform: translateY(2px) scale(0.985); }
+.ms-btn:active { transform: translateY(2px) scale(var(--press-card)); }
 
 /* Back button — collapses to 0 width when on step 0 */
 .ms-btn--back {
@@ -233,7 +233,7 @@
   opacity: 1;
   pointer-events: auto;
 }
-.ms-btn--back:active { transform: translateY(1px) scale(0.985); }
+.ms-btn--back:active { transform: translateY(1px) scale(var(--press-card)); }
 
 /* Stationary slots — keep hover trigger fixed while buttons lift.
    Multisteps previously shipped a hover-transform flicker bug: the
@@ -255,7 +255,7 @@
     inset 0 -2px 0 rgba(0, 0, 0, 0.22),
     inset 0 0 0 1px rgba(255, 255, 255, 0.15);
 }
-.ms-btn-slot:hover .ms-btn--back:active { transform: translateY(1px) scale(0.985); }
+.ms-btn-slot:hover .ms-btn--back:active { transform: translateY(1px) scale(var(--press-card)); }
 .ms-btn-slot:hover .ms-btn--primary:active { transform: translateY(1px) scale(0.99); }
 
 /* Proximity — scale channel appended (transform/filter/box-shadow already
@@ -267,9 +267,9 @@
     transform   calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-spring),
     filter      calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
     box-shadow  calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-spring),
-    width       calc(480ms * var(--anim-mult, 1)) var(--ease-card-pop),
+    width       calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-card-pop),
     opacity     calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade),
-    margin      calc(480ms * var(--anim-mult, 1)) var(--ease-card-pop),
+    margin      calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-card-pop),
     scale       calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 
@@ -278,7 +278,7 @@
    glow animates instead of snapping. */
 .ms-dot.ms-dot[data-proximity] {
   transition:
-    left        calc(540ms * var(--anim-mult, 1)) var(--ease-out),
+    left        calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out),
     width       calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-out),
     height      calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-out),
     background  calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-fade),
@@ -329,7 +329,7 @@
   pointer-events: none;
   background: radial-gradient(circle, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0.18) 60%, transparent 72%);
   transform: translate(-50%, -50%) scale(0);
-  animation: ms-ripple calc(620ms * var(--anim-mult, 1)) var(--ease-out) forwards;
+  animation: ms-ripple calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out) forwards;
 }
 .ms-btn--back .ms-ripple {
   background: radial-gradient(circle, rgba(17,17,17, 0.14) 0%, rgba(17,17,17, 0.05) 60%, transparent 72%);
@@ -345,7 +345,7 @@
   40%        { transform: translateY(0) scale(1.03); }
 }
 .ms-btn--primary.celebrate {
-  animation: ms-finish-pulse calc(520ms * var(--anim-mult, 1)) var(--ease-spring);
+  animation: ms-finish-pulse calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-spring);
 }
 
 /* ── Dark mode (System A — html.dark) ─────────────────────────────────── */

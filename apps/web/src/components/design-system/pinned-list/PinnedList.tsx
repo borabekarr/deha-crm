@@ -110,8 +110,8 @@ function makeScaleEntranceRef(_animKey: string, isUnpin = false): (el: HTMLEleme
     // Play: transition to resting state
     aug.__plEnterRafId = requestAnimationFrame(() => {
       aug.style.transition =
-        `opacity calc(280ms * var(--anim-mult, 1)) ease-out,` +
-        ` transform calc(280ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1)`
+        `opacity calc(var(--duration-280) * var(--anim-mult, 1)) ease-out,` +
+        ` transform calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236)`
       aug.style.opacity = ''
       aug.style.transform = ''
 
@@ -232,7 +232,7 @@ export default function PinnedList({ items: initialItems = DEFAULT_ITEMS }: Pinn
   // DOM node registry: outer wrapper div per item id, used for snapRects
   const nodeRefs = useRef<Record<string, HTMLElement>>({})
   // Easing to use for the current FLIP pass (pin vs unpin)
-  const flipEaseRef = useRef('cubic-bezier(.22,1,.36,1)')
+  const flipEaseRef = useRef('var(--ease-motion-sweep-2236)')
 
   // Pinned-section header collapses to 0 when the pinned group is empty --
   // measured height instead of a fixed max-height cap.
@@ -249,8 +249,8 @@ export default function PinnedList({ items: initialItems = DEFAULT_ITEMS }: Pinn
     // UNPIN uses smooth spring. Both toned down from the prior heavy-bounce
     // curve per "reduce animation power" feedback (was cubic-bezier(.34,1.7,.46,1)).
     flipEaseRef.current = target.pinned
-      ? 'cubic-bezier(.22,1,.36,1)'   // unpin: smooth
-      : 'var(--ease-bounce-soft, cubic-bezier(.34,1.32,.64,1))' // pin: damped spring
+      ? 'var(--ease-motion-sweep-2236)'   // unpin: smooth
+      : 'var(--ease-bounce-soft, var(--ease-bounce-soft))' // pin: damped spring
 
     // Snapshot all item positions (First in FLIP) before state mutation.
     snapRects(nodeRefs.current)

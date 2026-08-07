@@ -30,7 +30,7 @@ html.dark .card:has(.folder) { background:transparent !important; background-ima
   color:var(--fg3); background:#FFFFFF; border:1px solid var(--border-hairline);
   padding:6px 12px; border-radius:9999px; cursor:pointer;
   box-shadow:0 2px 6px rgba(17,17,17,0.07), inset 0 1px 0 rgba(255,255,255,0.9);
-  transition:transform calc(130ms * var(--anim-mult, 1)) var(--ease-out), color calc(var(--duration-150) * var(--anim-mult, 1));
+  transition:transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-out), color calc(var(--duration-150) * var(--anim-mult, 1));
 }
 .ff-replay:hover { transform:translateY(-1px); color:var(--fg1); }
 .ff-replay:active { transform:scale(0.95); }
@@ -75,7 +75,7 @@ html.dark .card:has(.folder) { background:transparent !important; background-ima
   transform-origin: center 62%;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: transform calc(600ms * var(--anim-mult, 1)) var(--ease-spring-strong), box-shadow calc(380ms * var(--anim-mult, 1)) var(--ease-fade), opacity calc(480ms * var(--anim-mult, 1)) var(--ease-fade);
+  transition: transform calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-spring-strong), box-shadow calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-fade), opacity calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .folder * { box-sizing: border-box; }
 /* Proximity: own `transform`/`box-shadow`/`opacity` transition (0,1,0) beats
@@ -85,9 +85,9 @@ html.dark .card:has(.folder) { background:transparent !important; background-ima
    properties and composite on top without conflict. */
 .folder[data-proximity] {
   transition:
-    transform calc(600ms * var(--anim-mult, 1)) var(--ease-spring-strong),
-    box-shadow calc(380ms * var(--anim-mult, 1)) var(--ease-fade),
-    opacity calc(480ms * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-spring-strong),
+    box-shadow calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-fade),
+    opacity calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-fade),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
@@ -100,7 +100,7 @@ html.dark .card:has(.folder) { background:transparent !important; background-ima
   position:absolute; top:var(--frame); left:var(--frame); right:var(--frame);
   height:58%;
   border-radius: 22px 22px 0 0;
-  transition: opacity calc(600ms * var(--anim-mult, 1)) var(--ease-fade);
+  transition: opacity calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-fade);
   background: radial-gradient(125% 125% at 22% 2%, #9AC8F6 0%, #5594F1 34%, #2C66E0 68%, #2150CB 100%);
 }
 .ff-grad::before {     /* faint house-style grid texture */
@@ -126,7 +126,7 @@ html.dark .card:has(.folder) { background:transparent !important; background-ima
   border-radius: 12px;
   box-shadow: var(--ff-paper-shadow);
   transform: translate(var(--tx),var(--ty)) rotate(var(--rot)) scale(var(--sc));
-  transition: transform calc(560ms * var(--anim-mult, 1)) var(--ease-spring), opacity calc(var(--duration-compact) * var(--anim-mult, 1)) var(--ease-fade);
+  transition: transform calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-spring), opacity calc(var(--duration-compact) * var(--anim-mult, 1)) var(--ease-fade);
   padding: 18px 16px;
 }
 .ff-paper .line { height:3px; border-radius:2px; background:var(--ff-line); margin-bottom:9px; }
@@ -168,7 +168,7 @@ html.dark .card:has(.folder) { background:transparent !important; background-ima
 }
 .ff-dots:hover { background:rgba(17,17,17,0.06); color:var(--ff-title); }
 html.dark .ff-dots:hover { background:rgba(255,255,255,0.08); }
-.ff-dots:active { transform:scale(0.92); }
+.ff-dots:active { transform:scale(var(--press-chip)); }
 .ff-dots.open { background:rgba(17,17,17,0.08); color:var(--ff-title); }
 html.dark .ff-dots.open { background:rgba(255,255,255,0.10); }
 .ff-dots:focus-visible { outline:2px solid #5594F1; outline-offset:2px; }
@@ -194,11 +194,20 @@ html.dark .ff-menu {
   padding:8px 10px; margin:0; border:none; border-radius:9px; background:transparent;
   font-family:'Montserrat'; font-size:12.5px; font-weight:700; letter-spacing:-0.005em;
   color:var(--ff-title); text-align:left; cursor:pointer;
-  transition:background calc(130ms * var(--anim-mult, 1)) var(--ease-fade);
+  transition:background calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-fade);
 }
-.ff-menu-item:hover { background:rgba(17,17,17,0.06); }
+/* Option hover converged on the global option pattern (fab/Fab.css .fab-item). */
+.ff-menu-item:hover { background:var(--fp-hover); }
 html.dark .ff-menu-item { color:#F5F5F5; }
-html.dark .ff-menu-item:hover { background:rgba(255,255,255,0.07); }
+/* Proximity: own transition beats hover-tokens.css's [data-proximity]x3
+   fallback; scale + filter channels added here so the engine's --prox
+   mapping doesn't snap, mirroring .ff-file[data-proximity]. */
+.ff-menu-item[data-proximity] {
+  transition:
+    background calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-fade),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+}
 .ff-menu-item .material-symbols-outlined { font-size:17px; color:var(--ff-sub); }
 .ff-menu-item--danger { color:#EF4444; }
 .ff-menu-item--danger .material-symbols-outlined { color:#EF4444; }
@@ -225,9 +234,11 @@ html.dark .ff-menu-item--danger .material-symbols-outlined { color:#FB7185; }
 }
 
 
-/* ════════════════════ HOVER (reduced intensity) ════════════════════ */
-/* Lift softened from -5px to -3px; title scale removed to avoid over-animation */
-.folder:hover { --fy:-3px; }
+/* ════════════════════ HOVER ════════════════════ */
+/* D6 verdict (2026-08-06): the --fy:-3px lift is replaced by the canon
+   proximity scale already wired via .folder[data-proximity] above (dialed to
+   --canon-hover-scale, matching the whole-card canon instead of a bespoke lift). */
+.folder[data-proximity] { --hover-scale-max: var(--canon-hover-scale, 1.006); }
 .folder:hover .ff-paper { --ty:-3px; }
 .folder:hover .ff-paper--mid   { --ty:-5px; }
 .folder:hover .ff-paper--front { --ty:-2px; }
@@ -241,16 +252,16 @@ html.dark .ff-menu-item--danger .material-symbols-outlined { color:#FB7185; }
 
 /* ════════════════════ ENTRANCE — visible base, gated on .play ════════════════════ */
 @media (prefers-reduced-motion: no-preference) {
-  .folder.play           { animation: ffIn calc(620ms * var(--anim-mult, 1)) var(--ease-spring-strong) backwards; }
-  .folder.play .ff-grad  { animation: ffFade calc(640ms * var(--anim-mult, 1)) var(--ease-fade) backwards; }
-  .folder.play .ff-paper { animation: ffPaperIn calc(560ms * var(--anim-mult, 1)) var(--ease-spring) backwards; }
+  .folder.play           { animation: ffIn calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-spring-strong) backwards; }
+  .folder.play .ff-grad  { animation: ffFade calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-fade) backwards; }
+  .folder.play .ff-paper { animation: ffPaperIn calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-spring) backwards; }
   .folder.play .ff-paper--back  { animation-delay: calc(var(--duration-150) * var(--anim-mult, 1)); }
   .folder.play .ff-paper--front { animation-delay: calc(var(--duration-240) * var(--anim-mult, 1)); }
-  .folder.play .ff-paper--mid   { animation-delay: calc(330ms * var(--anim-mult, 1)); }
-  .folder.play .ff-title { animation: ffRise calc(500ms * var(--anim-mult, 1)) var(--ease-fade) calc(var(--duration-420) * var(--anim-mult, 1)) backwards; }
-  .folder.play .ff-sub   { animation: ffRise calc(500ms * var(--anim-mult, 1)) var(--ease-fade) calc(470ms * var(--anim-mult, 1)) backwards; }
-  .folder.play .ff-dots  { animation: ffRise calc(500ms * var(--anim-mult, 1)) var(--ease-fade) calc(510ms * var(--anim-mult, 1)) backwards; }
-  .folder.play .ff-count { animation: ffRise calc(500ms * var(--anim-mult, 1)) var(--ease-fade) calc(540ms * var(--anim-mult, 1)) backwards; }
+  .folder.play .ff-paper--mid   { animation-delay: calc(var(--duration-320) * var(--anim-mult, 1)); }
+  .folder.play .ff-title { animation: ffRise calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--duration-420) * var(--anim-mult, 1)) backwards; }
+  .folder.play .ff-sub   { animation: ffRise calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--duration-expand) * var(--anim-mult, 1)) backwards; }
+  .folder.play .ff-dots  { animation: ffRise calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--duration-expand) * var(--anim-mult, 1)) backwards; }
+  .folder.play .ff-count { animation: ffRise calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--duration-560) * var(--anim-mult, 1)) backwards; }
 
   /* ffHotGlow removed — red folder uses same static shadow as blue */
 }
@@ -314,7 +325,7 @@ html.dark .ff-pop {
   transition:background calc(var(--duration-140) * var(--anim-mult, 1)), color calc(var(--duration-140) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1));
 }
 .ff-pop-close:hover { background:var(--ff-row-hover); color:var(--ff-pop-fg); }
-.ff-pop-close:active { transform:scale(0.9); }
+.ff-pop-close:active { transform:scale(var(--press-chip)); }
 .ff-pop-close .material-symbols-outlined { font-size:17px; }
 .ff-pop-sep { margin-top:12px; border-top:1px solid var(--ff-pop-bd); }
 
@@ -342,18 +353,18 @@ html.dark .ff-pop {
   display:flex; align-items:center; gap:10px; padding:8px; border-radius:12px;
   background:var(--ff-row); border:1px solid var(--ff-row-bd); cursor:pointer;
   box-shadow:inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -1px 0 rgba(17,17,17,0.06);
-  transition:background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade) 0ms;
+  transition:background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade) 0ms; /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
 }
 /* Option hover converged on the global option pattern (fab/Fab.css .fab-item):
    background var(--fp-hover) fill, zero-delay ~150ms transition, press scale(0.97). */
 .ff-file:hover { background:var(--fp-hover); }
-.ff-file:active { transform:scale(0.97); }
+.ff-file:active { transform:scale(var(--press-control)); }
 /* Proximity: own transition beats hover-tokens.css's [data-proximity]x3
    fallback; scale + filter channels added here so the engine's --prox mapping
    doesn't snap. Background matches the base rule's zero-delay leg. */
 .ff-file[data-proximity] {
   transition:
-    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade) 0ms,
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade) 0ms, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }

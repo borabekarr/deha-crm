@@ -45,27 +45,6 @@ export function makeCopyHandle(): CopyHandle {
   return { trigger, cleanup: clearAll }
 }
 
-/* ---- copy-button callback ref ---- */
-type CopyRefEl = HTMLElement & { __scCopyCleanup?: () => void }
-
-export function copyBtnRef(
-  el: CopyRefEl | null,
-  handle: CopyHandle
-): void {
-  if (!el) {
-    // node unmounted — clear timers
-    handle.cleanup()
-    return
-  }
-  el.__scCopyCleanup = () => handle.cleanup()
-}
-
-export function cleanupCopyBtn(el: CopyRefEl | null): void {
-  if (!el) return
-  el.__scCopyCleanup?.()
-  delete el.__scCopyCleanup
-}
-
 /* ---- ripple management ---- */
 export interface Ripple {
   id: number

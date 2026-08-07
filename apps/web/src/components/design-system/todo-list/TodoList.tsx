@@ -211,7 +211,7 @@ export default function TodoList() {
       weekEl.style.transform = 'translateX(' + (-outX) + 'px)'
       weekEl.style.opacity = '0'
       void weekEl.offsetWidth
-      weekEl.style.transition = 'transform calc(380ms * var(--anim-mult, 1)) var(--ease-out), opacity calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade)'
+      weekEl.style.transition = 'transform calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out), opacity calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade)'
       weekEl.style.transform = 'translateX(0)'
       weekEl.style.opacity = '1'
       setTimeout(() => { weekEl.style.transition = ''; weekEl.style.transform = '' }, 400)

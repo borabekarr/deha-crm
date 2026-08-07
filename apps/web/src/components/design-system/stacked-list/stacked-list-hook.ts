@@ -24,33 +24,3 @@ export function cleanupDirSearch(el: HTMLInputElement | null): void {
   e.__slCleanup?.()
   delete e.__slCleanup
 }
-
-/**
- * Build a debounced search handler.
- * Returns a change handler and a cancel function.
- * Replaces `useEffect(() => { ... debounce ... }, [query])` with a plain event handler.
- */
-export function makeDebounceHandler(
-  setter: (value: string) => void,
-  delay = 120,
-): { onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; cancel: () => void } {
-  let timer: ReturnType<typeof setTimeout> | null = null
-
-  function onChange(e: React.ChangeEvent<HTMLInputElement>): void {
-    const value = e.target.value
-    if (timer !== null) clearTimeout(timer)
-    timer = setTimeout(() => {
-      setter(value)
-      timer = null
-    }, delay)
-  }
-
-  function cancel(): void {
-    if (timer !== null) {
-      clearTimeout(timer)
-      timer = null
-    }
-  }
-
-  return { onChange, cancel }
-}

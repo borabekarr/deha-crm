@@ -93,15 +93,17 @@
    stable element keeps the whole interaction flicker-free. */
 .wf-hover-strip {
   position: absolute;
-  /* Hit area extended ~10px past the toolbar rail's visual bounds on every
-     side (top/bottom/right) so the hover stays engaged a bit outside the
-     rail — the extra reach lands in the canvas's reserved right padding /
-     row gap, which has nothing else to click, so it never steals clicks
-     meant for adjacent cards (pinned-list z-index precedent, 043bbb2). */
-  top: -10px;
-  bottom: -10px;
-  right: -18px;
-  width: 54px;
+  /* Hit area extended past the toolbar rail's visual bounds on every side
+     (top/bottom/right/left, via widened width) so the hover stays engaged
+     well outside the rail — the extra reach lands in the canvas's reserved
+     right padding / row gap, which has nothing else to click, so it never
+     steals clicks meant for adjacent cards (pinned-list z-index precedent,
+     043bbb2). Stays pinned to .wf-body's fixed right edge and never
+     resizes with the shell (hover-transform-needs-stationary-anchor). */
+  top: -16px;
+  bottom: -16px;
+  right: -24px;
+  width: 64px;
   z-index: 5;
   cursor: default;
 }
@@ -127,7 +129,7 @@
   transition:
     max-width calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring-open),
     margin-left calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring-open),
-    opacity calc(150ms * var(--anim-mult, 1)) ease;
+    opacity calc(var(--duration-150) * var(--anim-mult, 1)) ease;
 }
 
 /* Reveal + extend when hovering the strip OR the toolbar itself (keeps it
@@ -154,11 +156,11 @@
   padding: 0;
   position: relative;
   box-shadow: 0 3px 8px rgba(17,17,17, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.85);
-  transition: background calc(140ms * var(--anim-mult, 1)), color calc(140ms * var(--anim-mult, 1)), border-color calc(140ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: background calc(var(--duration-140) * var(--anim-mult, 1)), color calc(var(--duration-140) * var(--anim-mult, 1)), border-color calc(var(--duration-140) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out);
 }
 
 .wf-tool:hover  { transform: translateY(-1px); }
-.wf-tool:active { transform: scale(0.92); }
+.wf-tool:active { transform: scale(var(--press-chip)); }
 
 .wf-tool .material-icons {
   font-size: 15px;
@@ -200,7 +202,7 @@
   pointer-events: none;
   z-index: 40;
   box-shadow: 0 6px 16px rgba(17,17,17, 0.22);
-  transition: opacity calc(130ms * var(--anim-mult, 1)) ease, transform calc(130ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: opacity calc(var(--duration-140) * var(--anim-mult, 1)) ease, transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-out);
 }
 
 .wf-tool::before {
@@ -216,7 +218,7 @@
   opacity: 0;
   pointer-events: none;
   z-index: 40;
-  transition: opacity calc(130ms * var(--anim-mult, 1)) ease;
+  transition: opacity calc(var(--duration-140) * var(--anim-mult, 1)) ease;
 }
 
 .wf-tool:hover::after  { opacity: 1; transform: translateY(-50%) translateX(0); }
@@ -400,19 +402,19 @@
   gap: 6px;
   cursor: pointer;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), inset 0 -1px 0 rgba(17,17,17, 0.04);
-  transition: background calc(150ms * var(--anim-mult, 1)), transform calc(100ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: background calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out);
 }
 
 .wf-connect:hover  { background: #FAFAFA; }
-.wf-connect:active { transform: scale(0.985); }
+.wf-connect:active { transform: scale(var(--press-card)); }
 
 /* Proximity: append scale/filter channels (existing background/transform
    transition untouched; :active scale is unaffected since it's a separate
    pseudo-class, not hover). */
 .wf-connect[data-proximity] {
   transition:
-    background calc(150ms * var(--anim-mult, 1)),
-    transform calc(100ms * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out),
+    transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }

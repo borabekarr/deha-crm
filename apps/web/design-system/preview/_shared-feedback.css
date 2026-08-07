@@ -330,10 +330,17 @@ html [data-squircle="on"] {
    class -- it would double up the animation.
    ============================================================ */
 :root {
-  --canon-hover-scale:  1.007;
+  --canon-hover-scale:  1.006;
   --canon-active-scale: 1.003;
   --canon-shadow-rest:  drop-shadow(0 10px 15px rgba(17,17,17,0.12)) drop-shadow(0 2px 4px rgba(17,17,17,0.06));
   --canon-shadow-hover: drop-shadow(0 16px 25px rgba(17,17,17,0.13)) drop-shadow(0 3px 4.5px rgba(17,17,17,0.07));
+  /* Tiered press-shrink scales, migrated from scattered literals
+     (.985 / .97 / .94 / .92 / .9 / .88) across design-system components:
+     card = whole cards, control = buttons and medium controls,
+     chip = small chips and tags. */
+  --press-card:    0.985;
+  --press-control: 0.94;
+  --press-chip:    0.90;
 }
 .canon-hover {
   transition:
@@ -343,8 +350,8 @@ html [data-squircle="on"] {
 }
 /* Literal values repeated here (not just via custom property) so the
    canon-hover recipe is grep-able and diff-able at a glance: hover
-   resolves to scale(1.007), active to scale(1.003) -- must match
+   resolves to scale(1.006), active to scale(1.003) -- must match
    --canon-hover-scale / --canon-active-scale above. */
-.canon-hover:hover  { transform: scale(1.007); filter: var(--canon-shadow-hover); }
+.canon-hover:hover  { transform: scale(1.006); filter: var(--canon-shadow-hover); }
 .canon-hover:active { transform: scale(1.003); }
 

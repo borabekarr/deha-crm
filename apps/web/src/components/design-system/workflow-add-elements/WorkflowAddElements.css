@@ -213,7 +213,7 @@
 }
 
 .wae-ae-item:active {
-  transform: scale(0.97);
+  transform: scale(var(--press-control));
 }
 
 .wae-ae-item.hovered .wae-ae-chevron {
@@ -280,6 +280,23 @@
   font-size: 16px;
 }
 
+/* Step 4: compact the Add Elements card to search mode by springing the
+   footer's max-height to 0 (overall panel height shrinks with it, since
+   nothing else has a fixed height). Directional split leans on the CSS
+   Transitions spec (the destination rule's `transition` wins): typing
+   compacts via --ease-spring-open, clearing re-expands via
+   --ease-slide-bounce — reusing the ApplyButton compact/expand duration
+   pair from motion-tokens.css for the same "shrink vs. grow" shape. */
+.wae-ae-footer-wrap {
+  max-height: 64px;
+  overflow: hidden;
+  transition: max-height calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-slide-bounce);
+}
+.wae-ae-inner[data-compact="true"] .wae-ae-footer-wrap {
+  max-height: 0;
+  transition: max-height calc(var(--duration-compact) * var(--anim-mult, 1)) var(--ease-spring-open);
+}
+
 /* ── Nodes flyout panel ──────────────────────────────────────────────────── */
 /* Fix 5: width is the one predetermined (known-start, known-end) dimension of
    the resize, so it gets a CSS transition with a slight overshoot easing
@@ -324,7 +341,7 @@
   border-radius: 9px;
   background: linear-gradient(90deg, #F0F0F0 25%, #F8F8F8 50%, #F0F0F0 75%);
   background-size: 200% 100%;
-  animation: wae-shimmer-sweep calc(1100ms * var(--anim-mult, 1)) var(--ease-linear) infinite;
+  animation: wae-shimmer-sweep calc(var(--duration-1100) * var(--anim-mult, 1)) var(--ease-linear) infinite;
 }
 @keyframes wae-shimmer-sweep {
   from { background-position: 200% 0; }
@@ -487,7 +504,7 @@ html.dark .wae-nodes-header .material-icons {
 }
 
 .wae-node-item:active {
-  transform: scale(0.97);
+  transform: scale(var(--press-control));
 }
 
 .wae-node-item:hover .wae-node-add-btn {
@@ -708,13 +725,18 @@ html.dark .wae-search-cat-header .wae-badge-icon .material-symbols-outlined {
   text-shadow: none;
 }
 
-/* ── Tab-switch list morph — direction-aware (Fix 3) ─────────────────────────
+/* ── Tab-switch list morph — direction-aware (Fix 3, Step 3 migration) ───────
    Applied to the LIST CONTAINER as one unit (not per item) so rows never appear
-   to spawn individually. Mirrors motion-tabs' index-derived travel direction:
-   dir>0 (general→integrations) travels rightward, dir<0 travels leftward. The
-   outgoing tab (.wae-ae-list-exit, a non-interactive ghost layer) and the
-   incoming tab (.wae-ae-list-enter, key={activeTab} remount) share one travel
-   direction so they read as a single sequenced swap, not two unrelated fades. */
+   to spawn individually. Migrated onto the shared usePanelDirection hook + the
+   global [data-panel-state] enter/exit keyframes (styles/motion-tokens.css),
+   mirroring MotionTabs.css's .mt-panel[data-panel-state] consumption — the
+   translateX/opacity animation itself is the shared one; this block only
+   scopes layout/positioning plus the component's ~180ms --ease-out retune
+   (locked decision, same override motion-tabs applies over the keyframes'
+   default --duration-fast). The outgoing tab (.wae-ae-list-exit, a
+   non-interactive ghost layer) and the incoming tab (.wae-ae-list-enter,
+   key={activeTab} remount) share the same hook-derived direction so they read
+   as a single sequenced swap, not two unrelated fades. */
 .wae-ae-list-wrap {
   position: relative;
 }
@@ -725,34 +747,10 @@ html.dark .wae-search-cat-header .wae-badge-icon .material-symbols-outlined {
   pointer-events: none;
 }
 
-@keyframes wae-list-enter-fwd {
-  from { opacity: 0; filter: blur(4px); transform: translateX(14px); }
-  to   { opacity: 1; filter: blur(0);   transform: translateX(0); }
-}
-@keyframes wae-list-enter-back {
-  from { opacity: 0; filter: blur(4px); transform: translateX(-14px); }
-  to   { opacity: 1; filter: blur(0);   transform: translateX(0); }
-}
-@keyframes wae-list-exit-fwd {
-  from { opacity: 1; transform: translateX(0); }
-  to   { opacity: 0; transform: translateX(-14px); }
-}
-@keyframes wae-list-exit-back {
-  from { opacity: 1; transform: translateX(0); }
-  to   { opacity: 0; transform: translateX(14px); }
-}
-
-.wae-ae-list-enter.dir-fwd {
-  animation: wae-list-enter-fwd calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-out) both;
-}
-.wae-ae-list-enter.dir-back {
-  animation: wae-list-enter-back calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-out) both;
-}
-.wae-ae-list-exit.dir-fwd {
-  animation: wae-list-exit-fwd calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-accel) both;
-}
-.wae-ae-list-exit.dir-back {
-  animation: wae-list-exit-back calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-accel) both;
+.wae-ae-list-enter[data-panel-state],
+.wae-ae-list-exit[data-panel-state] {
+  animation-duration: calc(var(--duration-180) * var(--anim-mult, 1));
+  animation-timing-function: var(--ease-out);
 }
 
 /* ── Item 1: search-results flyout morph (enter + reversible exit) ───────────

@@ -73,8 +73,8 @@
     inset 0 -2px 0 rgba(17,17,17, 0.08),
     0 4px 14px -8px rgba(17,17,17, 0.30);
   transition:
-    filter calc(var(--duration-180) * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
-    transform calc(var(--duration-140) * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
+    filter calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236),
+    transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);
 }
 
 .sd-trigger:hover {
@@ -82,7 +82,7 @@
 }
 
 .sd-trigger:active {
-  transform: scale(0.97);
+  transform: scale(var(--press-control));
 }
 
 /* Proximity: the brightness(0.98) hover filter above was removed (it fought
@@ -91,8 +91,8 @@
    filter/transform transition. */
 .sd-trigger[data-proximity] {
   transition:
-    filter calc(var(--duration-180) * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
-    transform calc(var(--duration-140) * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
+    filter calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236),
+    transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 
@@ -155,7 +155,7 @@
   background: rgba(17,17,17, 0.42);
   -webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
-  transition: opacity calc(0.4s * var(--anim-mult, 1)) var(--ease-fade);
+  transition: opacity calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-fade);
   cursor: pointer;
 }
 
@@ -172,7 +172,10 @@
   /* inner-card surface tokens */
   background: var(--card-bg, #ffffff);
   border: 1px solid var(--card-border, #D4D4D4);
-  border-radius: var(--card-radius, 20px);
+  /* Concentric pairing with the 36px .sd-sheet-outer shell (canon delta 8,
+     matching Cards.css .concentric-demo-inner) -- was var(--card-radius)
+     = 20px against a 28px outer, a mismatched, off-canon corner curve. */
+  border-radius: 28px;
   padding: 8px var(--space-6, 26px) var(--space-6, 26px);
   /* inner-card light shadows: inset outline only (lift shadow moved to the
      outer bezel's filter, both themes) */
@@ -183,11 +186,12 @@
    recipe (_shared-feedback.css) drops the real border/box-shadow for
    clip-path + ring pseudo-elements. Padding gets the +1px padding-box/
    border-box offset (see Cards.css .card-inner); corner-radius binds to
-   the same --card-radius token used above so bottom/top and left/right
-   variants share one rule. */
+   the concentric-inner canon (28px, matching the base rule above) so
+   bottom/top and left/right variants share one rule and both sides render
+   identically. */
 .sd-sheet[data-squircle="on"] {
   padding: calc(8px + 1px) calc(var(--space-6, 26px) + 1px) calc(var(--space-6, 26px) + 1px);
-  --corner-radius: var(--card-radius, 20px);
+  --corner-radius: 28px;
   box-shadow: none;
 }
 
@@ -203,7 +207,7 @@
   max-height: none;
   max-width: 340px;
   width: 340px;
-  border-radius: var(--card-radius, 20px);
+  border-radius: 28px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -218,18 +222,20 @@
 /* Canon 3-layer bezel — grey shell (this element) around the white/dark
    card (.sd-sheet), applied on ALL four sides (bottom/top previously had
    no outer shell at all; left/right previously used a non-canon 14px
-   gap/34px radius pair with a dark !important top-rim hack). Gap 8px,
-   radius delta 8 (--card-radius + 8), matching the canonical inner-card
-   recipe. transform is applied via inline style (same sheetStyle as the
-   sheet) so the shell starts off-screen at rest and animates in/out
-   together with the inner card as one rigid unit. */
+   gap/34px radius pair with a dark !important top-rim hack). Outer radius
+   pinned to the concentric canon (36px, matching Cards.css
+   .concentric-demo-outer exactly -- was card-radius+8=28px, a mismatched
+   pair against the paired 28px inner sheet). transform is applied via
+   inline style (same sheetStyle as the sheet) so the shell starts
+   off-screen at rest and animates in/out together with the inner card as
+   one rigid unit. */
 .sd-sheet-outer {
   position: relative;
   display: flex;
   flex-direction: column;
   background: var(--shell-bg, #d9d9d9);
   padding: 8px;
-  border-radius: 28px; /* --card-radius (20px) + 8px gap */
+  border-radius: 36px; /* concentric outer canon, matches Cards.css .concentric-demo-outer */
   box-sizing: border-box;
   will-change: transform;
   box-shadow: none;
@@ -252,17 +258,17 @@
   max-width: calc(384px + 16px);
   margin: 0 14px;
 }
-/* Squircle outer shell (concentric pair): inner .sd-sheet = outer minus the
-   8px padding above, matching --card-radius exactly via the delta-8 corner
-   math. No card-border ring in light mode (content:none, mirrors
+/* Squircle outer shell (concentric pair): 36px outer / 28px inner sheet,
+   an exact copy of Cards.css .concentric-demo-outer / .concentric-demo-inner
+   (was card-radius-anchored 28/20, a mismatched pair on both drawer
+   sides). No card-border ring in light mode (content:none, mirrors
    Cards.css .concentric-demo-outer); dark mode re-enables its own hairline
    below. Shadow is identical in both themes per canon (no separate dark
    drop-shadow). */
 .sd-sheet-outer[data-squircle="on"] {
   /* literal px, not calc(): useSquircle reads this custom property with
-     parseFloat, which cannot resolve an unevaluated calc() expression
-     (--card-radius is 20px + 8px gap = 28px, matching Cards.css precedent) */
-  --corner-radius: 28px;
+     parseFloat, which cannot resolve an unevaluated calc() expression */
+  --corner-radius: 36px;
   padding: calc(8px + 1px);
   border: 0;
   box-shadow: none;
@@ -342,8 +348,8 @@
   opacity: 0;
   transform: translateY(20px);
   transition:
-    opacity calc(0.5s * var(--anim-mult, 1)) var(--ease-fade),
-    transform calc(0.5s * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
+    opacity calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);
 }
 
 .sd-item.in {
@@ -495,7 +501,7 @@
 .sd-buy[data-proximity] {
   transition:
     background-color calc(var(--duration-180) * var(--anim-mult, 1)),
-    transform calc(var(--duration-base) * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring-snap),
     box-shadow calc(var(--duration-200) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
@@ -520,7 +526,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .sd-buy-icon {
-    animation: sdWiggle calc(2s * var(--anim-mult, 1)) var(--ease-in-out) calc(1s * var(--anim-mult, 1)) infinite;
+    animation: sdWiggle calc(var(--duration-1800) * var(--anim-mult, 1)) var(--ease-in-out) calc(1s * var(--anim-mult, 1)) /* motion-sweep: kept, unit-conversion multiplier (N * 1ms trick to cast a unitless var to a time), not a duration literal */ infinite;
     transform-origin: center;
   }
 }
@@ -548,7 +554,7 @@
 }
 
 .sd-buy:hover .sd-buy-shimmer {
-  animation: sdSweep calc(1.1s * var(--anim-mult, 1)) var(--ease-standard);
+  animation: sdSweep calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-standard);
 }
 
 @keyframes sdSweep {
@@ -575,8 +581,8 @@
     inset 0 0 0 1px rgba(17,17,17, 0.07),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
   transition:
-    filter calc(var(--duration-180) * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
-    transform calc(var(--duration-140) * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1);
+    filter calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236),
+    transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);
 }
 
 .sd-later:hover,
@@ -605,7 +611,7 @@
    proximity]:active` raises specificity to (0,3,0) so the snap wins
    deterministically; release still eases via the base 140ms transition. */
 .sd-later[data-proximity]:active {
-  transition-duration: 0ms;
+  transition-duration: 0ms; /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
 }
 
 /* Proximity: the brightness(0.97) hover filter was removed (conflicted with
@@ -613,8 +619,8 @@
    so --prox scale doesn't snap against the existing filter/transform transition. */
 .sd-later[data-proximity] {
   transition:
-    filter calc(var(--duration-180) * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
-    transform calc(var(--duration-140) * var(--anim-mult, 1)) cubic-bezier(.22, 1, .36, 1),
+    filter calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236),
+    transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
 

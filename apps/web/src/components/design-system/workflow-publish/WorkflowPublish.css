@@ -40,17 +40,17 @@
     inset 0 1px 0 rgba(255,255,255,0.10),
     inset 0 -2px 0 rgba(0,0,0,0.25),
     0 2px 6px rgba(17,17,17,0.20);
-  transition: background calc(150ms * var(--anim-mult, 1)), transform calc(120ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: background calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out);
   letter-spacing: -0.01em;
 }
 .wp-btn:hover { background: #1C1C1C; }
-.wp-btn:active { transform: scale(0.97); }
+.wp-btn:active { transform: scale(var(--press-control)); }
 
 /* Proximity: append scale/filter channels (existing transition untouched). */
 .wp-btn[data-proximity] {
   transition:
-    background calc(150ms * var(--anim-mult, 1)),
-    transform calc(120ms * var(--anim-mult, 1)) var(--ease-out),
+    background calc(var(--duration-150) * var(--anim-mult, 1)),
+    transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
@@ -61,13 +61,13 @@
 .wp-update-btn[data-proximity],
 .wp-edited[data-proximity],
 .wp-action[data-proximity] {
-  --hover-scale-max: 1.02;
-  --hover-brightness-max: 1.025;
+  --hover-scale-max: 1.014;
+  --hover-brightness-max: 1.018;
 }
 
 .wp-btn .wp-chevron {
   font-size: 18px;
-  transition: transform calc(300ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: transform calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out);
 }
 .wp-btn.open .wp-chevron { transform: rotate(180deg); }
 
@@ -94,11 +94,11 @@
     inset 0 0 0 1px rgba(255,255,255,.04);
   /* Enter animation — same easing as exit, no bounce overshoot */
   transform-origin: top right;
-  animation: wp-popIn calc(300ms * var(--anim-mult, 1)) var(--ease-out) forwards;
+  animation: wp-popIn calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out) forwards;
 }
 /* Exit animation — identical easing/timing curve reversed */
 .wp-bezel.closing {
-  animation: wp-popOut calc(220ms * var(--anim-mult, 1)) var(--ease-out) forwards;
+  animation: wp-popOut calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out) forwards;
 }
 
 /* Squircle conversion (Step 7): concentric outer/inner pair, mirrors
@@ -221,17 +221,17 @@ html.dark .wp-popover[data-squircle="on"] {
     inset 0 1px 0 rgba(255,255,255,0.10),
     inset 0 -2px 0 rgba(0,0,0,0.25);
   letter-spacing: -0.01em;
-  transition: background calc(150ms * var(--anim-mult, 1)), transform calc(100ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: background calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out);
 }
 .wp-update-btn:hover { background: #1C1C1C; }
-.wp-update-btn:active { transform: scale(0.97); }
+.wp-update-btn:active { transform: scale(var(--press-control)); }
 .wp-update-btn .material-icons { font-size: 18px; }
 
 /* Proximity: append scale/filter channels (existing transition untouched). */
 .wp-update-btn[data-proximity] {
   transition:
-    background calc(150ms * var(--anim-mult, 1)),
-    transform calc(100ms * var(--anim-mult, 1)) var(--ease-out),
+    background calc(var(--duration-150) * var(--anim-mult, 1)),
+    transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
@@ -247,7 +247,7 @@ html.dark .wp-popover[data-squircle="on"] {
   transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out);
 }
 .wp-edited:hover { background: var(--fp-hover); }
-.wp-edited:active { transform: scale(0.97); }
+.wp-edited:active { transform: scale(var(--press-control)); }
 
 /* Proximity: append scale/filter channels (existing transition untouched). */
 .wp-edited[data-proximity] {
@@ -288,7 +288,7 @@ html.dark .wp-popover[data-squircle="on"] {
 .wp-action:hover {
   background: var(--fp-hover);
 }
-.wp-action:active { transform: scale(0.97); }
+.wp-action:active { transform: scale(var(--press-control)); }
 .wp-action:last-child { margin-bottom: 6px; }
 
 /* Proximity: append scale/filter channels (existing transition untouched). */
@@ -377,6 +377,6 @@ html.dark .wp-div { background: #232323; }
 html.dark .wp-action:hover {
   background: var(--fp-hover);
 }
-html.dark .wp-action:active { transform: scale(0.97); }
+html.dark .wp-action:active { transform: scale(var(--press-control)); }
 html.dark .wp-action-label { color: #F5F5F5; }
 html.dark .wp-action .wp-arrow { color: #4A4A4A; }

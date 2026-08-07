@@ -75,11 +75,6 @@ export function useTween(target: number, dur: number): number {
   return v
 }
 
-// ── stopTween — call on unmount ────────────────────────────────────────────────
-export function stopTween(idRef: React.MutableRefObject<ReturnType<typeof setTimeout> | null>): void {
-  if (idRef.current !== null) clearTimeout(idRef.current)
-}
-
 // ── useCountdownRef ───────────────────────────────────────────────────────────
 //
 // Returns a callback ref to attach to the popover overlay container.

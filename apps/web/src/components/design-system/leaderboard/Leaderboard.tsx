@@ -4,7 +4,7 @@
  * NO raw useEffect in this folder. Timers and FLIP live in leaderboard-hook.ts,
  * wired via callback refs and useLayoutEffect.
  */
-import React, { useState, useRef, useLayoutEffect, useCallback } from 'react'
+import { useState, useRef, useLayoutEffect, useCallback } from 'react'
 import './Leaderboard.css'
 import { iconClass } from '../../../lib/iconClass'
 import {
@@ -20,6 +20,7 @@ import {
   type FlipState,
 } from './leaderboard-hook'
 import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
+import { usePanelDirection } from '../../../lib/hooks/use-panel-direction'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -37,14 +38,25 @@ function initDisplay(): Record<string, number> {
 
 export default function Leaderboard() {
   const [metric, setMetric] = useState<Metric>('revenue')
-  const [dir, setDir] = useState(0)
   const [display, setDisplay] = useState<Record<string, number>>(initDisplay)
-  // Direction-aware animation state on the .rows container.
-  // 'lb-entering-*'  → entering panel slides in from the direction of the new metric.
-  // 'lb-exiting-*'   → current panel exits in the travel direction before content switches.
-  // 'lb-entering'    → neutral fade (initial mount, no direction).
-  type RowsAnim = 'lb-entering' | 'lb-entering-right' | 'lb-entering-left' | 'lb-exiting-left' | 'lb-exiting-right' | ''
-  const [rowsAnim, setRowsAnim] = useState<RowsAnim>('')
+  // usePanelDirection indices: revenue=0, growth=1. `activeIndex` flips
+  // IMMEDIATELY on click (no stale-direction gap); `metric` (content) lags,
+  // flipping only after the exit timer fires. So panelState(metricIndex)
+  // reads 'exiting-*' pre-switch, 'entering-*' post-switch -- the two-phase
+  // sequence falls out of the hook, no manual dir math. Exit names are
+  // swapped vs travel direction per the global convention (motion-tokens.css):
+  // dir > 0 (revenue→growth, RIGHT) -> exit 'exiting-left', enter 'entering-
+  // right'; dir < 0 is the mirror.
+  const [activeIndex, setActiveIndex] = useState(0)
+  const panelState = usePanelDirection(activeIndex)
+  const metricIndex = metric === 'revenue' ? 0 : 1
+  const rowState = panelState(metricIndex)
+  // Exit plays on the .rows container (no stagger); enter plays per-.row
+  // (staggered, see Leaderboard.css) -- never both at once.
+  const containerPanelState =
+    rowState === 'exiting-left' || rowState === 'exiting-right' ? rowState : undefined
+  const rowPanelState =
+    rowState === 'entering-right' || rowState === 'entering-left' ? rowState : undefined
   const rowsRef = useRef<HTMLDivElement | null>(null)
   // Proximity group: leaderboard rows are interactive (cursor:pointer, clickable-feel rows).
   const rowsProximityRef = useProximityGroup<HTMLDivElement>()
@@ -62,10 +74,9 @@ export default function Leaderboard() {
 
   // Ref for tween cleanup
   const tweenState = useRef<TweenState>({ timerId: null, start: {}, t0: 0 })
-  // Timer that sequences exit animation → content switch → enter animation
+  // Timer that sequences exit animation → content switch (usePanelDirection
+  // derives the enter state automatically once metric catches up, below).
   const switchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  // Enter class to apply after content switches (set in switchMetric, read in useLayoutEffect)
-  const pendingEnterClassRef = useRef<RowsAnim>('lb-entering')
   // Keep a ref to current display values for tween start point.
   // Sync during render — safe: displayRef is only read inside the tween callback,
   // never used to compute rendered output.
@@ -125,25 +136,13 @@ export default function Leaderboard() {
   }, [metric])
 
   // ---------------------------------------------------------------------------
-  // Rows enter animation: fires on mount and after each content switch.
-  // Reads pendingEnterClassRef set by switchMetric so the correct direction class
-  // is applied without having to add dir to the dep array.
+  // Metric switch: flip activeIndex immediately (drives the exit state via
+  // rowState above), then switch metric after the exit completes -- 120ms
+  // (scaled by --anim-mult) matches the global panel-exit-* --duration-fast
+  // -- so old rows are fully gone before new ones appear; the enter state
+  // then falls out of panelState(metricIndex) once metric catches up.
   // ---------------------------------------------------------------------------
-  useLayoutEffect(() => {
-    setRowsAnim(pendingEnterClassRef.current)
-  }, [metric])
-
-  // ---------------------------------------------------------------------------
-  // Metric switch: play exit animation on current rows, then switch content and
-  // trigger the direction-aware enter animation.
-  //
-  // dir > 0  (revenue → growth):  rows travel right → exit lb-exiting-right, enter lb-entering-right
-  // dir < 0  (growth → revenue):  rows travel left  → exit lb-exiting-left,  enter lb-entering-left
-  //
-  // The 200ms timer matches the lb-exiting-* CSS duration; content switches only
-  // after the exit completes so the old rows are fully gone before new ones appear.
-  // ---------------------------------------------------------------------------
-  function switchMetric(newMetric: Metric, newDir: number) {
+  function switchMetric(newMetric: Metric) {
     if (newMetric === metric) return
 
     // Cancel any in-flight switch timer
@@ -152,23 +151,13 @@ export default function Leaderboard() {
       switchTimerRef.current = null
     }
 
-    if (newDir !== 0) {
-      const exitClass: RowsAnim  = newDir > 0 ? 'lb-exiting-right'   : 'lb-exiting-left'
-      const enterClass: RowsAnim = newDir > 0 ? 'lb-entering-right'   : 'lb-entering-left'
-      // Stash enter class so useLayoutEffect([metric]) picks it up after the switch
-      pendingEnterClassRef.current = enterClass
-      setDir(newDir)
-      setRowsAnim(exitClass)
-      // Switch content after the exit animation completes (200ms CSS duration)
-      switchTimerRef.current = setTimeout(() => {
-        switchTimerRef.current = null
-        setMetric(newMetric)
-      }, 200)
-    } else {
-      pendingEnterClassRef.current = 'lb-entering'
-      setDir(0)
+    setActiveIndex(newMetric === 'revenue' ? 0 : 1)
+    const rawMult = getComputedStyle(document.documentElement).getPropertyValue('--anim-mult')
+    const animMult = parseFloat(rawMult) || 1
+    switchTimerRef.current = setTimeout(() => {
+      switchTimerRef.current = null
       setMetric(newMetric)
-    }
+    }, 120 * animMult)
   }
 
   // ---------------------------------------------------------------------------
@@ -202,7 +191,7 @@ export default function Leaderboard() {
               <button
                 type="button"
                 className={metric === 'revenue' ? 'active' : ''}
-                onClick={() => switchMetric('revenue', metric === 'growth' ? -1 : 0)}
+                onClick={() => switchMetric('revenue')}
               >
                 <span className={iconClass('payments')}>payments</span>
                 Revenue
@@ -210,7 +199,7 @@ export default function Leaderboard() {
               <button
                 type="button"
                 className={metric === 'growth' ? 'active' : ''}
-                onClick={() => switchMetric('growth', metric === 'revenue' ? 1 : 0)}
+                onClick={() => switchMetric('growth')}
               >
                 <span className={iconClass('trending_up')}>trending_up</span>
                 Growth %
@@ -231,9 +220,9 @@ export default function Leaderboard() {
           <div ref={tweenAnchorRef} style={{ display: 'none' }} />
 
           <div
-            className={rowsAnim ? `rows ${rowsAnim}` : 'rows'}
+            className="rows"
             ref={rowsCombinedRef}
-            style={{'--dir': dir} as React.CSSProperties}
+            data-panel-state={containerPanelState}
           >
             {ordered.map((agent, i) => {
               const rank = i + 1
@@ -245,6 +234,7 @@ export default function Leaderboard() {
                   className={'row' + (agent.you ? ' win' : '')}
                   ref={makeRowRef(agent.id)}
                   data-proximity
+                  data-panel-state={rowPanelState}
                 >
                   <div className="who">
                     <div className={'avatar ' + (leader ? 'a1' : 'a2')}>{rank}</div>

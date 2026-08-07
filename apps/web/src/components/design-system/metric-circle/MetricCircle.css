@@ -60,10 +60,10 @@ body { background: #FAFAFA; }
      any SVG/CSS filter on the stroke. Every filter-on-the-stroke approach
      (CSS drop-shadow+fill-box, then SVG feDropShadow) painted a Chromium
      black-square filter-region artifact, so the stroke stays filter-free. */
-  transition: stroke-dashoffset calc(700ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: stroke-dashoffset calc(var(--duration-700) * var(--anim-mult, 1)) var(--ease-out);
 }
-.s0 { stop-color: var(--c0); transition: stop-color calc(700ms * var(--anim-mult, 1)) var(--ease-out); }
-.s1 { stop-color: var(--c1); transition: stop-color calc(700ms * var(--anim-mult, 1)) var(--ease-out); }
+.s0 { stop-color: var(--c0); transition: stop-color calc(var(--duration-700) * var(--anim-mult, 1)) var(--ease-out); }
+.s1 { stop-color: var(--c1); transition: stop-color calc(var(--duration-700) * var(--anim-mult, 1)) var(--ease-out); }
 
 /* ── Text ───────────────────────────────────────────────────────────── */
 /* Base state is visible; the pop is gated behind .anim (added by JS inside

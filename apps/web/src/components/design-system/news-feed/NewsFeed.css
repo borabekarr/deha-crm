@@ -78,7 +78,7 @@
     position: absolute; inset: 0; z-index: -1;
     background: var(--nf-glow);
     opacity: 0.92;
-    animation: nfPulse calc(2200ms * var(--anim-mult, 1)) var(--ease-in-out) infinite;
+    animation: nfPulse calc(var(--duration-2200) * var(--anim-mult, 1)) var(--ease-in-out) infinite;
     pointer-events: none;
   }
   @keyframes nfPulse {
@@ -100,7 +100,11 @@
   /* arrow press must not bounce the shell — :has guard isolates the arrows */
   .nf-shell:active:not(:has(.nf-arrow:active)) { transform: scale(0.99); transition-duration: calc(var(--duration-fast) * var(--anim-mult, 1)); }
   .nf-shell:hover .nf-card { box-shadow: var(--nf-shadow), 0 20px 44px -24px var(--nf-c-strong); }
-  .nf-shell:hover .nf-glow { animation-duration: calc(1100ms * var(--anim-mult, 1)); }
+  /* Root cause of the reported hover "beeping": this used to speed up the
+     infinite nfPulse animation from 2200ms to --duration-fast (~120ms) on
+     hover, an ~18x speedup that reads as rapid strobing/flashing rather than
+     an energized pulse. Removed — the glow keeps its calm resting cadence
+     while hovered. */
   /* genuine card-body click presses shell + card together (hook toggles .nf-shell.tap) */
   .nf-shell.tap { animation: nfTap calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out); }
   @keyframes nfTap {
@@ -138,7 +142,7 @@
       filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
   }
   .nf-arrow:hover { transform: scale(1.04); border-color: var(--nf-c-strong); box-shadow: 0 0 0 4px color-mix(in srgb, var(--nf-c-strong) 18%, transparent), 0 6px 18px -6px var(--nf-c-strong); }
-  .nf-arrow:active { transform: scale(0.92); }
+  .nf-arrow:active { transform: scale(var(--press-chip)); }
   .nf-arrow .material-icons { transition: transform calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-spring); }
   .nf-arrow:hover .material-icons { transform: translate(2px, -2px); }
 
@@ -232,7 +236,7 @@
   /* ─────────────────────────────────────────────────────────────────────
      1. LOAD — cards spring + slide in from their side, content staggers
      ───────────────────────────────────────────────────────────────────── */
-  .nf-card.anim-in { animation: nfCardIn calc(720ms * var(--anim-mult, 1)) var(--ease-card-pop) both; }
+  .nf-card.anim-in { animation: nfCardIn calc(var(--duration-700) * var(--anim-mult, 1)) var(--ease-card-pop) both; }
   .nf--bull.anim-in { --nf-from: -46px; }
   .nf--bear.anim-in { --nf-from: 46px; }
   @keyframes nfCardIn {
@@ -240,11 +244,11 @@
     60%  { opacity: 1; transform: translateX(0) scale(1.015); }
     100% { opacity: 1; transform: translateX(0) scale(1); }
   }
-  .anim-in .nf-kicker { animation: nfFade calc(480ms * var(--anim-mult, 1)) var(--ease-out) calc(var(--duration-200) * var(--anim-mult, 1)) both; }
-  .anim-in .nf-arrow  { animation: nfPopSm calc(560ms * var(--anim-mult, 1)) var(--ease-spring) calc(340ms * var(--anim-mult, 1)) both; }
-  .anim-in .nf-title  { animation: nfTitlePop calc(520ms * var(--anim-mult, 1)) var(--ease-out) calc(var(--duration-sweep) * var(--anim-mult, 1)) both; }
-  .anim-in .nf-date   { animation: nfGlowFade calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out) calc(520ms * var(--anim-mult, 1)) both; }
-  .anim-in .nf-seg    { animation: nfFade calc(520ms * var(--anim-mult, 1)) var(--ease-out) both; animation-delay: calc(var(--i) * calc(70ms * var(--anim-mult, 1)) + calc(560ms * var(--anim-mult, 1))); }
+  .anim-in .nf-kicker { animation: nfFade calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-out) calc(var(--duration-200) * var(--anim-mult, 1)) both; }
+  .anim-in .nf-arrow  { animation: nfPopSm calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-spring) calc(var(--duration-sweep) * var(--anim-mult, 1)) both; }
+  .anim-in .nf-title  { animation: nfTitlePop calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out) calc(var(--duration-sweep) * var(--anim-mult, 1)) both; }
+  .anim-in .nf-date   { animation: nfGlowFade calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out) calc(var(--duration-560) * var(--anim-mult, 1)) both; }
+  .anim-in .nf-seg    { animation: nfFade calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out) both; animation-delay: calc(var(--i) * calc(var(--duration-60) * var(--anim-mult, 1)) + calc(var(--duration-560) * var(--anim-mult, 1))); }
   @keyframes nfTitlePop {
     0%   { opacity: 0; transform: translateY(10px); }
     100% { opacity: 1; transform: translateY(0); }
@@ -281,7 +285,7 @@
   .sk { border-radius: 8px; background: var(--nf-bar-track); position: relative; overflow: hidden; }
   .sk::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%);
     background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--nf-c-strong) 30%, transparent), transparent);
-    animation: nfShimmer calc(1200ms * var(--anim-mult, 1)) infinite; }
+    animation: nfShimmer calc(var(--duration-1100) * var(--anim-mult, 1)) infinite; }
   @keyframes nfShimmer { 100% { transform: translateX(100%); } }
 
   /* ── EMPTY STATE ── */

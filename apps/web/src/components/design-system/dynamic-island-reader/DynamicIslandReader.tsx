@@ -449,7 +449,7 @@ function DynamicIsland({
                     <span style={{
                       position: 'absolute', top: 0, bottom: 0, left: '-30%', width: 36,
                       background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
-                      animation: 'diShine calc(1800ms * var(--anim-mult, 1)) var(--ease-in-out) infinite',
+                      animation: 'diShine calc(var(--duration-1800) * var(--anim-mult, 1)) var(--ease-in-out) infinite',
                     }} />
                   </div>
                 )}
@@ -472,7 +472,7 @@ function DynamicIsland({
                       style={RM ? {} : {
                         strokeDasharray: 28,
                         strokeDashoffset: 28,
-                        animation: 'diCheckDraw calc(360ms * var(--anim-mult, 1)) calc(120ms * var(--anim-mult, 1)) var(--ease-draw) forwards',
+                        animation: 'diCheckDraw calc(var(--duration-sweep) * var(--anim-mult, 1)) calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-draw) forwards',
                       }}
                     />
                   </svg>

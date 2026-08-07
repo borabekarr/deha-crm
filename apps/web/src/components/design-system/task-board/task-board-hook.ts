@@ -127,7 +127,7 @@ export function makeTaskBoardTimers(el: Element): TaskBoardTimers {
         if (!oldRect) {
           node.animate(
             [{ opacity: 0, transform: 'scale(0.96)' }, { opacity: 1, transform: 'scale(1)' }],
-            { duration: 280, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'both' },
+            { duration: 280, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'both' }, /* motion-sweep: kept, WAAPI easing option cannot resolve CSS custom properties */
           );
           return;
         }
@@ -140,7 +140,7 @@ export function makeTaskBoardTimers(el: Element): TaskBoardTimers {
             { transform: `translate(${dx}px, ${dy}px)`, boxShadow: '0 12px 28px -8px rgba(15,23,42,0.18), 0 4px 8px -2px rgba(15,23,42,0.10)' },
             { transform: 'translate(0,0)', boxShadow: '0 0 0 transparent' },
           ],
-          { duration: 500, easing: 'cubic-bezier(.22, 1, .36, 1)', fill: 'both' },
+          { duration: 500, easing: 'cubic-bezier(.22, 1, .36, 1)', fill: 'both' }, /* motion-sweep: kept, WAAPI easing option cannot resolve CSS custom properties */
         );
       });
     });

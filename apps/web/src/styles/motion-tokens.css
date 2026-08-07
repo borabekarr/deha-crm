@@ -150,6 +150,8 @@
   --duration-280: 280ms;   /* library sweep: 20 uses */
   --duration-320: 320ms;   /* library sweep: 35 uses */
   --duration-420: 420ms;   /* library sweep: 28 uses */
+  --duration-560: 560ms;   /* library sweep: 22 uses across 15 files (leaderboard FLIP-reorder, FileFolder, Calendar, etc.) */
+  --duration-1100: 1100ms;   /* shimmer-sweep duration; 1100ms recurs across several component files (StatisticsGraphCard, SprintPlannerCore, NewsFeed, IndexBar, todo-list-hook) */
 
   /* Step-1 easing migration (plan: motion-sweep-top10) -- extracted verbatim
      from curves in the top-10 component files with no byte-matching token
@@ -171,4 +173,64 @@
      `ease-in` keyword, token-wrapped to mirror --ease-out-native above;
      NOT the same curve as --ease-in-out or any --ease-* cubic-bezier here. */
   --ease-in-native: ease-in; /* native `ease-in` keyword (cubic-bezier(.42,0,1,1)) */
+
+  /* Step-4/5 motion-sweep-worklist migration (plan: fix-all-debts) -- new tokens
+     minted for literals recurring 3+ times library-wide with no existing exact
+     token match (post-consolidation: 15 of 27 proposals folded into existing
+     tiers within 15%, see reports/motion-sweep-worklist.md consolidation
+     addendum). Values extracted verbatim; no existing token modified. */
+  --duration-30: 30ms;   /* library-wide: 3 uses, no prior exact tier */
+  --duration-40: 40ms;   /* library-wide: 6 uses, no prior exact tier */
+  --duration-50: 50ms;   /* library-wide: 4 uses, no prior exact tier */
+  --duration-60: 60ms;   /* library-wide: 5 uses, no prior exact tier */
+  --duration-80: 80ms;   /* library-wide: 9 uses, no prior exact tier */
+  --duration-700: 700ms;   /* library-wide: 11 uses, no prior exact tier */
+  --duration-760: 760ms;   /* library-wide: 3 uses, no prior exact tier */
+  --duration-800: 800ms;   /* library-wide: 3 uses, no prior exact tier */
+  --duration-900: 900ms;   /* library-wide: 3 uses, no prior exact tier */
+  --duration-1800: 1800ms;   /* library-wide: 7 uses, no prior exact tier */
+  --duration-1900: 1900ms;   /* library-wide: 6 uses, no prior exact tier */
+  --duration-2200: 2200ms;   /* library-wide: 4 uses, no prior exact tier */
+  --ease-sweep-1: cubic-bezier(0.32, 1.12, 0.4, 1.0);  /* library-wide non-hover reuse of an otherwise-unmatched curve, 6 uses */
+  --ease-motion-sweep-2236: cubic-bezier(.22, 1, .36, 1);  /* the three spellings of this curve (28 uses, rule 3) collapse to this one token -- exact value, no rounding */
+}
+
+/* Step-1 direction-aware panel switch (plan: dsfb-02-direction-aware-switch-canon)
+ * -- shared by usePanelDirection() consumers (lib/hooks/use-panel-direction.ts):
+ * a per-panel [data-panel-state] attribute drives enter/exit translateX(22px)
+ * + opacity keyframes. State names describe the direction of TRAVEL (+x =
+ * right); see the hook for the dir = Math.sign(toIdx - fromIdx) math.
+ * MotionTabs is the proof-of-use (extracted verbatim from its prior inlined
+ * mt-enter/exit-travel-* keyframes, unchanged values). Local component CSS
+ * still scopes pointer-events/positioning per state -- only the animation
+ * itself lives here so future consumers (calendar, leaderboard,
+ * workflow-add-elements) share one definition. */
+@keyframes panel-enter-right {
+  from { opacity: 0; transform: translateX(-22px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes panel-enter-left {
+  from { opacity: 0; transform: translateX(22px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes panel-exit-right {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(22px); }
+}
+@keyframes panel-exit-left {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(-22px); }
+}
+[data-panel-state="active"] { opacity: 1; }
+[data-panel-state="entering-right"] {
+  animation: panel-enter-right calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out) both;
+}
+[data-panel-state="entering-left"] {
+  animation: panel-enter-left calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out) both;
+}
+[data-panel-state="exiting-left"] {
+  animation: panel-exit-right calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out) both;
+}
+[data-panel-state="exiting-right"] {
+  animation: panel-exit-left calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out) both;
 }

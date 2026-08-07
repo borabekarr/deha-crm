@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { mtRootRef, cleanupMtRoot } from './motion-tabs-hook'
 import { useSquircle } from '../../../lib/hooks/use-squircle'
 import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
+import { usePanelDirection } from '../../../lib/hooks/use-panel-direction'
 import { usePillSpring } from '../../../lib/motion-spring'
 
 // ---------------------------------------------------------------------------
@@ -67,10 +68,8 @@ const PANEL_ROWS: Record<string, PanelRow[]> = {
 }
 
 export default function MotionTabs() {
-  const [active, setActive]     = useState<string>('leads')
-  const [view, setView]         = useState<string>('default')
-  const [dir, setDir]           = useState<number>(0)
-  const [prevView, setPrevView] = useState<string>('default')
+  const [active, setActive] = useState<string>('leads')
+  const [view, setView]     = useState<string>('default')
 
   // Concentric squircle pair: outer .mt-dock (grey shell) + inner
   // .mt-dock-inner (white card), mirrors Cards.css .concentric-demo.
@@ -81,8 +80,6 @@ export default function MotionTabs() {
   const mtTabwrapProximityRef = useProximityGroup<HTMLDivElement>()
 
   function close(): void {
-    setPrevView('default')
-    setDir(0)
     setView('default')
   }
 
@@ -91,30 +88,16 @@ export default function MotionTabs() {
       close()
       return
     }
-    const fromIdx = TABS.findIndex((t) => t.key === view)
-    const toIdx   = TABS.findIndex((t) => t.key === key)
-    const nextDir = view === 'default' ? 0 : Math.sign(toIdx - fromIdx)
-    setPrevView(view)
-    setDir(nextDir)
     setActive(key)
     setView(key)
   }
 
-  /** Determines enter/exit animation state for each panel.
-   *  dir > 0 = new tab is to the RIGHT of old tab.
-   *  entering panel slides in from the direction of the new tab.
-   *  exiting panel slides out in the OPPOSITE direction.
-   */
-  function panelState(tabKey: string): string {
-    if (view === tabKey) {
-      if (dir === 0) return 'active'
-      return dir > 0 ? 'entering-right' : 'entering-left'
-    }
-    if (prevView === tabKey && dir !== 0) {
-      return dir > 0 ? 'exiting-left' : 'exiting-right'
-    }
-    return 'idle'
-  }
+  // Direction-aware enter/exit state per panel (dir = Math.sign(toIdx -
+  // fromIdx), tracked across renders by the shared hook). null while closed
+  // so closing never triggers a directional exit slide, matching the prior
+  // inlined close()'s explicit dir-reset-to-0 behavior.
+  const viewIndex = view === 'default' ? null : TABS.findIndex((t) => t.key === view)
+  const panelState = usePanelDirection(viewIndex)
 
   // ── Derived indicator geometry (no DOM measurement) ──────────────────────
   const activeIndex = TABS.findIndex((t) => t.key === active)
@@ -161,14 +144,14 @@ export default function MotionTabs() {
               <div className="mt-panels-wrap">
                 <div className="mt-panels">
 
-                  {TABS.map((tab) => {
+                  {TABS.map((tab, tabIndex) => {
                     const rows = PANEL_ROWS[tab.key]
                     const isProfileTab = tab.key === 'profile'
                     return (
                       <div
                         key={tab.key}
                         className="mt-panel"
-                        data-panel-state={panelState(tab.key)}
+                        data-panel-state={panelState(tabIndex)}
                       >
                         {rows.map((row) => (
                           <button type="button" key={row.title} className="mt-row">

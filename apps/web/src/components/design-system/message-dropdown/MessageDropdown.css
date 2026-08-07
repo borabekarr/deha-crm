@@ -12,7 +12,7 @@
   border: 1px solid #ECECEC;
   border-radius: 16px;
   display: flex; flex-direction: column; align-items: center;
-  min-height: 460px;
+  min-height: 500px; /* E2 defect fix: room for the taller open shell (326px, was 286px) */
 }
 
 /* ---- Dropdown root ---- */
@@ -24,8 +24,9 @@
      children (top:0), so padding on this element would not create clearance —
      margin-top pushes the whole stack down inside .md-card instead.
      Step 19: bumped 18px -> 50px (+32px) so the trigger sits lower on the
-     preview page per feedback. */
-  margin-top: 50px;
+     preview page per feedback. Step 3 (dsfb-08): bumped again 50px -> 66px
+     so the trigger sits lower still, per follow-up feedback. */
+  margin-top: 66px;
 }
 
 /* ---- Grey external shell ---- */
@@ -66,20 +67,27 @@
      almost immediately (~0.08x close duration) so the collapsing shape reads
      as the button colour, not the white/grey panel (Fix 3). Raise toward 0.2x
      only if the goo filter bleeds card-bg through mid-collapse. */
+  /* E2 verdict (2026-08-06): close leg unified onto var(--ease-spring-open),
+     the same spring the open leg already uses, so open and close read as one
+     spring family instead of a bouncy open + a plain ease-out close. */
   transition:
-    width  calc(var(--md-dur) * 0.85) var(--ease-out) 0s,
-    height calc(var(--md-dur) * 0.85) var(--ease-out) 0s,
-    top    calc(var(--md-dur) * 0.85) var(--ease-out) 0s,
-    border-radius calc(var(--md-dur) * 0.85) var(--ease-out) 0s,
-    background-color calc(1ms * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.08),
-    border-color calc(1ms * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.08),
-    box-shadow calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade) 0s;
+    width  calc(var(--md-dur) * 0.85) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
+    height calc(var(--md-dur) * 0.85) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
+    top    calc(var(--md-dur) * 0.85) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
+    border-radius calc(var(--md-dur) * 0.85) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
+    background-color calc(1ms * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.08), /* motion-sweep: kept, unit-conversion multiplier (N * 1ms trick to cast a unitless var to a time), not a duration literal */
+    border-color calc(1ms * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.08), /* motion-sweep: kept, unit-conversion multiplier (N * 1ms trick to cast a unitless var to a time), not a duration literal */
+    box-shadow calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade) 0s; /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
 }
 .md-root.open .md-panel-shell {
   /* Fix (1): concentric shell — 36px radius, 8px inset around .md-panel-bg
-     (352x286 -> 8px inset yields the 336x270 inner panel below). */
+     (352x326 -> 8px inset yields the 336x310 inner panel below).
+     E2 defect fix (2026-08-06): height was 286px, but the live panel content
+     (list + footer, measured via dialog.md-panel-content) needs ~307px —
+     37px taller than the fixed shell, so the footer buttons rendered past
+     the shell's visible bottom edge with no bottom clearance. Bumped +40px. */
   width: 352px;
-  height: 286px;
+  height: 326px;
   top: 70px;
   border-radius: 36px;
   --corner-radius: 36px;
@@ -95,12 +103,12 @@
   z-index: 3; /* above goo-wrap (z-index:2), below dialog (z-index:9000) — rim is hit-testable */
   /* Open (enter): bouncy morph; colour, border and shadow deferred until shape expanded */
   transition:
-    width  var(--md-dur) var(--ease-spring-open) 0s,
-    height var(--md-dur) var(--ease-spring-open) 0s,
-    top    var(--md-dur) var(--ease-spring-open) 0s,
-    border-radius var(--md-dur) var(--ease-spring-open) 0s,
+    width  var(--md-dur) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
+    height var(--md-dur) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
+    top    var(--md-dur) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
+    border-radius var(--md-dur) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
     background-color calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.35),
-    border-color calc(1ms * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.35),
+    border-color calc(1ms * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.35), /* motion-sweep: kept, unit-conversion multiplier (N * 1ms trick to cast a unitless var to a time), not a duration literal */
     box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.35);
 }
 
@@ -160,18 +168,19 @@
      ~0.08x close duration so the collapsing shape reads as the trigger colour
      from the start of the close, not white/card-colour (Fix 3). Raise toward
      0.2x only if the goo filter bleeds card-bg through mid-collapse. */
+  /* E2 verdict (2026-08-06): close leg unified onto var(--ease-spring-open). */
   transition:
-    width  calc(var(--md-dur) * 0.85) var(--ease-out) 0s,
-    height calc(var(--md-dur) * 0.85) var(--ease-out) 0s,
-    top    calc(var(--md-dur) * 0.85) var(--ease-out) 0s,
-    border-radius calc(var(--md-dur) * 0.85) var(--ease-out) 0s,
-    background-color calc(1ms * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.08),
-    box-shadow calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade) 0ms;
+    width  calc(var(--md-dur) * 0.85) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
+    height calc(var(--md-dur) * 0.85) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
+    top    calc(var(--md-dur) * 0.85) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
+    border-radius calc(var(--md-dur) * 0.85) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
+    background-color calc(1ms * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.08), /* motion-sweep: kept, unit-conversion multiplier (N * 1ms trick to cast a unitless var to a time), not a duration literal */
+    box-shadow calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade) 0ms; /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
 }
 .md-root.open .md-panel-bg {
-  /* Fix (1): 8px inset on all sides of the 352x286/36px shell -> 336x270/28px. */
+  /* Fix (1): 8px inset on all sides of the 352x326/36px shell -> 336x310/28px. */
   width: 336px;
-  height: 270px;
+  height: 310px;
   top: 78px;
   border-radius: 28px;
   background-color: var(--card-bg, #FFFFFF);
@@ -184,10 +193,10 @@
      so the surface stays as trigger colour until the shape is almost fully expanded.
      Explicit 0s delays on shape properties (no blanket transition-delay override). */
   transition:
-    width  var(--md-dur) var(--ease-spring-open) 0s,
-    height var(--md-dur) var(--ease-spring-open) 0s,
-    top    var(--md-dur) var(--ease-spring-open) 0s,
-    border-radius var(--md-dur) var(--ease-spring-open) 0s,
+    width  var(--md-dur) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
+    height var(--md-dur) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
+    top    var(--md-dur) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
+    border-radius var(--md-dur) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
     background-color calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.35),
     box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.35);
 }
@@ -240,7 +249,7 @@ html.dark .md-panel-bg[data-squircle="on"]::before {
 }
 /* Step 19: same calm-family dial-down as .md-trigger-bg above (1.04 -> 1.02). */
 .md-root:has(.md-trigger:hover) .md-trigger { transform: translateX(-50%) scale(1.02); }
-.md-trigger:active { transform: translateX(-50%) scale(0.94); }
+.md-trigger:active { transform: translateX(-50%) scale(var(--press-control)); }
 .md-trigger:focus-visible {
   outline: 2px solid var(--brand-primary-500);
   outline-offset: 4px;
@@ -301,8 +310,10 @@ dialog.md-panel-content {
   left: 50%; transform: translateX(-50%);
   width: 336px;
   box-sizing: border-box;
-  /* Step 19: canon spacing tokens (was hardcoded 18px 20px 14px) */
-  padding: var(--pad-card) var(--space-5) var(--space-3);
+  /* Step 3 (dsfb-08): inner-card spacing parity — .card-inner uses a single
+     uniform --pad-card (16px) on all sides (Cards.css:14); the asymmetric
+     var(--space-5) var(--space-3) sides read as an off-canon shrink. */
+  padding: var(--pad-card);
   z-index: 9000;         /* TOP interactive layer: above Agentation dev toolbar */
   pointer-events: none;
   opacity: 0;
@@ -320,7 +331,10 @@ dialog.md-panel-content {
 .md-list {
   list-style: none; margin: 0; padding: 0;
   display: flex; flex-direction: column;
-  gap: var(--space-1);
+  /* Step 3 (dsfb-08): --space-1 (4px) read cramped against the wider
+     uniform panel padding above; --space-2 (8px) matches the canon's
+     row rhythm (see .gap-stack usage elsewhere in this file). */
+  gap: var(--space-2);
 }
 .md-item {
   display: flex; align-items: center; gap: var(--space-3);
@@ -333,7 +347,7 @@ dialog.md-panel-content {
   transition:
     opacity calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out),
-    background calc(45ms * var(--anim-mult, 1)),
+    background calc(var(--duration-50) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
@@ -345,25 +359,25 @@ dialog.md-panel-content {
   transition-delay:
     calc(var(--md-dur) * 0.48),
     calc(var(--md-dur) * 0.48),
-    0s;
+    0s; /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
 }
 .md-root.open .md-item:nth-child(2) {
   transition-delay:
-    calc(var(--md-dur) * 0.48 + 30ms * var(--anim-mult, 1)),
-    calc(var(--md-dur) * 0.48 + 30ms * var(--anim-mult, 1)),
-    0s;
+    calc(var(--md-dur) * 0.48 + var(--duration-30) * var(--anim-mult, 1)),
+    calc(var(--md-dur) * 0.48 + var(--duration-30) * var(--anim-mult, 1)),
+    0s; /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
 }
 .md-root.open .md-item:nth-child(3) {
   transition-delay:
-    calc(var(--md-dur) * 0.48 + 60ms * var(--anim-mult, 1)),
-    calc(var(--md-dur) * 0.48 + 60ms * var(--anim-mult, 1)),
-    0s;
+    calc(var(--md-dur) * 0.48 + var(--duration-60) * var(--anim-mult, 1)),
+    calc(var(--md-dur) * 0.48 + var(--duration-60) * var(--anim-mult, 1)),
+    0s; /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
 }
 .md-root.open .md-item:nth-child(4) {
   transition-delay:
-    calc(var(--md-dur) * 0.48 + 90ms * var(--anim-mult, 1)),
-    calc(var(--md-dur) * 0.48 + 90ms * var(--anim-mult, 1)),
-    0s;
+    calc(var(--md-dur) * 0.48 + var(--duration-instant) * var(--anim-mult, 1)),
+    calc(var(--md-dur) * 0.48 + var(--duration-instant) * var(--anim-mult, 1)),
+    0s; /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
 }
 .md-item:hover {
   background: #F5F5F5;
@@ -528,13 +542,13 @@ dialog.md-panel-content {
 .md-mark-state-sliding .md-item:nth-child(1) .md-tick-overlay,
 .md-mark-state-done    .md-item:nth-child(1) .md-tick-overlay {
   opacity: 1;
-  transition-delay: 0ms;
+  transition-delay: 0ms; /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
 }
 .md-mark-state-ticking .md-item:nth-child(2) .md-tick-overlay,
 .md-mark-state-sliding .md-item:nth-child(2) .md-tick-overlay,
 .md-mark-state-done    .md-item:nth-child(2) .md-tick-overlay {
   opacity: 1;
-  transition-delay: calc(80ms * var(--anim-mult, 1));
+  transition-delay: calc(var(--duration-80) * var(--anim-mult, 1));
 }
 .md-mark-state-ticking .md-item:nth-child(3) .md-tick-overlay,
 .md-mark-state-sliding .md-item:nth-child(3) .md-tick-overlay,
@@ -554,14 +568,14 @@ dialog.md-panel-content {
   transition:
     transform var(--md-dur) var(--ease-goo-collapse),
     opacity calc(var(--md-dur) * 0.6) var(--ease-fade) !important;
-  transition-delay: 0ms !important;
+  transition-delay: 0ms !important; /* motion-sweep: kept, prefers-reduced-motion !important near-zero override, intentionally literal (house pattern, see frontend-motion-contract.md) */
 }
 .md-mark-state-sliding .md-item:nth-child(2),
 .md-mark-state-done    .md-item:nth-child(2) {
   transition:
     transform var(--md-dur) var(--ease-goo-collapse),
     opacity calc(var(--md-dur) * 0.6) var(--ease-fade) !important;
-  transition-delay: calc(60ms * var(--anim-mult, 1)) !important;
+  transition-delay: calc(60ms * var(--anim-mult, 1)) !important; /* motion-sweep: kept, prefers-reduced-motion !important near-zero override, intentionally literal (house pattern, see frontend-motion-contract.md) */
 }
 .md-mark-state-sliding .md-item:nth-child(3),
 .md-mark-state-done    .md-item:nth-child(3) {
@@ -574,16 +588,19 @@ dialog.md-panel-content {
 /* ---- Slow-down toggle via global --anim-mult ---- */
 /* Step 19: one tier faster open -- 560ms -> var(--duration-expand) (460ms),
    the closest existing duration token below the prior literal. Easing curves
-   and the --anim-mult multiplier are untouched. */
-.md-root { --md-dur: calc(var(--duration-expand) * var(--anim-mult, 1)); }
+   and the --anim-mult multiplier are untouched.
+   Step 3 (dsfb-08): one more tier faster -- 460ms -> var(--duration-420)
+   (420ms), the next tier down; shell/panel-bg/content all key off --md-dur
+   so this speeds the whole open coherently. */
+.md-root { --md-dur: calc(var(--duration-420) * var(--anim-mult, 1)); }
 
 /* Reduce motion */
 @media (prefers-reduced-motion: reduce) {
   .md-panel-bg, .md-panel-shell, .md-trigger-bg, .md-trigger,
   .md-item, .md-panel-content, .md-trigger-badge,
   .md-trigger .material-symbols-outlined, .md-footer button {
-    transition-duration: 1ms !important;
-    animation-duration: 1ms !important;
+    transition-duration: 1ms !important; /* motion-sweep: kept, prefers-reduced-motion !important near-zero override, intentionally literal (house pattern, see frontend-motion-contract.md) */
+    animation-duration: 1ms !important; /* motion-sweep: kept, prefers-reduced-motion !important near-zero override, intentionally literal (house pattern, see frontend-motion-contract.md) */
   }
 }
 

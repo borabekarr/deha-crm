@@ -6,7 +6,6 @@
  *
  * Exports:
  *   - sgcCardRef   — callback ref for each .sg-card element; wires all listeners + animations
- *   - sgcCleanup   — cleans up listeners stored on the element
  */
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -383,15 +382,6 @@ export function sgcCardRef(elOrNull: HTMLElement | null, d: SgCardData): void {
   }
 
   ;(el as HTMLElement & { __sgcCleanup?: CardCleanup }).__sgcCleanup = cleanup
-}
-
-/** Call when the element unmounts to remove all listeners. */
-export function sgcCleanup(el: HTMLElement | null): void {
-  if (!el) return
-  const e = el as HTMLElement & { __sgcCleanup?: CardCleanup; __sgcInitialized?: boolean }
-  e.__sgcCleanup?.()
-  delete e.__sgcCleanup
-  delete e.__sgcInitialized
 }
 
 /** Document-level outside-click handler — wire once on the container mount. */

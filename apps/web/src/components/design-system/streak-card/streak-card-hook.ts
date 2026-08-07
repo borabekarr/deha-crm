@@ -18,22 +18,6 @@ interface BarEl extends HTMLDivElement {
   __stkFlashTimer?: ReturnType<typeof setTimeout>
 }
 
-// ── Ring SVG helper ───────────────────────────────────────────────────────────
-
-const RING_R = 15.2
-const RING_C = 2 * Math.PI * RING_R
-
-export function buildRingSVG(pct: number): string {
-  const off = RING_C * (1 - pct)
-  return (
-    `<svg viewBox="0 0 35 35">` +
-    `<circle cx="17.5" cy="17.5" r="${RING_R}" fill="none" stroke="var(--sc-ring-track)" stroke-width="3.4"/>` +
-    `<circle class="ring-prog" cx="17.5" cy="17.5" r="${RING_R}" fill="none" stroke="#10B981" stroke-width="3.4" ` +
-    `stroke-linecap="round" stroke-dasharray="${RING_C.toFixed(2)}" stroke-dashoffset="${RING_C.toFixed(2)}" ` +
-    `data-off="${off.toFixed(2)}"/></svg>`
-  )
-}
-
 // ── Tween helper ──────────────────────────────────────────────────────────────
 
 export function tween(

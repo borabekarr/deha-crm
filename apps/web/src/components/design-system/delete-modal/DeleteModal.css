@@ -24,7 +24,7 @@
   pointer-events: none;
   transition:
     opacity calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-fade),
-    visibility 0s calc(var(--duration-240) * var(--anim-mult, 1));
+    visibility 0s /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */ calc(var(--duration-240) * var(--anim-mult, 1));
 }
 
 .dm-overlay[data-state='open'] {
@@ -32,7 +32,7 @@
   pointer-events: auto;
   transition:
     opacity calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-fade),
-    visibility 0s 0s;
+    visibility 0s /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */ 0s; /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
 }
 
 .dm-overlay.dm-anim {
@@ -227,7 +227,7 @@ html.dark .dm-card[data-squircle="on"] {
 }
 
 .dm-close:active {
-  transform: scale(0.94);
+  transform: scale(var(--press-control));
 }
 
 .dm-close .material-symbols-outlined,
@@ -273,10 +273,10 @@ html.dark .dm-close:hover {
   .dm-card[data-done='true'] .dm-badge-icon,
   .dm-card[data-done='true'] .dm-title,
   .dm-card[data-done='true'] .dm-body {
-    animation: dm-crossfade calc(600ms * var(--anim-mult, 1)) var(--ease-out) both;
+    animation: dm-crossfade calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out) both;
   }
   .dm-badge--done {
-    animation: dm-badge-pop calc(500ms * var(--anim-mult, 1)) var(--ease-spring) both;
+    animation: dm-badge-pop calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-spring) both;
   }
 }
 
@@ -299,8 +299,8 @@ html.dark .dm-close:hover {
 /* ── Entrance animations (transform-only, opacity always 1) ──────────────── */
 @media (prefers-reduced-motion: no-preference) {
   .dm-overlay.dm-anim .dm-badge {
-    animation: dm-pop calc(560ms * var(--anim-mult, 1)) var(--ease-spring)
-      calc(80ms * var(--anim-mult, 1)) both;
+    animation: dm-pop calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-spring)
+      calc(var(--duration-80) * var(--anim-mult, 1)) both;
   }
   .dm-overlay.dm-anim .dm-title {
     animation: dm-rise calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-out)
@@ -308,11 +308,11 @@ html.dark .dm-close:hover {
   }
   .dm-overlay.dm-anim .dm-body {
     animation: dm-rise calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-out)
-      calc(210ms * var(--anim-mult, 1)) both;
+      calc(var(--duration-slow) * var(--anim-mult, 1)) both;
   }
   .dm-overlay.dm-anim .dm-actions {
     animation: dm-rise calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-out)
-      calc(270ms * var(--anim-mult, 1)) both;
+      calc(var(--duration-260) * var(--anim-mult, 1)) both;
   }
 }
 
@@ -482,7 +482,7 @@ html.dark .dm-card .dm-btn.btn-discuss:hover {
 }
 
 .dm-card .dm-btn.btn-delete:active {
-  transform: scale(0.985);
+  transform: scale(var(--press-control));
 }
 
 /* base .btn-delete transition (Buttons.css, locked) has no scale/filter
@@ -561,7 +561,7 @@ html.dark .dm-card .dm-btn.btn-delete .dm-ok {
   border: 3px solid rgba(255, 255, 255, 0.35);
   border-top-color: #fff;
   border-radius: 50%;
-  animation: dm-spin calc(700ms * var(--anim-mult, 1)) var(--ease-linear) infinite;
+  animation: dm-spin calc(var(--duration-700) * var(--anim-mult, 1)) var(--ease-linear) infinite;
 }
 
 @keyframes dm-spin {
@@ -581,7 +581,7 @@ html.dark .dm-card .dm-btn.btn-delete .dm-ok {
   stroke-linejoin: round;
   stroke-dasharray: 28;
   stroke-dashoffset: 28;
-  animation: dm-check calc(450ms * var(--anim-mult, 1)) var(--ease-fade) forwards;
+  animation: dm-check calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-fade) forwards;
 }
 
 @keyframes dm-check {

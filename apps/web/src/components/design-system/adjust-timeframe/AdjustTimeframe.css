@@ -103,7 +103,7 @@ html.dark .tf-card:not([data-squircle="on"]) {
 /* tiny pop when the range text changes (own class — `seg`/`dash` collide with the
    global preview control styles in _controls.css that paint a pill background) */
 .tf-range .tf-seg { display: inline-block; background: none; padding: 0; border-radius: 0; transition: transform calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-spring-soft-2); }
-.tf-range.bump .tf-seg { animation: tfBump calc(340ms * var(--anim-mult, 1)) var(--ease-spring-soft-2); }
+.tf-range.bump .tf-seg { animation: tfBump calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-spring-soft-2); }
 @keyframes tfBump { 0%{ transform: translateY(2px); opacity:.5; } 100%{ transform: translateY(0); opacity:1; } }
 
 /* ---- Item 2: segmented presets — mirrors .seg.accent pattern exactly ---- */
@@ -196,7 +196,7 @@ html.dark .tf-preset.active { color: #111111; }
   transition: background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade), color calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade), opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .tf-pan:hover:not(:disabled) { background: var(--gray-100); color: var(--fg2); }
-.tf-pan:active:not(:disabled) { transform: scale(.9); }
+.tf-pan:active:not(:disabled) { transform: scale(var(--press-chip)); }
 .tf-pan:disabled { opacity: .25; cursor: default; }
 
 /* Proximity — scale+filter channels appended; no local transform/filter
@@ -218,7 +218,7 @@ html.dark .tf-preset.active { color: #111111; }
   touch-action: none;
 }
 .tf-strip { position: absolute; top: 0; left: 0; height: 100%; }
-.tf-strip[data-anim="true"] { transition: transform calc(400ms * var(--anim-mult, 1)) var(--ease-out); }
+.tf-strip[data-anim="true"] { transition: transform calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out); }
 
 /* base ruler ticks */
 .tf-ruler {
@@ -239,10 +239,10 @@ html.dark .tf-preset.active { color: #111111; }
   font-size: 11px; font-weight: var(--weight-semibold); color: var(--fg4);
   letter-spacing: -0.01em; white-space: nowrap; cursor: pointer;
   padding: 2px 6px; border-radius: 7px;
-  transition: color calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade), font-weight calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade), background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade), left calc(400ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: color calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade), font-weight calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade), background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade), left calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out);
 }
 .tf-month:hover { color: var(--fg2); background: var(--gray-100); }
-.tf-month:active { transform: translateX(-50%) scale(.94); }
+.tf-month:active { transform: translateX(-50%) scale(var(--press-control)); }
 .tf-month[data-in="true"] { color: var(--fg1); font-weight: var(--weight-bold); }
 .tf-month:focus-visible { outline: 2px solid var(--tf-accent); outline-offset: 1px; }
 
@@ -258,7 +258,7 @@ html.dark .tf-preset.active { color: #111111; }
   top: 8px;
   height: 20px;
 }
-.tf-sel[data-anim="true"] { transition: left calc(400ms * var(--anim-mult, 1)) var(--ease-out), width calc(400ms * var(--anim-mult, 1)) var(--ease-out); }
+.tf-sel[data-anim="true"] { transition: left calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out), width calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out); }
 .tf-lens {
   position: absolute; inset: 0; overflow: hidden;
   border-radius: 9px;
@@ -280,7 +280,8 @@ html.dark .tf-lens {
 }
 html.dark .tf-daycount { text-shadow: none; }
 
-/* Item 1: handles centered on the bubble side edges (left:0 / left:100%).
+/* Item 1: .start centered on the left bubble edge (left:0); .end right-anchored
+   flush to the right bubble edge (right:0) — see .tf-handle.end below.
    .tf-sel: top:8px, height:20px → lens center at 18px in track, 10px in .tf-sel.
    Handle box 34px tall; top:50% (=10px in .tf-sel) + translateY(-50%) centers it.
    Handle box spans -7px to 27px relative to .tf-sel.
@@ -302,7 +303,13 @@ html.dark .tf-daycount { text-shadow: none; }
   accent-color: transparent;
 }
 .tf-handle.start { left: 0; }
-.tf-handle.end { left: 100%; }
+/* End handle: right-aligned flush to .tf-sel's right edge instead of centered on
+   it. Centering (like .start) would leave 11px overhanging past the edge, which
+   depended on EDGE_PAD headroom in .tf-track and could clip/leave only a sliver
+   of the grip visible (the reported "grey stub"). Anchoring the box's own right
+   edge to 100% keeps it fully inside .tf-sel and guarantees a flush, unclipped
+   right edge regardless of zoom/scroll. */
+.tf-handle.end { left: auto; right: 0; transform: translateY(-50%); }
 /* range input thumb: hide native thumb, use ::before pseudo for the bar */
 .tf-handle::-webkit-slider-thumb { -webkit-appearance: none; width: 0; height: 0; }
 .tf-handle::-moz-range-thumb { width: 0; height: 0; border: none; background: transparent; }
@@ -327,6 +334,10 @@ html.dark .tf-daycount { text-shadow: none; }
   transition: height calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-spring-soft-2), width calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade), box-shadow calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade);
   pointer-events: none;
 }
+/* Grip stays centered on the box for .start, but the .end box is now
+   right-anchored (not centered) on the true edge — so its grip needs its
+   own offset to keep straddling that edge visually, matching .start's look. */
+.tf-handle.end::before { left: auto; right: -3px; transform: none; }
 html.dark .tf-handle::before { border-color: rgba(0,0,0,.35); }
 .tf-handle:hover::before { height: 16px; width: 7px; }
 .tf-card[data-dragging="true"] .tf-handle[data-active="true"]::before { height: 17px; width: 7px; }
@@ -339,7 +350,7 @@ html.dark .tf-handle::before { border-color: rgba(0,0,0,.35); }
 @media (prefers-reduced-motion: reduce) {
   .tf-strip[data-anim="true"], .tf-sel[data-anim="true"] { transition: none !important; }
   .tf-range.bump .seg { animation: none !important; }
-  .tf-preset-glider { transition-duration: 0ms !important; }
+  .tf-preset-glider { transition-duration: 0ms !important; /* motion-sweep: kept, prefers-reduced-motion !important near-zero override, intentionally literal (house pattern, see frontend-motion-contract.md) */ }
 }
 
 @media (max-width: 560px) {

@@ -17,6 +17,16 @@ import { animate } from 'framer-motion/dom'
  *  "no bounce/elastic easing" rule holds. */
 export const PILL_SPRING = { type: 'spring', stiffness: 520, damping: 38 } as const
 
+/** Mirrors `--ease-slide-bounce` in motion-tokens.css. Kept as a JS constant
+ *  because WAAPI/`animate` calls cannot read a CSS custom property directly. */
+export const EASE_SLIDE_BOUNCE = 'cubic-bezier(.34,1.3,.64,1)'
+
+/** E2 verdict (2026-08-06): mirrors `--ease-spring-open` in motion-tokens.css,
+ *  the house open-spring used by message-dropdown. FinancialHealthCard now
+ *  uses this for BOTH its open and close leg so the two components' open/close
+ *  motion reads as one shared spring family instead of two distinct feels. */
+export const EASE_SPRING_OPEN = 'cubic-bezier(.55,1.35,.35,1)'
+
 function motionDisabled(el: HTMLElement): boolean {
   const raw = getComputedStyle(el).getPropertyValue('--anim-mult').trim()
   const mult = raw === '' ? 1 : parseFloat(raw)

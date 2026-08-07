@@ -27,6 +27,12 @@
     box-shadow: 0 16px 56px rgba(17,17,17,0.13), 0 3px 10px rgba(17,17,17,0.06);
   }
 
+  /* C5 verdict (2026-08-06): the extra shell scale-bounce (msShellBounceIn)
+     was removed — the panel already opens on a spring via useAutoHeight's
+     --ease-spring-open, so a second overshoot animation on the shell was a
+     duplicate bounce, not the Apple-standard single spring. Open now reads
+     as one spring on height only. */
+
   /* Squircle conversion (Step 12): ms-shell/ms-panel canonical grey-shell/
      white-panel concentric pair (mirrors .te-outer/.te-panel, .dp-outer/.dp-panel).
      Depth shadow migrates to filter:drop-shadow (clip-path clips box-shadow).
@@ -62,12 +68,24 @@
      which is the "symmetric top inset" the header now merges into. */
   .ms-header {
     display: flex; align-items: center; gap: 8px;
+    /* Step 2 (dsfb-09-model-selector): width:100% used to stretch the
+       header to whatever width .ms-shell settled on (driven by .ms-panel's
+       own max-content sizing), leaving slack that .ms-t-chevron's
+       margin-left:auto absorbed as empty space rather than trimming it —
+       the header read wider than its content needed. width:max-content
+       makes the header size to its own content, same as .ms-panel already
+       does; .ms-shell (align-items:stretch, no explicit width) then fits
+       the widest of the two, so the header stops padding out the shell. */
+    /* C5 verdict (2026-08-06): was width:max-content, which left the header
+       narrower than the panel below it (measured 221px vs 367px) whenever a
+       model name was short — widened to fill the shell like the panel does,
+       to inner-card standards. */
     width: 100%;
-    /* Step 14: symmetric 14px -> 12px padding. The chevron is pinned flush
-       to this padding via margin-left:auto (see .ms-t-chevron), so left
-       inset (icon-tag) and right inset (chevron) both equal this value
-       regardless of the header's total width; .ms-panel's width-fit change
-       keeps the header/panel concentric under .ms-shell's 10px padding. */
+    /* Step 14: symmetric 14px -> 12px padding. With the header now sized
+       to its own content, padding-left/padding-right land the icon-tag's
+       left inset and the chevron's right inset at the same 12px from the
+       header's own edges — which are the shell's inner edges whenever the
+       header is the widest child (the normal case). */
     padding: 10px 12px;
     background: var(--card-bg, rgba(255,255,255,0.92));
     backdrop-filter: blur(20px);
@@ -86,7 +104,7 @@
       box-shadow calc(150ms * var(--anim-mult, 1)),
       transform calc(120ms * var(--anim-mult, 1)) var(--ease-out);
   }
-  .ms-header:active { transform: scale(0.985); }
+  .ms-header:active { transform: scale(var(--press-card)); }
   .ms-header:focus-visible {
     outline: 2px solid var(--brand-primary-500);
     outline-offset: 2px;
@@ -99,7 +117,7 @@
       linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
     background-size: cover, 5px 5px, 5px 5px;
-    transition: background-color calc(200ms * var(--anim-mult, 1)) var(--ease-out);
+    transition: background-color calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out);
   }
   .ms-t-icon-tag .material-icons,
   .ms-t-icon-tag .material-symbols-outlined {
@@ -109,7 +127,7 @@
   /* ④ Text morph: label fades + scales in on mount (triggered by key prop change) */
   .ms-t-model {
     font-size: 14px; font-weight: 800; color: #111111; letter-spacing: -0.01em;
-    animation: msLabelIn calc(280ms * var(--anim-mult, 1)) var(--ease-out);
+    animation: msLabelIn calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out);
   }
   @keyframes msLabelIn {
     from { opacity: 0; transform: scale(0.82) translateY(3px); filter: blur(2px); }
@@ -198,8 +216,10 @@
        via custom-property inheritance -- the global constant itself
        (src/styles/hover-tokens.css) is untouched, so no other component is
        affected. */
-    --hover-scale-max: 1.01;
-    --hover-brightness-max: 1.01;
+    /* Step 3 (dsfb-09): nudged down further from 1.01/1.01 -- still
+       perceptible but calmer proximity feel on option rows. */
+    --hover-scale-max: 1.007;
+    --hover-brightness-max: 1.006;
   }
   /* Squircle conversion (Step 12): inner of the .ms-shell/.ms-panel pair.
      box-shadow here is inset-only (unaffected by clip-path); border stays a
@@ -223,8 +243,10 @@
   }
   .ms-row:last-of-type::after { display: none; }
   .ms-row:hover { background: var(--fp-hover); }
-  /* ① Row click animation */
-  .ms-row:active { transform: scale(0.97); background: #F5F5F5; }
+  /* C5 verdict (2026-08-06): row press-scale removed (was a second bounce-
+     adjacent "click animation"); the sliding selection indicator + background
+     recolor are enough press feedback, spring-only per Apple standard. */
+  .ms-row:active { background: #F5F5F5; }
   /* Proximity — scale+filter channels appended; no local transform/filter
      hover rule to remove (hover only recolors background). */
   .ms-row.ms-row[data-proximity] {
@@ -353,7 +375,7 @@
     font-size: 20px; color: #fff;
     font-weight: 900;
     opacity: 0; transform: scale(0.6);
-    transition: opacity calc(200ms * var(--anim-mult, 1)), transform calc(200ms * var(--anim-mult, 1)) var(--ease-out);
+    transition: opacity calc(var(--duration-200) * var(--anim-mult, 1)), transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out);
     text-shadow: 0 1px 3px rgba(0,0,0,0.45), 0 0 1px rgba(255,255,255,0.4);
     -webkit-text-stroke: 1px #fff;
   }

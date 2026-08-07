@@ -127,7 +127,7 @@ export function runFlip(
       if (Math.abs(dy) > 0.5) {
         el.style.transform = `translateY(${dy}px)`
         el.getBoundingClientRect() // force layout to commit offset
-        el.style.transition = 'transform 560ms cubic-bezier(.22,1,.36,1)'
+        el.style.transition = 'transform var(--duration-560) var(--ease-motion-sweep-2236)'
         el.style.transform = ''
       }
     }

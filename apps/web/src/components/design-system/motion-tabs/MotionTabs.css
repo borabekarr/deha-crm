@@ -108,6 +108,12 @@ html.dark .mt-dock {
   box-shadow: none;
   filter: drop-shadow(0 18px 50px rgba(17,17,17,0.18)) drop-shadow(0 2px 8px rgba(17,17,17,0.06));
 }
+/* Explicit light-mode suppression (mirrors Calendar.css .cal-shell): no
+   pseudo-ring shell outside the single dark-mode ring added below. */
+.mt-dock[data-squircle="on"]::before,
+.mt-dock[data-squircle="on"]::after {
+  content: none;
+}
 html.dark .mt-dock[data-squircle="on"] {
   filter: drop-shadow(0 24px 60px rgba(0,0,0,0.50));
 }
@@ -153,6 +159,12 @@ html.dark .mt-dock-inner {
 .mt-dock-inner[data-squircle="on"] {
   padding: calc(4px + 1px) calc(8px + 1px) calc(12px + 1px);
   --corner-radius: 28px;
+  /* Inner card must stay borderless like Calendar.css .cal-panel -- the
+     outer's dark-mode ring is the ONLY shell line. Explicit here (not just
+     relying on the shared reset) so the "no duplicate shell" canon holds
+     even if a future edit reorders/overrides the base .mt-dock-inner
+     border rule. */
+  border: 0;
 }
 html.dark .mt-dock-inner[data-squircle="on"] {
   box-shadow: none;
@@ -186,31 +198,12 @@ html.dark .mt-divider {
   background: var(--card-border, #232323);
 }
 
-/* ── Panel enter/exit keyframes ─────────────────────────────────────────── */
-/* SPEC: dir > 0 = new tab is RIGHT of old tab → BOTH panels travel
-   left→right (+x). dir < 0 = new tab LEFT of old → BOTH travel right→left (-x).
-   Keyframe names describe the DIRECTION OF TRAVEL (the +x/-x motion),
-   not which side the panel comes from. Each panel gets an independent
-   data-panel-state so enter and exit map to the matched travel direction
-   without a shared --dir var collision.
-   travel-right (+x): enter comes from the left edge → 0; exit leaves to the right.
-   travel-left  (-x): enter comes from the right edge → 0; exit leaves to the left. */
-@keyframes mt-enter-travel-right {
-  from { opacity: 0; transform: translateX(-22px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-@keyframes mt-enter-travel-left {
-  from { opacity: 0; transform: translateX(22px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-@keyframes mt-exit-travel-right {
-  from { opacity: 1; transform: translateX(0); }
-  to   { opacity: 0; transform: translateX(22px); }
-}
-@keyframes mt-exit-travel-left {
-  from { opacity: 1; transform: translateX(0); }
-  to   { opacity: 0; transform: translateX(-22px); }
-}
+/* ── Panel enter/exit ───────────────────────────────────────────────────── */
+/* Direction-aware slide animation (translateX ±22px + opacity fade) now
+   lives in the global [data-panel-state] keyframes (styles/motion-tokens.css),
+   shared with future usePanelDirection() consumers (calendar, leaderboard,
+   workflow-add-elements). This block only scopes interaction/visibility for
+   .mt-panel specifically -- unchanged from the prior inlined version. */
 
 /* ── Panel stack ────────────────────────────────────────────────────────── */
 .mt-panel {
@@ -228,40 +221,23 @@ html.dark .mt-divider {
   opacity: 1;
   pointer-events: auto;
 }
-/* Entering panels: slide in after the pill glide begins.
-   dir>0 (entering-right state) → panels travel RIGHTWARD (+x). */
-.mt-panel[data-panel-state="entering-right"] {
-  pointer-events: auto;
-  animation:
-    mt-enter-travel-right
-    calc(var(--duration-fast) * var(--anim-mult, 1))
-    var(--ease)
-    both;
-}
+/* Entering panels: slide in after the pill glide begins (animation itself
+   comes from the global [data-panel-state] rule above via cascade). */
+.mt-panel[data-panel-state="entering-right"],
 .mt-panel[data-panel-state="entering-left"] {
   pointer-events: auto;
-  animation:
-    mt-enter-travel-left
-    calc(var(--duration-fast) * var(--anim-mult, 1))
-    var(--ease)
-    both;
 }
-/* Exiting panels: slide out immediately, same fast tier as enter so the
-   switch reads as near-instant (was 220ms exit trailing a 160ms-delayed
-   300ms enter -- the delay is gone too, both panels now start together). */
-.mt-panel[data-panel-state="exiting-left"] {
-  animation:
-    mt-exit-travel-right
-    calc(var(--duration-fast) * var(--anim-mult, 1))
-    var(--ease)
-    both;
-}
+/* Component-local retune (locked decision, supersedes the earlier "almost
+   immediate" ask): panel switch is ~180ms decelerating, not the global
+   120ms (--duration-fast). Overrides the [data-panel-state] animation
+   *duration only* -- keyframes + direction-aware translateX/opacity stay
+   the shared global ones from motion-tokens.css. */
+.mt-panel[data-panel-state="entering-right"],
+.mt-panel[data-panel-state="entering-left"],
+.mt-panel[data-panel-state="exiting-left"],
 .mt-panel[data-panel-state="exiting-right"] {
-  animation:
-    mt-exit-travel-left
-    calc(var(--duration-fast) * var(--anim-mult, 1))
-    var(--ease)
-    both;
+  animation-duration: calc(var(--duration-180) * var(--anim-mult, 1));
+  animation-timing-function: var(--ease-out);
 }
 
 /* Need relative context for absolute panels */
@@ -580,6 +556,11 @@ html.dark .mt-tabwrap:has(.mt-tab.active:hover) .mt-ind {
   font-size: 14px;
   font-weight: 800;
   letter-spacing: -0.01em;
+  /* lw (var(--lw)) is a rounded-up measured bbox width -- center the glyph
+     run inside it so any sub-pixel rounding slack splits evenly left/right
+     instead of piling on one edge. Keeps the active-pill's left/right edge
+     gaps reading even for every tab, not just the first/last. */
+  text-align: center;
   transition:
     width calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease),
     opacity calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease),

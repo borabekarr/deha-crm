@@ -273,6 +273,11 @@ export default function AdjustTimeframe() {
           const hitId = hit.id
           setPickedPreset(hitId)
           requestAnimationFrame(() => measureGlider(hitId))
+        } else {
+          // Step 4: dragging off a preset landmark is a special (non-preset)
+          // selection — clear the stale picked id so activeId falls through to
+          // undefined and the glider's data-on="false" spring+blur fade-out fires.
+          setPickedPreset(null)
         }
         // Item 4/2: auto zoom-out whenever focal point is off-screen (edge condition),
         // regardless of whether scroll moved — drive off focal check alone.
@@ -375,6 +380,13 @@ export default function AdjustTimeframe() {
     } else if (selRightNew > targetScroll + trackW) {
       targetScroll = Math.min(nMaxScroll, selRightNew - trackW)
     }
+    /* Final safety clamp: the fit-pass branches above only clamp against ONE
+       bound each (left branch never re-checks nMaxScroll, right branch never
+       re-checks minScroll). On a narrow track where a selection's pad-adjusted
+       width exceeds trackW, that single-sided clamp could leave targetScroll
+       outside [minScroll, nMaxScroll] — re-clamp here so it always matches the
+       same bounds the .tf-strip render-time clamp (Step 2) uses. */
+    targetScroll = clamp(targetScroll, minScroll, nMaxScroll)
 
     setAnim(true)
     setDaysVisible(next)
@@ -501,7 +513,15 @@ export default function AdjustTimeframe() {
             <div
               className="tf-strip"
               data-anim={anim ? 'true' : 'false'}
-              style={{ width: stripW + 'px', transform: `translateX(${-scroll}px)` }}
+              /* Render-time safety clamp: `scroll` state can momentarily race
+                 ahead of a mid-drag daysVisible/ppd change (auto zoom-out
+                 during a fast rightward move-drag), which would otherwise let
+                 the translate expose blank track past today. minScroll/
+                 maxScroll are recomputed fresh every render from the CURRENT
+                 ppd/stripW, so clamping here is always in sync — no matter
+                 how the underlying scroll state drifted, the painted strip
+                 can never fall short of the track's right edge. */
+              style={{ width: stripW + 'px', transform: `translateX(${-clamp(scroll, minScroll, maxScroll)}px)` }}
             >
               <div className="tf-ruler" style={{ width: stripW + 'px' }} />
 

@@ -132,7 +132,7 @@ export function drawSpark(pathEl: SVGPathElement, m: MetricDef): void {
   pathEl.style.strokeDashoffset = String(len)
   void pathEl.getBoundingClientRect()
   setTimeout(() => {
-    pathEl.style.transition = 'stroke-dashoffset 900ms cubic-bezier(.33,1,.68,1)'
+    pathEl.style.transition = 'stroke-dashoffset var(--duration-900) cubic-bezier(.33,1,.68,1)' /* motion-sweep: kept, easing curve used <3x, no exact/near token */
     pathEl.style.strokeDashoffset = '0'
   }, 60)
   setTimeout(() => {
@@ -179,14 +179,14 @@ export function playBars(barsEl: HTMLElement, _sweepEl: HTMLElement): void {
 
     // Phase 1: squash this single bar down
     setTimeout(() => {
-      bars[i].style.transition = `transform ${squashDur}ms cubic-bezier(.4,0,1,1), opacity ${squashDur}ms ease-in`
+      bars[i].style.transition = `transform ${squashDur}ms var(--ease-accel), opacity ${squashDur}ms ease-in`
       bars[i].style.transform = 'scaleY(0.45)'
       bars[i].style.opacity = '0.40'
     }, startDelay)
 
     // Phase 2: spring this bar back to full height
     setTimeout(() => {
-      bars[i].style.transition = `transform ${springDur}ms cubic-bezier(.34,1.56,.64,1), opacity ${Math.round(springDur * 0.5)}ms ease-out`
+      bars[i].style.transition = `transform ${springDur}ms var(--ease-spring-snap), opacity ${Math.round(springDur * 0.5)}ms ease-out`
       bars[i].style.transform = 'scaleY(1)'
       bars[i].style.opacity = '1'
     }, startDelay + squashDur)
