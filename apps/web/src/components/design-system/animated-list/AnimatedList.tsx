@@ -27,22 +27,22 @@ const VARIANTS: Record<string, AnimVariant> = {
   scale: {
     initial: { opacity: 0, transform: 'translateY(-22px) scale(0.96)' },
     exit:    { opacity: 0, transform: 'translateY(10px) scale(0.92)' },
-    ease: 'cubic-bezier(.22,1,.36,1)',
+    ease: 'var(--ease-motion-sweep-2236)',
   },
   slide: {
     initial: { opacity: 0, transform: 'translateY(-32px)' },
     exit:    { opacity: 0, transform: 'translateY(28px)' },
-    ease: 'cubic-bezier(.22,1,.36,1)',
+    ease: 'var(--ease-motion-sweep-2236)',
   },
   fade: {
     initial: { opacity: 0, transform: 'none' },
     exit:    { opacity: 0, transform: 'translateY(8px)' },
-    ease: 'cubic-bezier(.4,0,.2,1)',
+    ease: 'var(--ease-standard)',
   },
   bounce: {
     initial: { opacity: 0, transform: 'translateY(-20px) scale(0.8)' },
     exit:    { opacity: 0, transform: 'translateY(14px) scale(0.86)' },
-    ease: 'cubic-bezier(.34,1.7,.46,1)',
+    ease: 'var(--ease-bounce)',
   },
 }
 
@@ -94,7 +94,7 @@ export function AnimatedList<T extends { id: string | number }>({
       style={{
         position: 'relative',
         height: containerHeight + 'px',
-        transition: `height calc(500ms * var(--anim-mult,1)) ${variant.ease}`,
+        transition: `height calc(var(--duration-expand) * var(--anim-mult,1)) ${variant.ease}`,
       }}
     >
       {combined.map((row) => {

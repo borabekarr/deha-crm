@@ -116,7 +116,7 @@ export function useFLIPRefs() {
    *               Pass var(--ease-bounce-soft) for a damped spring (PIN),
    *               or cubic-bezier(.22,1,.36,1) for a smooth slide (UNPIN).
    */
-  function getFlipRef(id: string, ease: string = 'cubic-bezier(.22,1,.36,1)') {
+  function getFlipRef(id: string, ease: string = 'var(--ease-motion-sweep-2236)') {
     return (el: HTMLElement | null) => {
       if (!el) return
 
@@ -145,7 +145,7 @@ export function useFLIPRefs() {
       }
       e.__plFlipRaf = requestAnimationFrame(() => {
         // Duration shortened one tier (was 540ms) per "reduce animation power" feedback.
-        el.style.transition = `transform calc(440ms * var(--anim-mult, 1)) ${ease}`
+        el.style.transition = `transform calc(var(--duration-compact) * var(--anim-mult, 1)) ${ease}`
         el.style.transform = ''
 
         const onEnd = (ev: TransitionEvent) => {

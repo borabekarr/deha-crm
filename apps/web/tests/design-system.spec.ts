@@ -110,6 +110,20 @@ const SLUGS = [
   'workflow-nodes',
   'workflow-template-cards',
   'animated-list',
+  // Visual-test SLUGS additions (B1/C7, 2026-08-06) — baselines adopt from
+  // CI `actual` artifact after push per BASELINE ADOPTION RULE above.
+  'leaderboard',
+  'index-bar',
+  'calendar',
+  'file-folder',
+  'workflow-publish',
+  'morph-surface-feedback',
+  'avatar-picker',
+  'date-picker',
+  'motion-tabs',
+  'pipeline-card',
+  'multisteps',
+  'news-feed',
 ] as const
 
 // ---------------------------------------------------------------------------

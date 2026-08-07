@@ -154,7 +154,7 @@ function DrawerInstance({
     transform: shown ? openTranslate : closedTranslate,
     transition: dragging
       ? 'none'
-      : 'transform calc(0.46s * var(--anim-mult, 1)) cubic-bezier(.32,1.45,.45,1)',
+      : 'transform calc(var(--duration-expand) * var(--anim-mult, 1)) cubic-bezier(.32,1.45,.45,1)', /* motion-sweep: kept, easing curve used <3x, no exact/near token */
   }
 
   // The outer bezel shell and inner card sheet always animate as ONE unit on

@@ -35,7 +35,7 @@ export function buildTransition(ease: string): string {
   return (
     `top calc(${TRANSITION_MS}ms * var(--anim-mult,1)) ${ease},` +
     ` transform calc(${TRANSITION_MS}ms * var(--anim-mult,1)) ${ease},` +
-    ` opacity calc(320ms * var(--anim-mult,1)) ease-out`
+    ` opacity calc(var(--duration-320) * var(--anim-mult,1)) ease-out`
   )
 }
 

@@ -68,12 +68,12 @@ html.dark .cal-shell[data-squircle="on"]::before {
 .cal-actions { display: flex; gap: 5px; align-items: center; }
 .cal-today-btn { background: #111111; border: 1px solid transparent; border-radius: 9999px; padding: 6px 14px; font-family: 'Montserrat'; font-size: 12px; font-weight: 800; color: #fff; cursor: pointer; transition: background calc(var(--duration-150) * var(--anim-mult, 1)), color calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out); box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.22); }
 .cal-today-btn:hover { background: #1C1C1C; }
-.cal-today-btn:active { transform: scale(0.94); }
+.cal-today-btn:active { transform: scale(var(--press-control)); }
 .cal-today-btn.is-today { background: #ECECEC; color: #111111; border-color: #D4D4D4; box-shadow: inset 0 2px 4px rgba(0,0,0,0.10), inset 0 1px 2px rgba(0,0,0,0.06); }
 .cal-today-btn.is-today:hover { background: #D8E0EA; }
 .cal-nav-btn { background: #fff; border: 1px solid #ECECEC; border-radius: 50%; width: 30px; height: 30px; display: grid; place-items: center; cursor: pointer; transition: background calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out); box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgba(0,0,0,0.04); }
 .cal-nav-btn:hover { background: #FAFAFA; }
-.cal-nav-btn:active { transform: scale(0.88); }
+.cal-nav-btn:active { transform: scale(var(--press-chip)); }
 .cal-nav-btn .material-icons { font-size: 17px; color: #6B6B6B; }
 
 /* ── Day headers ── */
@@ -83,27 +83,24 @@ html.dark .cal-shell[data-squircle="on"]::before {
 /* ── Grid ── */
 .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); padding: 4px 4px 8px; }
 
-/* ── Direction-aware header switch (motion-tabs pattern) ──
-   .cal-grid-stack carries --gdx (travel distance+sign, set inline from
-   monthDir); the departing month is an absolute exit-overlay reading the
-   same --gdx so both travel together, sequenced not crossfaded (enter
-   delayed until the exit is most of the way through). */
+/* ── Direction-aware header switch ──
+   Uses the shared usePanelDirection() hook + global [data-panel-state]
+   keyframes (styles/motion-tokens.css) -- same canon MotionTabs uses. This
+   scope only positions the departing grid as an absolute overlay and tunes
+   local timing; the enter/exit translateX/opacity animation itself is the
+   global one, not re-minted here. */
 .cal-grid-stack { position: relative; }
-.cal-grid-exit {
+.cal-grid[data-panel-state="exiting-left"],
+.cal-grid[data-panel-state="exiting-right"] {
   position: absolute; inset: 0;
   pointer-events: none;
-  animation: cal-grid-exit-travel calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out) both;
 }
-.cal-grid-enter {
-  animation: cal-grid-enter-travel calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out) calc(130ms * var(--anim-mult, 1)) both;
-}
-@keyframes cal-grid-enter-travel {
-  from { opacity: 0; transform: translateX(var(--gdx, 18px)); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-@keyframes cal-grid-exit-travel {
-  from { opacity: 1; transform: translateX(0); }
-  to   { opacity: 0; transform: translateX(calc(var(--gdx, 18px) * -1)); }
+.cal-grid[data-panel-state="entering-right"],
+.cal-grid[data-panel-state="entering-left"],
+.cal-grid[data-panel-state="exiting-left"],
+.cal-grid[data-panel-state="exiting-right"] {
+  animation-duration: calc(var(--duration-280) * var(--anim-mult, 1));
+  animation-timing-function: var(--ease-out);
 }
 
 /* ── Cell ── */
@@ -118,11 +115,19 @@ html.dark .cal-shell[data-squircle="on"]::before {
   width: 30px; height: 30px; border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
   font-size: 14px; font-weight: 600; color: #111111;
-  transition: background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade) 0ms, transform calc(110ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade) 0ms /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */, transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out);
 }
 .cal-cell.other-month .cal-date-num { color: #D4D4D4; font-weight: 500; }
 /* Hover: only non-selected, non-other-month cells */
 .cal-cell:not(.other-month):not(.selected):hover .cal-date-num { background: var(--fp-hover); }
+/* Proximity: own `scale`/`filter` transition beats hover-tokens.css's
+   [data-proximity]x3 fallback timing/easing; mirrors .cal-ev-item[data-proximity]
+   so the engine's --prox mapping fades smoothly instead of snapping. */
+.cal-cell[data-proximity] {
+  transition:
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+}
 /* Click animation */
 .cal-cell:active .cal-date-num { transform: scale(0.85); background: #ECECEC !important; }
 .cal-cell.selected:active .cal-date-num { background: #111111 !important; }
@@ -154,9 +159,9 @@ html.dark .cal-dot-more { color: #6B6B6B; }
    property (was hover-only, causing a corner-radius pop) and the option
    converges on the global hover (fab/Fab.css .fab-item): background
    var(--fp-hover), 150ms zero-delay fade, press scale(0.97). */
-.cal-ev-item { display: flex; align-items: center; width: 100%; padding: 10px 2px; border: 0; border-bottom: 1px solid #FAFAFA; border-radius: 8px; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; appearance: none; transition: transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade) 0ms; }
+.cal-ev-item { display: flex; align-items: center; width: 100%; padding: 10px 2px; border: 0; border-bottom: 1px solid #FAFAFA; border-radius: 8px; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; appearance: none; transition: transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade) 0ms /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */; }
 .cal-ev-item:hover { background: var(--fp-hover); }
-.cal-ev-item:active { transform: scale(0.97); }
+.cal-ev-item:active { transform: scale(var(--press-control)); }
 .cal-ev-item:last-of-type { border-bottom: none; }
 /* Proximity: own `transform` transition (0,1,0) beats hover-tokens.css's
    [data-proximity]x3 fallback; scale + filter channels added here so the
@@ -164,7 +169,7 @@ html.dark .cal-dot-more { color: #6B6B6B; }
 .cal-ev-item[data-proximity] {
   transition:
     transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out),
-    background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade) 0ms,
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade) 0ms /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */,
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
@@ -190,18 +195,18 @@ html.dark .cal-dot-more { color: #6B6B6B; }
    (fab/Fab.css .fab-item): background var(--fp-hover), 150ms zero-delay
    fade, press scale(0.97). The idle 0.7 opacity ghost-affordance is kept
    (pre-existing, not part of the broken-hover report). */
-.cal-add-row { display: flex; align-items: center; gap: 10px; padding: 10px 2px 4px; cursor: pointer; opacity: 0.7; border-radius: 8px; transition: opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade), background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade) 0ms; }
+.cal-add-row { display: flex; align-items: center; gap: 10px; padding: 10px 2px 4px; cursor: pointer; opacity: 0.7; border-radius: 8px; transition: opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade), background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade) 0ms /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */; }
 .cal-add-row:hover { opacity: 1; background: var(--fp-hover); }
-.cal-add-row:active { transform: scale(0.97); }
+.cal-add-row:active { transform: scale(var(--press-control)); }
 /* Proximity: own `opacity` transition (0,1,0) beats hover-tokens.css's
    [data-proximity]x3 fallback; scale + filter channels appended so the
    engine's --prox mapping doesn't snap (mirrors .cal-ev-item[data-proximity]). */
 .cal-add-row[data-proximity] {
   transition:
-    opacity calc(var(--duration-150) * var(--anim-mult, 1)),
+    opacity calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
+    background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade) 0ms /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */,
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
-    background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade) 0ms;
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .cal-add-icon { width: 26px; height: 26px; border-radius: 50%; background: #F5F5F5; display: grid; place-items: center; color: #A1A1A1; }
 .cal-add-icon .material-icons { font-size: 16px; }
@@ -242,17 +247,17 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
 @keyframes calEvIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes calLabelIn { from { opacity: 0; transform: translateY(-5px); filter: blur(2px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
 .cal-events-container > * { animation: calEvIn calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out) both; }
-.cal-events-container > .cal-ev-label { animation: calLabelIn calc(.34s * var(--anim-mult, 1)) var(--ease-out) both; }
-.cal-events-container > *:nth-child(2) { animation-delay: calc(.05s * var(--anim-mult, 1)); }
+.cal-events-container > .cal-ev-label { animation: calLabelIn calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out) both; }
+.cal-events-container > *:nth-child(2) { animation-delay: calc(var(--duration-50) * var(--anim-mult, 1)); }
 .cal-events-container > *:nth-child(3) { animation-delay: calc(var(--duration-instant) * var(--anim-mult, 1)); }
 .cal-events-container > *:nth-child(4) { animation-delay: calc(var(--duration-150) * var(--anim-mult, 1)); }
 .cal-events-container > *:nth-child(5) { animation-delay: calc(var(--duration-200) * var(--anim-mult, 1)); }
-.cal-events-container > *:nth-child(6) { animation-delay: calc(.25s * var(--anim-mult, 1)); }
+.cal-events-container > *:nth-child(6) { animation-delay: calc(var(--duration-260) * var(--anim-mult, 1)); }
 .cal-events-container > *:nth-child(7) { animation-delay: calc(var(--duration-slower) * var(--anim-mult, 1)); }
-.cal-events-container > *:nth-child(8) { animation-delay: calc(.35s * var(--anim-mult, 1)); }
+.cal-events-container > *:nth-child(8) { animation-delay: calc(var(--duration-sweep) * var(--anim-mult, 1)); }
 /* Selected day pill gives a little morph pop when it moves — FIX#1: softer overshoot 1.12→1.06, lower bezier tension */
 @keyframes calSelPop { 0% { transform: scale(.7); } 60% { transform: scale(1.06); } 100% { transform: scale(1); } }
-.cal-cell.selected .cal-date-num { animation: calSelPop calc(.34s * var(--anim-mult, 1)) var(--ease-spring-pop); }
+.cal-cell.selected .cal-date-num { animation: calSelPop calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-spring-pop); }
 
 /* ── Task-creation popover (FIX#2) ── */
 .cal-popover-backdrop {
@@ -266,9 +271,11 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
 .cal-popover {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-radius: var(--card-radius);
+  border-radius: 28px;
   padding: 24px;
   width: 320px;
+  max-width: 320px;
+  box-sizing: border-box;
   box-shadow: 0 24px 80px rgba(17,17,17,0.22), 0 4px 16px rgba(17,17,17,0.08),
               inset 0 1px 0 rgba(255,255,255,0.8);
   display: flex; flex-direction: column; gap: 16px;
@@ -324,7 +331,7 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
   transition: filter calc(var(--duration-fast) * var(--anim-mult, 1)), transform calc(var(--duration-instant) * var(--anim-mult, 1));
 }
 .cal-pop-add:hover { filter: brightness(1.08); }
-.cal-pop-add:active { transform: scale(.97); }
+.cal-pop-add:active { transform: scale(var(--press-control)); }
 
 /* ── Event-detail popover (.cal-ep-*) — scoped, does NOT import task-card CSS ── */
 
@@ -337,23 +344,26 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
   display: flex; align-items: center; justify-content: center;
   visibility: hidden; opacity: 0; pointer-events: none;
   transition: opacity calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade),
-              visibility 0s var(--ease-linear) calc(var(--duration-slow) * var(--anim-mult, 1));
+              visibility 0s /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */ var(--ease-linear) calc(var(--duration-slow) * var(--anim-mult, 1));
 }
 .cal-ep-overlay.open {
   visibility: visible; opacity: 1; pointer-events: auto;
-  transition: opacity calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade), visibility 0s;
+  transition: opacity calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade), visibility 0s /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */;
 }
 
 /* Gray bezel outer shell — pop entrance via var(--ease-spring). This popover
-   is the canon task-card popovers copy (Step 7): no strict hard frames,
-   concentric squircle 36/28 pair, dark-only ::before ring on the OUTER
-   shell (per cards/Cards.css .concentric-demo-outer, lines 132-143). */
+   is the canon task-card popovers copy (Step 7/dsfb-11): STRICT bounded frame
+   (fixed width + max-width, no content-driven reflow), concentric squircle
+   36/28 pair, dark-only ::before ring on the OUTER shell (per cards/Cards.css
+   .concentric-demo-outer, lines 132-143). */
 .cal-ep-outer {
   position: relative;
   background: var(--shell-bg);
   border-radius: 36px;
   padding: 10px;
   width: min(540px, calc(100vw - 28px));
+  max-width: 540px;
+  box-sizing: border-box;
   max-height: calc(100vh - 36px);
   display: flex; flex-direction: column;
   box-shadow: 0 32px 80px rgba(0,0,0,0.28), 0 6px 20px rgba(0,0,0,0.12);
@@ -379,14 +389,17 @@ html.dark .cal-ep-outer[data-squircle="on"]::before {
 }
 html.dark .cal-ep-outer { background: #111111; }
 
-/* Card surface — inner half of the outer/inner canon pair (no strict hard
-   frame; border kept only as the pre-squircle fallback, dropped once
-   [data-squircle="on"] is live via the shared recipe). */
+/* Card surface — inner half of the outer/inner canon pair. Strict frame:
+   fills the bounded outer width exactly (no content-driven reflow); border
+   kept only as the pre-squircle fallback, dropped once [data-squircle="on"]
+   is live via the shared recipe. */
 .cal-ep-card {
   --ep-color: #3B82F6;
   background: var(--bg-card-solid);
   border: 1px solid var(--card-border);
   border-radius: 28px;
+  width: 100%;
+  box-sizing: border-box;
   overflow: hidden;
   display: flex; flex-direction: column;
   min-height: 0;
@@ -584,7 +597,7 @@ html.dark .cal-ep-cust-sub { color: var(--fg3) !important; }
   position: absolute; border-radius: 50%; transform: scale(0);
   z-index: -1; pointer-events: none;
   background: rgba(17,17,17,0.10);
-  animation: cal-ep-cust-rip calc(560ms * var(--anim-mult, 1)) var(--ease-out) forwards;
+  animation: cal-ep-cust-rip calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out) forwards;
 }
 html.dark .cal-ep-cust-ripple { background: rgba(255,255,255,0.11); }
 @keyframes cal-ep-cust-rip { to { transform: scale(3.4); opacity: 0; } }
@@ -1002,8 +1015,8 @@ html.dark .cal-popover-backdrop { background: rgba(0,0,0,.55); }
 .cal-ev-scrollbar-thumb {
   position: absolute; right: 0; left: auto; width: 3px; border-radius: 9999px;
   background: #A1A1A1;
-  transition: top calc(50ms * var(--anim-mult, 1)) var(--ease-linear),
-              height calc(50ms * var(--anim-mult, 1)) var(--ease-linear);
+  transition: top calc(var(--duration-50) * var(--anim-mult, 1)) var(--ease-linear),
+              height calc(var(--duration-50) * var(--anim-mult, 1)) var(--ease-linear);
 }
 html.dark .cal-ev-scrollbar { background: rgba(255,255,255,0.08); }
 html.dark .cal-ev-scrollbar-thumb { background: #4A4A4A; }

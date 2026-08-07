@@ -124,7 +124,7 @@
   pointer-events: none;
   outline: 4px solid transparent;
   outline-offset: 4px;
-  transition: box-shadow calc(0.45s * var(--anim-mult, 1)) var(--ease-out), outline-color calc(0.45s * var(--anim-mult, 1)) var(--ease-out);
+  transition: box-shadow calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-out), outline-color calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-out);
 }
 
 .ap-big-clip {
@@ -153,7 +153,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .ap-big-art {
-    animation: apSwap calc(0.5s * var(--anim-mult, 1)) var(--ease-avatar-swap) forwards;
+    animation: apSwap calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-avatar-swap) forwards;
   }
 }
 
@@ -181,7 +181,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .ap-avatar-name {
-    animation: apFade calc(0.3s * var(--anim-mult, 1)) var(--ease-fade) forwards;
+    animation: apFade calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade) forwards;
   }
 }
 
@@ -214,9 +214,9 @@
     filter calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
 }
 
-/* Canon hover (task-card benchmark): scale(1.007) + modest drop-shadow ramp. */
+/* Canon hover (task-card benchmark): canon-hover-scale + modest drop-shadow ramp. */
 .ap-strip-wrap:hover {
-  transform: scale(1.007);
+  transform: scale(var(--canon-hover-scale));
   filter: drop-shadow(0 10px 15px rgba(17,17,17,0.10)) drop-shadow(0 2px 4px rgba(17,17,17,0.05));
 }
 
@@ -230,7 +230,7 @@
   display: flex;
   gap: 10px;
   transform: translateX(calc(var(--ap-page, 0) * -235px));
-  transition: transform calc(0.42s * var(--anim-mult, 1)) var(--ease-out);
+  transition: transform calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out);
   will-change: transform;
 }
 
@@ -259,7 +259,7 @@
   z-index: 2;
   pointer-events: none;
   opacity: 0;
-  transition: opacity calc(200ms * var(--anim-mult, 1)) var(--ease-fade);
+  transition: opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade);
 }
 
 .ap-edge--visible {
@@ -287,8 +287,8 @@
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(17,17,17, 0.12);
   transition:
-    transform calc(140ms * var(--anim-mult, 1)) var(--ease-out),
-    box-shadow calc(160ms * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-out),
+    box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
   padding: 0;
@@ -297,11 +297,11 @@
 
 /* Calm proportionate variant of the canon hover, scaled for a 30px control. */
 .ap-edge-btn:hover {
-  transform: scale(1.03);
+  transform: scale(var(--canon-hover-scale));
   box-shadow: 0 3px 8px rgba(17,17,17, 0.14);
 }
 
-.ap-edge-btn:active { transform: scale(0.92); }
+.ap-edge-btn:active { transform: scale(var(--press-chip)); }
 
 .ap-edge-btn .material-icons,
 .ap-edge-btn .material-symbols-outlined {
@@ -316,7 +316,7 @@
  * Optical centering: Material Symbols arrow_back_ios / arrow_forward_ios have
  * an asymmetric side-bearing. Nudge each icon to align visually.
  */
-.ap-edge--left .ap-edge-btn .material-symbols-outlined { margin-left: 3px; }
+.ap-edge--left .ap-edge-btn .material-symbols-outlined { margin-left: 1px; }
 .ap-edge--right .ap-edge-btn .material-symbols-outlined { margin-left: -2px; }
 
 /* ── Thumbnail buttons ── */
@@ -336,21 +336,24 @@
     inset 0 0 0 1px rgba(17,17,17, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.7);
   transition:
-    opacity calc(200ms * var(--anim-mult, 1)) var(--ease-fade),
-    transform calc(160ms * var(--anim-mult, 1)) var(--ease-out),
-    box-shadow calc(200ms * var(--anim-mult, 1)) var(--ease-fade),
+    opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
+    box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 
-.ap-thumb:hover { opacity: 1; transform: scale(1.02); }
+/* Scale is driven by the proximity engine via --hover-scale-max
+   (hover-tokens.css), not a fixed local value, so it tracks the global
+   token instead of drifting when that token is retuned. */
+.ap-thumb:hover { opacity: 1; }
 /* Hover ring reach kept well under half the 10px track gap so it can never
    touch a neighboring active thumb's ring (see .ap-thumb--on below). */
 .ap-thumb:hover:not(.ap-thumb--on) {
   outline: 1.5px solid rgba(17,17,17, 0.18);
   outline-offset: 1px;
 }
-.ap-thumb:active { transform: scale(0.94); }
+.ap-thumb:active { transform: scale(var(--press-control)); }
 
 .ap-thumb-img {
   width: 100%;
@@ -409,7 +412,7 @@
   font-weight: 600;
   color: var(--fg4, #A1A1A1);
   font-variant-numeric: tabular-nums;
-  transition: color calc(200ms * var(--anim-mult, 1)) var(--ease-fade);
+  transition: color calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade);
 }
 
 .ap-count--warn { color: var(--sem-warning, #f59e0b); }
@@ -424,7 +427,7 @@
   font-size: 18px;
   color: var(--fg4, #A1A1A1);
   pointer-events: none;
-  transition: color calc(200ms * var(--anim-mult, 1)) var(--ease-fade);
+  transition: color calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade);
   user-select: none;
 }
 
@@ -443,7 +446,7 @@
   font-size: 14px;
   font-weight: 600;
   box-shadow: inset 0 0 0 1px rgba(17,17,17, 0.10), var(--shadow-recessed, inset 0 2px 4px rgba(17,17,17,0.05));
-  transition: box-shadow calc(180ms * var(--anim-mult, 1)) var(--ease-fade);
+  transition: box-shadow calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade);
   outline: none;
 }
 
@@ -469,7 +472,7 @@
   font-size: 12px;
   font-weight: 600;
   color: var(--sem-danger, #ef4444);
-  animation: apErr calc(0.18s * var(--anim-mult, 1)) var(--ease-fade) forwards;
+  animation: apErr calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade) forwards;
 }
 
 @keyframes apErr {
@@ -492,8 +495,8 @@
 .ap-submit[data-proximity] {
   transition:
     background-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade),
-    transform calc(160ms * var(--anim-mult, 1)) var(--ease-spring),
-    box-shadow calc(200ms * var(--anim-mult, 1)),
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring),
+    box-shadow calc(var(--duration-200) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
@@ -501,7 +504,7 @@
 .ap-submit-icon {
   font-size: 18px;
   /* bolder chevron weight set via inline fontVariationSettings in TSX */
-  transition: transform calc(200ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out);
 }
 
 .ap-submit:hover:not(:disabled) .ap-submit-icon {

@@ -5,7 +5,7 @@
 */
 
 :root {
-  --dur: calc(540ms * var(--anim-mult, 1));
+  --dur: calc(var(--duration-560) * var(--anim-mult, 1));
   --cc-shell: #D4DCE8;
   --cc-panel: #FFFFFF;
   --cc-slot: #FAFAFA;
@@ -19,7 +19,7 @@
   --cc-chip: #F5F5F5;
   --cc-hairline: #F5F5F5;
   --cc-inset-hi: rgba(255, 255, 255, 1);
-  --cc-ease-digit: cubic-bezier(.34, 1.18, .64, 1); /* digit-track roll: no byte-match in motion-tokens.css */
+  --cc-ease-digit: var(--ease-bounce-glow); /* digit-track roll: no byte-match in motion-tokens.css */
 }
 
 html.dark {
@@ -50,7 +50,8 @@ html.dark {
 }
 
 html.dark .cc-outer {
-  background: #0A0A0A;
+  --cc-shell-dark: #0A0A0A;
+  background: var(--cc-shell-dark);
   border: 1px solid var(--card-border, #232323);
   box-shadow:
     0 10px 30px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2),
@@ -171,7 +172,7 @@ html.dark .cc-panel:not([data-squircle="on"]) {
 }
 
 .cc-pill:active {
-  transform: scale(0.97);
+  transform: scale(var(--press-control));
 }
 
 /* Proximity — scale+filter channels appended; no local transform/filter
@@ -220,11 +221,11 @@ html.dark .cc-panel:not([data-squircle="on"]) {
 }
 
 .cc-flag-layer.morph-out {
-  animation: flagMorphOut calc(520ms * var(--anim-mult, 1)) var(--ease-standard) forwards;
+  animation: flagMorphOut calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-standard) forwards;
 }
 
 .cc-flag-layer.morph-in {
-  animation: flagMorphIn calc(540ms * var(--anim-mult, 1)) var(--ease-out) forwards;
+  animation: flagMorphIn calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out) forwards;
 }
 
 
@@ -251,7 +252,7 @@ html.dark .cc-panel:not([data-squircle="on"]) {
 .digit-track {
   display: flex;
   flex-direction: column;
-  transition: transform calc(540ms * var(--anim-mult, 1)) var(--cc-ease-digit);
+  transition: transform calc(var(--duration-560) * var(--anim-mult, 1)) var(--cc-ease-digit);
 }
 
 .digit-track > span {
@@ -272,7 +273,7 @@ html.dark .cc-panel:not([data-squircle="on"]) {
 }
 
 html.dark .cc-swap-shell {
-  background: #0A0A0A;
+  background: var(--cc-shell-dark);
   border: 1px solid #232323;
 }
 
@@ -305,7 +306,7 @@ html.dark .cc-swap-shell {
 }
 
 .cc-swap:active {
-  transform: scale(0.88) !important;
+  transform: scale(var(--press-chip)) !important;
 }
 
 /* Proximity — scale+filter channels appended; no local transform/filter
@@ -331,7 +332,7 @@ html.dark .cc-swap-shell {
   border-radius: 50%;
   background: var(--brand-primary-500);
   box-shadow: 0 0 0 0 var(--brand-glow);
-  animation: livePulse calc(1800ms * var(--anim-mult, 1)) var(--ease-out-native) infinite;
+  animation: livePulse calc(var(--duration-1800) * var(--anim-mult, 1)) var(--ease-out-native) infinite;
 }
 
 @keyframes livePulse {
@@ -475,7 +476,7 @@ html.dark .cc-pop-shell[data-squircle="on"]::before {
   gap: 12px;
   padding: 10px 14px;
   cursor: pointer;
-  transition: background calc(.25s * var(--anim-mult, 1)) ease, transform calc(.18s * var(--anim-mult, 1)) var(--ease-out);
+  transition: background calc(var(--duration-260) * var(--anim-mult, 1)) ease, transform calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-out);
   border: none;
   background: transparent;
   width: 100%;
@@ -499,8 +500,8 @@ html.dark .cc-pop-shell[data-squircle="on"]::before {
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
-    animation-duration: 1ms !important;
-    transition-duration: 1ms !important;
+    animation-duration: 1ms !important; /* motion-sweep: kept, prefers-reduced-motion !important near-zero override, intentionally literal (house pattern, see frontend-motion-contract.md) */
+    transition-duration: 1ms !important; /* motion-sweep: kept, prefers-reduced-motion !important near-zero override, intentionally literal (house pattern, see frontend-motion-contract.md) */
   }
 }
 

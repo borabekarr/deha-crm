@@ -37,7 +37,7 @@
   transition: transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out);
 }
 .dds-trigger:active {
-  transform: scale(0.97);
+  transform: scale(var(--press-control));
 }
 
 /* Overlay -- fixed, viewport-anchored. Mounted-through-exit
@@ -155,5 +155,5 @@
   transition: transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out);
 }
 .dds-close:active {
-  transform: scale(0.97);
+  transform: scale(var(--press-control));
 }

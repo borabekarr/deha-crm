@@ -5,6 +5,7 @@ import { useState, useCallback, useRef, Fragment } from 'react'
 import { iconClass } from '../../../lib/iconClass'
 import { useSquircle } from '../../../lib/hooks/use-squircle'
 import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
+import { usePanelDirection } from '../../../lib/hooks/use-panel-direction'
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
@@ -713,10 +714,13 @@ export default function Calendar() {
   const [curMonth, setCurMonth] = useState(4) // May = 4
   const [sel, setSel] = useState(4) // day 4 selected initially
 
-  // Direction-aware header switch (motion-tabs pattern): monthDir sign picks
-  // the travel direction; exitingMonth holds the outgoing grid's snapshot so
-  // it can render as a departing overlay while the new grid enters in-flow.
-  const [monthDir, setMonthDir] = useState(0)
+  // Direction-aware header switch: shared usePanelDirection() hook (dsfb-02)
+  // + global [data-panel-state] keyframes (styles/motion-tokens.css), same
+  // canon MotionTabs uses. monthIndex is the monotonic index fed to the
+  // hook; exitingMonth holds the outgoing grid's snapshot so it can render
+  // as a departing overlay while the new grid enters in-flow.
+  const monthIndex = curYear * 12 + curMonth
+  const panelState = usePanelDirection(monthIndex)
   const [exitingMonth, setExitingMonth] = useState<{ cells: Cell[]; year: number; month: number } | null>(null)
   const gridExitCleanupRef = useRef<(() => void) | null>(null)
   const gridExitOverlayRef = useCallback((el: HTMLDivElement | null) => {
@@ -796,7 +800,6 @@ export default function Calendar() {
 
   function prevMonth() {
     setExitingMonth({ cells, year: curYear, month: curMonth })
-    setMonthDir(-1)
     if (curMonth === 0) {
       setCurMonth(11)
       setCurYear((y) => y - 1)
@@ -808,7 +811,6 @@ export default function Calendar() {
 
   function nextMonth() {
     setExitingMonth({ cells, year: curYear, month: curMonth })
-    setMonthDir(1)
     if (curMonth === 11) {
       setCurMonth(0)
       setCurYear((y) => y + 1)
@@ -953,20 +955,23 @@ export default function Calendar() {
             <div className="cal-dow">Sat</div>
           </div>
 
-          {/* Calendar grid — direction-aware month switch (motion-tabs pattern):
-              the departing month renders as an absolute exit-overlay while the
-              live grid enters in normal flow, both reading --gdx for travel sign. */}
-          <div
-            className="cal-grid-stack"
-            style={{ '--gdx': `${monthDir < 0 ? -18 : 18}px` } as React.CSSProperties}
-          >
+          {/* Calendar grid — direction-aware month switch via the shared
+              usePanelDirection() hook + global [data-panel-state] keyframes
+              (motion-tabs pattern, dsfb-02 canon): the departing month renders
+              as an absolute exit overlay while the live grid enters in-flow. */}
+          <div className="cal-grid-stack">
             {exitingMonth && (
-              <div className="cal-grid cal-grid-exit" ref={gridExitOverlayRef}>
+              <div
+                className="cal-grid"
+                data-panel-state={panelState(exitingMonth.year * 12 + exitingMonth.month)}
+                ref={gridExitOverlayRef}
+              >
                 {renderCells(exitingMonth.cells, exitingMonth.year, exitingMonth.month, false)}
               </div>
             )}
             <div
-              className={`cal-grid${monthDir !== 0 ? ' cal-grid-enter' : ''}`}
+              className="cal-grid"
+              data-panel-state={panelState(monthIndex)}
               key={`${curYear}-${curMonth}`}
               ref={gridProximityRef}
             >

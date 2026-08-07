@@ -8,6 +8,11 @@
 
 /* ── List surface ─────────────────────────────────────────────────────── */
 .pinlist {
+  /* Calmer proximity hover across list items: scopes the global cap
+     (hover-tokens.css) down at the container, same mechanism as
+     WorkflowPublish.css / Leaderboard's .row --hover-scale-max override. */
+  --hover-scale-max: 1.010;
+  --hover-brightness-max: 1.012;
   --pl-surface:       linear-gradient(168deg, var(--card-bg, #FFFFFF) 0%, #F6F8FB 100%);
   --pl-card:          var(--card-bg, #FFFFFF);
   --pl-card-bd:       var(--card-border, rgba(17,17,17,0.07));
@@ -122,7 +127,7 @@
   overflow: hidden;
   opacity: 1;
   transition:
-    opacity calc(240ms * var(--anim-mult, 1)) var(--ease-fade),
+    opacity calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-fade),
     padding calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out),
     margin calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out);
 }
@@ -137,7 +142,7 @@
 .pl-sec.all .pl-head { margin-top: var(--space-3, 12px); }
 .pl-sec.all.solo .pl-head {
   margin-top: var(--space-1, 4px);
-  transition: margin calc(360ms * var(--anim-mult, 1)) var(--ease-out);
+  transition: margin calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out);
 }
 
 .pl-items {
@@ -165,11 +170,11 @@
 }
 
 /* entrance animation helpers (applied programmatically by hook) */
-.pl-item.pl-preanim { opacity: 0; transform: translateY(-7px) scale(0.96); }
+.pl-item.pl-preanim { opacity: 0; transform: translateY(-4px) scale(0.98); }
 .pl-item.pl-anim {
   transition:
     opacity calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-fade),
-    transform calc(420ms * var(--anim-mult, 1)) var(--ease-out);
+    transform calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out);
 }
 
 /* pinned look */
@@ -192,8 +197,8 @@
     inset 0 1px 0 rgba(255,255,255,0.9),
     inset 0 0 0 1px rgba(17,17,17,0.04);
   transition:
-    background calc(260ms * var(--anim-mult, 1)) var(--ease-fade),
-    color calc(260ms * var(--anim-mult, 1)) var(--ease-fade);
+    background calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade),
+    color calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade);
 }
 
 .pl-ico span { font-size: 21px; }
@@ -256,18 +261,18 @@
     inset 0 1px 0 rgba(255,255,255,0.7),
     inset 0 0 0 1px rgba(17,17,17,0.04);
   transition:
-    background calc(200ms * var(--anim-mult, 1)) var(--ease-fade),
-    color calc(200ms * var(--anim-mult, 1)) var(--ease-fade),
-    box-shadow calc(200ms * var(--anim-mult, 1)) var(--ease-fade);
+    background calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
+    color calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
+    box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade);
 }
 
 .pl-pin span {
   font-size: 18px;
-  transition: transform calc(280ms * var(--anim-mult, 1)) var(--ease-spring);
+  transition: transform calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-spring);
 }
 
 .pl-pin:hover { color: var(--fg2); }
-.pl-pin:active { transform: scale(0.88); }
+.pl-pin:active { transform: scale(var(--press-chip)); }
 
 .pl-item.is-pinned .pl-pin {
   background: var(--brand-primary);

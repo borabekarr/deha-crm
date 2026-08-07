@@ -363,7 +363,7 @@ export default function DynamicCalendar({
                     {eventsToday.length === 0 && (
                       <div
                         className="dc-more"
-                        style={{ '--dc-delay': '120ms' } as React.CSSProperties}
+                        style={{ '--dc-delay': 'var(--duration-fast)' } as React.CSSProperties}
                       >
                         Nothing scheduled
                       </div>

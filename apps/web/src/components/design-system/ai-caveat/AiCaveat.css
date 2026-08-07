@@ -37,7 +37,7 @@
   padding: 0;
 }
 .ai-action-btn:hover { background: #F5F5F5; color: #6B6B6B; }
-.ai-action-btn:active { transform: scale(0.9); }
+.ai-action-btn:active { transform: scale(var(--press-chip)); }
 .ai-action-btn .material-icons { font-size: 20px; line-height: 1; display: block; }
 
 /* ── Caveat banner ── */

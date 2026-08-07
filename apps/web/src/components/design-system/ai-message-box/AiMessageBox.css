@@ -12,9 +12,9 @@ body { background: #FAFAFA; font-family: 'Montserrat', sans-serif; }
 .mb-shell {
   position: relative;
   background: var(--shell-bg);
-  border-radius: 26px;
-  padding: 7px;
-  --corner-radius: 26px;
+  border-radius: 36px;
+  padding: 8px;
+  --corner-radius: 36px;
 }
 .mb-shell[data-squircle="on"] { border-radius: 0; }
 .mb-shell[data-squircle="on"]::before,
@@ -34,19 +34,22 @@ html.dark .mb-shell[data-squircle="on"]::before {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-top-color: rgba(255,255,255,0.9);
-  border-radius: var(--card-radius);
+  /* Concentric pairing with the 36px .mb-shell outer shell (canon delta 8,
+     matching Cards.css .concentric-demo-inner) -- was var(--card-radius),
+     which read as a mismatched, broken corner curve against the outer shell. */
+  border-radius: 28px;
   padding: 16px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(17,17,17,0.04);
-  transition: border-color calc(250ms * var(--anim-mult, 1)), box-shadow calc(var(--duration-slower) * var(--anim-mult, 1));
+  transition: border-color calc(var(--duration-260) * var(--anim-mult, 1)), box-shadow calc(var(--duration-slower) * var(--anim-mult, 1));
 }
 /* useSquircle takes over corner rendering: shared [data-squircle="on"]
    recipe (_shared-feedback.css) drops the real border/box-shadow for
    clip-path + ring pseudo-elements. Padding gets the +1px padding-box/
    border-box offset (see Cards.css .card-inner); corner-radius binds
-   to the box's own 20px radius. */
+   to the box's own 28px concentric-inner radius. */
 .mb[data-squircle="on"] {
   padding: calc(16px + 1px);
-  --corner-radius: 20px;
+  --corner-radius: 28px;
 }
 /* keep content above the glow layer */
 .mb > * { position: relative; z-index: 1; }
@@ -61,8 +64,8 @@ html.dark .mb-shell[data-squircle="on"]::before {
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand-primary-500) 12%, transparent), 0 8px 28px color-mix(in srgb, var(--brand-primary-500) 22%, transparent);
 }
 /* fade the glow in, breathe while lit, then fade out gracefully (keyframes = reliable) */
-.mb.generating::before { animation: mbGlowIn calc(.5s * var(--anim-mult, 1)) var(--ease-fade) both, glowPulse calc(2.5s * var(--anim-mult, 1)) var(--ease-in-out) calc(.5s * var(--anim-mult, 1)) infinite; }
-.mb.exiting::before { animation: mbGlowOut calc(.6s * var(--anim-mult, 1)) var(--ease-standard) both; }
+.mb.generating::before { animation: mbGlowIn calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-fade) both, glowPulse calc(2.5s /* motion-sweep: kept, 2500ms, used <3x library-wide, >15% off nearest tier */ * var(--anim-mult, 1)) var(--ease-in-out) calc(var(--duration-expand) * var(--anim-mult, 1)) infinite; }
+.mb.exiting::before { animation: mbGlowOut calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-standard) both; }
 @keyframes mbGlowIn  { from { opacity: 0; } to { opacity: 1; } }
 @keyframes mbGlowOut { from { opacity: 1; } to { opacity: 0; } }
 
@@ -94,10 +97,10 @@ html.dark .mb-shell[data-squircle="on"]::before {
 }
 /* ── Morph: ENTER (static → generating) ── */
 .mb.generating .mb-input  { animation: mbInputOut calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out) both; }
-.mb.generating .skel-bar  { animation: mbBarIn calc(.5s * var(--anim-mult, 1)) var(--ease-bounce-glow) both, shimmer calc(1.6s * var(--anim-mult, 1)) var(--ease-linear) infinite; }
-.mb.generating .skel-bar.w1 { animation-delay: calc(.06s * var(--anim-mult, 1)), 0s; }
-.mb.generating .skel-bar.w2 { animation-delay: calc(.14s * var(--anim-mult, 1)), 0s; }
-.mb.generating .skel-bar.w3 { animation-delay: calc(.22s * var(--anim-mult, 1)), 0s; }
+.mb.generating .skel-bar  { animation: mbBarIn calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-bounce-glow) both, shimmer calc(1.6s /* motion-sweep: kept, 1600ms, used <3x library-wide, >15% off nearest tier */ * var(--anim-mult, 1)) var(--ease-linear) infinite; }
+.mb.generating .skel-bar.w1 { animation-delay: calc(var(--duration-60) * var(--anim-mult, 1)), 0s /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */; }
+.mb.generating .skel-bar.w2 { animation-delay: calc(var(--duration-140) * var(--anim-mult, 1)), 0s /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */; }
+.mb.generating .skel-bar.w3 { animation-delay: calc(var(--duration-slow) * var(--anim-mult, 1)), 0s /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */; }
 /* ── Morph: EXIT (generating → static) ── */
 .mb.exiting .mb-input { animation: mbInputIn calc(var(--duration-compact) * var(--anim-mult, 1)) var(--ease-out) both; }
 .mb.exiting .skel-bar { animation: mbBarOut calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade) both; }
@@ -126,7 +129,7 @@ html.dark .mb-shell[data-squircle="on"]::before {
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .mb-btn:hover { background: #FAFAFA; }
-.mb-btn:active { transform: scale(0.97); }
+.mb-btn:active { transform: scale(var(--press-control)); }
 .mb-btn .material-icons { font-size: 16px; color: #4A4A4A; }
 
 /* Extend AI button — emerald gradient */
@@ -144,7 +147,7 @@ html.dark .mb-shell[data-squircle="on"]::before {
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .mb-ai-btn:hover { box-shadow: inset 0 1px 0 rgba(255,255,255,1), 0 4px 12px color-mix(in srgb, var(--brand-primary-500) 30%, transparent); }
-.mb-ai-btn:active { transform: scale(0.97); }
+.mb-ai-btn:active { transform: scale(var(--press-control)); }
 /* btn exits in .3s; give it full runway before gen-label enters */
 .mb.generating .mb-ai-btn { animation: mbBtnOut calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out) both; pointer-events: none; }
 /* btn re-enters after gen-label fully exits (.24s); add matching delay */
@@ -173,9 +176,9 @@ html.dark .mb-shell[data-squircle="on"]::before {
   /* done state: animated green outline reveal */
   outline: 2px solid transparent;
   outline-offset: 2px;
-  transition: outline-color calc(.35s * var(--anim-mult, 1)) var(--ease-fade);
+  transition: outline-color calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-fade);
 }
-.mb.done .mb-ai-slot { outline-color: var(--brand-primary-500); animation: mbSlotOutlineIn calc(.4s * var(--anim-mult, 1)) var(--ease-out) both; }
+.mb.done .mb-ai-slot { outline-color: var(--brand-primary-500); animation: mbSlotOutlineIn calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out) both; }
 .mb.done-out .mb-ai-slot { outline-color: transparent; transition: outline-color calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-fade); }
 @keyframes mbSlotOutlineIn {
   from { outline-color: color-mix(in srgb, var(--brand-primary-500) 0%, transparent); box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand-primary-500) 0%, transparent); }
@@ -191,7 +194,7 @@ html.dark .mb.done .mb-ai-slot { outline-color: var(--brand-primary-400); }
   white-space: nowrap;
 }
 /* delay gen-label enter until btn exit is nearly complete (.28s ≈ .3s btn exit) */
-.mb.generating .mb-gen-label { animation: mbGenIn calc(.34s * var(--anim-mult, 1)) var(--ease-bounce-glow) calc(var(--duration-280) * var(--anim-mult, 1)) both; }
+.mb.generating .mb-gen-label { animation: mbGenIn calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-bounce-glow) calc(var(--duration-280) * var(--anim-mult, 1)) both; }
 /* gen-label exits first (0s delay); btn re-enters after (.22s delay on mbBtnIn) */
 .mb.exiting .mb-gen-label { animation: mbGenOut calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade) both; }
 @keyframes mbGenIn  { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: scale(1); } }
@@ -210,7 +213,7 @@ html.dark .mb.done .mb-ai-slot { outline-color: var(--brand-primary-400); }
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .mb-send:hover { background: #1C1C1C; }
-.mb-send:active { transform: scale(0.92); }
+.mb-send:active { transform: scale(var(--press-control)); }
 /* No click animation while the "Extend with AI" button is hidden
    (generating → exiting → done). Restored once Extend returns. */
 .mb.generating .mb-send,
@@ -230,12 +233,12 @@ html.dark .mb.done .mb-ai-slot { outline-color: var(--brand-primary-400); }
   opacity: 0; pointer-events: none;
 }
 .mb-done-badge svg { display: block; }
-.mb.done .mb-done-badge { animation: mbDoneIn calc(.4s * var(--anim-mult, 1)) var(--ease-out) both; }
+.mb.done .mb-done-badge { animation: mbDoneIn calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out) both; }
 .mb.done-out .mb-done-badge { animation: mbDoneOut calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-standard) both; }
 @keyframes mbDoneIn { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes mbDoneOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-7px); } }
 .mb-done-check path { stroke: var(--brand-primary-600); stroke-dasharray: 28; stroke-dashoffset: 28; }
-.mb.done .mb-done-check path { animation: mbCheckDraw calc(.4s * var(--anim-mult, 1)) calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-draw) forwards; }
+.mb.done .mb-done-check path { animation: mbCheckDraw calc(var(--duration-420) * var(--anim-mult, 1)) calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-draw) forwards; }
 @keyframes mbCheckDraw { to { stroke-dashoffset: 0; } }
 /* the simple Done icon+text replaces the Extend button while shown */
 .mb.done .mb-ai-btn { animation: none !important; opacity: 0 !important; }

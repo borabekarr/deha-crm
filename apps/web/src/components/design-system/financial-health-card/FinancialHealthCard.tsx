@@ -5,6 +5,7 @@ import './FinancialHealthCard.css'
 import { useRef, useState, useCallback } from 'react'
 import { useAutoHeight } from '@/lib/hooks/use-auto-height'
 import { useProximityGroup } from '@/lib/hooks'
+import { EASE_SPRING_OPEN } from '@/lib/motion-spring'
 import {
   ZONES,
   type FhcRefs,
@@ -42,8 +43,8 @@ export default function FinancialHealthCard() {
   // measured-height spam-proof expand/collapse for the why/recommendation panel
   const { ref: infoBodyRef } = useAutoHeight<HTMLDivElement>({
     open: isOpen,
-    duration: 500,
-    easing: 'cubic-bezier(.34,1.56,.64,1)',
+    duration: 400,
+    easing: EASE_SPRING_OPEN,
   })
 
   function getRefs(): FhcRefs {

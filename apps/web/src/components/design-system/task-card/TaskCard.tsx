@@ -1,4 +1,5 @@
 import '../../../../design-system/preview/_base.css'
+import '../../../../design-system/preview/_shared-feedback.css'
 import './TaskCard.css'
 
 // ---------------------------------------------------------------------------
@@ -160,7 +161,7 @@ const TASK_METRICS: Record<string, TaskMetrics> = {
 
 const TASK_CARDS = [
   {
-    cls: 't-low', delay: '.05s', tag: 'var(--brand-primary-500)',
+    cls: 't-low', delay: 'var(--duration-50)', tag: 'var(--brand-primary-500)',
     title: 'Property Viewing', section: 'Prospect', priority: 'Low Priority', priColor: 'var(--brand-primary-500)',
     status: 'Under Review', statusColor: '#3B82F6', industry: 'Real Estate',
     link: 'customer' as const, entName: 'Canberk Yıldız', entSub: '+90 532 118 4470', entInit: 'CY', entColor: '#F59E0B',
@@ -170,7 +171,7 @@ const TASK_CARDS = [
     dateClass: 'overdue', dateIcon: 'event_busy', dateText: 'Overdue · 2 days',
   },
   {
-    cls: 't-urgent', delay: '.13s', tag: '#EF4444',
+    cls: 't-urgent', delay: 'var(--duration-140)', tag: '#EF4444',
     title: 'Pre-op Consultation', section: 'Prospect', priority: 'Urgent', priColor: '#EF4444',
     status: 'Blocked', statusColor: '#EF4444', industry: 'Healthcare',
     link: 'customer' as const, entName: 'Selin Demir', entSub: 'Patient · +90 542 309 7781', entInit: 'SD', entColor: '#EC4899',
@@ -180,7 +181,7 @@ const TASK_CARDS = [
     dateClass: 'today', dateIcon: 'event', dateText: 'Today',
   },
   {
-    cls: 't-onboard', delay: '.21s', tag: '#3B82F6',
+    cls: 't-onboard', delay: 'var(--duration-slow)', tag: '#3B82F6',
     title: 'Loan Pre-Approval', section: 'Prospect', priority: 'On Boarding', priColor: '#3B82F6',
     status: 'Pending', statusColor: '#EAB308', industry: 'Finance',
     link: 'customer' as const, entName: 'Mert Aydın', entSub: '+90 535 220 1180', entInit: 'MA', entColor: '#6366F1',
@@ -190,7 +191,7 @@ const TASK_CARDS = [
     dateClass: 'soon', dateIcon: 'event', dateText: 'Due in 3 days',
   },
   {
-    cls: 't-mod', delay: '.29s', tag: '#F97316',
+    cls: 't-mod', delay: 'var(--duration-slower)', tag: '#F97316',
     title: 'Test Drive Scheduled', section: 'Prospect', priority: 'Moderate Priority', priColor: '#F97316',
     status: 'In Progress', statusColor: 'var(--brand-primary-500)', industry: 'Automotive',
     link: 'company' as const, entName: 'Yıldız Motors', entSub: 'Showroom · Maslak', entInit: 'directions_car', entColor: '#06B6D4',
@@ -862,7 +863,7 @@ export default function TaskCard() {
           {TASK_CARDS.map(card => (
             <div
               key={card.title}
-              className={`task ${card.cls}`}
+              className={`task canon-hover ${card.cls}`}
               style={{ animationDelay: card.delay, '--tag': card.tag } as React.CSSProperties}
               onClick={() => openTask(buildTask(card))}
             >
@@ -871,26 +872,24 @@ export default function TaskCard() {
                 {card.priority}
               </div>
               <div className="task-body">
-                <div className="task-inner">
-                  <div className="t-ind">
-                    <span className="material-icons">{card.industry === 'Real Estate' ? 'apartment' : card.industry === 'Healthcare' ? 'medical_services' : card.industry === 'Finance' ? 'account_balance' : 'directions_car'}</span>
-                    {card.industry}
-                  </div>
-                  <div className="t-title">{card.title}</div>
-                  <div className="t-desc">{card.cardDesc}</div>
-                  <div className="entity">
-                    <span
-                      className="ent-round"
-                      style={{ background: card.entColor }}
-                    >
-                      {/\s/.test(card.entInit) || card.entInit.length > 3
-                        ? <span className="material-icons">{card.entInit}</span>
-                        : card.entInit}
-                    </span>
-                    <div className="ent-meta">
-                      <div className="ent-name">{card.entName}</div>
-                      <div className="ent-sub">{card.entSub}</div>
-                    </div>
+                <div className="t-ind">
+                  <span className="material-icons">{card.industry === 'Real Estate' ? 'apartment' : card.industry === 'Healthcare' ? 'medical_services' : card.industry === 'Finance' ? 'account_balance' : 'directions_car'}</span>
+                  {card.industry}
+                </div>
+                <div className="t-title">{card.title}</div>
+                <div className="t-desc">{card.cardDesc}</div>
+                <div className="entity">
+                  <span
+                    className="ent-round"
+                    style={{ background: card.entColor }}
+                  >
+                    {/\s/.test(card.entInit) || card.entInit.length > 3
+                      ? <span className="material-icons">{card.entInit}</span>
+                      : card.entInit}
+                  </span>
+                  <div className="ent-meta">
+                    <div className="ent-name">{card.entName}</div>
+                    <div className="ent-sub">{card.entSub}</div>
                   </div>
                 </div>
                 <div className="task-foot">

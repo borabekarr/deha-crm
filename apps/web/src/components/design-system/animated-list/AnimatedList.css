@@ -98,8 +98,8 @@ html.dark .al-rd-ic { background-color: #060B16; }
   background: color-mix(in srgb, var(--brand-primary-500) 10%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-primary-500) 22%, transparent);
   transition:
-    opacity calc(240ms * var(--anim-mult,1)) ease,
-    filter  calc(240ms * var(--anim-mult,1)) ease;
+    opacity calc(var(--duration-240) * var(--anim-mult,1)) ease,
+    filter  calc(var(--duration-240) * var(--anim-mult,1)) ease;
 }
 .al-live.al-paused {
   color: var(--fg4, #A1A1A1);
@@ -120,7 +120,7 @@ html.dark .al-live.al-paused {
   width: 7px; height: 7px; border-radius: 50%;
   background: var(--brand-primary-500);
   box-shadow: 0 0 0 0 var(--brand-glow);
-  animation: al-pulse calc(1.8s * var(--anim-mult,1)) var(--ease-out-native) infinite;
+  animation: al-pulse calc(var(--duration-1800) * var(--anim-mult,1)) var(--ease-out-native) infinite;
 }
 .al-live.al-paused .al-live-dot {
   background: var(--fg4, #A1A1A1);
@@ -147,10 +147,10 @@ html.dark .al-live.al-paused {
   border: 1px solid var(--card-border, #D4D4D4);
   cursor: pointer;
   transition:
-    background calc(160ms * var(--anim-mult,1)),
-    color      calc(160ms * var(--anim-mult,1)),
-    transform  calc(140ms * var(--anim-mult,1)) cubic-bezier(.34,1.4,.5,1),
-    box-shadow calc(160ms * var(--anim-mult,1)),
+    background calc(var(--duration-base) * var(--anim-mult,1)),
+    color      calc(var(--duration-base) * var(--anim-mult,1)),
+    transform  calc(var(--duration-140) * var(--anim-mult,1)) var(--ease-card-pop),
+    box-shadow calc(var(--duration-base) * var(--anim-mult,1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
@@ -186,9 +186,9 @@ html.dark .al-push-btn:hover {
   border: 1px solid var(--card-border, #D4D4D4);
   cursor: pointer;
   transition:
-    background calc(140ms * var(--anim-mult,1)),
-    color      calc(140ms * var(--anim-mult,1)),
-    border-color calc(140ms * var(--anim-mult,1)),
+    background calc(var(--duration-140) * var(--anim-mult,1)),
+    color      calc(var(--duration-140) * var(--anim-mult,1)),
+    border-color calc(var(--duration-140) * var(--anim-mult,1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }

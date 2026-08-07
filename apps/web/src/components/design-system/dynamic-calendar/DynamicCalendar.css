@@ -5,8 +5,8 @@
 
 :root {
   /* Custom motion curve — slight overshoot, premium feel */
-  --dc-spring: cubic-bezier(.5, 1.5, .35, 1);
-  --dc-out:    cubic-bezier(.22, 1, .36, 1);
+  --dc-spring: var(--ease-dc-spring);
+  --dc-out:    var(--ease-motion-sweep-2236);
 
   --dc-bg:        #0F0F12;
   --dc-bg-edge:   #1A1A1F;
@@ -192,9 +192,9 @@ html.dark .dc-event-row.is-focus {
 .dc-island.preview,
 .dc-island.expanded {
   transition:
-    width  calc(520ms * var(--anim-mult, 1)) var(--ease-dc-spring),
-    height calc(520ms * var(--anim-mult, 1)) var(--ease-dc-spring),
-    border-radius calc(520ms * var(--anim-mult, 1)) var(--ease-dc-spring);
+    width  calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-dc-spring),
+    height calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-dc-spring),
+    border-radius calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-dc-spring);
 }
 .dc-island:focus-visible {
   outline: 2px solid var(--dc-accent);
@@ -221,8 +221,8 @@ html.dark .dc-event-row.is-focus {
   pointer-events: auto;
   /* arriving: wait for the previous layer's exit (200ms) to complete */
   transition:
-    opacity calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out) calc(210ms * var(--anim-mult, 1)),
-    transform calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out) calc(210ms * var(--anim-mult, 1));
+    opacity calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out) calc(var(--duration-slow) * var(--anim-mult, 1)),
+    transform calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out) calc(var(--duration-slow) * var(--anim-mult, 1));
 }
 .dc-layer.behind { transform: scale(0.96); }
 
@@ -269,7 +269,7 @@ html.dark .dc-event-row.is-focus {
   border-radius: 50%;
   background: var(--dc-accent);
   box-shadow: 0 0 0 0 var(--brand-glow);
-  animation: dcPulse calc(2000ms * var(--anim-mult, 1)) var(--ease-out-native) infinite;
+  animation: dcPulse calc(var(--duration-1800) * var(--anim-mult, 1)) var(--ease-out-native) infinite;
 }
 @keyframes dcPulse {
   0%   { box-shadow: 0 0 0 0   var(--brand-glow); }
@@ -593,7 +593,7 @@ html.dark .dc-left {
   padding: 0;
 }
 .dc-nav-btn:hover { background: rgba(255,255,255,0.12); color: var(--dc-fg); }
-.dc-nav-btn:active { transform: scale(0.92); }
+.dc-nav-btn:active { transform: scale(var(--press-chip)); }
 .dc-nav-btn .dc-icon {
   font-size: 18px;
   line-height: 1;
@@ -637,7 +637,8 @@ html.dark .dc-left {
   transition: background calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-dc-spring), color calc(var(--duration-base) * var(--anim-mult, 1)), box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out);
 }
 .dc-cell.dim { color: var(--dc-fg-dimmer); font-weight: 500; }
-.dc-cell:hover { background: rgba(255,255,255,0.08); transform: scale(1.05); }
+/* D5 global rule (2026-08-06): option/list rows hover = color change only. */
+.dc-cell:hover { background: rgba(255,255,255,0.08); }
 /* Proximity: own transition (0,1,0) beats hover-tokens.css's [data-proximity]x3
    fallback; scale + filter channels added here so the engine's --prox mapping
    doesn't snap. */
@@ -704,7 +705,7 @@ html.dark .dc-left {
   transition: background calc(var(--duration-base) * var(--anim-mult, 1)), color calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-140) * var(--anim-mult, 1));
 }
 .dc-close:hover { background: rgba(255,255,255,0.14); color: #fff; }
-.dc-close:active { transform: scale(0.92); }
+.dc-close:active { transform: scale(var(--press-chip)); }
 .dc-close .dc-icon {
   font-size: 14px;
   line-height: 1;
@@ -802,20 +803,20 @@ html.dark .dc-left {
 }
 /* Applied by className; delay injected via --dc-delay custom prop on element */
 .dc-event-row {
-  animation: dcRise calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out) var(--dc-delay, 120ms) both;
+  animation: dcRise calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out) var(--dc-delay, var(--duration-fast)) both;
 }
 .dc-more {
-  animation: dcRise calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out) var(--dc-delay, 120ms) both;
+  animation: dcRise calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out) var(--dc-delay, var(--duration-fast)) both;
 }
 .dc-cell {
-  animation: dcCellPop calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-dc-cell-pop) var(--dc-delay, 120ms) both;
+  animation: dcCellPop calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-dc-cell-pop) var(--dc-delay, var(--duration-fast)) both;
 }
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .dc-island, .dc-layer, .dc-cell, .dc-event-row, .dc-nav-btn {
-    transition-duration: 1ms !important;
-    animation-duration: 1ms !important;
+    transition-duration: 1ms !important; /* motion-sweep: kept, prefers-reduced-motion !important near-zero override, intentionally literal (house pattern, see frontend-motion-contract.md) */
+    animation-duration: 1ms !important; /* motion-sweep: kept, prefers-reduced-motion !important near-zero override, intentionally literal (house pattern, see frontend-motion-contract.md) */
   }
 }
 

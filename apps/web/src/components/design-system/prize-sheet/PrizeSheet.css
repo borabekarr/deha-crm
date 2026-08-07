@@ -42,7 +42,7 @@
   background: var(--wallet-bg); transition: background calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1));
 }
 .panel-x:hover { transform: scale(1.06); }
-.panel-x:active { transform: scale(0.92); }
+.panel-x:active { transform: scale(var(--press-chip)); }
 .panel-x .material-icons { font-size: 18px; }
 
 .prize {
@@ -57,7 +57,7 @@
   -webkit-background-clip: text; background-clip: text; color: transparent;
   filter: drop-shadow(0 1px 0 var(--chrome-hi)) drop-shadow(0 6px 18px var(--chrome-glow));
   transform: scale(0.84); opacity: 0;
-  transition: transform calc(520ms * var(--anim-mult, 1)) var(--ease-spring-medium) calc(var(--duration-fast) * var(--anim-mult, 1)), opacity calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--duration-fast) * var(--anim-mult, 1));
+  transition: transform calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-spring-medium) calc(var(--duration-fast) * var(--anim-mult, 1)), opacity calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--duration-fast) * var(--anim-mult, 1));
 }
 .amount .cur { font-size: 42px; vertical-align: 0.18em; margin-right: 2px; }
 .panel.is-open .amount { transform: scale(1); opacity: 1; }
@@ -71,7 +71,7 @@
   background: linear-gradient(160deg, #ffffff 0%, #ECECEC 38%, #aeb8c6 62%, #F5F5F5 100%);
   box-shadow: 0 6px 14px rgba(4,7,11,0.30), inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 2px rgba(100,116,139,0.5), inset 0 0 0 1px rgba(255,255,255,0.4);
   text-shadow: 0 1px 0 rgba(255,255,255,0.7);
-  transition: transform calc(520ms * var(--anim-mult, 1)) var(--ease-spring-medium) calc(var(--duration-slow) * var(--anim-mult, 1)), opacity calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--duration-slow) * var(--anim-mult, 1));
+  transition: transform calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-spring-medium) calc(var(--duration-slow) * var(--anim-mult, 1)), opacity calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--duration-slow) * var(--anim-mult, 1));
 }
 .panel.is-open .wontag { transform: rotate(-7deg) translateY(0) scale(1); opacity: 1; }
 
@@ -83,7 +83,7 @@
 .prize-desc {
   margin-top: 8px; max-width: 250px; font-size: 13.5px; font-weight: 500; line-height: 1.5; color: var(--desc);
   opacity: 0; transform: translateY(8px);
-  transition: transform calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-fade) calc(380ms * var(--anim-mult, 1)), opacity calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-fade) calc(380ms * var(--anim-mult, 1));
+  transition: transform calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--duration-sweep) * var(--anim-mult, 1)), opacity calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--duration-sweep) * var(--anim-mult, 1));
 }
 .panel.is-open .prize-title, .panel.is-open .prize-desc { opacity: 1; transform: translateY(0); }
 
@@ -132,7 +132,7 @@
   opacity: 0; transform: translateY(-14px) scale(0.96); pointer-events: none;
   /* override the staggered entrance transition (which delays opacity 440ms) so the
      button fades out promptly on click instead of lingering opaque over the success screen */
-  transition: transform calc(340ms * var(--anim-mult, 1)) var(--ease-spring-loose), opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade);
+  transition: transform calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-spring-loose), opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade);
 }
 
 .check {
@@ -141,7 +141,7 @@
   box-shadow: 0 14px 34px -6px color-mix(in srgb, var(--brand-primary-500) 60%, transparent), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -3px 0 rgba(0,40,30,0.22);
   transform: scale(0);
 }
-.panel.claimed .check { animation: pop calc(560ms * var(--anim-mult, 1)) var(--ease-spring-medium) calc(80ms * var(--anim-mult, 1)) forwards; }
+.panel.claimed .check { animation: pop calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-spring-medium) calc(var(--duration-80) * var(--anim-mult, 1)) forwards; }
 @keyframes pop { 0%{transform:scale(0)} 60%{transform:scale(1.12)} 100%{transform:scale(1)} }
 .check .material-icons { color:#fff; font-size: 42px; text-shadow: 0 1px 2px rgba(0,40,30,0.3); }
 
@@ -213,7 +213,7 @@
   left: 0; right: 0; bottom: 0; z-index: 16; height: 60%; padding: 14px 26px 30px;
   border-radius: 34px 34px 42px 42px;
   border-top: 1px solid var(--sheet-edge); box-shadow: 0 -20px 50px -10px rgba(4,7,11,0.4), inset 0 1px 0 var(--sheet-hi);
-  transform: translateY(110%); transition: transform calc(560ms * var(--anim-mult, 1)) var(--ease-spring-loose); touch-action: none;
+  transform: translateY(110%); transition: transform calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-spring-loose); touch-action: none;
 }
 .ps-device.sheet-open .sheet { transform: translateY(0); }
 .ps-device.dragging .sheet { transition: none; }
@@ -292,7 +292,7 @@ html.dark .sheet[data-squircle="on"]::before {
   padding: 9px; border-radius: 28px; background: var(--shell-bg, #D9D9D9);
   box-shadow: 0 32px 70px -22px rgba(4,7,11,0.5), 0 8px 20px rgba(17,17,17,0.14);
   transform: translate(-50%, -46%) scale(0.9); opacity: 0; pointer-events: none;
-  transition: transform calc(520ms * var(--anim-mult, 1)) var(--ease-spring-wide), opacity calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade);
+  transition: transform calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-spring-wide), opacity calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .ps-desktop.modal-open .ps-modal-shell { transform: translate(-50%, -50%) scale(1); opacity: 1; pointer-events: auto; }
 /* Squircle outer shell of the desktop concentric pair (.modal nests inside).
@@ -338,6 +338,12 @@ html.dark .modal[data-squircle="on"]::after {
   pointer-events: none;
   background: var(--card-border);
   clip-path: var(--squircle-border-path);
+}
+/* Dark-only dotty-edge fix, mirrored from .sheet[data-squircle="on"]::before
+   above: inset the dot texture so no partial tile reaches the squircle
+   clip boundary (best-effort, pending Bora's visual review). */
+html.dark .modal[data-squircle="on"]::before {
+  inset: 5px;
 }
 .modal .amount { font-size: 54px; }
 .modal .amount .cur { font-size: 36px; }

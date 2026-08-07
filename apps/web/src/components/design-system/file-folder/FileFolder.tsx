@@ -63,6 +63,9 @@ function FolderIcon({
     .filter(Boolean)
     .join(' ')
 
+  // Proximity: dropdown menu options — same group pattern as .ff-file.
+  const menuProximityRef = useProximityGroup<HTMLDivElement>()
+
   return (
     // eslint-disable-next-line jsx-a11y/prefer-tag-over-role -- wraps a nested <button> (folder menu); a native <button> cannot contain interactive children
     <div
@@ -114,6 +117,7 @@ function FolderIcon({
           className={`ff-menu${menuOpen ? ' show' : ''}`}
           role="menu"
           aria-label="Folder actions"
+          ref={menuProximityRef}
           onClick={(e) => e.stopPropagation()}
         >
           {FOLDER_MENU_ACTIONS.map((a) => (
@@ -122,6 +126,7 @@ function FolderIcon({
               type="button"
               role="menuitem"
               className={`ff-menu-item${a.danger ? ' ff-menu-item--danger' : ''}`}
+              data-proximity
               onClick={(e) => {
                 e.stopPropagation()
                 onMenuAction(a.id)

@@ -1,23 +1,17 @@
 # React + TypeScript + Vite
 
-> See [MIGRATION.md](./MIGRATION.md) for the monorepo restructure rationale and layout.
+> See [MIGRATION.md](./MIGRATION.md) for background on a since-abandoned multi-platform layout and the current workspace setup.
 
 ## Workspaces
 
 | Package | Stack | Port |
 |---|---|---|
 | `apps/web` | Vite + React 19 + Tailwind v4 + TanStack Router | 5173 |
-| `apps/mobile` | Expo SDK 56 + React Native | 8081 |
-| `packages/core` | Pure TS types and schemas | — |
-| `packages/api` | Supabase client factory | — |
-| `packages/motion-tokens` | Duration + easing tokens (shared with both apps) | — |
-| `packages/ui-contracts` | Cross-platform component prop interfaces | — |
 
 ### Dev commands
 
-- `pnpm dev` — boots web + mobile in parallel via Turborepo
-- `pnpm dev:web` — Vite only (port 5173)
-- `pnpm dev:mobile` — Metro only (port 8081)
+- `pnpm dev` — runs the web app via Turborepo (delegates to `apps/web`)
+- `pnpm dev:web` — Vite only (port 5173), equivalent today since `apps/web` is the only workspace
 
 > **Vite-under-Turborepo gotcha** ([vercel/turborepo#11784](https://github.com/vercel/turborepo/issues/11784)): If `pnpm dev` causes Vite to exit early, use `pnpm dev:web` directly.
 

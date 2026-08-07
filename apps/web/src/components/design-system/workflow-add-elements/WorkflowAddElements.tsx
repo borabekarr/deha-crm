@@ -21,6 +21,7 @@ import { useState, useCallback, useRef } from 'react'
 import './WorkflowAddElements.css'
 import { iconClass } from '../../../lib/iconClass'
 import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
+import { usePanelDirection } from '../../../lib/hooks/use-panel-direction'
 import { usePillSpring } from '../../../lib/motion-spring'
 import { clampAEPosition, clampNodesPosition } from './workflow-add-elements-hook'
 
@@ -109,8 +110,6 @@ interface MenuState {
   searchPending: boolean
   /** Fix 3: outgoing tab, kept mounted (as a ghost layer) through its exit animation. */
   listLeavingTab: Tab | null
-  /** Fix 3: direction of the last tab switch, +1 (general→integrations) or -1. */
-  listDir: number
 }
 
 // Category ids whose brand color is near-black and becomes unreadable in dark mode.
@@ -139,7 +138,6 @@ const INITIAL: MenuState = {
   searchPanelLeaving: false,
   searchPending: false,
   listLeavingTab: null,
-  listDir: 0,
 }
 
 // Coords-only reset — preserves last aeLeft/aeTop so the panel
@@ -155,7 +153,6 @@ function closedState(s: MenuState): MenuState {
     searchPanelLeaving: false,
     searchPending: false,
     listLeavingTab: null,
-    listDir: 0,
   }
 }
 
@@ -189,6 +186,11 @@ export default function WorkflowAddElements() {
   // data-proximity (category rows, node rows, the footer button) gets the
   // proximity ramp from a single shared listener.
   const proximityRef = useProximityGroup<HTMLDivElement>()
+
+  // Fix 3 (Step 3 migration): direction-aware category-list enter/exit, driven
+  // by the shared hook instead of a hand-rolled listDir/dir-fwd/dir-back pair —
+  // mirrors MotionTabs.tsx's usePanelDirection(viewIndex) consumption.
+  const listPanelState = usePanelDirection(TAB_ORDER.indexOf(state.activeTab))
 
   // Fix 4: seg pill geometry, measured off the wrapper (buttons are `flex: 1`
   // so both are always equal width — no per-label width table needed) and
@@ -453,19 +455,18 @@ export default function WorkflowAddElements() {
     }
   }, [])
 
-  /** Fix 3: switch the General/Integrations pill — direction-aware, sequenced
-   *  exit/enter for the category list, mirroring motion-tabs' index-derived
-   *  `dir` (see MotionTabs.tsx onTab). The outgoing tab stays mounted as a
-   *  ghost layer until its exit animation completes. */
+  /** Fix 3 (migrated to usePanelDirection, Step 3): switch the General/Integrations
+   *  pill — direction-aware, sequenced exit/enter for the category list, mirroring
+   *  motion-tabs' usePanelDirection consumption (see MotionTabs.tsx onTab). The
+   *  outgoing tab stays mounted as a ghost layer until its exit animation completes;
+   *  the hook derives dir from the activeTab index change below. */
   function switchTab(tab: Tab) {
     if (tab === state.activeTab) return
     if (listLeaveTimer.current) clearTimeout(listLeaveTimer.current)
-    const dir = Math.sign(TAB_ORDER.indexOf(tab) - TAB_ORDER.indexOf(state.activeTab))
     setState((s) => ({
       ...s,
       activeTab: tab,
       listLeavingTab: s.activeTab,
-      listDir: dir,
       hoveredId: null,
       nodesVisible: false,
     }))
@@ -534,7 +535,10 @@ export default function WorkflowAddElements() {
         className={`wae-pop-outer${state.aeVisible ? ' visible' : ''}`}
         style={{ left: state.aeLeft, top: state.aeTop }}
       >
-        <div className="wae-pop-inner wae-ae-inner">
+        {/* Step 4: data-compact drives the footer collapse (spring/bounce) below —
+            the card compacts whenever the search field holds any text, and
+            re-expands the same way the moment it's cleared. */}
+        <div className="wae-pop-inner wae-ae-inner" data-compact={state.search ? 'true' : undefined}>
           <div className="wae-ae-header">
             <div className="wae-ae-title">
               <span className="material-icons">widgets</span>
@@ -594,7 +598,8 @@ export default function WorkflowAddElements() {
             </div>
           </div>
 
-          {/* Category list — direction-aware exit/enter on tab switch (Fix 3), mirroring
+          {/* Category list — direction-aware exit/enter on tab switch (Fix 3), driven by
+              usePanelDirection + the global [data-panel-state] keyframes, mirroring
               motion-tabs: the outgoing tab plays a ghost exit layer while the incoming
               tab (key={activeTab} remount) enters from the opposite side. Options inside
               register as a proximity group via data-proximity (Fix 2, default engine
@@ -602,7 +607,8 @@ export default function WorkflowAddElements() {
           <div className="wae-ae-list-wrap">
             {state.listLeavingTab && (
               <div
-                className={`wae-ae-list wae-ae-list-exit${state.listDir > 0 ? ' dir-fwd' : ' dir-back'}`}
+                className="wae-ae-list wae-ae-list-exit"
+                data-panel-state={listPanelState(TAB_ORDER.indexOf(state.listLeavingTab))}
                 aria-hidden="true"
               >
                 {renderCatItems(
@@ -614,20 +620,23 @@ export default function WorkflowAddElements() {
               </div>
             )}
             <div
-              className={`wae-ae-list wae-ae-list-enter${state.listLeavingTab ? (state.listDir > 0 ? ' dir-fwd' : ' dir-back') : ''}`}
+              className="wae-ae-list wae-ae-list-enter"
+              data-panel-state={listPanelState(TAB_ORDER.indexOf(state.activeTab))}
               key={state.activeTab}
             >
               {renderCatItems(visibleCats, true)}
             </div>
           </div>
 
-          {/* Footer */}
-          <div className="wae-ae-sep" />
-          <div className="wae-ae-footer">
-            <button type="button" className="btn-green" data-proximity>
-              <span className={iconClass('neurology')}>neurology</span>
-              AI Recommendations
-            </button>
+          {/* Footer — wrapped so its max-height can spring-collapse in search mode. */}
+          <div className="wae-ae-footer-wrap">
+            <div className="wae-ae-sep" />
+            <div className="wae-ae-footer">
+              <button type="button" className="btn-green" data-proximity>
+                <span className={iconClass('neurology')}>neurology</span>
+                AI Recommendations
+              </button>
+            </div>
           </div>
         </div>
       </div>

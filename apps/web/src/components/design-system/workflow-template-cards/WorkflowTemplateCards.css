@@ -232,10 +232,12 @@ html.dark .wtc-outer {
 /* Inner card */
 html.dark .wtc-card { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
 
-/* Preview area — icon section reads as a darker tinted band vs the card
-   body, mirroring the light-mode #F5F5F5-vs-white relationship. Token-driven
-   so the tint tracks --card-bg instead of a hardcoded hex. */
-html.dark .wtc-preview { background: color-mix(in srgb, var(--card-bg) 40%, black); }
+/* Preview area — icon section reads as its own tinted band vs the card body,
+   mirroring the light-mode #F5F5F5-vs-white relationship. The old 40%-black
+   mix landed too close to true black, blending into the surrounding shell
+   bezel instead of standing apart from the card; lightening toward white
+   keeps it a token-driven tint of --card-bg while giving real separation. */
+html.dark .wtc-preview { background: color-mix(in srgb, var(--card-bg) 85%, white); }
 
 /* Connector line */
 html.dark .wtc-conn { border-top-color: #4A4A4A; }
@@ -275,8 +277,8 @@ html.dark .wtc-badge-pro { background-color: #4A4A4A; }
   opacity: 0;
   transform: translateY(-6px);
   transition:
-    opacity calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out) calc(60ms * var(--anim-mult, 1)),
-    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out) calc(60ms * var(--anim-mult, 1));
+    opacity calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out) calc(var(--duration-60) * var(--anim-mult, 1)),
+    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out) calc(var(--duration-60) * var(--anim-mult, 1));
 }
 .wtc-outer.wtc-expanded .wtc-expand-body {
   opacity: 1;

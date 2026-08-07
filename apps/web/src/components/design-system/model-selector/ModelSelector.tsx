@@ -135,7 +135,10 @@ export default function ModelSelector() {
         below animates height/opacity; .ms-header stays mounted and visible
         at all times, and IS the toggle control (real <button>).
       */}
-      <div className="ms-shell" ref={shellRef}>
+      <div
+        className="ms-shell"
+        ref={shellRef}
+      >
 
         {/* Header — real toggle button; content lives inside the card */}
         <button

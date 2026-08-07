@@ -687,7 +687,7 @@ function UpdateItem({ item }: { item: FeedItem }) {
       display: 'flex', alignItems: 'flex-start', gap: 12,
       padding: '11px 16px',
       borderBottom: '1px dashed var(--tb-col-border)',
-      animation: `itemBounce calc(380ms * var(--anim-mult, 1)) var(--ease-bounce) both`,
+      animation: `itemBounce calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-bounce) both`,
     }}>
       <span style={{
         marginTop: 6, width: 7, height: 7, borderRadius: '50%',
@@ -724,7 +724,7 @@ function SyncFeed({ items, visible }: { items: FeedItem[]; visible: boolean }) {
   const { ref } = useAutoHeight<HTMLDivElement>({
     open: visible,
     duration: 340,
-    easing: 'cubic-bezier(.22,1,.36,1)',
+    easing: 'var(--ease-motion-sweep-2236)',
   });
   return (
     <div className={`tb-sync-feed ${visible ? 'tb-sync-feed--visible' : ''}`}>
@@ -820,7 +820,7 @@ function StatusBar({
           className={iconClass(btnCfg.icon)}
           style={{
             fontSize: 16, lineHeight: 1,
-            animation: btnCfg.spin ? 'spin calc(800ms * var(--anim-mult, 1)) var(--ease-linear) infinite' : 'none',
+            animation: btnCfg.spin ? 'spin calc(var(--duration-800) * var(--anim-mult, 1)) var(--ease-linear) infinite' : 'none',
           }}
         >{btnCfg.icon}</span>
         {btnCfg.label}

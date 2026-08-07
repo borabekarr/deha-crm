@@ -56,7 +56,10 @@ html.dark .sgc-toast { background: rgb(255 255 255); color: #111111; }
   --glow:color-mix(in srgb, var(--brand-primary-500) 42%, transparent); --ring:color-mix(in srgb, var(--brand-primary-500) 22%, transparent); --glow2:color-mix(in srgb, var(--brand-primary-500) 78%, transparent);
   --ctaglow:var(--brand-glow); --flashc:color-mix(in srgb, var(--brand-primary-500) 24%, transparent);
   position: relative; width: 100%; height: 364px; box-sizing: border-box;
-  border-radius: var(--card-radius); overflow: hidden; font-family: 'Montserrat';
+  /* Concentric outer shell radius -- canon 36px (matches Cards.css
+     .concentric-demo-outer), not --card-radius (20px), which paired
+     mismatched against the 28px inner. */
+  border-radius: 36px; overflow: hidden; font-family: 'Montserrat';
   /* grey outer shell -- inner card surface lives on .sg-inner */
   background: var(--shell-bg, #D9D9D9);
   opacity: 1; transform: none;
@@ -78,7 +81,7 @@ html.dark .sg-card.acc-risk { --accent-text:#F87171; }
    pair (grey shell + white inner, 9px inset) mirroring .gc-outer/.gc-card and
    .dp-outer/.dp-panel. No outward box-shadow on .sg-card to migrate. */
 .sg-card[data-squircle="on"] {
-  --corner-radius: var(--card-radius, 20px);
+  --corner-radius: 36px;
 }
 /* Dark-mode outer hairline -- .sg-card has no border of its own in dark mode,
    so this is a net-new external hairline satisfying the outer-shell
@@ -116,7 +119,7 @@ html.dark .sg-inner::before {
 }
 .sg-dot::after {
   content: ''; position: absolute; inset: -4px; border-radius: 50%;
-  border: 2px solid var(--accent); opacity: 0.6; animation: sg-ping calc(1.9s * var(--anim-mult, 1)) var(--ease-out) infinite;
+  border: 2px solid var(--accent); opacity: 0.6; animation: sg-ping calc(var(--duration-1900) * var(--anim-mult, 1)) var(--ease-out) infinite;
 }
 @keyframes sg-ping { 0% { transform: scale(0.7); opacity: 0.65; } 70%,100% { transform: scale(2.1); opacity: 0; } }
 
@@ -126,7 +129,10 @@ html.dark .sg-inner::before {
   display: flex; flex-direction: column;
   background: var(--card-bg, #FFFFFF);
   border: 1px solid var(--card-border, #D4D4D4);
-  border-radius: calc(var(--card-radius, 20px) - 9px);
+  /* Concentric pairing with the 36px .sg-card outer shell (canon delta 8,
+     matching Cards.css .concentric-demo-inner) -- was calc(--card-radius -
+     9px) = 11px, a mismatched, broken corner curve against the outer shell. */
+  border-radius: 28px;
   box-shadow: inset 0 0 0 1px rgba(17,17,17,0.04);
   overflow: hidden;
 }
@@ -143,7 +149,7 @@ html.dark .sg-inner {
    drop-shadow migration is needed; border stays a real CSS border per the
    .gc-card/.dp-panel precedent. */
 .sg-inner[data-squircle="on"] {
-  --corner-radius: calc(var(--card-radius, 20px) - 9px);
+  --corner-radius: 28px;
 }
 /* Canon (corrected): inner line-less in both themes -- the unscoped
    html.dark .sg-inner rule above wins on specificity over the shared reset. */
@@ -183,7 +189,7 @@ html.dark .sg-avatar { color: #ECECEC; background: rgba(255,255,255,0.07); box-s
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
-.sg-sync .material-symbols-outlined { font-size: 15px; line-height: 1; transition: transform calc(700ms * var(--anim-mult, 1)) var(--ease-out); }
+.sg-sync .material-symbols-outlined { font-size: 15px; line-height: 1; transition: transform calc(var(--duration-700) * var(--anim-mult, 1)) var(--ease-out); }
 .sg-sync:hover { color: var(--fg1, #111111); }
 .sg-sync:active { transform: scale(0.93); }
 .sg-sync.spin .material-symbols-outlined { transform: rotate(360deg); }
@@ -212,7 +218,7 @@ html.dark .sg-card.filters-open .sg-scrim { background: rgba(2,6,23,0.40); }
   transform: translate(-50%, calc(-50% + 12px)) scale(0.95);
   transform-origin: 50% 50%;
   pointer-events: none; visibility: hidden;
-  transition: opacity calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-out-soft), transform calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out-soft), visibility 0s var(--ease-linear) calc(var(--duration-sweep) * var(--anim-mult, 1));
+  transition: opacity calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-out-soft), transform calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out-soft), visibility 0s /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */ var(--ease-linear) calc(var(--duration-sweep) * var(--anim-mult, 1));
 }
 html.dark .sg-rangepop {
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
@@ -240,7 +246,7 @@ html.dark .sg-rangepop {
   left: 4px; right: 4px; width: auto; top: 10px; bottom: auto; height: 0; border-radius: 9999px;
   transition: top calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out), height calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out);
 }
-.sg-rangepop .seg.vert button { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 8px 16px; text-align: center; border-radius: 9999px; font-size: 12px; transition: color calc(var(--duration-200) * var(--anim-mult, 1)), background calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(110ms * var(--anim-mult, 1)) var(--ease-out),
+.sg-rangepop .seg.vert button { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 8px 16px; text-align: center; border-radius: 9999px; font-size: 12px; transition: color calc(var(--duration-200) * var(--anim-mult, 1)), background calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear; }
 .sg-rangepop .seg.vert button .material-symbols-outlined { font-size: 16px; }
@@ -257,7 +263,7 @@ html.dark .sg-rangepop .seg.vert button:not(.active):hover { color: #fff; backgr
 html.dark .sg-poploader { background: rgba(255,255,255,0.08); }
 .sg-poploader::after { content: ''; display: block; height: 100%; width: 0; border-radius: inherit; background: var(--accent); }
 .sg-rangepop.loading .sg-poploader { height: 3px; margin: 9px 6px 3px; opacity: 1; }
-.sg-rangepop.loading .sg-poploader::after { animation: sg-load calc(430ms * var(--anim-mult, 1)) var(--ease-standard) forwards; }
+.sg-rangepop.loading .sg-poploader::after { animation: sg-load calc(var(--duration-compact) * var(--anim-mult, 1)) var(--ease-standard) forwards; }
 @keyframes sg-load { from { width: 0; } to { width: 100%; } }
 
 /* vertical range opener tab — selected-pill aesthetic (dark fill, white label)
@@ -330,7 +336,7 @@ html.dark .sg-meter-track { background: rgba(255,255,255,0.08); box-shadow: inse
   background-image: linear-gradient(rgba(255,255,255,0.20) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.20) 1px, transparent 1px);
   background-size: 7px 7px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -1px 0 rgba(0,0,0,0.14);
-  transition: width calc(750ms * var(--anim-mult, 1)) var(--ease-out), background-color calc(var(--duration-slower) * var(--anim-mult, 1));
+  transition: width calc(var(--duration-760) * var(--anim-mult, 1)) var(--ease-out), background-color calc(var(--duration-slower) * var(--anim-mult, 1));
 }
 /* four tick segments for an at-a-glance read */
 .sg-meter-track::after {
@@ -361,7 +367,7 @@ html.dark .sg-meter-track::after { background-image: linear-gradient(90deg, rgba
    tripled [data-proximity]x3 selector owns filter outright once wired; box-shadow
    feedback kept. */
 .sg-cta:hover { box-shadow: 0 12px 28px -8px var(--ctaglow), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -2px 0 rgba(0,0,0,0.22), inset 0 0 0 1px rgba(255,255,255,0.18); }
-.sg-cta:active { transform: scale(0.97); }
+.sg-cta:active { transform: scale(var(--press-control)); }
 .sg-cta:focus-visible, .sg-sync:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ── in-button "thinking" sequence (no card values change) ── */
@@ -371,7 +377,7 @@ html.dark .sg-meter-track::after { background-image: linear-gradient(90deg, rgba
 .sg-cta.thinking::after {
   content: ''; position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,0.32) 50%, transparent 80%);
-  background-size: 220% 100%; animation: sg-sweep calc(1900ms * var(--anim-mult, 1)) var(--ease-linear) infinite;
+  background-size: 220% 100%; animation: sg-sweep calc(var(--duration-1900) * var(--anim-mult, 1)) var(--ease-linear) infinite;
 }
 @keyframes sg-sweep { 0% { background-position: 140% 0; } 100% { background-position: -140% 0; } }
 
@@ -379,7 +385,7 @@ html.dark .sg-meter-track::after { background-image: linear-gradient(90deg, rgba
 .sg-spin {
   width: 16px; height: 16px; flex-shrink: 0; border-radius: 50%;
   border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff;
-  animation: sg-rot calc(1100ms * var(--anim-mult, 1)) var(--ease-linear) infinite;
+  animation: sg-rot calc(var(--duration-1100) * var(--anim-mult, 1)) var(--ease-linear) infinite;
 }
 @keyframes sg-rot { to { transform: rotate(360deg); } }
 .sg-cta.done::after { display: none; }
@@ -391,18 +397,18 @@ html.dark .sg-meter-track::after { background-image: linear-gradient(90deg, rgba
 .sg-step {
   display: inline-block; font-variant-numeric: tabular-nums; white-space: nowrap;
 }
-.sg-step.morph { animation: sg-morph calc(340ms * var(--anim-mult, 1)) var(--ease-out); }
+.sg-step.morph { animation: sg-morph calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out); }
 @keyframes sg-morph {
   0%   { opacity: 0; transform: translateY(8px); filter: blur(3px); }
   100% { opacity: 1; transform: translateY(0);   filter: blur(0); }
 }
 
-.sg-ripple { position: absolute; border-radius: 50%; transform: scale(0); background: rgba(255,255,255,0.4); pointer-events: none; animation: sg-rip calc(520ms * var(--anim-mult, 1)) var(--ease-out); }
+.sg-ripple { position: absolute; border-radius: 50%; transform: scale(0); background: rgba(255,255,255,0.4); pointer-events: none; animation: sg-rip calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out); }
 @keyframes sg-rip { to { transform: scale(2.6); opacity: 0; } }
 
 .sg-flash { position: absolute; inset: 0; z-index: 1; pointer-events: none; border-radius: 24px; opacity: 0;
   background: radial-gradient(ellipse at 50% 60%, var(--flashc) 0%, transparent 70%); }
-.sg-flash.go { animation: sg-flash calc(720ms * var(--anim-mult, 1)) var(--ease-out-native); }
+.sg-flash.go { animation: sg-flash calc(var(--duration-700) * var(--anim-mult, 1)) var(--ease-out-native); }
 @keyframes sg-flash { 0% { opacity: 0; } 20% { opacity: 1; } 100% { opacity: 0; } }
 
 .sg-card.lift { cursor: pointer; }

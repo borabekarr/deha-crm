@@ -5,7 +5,7 @@
  *  - Staggered entrance animation on mount via callback ref
  *  - Per-row pointer drag logic (right=complete, left=actions, vertical=reorder)
  *  - FLIP reorder animation
- *  - completeRow, uncompleteRow, removeRow, insertTask
+ *  - completeRow, removeRow, insertTask
  *  - Confetti burst on drag-complete
  *  - Week calendar pill positioning
  *  - Tag filter show/hide with morph animation
@@ -170,33 +170,6 @@ export function flip(list: HTMLElement, mutate: () => void): void {
   })
 }
 
-// ── Confetti burst ───────────────────────────────────────────────────────────
-
-export function launchConfetti(row: HTMLElement): void {
-  const rect = row.getBoundingClientRect()
-  const cx = rect.left + rect.width * 0.35
-  const cy = rect.top + rect.height / 2
-  const colors = ['#10B981','#34D399','#6EE7B7','#fff','#BBF7D0','#059669','#A7F3D0','#FDE68A','#FCA5A5','#93C5FD']
-  const shapes = ['50%', '3px', '50% 0 50% 50%']
-  const count = 48
-  for (let i = 0; i < count; i++) {
-    const dot = document.createElement('span')
-    const angle = (i / count) * Math.PI * 2 - Math.PI / 2 + (Math.random() - 0.5) * 0.8
-    const dist = 36 + Math.random() * 90
-    const dx = (Math.cos(angle) * dist).toFixed(1)
-    const dy = (Math.sin(angle) * dist - 20).toFixed(1)
-    const size = (3 + Math.random() * 6).toFixed(1)
-    const shape = shapes[Math.floor(Math.random() * shapes.length)]
-    dot.style.cssText =
-      'position:fixed;width:' + size + 'px;height:' + size + 'px;border-radius:' + shape + ';pointer-events:none;z-index:9999;' +
-      'background:' + colors[i % colors.length] + ';left:' + cx + 'px;top:' + cy + 'px;' +
-      '--dx:' + dx + 'px;--dy:' + dy + 'px;' +
-      'animation:confetti-burst 700ms cubic-bezier(.15,1,.4,1) ' + (i * 10) + 'ms both;'
-    document.body.appendChild(dot)
-    setTimeout(() => { dot.remove() }, 820 + i * 10)
-  }
-}
-
 // ── Celebration overlay (prize-sheet-style complete sequence) ────────────────
 //
 // Mounts a fixed full-viewport canvas + check-pop badge + "Done!" label over
@@ -324,19 +297,6 @@ export function completeRow(row: HTMLElement, list: HTMLElement, _fromDrag?: boo
   // Scope the celebration to the task-list area (item 5) — confetti, green
   // watermark + done badge stay INSIDE the list, never over the whole card.
   launchListCelebration(row, list)
-  updateStats(list)
-}
-
-export function uncompleteRow(row: HTMLElement, list: HTMLElement): void {
-  if (!row.classList.contains('is-done')) return
-  flip(list, () => {
-    row.classList.remove('is-done')
-    let ref: Element | null = null
-    for (let i = 0; i < list.children.length; i++) {
-      if (!list.children[i].classList.contains('is-done') && list.children[i] !== row) { ref = list.children[i]; break }
-    }
-    list.insertBefore(row, ref)
-  })
   updateStats(list)
 }
 

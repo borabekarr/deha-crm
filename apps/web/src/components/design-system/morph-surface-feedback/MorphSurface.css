@@ -17,7 +17,7 @@
      from the box size mid-morph; that desync was what made the pill's corners
      visually flatten out during open/close. Gentle spring overshoot, not the
      "edgy" bounce the previous bespoke curve produced. */
-  --ms2-morph-dur: 380ms;
+  --ms2-morph-dur: var(--duration-sweep);
   --ms2-surface-bg: var(--card-bg, var(--bg-card-solid, #ffffff));
 }
 
@@ -45,7 +45,7 @@
 
 /* Exit reverses the same morph, just faster -- deliberate open, snappy close. */
 .ms2-surface:not(.ms2-open) {
-  --ms2-morph-dur: 300ms;
+  --ms2-morph-dur: var(--duration-slower);
 }
 
 .ms2-surface:not(.ms2-open):hover {
@@ -198,7 +198,7 @@
   transition:
     opacity calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade),
     filter calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade),
-    pointer-events 0ms calc(var(--duration-180) * var(--anim-mult, 1));
+    pointer-events 0ms calc(var(--duration-180) * var(--anim-mult, 1)); /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
 }
 
 /* Content only starts fading/blurring in once the pill has begun expanding,
@@ -208,8 +208,8 @@
   filter: blur(0);
   pointer-events: auto;
   transition:
-    opacity calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade) calc(90ms * var(--anim-mult, 1)),
-    filter calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade) calc(90ms * var(--anim-mult, 1));
+    opacity calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--duration-instant) * var(--anim-mult, 1)),
+    filter calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--duration-instant) * var(--anim-mult, 1));
 }
 
 .ms2-form-head {

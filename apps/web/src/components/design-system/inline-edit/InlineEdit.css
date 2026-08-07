@@ -38,19 +38,31 @@
   padding-right: 5px;
   border-radius: 9999px;
   background: var(--bg-card-solid, #fff);
-  border: 2px solid var(--border-hairline, #ECECEC);
+  border: 2px solid transparent;
   box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand-primary-500) 0%, transparent), var(--ie-rest);
   transition:
-    width        calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-spring),
-    border-color calc(.25s * var(--anim-mult, 1)) var(--ease-out),
-    box-shadow   calc(.25s * var(--anim-mult, 1)) var(--ease-out);
+    width        calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-spring),
+    border-color calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-out),
+    box-shadow   calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-out);
   cursor: text;
 }
 
 html.dark .ie-field {
   --ie-glow: color-mix(in srgb, var(--brand-primary-500) 30%, transparent);
   --ie-rest: inset 0 1px 0 rgba(255,255,255,.06), 0 1px 2px rgba(0,0,0,.3);
-  border-color: var(--card-border);
+}
+
+/* Dark-mode canon: field is line-less by default; the single 1px --card-border
+   ring lives on a ::before overlay (not the element border) so the editing-mode
+   brand-color border above stays unaffected. Copies .concentric-demo-outer's
+   html.dark ::before ring pattern from cards/Cards.css. */
+html.dark .ie-field[data-editing="false"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid var(--card-border);
+  pointer-events: none;
 }
 
 .ie-field[data-editing="false"] { cursor: pointer; }
@@ -64,7 +76,7 @@ html.dark .ie-field {
 
 /* saved flash on the field ring */
 .ie-field[data-saved="true"] {
-  animation: ieSaved calc(.62s * var(--anim-mult, 1)) var(--ease-out); /* 620ms — no exact tier, left as literal per recipe */
+  animation: ieSaved calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out); /* 620ms — no exact tier, left as literal per recipe */
 }
 
 @keyframes ieSaved {
@@ -157,7 +169,7 @@ html.dark .ie-input::selection {
     filter           calc(var(--duration-140) * var(--anim-mult, 1));
 }
 
-.ie-act:active { transform: scale(.9); }
+.ie-act:active { transform: scale(var(--press-chip)); }
 
 /* Hidden while saved: mirrors .ie-cancel[data-visible] fade+scale pattern.
    Fades and scales out while Kaydedildi is showing; re-enters on exit. */
@@ -267,7 +279,7 @@ html.dark .ie-cancel {
 }
 
 .ie-cancel:active {
-  transform: scale(.88);
+  transform: scale(var(--press-chip));
 }
 
 html.dark .ie-cancel:hover {
@@ -432,8 +444,8 @@ html.dark .ie-saved-morph {
   .ie-ic,
   .ie-saved-morph,
   .ie-cap {
-    animation-duration: .001ms !important;
-    transition-duration: .001ms !important;
+    animation-duration: .001ms !important; /* motion-sweep: kept, prefers-reduced-motion !important near-zero override, intentionally literal (house pattern, see frontend-motion-contract.md) */
+    transition-duration: .001ms !important; /* motion-sweep: kept, prefers-reduced-motion !important near-zero override, intentionally literal (house pattern, see frontend-motion-contract.md) */
   }
 
   /* Ensure saved-morph is visible even with instant transition */

@@ -137,7 +137,7 @@ function ProgressRing({
           stroke={color} strokeWidth={stroke}
           strokeDasharray={circ} strokeDashoffset={offset}
           strokeLinecap="round"
-          style={{ transition: 'stroke-dashoffset calc(400ms * var(--anim-mult, 1)) var(--ease-out)' }}
+          style={{ transition: 'stroke-dashoffset calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out)' }}
         />
       </svg>
     </span>
@@ -361,8 +361,8 @@ const OC_OVERRIDES = `
   .oc-focus { background: transparent; }
 
   /* FIX 2 — Step transitions: smoother easing, longer, no abrupt cut */
-  .oc-card { animation: ocCardIn calc(580ms * var(--anim-mult, 1)) var(--ease-out-soft); }
-  .oc-focus { animation: ocFocusIn calc(620ms * var(--anim-mult, 1)) var(--ease-out-soft); }
+  .oc-card { animation: ocCardIn calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out-soft); }
+  .oc-focus { animation: ocFocusIn calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out-soft); }
   @keyframes ocCardIn {
     from { opacity: 0; transform: translateY(14px) scale(.98); }
     to   { opacity: 1; transform: none; }
@@ -371,7 +371,7 @@ const OC_OVERRIDES = `
     from { opacity: 0; transform: translateY(16px); }
     to   { opacity: 1; transform: none; }
   }
-  .oc-prompt { animation: ocCardIn calc(580ms * var(--anim-mult, 1)) var(--ease-out-soft); }
+  .oc-prompt { animation: ocCardIn calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out-soft); }
 
   /* FIX 3 — Remove drop-shadow from all glyph icons; color/bg handled in TSX */
   .oc-glyph svg, .oc-prompt-ico svg { filter: none !important; }
@@ -390,7 +390,7 @@ const OC_OVERRIDES = `
         color-mix(in srgb, var(--oc-accent) 10%, transparent) 45%,
         transparent 70%
       );
-    animation: ocGlowFade calc(800ms * var(--anim-mult, 1)) var(--ease-out) both;
+    animation: ocGlowFade calc(var(--duration-800) * var(--anim-mult, 1)) var(--ease-out) both;
   }
   @keyframes ocGlowFade {
     from { opacity: 0; transform: scale(.7); }
@@ -404,7 +404,7 @@ const OC_OVERRIDES = `
         transparent 65%
       );
     border-radius: 0;
-    animation: ocBloom calc(700ms * var(--anim-mult, 1)) var(--ease-out) both;
+    animation: ocBloom calc(var(--duration-700) * var(--anim-mult, 1)) var(--ease-out) both;
   }
   /* Ensure body content sits above the glow */
   .oc-success-body { z-index: 1; }
@@ -414,7 +414,7 @@ const OC_OVERRIDES = `
   .oc-confetti--loop span {
     animation-iteration-count: infinite;
     /* stagger total cycle so pieces restart at slightly different times */
-    animation-duration: calc(var(--dur-raw, 1300) * 1ms * var(--anim-mult, 1));
+    animation-duration: calc(var(--dur-raw, 1300) * 1ms * var(--anim-mult, 1)); /* motion-sweep: kept, unit-conversion multiplier (N * 1ms trick to cast a unitless var to a time), not a duration literal */
     animation-fill-mode: none;
     opacity: 0;
   }

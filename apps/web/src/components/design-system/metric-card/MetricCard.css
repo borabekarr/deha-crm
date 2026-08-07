@@ -7,8 +7,23 @@ html.dark .frame.mc-frame { background-image: none; }
 
 /* Shell parity: default tile shells (`.shell.zoom`, shared class from _base.css)
    must match the popover's outer radius (36, `.exp-outer`). Scoped to `.mc-frame`
-   (unique to this component) so the shared class is not touched globally. */
-.mc-frame .shell.zoom { border-radius: 36px; }
+   (unique to this component) so the shared class is not touched globally.
+   `--mc-shell-radius`/`--mc-shell-inner-radius` are the single shared tokens;
+   `.exp-overlay` also declares them (it renders outside `.mc-frame` in the DOM)
+   so both trees provably read the same value. */
+.mc-frame, .exp-overlay { --mc-shell-radius: 36px; --mc-shell-inner-radius: 28px; }
+/* Tile hover rode the global proximity default (--hover-scale-max: 1.014, too
+   strong); capped here to the gentle canon (_shared-feedback.css .canon-hover,
+   scale(1.007)). Higher specificity than the :root default so it wins for the
+   [data-proximity] scale calc without touching the shared global token. */
+.mc-frame .shell.zoom { border-radius: var(--mc-shell-radius); --hover-scale-max: 1.007; }
+/* _base.css's static `.shell.zoom:hover { transform: scale(1.007) }` and the
+   proximity engine's `scale` property both apply here (this element has both
+   data-proximity and matches that global :hover) and compose multiplicatively
+   (~1.007 x 1.007 ~= 1.014), exceeding the canon cap. Proximity is the single
+   hover-scale driver on metric-card tiles; neutralize the static transform on
+   hover only (press/:active keeps its transform untouched). */
+.mc-frame .shell.zoom:hover:not(:active) { transform: none; }
 
 .metric {
   background: rgba(255,255,255,0.7); backdrop-filter: blur(40px);
@@ -73,7 +88,7 @@ html.dark .metric { border-top-color: rgba(255, 255, 255, 0.06) !important; }
 .exp-outer {
   position: relative;
   background: var(--shell-bg);
-  border-radius: 36px;
+  border-radius: var(--mc-shell-radius);
   padding: 8px;
   width: 480px;
   transform: translateY(16px) scale(0.95);
@@ -85,7 +100,7 @@ html.dark .metric { border-top-color: rgba(255, 255, 255, 0.06) !important; }
    is restored, mirroring .concentric-demo-outer in Cards.css. */
 .exp-outer[data-squircle="on"] {
   border-radius: 0;
-  --corner-radius: 36px;
+  --corner-radius: var(--mc-shell-radius);
   filter: drop-shadow(0 32px 80px rgba(0,0,0,0.24)) drop-shadow(0 6px 20px rgba(0,0,0,0.12));
 }
 .exp-outer[data-squircle="on"]::before,
@@ -108,7 +123,7 @@ html.dark .exp-outer[data-squircle="on"]::before {
 .exp-card {
   position: relative;
   background: var(--card-bg);
-  border-radius: 28px;
+  border-radius: var(--mc-shell-inner-radius);
   overflow: hidden;
   font-family: 'Montserrat';
   box-shadow: inset 0 1px 0 rgba(255,255,255,1);
@@ -116,7 +131,7 @@ html.dark .exp-outer[data-squircle="on"]::before {
 /* Shared [data-squircle="on"] recipe paints the ::before/::after rings; the
    inner card wants both (matches .card-inner), so nothing is cancelled here. */
 .exp-card[data-squircle="on"] {
-  --corner-radius: 28px;
+  --corner-radius: var(--mc-shell-inner-radius);
   padding: 1px;
 }
 
@@ -186,9 +201,9 @@ html.dark .exp-top { border-bottom-color: #232323; }
   transform: translate(-50%, -50%);
   z-index: 3;
   animation:
-    exp-dot-pulse calc(2200ms * var(--anim-mult, 1)) var(--ease-in-out) infinite,
-    exp-dot-glow  calc(2200ms * var(--anim-mult, 1)) var(--ease-in-out) infinite;
-  animation-delay: 0ms, calc(400ms * var(--anim-mult, 1));
+    exp-dot-pulse calc(var(--duration-2200) * var(--anim-mult, 1)) var(--ease-in-out) infinite,
+    exp-dot-glow  calc(var(--duration-2200) * var(--anim-mult, 1)) var(--ease-in-out) infinite;
+  animation-delay: 0ms, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */ calc(var(--duration-420) * var(--anim-mult, 1));
 }
 
 @keyframes exp-dot-pulse {

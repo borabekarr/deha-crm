@@ -1,3 +1,10 @@
+/* C2 canon: buttons/chips hover unified on the proximity engine (data-proximity
+   already wired on all buttons in Buttons.tsx) instead of a bare translateY lift,
+   at a dialed-down control magnitude (pinned-list --hover-scale-max: 1.010 precedent). */
+.btn-page-root {
+  --hover-scale-max: 1.008;
+  --hover-brightness-max: 1.015;
+}
 .btn-row { display:flex; gap: 12px; align-items:center; flex-wrap: wrap; }
 .btn-row + .btn-row { margin-top: 14px; }
 .btn-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #A1A1A1; display:block; margin-bottom: 6px; }
@@ -23,7 +30,6 @@
 /* richgold uses dark on-primary text; the dark text-shadow would muddy it */
 :root[data-primary="richgold"] .btn-primary { text-shadow: none; }
 .btn-primary:hover {
-  transform: translateY(-1px);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.5),
     inset 0 -2px 0 rgba(0,0,0,0.22),
@@ -46,7 +52,6 @@
   transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .btn-inverse:hover {
-  transform: translateY(-1px);
   box-shadow:
     inset 0 0 0 1px rgba(17,17,17,0.22),
     inset 0 1px 0 rgba(255,255,255,0.7),
@@ -72,7 +77,6 @@
   transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-base) * var(--anim-mult, 1)), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .btn-glass:hover {
-  transform: translateY(-1px);
   background: rgba(255,255,255,0.9);
   box-shadow:
     inset 0 0 0 1px rgba(17,17,17,0.22),
@@ -96,8 +100,8 @@
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
-.btn-text:hover { opacity: 0.8; transform: translateY(-1px); box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--brand-primary-500) 40%, transparent); }
-.btn-text:active { opacity: 0.55; transform: translateY(0); }
+.btn-text:hover { opacity: 0.8; box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--brand-primary-500) 40%, transparent); }
+.btn-text:active { opacity: 0.55; }
 html.dark .btn-text:hover { box-shadow: 0 4px 12px -4px rgba(52,211,153,0.45); }
 
 .btn-mi { font-size: 18px; }
@@ -137,20 +141,22 @@ html.dark .btn-text { color: var(--brand-primary-400); }
   --color-3: 210 100% 63%;
   --color-4: 195 100% 63%;
   --color-5: 90 100% 63%;
-  /* Property list + easings are fixed across all three phases; only
-     transition-duration is overridden per state class below, because
-     phase-1 (compact) and phase-3 (extend) need different width/padding
-     timing -- see the .is-loading / .is-done overrides further down.
+  /* Base timing-function is the phase-3 (done -> default) set: width/padding
+     use --ease-out here so the extend-back is a monotonic decelerate, no
+     overshoot-bounce -- the .is-loading override below re-applies
+     --ease-spring for width/padding so phase-1's compact bounce is kept.
+     transition-duration is also overridden per state class below.
      Order: width, padding, background-color, transform, box-shadow, scale. */
   transition-property: width, padding, background-color, transform, box-shadow, scale;
-  transition-timing-function: var(--ease-spring), var(--ease-spring), var(--ease-spring), var(--ease-out), var(--ease-out), var(--ease-linear);
-  /* Resting / phase-3 duration set: width+padding extend back over
-     ~460ms (deliberately slower than the ~440ms compact so returning to
-     rest doesn't feel abrupt); background-color reverts over ~360ms. */
+  transition-timing-function: var(--ease-out), var(--ease-out), var(--ease-spring), var(--ease-out), var(--ease-out), var(--ease-linear);
+  /* Resting / phase-3 duration set: width+padding+background-color all
+     revert together over ~460ms so the return leg reads as one continuous
+     glide instead of the background finishing 100ms early and visually
+     decoupling from the still-growing width (the prior snap). */
   transition-duration:
     calc(var(--duration-expand) * var(--anim-mult, 1)),
     calc(var(--duration-expand) * var(--anim-mult, 1)),
-    calc(var(--duration-sweep) * var(--anim-mult, 1)),
+    calc(var(--duration-expand) * var(--anim-mult, 1)),
     calc(var(--duration-fast) * var(--anim-mult, 1)),
     calc(var(--duration-fast) * var(--anim-mult, 1)),
     calc(var(--duration-instant) * var(--anim-mult, 1));
@@ -179,7 +185,7 @@ html.dark .btn-text { color: var(--brand-primary-400); }
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
-  animation: btn-rainbow-scroll calc(3s * var(--anim-mult, 1)) var(--ease-linear) infinite;
+  animation: btn-rainbow-scroll calc(3s * var(--anim-mult, 1)) var(--ease-linear) infinite; /* motion-sweep: kept, decorative rainbow-scroll loop, no discrete-duration semantics, no token needed */
   pointer-events: none;
 }
 
@@ -202,7 +208,7 @@ html.dark .btn-text { color: var(--brand-primary-400); }
   background-size: 200% 100%;
   filter: blur(10px);
   opacity: 0.7;
-  animation: btn-rainbow-scroll calc(3s * var(--anim-mult, 1)) var(--ease-linear) infinite;
+  animation: btn-rainbow-scroll calc(3s * var(--anim-mult, 1)) var(--ease-linear) infinite; /* motion-sweep: kept, decorative rainbow-scroll loop, no discrete-duration semantics, no token needed */
   pointer-events: none;
 }
 
@@ -217,20 +223,21 @@ html.dark .btn-text { color: var(--brand-primary-400); }
 }
 
 /* Active state scoped to .btn-apply; hover is raised via .btn-page-root below */
-.btn-apply:active { transform: scale(0.985); }
+.btn-apply:active { transform: scale(var(--press-card)); }
 
 /* ── Apply state machine — compress-from-right + loading bar ── */
 
 /* Label: always-mounted, morphs out (scale+fade) when loading/done.
    Split enter/exit timing -- the structural stagger fix: exit is fast and
    undelayed so it visibly clears the stage first; enter (phase-3, done ->
-   default) is a slower spring with a ~120ms delay so it doesn't overlap
-   the outgoing check mark. */
+   default) is a slower spring delayed to land exactly as the width finishes
+   extending (delay = duration-expand - duration-slow = 460 - 220 = 240ms),
+   instead of popping in ~120ms before the button is done widening. */
 .btn-apply .btn-apply-label {
   display: inline-flex; align-items: center; gap: 7px;
   transition:
-    opacity   calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring) calc(var(--duration-fast) * var(--anim-mult, 1)),
-    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring) calc(var(--duration-fast) * var(--anim-mult, 1));
+    opacity   calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring) calc((var(--duration-expand) - var(--duration-slow)) * var(--anim-mult, 1)),
+    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring) calc((var(--duration-expand) - var(--duration-slow)) * var(--anim-mult, 1));
 }
 .btn-apply.is-loading .btn-apply-label,
 .btn-apply.is-done    .btn-apply-label {
@@ -246,12 +253,14 @@ html.dark .btn-text { color: var(--brand-primary-400); }
 
 /* Loading: compress to a narrow pill holding the bar.
    Phase-1 (default -> loading) duration override: width/padding compact
-   over ~440ms -- keeps --ease-spring (from the base rule) so the 1.56
-   overshoot still delivers the requested bounce. */
+   over ~440ms. Re-applies --ease-spring on width/padding (base rule now
+   defaults those two to --ease-out for phase-3) so the 1.56 overshoot
+   still delivers the requested compact-leg bounce. */
 .btn-apply.is-loading {
   min-width: unset;
   width: 72px;
   padding: 0 10px;
+  transition-timing-function: var(--ease-spring), var(--ease-spring), var(--ease-spring), var(--ease-out), var(--ease-out), var(--ease-linear);
   transition-duration:
     calc(var(--duration-compact) * var(--anim-mult, 1)),
     calc(var(--duration-compact) * var(--anim-mult, 1)),
@@ -325,7 +334,7 @@ html.dark .btn-text { color: var(--brand-primary-400); }
   stroke-linecap: round;
   fill: none;
   stroke-dasharray: 23 46;
-  animation: btn-spin-rotate calc(800ms * var(--anim-mult, 1)) var(--ease-linear) infinite;
+  animation: btn-spin-rotate calc(800ms * var(--anim-mult, 1)) var(--ease-linear) infinite; /* motion-sweep: kept, decorative spin-rotate loop, no token needed */
   transform-origin: 16px 16px;
 }
 
@@ -394,10 +403,9 @@ html.dark .btn-apply.is-done .btn-apply-check-ic { color: var(--brand-primary-50
 .btn-discuss:hover {
   background: var(--r-btn-hover, rgba(17,17,17,0.06));
   border-color: var(--r-btn, #6B6B6B);
-  transform: translateY(-1px);
   box-shadow: 0 6px 18px -4px rgba(100,116,139,0.22);
 }
-.btn-discuss:active { transform: scale(0.97); }
+.btn-discuss:active { transform: scale(var(--press-control)); }
 html.dark .btn-discuss { color: #F5F5F5; border-color: rgba(255,255,255,0.18); }
 html.dark .btn-discuss:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.35); }
 
@@ -419,13 +427,12 @@ html.dark .btn-discuss:hover { background: rgba(255,255,255,0.07); border-color:
 }
 .btn-delete:hover {
   filter: brightness(1.08);
-  transform: translateY(-1px);
   box-shadow:
     0 10px 26px -6px rgba(239,68,68,0.5),
     inset 0 1px 0 rgba(255,255,255,0.45),
     inset 0 -2px 0 rgba(0,0,0,0.22);
 }
-.btn-delete:active { transform: scale(0.985); }
+.btn-delete:active { transform: scale(var(--press-card)); }
 html.dark .btn-delete {
   background: #DC2626;
   box-shadow:
@@ -458,7 +465,6 @@ html.dark .btn-delete {
 }
 .btn-task:hover {
   filter: brightness(1.08);
-  transform: translateY(-1px);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.22),
     inset 0 -1.5px 0 rgba(0,0,0,0.18),
@@ -512,33 +518,35 @@ html.dark .btn-delete {
 }
 .btn-cta:hover {
   filter: brightness(1.07);
-  transform: translateY(-1px);
   box-shadow:
     0 10px 28px -6px var(--ctaglow),
     inset 0 1px 0 rgba(255,255,255,0.45),
     inset 0 -2px 0 rgba(0,0,0,0.22),
     inset 0 0 0 1px rgba(255,255,255,0.14);
 }
-.btn-cta:active { transform: scale(0.97); }
+.btn-cta:active { transform: scale(var(--press-control)); }
 
 /* ── Scoped hover overrides for shared pill buttons (.btn-green/.btn-yellow/.btn-red) ──
    These live in _shared-feedback.css (global) with scale(1.03) hover.
    .btn-page-root wrapper raises specificity (0,2,0) so these win on the buttons page only,
    replacing scale with the canonical translateY(-1px) + tinted directional glow. */
+/* transform: none cancels _shared-feedback.css's literal .btn-green/.btn-yellow/
+   .btn-red :hover { transform: scale(1.03) } so the proximity engine's `scale`
+   property (dialed down via .btn-page-root above) is the only hover mechanism. */
 .btn-page-root .btn-green:hover {
-  transform: translateY(-1px);
+  transform: none;
   box-shadow: 0 6px 18px -4px color-mix(in srgb, var(--brand-primary-500) 40%, transparent), inset 0 1px 0 rgba(255,255,255,0.2);
 }
 .btn-page-root .btn-yellow:hover {
-  transform: translateY(-1px);
+  transform: none;
   box-shadow: 0 6px 18px -4px rgba(245,158,11,0.42), inset 0 1px 0 rgba(255,255,255,0.28);
 }
 .btn-page-root .btn-red:hover {
-  transform: translateY(-1px);
+  transform: none;
   box-shadow: 0 6px 18px -4px rgba(239,68,68,0.42), inset 0 1px 0 rgba(255,255,255,0.28);
 }
 html.dark .btn-page-root .btn-green:hover {
-  transform: translateY(-1px);
+  transform: none;
   box-shadow: 0 6px 18px -4px rgba(52,211,153,0.45), inset 0 1px 0 rgba(255,255,255,0.22);
 }
 
@@ -546,11 +554,9 @@ html.dark .btn-page-root .btn-green:hover {
    Specificity 0,3,0 + later in file — beats .btn-page-root .btn-green:hover above.
    .btn-green is NOT redefined globally; these rules are scoped to .btn-page-root .btn-apply. */
 .btn-page-root .btn-apply:hover {
-  transform: translateY(-0.5px);
   box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--brand-primary-500) 25%, transparent);
 }
 html.dark .btn-page-root .btn-apply:hover {
-  transform: translateY(-0.5px);
   box-shadow: 0 4px 12px -4px rgba(52,211,153,0.28);
 }
 

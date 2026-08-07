@@ -93,7 +93,6 @@ function Chip({ icon, children, tooltip, onClick, active, copied, exiting, trail
       className={cls}
       onClick={onClick}
       type="button"
-      data-proximity
       style={accent ? ({ '--chip-accent': accent } as React.CSSProperties) : undefined}
     >
       <span className="sc-chip-ico">{icon}</span>

@@ -5,7 +5,7 @@
   background: var(--shell-bg, #D9D9D9);
   border-radius: 36px;
   box-shadow: 0 16px 56px rgba(17,17,17,.14), 0 3px 10px rgba(17,17,17,.07);
-  transition: transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-spring-firm);
+  transition: transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
 }
 html.dark .sc-stage { background: var(--shell-bg, #0A0A0A); box-shadow: 0 16px 56px rgba(0,0,0,.42), 0 3px 10px rgba(0,0,0,.3); }
 
@@ -20,7 +20,7 @@ html.dark .sc-stage { background: var(--shell-bg, #0A0A0A); box-shadow: 0 16px 5
     drop-shadow(0 16px 56px rgba(17,17,17,.14))
     drop-shadow(0 3px 10px rgba(17,17,17,.07));
   transition: filter calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-spring-firm),
-    transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-spring-firm);
+    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
 }
 html.dark .sc-stage[data-squircle="on"] {
   filter:
@@ -77,8 +77,9 @@ html.dark .sc-card[data-squircle="on"] {
 /* Step 9 (whole-composite hover/press): scale the stationary outer .sc-stage
    itself (not just .sc-header) so the grey shell + white card + ring all
    move as one unit. :has() reaches up from the pressed inner card. */
-.sc-stage:hover { transform: scale(1.007); }
-.sc-stage:has(.sc-card.is-pressed) { transform: scale(.985); transition-duration: calc(90ms * var(--anim-mult, 1)); }
+.sc-stage:hover { transform: scale(var(--canon-hover-scale)); }
+/* duration-only override: inherits var(--ease-out) from the base .sc-stage transition above, deliberate */
+.sc-stage:has(.sc-card.is-pressed) { transform: scale(var(--press-card)); transition-duration: calc(var(--duration-fast) * var(--anim-mult, 1)); }
 
 /* ---- header ---- */
 .sc-header {
@@ -111,7 +112,7 @@ html.dark .sc-card[data-squircle="on"] {
 .sc-chev {
   flex: none; display: grid; place-items: center; color: var(--gray-400);
   width: 20px; height: 20px; border-radius: 6px;
-  transition: transform calc(340ms * var(--anim-mult, 1)) var(--ease-spring-firm), background calc(var(--duration-150) * var(--anim-mult, 1)), color calc(var(--duration-150) * var(--anim-mult, 1));
+  transition: transform calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-spring-firm), background calc(var(--duration-150) * var(--anim-mult, 1)), color calc(var(--duration-150) * var(--anim-mult, 1));
 }
 .sc-card[data-open="true"] .sc-chev { transform: rotate(180deg); }
 .sc-header:hover .sc-chev { background: var(--gray-100); color: var(--fg2); }
@@ -121,7 +122,7 @@ html.dark .sc-header:hover .sc-chev { background: color-mix(in srgb, #fff 10%, v
   position: absolute; width: 16px; height: 16px; border-radius: 50%;
   background: rgba(161,161,161,.28);
   transform: translate(-50%, -50%) scale(0); pointer-events: none;
-  animation: scRipple calc(650ms * var(--anim-mult, 1)) var(--ease-out) forwards;
+  animation: scRipple calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out) forwards;
 }
 html.dark .sc-ripple { background: rgba(100,116,139,.30); }
 @keyframes scRipple { to { transform: translate(-50%, -50%) scale(34); opacity: 0; } }
@@ -153,7 +154,7 @@ html.dark .sc-ripple { background: rgba(100,116,139,.30); }
 }
 .sc-chip:hover { background: var(--gray-50); border-color: var(--gray-300); }
 html.dark .sc-chip:hover { background: color-mix(in srgb, #fff 8%, var(--card-bg)); border-color: color-mix(in srgb, #fff 18%, transparent); }
-.sc-chip:active { transform: translateY(0) scale(.97); }
+.sc-chip:active { transform: translateY(0) scale(var(--press-chip)); }
 .sc-chip-ico { display: grid; place-items: center; color: var(--fg4); transition: color calc(var(--duration-base) * var(--anim-mult, 1)); }
 .sc-chip:hover .sc-chip-ico { color: var(--fg2); }
 .sc-chip.is-active:hover .sc-chip-ico { color: var(--chip-accent); }
@@ -207,7 +208,7 @@ html.dark .sc-tip-arrow { border-top-color: #232323; }
 .sk::after {
   content: ''; position: absolute; inset: 0; transform: translateX(-100%);
   background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gray-300) 60%, transparent), transparent);
-  animation: scShimmer calc(1.3s * var(--anim-mult, 1)) infinite;
+  animation: scShimmer calc(1.3s * var(--anim-mult, 1)) infinite; /* motion-sweep: kept, 1300ms, used <3x library-wide, >15% off nearest tier */
 }
 @keyframes scShimmer { 100% { transform: translateX(100%); } }
 .sk-ico { width: 32px; height: 32px; border-radius: 9px; flex: none; }
@@ -215,5 +216,5 @@ html.dark .sc-tip-arrow { border-top-color: #232323; }
 .sk-pill { width: 67px; height: 30px; border-radius: 9px; }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; } /* motion-sweep: kept, prefers-reduced-motion override */
 }
