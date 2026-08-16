@@ -342,11 +342,9 @@ function TaskCard({
       onDragStart={(e) => onDragStart(e, task.id)}
       onDragEnd={onDragEnd}
       data-proximity
-      className={`tb-card ${dragging ? 'dragging' : ''} ${successClass ?? ''}`}
+      className={`tb-card ${dragging ? 'dragging' : ''} ${highlight ? 'tb-highlight' : ''} ${successClass ?? ''}`}
       style={{
         position: 'relative',
-        background: highlight ? 'var(--tb-card-hl)' : 'var(--tb-card-bg)',
-        border: `1px ${highlight ? 'dashed' : 'solid'} ${highlight ? 'var(--brand-primary-500)' : 'var(--tb-card-border)'}`,
         borderRadius: 10,
         padding: '10px 11px 10px',
         cursor: 'grab',

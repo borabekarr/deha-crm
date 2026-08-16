@@ -113,39 +113,32 @@ html.dark .tb-outer[data-squircle="on"]::before {
 .tb-panel[data-squircle="on"]::before,
 .tb-panel[data-squircle="on"]::after { content: none; }
 
-/* Task card hover */
+/* Task card: border-only, no shadow (Bora's explicit decision, both themes).
+   Proximity engine (hover-tokens.css / useProximityGroup) is bypassed for
+   .tb-card, not rewritten — it produced no visible change on the live page.
+   Hover reacts via this plain border-color + background-color rule instead. */
 .tb-card {
   position: relative;
   z-index: 1;
-  /* Card-canon convergence (task-card/.task, workflow-template-cards):
-     tune the ambient proximity ramp down from the 1.02 exaggerated max to
-     the calmer 1.007 card benchmark, and widen the drop-shadow toward the
-     shared card-shadow feel (same technique as leaderboard's .row) — all on
-     the engine's own scale/filter channels (not transform/box-shadow, which
-     no-card-hover-gate reserves for inner elements on `-card` containers,
-     and which .dragging below owns) so hover and drag never fight over the
-     same channel. */
-  --hover-scale-max: 1.007;
-  --hover-shadow-y: 10px;
-  --hover-shadow-blur: 30px;
-  --hover-shadow-color: rgba(17,17,17,0.13);
-  transition: box-shadow calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
-              border-color calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
-              transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
-              background-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade),
-              scale calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
-              filter calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
+  background-color: var(--tb-card-bg);
+  border: 1px solid #C9C9C9;
+  box-shadow: none;
+  transition: border-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out-soft),
+              background-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out-soft);
 }
-/* Lift hovered card above siblings so its dashed border + lift shadow
-   are never clipped by the column header or adjacent cards */
-.tb-card:hover { z-index: 3; }
-/* Hover is proximity-driven: data-proximity on each .tb-card + useProximityGroup
-   on the column card-list. hover-tokens.css maps --prox to scale+brightness+
-   drop-shadow — an in-place scale, so cards never translate out from under the
-   pointer (no flicker loop) and the success wash is never interrupted.
-   --hover-scale-max above is neutralized while dragging (next rule) so the
-   drag transform is never compounded by a concurrent hover scale. */
-.tb-card.dragging { --hover-scale-max: 1; opacity: 0.35; transform: scale(0.97); }
+/* Lift hovered card above siblings so its border is never clipped by the
+   column header or adjacent cards */
+.tb-card:hover {
+  z-index: 3;
+  border-color: #B0B0B0;
+  background-color: rgba(17,17,17,0.03);
+}
+html.dark .tb-card { border-color: rgba(255,255,255,0.16); box-shadow: none; }
+html.dark .tb-card:hover { border-color: rgba(255,255,255,0.24); background-color: rgba(255,255,255,0.03); }
+/* Search/filter highlight always wins over rest + hover border/background
+   (declared after :hover, equal specificity -> source order decides) */
+.tb-card.tb-highlight { border: 1px dashed var(--brand-primary-500); background-color: var(--tb-card-hl); }
+.tb-card.dragging { opacity: 0.35; transform: scale(0.97); }
 
 .tb-column.drop-target {
   outline-offset: -1px;
@@ -295,9 +288,15 @@ html.dark .tb-outer[data-squircle="on"]::before {
 .tb-toast-layer .tb-toast.tb-toast-out { animation: toastMorphOut calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-accel) both; }
 
 /* ---- Column scrollbar — visible (slim, design-system grey) ---- */
+/* Cards are border-only (no shadow), so the scroll wrapper padding stays
+   compact ('4px 4px 4px 2px' in TaskBoard.tsx). This 10px top override adds
+   a little breathing room above the first card; !important overrides the
+   inline top-padding shorthand since the extra 6px is absorbed into the
+   scroll area (column height is fixed), not into layout. */
 .tb-column-scroll {
   scrollbar-width: thin;
   scrollbar-color: #D4D4D4 transparent;
+  padding-top: 10px !important;
 }
 .tb-column-scroll::-webkit-scrollbar { width: 6px; }
 .tb-column-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -337,19 +336,19 @@ html.dark .tb-outer[data-squircle="on"]::before {
     box-shadow calc(var(--duration-200) * var(--anim-mult, 1));
 }
 .tb-btn-gray { background: #6B6B6B; color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 2px 6px rgba(107,107,107,0.30); }
-.tb-btn-gray:hover { transform: scale(1.03); box-shadow: 0 8px 20px rgba(107,107,107,0.34), inset 0 1px 0 rgba(255,255,255,0.24); }
+.tb-btn-gray:hover { background: color-mix(in srgb, #6B6B6B 85%, #000); box-shadow: 0 8px 20px rgba(107,107,107,0.34), inset 0 1px 0 rgba(255,255,255,0.24); }
 .tb-btn-gray:focus-visible { outline: 2px solid #6B6B6B; outline-offset: 2px; }
 
 .tb-btn-orange { background: #F97316; color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 2px 6px rgba(249,115,22,0.30); }
-.tb-btn-orange:hover { transform: scale(1.03); box-shadow: 0 8px 20px rgba(249,115,22,0.34), inset 0 1px 0 rgba(255,255,255,0.28); }
+.tb-btn-orange:hover { background: color-mix(in srgb, #F97316 85%, #000); box-shadow: 0 8px 20px rgba(249,115,22,0.34), inset 0 1px 0 rgba(255,255,255,0.28); }
 .tb-btn-orange:focus-visible { outline: 2px solid #F97316; outline-offset: 2px; }
 
 .tb-btn-amber { background: #FBBF24; color: #451A03; box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), 0 2px 6px rgba(251,191,36,0.32); }
-.tb-btn-amber:hover { transform: scale(1.03); box-shadow: 0 8px 20px rgba(251,191,36,0.36), inset 0 1px 0 rgba(255,255,255,0.36); }
+.tb-btn-amber:hover { background: color-mix(in srgb, #FBBF24 85%, #000); box-shadow: 0 8px 20px rgba(251,191,36,0.36), inset 0 1px 0 rgba(255,255,255,0.36); }
 .tb-btn-amber:focus-visible { outline: 2px solid #FBBF24; outline-offset: 2px; }
 
 .tb-btn-solid-green { background: var(--brand-primary-500); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 2px 6px color-mix(in srgb, var(--brand-primary-500) 30%, transparent); }
-.tb-btn-solid-green:hover { transform: scale(1.03); box-shadow: 0 8px 20px color-mix(in srgb, var(--brand-primary-500) 34%, transparent), inset 0 1px 0 rgba(255,255,255,0.28); }
+.tb-btn-solid-green:hover { background: color-mix(in srgb, var(--brand-primary-500) 85%, #000); box-shadow: 0 8px 20px color-mix(in srgb, var(--brand-primary-500) 34%, transparent), inset 0 1px 0 rgba(255,255,255,0.28); }
 .tb-btn-solid-green:focus-visible { outline: 2px solid var(--brand-primary-500); outline-offset: 2px; }
 
 /* ---- Importance badges (Change 2) -- token-for-token mirror of
@@ -369,7 +368,7 @@ html.dark .tb-outer[data-squircle="on"]::before {
    (todo-list/TodoList.css), local tb- names. ---- */
 .tb-week {
   display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
-  padding: 0 16px; margin: 0 0 8px;
+  padding: 0 16px; margin: 0 0 20px;
 }
 .tb-daybtn {
   position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px;
@@ -379,20 +378,20 @@ html.dark .tb-outer[data-squircle="on"]::before {
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
   font-family: 'Montserrat';
   transition: transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-spring-snap),
-              background calc(var(--duration-180) * var(--anim-mult, 1)),
-              border-color calc(var(--duration-180) * var(--anim-mult, 1)),
-              box-shadow calc(var(--duration-180) * var(--anim-mult, 1));
+              background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
+              border-color calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade),
+              box-shadow calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade);
 }
 html.dark .tb-daybtn { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
 .tb-daybtn .dow { font-size: 8.5px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tb-fg4); }
 .tb-daybtn .dnum { font-size: 14px; font-weight: 800; color: var(--tb-fg3); font-variant-numeric: tabular-nums; }
-.tb-daybtn:hover { transform: translateY(-1px); border-color: var(--tb-fg4); }
+.tb-daybtn:hover { background: var(--fp-hover); border-color: var(--tb-fg4); }
 .tb-daybtn:active { transform: scale(.95); transition: transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out); }
 .tb-daybtn.active {
   background: #111111; border-color: transparent;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 5px 13px -5px rgba(17,17,17,0.45);
 }
-.tb-daybtn.active:hover { background: #1C1C1C; transform: translateY(-1px); }
+.tb-daybtn.active:hover { background: #1C1C1C; }
 .tb-daybtn.active .dow { color: rgba(255,255,255,0.65); }
 .tb-daybtn.active .dnum { color: #fff; font-weight: 900; }
 
@@ -403,10 +402,10 @@ html.dark .tb-daybtn { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
   padding: 7px 13px; border-radius: 9999px; cursor: pointer; border: 1px solid var(--tb-col-border);
   background: var(--tb-col-bg); color: var(--tb-fg3); font-family: 'Montserrat';
   font-size: 11px; font-weight: 800; letter-spacing: 0.02em; white-space: nowrap;
-  transition: background calc(var(--duration-base) * var(--anim-mult, 1)), color calc(var(--duration-base) * var(--anim-mult, 1)), border-color calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring-snap);
+  transition: background calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade), color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade), border-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring-snap);
 }
 .tb-filt .fdot { width: 8px; height: 8px; border-radius: 50%; background: var(--fcolor, var(--tb-fg4)); flex: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); }
-.tb-filt:hover { transform: translateY(-1px); color: var(--tb-fg1); }
+.tb-filt:hover { background: var(--fp-hover); color: var(--tb-fg1); }
 .tb-filt:active { transform: scale(0.95); }
 .tb-filt.on { background: #111111; color: #fff; border-color: transparent; box-shadow: 0 5px 13px -5px rgba(17,17,17,0.45), inset 0 1px 0 rgba(255,255,255,0.14); }
 html.dark .tb-filt.on { background: #0A0A0A; }
