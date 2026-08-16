@@ -1,0 +1,181 @@
+/* =========================================================================
+   DisclosureGroup — prototype variant surface (ds-review-expandables Step 6)
+
+   Two things live here and nothing else:
+     1. The prototype picker chrome, copied VERBATIM from
+        .claude/skills/prototype/PICKER.md (a spec, not a design decision).
+     2. Per-variant deltas keyed off `[data-variant]` on `.dg-root`.
+        `main` has NO rules here at all — it renders byte-identically to the
+        Step 5 result, which is the cherry-pick baseline (and what the
+        animation-spam contract for this slug is pinned to).
+
+   grid-template-rows 0fr → 1fr stays the reveal technique in EVERY variant.
+   Variant motion legs are token-driven and --anim-mult wrapped; nothing minted.
+   Any variant transition shorthand re-declares the FULL property list it
+   overrides (transition-shorthand-replaces-not-merges).
+   ========================================================================= */
+
+.dg-root { display: contents; } /* wrapper carries data-variant only, no layout */
+
+/* ── Picker chrome (verbatim, PICKER.md) ─────────────────────────────── */
+.proto-picker {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(10, 10, 10, 0.82);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  backdrop-filter: blur(12px) saturate(1.4);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+    0 8px 24px rgba(0, 0, 0, 0.24),
+    0 2px 6px rgba(0, 0, 0, 0.12);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.proto-picker-highlight {
+  position: absolute;
+  top: 4px;
+  left: 0;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  will-change: transform;
+}
+
+/* The slide is enabled only after first paint (data-ready), so load doesn't animate. */
+.proto-picker[data-ready] .proto-picker-highlight {
+  transition:
+    transform var(--proto-slide),
+    width var(--proto-slide);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .proto-picker[data-ready] .proto-picker-highlight { transition: none; }
+}
+
+.proto-picker-item {
+  position: relative; /* sits above the highlight */
+  display: flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  font: inherit;
+  cursor: pointer;
+  /* PICKER.md's `color 150ms ease-out`, value-identical through tokens */
+  transition: color calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-out-native);
+}
+
+.proto-picker-item:hover { color: rgba(255, 255, 255, 0.85); }
+.proto-picker-item:active { transform: scale(0.97); }
+
+.proto-picker-item:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.4);
+  outline-offset: 2px;
+}
+
+.proto-picker-item[data-active] { color: #fff; }
+
+.proto-picker-divider {
+  width: 1px;
+  height: 16px;
+  margin: 0 4px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.proto-picker-replay {
+  padding: 0 10px;
+  font-size: 14px;
+}
+
+.proto-picker[data-position='top'] {
+  bottom: auto;
+  top: 24px;
+}
+
+/* Cherry-pick mode: marks the designated main variant. */
+.proto-picker-item[data-main]::after {
+  content: '\2605';
+  margin-left: 4px;
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+/* ── Variant: cascade ────────────────────────────────────────────────────
+   Axis: expansion choreography. The panel stops arriving as one blurred slab;
+   the clip still opens on grid-rows, but the rows themselves ladder in ~60ms
+   apart (80/140/200ms token delays). Review reward-feel idea (1), built. */
+[data-variant='cascade'] .dg-scroll {
+  transform: none;
+  filter: none;
+  /* the slab's translate/blur legs are gone by design; only the fade remains */
+  transition: opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-linear);
+}
+[data-variant='cascade'] .dg-item {
+  opacity: 0;
+  transform: translateY(9px);
+  /* full property list re-declared: adding opacity must not drop the step-5
+     background/transform press legs */
+  transition: background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
+              transform calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236),
+              opacity calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);
+}
+[data-variant='cascade'] .dg[data-open='true'] .dg-item { opacity: 1; transform: none; }
+[data-variant='cascade'] .dg[data-open='true'] .dg-item:nth-child(2) { transition-delay: calc(var(--duration-80) * var(--anim-mult, 1)); }
+[data-variant='cascade'] .dg[data-open='true'] .dg-item:nth-child(3) { transition-delay: calc(var(--duration-140) * var(--anim-mult, 1)); }
+[data-variant='cascade'] .dg[data-open='true'] .dg-item:nth-child(4) { transition-delay: calc(var(--duration-200) * var(--anim-mult, 1)); }
+/* press feedback survives the higher-specificity open rule */
+[data-variant='cascade'] .dg[data-open='true'] .dg-item:active { transform: scale(.975); }
+[data-variant='cascade'] .dg[data-open='true'] .dg-item:disabled:active { transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  [data-variant='cascade'] .dg-item { transform: none !important; transition-delay: 0ms !important; }
+}
+
+/* ── Variant: ledger ─────────────────────────────────────────────────────
+   Axis: row chrome + icon/label treatment. One continuous settings sheet
+   instead of three floating cards: hairline-separated sections, monochrome
+   glyphs instead of tinted tiles, small-caps section titles, full-bleed rows. */
+[data-variant='ledger'] .dg-list { gap: 0; }
+[data-variant='ledger'] .dg {
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  border-top: 1px solid var(--border-hairline);
+}
+[data-variant='ledger'] .dg-list > :first-child.dg { border-top: 0; }
+[data-variant='ledger'] .dg-trigger { padding: 13px 6px; gap: 10px; }
+[data-variant='ledger'] .dg-tile {
+  width: 22px; height: 22px; font-size: 20px; border-radius: 0;
+  background: transparent; box-shadow: none; color: var(--fg3);
+}
+[data-variant='ledger'] .dg[data-open='true'] .dg-tile { color: var(--brand-primary); }
+[data-variant='ledger'] .dg-title {
+  font-family: 'Montserrat'; font-size: 11.5px; font-weight: var(--weight-black);
+  text-transform: uppercase; letter-spacing: .08em; color: var(--fg3);
+}
+[data-variant='ledger'] .dg-sub { font-size: 11px; color: var(--fg4); }
+[data-variant='ledger'] .dg-chevron { font-size: 18px; }
+[data-variant='ledger'] .dg[data-open='true'] .dg-chevron { color: var(--fg2); }
+[data-variant='ledger'] .dg-scroll { border-top: 0; padding: 0 0 6px 32px; }
+[data-variant='ledger'] .dg-item { border-radius: 0; padding: 12px 6px; }
+[data-variant='ledger'] .dg-item + .dg-item { box-shadow: inset 0 1px 0 var(--border-hairline); }
+[data-variant='ledger'] .dg-item-label { font-weight: var(--weight-semibold); font-size: 13.5px; }
+/* Ledger rows are full-bleed (radius 0), so the hover pill is an inset
+   fully-rounded rectangle rather than the row's own square corners. */
+[data-variant='ledger'] .dg-item:hover { margin: 0 6px; width: calc(100% - 12px); border-radius: 999px; background: var(--fp-hover); }
+[data-variant='ledger'] .dg-tile.msym { font-variation-settings: 'FILL' 0, 'wght' 700, 'GRAD' 0, 'opsz' 24; }

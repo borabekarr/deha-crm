@@ -6,6 +6,7 @@ import { useState, useCallback, useRef } from 'react'
 import { ocRootRef, cleanupOc, scheduleComplete, clearOcTimers, type StatusMap } from './onboarding-completion-hook'
 import { useSquircle } from '../../../lib/hooks/use-squircle'
 import { useProximityGroup } from '@/lib/hooks'
+import { segRef, cleanupSeg } from '../controls/controls-hook'
 
 // ── SVG icon helpers (no icon-font dependency) ────────────────────────────────
 
@@ -439,6 +440,14 @@ export default function OnboardingCompletion() {
 
   // Root element ref — timers are stored on the DOM node
   const rootElRef = useRef<HTMLElement | null>(null)
+  // Variant switcher — reuses the controls-page seg measurement hook (imported,
+  // not copied); this element ref just tracks mount/unmount for cleanup.
+  const segElRef = useRef<HTMLDivElement | null>(null)
+  const setSegRef = useCallback((el: HTMLDivElement | null) => {
+    if (el) segRef(el)
+    else cleanupSeg(segElRef.current)
+    segElRef.current = el
+  }, [])
   const proximityRef = useProximityGroup<HTMLElement>()
   // setFire is stable (from useState) — safe to close over in timer callbacks
   const setFireStable = useRef(setFire)
@@ -595,12 +604,9 @@ export default function OnboardingCompletion() {
         )}
       </div>
 
-      {/* ── Variant switcher ── */}
-      <div className="oc-seg" role="tablist" aria-label="View">
-        <span
-          className="oc-seg-thumb"
-          style={{ left: `calc(3px + ${(['prompt', 'card', 'checklist'] as Variant[]).indexOf(variant)} * (100% - 6px) / 3)` }}
-        />
+      {/* ── Variant switcher — controls-page pill design ── */}
+      <div className="seg fill oc-variant-switch" role="tablist" aria-label="View" ref={setSegRef}>
+        <span className="seg-pill" />
         {(['Prompt', 'Card', 'Checklist'] as const).map((v) => {
           const id = v.toLowerCase() as Variant
           return (
@@ -609,7 +615,7 @@ export default function OnboardingCompletion() {
               type="button"
               role="tab"
               aria-selected={variant === id}
-              className={`oc-seg-btn${variant === id ? ' is-on' : ''}`}
+              className={variant === id ? 'active' : ''}
               data-proximity
               onClick={() => setVariant(id)}
             >

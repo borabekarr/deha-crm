@@ -45,3 +45,25 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Step-6 immediate-fade utility (plan: ds-primer-entrance) -- Primer's
+ * "immediate" treatment for standalone typography/iconography that sits
+ * OUTSIDE cards (page titles, labels, icon rows). Fades in on mount only:
+ * no stagger, no scroll trigger, no slide. Retuned (plan: primer-entrance-fixes)
+ * to match the on-visible card reveal exactly: --duration-entrance (600ms)
+ * and --ease-brand-entrance, Primer's published curve, for a consistent feel.
+ * Do not apply to elements inside a reveal-engine container (see
+ * PreviewFrame.tsx / animated-list) -- that would double-animate. */
+@keyframes anim-immediate-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.anim-immediate {
+  animation: anim-immediate-fade calc(var(--duration-entrance) * var(--anim-mult, 1)) var(--ease-brand-entrance) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .anim-immediate {
+    animation: none;
+    opacity: 1;
+  }
+}

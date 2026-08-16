@@ -33,9 +33,6 @@ export default function ThemeEditor() {
   // Brightness slider (initial value 68 from prototype) — filters the preview area only
   const [brightness, setBrightness] = useState(68)
 
-  // Startup toggle (initial state: on — sw-base sw-on in prototype)
-  const [startupOn, setStartupOn] = useState(true)
-
   // Motion toggle (on = normal speed). Off sets --anim-mult: 0 on the preview subtree only.
   const [motionOn, setMotionOn] = useState(true)
   const teProxRef = useProximityGroup<HTMLDivElement>()
@@ -145,7 +142,7 @@ export default function ThemeEditor() {
 
             <div className="te-divider" />
 
-            {/* Motion + Startup */}
+            {/* Motion */}
             <div className="te-section">
 
               {/* Motion toggle row — off sets --anim-mult: 0 on the preview subtree (speeds up the CRM) */}
@@ -158,19 +155,6 @@ export default function ThemeEditor() {
                   onClick={() => setMotionOn((v) => !v)}
                   aria-label="Toggle preview motion"
                   aria-pressed={motionOn}
-                />
-              </div>
-
-              {/* Startup toggle row */}
-              <div className="te-row">
-                <span className="te-label">Startup</span>
-                <button
-                  type="button"
-                  className={`te-tog${startupOn ? ' on' : ''}`}
-                  data-proximity
-                  onClick={() => setStartupOn((v) => !v)}
-                  aria-label="Toggle startup"
-                  aria-pressed={startupOn}
                 />
               </div>
 

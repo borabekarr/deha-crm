@@ -234,16 +234,9 @@
   }
 
   /* ─────────────────────────────────────────────────────────────────────
-     1. LOAD — cards spring + slide in from their side, content staggers
+     1. LOAD — outer card entrance now owned by the shared reveal engine
+     (revealSelector: '.nf-card'); content still staggers via .anim-in.
      ───────────────────────────────────────────────────────────────────── */
-  .nf-card.anim-in { animation: nfCardIn calc(var(--duration-700) * var(--anim-mult, 1)) var(--ease-card-pop) both; }
-  .nf--bull.anim-in { --nf-from: -46px; }
-  .nf--bear.anim-in { --nf-from: 46px; }
-  @keyframes nfCardIn {
-    0%   { opacity: 0; transform: translateX(var(--nf-from, 0)) scale(0.85); }
-    60%  { opacity: 1; transform: translateX(0) scale(1.015); }
-    100% { opacity: 1; transform: translateX(0) scale(1); }
-  }
   .anim-in .nf-kicker { animation: nfFade calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-out) calc(var(--duration-200) * var(--anim-mult, 1)) both; }
   .anim-in .nf-arrow  { animation: nfPopSm calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-spring) calc(var(--duration-sweep) * var(--anim-mult, 1)) both; }
   .anim-in .nf-title  { animation: nfTitlePop calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out) calc(var(--duration-sweep) * var(--anim-mult, 1)) both; }
@@ -331,7 +324,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .nf-glow { animation: none !important; }
-    .nf-card.anim-in, .anim-in *, .nf-swap-out, .nf-swap-in, .nf-card.tap { animation: none !important; }
+    .anim-in *, .nf-swap-out, .nf-swap-in, .nf-card.tap { animation: none !important; }
     .nf-ind, .nf-ind-ghost { transition: none !important; }
     .nf-ind--exit-right, .nf-ind--enter-left, .nf-ind--exit-left, .nf-ind--enter-right { animation: none !important; }
   }

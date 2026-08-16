@@ -1,0 +1,54 @@
+/* Variant deltas for delete-button (ds-review-inputs Step 6). Picker chrome
+   lives in ./picker-css.ts (harness CSS, out of the token-gate's scope per
+   .claude/skills/prototype/PICKER.md). Delete this file, picker-css.ts and
+   VariantPicker.tsx, and the picker wiring in DeleteButton.tsx once a
+   direction is promoted. */
+
+/* Countdown — direction 2: time made spatial. A draining ring around the
+   badge (idea logged in delete-button.md's reward-feel section) instead of a
+   digit-only read. --db-progress is set inline per tick in DeleteButton.tsx
+   (no new effect: it rides the existing render, not a timer). */
+@property --db-progress {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+[data-variant='countdown'] .db-count {
+  background:
+    radial-gradient(circle, var(--semantic-danger) 62%, transparent 63%),
+    conic-gradient(#fff 0 calc(var(--db-progress) * 360deg), rgba(255, 255, 255, 0.35) 0);
+  transition: --db-progress calc(var(--duration-900) * var(--anim-mult, 1)) var(--ease-linear);
+}
+
+/* Celebrate — direction 3: done resolves with an icon pop + a soft emerald
+   bloom instead of a plain fade-in (reward-feel idea #2). Bloom is clipped to
+   the pill (.db keeps overflow: hidden), so inset: 0 not a negative offset. */
+[data-variant='celebrate'].db[data-state='done'] .db-ic {
+  animation: dbCelebratePop calc((var(--duration-200) + var(--duration-180)) * var(--anim-mult, 1)) var(--ease-out)
+    calc(var(--duration-320) * var(--anim-mult, 1)) backwards;
+}
+[data-variant='celebrate'].db[data-state='done']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.35), transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+  animation: dbCelebrateBloom calc((var(--duration-320) + var(--duration-200)) * var(--anim-mult, 1)) var(--ease-fade)
+    calc(var(--duration-320) * var(--anim-mult, 1)) forwards;
+}
+@keyframes dbCelebratePop {
+  from { transform: scale(0.5); }
+  to { transform: none; }
+}
+@keyframes dbCelebrateBloom {
+  0% { opacity: 0; transform: scale(0.7); }
+  40% { opacity: 0.8; }
+  100% { opacity: 0; transform: scale(1.4); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-variant='celebrate'].db[data-state='done'] .db-ic,
+  [data-variant='celebrate'].db[data-state='done']::after {
+    animation: none;
+  }
+}

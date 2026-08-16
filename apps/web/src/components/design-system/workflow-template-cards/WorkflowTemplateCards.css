@@ -59,21 +59,29 @@ html.dark .wtc-outer[data-squircle="on"]::before {
 .wtc-card {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-radius: var(--card-radius);
+  /* Concentric with the 28px .wtc-outer minus its 10px padding (matches
+     Cards.css .concentric-demo-inner's outer-minus-padding formula) --
+     was var(--card-radius) (20px), a 2px mismatch that read as the inner
+     surface not nesting cleanly inside the outer shell. */
+  border-radius: 18px;
   overflow: hidden;
   box-shadow: inset 0 1px 0 rgba(255,255,255,1);
-  /* .wtc-outer stretches to the tallest card in its grid row; without this
-     the shorter-copy card in a row leaves whitespace below itself inside
-     the outer's padding instead of matching the row's bottom rhythm. */
+  /* .wtc-outer stretches to the tallest card in its grid row. Flex column
+     + flex on .wtc-info (below) lets the info section absorb that extra
+     height so it reads as part of the info block instead of a stray white
+     strip hanging off the bottom of the card. */
   height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 .wtc-card[data-squircle="on"] {
-  --corner-radius: var(--card-radius);
+  --corner-radius: 18px;
 }
 
 /* ── Preview area ────────────────────────────────────────────────────────── */
 .wtc-preview {
   height: 158px;
+  flex-shrink: 0;
   background: #F5F5F5;
   display: flex;
   align-items: center;
@@ -94,6 +102,12 @@ html.dark .wtc-outer[data-squircle="on"]::before {
 /* matches .badge.gci / .wf-tag style from Pills + Semantic Colors */
 .wtc-node {
   border-radius: 50%;
+  /* Defensive against the last node's circle reading squashed/broken --
+     box-sizing keeps the gradient/box-shadow layers from expanding the box
+     past its declared square dimensions, and overflow clips them to the
+     circular silhouette instead of the bounding square. */
+  box-sizing: border-box;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -131,6 +145,9 @@ html.dark .wtc-outer[data-squircle="on"]::before {
   position: absolute;
   bottom: 12px;
   right: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   padding: 6px 12px;
   background: #111111;
   color: #fff;
@@ -159,6 +176,7 @@ html.dark .wtc-outer[data-squircle="on"]::before {
   box-shadow: 0 4px 12px rgba(17,17,17,0.32), inset 0 1px 0 rgba(255,255,255,0.08);
 }
 .wtc-use:active { transform: scale(0.96); }
+.wtc-use .material-icons { font-size: 13px; }
 
 /* ── Info section ────────────────────────────────────────────────────────── */
 .wtc-info {
@@ -166,6 +184,10 @@ html.dark .wtc-outer[data-squircle="on"]::before {
   border-top: 1px solid #EEF2F7;
   /* Bottom inner shadow */
   box-shadow: inset 0 -10px 18px rgba(17,17,17,0.05);
+  /* Absorbs the extra height .wtc-card gains when it stretches to match a
+     taller sibling in its grid row -- keeps the leftover space inside this
+     section instead of showing as a stray strip below it. */
+  flex: 1 0 auto;
 }
 .wtc-title-row {
   display: flex;
@@ -202,6 +224,7 @@ html.dark .wtc-outer[data-squircle="on"]::before {
     linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
   background-size: 7px 7px;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 .wtc-badge-pro { background-color: #232323; }
 .wtc-badge-new { background-color: var(--brand-primary-500); }

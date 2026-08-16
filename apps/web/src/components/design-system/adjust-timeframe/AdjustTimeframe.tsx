@@ -438,14 +438,17 @@ export default function AdjustTimeframe() {
       >
         <fieldset className="tf-head">
           {/* Item 2: plain Montserrat 900 header — no pill chrome */}
-          <div
-            className={'tf-range' + (bumpKey ? ' bump' : '')}
-            key={bumpKey}
-            aria-live="polite"
-          >
-            <span className="tf-seg start">{fmtDate(startDate)}</span>
-            <span className="tf-dash">–</span>
-            <span className="tf-seg end">{endIsToday ? 'Today' : fmtDate(endDate)}</span>
+          <div className="tf-range-group">
+            <span className="material-symbols-outlined tf-range-icon" aria-hidden="true">calendar_month</span>
+            <div
+              className={'tf-range' + (bumpKey ? ' bump' : '')}
+              key={bumpKey}
+              aria-live="polite"
+            >
+              <span className="tf-seg start">{fmtDate(startDate)}</span>
+              <span className="tf-dash">–</span>
+              <span className="tf-seg end">{endIsToday ? 'Today' : fmtDate(endDate)}</span>
+            </div>
           </div>
 
           {/* Item 1: segmented pill track with sliding glider */}

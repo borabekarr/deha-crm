@@ -9,12 +9,6 @@ body { background: #F5F5F5; }
   align-items: center;
   justify-content: center;
   padding: 32px 24px;
-  background-image: radial-gradient(ellipse at top right, color-mix(in srgb, var(--brand-primary-500) 9%, transparent) 0%, rgba(248,250,252,1) 55%);
-}
-/* Dark mode: the light-only rgba(248,250,252,1) wash above bled a bright
-   gradient over the dark canvas (stale, no dark counterpart declared). */
-html.dark .te-bg {
-  background-image: radial-gradient(ellipse at top right, color-mix(in srgb, var(--brand-primary-500) 9%, transparent) 0%, rgba(10,10,10,1) 55%);
 }
 
 /* ── Gray outer shell ── */

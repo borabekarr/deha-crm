@@ -37,38 +37,41 @@ html.dark .sec { color:#A1A1A1; } html.dark .sec-sub { color:#6B6B6B; }
 /* ═══════════════════ STACKED COMPONENT ═══════════════════ */
 .idx { position:relative; font-family:'Montserrat'; }
 
-/* the "drawer" that peeks out below the white card — background derives from
-   the funnel's active stage color (--idx-stage-color, set from STAGES in
-   IndexBar.tsx) so a future stage change re-themes it automatically.
-   Tint strength (22%/34%) chosen so the Moderate stage color reads clearly
-   while keeping the gray-600/#D4D4D4 text pair at ~6.9:1 / ~5.5:1 AA. */
+/* the "drawer" that peeks out below the white card — background is the
+   exact green pill token (.btn-green dark fill / brand-primary-500, see
+   preview/_shared-feedback.css L51), not a stage-color tint. Grid texture
+   mirrors the event-badge treatment (motion-tabs .mt-row-count L368-370 /
+   task-board .tb-stat-badge L174-177): repeating hairline lines at 7px. */
 .idx-drawer {
   position:relative; margin-top:-26px; padding:36px 22px 10px;
   border-radius:0 0 24px 24px;
-  background: color-mix(in srgb, var(--idx-stage-color, #84CC16) 22%, #EEF2F7);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), inset 0 -2px 0 rgba(17,17,17,0.03);
+  background-color: var(--brand-primary-500);
+  background-image:
+    linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+  background-size: 7px 7px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -2px 0 rgba(17,17,17,0.10);
   display:flex; align-items:center; justify-content:center; gap:16px;
 }
 html.dark .idx-drawer {
-  background: color-mix(in srgb, var(--idx-stage-color, #84CC16) 34%, #131C2E);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  background-color: var(--brand-primary-500);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), inset 0 -2px 0 rgba(0,0,0,0.20);
 }
-/* text re-tinted to the darker/lighter ink pair (was gray-400/#6B6B6B) —
-   that pairing failed AA contrast once the drawer picked up a colored tint.
-   Verified against the strengthened tint above: light ~6.9:1, dark ~5.5:1. */
-.idx-foot-txt { font-size:12px; font-weight:600; color:var(--gray-600,#4A4A4A); letter-spacing:-0.01em; text-align:center; }
-.idx-foot-txt b { color:var(--gray-600,#4A4A4A); font-weight:800; }
-html.dark .idx-foot-txt { color:#D4D4D4; } html.dark .idx-foot-txt b { color:#D4D4D4; }
+/* white + bolder + soft shadow so the text stays legible over the grid. */
+.idx-foot-txt { font-size:12px; font-weight:700; color:#fff; letter-spacing:-0.01em; text-align:center; text-shadow: 0 1px 2px rgba(0,0,0,0.35); }
+.idx-foot-txt b { color:#fff; font-weight:900; text-shadow: 0 1px 2px rgba(0,0,0,0.35); }
+html.dark .idx-foot-txt { color:#fff; } html.dark .idx-foot-txt b { color:#fff; }
 
 /* AI INSIGHTS pill */
 .idx-ai {
   flex-shrink:0; display:inline-flex; align-items:center; gap:8px; padding:5px 13px 5px 5px;
   border-radius:9999px; background:#FFFFFF; border:none; cursor:pointer; font-family:'Montserrat';
   box-shadow: 0 4px 14px rgba(17,17,17,0.10), inset 0 0 0 1px rgba(17,17,17,0.05), inset 0 1px 0 rgba(255,255,255,0.9);
-  transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring), box-shadow calc(var(--duration-200) * var(--anim-mult, 1));
+  transition: background calc(var(--duration-200) * var(--anim-mult, 1)), box-shadow calc(var(--duration-200) * var(--anim-mult, 1));
 }
 html.dark .idx-ai { background:#1C1C1C; box-shadow: 0 4px 14px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.07); }
-.idx-ai:hover { transform:translateY(-1px); box-shadow: 0 8px 22px color-mix(in srgb, var(--brand-primary-500) 22%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--brand-primary-500) 30%, transparent), inset 0 1px 0 rgba(255,255,255,0.9); }
+html.dark .idx-ai:hover { background:var(--fp-hover); }
+.idx-ai:hover { background:var(--fp-hover); box-shadow: 0 8px 22px color-mix(in srgb, var(--brand-primary-500) 22%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--brand-primary-500) 30%, transparent), inset 0 1px 0 rgba(255,255,255,0.9); }
 .idx-ai:active { transform:scale(0.99); }
 .idx-ai-orb {
   width:23px; height:23px; border-radius:9999px; flex-shrink:0; display:grid; place-items:center;
@@ -194,10 +197,11 @@ html.dark .idx-tick.on .idx-tick-label { color:inherit; }
 .replay button {
   display:inline-flex; align-items:center; gap:6px; font-family:'Montserrat'; font-size:11px; font-weight:800; letter-spacing:0.02em;
   color:var(--fg3,#6B6B6B); background:var(--card-bg,#FFFFFF); border:1px solid var(--card-border,#ECECEC); padding:6px 12px; border-radius:9999px; cursor:pointer;
-  box-shadow:0 2px 6px rgba(17,17,17,0.07), inset 0 1px 0 rgba(255,255,255,0.9); transition: transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-out), color calc(var(--duration-150) * var(--anim-mult, 1)), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+  box-shadow:0 2px 6px rgba(17,17,17,0.07), inset 0 1px 0 rgba(255,255,255,0.9); transition: background calc(var(--duration-150) * var(--anim-mult, 1)), color calc(var(--duration-150) * var(--anim-mult, 1)), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 html.dark .replay button { background:#1C1C1C; border-color:rgba(255,255,255,0.1); color:#A1A1A1; }
-.replay button:hover { transform:translateY(-1px); color:var(--fg1,#111111); }
+.replay button:hover { background:var(--fp-hover); color:var(--fg1,#111111); }
+html.dark .replay button:hover { background:var(--fp-hover); }
 .replay button:active { transform:scale(0.95); }
 .replay button .material-symbols-outlined { font-size:14px; }
 

@@ -18,8 +18,8 @@ function ComponentPreviewPage() {
     return (
       <GalleryLayout>
         <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-          <p className="text-lg font-semibold text-foreground">Component not found</p>
-          <p className="text-sm text-muted-foreground">
+          <p className="anim-immediate text-lg font-semibold text-foreground">Component not found</p>
+          <p className="anim-immediate text-sm text-muted-foreground">
             No component with slug <code className="rounded bg-muted px-1.5 py-0.5 text-xs">{slug}</code> exists in the registry.
           </p>
           <Link
@@ -48,11 +48,12 @@ function ComponentPreviewPage() {
           >
             <div
               key={entry.slug}
-              ref={makeRevealRef(
+              className={entry.entrance === 'immediate' ? 'anim-immediate' : undefined}
+              ref={
                 entry.revealSelector
-                  ? { selector: entry.revealSelector, from: 'first' }
-                  : {},
-              )}
+                  ? makeRevealRef({ selector: entry.revealSelector, from: 'first' })
+                  : undefined
+              }
             >
               <Component />
             </div>

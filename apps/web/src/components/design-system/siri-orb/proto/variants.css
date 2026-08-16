@@ -1,0 +1,40 @@
+/* Prototype variant styling (ds-review-visuals step 2). so-* namespace only
+   -- never bare Tailwind utility tokens (ring/size/grid/flex/blur collide
+   with utility-class injection; see
+   .claude/lessons/tailwind-ring-class-collision.md). Deleted alongside
+   proto/ when this prototype surface is stripped. so-variant-main carries
+   no overrides: it is step 1's reviewed/fixed result, byte-identical. */
+
+.so-proto-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px;
+}
+
+/* Aurora Veil -- page-presentation direction: the orb sits as a floating
+   glass card over a soft ambient page wash instead of filling the viewport
+   edge-to-edge with its own flat dark stage. */
+.so-variant-aurora-veil {
+  border-radius: 32px;
+  background: radial-gradient(1200px 900px at 50% 20%, #1a1035 0%, #0a0614 60%, #050308 100%);
+}
+.so-variant-aurora-veil .siri-orb-root {
+  border-radius: 28px;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+    0 24px 64px rgba(0, 0, 0, 0.45);
+}
+.so-variant-aurora-veil .siri-orb-root .stage {
+  background: radial-gradient(720px 620px at 50% 42%, #241748 0%, #0d0a1c 72%);
+}
+
+/* Ember -- orb palette/uniform preset direction: warm ember/gold shader
+   uniforms (threaded via SiriOrbProps in SiriOrb.tsx), backdrop retinted so
+   the stage doesn't fight the new orb colors. */
+.so-variant-ember .siri-orb-root .stage {
+  background: radial-gradient(720px 620px at 50% 42%, #2a1608 0%, #0f0803 72%);
+}
+.so-variant-ember .siri-orb-root .status.listening {
+  color: #fde68a;
+}

@@ -19,9 +19,15 @@ import { lazy, type ComponentType } from 'react'
 // Types
 // ---------------------------------------------------------------------------
 
-// Gate: marking an entry Finished when it has an expandable interaction
-// requires a SPAM_TARGETS entry in apps/web/tests/animation-spam-manifest.ts
-// with the spam spec passing.
+// Gate: EVERY entry marked Finished must be classified in
+// apps/web/tests/animation-spam-manifest.ts, in exactly one of three lists:
+//   SPAM_TARGETS — enrolled in the spam suite, which must pass. kind
+//     'auto-height' (useAutoHeight-measured height) or kind 'toggle' (a
+//     CSS-transition/fixed-size morph asserted via a settled CSS property).
+//   WAIVED — animated but not enrollable; needs a reason and an ISO date.
+//   STATIC — no animated interaction to spam (swatch/scale reference pages).
+// animation-spam.spec.ts derives this population by reading THIS file, so
+// flipping a status to Finished without classifying the slug fails the suite.
 export type ComponentStatus = 'Finished' | 'Proceeding' | 'Waiting'
 
 export type Subcategory =
@@ -54,6 +60,12 @@ export interface RegistryEntry {
    * component root as one block. Leave unset for every other entry.
    */
   revealSelector?: string
+  /**
+   * When set, the route skips the reveal engine entirely and applies the
+   * `anim-immediate` utility to the content wrapper instead (opacity-only
+   * fade on mount, no stagger, no translateY).
+   */
+  entrance?: 'immediate'
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Component: ReturnType<typeof lazy<ComponentType<any>>>
 }
@@ -115,6 +127,7 @@ export const registry: RegistryEntry[] = [
     category: 'Foundations',
     subtitle: 'Display 1/2, H1–H4, body, meta, micro',
     viewport: { width: 700, height: 480 },
+    entrance: 'immediate',
     sourceHtml: '/design-system/preview/type-scale.html',
     Component: lazy(() => import('@/components/design-system/type-scale/TypeScale')),
   },
@@ -125,6 +138,7 @@ export const registry: RegistryEntry[] = [
     category: 'Foundations',
     subtitle: 'Specimen + weight ladder (300/500/700/900)',
     viewport: { width: 700, height: 230 },
+    entrance: 'immediate',
     sourceHtml: '/design-system/preview/type-display.html',
     Component: lazy(() => import('@/components/design-system/type-display/TypeDisplay')),
   },
@@ -165,6 +179,7 @@ export const registry: RegistryEntry[] = [
     category: 'Foundations',
     subtitle: 'Material Icons + Material Symbols Outlined',
     viewport: { width: 700, height: 240 },
+    entrance: 'immediate',
     sourceHtml: '/design-system/preview/iconography.html',
     Component: lazy(() => import('@/components/design-system/iconography/Iconography')),
   },
@@ -186,6 +201,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Glass, inner & accent surfaces',
     viewport: { width: 700, height: 280 },
     sourceHtml: '/design-system/preview/components-cards.html',
+    revealSelector: '.card-accent, .concentric-demo',
     Component: lazy(() => import('@/components/design-system/cards/Cards')),
   },
   {
@@ -257,6 +273,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Animated streak + steps progress — light & dark',
     viewport: { width: 700, height: 560 },
     sourceHtml: '/design-system/preview/components-streak-card.html',
+    revealSelector: '.streak',
     Component: lazy(() => import('@/components/design-system/streak-card/StreakCard')),
   },
   {
@@ -280,18 +297,168 @@ export const registry: RegistryEntry[] = [
     sourceHtml: '/design-system/preview/brand-dynamic-calendar.html',
     Component: lazy(() => import('@/components/design-system/dynamic-calendar/DynamicCalendar')),
   },
-
-  // ══ Proceeding ════════════════════════════════════════════════════════════
   {
     slug: 'buttons',
     name: 'Buttons',
-    status: 'Proceeding',
+    status: 'Finished',
     category: 'Primitives',
     subtitle: 'Primary, inverse, glass, text',
     viewport: { width: 700, height: 140 },
     sourceHtml: '/design-system/preview/components-buttons.html',
     revealSelector: '.btn-row > *',
     Component: lazy(() => import('@/components/design-system/buttons/Buttons')),
+  },
+
+  // ══ Proceeding ════════════════════════════════════════════════════════════
+  {
+    slug: 'disclosure-group',
+    name: 'Disclosure Group',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Composable expandable section · measured height spring · accordion mode',
+    viewport: { width: 460, height: 460 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/disclosure-group',
+    Component: lazy(() => import('@/components/design-system/disclosure-group/DisclosureGroup')),
+  },
+  {
+    slug: 'delete-button',
+    name: 'Delete Button',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Destructive action · countdown-to-confirm morph · cancelable',
+    viewport: { width: 560, height: 380 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/delete-button',
+    Component: lazy(() => import('@/components/design-system/delete-button/DeleteButton')),
+  },
+  {
+    slug: 'shimmer',
+    name: 'Shimmer',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Skeleton loading primitive · sweeping wave + pulse variants',
+    viewport: { width: 460, height: 460 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/shimmer',
+    Component: lazy(() => import('@/components/design-system/shimmer/Shimmer')),
+  },
+  {
+    slug: 'pie-chart',
+    name: 'Pie Chart',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Composable donut · mount sweep · hover pop-out · synced legend',
+    viewport: { width: 700, height: 460 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/pie-chart',
+    Component: lazy(() => import('@/components/design-system/pie-chart/PieChart')),
+  },
+  {
+    slug: 'otp-input',
+    name: 'OTP Input',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Animated one-time-code entry · focus bounce · digit entrance · shake-on-error',
+    viewport: { width: 620, height: 500 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/otp-input',
+    Component: lazy(() => import('@/components/design-system/otp-input/OtpInput')),
+  },
+  {
+    slug: 'dropdown',
+    name: 'Dropdown',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Composable contextual menu · smart auto-positioning · spring scale+blur entrance',
+    viewport: { width: 660, height: 620 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/dropdown',
+    Component: lazy(() => import('@/components/design-system/dropdown/Dropdown')),
+  },
+  {
+    slug: 'blur-carousel',
+    name: 'Blur Carousel',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Cover-flow carousel · center item sharp, side items scale, fade & soft-blur as you scroll',
+    viewport: { width: 900, height: 760 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/blur-carousel',
+    Component: lazy(() => import('@/components/design-system/blur-carousel/BlurCarousel')),
+  },
+  {
+    slug: 'expandable-screen',
+    name: 'Expandable Screen',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Trigger card morphs (CSS FLIP) into a full-screen overlay · Escape / close button collapse back',
+    viewport: { width: 900, height: 700 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/expandable-screen',
+    Component: lazy(() => import('@/components/design-system/expandable-screen/ExpandableScreen')),
+  },
+  {
+    slug: 'expandable-card',
+    name: 'Expandable Card',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Three cards spring-expand width & reveal measured-height content · click or Enter/Space to toggle',
+    viewport: { width: 1260, height: 480 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/expandable-card',
+    Component: lazy(() => import('@/components/design-system/expandable-card/ExpandableCard')),
+  },
+  {
+    slug: 'message-dropdown',
+    name: 'Message Dropdown',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Gooey notification dropdown · SVG-filter liquid morph trigger-to-panel · outside-click / Escape dismiss',
+    viewport: { width: 920, height: 800 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/message-dropdown',
+    Component: lazy(() => import('@/components/design-system/message-dropdown/MessageDropdown')),
+  },
+  {
+    slug: 'animated-header-scroll',
+    name: 'Animated Header Scroll',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Large title collapses into a blurred pinned header on scroll · iOS-style',
+    viewport: { width: 420, height: 760 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/animated-header-scroll',
+    Component: lazy(() => import('@/components/design-system/animated-header-scroll/AnimatedHeaderScroll')),
+  },
+  {
+    slug: 'toast',
+    name: 'Toast',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Stacked toasts with semantic fills, top/bottom viewports & expandable rows',
+    viewport: { width: 760, height: 560 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/toast',
+    Component: lazy(() => import('@/components/design-system/toast/Toast')),
+  },
+  {
+    slug: 'picker',
+    name: 'Picker',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'FAB-expanding day/month & hour/minute wheel pickers · iOS 3D scroll columns with idle snap',
+    viewport: { width: 800, height: 620 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/picker',
+    Component: lazy(() => import('@/components/design-system/picker/Picker')),
+  },
+  {
+    slug: 'siri-orb',
+    name: 'Siri Orb',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Glowing WebGL voice-assistant orb · breathing halo · click to listen',
+    viewport: { width: 640, height: 640 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/siri-orb',
+    Component: lazy(() => import('@/components/design-system/siri-orb/SiriOrb')),
+  },
+  {
+    slug: 'buyer-brain',
+    name: 'Buyer-Brain Qualification',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Interactive 9-lobe buyer-psychology brain — real artwork, pop-on-select, dark mode',
+    viewport: { width: 960, height: 620 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/buyer-brain',
+    Component: lazy(() => import('@/components/design-system/buyer-brain/BuyerBrain')),
   },
   {
     slug: 'pills',
@@ -325,16 +492,6 @@ export const registry: RegistryEntry[] = [
     sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/smooth-drawer',
     revealSelector: '.sd-trigger',
     Component: lazy(() => import('@/components/design-system/smooth-drawer/SmoothDrawer')),
-  },
-  {
-    slug: 'drag-dismiss-sheet',
-    name: 'Drag Dismiss Sheet',
-    status: 'Proceeding',
-    category: 'Animations',
-    subtitle: 'Bottom sheet with projected-endpoint drag-to-dismiss physics',
-    viewport: { width: 420, height: 640 },
-    sourceHtml: '/design-system/preview/components-drag-dismiss-sheet.html',
-    Component: lazy(() => import('@/components/design-system/drag-dismiss-sheet/DragDismissSheet')),
   },
   {
     slug: 'inline-edit',
@@ -470,16 +627,6 @@ export const registry: RegistryEntry[] = [
     Component: lazy(() => import('@/components/design-system/avatar-picker/AvatarPicker')),
   },
   {
-    slug: 'message-dropdown',
-    name: 'Message Dropdown',
-    status: 'Proceeding',
-    category: 'Components',
-    subtitle: 'Gooey message dropdown — dark, side-by-side demo',
-    viewport: { width: 920, height: 800 },
-    sourceHtml: '/design-system/preview/brand-message-dropdown.html',
-    Component: lazy(() => import('@/components/design-system/message-dropdown/MessageDropdown')),
-  },
-  {
     slug: 'metric-card',
     name: 'Metric card',
     status: 'Finished',
@@ -487,6 +634,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Numeral + delta + sparkline; click to expand',
     viewport: { width: 700, height: 320 },
     sourceHtml: '/design-system/preview/components-metric-card.html',
+    revealSelector: '.shell.zoom',
     Component: lazy(() => import('@/components/design-system/metric-card/MetricCard')),
   },
   {
@@ -497,7 +645,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'CRM deal pipeline widget — live value, trend chart & quick actions',
     viewport: { width: 700, height: 900 },
     sourceHtml: '/design-system/preview/components-statistics-graph-card.html',
-    revealSelector: '.sg-sync, .sg-rangechip, .sg-cta',
+    revealSelector: '.shell.zoom',
     Component: lazy(() => import('@/components/design-system/statistics-graph-card/StatisticsGraphCard')),
   },
   {
@@ -508,6 +656,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Animated score card — glowing segmented health bar',
     viewport: { width: 700, height: 620 },
     sourceHtml: '/design-system/preview/components-financial-health-card.html',
+    revealSelector: '.fhc',
     Component: lazy(() => import('@/components/design-system/financial-health-card/FinancialHealthCard')),
   },
   {
@@ -529,6 +678,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Crypto news feed — bullish/bearish cards, light + dark',
     viewport: { width: 500, height: 460 },
     sourceHtml: '/design-system/preview/components-news-feed.html',
+    revealSelector: '.nf-card',
     Component: lazy(() => import('@/components/design-system/news-feed/NewsFeed')),
   },
   {
@@ -630,6 +780,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'AI workflow template card grid with flow preview and hover CTA',
     viewport: { width: 700, height: 620 },
     sourceHtml: '/design-system/preview/components-workflow-template-cards.html',
+    revealSelector: '.wtc-card',
     Component: lazy(() => import('@/components/design-system/workflow-template-cards/WorkflowTemplateCards')),
   },
   {

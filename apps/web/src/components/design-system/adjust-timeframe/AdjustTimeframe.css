@@ -90,6 +90,13 @@ html.dark .tf-card:not([data-squircle="on"]) {
   border: none; margin: 0; min-inline-size: unset;
 }
 
+/* Leading calendar icon — sized/spaced to match the library's other
+   icon+text pairings (statistics-graph-card .sg-rangechip-icon: 7-9px gap,
+   ~13-14px icon against smaller text; scaled up here for .tf-range's 18px
+   text). */
+.tf-range-group { display: inline-flex; align-items: center; gap: 8px; }
+.tf-range-icon { font-size: 16px; line-height: 1; color: var(--fg4, #A1A1A1); }
+
 /* Item 1+2: range display — plain Montserrat black header, no pill chrome */
 .tf-range {
   font-family: var(--font-display), 'Montserrat', sans-serif;

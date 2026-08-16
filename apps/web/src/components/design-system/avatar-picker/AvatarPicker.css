@@ -72,7 +72,7 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
 }
 
 .ap-header-icon {
@@ -325,7 +325,11 @@
   width: 54px;
   height: 54px;
   flex-shrink: 0;
-  border-radius: 15px;
+  /* Fully round to match the big-stage avatar (.ap-big-img, 9999px) --
+     the previous 15px rounded-square was the same value across resting,
+     hover, and selected, so all three states were already IDENTICAL, just
+     identically wrong; this is the one shared rule all of them read. */
+  border-radius: 9999px;
   border: none;
   padding: 0;
   cursor: pointer;

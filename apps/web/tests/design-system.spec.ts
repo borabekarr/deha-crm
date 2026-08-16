@@ -69,7 +69,6 @@ const SLUGS = [
   'cards',
   'controls',
   'fab',
-  'message-dropdown',
   'inline-edit',
   // Data
   'adjust-timeframe',
@@ -124,6 +123,27 @@ const SLUGS = [
   'pipeline-card',
   'multisteps',
   'news-feed',
+  // ds-rebuild-w1 (2026-08-07) — rebuilt from claude-design/raw/ via
+  // CONVERSION-SOP; baseline adopts from CI actual per BASELINE ADOPTION RULE.
+  'delete-button',
+  'shimmer',
+  'disclosure-group',
+  'pie-chart',
+  'otp-input',
+  // ds-rebuild-w2 (2026-08-08) — rebuilt from claude-design/raw/ via
+  // CONVERSION-SOP; baseline adopts from CI actual per BASELINE ADOPTION RULE.
+  'dropdown',
+  'blur-carousel',
+  'expandable-screen',
+  'expandable-card',
+  'message-dropdown',
+  // ds-rebuild-w3 (2026-08-08) — rebuilt from claude-design/raw/ via
+  // CONVERSION-SOP; baseline adopts from CI actual per BASELINE ADOPTION RULE.
+  'animated-header-scroll',
+  'toast',
+  'picker',
+  'siri-orb',
+  'buyer-brain',
 ] as const
 
 // ---------------------------------------------------------------------------

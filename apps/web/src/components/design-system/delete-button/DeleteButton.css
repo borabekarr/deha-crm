@@ -1,0 +1,299 @@
+/* =========================================================================
+   Delete Button — Deha Design System
+   Byte-preserved from apps/web/design-system/claude-design/raw/delete-button/delete-button.html
+   (the .db* rule set only; the raw file's <body>/#root scaffold is preview
+   chrome, not part of the component, same precedent as other conversions).
+   ========================================================================= */
+
+.db {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 54px;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  font-family: var(--font-display);
+  color: #fff;
+  overflow: hidden;
+  /* Press asymmetry: the transform leg reads its duration from --db-press-dur,
+     which :active swaps to the faster tier — press-in snaps (120ms), release
+     settles (180ms). Value-identical tokenization of the ported literals:
+     0.26s = --duration-260, 0.34s = 180 + base(160), 0.18s = --duration-180,
+     cubic-bezier(.22,1,.36,1) = --ease-out, bare `ease` = --ease-fade. */
+  --db-press-dur: calc(var(--duration-180) * var(--anim-mult, 1));
+  /* Odometer curve. cubic-bezier(.33, 1, .68, 1) (the ported roll easing) has
+     no byte-matching token in motion-tokens.css and that file is Locked for
+     this pass, so it lives here as a component-local ease var (same precedent
+     as CurrencyConverter's --cc-ease-swap before promotion). Promote on the
+     next motion-tokens pass. */
+  --ease-db-roll: cubic-bezier(0.33, 1, 0.68, 1);
+  transition:
+    width calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-out),
+    background-color calc((var(--duration-180) + var(--duration-base)) * var(--anim-mult, 1)) var(--ease-fade),
+    color calc((var(--duration-180) + var(--duration-base)) * var(--anim-mult, 1)) var(--ease-fade),
+    box-shadow calc((var(--duration-180) + var(--duration-base)) * var(--anim-mult, 1)) var(--ease-fade),
+    transform var(--db-press-dur) var(--ease-out);
+}
+.db:active {
+  --db-press-dur: calc(var(--duration-fast) * var(--anim-mult, 1));
+  transform: scale(0.97);
+}
+/* `done` is a terminal, non-clickable state (onClick ignores it) — do not offer
+   press feedback the machine will not honour. */
+.db[data-state='done'] {
+  cursor: default;
+}
+.db[data-state='done']:active {
+  transform: none;
+}
+.db-inner {
+  display: flex;
+  align-items: center;
+  width: max-content;
+}
+/* Content morph: the icon + text blur out and shrink slightly while the pill
+   re-colours and re-sizes, then the new content blurs back in. No colour-into-
+   background trick (that read as a glow), just a clean focus pull. */
+.db-inner {
+  transition:
+    opacity calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade),
+    filter calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-out);
+}
+/* will-change only while a morph is actually in flight — a permanent layer
+   promotion on an idle button costs memory for nothing. */
+.db[data-phase='out'] .db-inner,
+.db[data-phase='morph'] .db-inner,
+.db[data-phase='in'] .db-inner {
+  will-change: opacity, filter, transform;
+}
+.db[data-phase='out'] .db-inner,
+.db[data-phase='morph'] .db-inner {
+  opacity: 0;
+  filter: blur(6px);
+  transform: scale(0.82);
+  transition:
+    opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
+    filter calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade);
+}
+.db[data-phase='in'] .db-inner {
+  opacity: 1;
+  filter: blur(0);
+  transform: none;
+  transition:
+    opacity calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-fade),
+    filter calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc((var(--duration-180) + var(--duration-base)) * var(--anim-mult, 1)) var(--ease-out);
+}
+.db[data-phase='rest'] .db-inner {
+  opacity: 1;
+  filter: blur(0);
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .db-inner {
+    filter: none !important;
+    transform: none !important;
+  }
+  /* The digit roll is already reduced-motion gated; the badge's scale pop was
+     not, so it was the one piece of unrequested motion left under reduce. */
+  .db-count {
+    animation: none;
+  }
+  /* Belt and braces for the same failure mode DeleteButton.tsx guards in JS:
+     with the roll keyframes disabled, an outgoing digit has nothing to move it
+     off the incoming one, so it would sit superimposed. Never show it. */
+  .db-d.up {
+    display: none;
+  }
+}
+
+.db[data-state='idle'] {
+  background: var(--semantic-danger-bg);
+  color: var(--semantic-danger);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(239, 68, 68, 0.3),
+    0 8px 22px -12px rgba(239, 68, 68, 0.45);
+}
+.db[data-state='idle'] .db-inner {
+  padding: 0 26px;
+  gap: 10px;
+}
+/* Hover is a pointer affordance: gated so touch devices never get the sticky
+   post-tap hover. The 1px lift gives both live states the same "this responds"
+   read; `done` is excluded because it is not clickable. */
+@media (hover: hover) and (pointer: fine) {
+  .db[data-state='idle']:hover {
+    background: #fde6e6;
+    box-shadow:
+      inset 0 0 0 1.5px rgba(239, 68, 68, 0.45),
+      0 10px 26px -12px rgba(239, 68, 68, 0.55);
+  }
+  .db[data-state='idle']:hover,
+  .db[data-state='confirming']:hover {
+    transform: translateY(-1px);
+  }
+  .db[data-state='idle']:active,
+  .db[data-state='confirming']:active {
+    transform: translateY(0) scale(0.97);
+  }
+}
+[data-theme='dark'] .db[data-state='idle'] {
+  background: rgba(239, 68, 68, 0.16);
+  color: #fca5a5;
+  box-shadow: inset 0 0 0 1.5px rgba(239, 68, 68, 0.42);
+}
+@media (hover: hover) and (pointer: fine) {
+  [data-theme='dark'] .db[data-state='idle']:hover {
+    background: rgba(239, 68, 68, 0.22);
+    box-shadow: inset 0 0 0 1.5px rgba(239, 68, 68, 0.55);
+  }
+}
+
+.db[data-state='confirming'] {
+  background: var(--semantic-danger-bg);
+  color: var(--semantic-danger);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(239, 68, 68, 0.3),
+    0 6px 18px -10px rgba(239, 68, 68, 0.4);
+}
+.db[data-state='confirming'] .db-inner {
+  padding: 0 26px;
+  gap: 10px;
+}
+[data-theme='dark'] .db[data-state='confirming'] {
+  background: rgba(239, 68, 68, 0.16);
+  color: #fca5a5;
+  box-shadow: inset 0 0 0 1.5px rgba(239, 68, 68, 0.42);
+}
+
+.db[data-state='done'] {
+  background-color: var(--brand-primary);
+  color: #fff;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 14px 14px;
+  box-shadow:
+    0 12px 28px -10px rgba(16, 185, 129, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.18),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+.db[data-state='done'] .db-inner {
+  padding: 0 26px;
+  gap: 10px;
+}
+[data-theme='dark'] .db[data-state='done'] {
+  box-shadow:
+    0 12px 28px -10px rgba(16, 185, 129, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.25);
+}
+
+.db-ic {
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.db-text {
+  display: inline-flex;
+  font-size: 15px;
+  font-weight: var(--weight-extrabold);
+  letter-spacing: 0.005em;
+  white-space: pre;
+}
+
+/* countdown — red round badge, white number, outer shadow */
+.db-count {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--semantic-danger);
+  color: #fff;
+  font-weight: var(--weight-black);
+  font-variant-numeric: tabular-nums;
+  box-shadow:
+    0 5px 14px -3px rgba(239, 68, 68, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1.5px 0 rgba(0, 0, 0, 0.18);
+  transition:
+    opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade);
+  /* 0.38s = 200+180, delay 0.32s = --duration-320 (both value-identical). */
+  animation: dbPop calc((var(--duration-200) + var(--duration-180)) * var(--anim-mult, 1))
+    var(--ease-out) calc(var(--duration-320) * var(--anim-mult, 1)) backwards;
+}
+.db[data-phase='out'] .db-count {
+  opacity: 0;
+  transform: scale(0.5);
+}
+@keyframes dbPop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* odometer roll — old digit slides up & out, new slides in from below */
+.db-roll {
+  position: relative;
+  display: inline-block;
+  height: 19px;
+  min-width: 13px;
+  overflow: hidden;
+}
+.db-d {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  display: block;
+  text-align: center;
+  font-size: 16px;
+  line-height: 19px;
+}
+.db-d.cur {
+  position: static;
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* 0.52s = 320+200. MIRROR: DeleteButton.tsx ROLL_MS (520) times the same
+     --anim-mult, so the JS swap back to the resting digit stays in sync. */
+  .db-d.in {
+    animation: dbRollIn calc((var(--duration-320) + var(--duration-200)) * var(--anim-mult, 1))
+      var(--ease-db-roll);
+  }
+  .db-d.up {
+    animation: dbRollUp calc((var(--duration-320) + var(--duration-200)) * var(--anim-mult, 1))
+      var(--ease-db-roll) forwards;
+  }
+}
+@keyframes dbRollIn {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes dbRollUp {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+}

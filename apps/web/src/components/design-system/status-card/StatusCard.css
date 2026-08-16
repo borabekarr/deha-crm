@@ -57,16 +57,22 @@ html.dark .sc-stage[data-squircle="on"]::before {
   position: relative;
   background: var(--card-bg, #FFFFFF);
   border: 1px solid var(--card-border, #D4D4D4);
-  border-radius: 28px;
+  /* Pill radius (browser clamps to half the short edge automatically), was
+     28px which read as a merely-rounded rectangle, not a pill, at the
+     card's actual collapsed height. */
+  border-radius: 9999px;
   box-shadow: inset 0 0 0 1px rgba(17,17,17,.05);
   overflow: hidden;
+  /* Same duration/ease token pair .sc-chip uses for its own hover
+     background darkening below, so the grey-hover fade isn't instant. */
+  transition: background calc(var(--duration-base) * var(--anim-mult, 1));
 }
 html.dark .sc-card { background: var(--card-bg, #1C1C1C); border-color: var(--card-border, #232323); box-shadow: inset 0 0 0 1px rgba(255,255,255,.06); }
 /* Squircle conversion (Step 15 residual sweep): inner of the .sc-stage/.sc-card
    pair. box-shadow here is inset-only (unaffected by clip-path); border stays
    a real CSS border per the .gc-card/.dp-panel precedent. */
 .sc-card[data-squircle="on"] {
-  --corner-radius: 28px;
+  --corner-radius: 9999px;
 }
 /* Canon (corrected): inner line-less in both themes -- the unscoped
    html.dark .sc-card rule above wins on specificity over the shared reset,
@@ -74,12 +80,13 @@ html.dark .sc-card { background: var(--card-bg, #1C1C1C); border-color: var(--ca
 html.dark .sc-card[data-squircle="on"] {
   box-shadow: none;
 }
-/* Step 9 (whole-composite hover/press): scale the stationary outer .sc-stage
-   itself (not just .sc-header) so the grey shell + white card + ring all
-   move as one unit. :has() reaches up from the pressed inner card. */
-.sc-stage:hover { transform: scale(var(--canon-hover-scale)); }
 /* duration-only override: inherits var(--ease-out) from the base .sc-stage transition above, deliberate */
 .sc-stage:has(.sc-card.is-pressed) { transform: scale(var(--press-card)); transition-duration: calc(var(--duration-fast) * var(--anim-mult, 1)); }
+/* Hover: no zoom, just a grey darkening on the card surface (--fp-hover
+   already themes correctly for light/dark via hover-tokens.css). */
+.sc-stage:hover .sc-card:not(.sc-skel) {
+  background: color-mix(in srgb, var(--card-bg, #FFFFFF) 92%, var(--fp-hover));
+}
 
 /* ---- header ---- */
 .sc-header {
@@ -196,7 +203,7 @@ html.dark .sc-chip.is-copied { background: color-mix(in srgb, var(--brand-primar
   box-shadow: 0 10px 24px -8px rgba(17,17,17,.45);
   transition: opacity calc(var(--duration-base) * var(--anim-mult, 1)) ease, transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring-firm);
 }
-.sc-chip:hover .sc-tip { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+.sc-chip:hover .sc-tip { opacity: 1; transform: translateX(-50%) translateY(0); }
 .sc-tip-arrow { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: 0; height: 0; border: 5px solid transparent; border-top-color: var(--gray-900); }
 html.dark .sc-tip { background: #232323; }
 html.dark .sc-tip-arrow { border-top-color: #232323; }

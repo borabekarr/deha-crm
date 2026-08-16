@@ -1,0 +1,73 @@
+/* =========================================================================
+   pie-chart prototype variants (ds-review-visuals step 4).
+   Namespace: .pcv-<slug> on <html> AND on the stage root.
+   "main" has NO class: it is step 3's shipped result, byte-for-byte.
+   Motion: none — no new transitions/animations are declared here; every
+   rule below is a static/hover style override only, reusing the entrance
+   and hover states already probed in step 3.
+   ========================================================================= */
+
+/* ---------------- Track -- chart chrome: a static ring track ------------
+   Axis: chrome. A hairline track ring sits behind the donut so the arcs
+   read as "filling in" a fixed channel, and the hover glow filter is
+   suppressed in favour of the ring doing the emphasis work. */
+.pcv-track .pc-chart::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  pointer-events: none;
+}
+.pcv-track .pc-slice { filter: none !important; }
+.pcv-track .pc-wrap {
+  box-shadow:
+    0 1px 1px rgba(15, 23, 42, 0.05),
+    inset 0 1px 1px rgba(255, 255, 255, 0.55),
+    inset 0 0 0 1px var(--border-hairline),
+    0 18px 40px -22px rgba(15, 23, 42, 0.28);
+}
+
+/* ---------------- Chips -- legend treatment: horizontal pills -----------
+   Axis: legend layout. The vertical row-list becomes a wrapping row of
+   compact pill chips (swatch + label + share), dropping the raw value
+   column so each chip stays short. */
+.pcv-chips .pc-legend {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pcv-chips .pc-leg-row {
+  display: inline-flex;
+  grid-template-columns: unset;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px 6px 8px;
+  border-radius: 9999px;
+  background: var(--bg-chip);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+}
+.pcv-chips .pc-leg-row.is-hovered { background: var(--bg-card-solid); box-shadow: inset 0 0 0 1px var(--fg4); }
+.pcv-chips .pc-leg-val { display: none; }
+
+/* ---------------- Vivid -- colour commitment on the chrome --------------
+   Axis: colour. The shell and the hovered legend row carry a brand tint
+   (all six data-primary themes) so the palette reads as the surrounding
+   material, not just the slice hues. */
+.pcv-vivid .pc-wrap {
+  background: color-mix(in srgb, var(--brand-primary-500) 8%, var(--bg-card-solid));
+}
+.pcv-vivid .pc-total-pill {
+  background: var(--brand-primary-500);
+  color: var(--brand-on-primary);
+  box-shadow: none;
+}
+.pcv-vivid .pc-leg-row.is-hovered {
+  background: color-mix(in srgb, var(--brand-primary-500) 16%, transparent);
+}
+.pcv-vivid .pc-leg-swatch {
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--brand-primary-500) 35%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.pcv-vivid .pc-center-val { color: var(--brand-primary-700); }
