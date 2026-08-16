@@ -256,6 +256,13 @@ html.dark .wp-popover[data-squircle="on"] {
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
+/* House rule: popover option rows get grey darkening only, no lift/zoom.
+   Selector repeats [data-proximity] to outrank hover-tokens.css's own
+   [data-proximity]x3 fallback (0,3,0) without !important. */
+.wp-edited[data-proximity][data-proximity][data-proximity] {
+  scale: none;
+  filter: none;
+}
 
 .wp-edited-left {
   display: flex;
@@ -297,6 +304,10 @@ html.dark .wp-popover[data-squircle="on"] {
     background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+}
+.wp-action[data-proximity][data-proximity][data-proximity] {
+  scale: none;
+  filter: none;
 }
 
 .wp-action-left {

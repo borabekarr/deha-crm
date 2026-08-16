@@ -207,8 +207,13 @@
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 
+/* Shared hover treatment for every option row in every popover this component
+   renders (Add Elements list + Nodes flyout): grey pill darkening only, no
+   lift or zoom-in. Color from hover-tokens.css --fp-hover; timing from the
+   item's own `background` transition channel above (motion-tokens.css). */
 .wae-ae-item:hover,
-.wae-ae-item.hovered {
+.wae-ae-item.hovered,
+.wae-node-item:hover {
   background: var(--fp-hover);
 }
 
@@ -258,14 +263,12 @@
   background-size: 9px 9px;
 }
 
-.wae-ae-footer .btn-green:hover {
-  transform: translateY(-1px);
-}
-
 /* Proximity: .btn-green's global :hover uses `transform: scale(1.03)`
-   (_shared-feedback.css) which was already softened above to translateY;
-   append scale/filter transition channels here so hover-tokens.css's
-   --prox mapping (locked scale 1.02 / brightness 1.02) doesn't snap. */
+   (_shared-feedback.css); the file-wide no-lift/no-zoom sweep removes that
+   override entirely (was translateY(-1px)) so this footer button also gets
+   the flat proximity-only treatment. Append scale/filter transition channels
+   here so hover-tokens.css's --prox mapping (locked scale 1.02 / brightness
+   1.02) doesn't snap. */
 .wae-ae-footer .btn-green[data-proximity] {
   transition:
     background-color calc(var(--duration-180) * var(--anim-mult, 1)),
@@ -447,7 +450,7 @@ html.dark .wae-shimmer-row {
   gap: 5px;
   font-family: 'Montserrat', system-ui, sans-serif;
   font-size: 10px;
-  font-weight: 900;
+  font-weight: var(--weight-black, 900);
   color: #A1A1A1;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -499,10 +502,6 @@ html.dark .wae-nodes-header .material-icons {
     transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 
-.wae-node-item:hover {
-  background: var(--fp-hover);
-}
-
 .wae-node-item:active {
   transform: scale(var(--press-control));
 }
@@ -551,12 +550,17 @@ html.dark .wae-nodes-header .material-icons {
   margin-bottom: 11px;
 }
 
-/* Item 3: icons inside seg buttons — centered both states */
+/* Item 3: icons inside seg buttons — centered both states.
+   Rebalance the active-pill padding (icon/text/pill gaps read uneven,
+   worst on the longer "Integrations" label): tighten the shared .seg
+   button padding and use the gap alone to space icon from label so the
+   left inset, icon-text gap, and right inset all read symmetric. */
 .wae-seg-wrap button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 5px;
+  padding: 7px 14px;
 }
 
 .wae-seg-wrap button .material-icons {

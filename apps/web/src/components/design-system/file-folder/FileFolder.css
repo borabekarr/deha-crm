@@ -30,9 +30,9 @@ html.dark .card:has(.folder) { background:transparent !important; background-ima
   color:var(--fg3); background:#FFFFFF; border:1px solid var(--border-hairline);
   padding:6px 12px; border-radius:9999px; cursor:pointer;
   box-shadow:0 2px 6px rgba(17,17,17,0.07), inset 0 1px 0 rgba(255,255,255,0.9);
-  transition:transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-out), color calc(var(--duration-150) * var(--anim-mult, 1));
+  transition:transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-out), color calc(var(--duration-150) * var(--anim-mult, 1)), background calc(var(--duration-150) * var(--anim-mult, 1));
 }
-.ff-replay:hover { transform:translateY(-1px); color:var(--fg1); }
+.ff-replay:hover { background:var(--fp-hover); color:var(--fg1); }
 .ff-replay:active { transform:scale(0.95); }
 .ff-replay .material-symbols-outlined { font-size:14px; }
 
@@ -226,8 +226,12 @@ html.dark .ff-menu-item--danger .material-symbols-outlined { color:#FB7185; }
 }
 .ff-count .material-symbols-outlined { font-size:15px; color:var(--ff-meta); }
 
-/* leading icon in folder title */
-.ff-title { display:flex; align-items:center; gap:7px; }
+/* leading icon in folder title — thin hairline outer shell, same treatment
+   as the inline-edit field, so the icon+text chip reads as contained. */
+.ff-title {
+  display:flex; align-items:center; gap:7px; width:fit-content;
+  padding:4px 8px; border-radius:9999px; border:1px solid var(--card-border);
+}
 .ff-title-ic {
   font-size:17px; opacity:0.55; flex-shrink:0;
   color:var(--ff-title);
