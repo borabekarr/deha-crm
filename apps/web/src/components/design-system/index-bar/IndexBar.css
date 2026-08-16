@@ -40,16 +40,17 @@ html.dark .sec { color:#A1A1A1; } html.dark .sec-sub { color:#6B6B6B; }
 /* the "drawer" that peeks out below the white card — background is the
    exact green pill token (.btn-green dark fill / brand-primary-500, see
    preview/_shared-feedback.css L51), not a stage-color tint. Grid texture
-   mirrors the event-badge treatment (motion-tabs .mt-row-count L368-370 /
-   task-board .tb-stat-badge L174-177): repeating hairline lines at 7px. */
+   matches .badge-event exactly (pills/Pills.css L37): hairline lines at 16px.
+   Bottom radius 26px nests concentrically inside .idx-outer's 36px shell
+   minus its 10px padding (36 - 10 = 26). */
 .idx-drawer {
   position:relative; margin-top:-26px; padding:36px 22px 10px;
-  border-radius:0 0 24px 24px;
+  border-radius:0 0 26px 26px;
   background-color: var(--brand-primary-500);
   background-image:
     linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
-  background-size: 7px 7px;
+  background-size: 16px 16px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -2px 0 rgba(17,17,17,0.10);
   display:flex; align-items:center; justify-content:center; gap:16px;
 }

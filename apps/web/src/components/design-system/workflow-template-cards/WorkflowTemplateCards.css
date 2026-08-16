@@ -32,12 +32,6 @@
     transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
     filter calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
 }
-.wtc-outer:hover {
-  transform: scale(1.007);
-  filter:
-    drop-shadow(0 18px 52px rgba(17,17,17,0.13))
-    drop-shadow(0 3px 11px rgba(17,17,17,0.07));
-}
 .wtc-outer:active {
   transform: scale(1.003);
 }
@@ -73,9 +67,22 @@ html.dark .wtc-outer[data-squircle="on"]::before {
   height: 100%;
   display: flex;
   flex-direction: column;
+  transition: box-shadow calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .wtc-card[data-squircle="on"] {
   --corner-radius: 18px;
+}
+/* Apple-standard hover: two-layer box-shadow fade only, no lift/scale on the card itself */
+.wtc-outer:hover .wtc-card {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 1px 2px rgba(0,0,0,0.06),
+    0 8px 24px rgba(0,0,0,0.08);
+}
+html.dark .wtc-outer:hover .wtc-card {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    inset 0 0 0 1px rgba(255,255,255,0.14);
 }
 
 /* ── Preview area ────────────────────────────────────────────────────────── */
@@ -188,6 +195,11 @@ html.dark .wtc-outer[data-squircle="on"]::before {
      taller sibling in its grid row -- keeps the leftover space inside this
      section instead of showing as a stray strip below it. */
   flex: 1 0 auto;
+}
+/* Right-column cards only: realign text baseline to match left column + 3px
+   nudge down, per 2026-08-16 interview decision (left cards stay put). */
+.wtc-grid > *:nth-child(2n) .wtc-info {
+  padding-top: 16px;
 }
 .wtc-title-row {
   display: flex;

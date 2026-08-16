@@ -92,12 +92,13 @@ html.dark .cm-card[data-squircle="on"] {
 .cm-close:hover{ background:color-mix(in srgb, var(--fp-hover), #000 12%); color:var(--fg1); }
 html.dark .cm-close{ background:var(--fp-hover); color:var(--fg1); }
 html.dark .cm-close:hover{ background:color-mix(in srgb, var(--fp-hover), #fff 10%); color:var(--fg1); }
-.cm-close .material-symbols-outlined{ font-size:16px; }
+.cm-close .material-icons, .cm-close .material-symbols-outlined{ font-size:16px; }
 
 /* ---- badges + connector ---- */
-.cm-badges{ display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:15px; }
+/* Badge circle sized off the anchor: ~3.6x cm-title's 20px anchor (72px). */
+.cm-badges{ display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:18px; }
 .cm-badge{
-  width:116px; height:116px; flex:none;
+  width:72px; height:72px; flex:none;
   border-radius:var(--radius-circle);
   background:var(--card-bg, #FFFFFF);
   border:1px solid var(--card-border, #D4D4D4);
@@ -108,7 +109,7 @@ html.dark .cm-close:hover{ background:color-mix(in srgb, var(--fp-hover), #fff 1
     0 5px 12px -8px rgba(17,17,17,.22);
 }
 html.dark .cm-badge{ background:#fff; border-color:rgba(255,255,255,.14); box-shadow:inset 0 1px 3px rgba(0,0,0,.1), 0 5px 12px -8px rgba(0,0,0,.55); }
-.cm-badge svg{ width:58px; height:58px; display:block; }
+.cm-badge svg{ width:36px; height:36px; display:block; }
 .cm-connector{ display:grid; grid-template-columns:repeat(5,1fr); gap:4px; padding:0 3px; }
 .cm-connector i{
   width:3px; height:3px; border-radius:50%; background:var(--gray-300); display:block;
@@ -123,16 +124,19 @@ html.dark .cm-badge{ background:#fff; border-color:rgba(255,255,255,.14); box-sh
 }
 html.dark .cm-connector i{ background:rgba(255,255,255,.26); }
 
-/* ---- header ---- */
+/* ---- header ----
+   Anchor: cm-title @ HIG title3 (20px/600 semibold). Every section header in
+   this component (cm-title, cm-keylabel) shares this exact size+weight.
+   cm-sub steps down to subheadline (14px/500). */
 .cm-title{
   text-align:center; margin:0 0 7px;
-  font-size:18px; font-weight:var(--weight-black);
+  font-size:20px; font-weight:var(--weight-semibold);
   letter-spacing:var(--tracking-tight); color:var(--fg1);
   line-height:1.15;
 }
 .cm-sub{
-  text-align:center; margin:0 auto 15px; max-width:30ch;
-  font-size:13px; font-weight:var(--weight-medium);
+  text-align:center; margin:0 auto 17px; max-width:32ch;
+  font-size:14px; font-weight:var(--weight-medium);
   color:var(--fg3); line-height:var(--leading-snug);
   text-wrap:balance;
   display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
@@ -205,8 +209,9 @@ html.dark .cm-icontile{ background-color:#111111; border-color:rgba(255,255,255,
   45%{ transform:scale(1.14) rotate(2deg); }
   100%{ transform:scale(1) rotate(0); background-color:var(--brand-primary); }
 }
-.cm-icontile .material-symbols-outlined{ font-size:18px; line-height:1; transition:color calc(var(--duration-180) * var(--anim-mult,1)) var(--ease-fade); }
+.cm-icontile .material-icons, .cm-icontile .material-symbols-outlined{ font-size:18px; line-height:1; transition:color calc(var(--duration-180) * var(--anim-mult,1)) var(--ease-fade); }
 /* active icon: white + outer drop-shadow */
+.cm-icontile[data-active="true"] .material-icons,
 .cm-icontile[data-active="true"] .material-symbols-outlined{
   color:#fff;
   filter:drop-shadow(0 1px 2px rgba(0,0,0,0.4));
@@ -215,16 +220,19 @@ html.dark .cm-icontile{ background-color:#111111; border-color:rgba(255,255,255,
 /* method body text alignment */
 .cm-mbody{ flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center; }
 .cm-mhead{ display:flex; align-items:center; gap:7px; margin-bottom:2px; flex-wrap:wrap; }
-.cm-mname{ font-size:13px; font-weight:var(--weight-bold); color:var(--fg1); letter-spacing:-0.01em; line-height:1.2; }
+/* subheadline (14/600) / footnote (12/500) steps below the title3 anchor */
+.cm-mname{ font-size:14px; font-weight:var(--weight-semibold); color:var(--fg1); letter-spacing:-0.01em; line-height:1.2; }
 .cm-mdesc{ font-size:12px; font-weight:var(--weight-medium); color:var(--fg3); line-height:1.35; }
 
 /* RECOMMENDED badge — Pills.css .badge.gci tonal recipe: pill shape, dot-grid
    tonal background pattern, matching inset highlight/shadow stack. */
+/* caption1 (11px), 2 steps below title3 anchor; icon size is pinned equal
+   to the badge text's font-size so glyph and label read as one weight. */
 .cm-badge-rec{
   display:inline-flex; align-items:center; gap:3px;
-  font-size:9px; font-weight:900;
+  font-size:11px; font-weight:var(--weight-bold);
   line-height:1;
-  color:var(--brand-on-primary); padding:3px 8px; border-radius:9999px;
+  color:var(--brand-on-primary); padding:4px 9px; border-radius:9999px;
   background:var(--brand-primary-500);
   background-image:
     linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
@@ -236,7 +244,7 @@ html.dark .cm-icontile{ background-color:#111111; border-color:rgba(255,255,255,
     inset 0 -2px 0 rgba(17,17,17,.18),
     inset 0 0 0 1px rgba(17,17,17,.10);
 }
-.cm-badge-rec .material-symbols-outlined{ font-size:9px; text-shadow:0 1px 2px rgba(0,0,0,.4); }
+.cm-badge-rec .material-icons, .cm-badge-rec .material-symbols-outlined{ font-size:11px; text-shadow:0 1px 2px rgba(0,0,0,.4); }
 
 /* ---- radio / check ---- */
 .cm-radio{
@@ -290,7 +298,8 @@ html.dark .cm-expand[data-open="true"]{ border-top-color:var(--card-border, #232
 }
 .cm-expand[data-open="true"] .cm-keypad{ opacity:1; transform:translateY(0); }
 
-.cm-keylabel{ display:block; font-size:11px; font-weight:var(--weight-bold); color:var(--fg1); margin-bottom:7px; }
+/* section header: matches cm-title's title3 anchor exactly (test criterion) */
+.cm-keylabel{ display:block; font-size:20px; font-weight:var(--weight-semibold); color:var(--fg1); margin-bottom:9px; }
 
 .cm-field{
   display:flex; align-items:center; gap:7px;
@@ -307,7 +316,7 @@ html.dark .cm-field{ background:var(--card-bg, #1C1C1C); border-color:var(--card
 html.dark .cm-field[data-focus="true"]{ box-shadow:0 0 0 3px rgba(255,255,255,.08); }
 .cm-field[data-filled="true"]{ border-color:var(--gray-300); }
 .cm-lock{ color:var(--fg4); display:grid; place-items:center; }
-.cm-lock .material-symbols-outlined{ font-size:15px; }
+.cm-lock .material-icons, .cm-lock .material-symbols-outlined{ font-size:15px; }
 .cm-lock[data-filled="true"]{ color:var(--brand-primary-600); }
 .cm-lock[data-secure="true"]{ color:var(--brand-primary-600); animation:cm-lockpop calc(var(--duration-420) * var(--anim-mult,1)) var(--ease-spring-snap); }
 @keyframes cm-lockpop{
@@ -340,8 +349,8 @@ html.dark .cm-paste:hover{ background:var(--fp-hover); color:var(--fg1); }
 /* duration-only override: inherits per-property easing (var(--ease-fade)) from the base .cm-paste transition above, deliberate */
 .cm-paste:active{ transform:scale(var(--press-chip)); background:var(--gray-200); transition-duration:calc(var(--duration-fast) * var(--anim-mult, 1)); }
 html.dark .cm-paste:active{ background:color-mix(in srgb, #fff 14%, var(--card-bg, #1C1C1C)); }
-.cm-paste:active .material-symbols-outlined{ transform:scale(var(--press-chip)); }
-.cm-paste .material-symbols-outlined{ font-size:14px; transition:transform calc(var(--duration-fast) * var(--anim-mult,1)) var(--ease-out); }
+.cm-paste:active .material-icons, .cm-paste:active .material-symbols-outlined{ transform:scale(var(--press-chip)); }
+.cm-paste .material-icons, .cm-paste .material-symbols-outlined{ font-size:14px; transition:transform calc(var(--duration-fast) * var(--anim-mult,1)) var(--ease-out); }
 .cm-paste[data-variant="clear"]{ width:27px; padding:0; justify-content:center; }
 
 .cm-tip{
@@ -363,7 +372,9 @@ html.dark .cm-paste:active{ background:color-mix(in srgb, #fff 14%, var(--card-b
   width:100%; height:44px;
   display:inline-flex; align-items:center; justify-content:center; gap:8px;
   border:none; border-radius:12px; cursor:pointer;
-  font-family:var(--font-display); font-weight:var(--weight-extrabold); font-size:14px;
+  /* headline (16px/600), one step below the title3 anchor -- Apple's
+     primary-button weight, not the prior extrabold/900. */
+  font-family:var(--font-display); font-weight:var(--weight-semibold); font-size:16px;
   background:var(--gray-200); color:var(--gray-400);
   transition:background calc(var(--duration-slow) * var(--anim-mult,1)) var(--ease-fade), color calc(var(--duration-slow) * var(--anim-mult,1)) var(--ease-fade), transform calc(var(--duration-140) * var(--anim-mult,1)) var(--ease-out), box-shadow calc(var(--duration-slow) * var(--anim-mult,1)) var(--ease-fade), filter calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
@@ -408,7 +419,7 @@ html.dark .cm-cta{ background-color:#232323; color:var(--gray-500); }
   margin:20px 0 2px; color:var(--fg4);
   font-size:10px; font-weight:var(--weight-medium);
 }
-.cm-note .material-symbols-outlined{ font-size:12px; }
+.cm-note .material-icons, .cm-note .material-symbols-outlined{ font-size:12px; }
 .cm-note a{ color:var(--fg3); text-decoration:none; border-bottom:1px solid var(--gray-300); }
 .cm-note a:hover{ color:var(--fg2); }
 html.dark .cm-note a{ border-bottom-color:rgba(255,255,255,.22); }

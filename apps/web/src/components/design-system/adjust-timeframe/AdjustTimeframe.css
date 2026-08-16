@@ -95,7 +95,7 @@ html.dark .tf-card:not([data-squircle="on"]) {
    ~13-14px icon against smaller text; scaled up here for .tf-range's 18px
    text). */
 .tf-range-group { display: inline-flex; align-items: center; gap: 8px; }
-.tf-range-icon { font-size: 16px; line-height: 1; color: var(--fg4, #A1A1A1); }
+.tf-range-icon { font-size: 16px; line-height: 1; color: var(--fg1); font-variation-settings: 'wght' 700; }
 
 /* Item 1+2: range display — plain Montserrat black header, no pill chrome */
 .tf-range {
