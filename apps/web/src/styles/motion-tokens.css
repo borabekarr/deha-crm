@@ -44,7 +44,8 @@
   /* Step-5 motion-token migration (plan: fix-all-debts) -- extracted verbatim
    * from pre-existing literal curves in Fab.css / Toast.css / InlineEdit.css
    * flagged by .claude-ext/hooks/motion-token-gate.sh. Byte-match the
-   * literals they replace; see debt/step9-proximity-motion-token-gate.md. */
+   * literals they replace: a token added here must reproduce the extracted
+   * curve byte-for-byte, so no visual change accompanies the migration. */
   --ease-standard:    cubic-bezier(.4, 0, .2, 1);    /* Fab.css .fab-plus transform */
   --ease-accel:       cubic-bezier(.4, 0, 1, 1);     /* Toast.css exit anims; InlineEdit.css ieIcOut / .ie-act.is-confirming */
   --ease-spring-soft: cubic-bezier(.32, 1.32, .5, 1); /* Fab.css .fab-menu-hd */
@@ -82,7 +83,6 @@
   --ease-draw:          cubic-bezier(.65, 0,    .35, 1); /* AiMessageBox.css .mb-done-check path draw-in */
   --ease-spring-open:   cubic-bezier(.55, 1.35, .35, 1); /* ModelSelector.css .ms-shell.open expand */
   --ease-slide-bounce:  cubic-bezier(.34, 1.3,  .64, 1); /* ModelSelector.css .ms-sel-indicator slide */
-  --ease-goo-collapse:  cubic-bezier(.55, .35,  .85, .3); /* MessageDropdown.css gooey blob collapse */
   --ease-card-pop:      cubic-bezier(.34, 1.4,  .5,  1); /* NewsFeed.css .nf-card.anim-in enter */
   --ease-avatar-swap:   cubic-bezier(.22, 1.4,  .4,  1); /* AvatarPicker.css apSwap keyframe */
 
@@ -169,17 +169,11 @@
      token byte-matched this curve, so it is added here. */
   --ease-island-morph: cubic-bezier(.34, 1.32, .5, 1); /* DynamicIslandReader.css:21-23 .di-pill morph transition */
 
-  /* Step-1 motion-token migration (plan: ds-motion-parity) -- native
-     `ease-in` keyword, token-wrapped to mirror --ease-out-native above;
-     NOT the same curve as --ease-in-out or any --ease-* cubic-bezier here. */
-  --ease-in-native: ease-in; /* native `ease-in` keyword (cubic-bezier(.42,0,1,1)) */
-
   /* Step-4/5 motion-sweep-worklist migration (plan: fix-all-debts) -- new tokens
      minted for literals recurring 3+ times library-wide with no existing exact
      token match (post-consolidation: 15 of 27 proposals folded into existing
      tiers within 15%, see reports/motion-sweep-worklist.md consolidation
      addendum). Values extracted verbatim; no existing token modified. */
-  --duration-30: 30ms;   /* library-wide: 3 uses, no prior exact tier */
   --duration-40: 40ms;   /* library-wide: 6 uses, no prior exact tier */
   --duration-50: 50ms;   /* library-wide: 4 uses, no prior exact tier */
   --duration-60: 60ms;   /* library-wide: 5 uses, no prior exact tier */
@@ -193,6 +187,27 @@
   --duration-2200: 2200ms;   /* library-wide: 4 uses, no prior exact tier */
   --ease-sweep-1: cubic-bezier(0.32, 1.12, 0.4, 1.0);  /* library-wide non-hover reuse of an otherwise-unmatched curve, 6 uses */
   --ease-motion-sweep-2236: cubic-bezier(.22, 1, .36, 1);  /* the three spellings of this curve (28 uses, rule 3) collapse to this one token -- exact value, no rounding */
+
+  /* Step-3 on-visible entrance migration (plan: ds-primer-entrance) -- Primer
+     "on-visible" reveal: fade + upward slide, triggered by IntersectionObserver
+     instead of mount. Fix round (plan: primer-entrance-fixes): retuned to
+     Primer's exact published values (@primer/react-brand main.css) --
+     --duration-entrance is --brand-animation-duration-default (0.6s);
+     --ease-brand-entrance is --brand-animation-easing-default, a new token
+     since this curve does not byte-match --ease-motion-sweep-2236.
+     --stagger-entrance mints a semantically-named alias for the 100ms
+     DOM-order stagger increment; the raw value equals --duration-instant but
+     is kept separate so the engine's stagger math reads as "stagger", not
+     "duration". */
+  --duration-entrance: 600ms;
+  --ease-brand-entrance: cubic-bezier(0.16, 1, 0.3, 1);
+  --stagger-entrance: 100ms;
+
+  /* F3: the only sanctioned segmented-thumb (pill-switch) easing. Bounce /
+     overshoot curves are banned for pill switching per the frontend motion
+     contract -- every seg-pill / segmented-control thumb transition routes
+     through this token instead of a local overshoot bezier. */
+  --ease-pill-switch: cubic-bezier(.22, 1, .36, 1);
 }
 
 /* Step-1 direction-aware panel switch (plan: dsfb-02-direction-aware-switch-canon)

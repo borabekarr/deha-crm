@@ -1,12 +1,42 @@
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './MotionTabs.css'
-import { useState } from 'react'
+import { useState, useCallback, useLayoutEffect, useRef } from 'react'
 import { mtRootRef, cleanupMtRoot } from './motion-tabs-hook'
 import { useSquircle } from '../../../lib/hooks/use-squircle'
 import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 import { usePanelDirection } from '../../../lib/hooks/use-panel-direction'
-import { usePillSpring } from '../../../lib/motion-spring'
+
+// Measured left/width glide for the tab indicator -- mirrors the controls
+// seg-pill / leaderboard seg-pill recipe (imperative style writes, animation
+// via the CSS `transition` on left/width using --ease-pill-switch) instead of
+// the framer-motion spring previously used here, per the "match the controls
+// seg-pill, no overshoot" fix. Geometry (x/width) is derived math, not DOM
+// measurement, so no reposition-on-resize is needed.
+function usePillGlide<T extends HTMLElement>(x: number, width: number) {
+  const elRef = useRef<T | null>(null)
+  const painted = useRef(false)
+  const ref = useCallback((el: T | null) => {
+    elRef.current = el
+    if (!el) painted.current = false
+  }, [])
+  useLayoutEffect(() => {
+    const el = elRef.current
+    if (!el) return
+    if (!painted.current) {
+      painted.current = true
+      el.style.transition = 'none'
+      el.style.left = `${x}px`
+      el.style.width = `${width}px`
+      void el.offsetWidth
+      el.style.transition = ''
+      return
+    }
+    el.style.left = `${x}px`
+    el.style.width = `${width}px`
+  }, [x, width])
+  return ref
+}
 
 // ---------------------------------------------------------------------------
 // MotionTabs — Morphing icon-to-label tabs with slide-up popup panels
@@ -116,7 +146,7 @@ export default function MotionTabs() {
   )
   const indW = tabSlotWidth(activeIndex)
 
-  const mtIndRef = usePillSpring<HTMLDivElement>(indX, indW)
+  const mtIndRef = usePillGlide<HTMLDivElement>(indX, indW)
 
   const isOpen = view !== 'default'
 
@@ -192,6 +222,11 @@ export default function MotionTabs() {
 
                 {TABS.map((tab, i) => {
                   const isActiveTab = active === tab.key
+                  const tabPanelState = panelState(i)
+                  const enteringTabState =
+                    tabPanelState === 'entering-right' || tabPanelState === 'entering-left'
+                      ? tabPanelState
+                      : undefined
                   return (
                     <button
                       key={tab.key}
@@ -205,15 +240,24 @@ export default function MotionTabs() {
                       data-proximity
                     >
                       <span className="mt-hold" />
-                      <span className="mt-iconbox">
-                        <span className="mt-ic off">
-                          <span className="material-symbols-outlined">{tab.icon}</span>
+                      {/* .mt-content: dedicated wrapper for the direction-aware
+                          translateX/opacity keyframe. Its transform/opacity
+                          channels are otherwise untouched, so the keyframe
+                          never fights .mt-iconbox's own width transition or
+                          .mt-label's own collapse transform -- those stay on
+                          the (unmoved) children, composing additively with
+                          the wrapper's transform instead of overwriting it. */}
+                      <span className="mt-content" data-panel-state={enteringTabState}>
+                        <span className="mt-iconbox">
+                          <span className="mt-ic off">
+                            <span className="material-symbols-outlined">{tab.icon}</span>
+                          </span>
+                          <span className="mt-ic on">
+                            <span className="material-symbols-outlined">{tab.icon}</span>
+                          </span>
                         </span>
-                        <span className="mt-ic on">
-                          <span className="material-symbols-outlined">{tab.icon}</span>
-                        </span>
+                        <span className="mt-label">{tab.label}</span>
                       </span>
-                      <span className="mt-label">{tab.label}</span>
                     </button>
                   )
                 })}

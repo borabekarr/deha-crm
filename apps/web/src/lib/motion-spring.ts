@@ -22,9 +22,9 @@ export const PILL_SPRING = { type: 'spring', stiffness: 520, damping: 38 } as co
 export const EASE_SLIDE_BOUNCE = 'cubic-bezier(.34,1.3,.64,1)'
 
 /** E2 verdict (2026-08-06): mirrors `--ease-spring-open` in motion-tokens.css,
- *  the house open-spring used by message-dropdown. FinancialHealthCard now
- *  uses this for BOTH its open and close leg so the two components' open/close
- *  motion reads as one shared spring family instead of two distinct feels. */
+ *  the house open-spring. FinancialHealthCard now uses this for BOTH its
+ *  open and close leg so the two legs read as one shared spring family
+ *  instead of two distinct feels. */
 export const EASE_SPRING_OPEN = 'cubic-bezier(.55,1.35,.35,1)'
 
 function motionDisabled(el: HTMLElement): boolean {

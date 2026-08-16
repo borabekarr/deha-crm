@@ -26,6 +26,26 @@ html.dark {
   --fp-hover: #242424;
 }
 
+/* ---------------------------------------------------------------------
+ * Global hover standard (F10): the ONE sanctioned house hover. Grey fill
+ * only -- background-color transition, no scale/filter/lift/brightness.
+ * Source recipe: DisclosureGroup.css .dg-item:hover (~lines 155-158).
+ * New/updated hover spots should apply the `.hover-standard` utility (or
+ * the --hover-standard-bg token directly) instead of hand-rolling a fill.
+ * The 28 existing hover consumers are NOT migrated by this change; that
+ * is a separate future app-wide adoption plan.
+ * ------------------------------------------------------------------- */
+:root {
+  --hover-standard-bg: var(--fp-hover);
+}
+.hover-standard {
+  transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
+}
+.hover-standard:hover,
+.hover-standard:focus-visible {
+  background: var(--hover-standard-bg);
+}
+
 @media (hover: hover) and (pointer: fine) {
   /* Selector repeated 3x (specificity 0,3,0) to outrank component-level
    * `.class:hover { filter: ... }` rules (0,2,0, e.g. .btn-primary:hover in
