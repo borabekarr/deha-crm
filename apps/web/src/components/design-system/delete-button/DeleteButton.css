@@ -18,26 +18,24 @@
   color: #fff;
   overflow: hidden;
   /* Press asymmetry: the transform leg reads its duration from --db-press-dur,
-     which :active swaps to the faster tier — press-in snaps (120ms), release
-     settles (180ms). Value-identical tokenization of the ported literals:
-     0.26s = --duration-260, 0.34s = 180 + base(160), 0.18s = --duration-180,
-     cubic-bezier(.22,1,.36,1) = --ease-out, bare `ease` = --ease-fade. */
-  --db-press-dur: calc(var(--duration-180) * var(--anim-mult, 1));
-  /* Odometer curve. cubic-bezier(.33, 1, .68, 1) (the ported roll easing) has
-     no byte-matching token in motion-tokens.css and that file is Locked for
-     this pass, so it lives here as a component-local ease var (same precedent
-     as CurrencyConverter's --cc-ease-swap before promotion). Promote on the
-     next motion-tokens pass. */
-  --ease-db-roll: cubic-bezier(0.33, 1, 0.68, 1);
+     which :active swaps to the faster tier. All durations and easings below
+     resolve through motion-tokens.css var(--duration-*)/var(--ease-*) --
+     no raw ms/s literal or hand-written easing curve in this file.
+     motion-sweep step 2: every leg moved to a shorter token in the same
+     easing family -- brisk, not instant. Before -> after (ms):
+     press 180->140 (active 120->100), width 260->200,
+     color/bg/shadow 340->260, odometer roll curve promoted to
+     var(--ease-out) (was a component-local cubic-bezier var). */
+  --db-press-dur: calc(var(--duration-140) * var(--anim-mult, 1));
   transition:
-    width calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-out),
-    background-color calc((var(--duration-180) + var(--duration-base)) * var(--anim-mult, 1)) var(--ease-fade),
-    color calc((var(--duration-180) + var(--duration-base)) * var(--anim-mult, 1)) var(--ease-fade),
-    box-shadow calc((var(--duration-180) + var(--duration-base)) * var(--anim-mult, 1)) var(--ease-fade),
+    width calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out),
+    background-color calc((var(--duration-140) + var(--duration-fast)) * var(--anim-mult, 1)) var(--ease-fade),
+    color calc((var(--duration-140) + var(--duration-fast)) * var(--anim-mult, 1)) var(--ease-fade),
+    box-shadow calc((var(--duration-140) + var(--duration-fast)) * var(--anim-mult, 1)) var(--ease-fade),
     transform var(--db-press-dur) var(--ease-out);
 }
 .db:active {
-  --db-press-dur: calc(var(--duration-fast) * var(--anim-mult, 1));
+  --db-press-dur: calc(var(--duration-instant) * var(--anim-mult, 1));
   transform: scale(0.97);
 }
 /* `done` is a terminal, non-clickable state (onClick ignores it) — do not offer
@@ -58,35 +56,33 @@
    background trick (that read as a glow), just a clean focus pull. */
 .db-inner {
   transition:
-    opacity calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade),
-    filter calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade),
-    transform calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-out);
+    opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
+    filter calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out);
 }
 /* will-change only while a morph is actually in flight — a permanent layer
    promotion on an idle button costs memory for nothing. */
-.db[data-phase='out'] .db-inner,
 .db[data-phase='morph'] .db-inner,
 .db[data-phase='in'] .db-inner {
   will-change: opacity, filter, transform;
 }
-.db[data-phase='out'] .db-inner,
+/* MORPH is a hard, untransitioned snap into the hidden entrance pose (new
+   content mounts already blurred/shrunk) -- the label swap tracks the width
+   change directly instead of holding an OUT frame first (F24). */
 .db[data-phase='morph'] .db-inner {
   opacity: 0;
   filter: blur(6px);
   transform: scale(0.82);
-  transition:
-    opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
-    filter calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
-    transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade);
+  transition: none;
 }
 .db[data-phase='in'] .db-inner {
   opacity: 1;
   filter: blur(0);
   transform: none;
   transition:
-    opacity calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-fade),
-    filter calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-fade),
-    transform calc((var(--duration-180) + var(--duration-base)) * var(--anim-mult, 1)) var(--ease-out);
+    opacity calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade),
+    filter calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc((var(--duration-140) + var(--duration-fast)) * var(--anim-mult, 1)) var(--ease-out);
 }
 .db[data-phase='rest'] .db-inner {
   opacity: 1;
@@ -212,8 +208,11 @@
   display: inline-grid;
   place-items: center;
   flex: none;
-  width: 34px;
-  height: 34px;
+  /* Sized to sit close to .db-text's 15px (F24: was 34px, read oversized
+     next to the label). */
+  width: 26px;
+  height: 26px;
+  font-size: 15px;
   border-radius: 50%;
   background: var(--semantic-danger);
   color: #fff;
@@ -224,15 +223,11 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.35),
     inset 0 -1.5px 0 rgba(0, 0, 0, 0.18);
   transition:
-    opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
-    transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade);
-  /* 0.38s = 200+180, delay 0.32s = --duration-320 (both value-identical). */
-  animation: dbPop calc((var(--duration-200) + var(--duration-180)) * var(--anim-mult, 1))
-    var(--ease-out) calc(var(--duration-320) * var(--anim-mult, 1)) backwards;
-}
-.db[data-phase='out'] .db-count {
-  opacity: 0;
-  transform: scale(0.5);
+    opacity calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade);
+  /* duration-150 + duration-140, delay duration-260 (motion-sweep: shorter than before). */
+  animation: dbPop calc((var(--duration-150) + var(--duration-140)) * var(--anim-mult, 1))
+    var(--ease-out) calc(var(--duration-260) * var(--anim-mult, 1)) backwards;
 }
 @keyframes dbPop {
   from {
@@ -248,8 +243,8 @@
 .db-roll {
   position: relative;
   display: inline-block;
-  height: 19px;
-  min-width: 13px;
+  height: 17px;
+  min-width: 12px;
   overflow: hidden;
 }
 .db-d {
@@ -259,22 +254,24 @@
   top: 0;
   display: block;
   text-align: center;
-  font-size: 16px;
-  line-height: 19px;
+  /* Matches .db-text's 15px (F24: was 16px on a 34px badge). */
+  font-size: 15px;
+  line-height: 17px;
 }
 .db-d.cur {
   position: static;
 }
 @media (prefers-reduced-motion: no-preference) {
-  /* 0.52s = 320+200. MIRROR: DeleteButton.tsx ROLL_MS (520) times the same
-     --anim-mult, so the JS swap back to the resting digit stays in sync. */
+  /* duration-260 + duration-150 (motion-sweep: shorter than before). MIRROR: DeleteButton.tsx ROLL_MS
+     (410) times the same --anim-mult, so the JS swap back to the resting
+     digit stays in sync. */
   .db-d.in {
-    animation: dbRollIn calc((var(--duration-320) + var(--duration-200)) * var(--anim-mult, 1))
-      var(--ease-db-roll);
+    animation: dbRollIn calc((var(--duration-260) + var(--duration-150)) * var(--anim-mult, 1))
+      var(--ease-out);
   }
   .db-d.up {
-    animation: dbRollUp calc((var(--duration-320) + var(--duration-200)) * var(--anim-mult, 1))
-      var(--ease-db-roll) forwards;
+    animation: dbRollUp calc((var(--duration-260) + var(--duration-150)) * var(--anim-mult, 1))
+      var(--ease-out) forwards;
   }
 }
 @keyframes dbRollIn {

@@ -179,21 +179,20 @@
      curve -> --ease-motion-sweep-2236. The raw transform leg was .12s==120ms;
      ds-review-overlays step 1 deliberately raised THIS (release) leg to
      --duration-200, keeping the 120ms --duration-fast press in :active below. */
-  transition: background var(--duration-140) var(--ease-fade), color var(--duration-140) var(--ease-fade), transform var(--duration-200) var(--ease-motion-sweep-2236);
+  transition: background var(--duration-fast) var(--ease-out), color var(--duration-140) var(--ease-fade), transform var(--duration-200) var(--ease-motion-sweep-2236);
   -webkit-tap-highlight-color: transparent;
 }
-/* pointer-pan / hover highlight -- subtle scale-up + emerald wash (the web
-   analog of the RN pan-over highlight + haptic tick) */
-.dd-item[data-active="true"] { background: rgba(16,185,129,.10); transform: scale(1.018); }
+/* pointer-pan / hover highlight -- house grey (F23), token-routed via
+   --hover-standard-bg (theme-aware, hover-tokens.css); subtle scale-up kept */
+.dd-item[data-active="true"] { background: var(--hover-standard-bg); transform: scale(1.018); }
 /* REVIEW FIX (asymmetric press): press snaps at 120ms, release settles at the
    200ms base above. Full list re-declared. */
 .dd-item:active {
   transform: scale(.975);
-  transition: background var(--duration-140) var(--ease-fade), color var(--duration-140) var(--ease-fade), transform var(--duration-fast) var(--ease-motion-sweep-2236);
+  transition: background var(--duration-fast) var(--ease-out), color var(--duration-140) var(--ease-fade), transform var(--duration-fast) var(--ease-motion-sweep-2236);
 }
 .dd-item:disabled { opacity: .42; cursor: default; }
 .dd-item:disabled[data-active="true"] { background: transparent; transform: none; }
-[data-theme="dark"] .dd-item[data-active="true"] { background: rgba(16,185,129,.16); }
 
 /* raw: color .14s ease -- .14s==140ms -> --duration-140; bare `ease` -> --ease-fade. */
 .dd-item .ic { font-size: 20px; flex: none; width: 22px; text-align: center; color: var(--fg3); transition: color var(--duration-140) var(--ease-fade); }
@@ -209,12 +208,11 @@
 .dd-item[data-active="true"] .dd-item-shortcut { background: rgba(16,185,129,.16); color: var(--brand-primary-700); }
 [data-theme="dark"] .dd-item[data-active="true"] .dd-item-shortcut { color: var(--brand-primary-300); }
 
-/* destructive variant */
+/* destructive variant (F23): row hovers grey exactly like the others
+   (inherits .dd-item[data-active="true"] above); only the trash icon reddens
+   on hover, scoped to .ic so the row itself never tints red. */
 .dd-item.is-destructive { color: var(--semantic-danger); }
-.dd-item.is-destructive .ic { color: var(--semantic-danger); }
-.dd-item.is-destructive[data-active="true"] { background: var(--semantic-danger-bg); }
 .dd-item.is-destructive[data-active="true"] .ic { color: var(--semantic-danger); }
-[data-theme="dark"] .dd-item.is-destructive[data-active="true"] { background: rgba(239,68,68,.14); }
 
 .dd-sep { height: 1px; margin: 5px 8px; background: var(--border-hairline); }
 [data-theme="dark"] .dd-sep { background: #2A3A52; }

@@ -1,7 +1,6 @@
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './Dropdown.css'
-import './proto/variants.css'
 
 // ---------------------------------------------------------------------------
 // Dropdown — Deha Design System
@@ -46,7 +45,6 @@ import {
   type RefObject,
 } from 'react'
 import { createPortal } from 'react-dom'
-import { ProtoPicker } from './proto/ProtoPicker'
 
 // ── placement math ──────────────────────────────────────────────────────
 
@@ -511,39 +509,6 @@ function Demo() {
   )
 }
 
-// ── prototype surface (ds-review-overlays step 2) ────────────────────────
-// Three divergent directions behind the prototype skill's picker; "Main" is
-// the shipped component untouched and is the designated cherry-pick baseline
-// (star in the picker). Variant styling lives entirely in proto/variants.css,
-// keyed off a .ddv-<slug> class on <html> because the menu portals to <body>.
-// Delete this block + proto/ to strip the prototypes.
-
-const VARIANT_SLUGS = ['main', 'assembled', 'glass', 'weighted'] as const
-const VARIANT_NAMES = ['Main', 'Assembled', 'Glass', 'Weighted']
-
 export default function DropdownDemo() {
-  const [variant, setVariant] = useState(0)
-  const [nonce, setNonce] = useState(0) // replay: re-mount so entrances re-run
-  const slug = VARIANT_SLUGS[variant]
-
-  useEffect(() => {
-    const cls = 'ddv-' + slug
-    document.documentElement.classList.add(cls)
-    return () => document.documentElement.classList.remove(cls)
-  }, [slug])
-
-  return (
-    <div style={{ display: 'grid', placeItems: 'center' }}>
-      <div className={'dd-proto-root ddv-' + slug} data-variant={slug} key={slug + ':' + nonce}>
-        <Demo />
-      </div>
-      <ProtoPicker
-        names={VARIANT_NAMES}
-        index={variant}
-        mainIndex={0}
-        onSelect={setVariant}
-        onReplay={() => setNonce((n) => n + 1)}
-      />
-    </div>
-  )
+  return <Demo />
 }
