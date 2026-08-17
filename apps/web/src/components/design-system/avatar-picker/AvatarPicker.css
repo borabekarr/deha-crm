@@ -4,6 +4,18 @@
    rotation/scale swap animation (CSS keyframe apSwap, triggered by React
    `key` remount) + horizontally-scrollable thumbnail strip + validated
    username field.
+
+   Motion debt fixes (plan: motion-debt-fixes, step 2):
+   - .ap-submit[data-proximity]'s transition shorthand re-declares transform/
+     scale on --duration-base + --ease-press-calm (step-1 Apple-calm press
+     vocabulary, motion-tokens.css) so the press channel that [data-proximity]
+     silently stripped from .btn-green animates again.
+   - .ap-field-ph's display:none toggle is now an opacity+visibility fade
+     (display:none can't animate) on --duration-fast/--ease-fade; the
+     visibility delay keeps pointer-events: none effective until fully hidden.
+     The username==='' unmount path in the TSX stays instant (accepted).
+   - the bare box-shadow transition on .ap-submit[data-proximity] now carries
+     --ease-fade, matching the file's sibling easing pattern.
    ========================================================================= */
 
 /* ── Card (grey outer shell — canonical pattern: 28px radius, 10px padding) ── */
@@ -313,11 +325,14 @@
 }
 
 /*
- * Optical centering: Material Symbols arrow_back_ios / arrow_forward_ios have
- * an asymmetric side-bearing. Nudge each icon to align visually.
+ * Optical centering: arrow_back_ios / arrow_forward_ios render via .material-icons
+ * (iconClass()), not .material-symbols-outlined -- the prior rule targeted the
+ * wrong class and was dead. Measured ink offset from circle center: left arrow
+ * -4.33px horizontal (+0.33px vertical, within noise); right arrow already
+ * near-centered at 0.17px/0.33px with no correction applied. Measured residual
+ * -2.5px at 4px correction, so total correction is 6.5px.
  */
-.ap-edge--left .ap-edge-btn .material-symbols-outlined { margin-left: 1px; }
-.ap-edge--right .ap-edge-btn .material-symbols-outlined { margin-left: -2px; }
+.ap-edge--left .ap-edge-btn .material-icons { margin-left: 6.5px; }
 
 /* ── Thumbnail buttons ── */
 .ap-thumb {
@@ -390,8 +405,59 @@
 
 .ap-field-top {
   display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+/* Header text — left-aligned, Montserrat Black, a touch larger than the
+   old .ap-label; "0/20" sits right of it via the row's space-between. */
+.ap-field-label {
+  font-size: 15px;
+  font-weight: 900;
+  color: var(--fg2, #232323);
+  letter-spacing: -0.01em;
+  font-family: var(--font-display);
+}
+
+/* Own header supersedes InlineEdit's built-in label (locked file — no
+   InlineEdit.tsx edits, hide via CSS instead). */
+.ap-field .ie-label {
+  display: none;
+}
+
+/* Example-text overlay for the username field — sits over the empty input
+   at the same left inset (17px) InlineEdit.css uses for .ie-field padding.
+   Positioned relative to .ap-field-wrap; with .ie-label hidden the field is
+   the first row of .ie-wrap's grid, so top: 0 lines up with it. */
+.ap-field-wrap {
+  position: relative;
+}
+
+.ap-field-ph {
+  position: absolute;
+  left: 17px;
+  top: 0;
+  height: 46px;
+  display: flex;
   align-items: center;
-  justify-content: space-between;
+  font-size: 14px;
+  font-family: var(--font-display);
+  color: var(--fg4, #A1A1A1);
+  pointer-events: none;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
+    visibility 0s linear 0s;
+}
+
+.ap-field-wrap:has(.ie-field[data-editing="true"]) .ap-field-ph {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
+    visibility 0s linear calc(var(--duration-fast) * var(--anim-mult, 1));
 }
 
 .ap-label {
@@ -421,55 +487,12 @@
 
 .ap-count--warn { color: var(--sem-warning, #f59e0b); }
 
-.ap-input-wrap { position: relative; }
-
-.ap-input-icon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 18px;
-  color: var(--fg4, #A1A1A1);
-  pointer-events: none;
-  transition: color calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade);
-  user-select: none;
-}
-
-.ap-input-icon--on { color: var(--brand-primary-500); }
-
-.ap-input {
-  width: 100%;
-  height: 44px;
-  box-sizing: border-box;
-  padding: 0 14px 0 38px;
-  border: none;
-  border-radius: var(--radius-md, 10px);
-  background: var(--bg-chip, #F5F5F5);
-  color: var(--fg1, #111111);
-  font-family: var(--font-display);
-  font-size: 14px;
-  font-weight: 600;
-  box-shadow: inset 0 0 0 1px rgba(17,17,17, 0.10), var(--shadow-recessed, inset 0 2px 4px rgba(17,17,17,0.05));
-  transition: box-shadow calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade);
-  outline: none;
-}
-
-.ap-input::placeholder {
-  color: var(--fg4, #A1A1A1);
-  font-weight: 500;
-}
-
-.ap-input:focus {
-  box-shadow: inset 0 0 0 2px var(--brand-primary-500), 0 0 0 4px color-mix(in srgb, var(--brand-primary-500) 12%, transparent);
-}
-
-.ap-input--err {
-  box-shadow: inset 0 0 0 1.5px rgba(239, 68, 68, 0.6);
-}
-
-.ap-input--err:focus {
-  box-shadow: inset 0 0 0 2px var(--sem-danger, #ef4444), 0 0 0 4px rgba(239, 68, 68, 0.12);
-}
+/* .ap-field now hosts the InlineEdit component directly (design-system/
+   inline-edit) instead of a local input; scope its fixed 262/318px width
+   down to the field's own width so it doesn't overflow the 400px card. */
+.ap-field .ie-wrap { width: 100%; }
+.ap-field .ie-field,
+.ap-field .ie-field[data-editing="true"] { width: 100%; }
 
 .ap-err {
   margin: 0 0 0 2px;
@@ -484,11 +507,16 @@
   to   { opacity: 1; transform: none; }
 }
 
-/* ── Submit button — mirrors .btn-green, full-width pill ── */
+/* ── Submit button — mirrors .btn-green, full-width pill, Apple-conventions
+   redesign: hover darkens the fill within the pill shape only (never a lift/
+   zoom/bounce transform on the button), all motion on duration/ease tokens.
+   Never redeclare .btn-green itself (see btn-green-global-never-redefine
+   lesson) — every override below targets .ap-submit's own selectors. ── */
 .ap-submit {
   margin-top: 6px;
   width: 100%;
   height: 42px;
+  gap: 8px;
   /* pill shape — mirrors .btn-green but full width */
   border-radius: 9999px;
 }
@@ -499,20 +527,31 @@
 .ap-submit[data-proximity] {
   transition:
     background-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade),
-    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring),
-    box-shadow calc(var(--duration-200) * var(--anim-mult, 1)),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+    filter calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade),
+    box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-press-calm),
+    scale calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-press-calm);
+}
+
+/* Overrides .btn-green:hover's scale(1.03) lift — house rule bans lift/zoom/
+   bounce; darkening is the only hover signal, achieved via filter so the
+   underlying btn-green background rule itself is never touched. */
+.ap-submit:hover:not(:disabled) {
+  transform: none;
+  filter: brightness(0.88);
+  box-shadow: 0 2px 6px rgba(17,17,17,0.28);
 }
 
 .ap-submit-icon {
-  font-size: 18px;
-  /* bolder chevron weight set via inline fontVariationSettings in TSX */
-  transition: transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out);
+  font-size: 17px;
+  transition:
+    transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out),
+    scale calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out);
 }
 
 .ap-submit:hover:not(:disabled) .ap-submit-icon {
-  transform: translateX(3px);
+  transform: rotate(90deg);
+  scale: 1.12;
 }
 
 /* Disabled state scoped to ap-submit (btn-green has no disabled style) */

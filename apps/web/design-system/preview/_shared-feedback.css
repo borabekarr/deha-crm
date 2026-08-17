@@ -42,7 +42,7 @@ html.dark {
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 2px 6px rgba(17,17,17,0.28);
   transition:
     background-color calc(180ms * var(--anim-mult, 1)),
-    transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-press-calm),
     box-shadow calc(200ms * var(--anim-mult, 1));
 }
 .btn-green:hover { transform: scale(1.03); box-shadow: 0 8px 20px rgba(17,17,17,0.32), inset 0 1px 0 rgba(255,255,255,0.2); }
@@ -62,7 +62,7 @@ html.dark .btn-green { background: var(--brand-primary-500); color: var(--brand-
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 2px 6px rgba(245,158,11,0.30);
   transition:
     background-color calc(180ms * var(--anim-mult, 1)),
-    transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-press-calm),
     box-shadow calc(200ms * var(--anim-mult, 1));
 }
 .btn-yellow:hover { transform: scale(1.03); box-shadow: 0 8px 20px rgba(245,158,11,0.34), inset 0 1px 0 rgba(255,255,255,0.28); }
@@ -82,7 +82,7 @@ html.dark .btn-yellow { background: #F59E0B; box-shadow: inset 0 1px 0 rgba(255,
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 2px 6px rgba(239,68,68,0.30);
   transition:
     background-color calc(180ms * var(--anim-mult, 1)),
-    transform calc(160ms * var(--anim-mult, 1)) cubic-bezier(.34,1.56,.64,1),
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-press-calm),
     box-shadow calc(200ms * var(--anim-mult, 1));
 }
 .btn-red:hover { transform: scale(1.03); box-shadow: 0 8px 20px rgba(239,68,68,0.34), inset 0 1px 0 rgba(255,255,255,0.28); }
@@ -168,7 +168,7 @@ html.dark .sem.hot     { background: #2a1506 !important; color: #FDBA74 !importa
     radial-gradient(ellipse at top right, rgba(255,255,255,0.20) 0%, transparent 55%),
     linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
-  background-size: cover, 7px 7px, 7px 7px;
+  background-size: cover, 16px 16px, 16px 16px;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.55),
     inset 0 -2px 0 rgba(17,17,17,0.20),
@@ -193,7 +193,6 @@ html.dark .sem.hot     { background: #2a1506 !important; color: #FDBA74 !importa
 
 .icon-badge--lg {
   width: 38px; height: 38px; border-radius: 11px;
-  background-size: cover, 4px 4px, 4px 4px;
 }
 .icon-badge--lg .material-icons,
 .icon-badge--lg .material-symbols-outlined { font-size: 20px; }

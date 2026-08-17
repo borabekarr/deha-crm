@@ -7,6 +7,8 @@ import { iconClass } from '../../../lib/iconClass'
 import { validateUsername } from './avatar-picker-hook'
 import { useSquircle } from '../../../lib/hooks/use-squircle'
 import { useProximityGroup } from '@/lib/hooks'
+// direct copy - paste (Bora): username input reuses inline-edit as-is, no behavioral changes.
+import InlineEdit from '../inline-edit/InlineEdit'
 
 // ---------------------------------------------------------------------------
 // AvatarPicker — profile-setup avatar picker
@@ -52,7 +54,6 @@ const AVATARS: Avatar[] = [
 export default function AvatarPicker({ onComplete }: AvatarPickerProps) {
   const [selected, setSelected] = useState<Avatar>(AVATARS[0])
   const [username, setUsername] = useState('')
-  const [focused, setFocused] = useState(false)
   // Track scroll edges: canScrollLeft / canScrollRight
   // Discrete two-page slide: 0 = first 4 avatars, 1 = last 4 avatars
   const [page, setPage] = useState(0)
@@ -185,42 +186,36 @@ export default function AvatarPicker({ onComplete }: AvatarPickerProps) {
           </div>{/* end .ap-strip-outer */}
         </div>
 
-        {/* Username field */}
+        {/* Username field — direct copy of inline-edit (design-system/inline-edit/InlineEdit.tsx),
+            no behavioral changes; committed value drives validation/submit below. */}
         <div className="ap-field">
           <div className="ap-field-top">
-            <label className="ap-label" htmlFor="ap-username">
-              <span className={iconClass('person') + ' ap-label-icon'}>person</span>
-              Username
-            </label>
+            <span className="ap-field-label">Username</span>
             <span className={'ap-count' + (nearLimit ? ' ap-count--warn' : '')}>
               {username.length}/20
             </span>
           </div>
 
-          <div className="ap-input-wrap">
-            <span className={iconClass('edit') + ' ap-input-icon' + (focused ? ' ap-input-icon--on' : '')}>
-              edit
-            </span>
-            <input
-              id="ap-username"
-              className={'ap-input' + (showError ? ' ap-input--err' : '')}
-              type="text"
-              aria-label="Username"
-              placeholder="your_username..."
-              maxLength={20}
-              spellCheck={false}
-              autoComplete="off"
+          <div className="ap-field-wrap">
+            <InlineEdit
+              fieldLabel="Username"
+              prefix={false}
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              onFocus={() => setFocused(true)}
-              onBlur={() => setFocused(false)}
+              onCommit={(next) => setUsername(next.slice(0, 20))}
             />
+            {/* Grey example text — CSS-only visibility via InlineEdit's existing
+                data-editing attribute, no InlineEdit prop changes needed. */}
+            {username === '' && <span className="ap-field-ph" aria-hidden="true">@jeru</span>}
           </div>
 
           {showError && (
             <p className="ap-err" role="alert">Username must be at least 3 characters</p>
           )}
 
+          {/* Apple-conventions redesign: hover darkens the fill within the pill (no
+              lift/scale/translate on the button itself), plus-icon rotates+scales
+              subtly on hover; button-level motion stays on var(--duration-*)/
+              var(--ease-*) tokens (see .ap-submit rules in AvatarPicker.css). */}
           <button
             type="button"
             className="btn-green ap-submit"
@@ -228,13 +223,10 @@ export default function AvatarPicker({ onComplete }: AvatarPickerProps) {
             disabled={!isValid}
             onClick={submit}
           >
-            Get Started
-            <span
-              className={iconClass('chevron_right') + ' ap-submit-icon'}
-              style={{ fontVariationSettings: "'wght' 700" }}
-            >
-              chevron_right
+            <span className={iconClass('add') + ' ap-submit-icon'} aria-hidden="true">
+              add
             </span>
+            Get Started
           </button>
         </div>
 

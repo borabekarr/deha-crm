@@ -26,20 +26,23 @@
   --duration-slow: 220ms;    /* .btn-cta / .btn-delete / .btn-apply / .btn-apply-label background-color & filter transitions */
 
   /* Easing.
-   * --ease-spring and --ease-out are ALREADY canonically defined in
-   * ../../design-system/preview/_shared-feedback.css (lines 215-216) with
-   * these exact values, and that file is @imported globally ahead of every
-   * component stylesheet (see styles/global.css load order). To avoid a
-   * conflicting double-definition they are NOT redeclared here -- this file
-   * only adds the one easing token missing from that set. Buttons.css
-   * previously guarded one usage with a literal fallback,
-   * `var(--ease-out, cubic-bezier(.22,1,.36,1))`, for the theoretical case
-   * where --ease-out was not yet resolvable; since the running app always
-   * loads global.css (and therefore _shared-feedback.css) before any
-   * component mounts, that fallback was redundant and has been removed as
-   * part of this migration.
+   * --ease-spring and --ease-out are now canonically defined below,
+   * byte-identical to ../../design-system/preview/_shared-feedback.css
+   * (lines 214-215), which retains its own copy for standalone preview
+   * consumers and is otherwise untouched. Promoted here (plan:
+   * motion-token-debt) because ~66/47 app files resolved these vars only
+   * through the preview file's global load order, a fragile cross-file
+   * dependency. Buttons.css previously guarded one usage with a literal
+   * fallback, `var(--ease-out, cubic-bezier(.22,1,.36,1))`, for the
+   * theoretical case where --ease-out was not yet resolvable; since the
+   * running app always loads global.css (and therefore _shared-feedback.css)
+   * before any component mounts, that fallback was redundant and has been
+   * removed as part of this migration.
    */
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1); /* overshoot curve retained only for legacy references; new work uses the no-bounce vocabulary */
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
   --ease-in-out: cubic-bezier(0.42, 0, 0.58, 1); /* standard ease-in-out; no literal instance existed in Buttons.css to extract from -- added to complete the easing set requested for this step, currently unused by Buttons.css */
+  --ease-press-calm: cubic-bezier(0.23, 1, 0.32, 1); /* Apple-calm press curve (plan: motion-debt-fixes step 1) -- ease-out family, no overshoot; replaces --ease-spring on press/click transforms across .btn-green/.btn-cta/[data-proximity]. Duration reuses --duration-base (160ms), already in the house state-change band. */
 
   /* Step-5 motion-token migration (plan: fix-all-debts) -- extracted verbatim
    * from pre-existing literal curves in Fab.css / Toast.css / InlineEdit.css

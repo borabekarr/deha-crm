@@ -38,6 +38,7 @@
   padding-right: 5px;
   border-radius: 9999px;
   background: var(--bg-card-solid, #fff);
+  background-clip: padding-box;
   border: 2px solid transparent;
   box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand-primary-500) 0%, transparent), var(--ie-rest);
   transition:
