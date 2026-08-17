@@ -74,7 +74,7 @@
     inset 0 -2px 0 rgba(17,17,17,0.12);
   backdrop-filter: blur(20px);
   cursor: pointer;
-  transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-base) * var(--anim-mult, 1)), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+  transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .btn-glass:hover {
   background: rgba(255,255,255,0.9);
@@ -94,9 +94,9 @@
   padding: 6px 0;
   cursor: pointer;
   transition:
-    opacity calc(140ms * var(--anim-mult, 1)),
+    opacity calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
-    box-shadow calc(var(--duration-base) * var(--anim-mult, 1)),
+    box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }

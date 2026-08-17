@@ -396,6 +396,20 @@
 
 .ap-thumb--on:hover { transform: none; }
 
+/* Focus ring, explicit local rule (plan: focus-ring-tokens, step 3). The
+   house :where(...):focus-visible rule in _shared-feedback.css is zero-
+   specificity by design, but .ap-thumb:hover:not(.ap-thumb--on) (0,3,0)
+   and .ap-thumb--on (0,2,0, loaded after the house rule) both declare a
+   static outline that would otherwise win on hover-while-focused or
+   selected-while-focused. Re-declare focus-visible here at matching/higher
+   specificity, consuming the same tokens, so the ring always wins over
+   those two states. */
+.ap-thumb:focus-visible,
+.ap-thumb--on:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
 /* ── Username field ── */
 .ap-field {
   display: flex;
@@ -530,7 +544,9 @@
     filter calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade),
     box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-press-calm),
-    scale calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-press-calm);
+    scale calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-press-calm),
+    outline-color var(--focus-ring-duration) var(--focus-ring-ease),
+    outline-offset var(--focus-ring-duration) var(--focus-ring-ease);
 }
 
 /* Overrides .btn-green:hover's scale(1.03) lift — house rule bans lift/zoom/

@@ -47,7 +47,6 @@ html.dark {
 }
 .btn-green:hover { transform: scale(1.03); box-shadow: 0 8px 20px rgba(17,17,17,0.32), inset 0 1px 0 rgba(255,255,255,0.2); }
 .btn-green:active { transform: scale(0.96); }
-.btn-green:focus-visible { outline: 2px solid var(--brand-primary-500); outline-offset: 2px; }
 html.dark .btn-green { background: var(--brand-primary-500); color: var(--brand-on-primary); box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 8px color-mix(in srgb, var(--brand-primary-500) 34%, transparent); }
 
 /* --------------------------------------------------------------------------
@@ -67,7 +66,6 @@ html.dark .btn-green { background: var(--brand-primary-500); color: var(--brand-
 }
 .btn-yellow:hover { transform: scale(1.03); box-shadow: 0 8px 20px rgba(245,158,11,0.34), inset 0 1px 0 rgba(255,255,255,0.28); }
 .btn-yellow:active { transform: scale(0.96); }
-.btn-yellow:focus-visible { outline: 2px solid #F59E0B; outline-offset: 2px; }
 html.dark .btn-yellow { background: #F59E0B; box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 8px rgba(245,158,11,0.34); }
 
 /* --------------------------------------------------------------------------
@@ -87,8 +85,46 @@ html.dark .btn-yellow { background: #F59E0B; box-shadow: inset 0 1px 0 rgba(255,
 }
 .btn-red:hover { transform: scale(1.03); box-shadow: 0 8px 20px rgba(239,68,68,0.34), inset 0 1px 0 rgba(255,255,255,0.28); }
 .btn-red:active { transform: scale(0.96); }
-.btn-red:focus-visible { outline: 2px solid #EF4444; outline-offset: 2px; }
 html.dark .btn-red { background: #EF4444; box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 8px rgba(239,68,68,0.34); }
+
+/* --------------------------------------------------------------------------
+ * House focus-visible ring (plan: focus-ring-tokens) -- single shared ring
+ * for every interactive control, replacing the three hardcoded rings this
+ * rule folds (.btn-green/.btn-yellow/.btn-red used to each declare their
+ * own literal outline above). :where() keeps specificity at zero so any
+ * component rule can still override the ring locally if it ever needs to.
+ * --brand-primary-500 is a single global value (not theme-scoped), same
+ * as the ring it replaces, so no html.dark fallback is needed here.
+ * -------------------------------------------------------------------------- */
+:where(
+  .btn-green, .btn-yellow, .btn-red,
+  .btn-primary, .btn-inverse, .btn-glass, .btn-text,
+  .ap-edge-btn, .ap-thumb, .ap-submit, .ie-act
+):focus-visible,
+:where(.ie-field):focus-within {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Separate rule (never merged into any pre-existing transition shorthand
+ * above) so each selector's own hover/press transition list survives
+ * untouched. Scoped to the same focus pseudo-state as the ring itself so
+ * it only ever supplies the outline-color/outline-offset transition
+ * while focused, leaving each element's unconditional base transition
+ * list completely alone at every other time. Deliberately NOT wrapped in
+ * :where() here (unlike the outline rule above): component CSS files
+ * (e.g. Buttons.css) load after this file and each already declares its
+ * own unconditional `transition:` at single-class specificity, so an
+ * equal-specificity :where() version would lose the load-order tie and
+ * the ring would never animate; class + :focus-visible/:focus-within
+ * (two selector components) reliably outranks that single-class rule. */
+.btn-green:focus-visible, .btn-yellow:focus-visible, .btn-red:focus-visible,
+.btn-primary:focus-visible, .btn-inverse:focus-visible, .btn-glass:focus-visible, .btn-text:focus-visible,
+.ap-edge-btn:focus-visible, .ap-thumb:focus-visible, .ap-submit:focus-visible, .ie-act:focus-visible,
+.ie-field:focus-within {
+  transition: outline-color var(--focus-ring-duration) var(--focus-ring-ease),
+    outline-offset var(--focus-ring-duration) var(--focus-ring-ease);
+}
 
 /* ==========================================================================
  * SHARED FOUNDATIONS — appended block; do NOT redefine tokens above this line.

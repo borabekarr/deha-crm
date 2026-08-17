@@ -211,6 +211,18 @@
      contract -- every seg-pill / segmented-control thumb transition routes
      through this token instead of a local overshoot bezier. */
   --ease-pill-switch: cubic-bezier(.22, 1, .36, 1);
+
+  /* Step-1 focus-ring tokens (plan: focus-ring-tokens) -- one house
+     :focus-visible ring shared by every interactive control instead of
+     each component hardcoding its own outline. Color reuses the brand
+     emerald token; duration/ease reuse the existing base tier + fade
+     curve (curve, not spring, per house animation discipline) rather
+     than minting new values for a state change this small. */
+  --focus-ring-color: var(--brand-primary-500);
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+  --focus-ring-duration: calc(var(--duration-base) * var(--anim-mult, 1));
+  --focus-ring-ease: var(--ease-fade);
 }
 
 /* Step-1 direction-aware panel switch (plan: dsfb-02-direction-aware-switch-canon)
