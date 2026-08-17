@@ -48,6 +48,20 @@ interface HostState {
 
 const hostMap = new WeakMap<Element, HostState>();
 
+// Token-derived FLIP timing, mirrors the library's getComputedStyle(--anim-mult)
+// convention (see date-picker-hook.ts, index-bar-hook.ts, news-feed-hook.ts).
+// Falls back to the current literals if the tokens are unavailable (e.g. SSR/tests).
+function resolveFlipMotion() {
+  const root = getComputedStyle(document.documentElement);
+  const rawDuration = root.getPropertyValue('--duration-280').trim();
+  const rawEase = root.getPropertyValue('--ease-out').trim();
+  const rawMult = root.getPropertyValue('--anim-mult').trim();
+  const duration280 = parseFloat(rawDuration) || 280;
+  const ease = rawEase || 'cubic-bezier(.22,1,.36,1)';
+  const mult = parseFloat(rawMult) || 1;
+  return { duration280, ease, mult };
+}
+
 function getState(el: Element): HostState {
   if (!hostMap.has(el)) {
     hostMap.set(el, { toastTimer: null, phaseBtnTimer: null, syncTimers: [], flipBefore: new Map(), flipRaf: null });
@@ -121,13 +135,16 @@ export function makeTaskBoardTimers(el: Element): TaskBoardTimers {
     state.flipRaf = requestAnimationFrame(() => {
       state.flipRaf = null;
       const prev = state.flipBefore;
+      // WAAPI's easing option cannot resolve CSS custom properties directly, so
+      // resolve --duration-280 / --ease-out / --anim-mult here and pass literals.
+      const { duration280, ease, mult } = resolveFlipMotion();
       el.querySelectorAll('[data-flip-id]').forEach((node) => {
         const id = node.getAttribute('data-flip-id')!;
         const oldRect = prev.get(id);
         if (!oldRect) {
           node.animate(
             [{ opacity: 0, transform: 'scale(0.96)' }, { opacity: 1, transform: 'scale(1)' }],
-            { duration: 280, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'both' }, /* motion-sweep: kept, WAAPI easing option cannot resolve CSS custom properties */
+            { duration: duration280 * mult, easing: ease, fill: 'both' },
           );
           return;
         }
@@ -140,7 +157,9 @@ export function makeTaskBoardTimers(el: Element): TaskBoardTimers {
             { transform: `translate(${dx}px, ${dy}px)`, boxShadow: '0 12px 28px -8px rgba(15,23,42,0.18), 0 4px 8px -2px rgba(15,23,42,0.10)' },
             { transform: 'translate(0,0)', boxShadow: '0 0 0 transparent' },
           ],
-          { duration: 500, easing: 'cubic-bezier(.22, 1, .36, 1)', fill: 'both' }, /* motion-sweep: kept, WAAPI easing option cannot resolve CSS custom properties */
+          // 500ms new-card travel duration has no exact/near token in motion-tokens.css
+          // (nearest is --duration-1800); kept as a scaled literal, not tokenized.
+          { duration: 500 * mult, easing: ease, fill: 'both' },
         );
       });
     });

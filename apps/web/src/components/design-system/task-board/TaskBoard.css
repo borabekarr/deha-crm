@@ -114,17 +114,19 @@ html.dark .tb-outer[data-squircle="on"]::before {
 .tb-panel[data-squircle="on"]::after { content: none; }
 
 /* Task card: border-only, no shadow (Bora's explicit decision, both themes).
-   Proximity engine (hover-tokens.css / useProximityGroup) is bypassed for
-   .tb-card, not rewritten — it produced no visible change on the live page.
-   Hover reacts via this plain border-color + background-color rule instead. */
+   Proximity engine (hover-tokens.css / useProximityGroup) is removed from
+   .tb-card. Hover reacts via this plain border-color + background-color
+   rule instead. */
 .tb-card {
   position: relative;
   z-index: 1;
+  box-sizing: border-box;
   background-color: var(--tb-card-bg);
-  border: 1px solid #C9C9C9;
+  border: 2px solid #C9C9C9;
   box-shadow: none;
   transition: border-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out-soft),
-              background-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out-soft);
+              background-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out-soft),
+              transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out);
 }
 /* Lift hovered card above siblings so its border is never clipped by the
    column header or adjacent cards */
@@ -137,7 +139,7 @@ html.dark .tb-card { border-color: rgba(255,255,255,0.16); box-shadow: none; }
 html.dark .tb-card:hover { border-color: rgba(255,255,255,0.24); background-color: rgba(255,255,255,0.03); }
 /* Search/filter highlight always wins over rest + hover border/background
    (declared after :hover, equal specificity -> source order decides) */
-.tb-card.tb-highlight { border: 1px dashed var(--brand-primary-500); background-color: var(--tb-card-hl); }
+.tb-card.tb-highlight { border: 2px dashed var(--brand-primary-500); background-color: var(--tb-card-hl); }
 .tb-card.dragging { opacity: 0.35; transform: scale(0.97); }
 
 .tb-column.drop-target {
@@ -170,6 +172,32 @@ html.dark .tb-card:hover { border-color: rgba(255,255,255,0.24); background-colo
   background-size: 7px 7px;
 }
 .tb-stat-badge-icon { font-size: 13px !important; line-height: 1; }
+
+/* ---- Header live-count badge (F22) — recipe from message-dropdown's
+   .md-trigger-badge (green, white text, grid texture) forced to a fixed
+   square so it's a true circle (round even for multi-digit counts).
+   20px diameter matches the old "N tasks" pill tag's rendered height (±2px):
+   old box was padding 2px 10px 2px 7px around a 14.4px text line, ~18.4px
+   tall; 20px keeps parity with message-dropdown's own 20px badge. */
+.tb-live-count-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--brand-primary-500);
+  color: #fff;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px; font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.18);
+  font-variant-numeric: tabular-nums;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.50),
+    inset 0 -2px 0 rgba(0,0,0,0.22),
+    inset 0 0 0 1px rgba(0,0,0,0.10);
+  background-image: var(--grid-texture-image);
+  background-size: 6px 6px;
+}
 .tb-stat-badge-count {
   font-size: 10px; font-weight: 900;
   opacity: 0.85;
@@ -227,7 +255,7 @@ html.dark .tb-card:hover { border-color: rgba(255,255,255,0.24); background-colo
   72%  { background: var(--tb-wash-done2); border-color: var(--brand-primary-500); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-primary-500) 25%, transparent), inset 0 0 8px 0 color-mix(in srgb, var(--brand-primary-500) 18%, transparent); }
   100% { background: var(--tb-card-bg);    border-color: var(--tb-card-border); box-shadow: inset 0 0 0 0 transparent, inset 0 0 0 0 transparent; }
 }
-.tb-card.success-done { animation: cardDone calc(var(--duration-1900) * var(--anim-mult, 1)) var(--ease-out) forwards; }
+.tb-card.success-done { animation: cardDone calc(var(--duration-1800) * var(--anim-mult, 1)) var(--ease-out) forwards; }
 
 /* → In Progress: hot orange inset wash */
 @keyframes cardProgress {
@@ -236,7 +264,7 @@ html.dark .tb-card:hover { border-color: rgba(255,255,255,0.24); background-colo
   72%  { background: var(--tb-wash-prog2); border-color: #F97316; box-shadow: inset 0 0 0 1px rgba(249,115,22,0.25), inset 0 0 8px 0 rgba(249,115,22,0.18); }
   100% { background: var(--tb-card-bg);    border-color: var(--tb-card-border); box-shadow: inset 0 0 0 0 transparent, inset 0 0 0 0 transparent; }
 }
-.tb-card.success-progress { animation: cardProgress calc(var(--duration-1900) * var(--anim-mult, 1)) var(--ease-out) forwards; }
+.tb-card.success-progress { animation: cardProgress calc(var(--duration-1800) * var(--anim-mult, 1)) var(--ease-out) forwards; }
 
 /* → Review: warning yellow inset wash */
 @keyframes cardReview {
@@ -245,7 +273,7 @@ html.dark .tb-card:hover { border-color: rgba(255,255,255,0.24); background-colo
   72%  { background: var(--tb-wash-rev2); border-color: #FBBF24; box-shadow: inset 0 0 0 1px rgba(251,191,36,0.30), inset 0 0 8px 0 rgba(251,191,36,0.20); }
   100% { background: var(--tb-card-bg);    border-color: var(--tb-card-border); box-shadow: inset 0 0 0 0 transparent, inset 0 0 0 0 transparent; }
 }
-.tb-card.success-review { animation: cardReview calc(var(--duration-1900) * var(--anim-mult, 1)) var(--ease-out) forwards; }
+.tb-card.success-review { animation: cardReview calc(var(--duration-1800) * var(--anim-mult, 1)) var(--ease-out) forwards; }
 
 @keyframes confettiFlow {
   0%   { transform: translate(-50%,-50%) translate(0, 0)       rotate(0deg)              scale(0.6); opacity: 0; }
@@ -366,12 +394,32 @@ html.dark .tb-card:hover { border-color: rgba(255,255,255,0.24); background-colo
 
 /* ---- Week pill row (Change 3) -- mirrors todo-list's .td-daybtn recipe
    (todo-list/TodoList.css), local tb- names. ---- */
+/* Wrapper: prev-arrow, pill strip, next-arrow -- compact centered cluster
+   (F16/F17). Whole group centers as one unit; arrow-to-pill gap (14px) sits
+   at 1.75x the pill-to-pill gap (8px, set on .tb-week below), per Apple
+   grouping-by-proximity spacing. */
+.tb-week-row {
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  padding: 0 16px; margin: 0 0 23px;
+}
+.tb-week-nav {
+  flex: 0 0 auto; width: 26px; height: 26px; border-radius: 9999px; cursor: pointer;
+  display: grid; place-items: center;
+  border: 1px solid var(--tb-col-border); background: var(--tb-col-bg); color: var(--tb-fg3);
+  transition: background calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade),
+              border-color calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade),
+              transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-spring-snap);
+}
+.tb-week-nav:hover { background: var(--fp-hover); border-color: var(--tb-fg4); }
+.tb-week-nav:active { transform: scale(0.9); }
+/* Slimmed (Step 5): tracks are content-sized (44px each) instead of the prior
+   equal-1fr stretch across the full 888px row, was ~121.7px/pill before. */
 .tb-week {
-  display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
-  padding: 0 16px; margin: 0 0 20px;
+  display: flex; justify-content: center; gap: 8px;
 }
 .tb-daybtn {
   position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  flex: 0 0 44px; width: 44px;
   padding: 8px 0 9px; border-radius: 9999px; cursor: pointer;
   border: 1px solid var(--tb-col-border);
   background: var(--tb-col-bg);
@@ -396,13 +444,13 @@ html.dark .tb-daybtn { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
 .tb-daybtn.active .dnum { color: #fff; font-weight: 900; }
 
 /* Badge-filter pill row -- mirrors todo-list's .td-filt/.fdot recipe. */
-.tb-filters { display: flex; gap: 7px; flex-wrap: wrap; padding: 0 16px; margin: 0 0 14px; }
+.tb-filters { display: flex; gap: 7px; flex-wrap: wrap; padding: 0 16px; margin: 0 0 16px; }
 .tb-filt {
   flex: none; display: inline-flex; align-items: center; gap: 6px;
   padding: 7px 13px; border-radius: 9999px; cursor: pointer; border: 1px solid var(--tb-col-border);
   background: var(--tb-col-bg); color: var(--tb-fg3); font-family: 'Montserrat';
   font-size: 11px; font-weight: 800; letter-spacing: 0.02em; white-space: nowrap;
-  transition: background calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade), color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade), border-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring-snap);
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), border-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring-snap);
 }
 .tb-filt .fdot { width: 8px; height: 8px; border-radius: 50%; background: var(--fcolor, var(--tb-fg4)); flex: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); }
 .tb-filt:hover { background: var(--fp-hover); color: var(--tb-fg1); }

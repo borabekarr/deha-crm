@@ -40,16 +40,19 @@ const IMPORTANCE_KEYS = Object.keys(IMPORTANCE) as Array<keyof typeof IMPORTANCE
 
 const DOW = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
-// Current Mon–Sun week + today's index — computed once at module level
-// (todo-list's weekDays/activeIdx pattern), Mon=0…Sun=6.
+// Today's index — computed once at module level, Mon=0…Sun=6.
 const TODAY_IDX = (new Date().getDay() + 6) % 7;
-const WEEK_DAYS: Date[] = (() => {
+
+// Builds the Mon–Sun span for the week `offset` weeks from the current one
+// (Step 5: week navigation arrows shift this offset, keeping activeDayIdx
+// fixed so the same weekday stays selected across the jump).
+function buildWeekDays(offset: number): Date[] {
   const monday = new Date();
-  monday.setDate(monday.getDate() - TODAY_IDX);
+  monday.setDate(monday.getDate() - TODAY_IDX + offset * 7);
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(monday); d.setDate(monday.getDate() + i); return d;
   });
-})();
+}
 
 const INITIAL_TASKS: Task[] = [
   { id: 't1',  title: 'Investigate billing webhook timeout',        importance: 'ui',        day: 0, col: 'todo' },
@@ -341,7 +344,6 @@ function TaskCard({
       draggable
       onDragStart={(e) => onDragStart(e, task.id)}
       onDragEnd={onDragEnd}
-      data-proximity
       className={`tb-card ${dragging ? 'dragging' : ''} ${highlight ? 'tb-highlight' : ''} ${successClass ?? ''}`}
       style={{
         position: 'relative',
@@ -403,7 +405,6 @@ function Column({
   const [canScrollDown, setCanScrollDown] = React.useState(false);
   const [canScrollUp, setCanScrollUp] = React.useState(false);
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
-  const cardsProxRef = useProximityGroup<HTMLDivElement>();
 
   const checkScroll = () => {
     const el = scrollRef.current;
@@ -413,9 +414,13 @@ function Column({
     setCanScrollUp(overflowing && el.scrollTop > 4);
   };
 
-  // successClass derived from recentMoveId — no timing side-effect needed
+  // successClass derived from recentMoveId — no timing side-effect needed.
+  // Scoped to the single just-dropped card only: recentMoveId already excludes
+  // every other already-placed card, and the draggingId check additionally
+  // suppresses the glow on the one card it targets the instant it is picked
+  // up again, so holding/dragging never shows the "just moved" glow.
   const successClass = (taskId: string): string | null => {
-    if (recentMoveId !== taskId) return null;
+    if (recentMoveId !== taskId || draggingId === taskId) return null;
     const kindMap: Record<string, string> = { done: 'success-done', progress: 'success-progress', review: 'success-review' };
     return kindMap[col.id] ?? null;
   };
@@ -470,7 +475,6 @@ function Column({
         <div
           ref={(el) => {
             scrollRef.current = el;
-            cardsProxRef(el);
             if (el) checkScroll();
           }}
           onScroll={checkScroll}
@@ -544,23 +548,18 @@ const headerTitleStyle: React.CSSProperties = {
 function Header({ total }: { total: number }) {
   return (
     // Flat flex row — inner container div removed (feedback #6)
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '18px 20px 14px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '18px 20px 16px' }}>
       <h1 style={headerTitleStyle}>
-        {/* leading view_kanban glyph (item 5) */}
-        <span className={iconClass('view_kanban')} aria-hidden style={{ fontSize: 20, lineHeight: 1, fontVariationSettings: '"opsz" 24, "wght" 500' }}>view_kanban</span>
+        {/* Same glyph as the live-count badge below ('assignment'), rendered
+            ~1.3x the badge icon's 13px so header and badge read as one family. */}
+        <span className={iconClass('assignment')} aria-hidden style={{ fontSize: 17, lineHeight: 1, fontVariationSettings: '"opsz" 24, "wght" 500' }}>assignment</span>
         Task Board
       </h1>
-      <span style={{
-        display: 'inline-flex', alignItems: 'center', gap: 4,
-        padding: '2px 10px 2px 7px',
-        borderRadius: 9999,
-        background: 'var(--tb-chip-bg)',
-        border: '1px solid var(--tb-col-border)',
-        fontSize: 12, fontWeight: 700, color: 'var(--tb-chip-fg)',
-        letterSpacing: '-0.01em',
-      }}>
-        <span className={iconClass('assignment')} style={{ fontSize: 13 }}>assignment</span>
-        {total} tasks
+      {/* Round live-count badge — recipe from message-dropdown's .md-trigger-badge
+          (green, white text, grid texture) but fixed width==height for a true
+          circle; footprint (20px) matches the old pill tag's rendered height. */}
+      <span className="tb-live-count-badge" aria-label={`${total} tasks`}>
+        {total}
       </span>
       {/* AI Sync pushed to right with marginLeft: auto */}
       <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -577,21 +576,40 @@ function Header({ total }: { total: number }) {
 // Week pill row (Change 3) — mirrors todo-list's weekDays + activeIdx pattern
 // and .td-daybtn recipe (todo-list/TodoList.tsx / TodoList.css), local tb- names.
 // ---------------------------------------------------------------------------
-function WeekRow({ activeIdx, onSelect }: { activeIdx: number; onSelect: (i: number) => void }) {
+function WeekRow({
+  weekDays,
+  activeIdx,
+  onSelect,
+  onPrevWeek,
+  onNextWeek,
+}: {
+  weekDays: Date[];
+  activeIdx: number;
+  onSelect: (i: number) => void;
+  onPrevWeek: () => void;
+  onNextWeek: () => void;
+}) {
   return (
-    <div className="tb-week">
-      {WEEK_DAYS.map((d, i) => (
-        <button
-          key={d.toISOString().slice(0, 10)}
-          type="button"
-          data-proximity
-          className={`tb-daybtn${i === activeIdx ? ' active' : ''}`}
-          onClick={() => onSelect(i)}
-        >
-          <span className="dow">{DOW[i]}</span>
-          <span className="dnum">{d.getDate()}</span>
-        </button>
-      ))}
+    <div className="tb-week-row">
+      <button type="button" data-proximity className="tb-week-nav" aria-label="Previous week" onClick={onPrevWeek}>
+        <SymIcon name="chevron_left" size={16} />
+      </button>
+      <div className="tb-week">
+        {weekDays.map((d, i) => (
+          <button
+            key={d.toISOString().slice(0, 10)}
+            type="button"
+            className={`tb-daybtn hover-standard${i === activeIdx ? ' active' : ''}`}
+            onClick={() => onSelect(i)}
+          >
+            <span className="dow">{DOW[i]}</span>
+            <span className="dnum">{d.getDate()}</span>
+          </button>
+        ))}
+      </div>
+      <button type="button" data-proximity className="tb-week-nav" aria-label="Next week" onClick={onNextWeek}>
+        <SymIcon name="chevron_right" size={16} />
+      </button>
     </div>
   );
 }
@@ -603,8 +621,7 @@ function BadgeFilterRow({ active, onSelect }: { active: string; onSelect: (k: st
     <div className="tb-filters">
       <button
         type="button"
-        data-proximity
-        className={`tb-filt${active === 'all' ? ' on' : ''}`}
+        className={`tb-filt hover-standard${active === 'all' ? ' on' : ''}`}
         onClick={() => onSelect('all')}
       >
         All
@@ -613,8 +630,7 @@ function BadgeFilterRow({ active, onSelect }: { active: string; onSelect: (k: st
         <button
           key={k}
           type="button"
-          data-proximity
-          className={`tb-filt${active === k ? ' on' : ''}`}
+          className={`tb-filt hover-standard${active === k ? ' on' : ''}`}
           style={{ ['--fcolor' as string]: IMPORTANCE[k].color }}
           onClick={() => onSelect(k)}
         >
@@ -888,6 +904,10 @@ export default function TaskBoard() {
   // Week-day + badge filters (Change 3) — today active by default, both compose (AND)
   const [activeDayIdx, setActiveDayIdx] = React.useState(TODAY_IDX);
   const [activeBadge, setActiveBadge]   = React.useState<'all' | keyof typeof IMPORTANCE>('all');
+  // Week navigation (Step 5) — offset in whole weeks from the current one;
+  // activeDayIdx is untouched by the jump so the selected weekday carries over.
+  const [weekOffset, setWeekOffset]     = React.useState(0);
+  const weekDays = React.useMemo(() => buildWeekDays(weekOffset), [weekOffset]);
 
   // Refs for mutable state that timers need to read without stale closures
   const undoRef            = React.useRef<{ id: string; from: string; fromIdx: number } | null>(null);
@@ -1126,7 +1146,13 @@ export default function TaskBoard() {
       <div ref={panelSquircleRef} className="tb-panel">
         <Header total={tasks.length} />
 
-        <WeekRow activeIdx={activeDayIdx} onSelect={setActiveDayIdx} />
+        <WeekRow
+          weekDays={weekDays}
+          activeIdx={activeDayIdx}
+          onSelect={setActiveDayIdx}
+          onPrevWeek={() => setWeekOffset((o) => o - 1)}
+          onNextWeek={() => setWeekOffset((o) => o + 1)}
+        />
         <BadgeFilterRow active={activeBadge} onSelect={setActiveBadge} />
 
         <div style={{ position: 'relative' }}>
