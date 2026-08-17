@@ -37,6 +37,12 @@ Merged from `plans/scratch/ds-review/<slug>.md` per-component logs (ds-review-he
 - **Fixes applied:** logged in scratch file (token provenance verified live via `getComputedStyle`); legacy legs untouched (handoff note).
 - **Evidence:** `plans/scratch/ds-review/buyer-brain/buyer-brain-{light,dark}[-detail].png`.
 
+## avatar-picker — debt2-inline-avatar redesign (2026-08-17)
+
+- **Source:** debt2-inline-avatar run — field header label, edge-arrow centering rework, `.ap-input-icon` removal, InlineEdit conversion, submit icon `chevron_right` → `add` with rotate-on-hover; interleaved with the same-day motion-debt-fixes press/fade retune.
+- **Review status: CONFIRMED (2026-08-17).** Bora reviewed and approved keep-and-commit (interview 2026-08-17). Live Playwright probe run (zero console errors, glyph width-ratio 1.0 on both edge arrows and the submit icon, hover transform `rotate(90deg) scale(1.12)`, placeholder fade sampled mid-transition at opacity 0.1475, build exit 0) confirmed the render before commit.
+- **Committed:** `d34c90e` — `feat(avatar-picker): InlineEdit conversion + header label + edge-arrow centering + calm press/fade motion tokens`, scoped to the 6 named files only.
+
 ### delete-button (ds-review-inputs Step 5)
 - **Verdict:** headroom: yes.
 - **Fixes applied:** retry-2 code-reviewer fixes — HIGH: two superimposed digits on every countdown tick under reduced motion, fixed; MEDIUM: `PHASE_MORPH_MS` constant vs MIRROR comment vs CSS drift, fixed. Token provenance confirmed live (probe run 2026-08-08). Dark-selector evidence: 4x `[data-theme='dark']`, confirmed NOT blind-converted.
