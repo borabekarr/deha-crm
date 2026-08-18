@@ -142,7 +142,6 @@ const SLUGS = [
   'animated-header-scroll',
   'toast',
   'picker',
-  'siri-orb',
   'buyer-brain',
 ] as const
 

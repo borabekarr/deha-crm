@@ -252,36 +252,34 @@
   padding: 6px 8px 10px;
 }
 
-/* AI Recommendations uses the global .btn-green pill; stretch it to full footer width.
-   Item 2: layer a 9px grid texture on the dark fill (mirrors .pc-apply in _pipeline-card.css)
-   and soften the global scale(1.03) hover to a gentler scale(1.015). */
-.wae-ae-footer .btn-green {
-  width: 100%;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-  background-size: 9px 9px;
-}
+/* Item 2 (Step 9): the footer button is the buttons-page Ask Jeru button
+   (.btn-green.btn-apply from Buttons.css). No width override -- it hugs its
+   content via .btn-green's own min-width/padding, same as Ask Jeru, instead
+   of stretching to the card's full width. */
 
-/* Proximity: .btn-green's global :hover uses `transform: scale(1.03)`
-   (_shared-feedback.css); the file-wide no-lift/no-zoom sweep removes that
-   override entirely (was translateY(-1px)) so this footer button also gets
-   the flat proximity-only treatment. Append scale/filter transition channels
-   here so hover-tokens.css's --prox mapping (locked scale 1.02 / brightness
-   1.02) doesn't snap. */
-.wae-ae-footer .btn-green[data-proximity] {
-  transition:
-    background-color calc(var(--duration-180) * var(--anim-mult, 1)),
-    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring),
-    box-shadow calc(var(--duration-200) * var(--anim-mult, 1)),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+/* F6: mirror Buttons.css's .btn-page-root scoped hover exactly (this button
+   has no .btn-page-root ancestor here, so without these it fell through to
+   _shared-feedback.css's bare `.btn-green:hover { transform: scale(1.03) }`
+   -- a self-transform hover that fights the proximity engine's own `scale`
+   channel on the same element and reads as a hover glitch). */
+.wae-ae-footer { --hover-scale-max: 1.008; --hover-brightness-max: 1.015; }
+.wae-ae-footer .btn-green:hover {
+  transform: none;
+  box-shadow: 0 6px 18px -4px color-mix(in srgb, var(--brand-primary-500, #06c081) 40%, transparent), inset 0 1px 0 rgba(255,255,255,0.2);
 }
-
-/* Item 1: minimize the neurology glyph inside the footer button. */
-.wae-ae-footer .btn-green .material-symbols-outlined {
-  font-size: 16px;
+html.dark .wae-ae-footer .btn-green:hover {
+  transform: none;
+  box-shadow: 0 6px 18px -4px rgba(52,211,153,0.45), inset 0 1px 0 rgba(255,255,255,0.22);
 }
+.wae-ae-footer .btn-apply:hover {
+  box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--brand-primary-500, #06c081) 25%, transparent);
+}
+html.dark .wae-ae-footer .btn-apply:hover {
+  box-shadow: 0 4px 12px -4px rgba(52,211,153,0.28);
+}
+/* Rainbow border is scale-only under proximity; brightness/drop-shadow would
+   wash it (see Buttons.css's identical .btn-page-root exemption). */
+.wae-ae-footer .btn-apply.btn-apply[data-proximity] { filter: none; }
 
 /* Step 4: compact the Add Elements card to search mode by springing the
    footer's max-height to 0 (overall panel height shrinks with it, since
@@ -360,7 +358,10 @@ html.dark .wae-shimmer-row {
   display: grid;
   grid-template-columns: 1fr 1px 1fr;
   column-gap: 12px;
-  padding: 4px 12px 12px;
+  /* Item 3: top padding pushed past the 12px mask-fade band below so the
+     topmost card's top edge sits fully outside the fade and renders clearly
+     instead of being clipped/faded by the progressive-blur mask. */
+  padding: 16px 12px 12px;
   max-height: 400px;
   overflow-y: auto;
 }
@@ -403,17 +404,34 @@ html.dark .wae-shimmer-row {
 
 /* Category card header row: badge + name.
    Item 3a: horizontal separator between the header (wae search) and the node rows. */
+/* Item 4 (Step 9): header is themed by its category's own tag color (set via
+   the --wae-cat-color inline var), matching the colorful-tag treatment used
+   elsewhere in the library — colored fill, grid texture, bolder white icon
+   and text with a shadow behind it, replacing the prior plain-glyph header. */
 .wae-search-cat-header {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 8px 10px 6px;
+  padding: 6px 10px 5px;
   border-bottom: 1px solid #ECECEC;
+  background-color: var(--wae-cat-color, #232323);
+  background-image: var(--grid-texture-image);
+  background-size: var(--grid-texture-size);
 }
 
-/* Item 3c: search-result header icon is a plain glyph, not a colored badge tag,
-   and shares the header text color. Scoped to the search-result header only — the
-   main Add-Elements list (.wae-ae-item) and node-row (.wae-badge-sm) badges stay colored. */
+/* F8: bump the header's icon tile a touch (matches event-badge scale better
+   than the default .wae-badge-lg 28px used elsewhere in this popover). */
+.wae-search-cat-header .wae-badge-icon {
+  width: 30px;
+  height: 30px;
+}
+
+.wae-search-cat-header .wae-badge-icon .material-icons {
+  font-size: 16px;
+}
+
+/* Header badge: plain glyph (no separate tile fill — the header itself is now
+   the colored surface), bolder icon via text-shadow instead of a fill color. */
 .wae-search-cat-header .wae-badge-icon {
   background: transparent !important;
   background-image: none !important;
@@ -422,15 +440,16 @@ html.dark .wae-shimmer-row {
 
 .wae-search-cat-header .wae-badge-icon .material-icons,
 .wae-search-cat-header .wae-badge-icon .material-symbols-outlined {
-  color: #232323;
-  text-shadow: none;
+  color: #FFFFFF;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
 }
 
-/* Item 3b: header label is ~2px smaller than the node text (10px vs .wae-node-name 12px). */
+/* Item 3b/4: header label — bolder white text with a shadow behind it. */
 .wae-search-cat-name {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
-  color: #232323;
+  color: #FFFFFF;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
   letter-spacing: -0.01em;
   white-space: nowrap;
   overflow: hidden;
@@ -718,15 +737,11 @@ html.dark .wae-search-cat-name {
   color: #A1A1A1;
 }
 
-/* Item 3 dark parity: separator + plain header icon color. */
+/* Item 3/4 dark parity: separator only — the header's colored fill (Item 4)
+   already carries white icon/text in both themes, so no icon/text override
+   is needed here anymore. */
 html.dark .wae-search-cat-header {
   border-bottom-color: #232323;
-}
-
-html.dark .wae-search-cat-header .wae-badge-icon .material-icons,
-html.dark .wae-search-cat-header .wae-badge-icon .material-symbols-outlined {
-  color: #A1A1A1 !important;
-  text-shadow: none;
 }
 
 /* ── Tab-switch list morph — direction-aware (Fix 3, Step 3 migration) ───────
@@ -751,10 +766,31 @@ html.dark .wae-search-cat-header .wae-badge-icon .material-symbols-outlined {
   pointer-events: none;
 }
 
+/* Apple-rules retune: the shared panel-enter/exit keyframes (motion-tokens.css)
+   lean on opacity, which reads as a crossfade at this panel's size. Locally
+   override the transform composition to a pure directional slide — both the
+   outgoing ghost layer and the incoming layer move on the SAME token duration
+   and the sanctioned segmented-thumb easing (--ease-pill-switch, no bounce),
+   so they read as one panel swapping rather than two independent fades. The
+   direction (right vs left) still comes from the hook's data-panel-state,
+   unchanged. */
+@keyframes wae-list-slide-enter-right { from { opacity: 0; transform: translateX(-32px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes wae-list-slide-enter-left  { from { opacity: 0; transform: translateX(32px);  } to { opacity: 1; transform: translateX(0); } }
+@keyframes wae-list-slide-exit-right  { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(32px);  } }
+@keyframes wae-list-slide-exit-left   { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(-32px); } }
+
+/* Signs mirror the shared panel-enter/exit-* keyframes verbatim (motion-tokens.css):
+   "exiting-left" pairs with the rightward exit and vice versa — same contract, only
+   the magnitude/easing are locally retuned. */
+.wae-ae-list-wrap [data-panel-state="entering-right"] { animation-name: wae-list-slide-enter-right; }
+.wae-ae-list-wrap [data-panel-state="entering-left"]  { animation-name: wae-list-slide-enter-left; }
+.wae-ae-list-wrap [data-panel-state="exiting-left"]   { animation-name: wae-list-slide-exit-right; }
+.wae-ae-list-wrap [data-panel-state="exiting-right"]  { animation-name: wae-list-slide-exit-left; }
+
 .wae-ae-list-enter[data-panel-state],
 .wae-ae-list-exit[data-panel-state] {
   animation-duration: calc(var(--duration-180) * var(--anim-mult, 1));
-  animation-timing-function: var(--ease-out);
+  animation-timing-function: var(--ease-pill-switch);
 }
 
 /* ── Item 1: search-results flyout morph (enter + reversible exit) ───────────
@@ -778,31 +814,16 @@ html.dark .wae-search-cat-header .wae-badge-icon .material-symbols-outlined {
   }
 }
 
-@keyframes wae-search-morph-out {
-  0% {
-    opacity: 1;
-    filter: blur(0);
-    transform: scale(1) translateY(0);
-  }
-  40% {
-    opacity: 0.6;
-    filter: blur(2px);
-  }
-  100% {
-    opacity: 0;
-    filter: blur(8px);
-    transform: scale(0.97) translateY(6px);
-  }
-}
-
 /* Applied to the nodes flyout (.wae-pop-outer) when search results appear. */
 .wae-search-entering {
   animation: wae-search-morph-in calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-out) both;
 }
 
-/* Applied when search is cleared so the flyout plays exit animation before unmounting. */
+/* Exit is the enter animation played backwards: same keyframe, same duration
+   token, same easing. `reverse` guarantees the exit exactly mirrors the enter
+   instead of drifting via a hand-duplicated keyframe. */
 .wae-search-leaving {
-  animation: wae-search-morph-out calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-accel) both;
+  animation: wae-search-morph-in calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-out) reverse both;
   pointer-events: none;
 }
 

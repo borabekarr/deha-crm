@@ -57,6 +57,18 @@
   overflow: hidden;
 }
 
+/* CTA hover fix: .btn-green (Join meeting) is width:100% inside .card-inner,
+   which is overflow:hidden for the height-collapse clip -- its canonical
+   :hover `transform: scale(1.03)` therefore gets visibly cut off at the
+   card's own edges. Height/size already match the buttons page's
+   .btn-green (36px, same class, no override here); only the hover motion
+   needed containment: drop the scale for this placement and keep the lift
+   readable via box-shadow only. */
+.xc-content .btn-green:hover {
+  transform: none;
+  box-shadow: 0 4px 14px rgba(17, 17, 17, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
 .msym {
   font-family: 'Material Symbols Outlined';
   font-weight: normal;

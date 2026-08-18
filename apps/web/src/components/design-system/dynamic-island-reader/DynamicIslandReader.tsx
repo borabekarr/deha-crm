@@ -439,7 +439,12 @@ function DynamicIsland({
             }}>
               <div ref={fillCallbackRef} style={{
                 position: 'absolute', left: 0, top: 0, bottom: 0,
-                width: progress * 100 + '%',
+                // Loading-bar overflow fix: clamp to the track's own bounds
+                // at every frame (was raw `progress * 100 + '%'`, which
+                // could render past 100% on a fast scroll-up right at
+                // completion and then visibly snap back in).
+                width: Math.min(100, Math.max(0, progress * 100)) + '%',
+                maxWidth: '100%',
                 borderRadius: 999,
                 background: `linear-gradient(90deg, ${a.base}, ${a.bright})`,
                 boxShadow: `0 0 10px ${a.glow}`,
@@ -512,6 +517,14 @@ function DynamicIsland({
                   display: 'grid', placeItems: 'center',
                   boxShadow: `0 0 12px ${a.glow}, inset 0 1px 0 rgba(255,255,255,0.5)`,
                   animationDirection: 'reverse',
+                  // Exit-immediacy fix: the forward pop is --duration-420
+                  // (a deliberately weighty "you're done" moment), but
+                  // played in reverse on scroll-up that made the done icon
+                  // linger for the same 420ms before the 99% badge could
+                  // mount behind it. Reverse gets its own short token so
+                  // the icon clears near-instantly and 99% follows right
+                  // behind (still gated on this element's onAnimationEnd).
+                  animationDuration: 'calc(var(--duration-150) * var(--anim-mult, 1))',
                 } as CSSProperties}
               >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none">

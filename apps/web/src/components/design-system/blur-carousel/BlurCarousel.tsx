@@ -265,7 +265,7 @@ export function BlurCarousel() {
             ))}
           </div>
           <button
-            className={`nav-arrow${active === 0 ? ' is-cta' : ''}`}
+            className={`nav-arrow${active < CARDS.length - 1 ? ' is-cta' : ''}`}
             id="nextBtn"
             aria-label="Next card"
             disabled={active >= CARDS.length - 1}

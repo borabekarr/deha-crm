@@ -59,7 +59,7 @@ import { VariantPicker } from './VariantPicker'
 //
 // JS-timed motion: the wheels' idle snap and the Today/Now jump run on the raw
 // source's own rAF loop with its own hardcoded numbers (140ms idle threshold,
-// 280..700ms clamped jump duration, easeOutCubic) — see JS-TIMED MOTION below
+// 140..350ms clamped jump duration, easeOutCubic) — see JS-TIMED MOTION below
 // for the mirror-comment trail those constants carry.
 // ---------------------------------------------------------------------------
 
@@ -86,9 +86,14 @@ import { VariantPicker } from './VariantPicker'
 // `OPEN_H = 466`. The 132px spacer divs above/below each wheel's items are
 // literals in the raw markup ((7 * 44 - 44) / 2), as is the 308px wheel
 // height (7 * 44).
+// F7: OPEN_H trimmed 466 -> 453 (13px) to equalize the confirm button's
+// vertical gaps -- gap above (tray bottom -> confirm top, driven by
+// `--gap-stack`) measured 16px while gap below (confirm bottom -> card
+// bottom) measured 29px; shortening the card's bottom by the 13px
+// difference brings both to 16px without touching the top gap.
 const ITEM_H = 44
 const OPEN_W = 328
-const OPEN_H = 466
+const OPEN_H = 453
 
 // Raw source: `const t = (ms) => 'calc(' + ms + 'ms * var(--anim-mult, 1))'`.
 const t = (ms: number) => `calc(${ms}ms * var(--anim-mult, 1))`
@@ -140,10 +145,29 @@ const boxStyle = (open: boolean): CSSProperties => {
   // (.pk-box[data-open="false"]:active), gated to the closed state so an open
   // card never scales. 120ms MIRROR: --duration-fast -- press feedback is the
   // system responding, so it is the fastest tier, well inside the morph.
-  const common = `width ${t(500)} var(--ease-spring-pop), height ${t(500)} var(--ease-spring-pop), background-color ${t(300)} var(--ease-fade), border-color ${t(300)} var(--ease-fade), box-shadow ${t(300)} var(--ease-fade), transform ${t(120)} var(--ease-standard)`
+  // ds-motion-sweep step 3: border-radius used to only animate on the CLOSE
+  // direction (440ms leg appended below `common`, "open: radius snaps
+  // instantly"), so exit carried one extra transition leg enter never had --
+  // exactly the "exit isn't just the enter reversed" defect Bora flagged.
+  // Folded into `common` so both directions share the identical duration and
+  // property set as width/height.
+  //
+  // F4 rework: border-radius stayed on --ease-spring-pop (matching
+  // width/height) until a live probe showed the computed radius clamping to
+  // 0px mid-expand -- the overshoot amplitude that makes width/height read as
+  // a "pop" drives an interpolated px radius temporarily past its target,
+  // and the browser floors it at 0, producing the "weird corners" defect
+  // (a lopsided, near-square silhouette a few frames into the liquid
+  // expand). --ease-standard has no overshoot, so radius now shrinks
+  // monotonically to var(--card-radius) over the same 500ms window while
+  // width/height keep their spring-pop liquid character.
+  const common = `width ${t(500)} var(--ease-spring-pop), height ${t(500)} var(--ease-spring-pop), border-radius ${t(500)} var(--ease-standard), background-color ${t(300)} var(--ease-fade), border-color ${t(300)} var(--ease-fade), box-shadow ${t(300)} var(--ease-fade), transform ${t(120)} var(--ease-standard)`
   return {
     position: 'relative', overflow: 'hidden', boxSizing: 'border-box',
     cursor: open ? 'default' : 'pointer',
+    // F10: the confirmed pill keeps the SAME footprint as the unconfirmed
+    // 58px button (no auto/padding growth) -- the glyph row inside morphs,
+    // the box itself never resizes on confirm.
     width: open ? `${OPEN_W}px` : '58px',
     height: open ? `${OPEN_H}px` : '58px',
     borderRadius: open ? 'var(--card-radius)' : '9999px',
@@ -156,8 +180,7 @@ const boxStyle = (open: boolean): CSSProperties => {
     boxShadow: open
       ? 'inset 0 1px 0 rgba(255,255,255,0.9), inset 0 0 0 1px rgba(15,23,42,0.04)'
       : '0 14px 34px -8px rgba(16,185,129,0.55), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -2px 0 rgba(0,0,0,0.22), inset 0 0 0 1px rgba(255,255,255,0.15)',
-    // open: border-radius snaps instantly; close: radius animates back (440ms)
-    transition: open ? common : `${common}, border-radius ${t(440)} var(--ease-spring-pop)`,
+    transition: common,
     fontFamily: 'var(--font-display)',
   }
 }
@@ -170,6 +193,16 @@ const glyphStyle = (open: boolean): CSSProperties => ({
   transition: `opacity ${t(180)} var(--ease-fade), transform ${t(280)} var(--ease-standard)`,
 })
 
+// F4 rework: this "inner shell" (the card content) used to run its own
+// 220/320ms fade+slide, delayed 120ms after open, while the "outer shell"
+// (boxStyle's pill<->card morph, above) ran a flat 500ms spring-pop with no
+// delay -- a live probe confirmed the two computed transition strings shared
+// no duration, easing, or delay, which is the "inner + outer shells animate
+// independently" defect. Content's opacity/transform now ride the exact
+// same t(500) / --ease-spring-pop pair as the box's width/height legs, with
+// no delay in either direction, so both shells read as one liquid
+// choreography instead of a card that pops open and then, separately,
+// fades its contents in afterward.
 const contentStyle = (open: boolean): CSSProperties => ({
   position: 'absolute', top: '0', left: '0',
   width: `${OPEN_W}px`, height: `${OPEN_H}px`, boxSizing: 'border-box',
@@ -177,8 +210,7 @@ const contentStyle = (open: boolean): CSSProperties => ({
   opacity: open ? 1 : 0,
   transform: open ? 'none' : 'translateY(12px)',
   pointerEvents: open ? 'auto' : 'none',
-  transition: `opacity ${t(220)} var(--ease-fade) ${open ? t(120) : '0ms'}`
-    + `, transform ${t(320)} var(--ease-spring-soft) ${open ? t(120) : '0ms'}`,
+  transition: `opacity ${t(500)} var(--ease-spring-pop), transform ${t(500)} var(--ease-spring-pop)`,
 })
 
 const closeStyle = (open: boolean): CSSProperties => ({
@@ -237,9 +269,10 @@ const footerRowStyle: CSSProperties = {
 // listed here so the trail is explicit:
 //   - 140  (ms) idle threshold before a released wheel snaps to the nearest
 //          item (`now - s.idle > 140` in tick()).
-//   - 1.2 / clamp 280..700 (ms) programmatic jump duration, proportional to
+//   - 0.6 / clamp 140..350 (ms) programmatic jump duration, proportional to
 //          the scroll distance (`scrollWheelTo`), times 4 when the raw source's
 //          slowMotion tweak sets `data-anim-slow` (excluded default: false).
+//          Halved from the original 1.2 / 280..700 per F6 (arrow-slide 2x speed).
 //   - easeOutCubic `1 - (1 - p)^3` — the jump's easing, written out because
 //          rAF cannot read a CSS easing function.
 //   - 0.5  (px) dead zone: a wheel already within half a pixel of its item
@@ -291,6 +324,16 @@ function PickerBody({ minuteStep = '1', startOpen = false, variant = 'main' }: P
 
   const [openDate, setOpenDate] = useState(!!startOpen)
   const [openTime, setOpenTime] = useState(!!startOpen)
+
+  // Staged-selection commit surface (ds-picker-confirm-flow): scrolling/stepping
+  // a wheel only ever moves selRef's draft (existing engine, unchanged). The
+  // draft becomes real only on Confirm, which copies it here and drives the
+  // trigger label; closing without Confirm reverts the wheels to this ref
+  // (or to today if nothing has ever been confirmed) instead of leaving the
+  // discarded draft's scroll position sitting in the DOM for next reopen.
+  const committedRef = useRef<Partial<Record<WheelName, number>>>({})
+  const [dateLabel, setDateLabel] = useState<string | null>(null)
+  const [timeLabel, setTimeLabel] = useState<string | null>(null)
 
   const step = Number(minuteStep ?? 1) || 1
 
@@ -372,8 +415,8 @@ function PickerBody({ minuteStep = '1', startOpen = false, variant = 'main' }: P
       s.goal = target
       s.goalFrom = sc.scrollTop
       s.goalT0 = performance.now()
-      s.goalDur = Math.min(700, Math.max(280, Math.abs(target - sc.scrollTop) * 1.2))
-        * (document.documentElement.getAttribute('data-anim-slow') ? 4 : 1)
+      s.goalDur = Math.min(350, Math.max(140, Math.abs(target - sc.scrollTop) * 0.6))
+        * (document.documentElement.getAttribute('data-anim-slow') === 'true' ? 4 : 1)
     }
   }, [getWheel])
 
@@ -498,7 +541,7 @@ function PickerBody({ minuteStep = '1', startOpen = false, variant = 'main' }: P
               // MIRROR: --duration-slow (220ms); x4 under the raw source's own
               // slowMotion flag, same expression as scrollWheelTo(). Skipped
               // entirely under prefers-reduced-motion (branch above).
-              s.goalDur = SNAP_DUR * (document.documentElement.getAttribute('data-anim-slow') ? 4 : 1)
+              s.goalDur = SNAP_DUR * (document.documentElement.getAttribute('data-anim-slow') === 'true' ? 4 : 1)
             }
           }
         }
@@ -533,8 +576,53 @@ function PickerBody({ minuteStep = '1', startOpen = false, variant = 'main' }: P
     scrollWheelTo('minute', Math.round(d.getMinutes() / step) % Math.ceil(60 / step), true)
   }
 
+  const stepWheel = (name: WheelName, dir: 1 | -1, count: number) => (e: MouseEvent) => {
+    e.stopPropagation()
+    const cur = selRef.current[name] ?? 0
+    scrollWheelTo(name, Math.max(0, Math.min(count - 1, cur + dir)), true)
+  }
+
+  const confirmDate = (e: MouseEvent) => {
+    e.stopPropagation()
+    const di = selRef.current.day ?? 0
+    const mi = selRef.current.month ?? 0
+    committedRef.current.day = di
+    committedRef.current.month = mi
+    setDateLabel(`${days[di]} ${months[mi].slice(0, 3)}`)
+    setOpenDate(false)
+  }
+
+  const confirmTime = (e: MouseEvent) => {
+    e.stopPropagation()
+    const hi = selRef.current.hour ?? 0
+    const ni = selRef.current.minute ?? 0
+    committedRef.current.hour = hi
+    committedRef.current.minute = ni
+    setTimeLabel(`${hours[hi]}:${minutes[ni]}`)
+    setOpenTime(false)
+  }
+
+  const closeDate = (e: MouseEvent) => {
+    e.stopPropagation()
+    const d = new Date()
+    scrollWheelTo('day', committedRef.current.day ?? d.getDate() - 1, true)
+    scrollWheelTo('month', committedRef.current.month ?? d.getMonth(), true)
+    setOpenDate(false)
+  }
+
+  const closeTime = (e: MouseEvent) => {
+    e.stopPropagation()
+    const d = new Date()
+    scrollWheelTo('hour', committedRef.current.hour ?? d.getHours(), true)
+    scrollWheelTo('minute', committedRef.current.minute ?? Math.round(d.getMinutes() / step) % Math.ceil(60 / step), true)
+    setOpenTime(false)
+  }
+
   const wheel = (name: WheelName, items: readonly string[], width: string, numeric: boolean) => (
     <div data-wheel={name} style={{ position: 'relative', width, height: '308px' }}>
+      <button type="button" className="pk-arrow pk-arrow-up" aria-label={`${name} up`} onClick={stepWheel(name, -1, items.length)}>
+        <span className="material-icons">expand_less</span>
+      </button>
       <div data-scroller style={scrollerStyle}>
         <div style={spacerStyle} />
         {items.map((label, i) => (
@@ -548,6 +636,9 @@ function PickerBody({ minuteStep = '1', startOpen = false, variant = 'main' }: P
         ))}
         <div style={spacerStyle} />
       </div>
+      <button type="button" className="pk-arrow pk-arrow-down" aria-label={`${name} down`} onClick={stepWheel(name, 1, items.length)}>
+        <span className="material-icons">expand_more</span>
+      </button>
     </div>
   )
 
@@ -571,8 +662,15 @@ function PickerBody({ minuteStep = '1', startOpen = false, variant = 'main' }: P
       <div style={shellStyle(openDate)} data-screen-label="Date picker">
         <div className="pk-box" data-open={openDate ? 'true' : 'false'} style={boxStyle(openDate)} onClick={() => { if (!openDate) setOpenDate(true) }}>
 
+          {/* F10: single glyph row, always mounted -- the icon span never
+              unmounts across the confirm morph, only its size/position (and
+              the badge text's opacity/max-width) transition via CSS on
+              [data-confirmed]. */}
           <div style={glyphStyle(openDate)}>
-            <span className="material-icons" style={{ fontSize: '26px', WebkitTextStroke: '1px rgba(255,255,255,0.9)' }}>event</span>
+            <span className="pk-glyph-row" data-confirmed={dateLabel ? 'true' : 'false'}>
+              <span className="material-icons pk-trigger-icon">event</span>
+              <span className="pk-trigger-badge">{dateLabel ?? ''}</span>
+            </span>
           </div>
 
           <div style={contentStyle(openDate)}>
@@ -580,7 +678,7 @@ function PickerBody({ minuteStep = '1', startOpen = false, variant = 'main' }: P
               <div style={headerColStyle}>
                 <span style={titleStyle}><span className="material-icons" style={{ fontSize: '20px', color: '#10B981' }}>calendar_month</span>Pick a day</span>
               </div>
-              <button aria-label="Close date picker" style={closeStyle(openDate)} onClick={(e) => { e.stopPropagation(); setOpenDate(false) }}>
+              <button aria-label="Close date picker" style={closeStyle(openDate)} onClick={closeDate}>
                 <span className="material-icons" style={{ fontSize: '15px' }}>close</span>
               </button>
             </div>
@@ -594,11 +692,14 @@ function PickerBody({ minuteStep = '1', startOpen = false, variant = 'main' }: P
 
               {wheel('day', days, '96px', true)}
 
+              <div className="pk-sep" />
+
               {wheel('month', months, '156px', false)}
             </div>
 
             <div style={footerRowStyle}>
-              <button className="btn-primary" onClick={jumpToday}><span className="material-icons btn-mi">today</span>Today</button>
+              <button type="button" className="pk-today-btn" onClick={jumpToday}><span className="material-icons btn-mi">today</span>Today</button>
+              <button type="button" className="btn-primary" onClick={confirmDate}><span className="material-icons btn-mi">check</span>Confirm</button>
             </div>
           </div>
         </div>
@@ -609,7 +710,10 @@ function PickerBody({ minuteStep = '1', startOpen = false, variant = 'main' }: P
         <div className="pk-box" data-open={openTime ? 'true' : 'false'} style={boxStyle(openTime)} onClick={() => { if (!openTime) setOpenTime(true) }}>
 
           <div style={glyphStyle(openTime)}>
-            <span className="material-icons" style={{ fontSize: '26px', WebkitTextStroke: '1px rgba(255,255,255,0.9)' }}>schedule</span>
+            <span className="pk-glyph-row" data-confirmed={timeLabel ? 'true' : 'false'}>
+              <span className="material-icons pk-trigger-icon">schedule</span>
+              <span className="pk-trigger-badge">{timeLabel ?? ''}</span>
+            </span>
           </div>
 
           <div style={contentStyle(openTime)}>
@@ -617,7 +721,7 @@ function PickerBody({ minuteStep = '1', startOpen = false, variant = 'main' }: P
               <div style={headerColStyle}>
                 <span style={titleStyle}><span className="material-icons" style={{ fontSize: '20px', color: '#10B981' }}>schedule</span>Pick a time</span>
               </div>
-              <button aria-label="Close time picker" style={closeStyle(openTime)} onClick={(e) => { e.stopPropagation(); setOpenTime(false) }}>
+              <button aria-label="Close time picker" style={closeStyle(openTime)} onClick={closeTime}>
                 <span className="material-icons" style={{ fontSize: '15px' }}>close</span>
               </button>
             </div>
@@ -640,7 +744,8 @@ function PickerBody({ minuteStep = '1', startOpen = false, variant = 'main' }: P
             </div>
 
             <div style={footerRowStyle}>
-              <button className="btn-primary" onClick={jumpNow}><span className="material-icons btn-mi">schedule</span>Now</button>
+              <button type="button" className="pk-today-btn" onClick={jumpNow}><span className="material-icons btn-mi">schedule</span>Now</button>
+              <button type="button" className="btn-primary" onClick={confirmTime}><span className="material-icons btn-mi">check</span>Confirm</button>
             </div>
           </div>
         </div>

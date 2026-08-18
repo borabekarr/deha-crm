@@ -14,23 +14,27 @@
 
    `.buyer-brain-root` itself carries what the raw page put on `body`
    (Montserrat stack, --canvas background, --txt colour, the centering grid,
-   the 34px/22px padding, font-smoothing and the .35s background
-   transition).
+   the 34px/22px padding, font-smoothing and the background
+   transition (now tokenized to duration-200+duration-150, see below)).
 
    Excluded from the port: the raw page's `.bbq-darktoggle` chrome rules are
    dropped, because no markup uses them (the toggle drives html.dark, which
-   the app owns) — same authoring-chrome precedent as SiriOrb.css.
+   the app owns) — same authoring-chrome exclusion precedent used elsewhere
+   in the library. The
+   `.bbq-tabs`/`.bbq-tab` rule cluster (raw lines ~227-260) was also pruned
+   on 2026-08-16 (plan anim-mult-wiring): no markup in this port renders a
+   tab row, so the CSS was never-rendered dead weight.
 
-   Motion (no tokenization pass, per the plan step): every duration keeps the
-   source's own number, wrapped as `calc(<source value> * var(--anim-mult, 1))`
-   so motion-token-gate accepts it — the Toast.css precedent, and a no-op at
-   the default --anim-mult of 1. Easings are substituted only where a token
-   resolves to the byte-identical curve:
+   Motion: every duration is expressed via `var(--duration-*)` (or an exact
+   calc-sum of two tiers where no single tier matched), wrapped as
+   `calc(<token(s)> * var(--anim-mult, 1))` so motion-token-gate accepts it,
+   value-identical to the raw source's literal seconds (no retiming). Easings
+   are substituted only where a token resolves to the byte-identical curve:
      bare `ease`                     == var(--ease-fade)         cubic-bezier(.25,.1,.25,1)
      bare `ease-in-out`              == var(--ease-in-out)       cubic-bezier(.42,0,.58,1)
      cubic-bezier(.34,1.56,.64,1)    == var(--ease-spring-snap)
      cubic-bezier(.4,0,.2,1)         == var(--ease-standard)
-   Substitution sites: .buyer-brain-root (background), .bbq-card, .bbq-tab,
+   Substitution sites: .buyer-brain-root (background), .bbq-card,
    .bbq-ink, .bbq-qual, .bbq-piece, .bbq-line, circle.bbq-knob, .bbq-label,
    .bbq-detail, .bbq-detail-card, .bbq-back, .bbq-caret, .bbq-think span,
    .bbq-chip. No token was minted.
@@ -93,7 +97,7 @@ html.dark .buyer-brain-root {
   place-items: center;
   padding: 34px 22px;
   -webkit-font-smoothing: antialiased;
-  transition: background calc(0.35s * var(--anim-mult, 1)) var(--ease-fade);
+  transition: background calc((var(--duration-200) + var(--duration-150)) * var(--anim-mult, 1)) var(--ease-fade);
 }
 
 .buyer-brain-root .material-symbols-outlined {
@@ -117,8 +121,8 @@ html.dark .buyer-brain-root {
   border-radius: 14px;
   box-shadow: var(--shadow), var(--gloss);
   overflow: hidden;
-  transition: background calc(0.35s * var(--anim-mult, 1)) var(--ease-fade),
-    border-color calc(0.35s * var(--anim-mult, 1)) var(--ease-fade);
+  transition: background calc((var(--duration-200) + var(--duration-150)) * var(--anim-mult, 1)) var(--ease-fade),
+    border-color calc((var(--duration-200) + var(--duration-150)) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .buyer-brain-root .bbq-head {
   display: flex;
@@ -223,54 +227,35 @@ html.dark .buyer-brain-root {
   position: relative;
 }
 
-/* tabs */
-.buyer-brain-root .bbq-tabs {
-  position: relative;
-  display: flex;
-  padding: 0 22px;
-  border-bottom: 1px solid var(--line);
-}
-.buyer-brain-root .bbq-tab {
-  appearance: none;
-  border: 0;
-  background: none;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--txt3);
-  padding: 11px 4px;
-  margin-right: 22px;
-  letter-spacing: -0.005em;
-  transition: color calc(0.2s * var(--anim-mult, 1)) var(--ease-fade);
-  position: relative;
-}
-.buyer-brain-root .bbq-tab[aria-selected='true'] {
-  color: var(--txt);
-}
-@media (hover: hover) and (pointer: fine) {
-  .buyer-brain-root .bbq-tab:hover {
-    color: var(--txt2);
-  }
-}
-.buyer-brain-root .bbq-tab:focus-visible {
-  outline: 2px solid var(--emerald);
-  outline-offset: 3px;
-  border-radius: 4px;
-}
+/* tab underline indicator (`.bbq-tabs`/`.bbq-tab` chrome pruned 2026-08-16,
+   plan anim-mult-wiring — never rendered, no markup) */
 .buyer-brain-root .bbq-ink {
   position: absolute;
   bottom: -1px;
   height: 2.5px;
   border-radius: 2px;
   background: var(--emerald);
-  transition: left calc(0.26s * var(--anim-mult, 1)) var(--ease-spring-snap),
-    width calc(0.26s * var(--anim-mult, 1)) var(--ease-spring-snap);
+  transition: left calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-spring-snap),
+    width calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-spring-snap);
 }
 
-/* panels */
+/* panels — enlarged toward blur-carousel's 262x364 background-tile scale
+   (pre-change baseline: padding 18px 22px 24px, computed box ~576x291 at the
+   fixed 560x362 stage) */
 .buyer-brain-root .bbq-panel {
-  padding: 18px 22px 24px;
+  padding: 30px 38px 40px;
+}
+
+/* shimmer-only loading gate: covers the stage while brain pieces are still
+   fetching; the brain/svg/labels stay mounted underneath (visibility:hidden,
+   images still load) so onLoad fires without a remount once ready */
+.buyer-brain-root .bbq-stage-shimmer {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+}
+.buyer-brain-root .bbq-stage-shimmer .shimmer {
+  display: block;
 }
 .buyer-brain-root .bbq-behaviour {
   display: none;
@@ -297,7 +282,7 @@ html.dark .buyer-brain-root {
   display: flex;
   align-items: stretch;
   padding-left: 153px;
-  transition: padding-left calc(0.42s * var(--anim-mult, 1)) var(--ease-standard);
+  transition: padding-left calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-standard);
 }
 .buyer-brain-root .bbq-qual:not(.show) {
   display: none;
@@ -357,8 +342,8 @@ html.dark .buyer-brain-root {
   will-change: transform, filter;
   transform: scale(1);
   transform-origin: var(--ox) var(--oy);
-  transition: filter calc(0.24s * var(--anim-mult, 1)) var(--ease-fade),
-    transform calc(0.24s * var(--anim-mult, 1)) var(--ease-spring-snap);
+  transition: filter calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-spring-snap);
 }
 .buyer-brain-root .bbq-brain.focused .bbq-piece:not(.on) {
   filter: brightness(0.5) saturate(0.82);
@@ -368,7 +353,9 @@ html.dark .buyer-brain-root {
   transform: scale(1.05);
   filter: brightness(1.05) saturate(1.12) drop-shadow(0 0 8px var(--acc));
 }
-/* transparent rectangular hit zones (interaction + keyboard) */
+/* transparent rectangular hit zones (interaction + keyboard) — .bbq-hit
+   itself is invisible; hover/focus motion renders on its .bbq-line/
+   .bbq-knob siblings below, not on the hit zone. */
 .buyer-brain-root .bbq-hit {
   position: absolute;
   z-index: 4;
@@ -408,8 +395,8 @@ html.dark .buyer-brain-root .bbq-hit:focus-visible {
   vector-effect: non-scaling-stroke;
   stroke-linecap: round;
   stroke-linejoin: round;
-  transition: opacity calc(0.2s * var(--anim-mult, 1)) var(--ease-fade),
-    stroke-width calc(0.2s * var(--anim-mult, 1)) var(--ease-fade);
+  transition: opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
+    stroke-width calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .buyer-brain-root .bbq-line.on {
   opacity: 1;
@@ -418,7 +405,7 @@ html.dark .buyer-brain-root .bbq-hit:focus-visible {
 .buyer-brain-root circle.bbq-knob {
   fill: var(--acc);
   opacity: 0.55;
-  transition: opacity calc(0.2s * var(--anim-mult, 1)), r calc(0.2s * var(--anim-mult, 1));
+  transition: opacity calc(var(--duration-200) * var(--anim-mult, 1)), r calc(var(--duration-200) * var(--anim-mult, 1));
 }
 .buyer-brain-root circle.bbq-knob.on {
   opacity: 1;
@@ -447,9 +434,9 @@ html.dark .buyer-brain-root .bbq-hit:focus-visible {
     0 2px 6px rgba(15, 23, 42, 0.14);
   cursor: pointer;
   user-select: none;
-  transition: box-shadow calc(0.2s * var(--anim-mult, 1)) var(--ease-fade),
-    transform calc(0.2s * var(--anim-mult, 1)) var(--ease-fade),
-    filter calc(0.2s * var(--anim-mult, 1)) var(--ease-fade);
+  transition: box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
+    filter calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .buyer-brain-root .bbq-label .material-symbols-outlined {
   font-size: 15px;
@@ -488,9 +475,9 @@ html.dark .buyer-brain-root .bbq-hit:focus-visible {
   margin-left: 0;
   min-height: 362px;
   display: flex;
-  transition: flex-basis calc(0.42s * var(--anim-mult, 1)) var(--ease-standard),
-    opacity calc(0.3s * var(--anim-mult, 1)) var(--ease-fade),
-    margin-left calc(0.42s * var(--anim-mult, 1)) var(--ease-standard);
+  transition: flex-basis calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-standard),
+    opacity calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade),
+    margin-left calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-standard);
 }
 .buyer-brain-root .bbq-qual.detail-open .bbq-detail {
   flex-basis: 270px;
@@ -529,16 +516,22 @@ html.dark .buyer-brain-root .bbq-hit:focus-visible {
   flex-direction: column;
   position: relative;
   box-shadow: var(--gloss);
-  animation: bbqCardSlideIn calc(0.42s * var(--anim-mult, 1)) var(--ease-standard);
+  /* Apple open/exit rule: scale+fade from the piece that was clicked
+     (transform-origin set inline per region side), exit is the reverse of
+     the same animation on the same token duration/easing. */
+  animation: bbqCardOpen calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-standard);
 }
-@keyframes bbqCardSlideIn {
+.buyer-brain-root .bbq-detail-card.closing {
+  animation: bbqCardOpen calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-standard) reverse both;
+}
+@keyframes bbqCardOpen {
   from {
     opacity: 0;
-    transform: translateX(100%);
+    transform: scale(0.86);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: scale(1);
   }
 }
 .buyer-brain-root .bbq-back {
@@ -642,16 +635,17 @@ html.dark .buyer-brain-root .bbq-hit:focus-visible {
   text-shadow: none;
 }
 .buyer-brain-root .bbq-detail-body {
-  padding: 16px 18px 18px;
+  padding: 22px 22px 24px;
   overflow-y: auto;
 }
 .buyer-brain-root .bbq-blurb {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 500;
-  line-height: 1.55;
+  line-height: 1.65;
   color: var(--txt);
   text-wrap: pretty;
   min-height: 74px;
+  letter-spacing: -0.005em;
 }
 .buyer-brain-root .bbq-caret {
   display: inline-block;
@@ -660,7 +654,7 @@ html.dark .buyer-brain-root .bbq-hit:focus-visible {
   background: var(--acc);
   margin-left: 1px;
   vertical-align: -2px;
-  animation: caret calc(1s * var(--anim-mult, 1)) steps(1) infinite;
+  animation: caret calc((var(--duration-800) + var(--duration-200)) * var(--anim-mult, 1)) steps(1) infinite;
 }
 @keyframes caret {
   50% {
@@ -679,7 +673,7 @@ html.dark .buyer-brain-root .bbq-hit:focus-visible {
   border-radius: 50%;
   background: var(--acc);
   opacity: 0.4;
-  animation: think calc(1s * var(--anim-mult, 1)) var(--ease-in-out) infinite;
+  animation: think calc((var(--duration-800) + var(--duration-200)) * var(--anim-mult, 1)) var(--ease-in-out) infinite;
 }
 .buyer-brain-root .bbq-think span:nth-child(2) {
   /* raw: 0.15s -> --duration-150 */
@@ -703,8 +697,8 @@ html.dark .buyer-brain-root .bbq-hit:focus-visible {
 .buyer-brain-root .bbq-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 7px;
-  margin-top: 14px;
+  gap: 8px;
+  margin-top: 18px;
 }
 .buyer-brain-root .bbq-chip {
   font-size: 10px;
@@ -716,7 +710,7 @@ html.dark .buyer-brain-root .bbq-hit:focus-visible {
   border: 1px solid color-mix(in srgb, var(--acc) 34%, transparent);
   opacity: 0;
   transform: translateY(6px);
-  animation: chipin calc(0.34s * var(--anim-mult, 1)) var(--ease-spring-snap) forwards;
+  animation: chipin calc((var(--duration-200) + var(--duration-140)) * var(--anim-mult, 1)) var(--ease-spring-snap) forwards;
 }
 @keyframes chipin {
   to {

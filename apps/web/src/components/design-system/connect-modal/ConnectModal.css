@@ -27,7 +27,7 @@
 .cm-card{
   background:var(--card-bg, #FFFFFF);
   border-radius:28px;
-  padding:21px 21px 15px;
+  padding:24px 20px 20px;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,1),
     0 4px 10px -6px rgba(17,17,17,.15);
@@ -69,7 +69,6 @@ html.dark .cm-shell[data-squircle="on"]::before {
   clip-path: var(--squircle-border-path);
 }
 .cm-card[data-squircle="on"] {
-  padding: 22px 22px 16px;
   --corner-radius: 28px;
   filter: drop-shadow(0 4px 10px rgba(17,17,17,.15));
 }
@@ -78,7 +77,9 @@ html.dark .cm-card[data-squircle="on"] {
 }
 
 .cm-close{
-  position:absolute; top:10px; right:10px;
+  /* top aligns with cm-badges' top (cm-card's padding-top, 24px); right is
+     the round icons' 10px inset shifted 2px further left per Bora's ask. */
+  position:absolute; top:24px; right:12px;
   width:27px; height:27px; display:grid; place-items:center;
   border:none; border-radius:var(--radius-circle); cursor:pointer;
   background:var(--fp-hover); color:var(--fg2);
@@ -96,7 +97,7 @@ html.dark .cm-close:hover{ background:color-mix(in srgb, var(--fp-hover), #fff 1
 
 /* ---- badges + connector ---- */
 /* Badge circle sized off the anchor: ~3.6x cm-title's 20px anchor (72px). */
-.cm-badges{ display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:18px; }
+.cm-badges{ display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:16px; }
 .cm-badge{
   width:72px; height:72px; flex:none;
   border-radius:var(--radius-circle);
@@ -117,25 +118,26 @@ html.dark .cm-badge{ background:#fff; border-color:rgba(255,255,255,.14); box-sh
 }
 @keyframes cm-flow{
   0%   { background:var(--gray-300); transform:scale(.8); opacity:.4; }
-  2%   { background:var(--brand-primary-400); transform:scale(1.3); opacity:1; }
+  9%   { background:var(--brand-primary-400); transform:scale(1.3); opacity:1; }
   23%  { background:var(--brand-primary-400); transform:scale(1.3); opacity:1; }
-  25%  { background:var(--gray-300); transform:scale(.8); opacity:.4; }
+  32%  { background:var(--gray-300); transform:scale(.8); opacity:.4; }
   100% { background:var(--gray-300); transform:scale(.8); opacity:.4; }
 }
 html.dark .cm-connector i{ background:rgba(255,255,255,.26); }
 
 /* ---- header ----
-   Anchor: cm-title @ HIG title3 (20px/600 semibold). Every section header in
-   this component (cm-title, cm-keylabel) shares this exact size+weight.
-   cm-sub steps down to subheadline (14px/500). */
+   Anchor: cm-title @ HIG title3 (20px). Header-level text (cm-title,
+   cm-mname, cm-cta, cm-badge-rec) is Montserrat Black (900) per the
+   display-montserrat page; cm-keylabel and body/description text stay
+   at their prior weights. cm-sub steps down to subheadline (14px/500). */
 .cm-title{
-  text-align:center; margin:0 0 7px;
-  font-size:20px; font-weight:var(--weight-semibold);
+  text-align:center; margin:0 0 8px;
+  font-family:var(--font-display); font-size:20px; font-weight:var(--weight-black);
   letter-spacing:var(--tracking-tight); color:var(--fg1);
   line-height:1.15;
 }
 .cm-sub{
-  text-align:center; margin:0 auto 17px; max-width:32ch;
+  text-align:center; margin:0 auto 16px; max-width:32ch;
   font-size:14px; font-weight:var(--weight-medium);
   color:var(--fg3); line-height:var(--leading-snug);
   text-wrap:balance;
@@ -153,21 +155,17 @@ html.dark .cm-methods{ background:var(--card-bg, #1C1C1C); border-color:var(--ca
 .cm-method{
   display:flex; align-items:center; gap:12px;
   width:100%; text-align:left; cursor:pointer;
-  padding:14px 15px;
+  padding:12px 16px;
   background:transparent; border:none;
   font-family:var(--font-display);
-  transition:background calc(var(--duration-fast) * var(--anim-mult,1)) var(--ease-fade), transform calc(var(--duration-140) * var(--anim-mult,1)) var(--ease-out),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+  transition:background calc(var(--duration-fast) * var(--anim-mult,1)) var(--ease-fade);
   position:relative;
 }
 .cm-method + .cm-method{ border-top:1px solid var(--card-border, #D4D4D4); }
 html.dark .cm-method + .cm-method{ border-top-color:var(--card-border, #232323); }
-/* fab-item option hover recipe (Fab.css .fab-item:hover/:active): shared
-   --fp-hover token, no scale-on-hover, press-only scale(0.97). */
+/* fab-item option hover recipe (Fab.css .fab-item:hover): shared --fp-hover
+   token; press animation removed, hover and aria-checked selected state unchanged. */
 .cm-method:hover{ background:var(--fp-hover); }
-.cm-method:active{ background:var(--fp-hover); transform:scale(var(--press-control)); }
-.cm-method:active .cm-icontile{ transform:scale(.93); transition-duration:calc(var(--duration-instant) * var(--anim-mult, 1)); }
 .cm-method:focus-visible{ outline:2px solid var(--brand-primary); outline-offset:-2px; }
 
 /* icon tile — flex centering so glyph is optically centered */
@@ -179,8 +177,7 @@ html.dark .cm-method + .cm-method{ border-top-color:var(--card-border, #232323);
   display:flex; align-items:center; justify-content:center;
   color:var(--fg1);
   transition:border-color calc(var(--duration-180) * var(--anim-mult,1)) var(--ease-fade),
-             box-shadow calc(var(--duration-260) * var(--anim-mult,1)) var(--ease-fade),
-             transform calc(var(--duration-180) * var(--anim-mult,1)) var(--ease-out);
+             box-shadow calc(var(--duration-260) * var(--anim-mult,1)) var(--ease-fade);
 }
 html.dark .cm-icontile{ background-color:#111111; border-color:rgba(255,255,255,.10); }
 .cm-method[aria-checked="true"] .cm-icontile{
@@ -202,12 +199,11 @@ html.dark .cm-icontile{ background-color:#111111; border-color:rgba(255,255,255,
     inset 0 0 0 1px rgba(17,17,17,0.12),
     0 0 0 3px color-mix(in srgb, var(--brand-primary-500) 22%, transparent),
     0 4px 10px -3px color-mix(in srgb, var(--brand-primary-500) 40%, transparent);
-  animation:cm-badge-pop calc(var(--duration-compact) * var(--anim-mult,1)) var(--ease-spring-snap);
+  animation:cm-badge-pop calc(var(--duration-200) * var(--anim-mult,1)) var(--ease-out);
 }
 @keyframes cm-badge-pop{
-  0%{ transform:scale(.9) rotate(-4deg); background-color:var(--brand-primary-100); }
-  45%{ transform:scale(1.14) rotate(2deg); }
-  100%{ transform:scale(1) rotate(0); background-color:var(--brand-primary); }
+  0%{ transform:scale(.96); background-color:var(--brand-primary-100); }
+  100%{ transform:scale(1); background-color:var(--brand-primary); }
 }
 .cm-icontile .material-icons, .cm-icontile .material-symbols-outlined{ font-size:18px; line-height:1; transition:color calc(var(--duration-180) * var(--anim-mult,1)) var(--ease-fade); }
 /* active icon: white + outer drop-shadow */
@@ -219,9 +215,9 @@ html.dark .cm-icontile{ background-color:#111111; border-color:rgba(255,255,255,
 
 /* method body text alignment */
 .cm-mbody{ flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center; }
-.cm-mhead{ display:flex; align-items:center; gap:7px; margin-bottom:2px; flex-wrap:wrap; }
-/* subheadline (14/600) / footnote (12/500) steps below the title3 anchor */
-.cm-mname{ font-size:14px; font-weight:var(--weight-semibold); color:var(--fg1); letter-spacing:-0.01em; line-height:1.2; }
+.cm-mhead{ display:flex; align-items:center; gap:8px; margin-bottom:2px; flex-wrap:wrap; }
+/* option header: Montserrat Black (900), footnote (12/500) steps below the title3 anchor */
+.cm-mname{ font-size:14px; font-weight:var(--weight-black); color:var(--fg1); letter-spacing:-0.01em; line-height:1.2; }
 .cm-mdesc{ font-size:12px; font-weight:var(--weight-medium); color:var(--fg3); line-height:1.35; }
 
 /* RECOMMENDED badge — Pills.css .badge.gci tonal recipe: pill shape, dot-grid
@@ -230,7 +226,7 @@ html.dark .cm-icontile{ background-color:#111111; border-color:rgba(255,255,255,
    to the badge text's font-size so glyph and label read as one weight. */
 .cm-badge-rec{
   display:inline-flex; align-items:center; gap:3px;
-  font-size:11px; font-weight:var(--weight-bold);
+  font-size:11px; font-weight:var(--weight-black);
   line-height:1;
   color:var(--brand-on-primary); padding:4px 9px; border-radius:9999px;
   background:var(--brand-primary-500);
@@ -262,7 +258,7 @@ html.dark .cm-radio .cm-ring{ border-color:rgba(255,255,255,.30); }
   background:var(--brand-primary);
   display:grid; place-items:center;
   transform:scale(.2); opacity:0;
-  transition:transform calc(var(--duration-260) * var(--anim-mult,1)) var(--ease-spring-snap), opacity calc(var(--duration-180) * var(--anim-mult,1)) var(--ease-fade);
+  transition:transform calc(var(--duration-260) * var(--anim-mult,1)) var(--ease-out), opacity calc(var(--duration-180) * var(--anim-mult,1)) var(--ease-fade);
   box-shadow:
     0 3px 7px -2px var(--brand-glow),
     inset 0 1px 0 rgba(255,255,255,.55),
@@ -292,49 +288,41 @@ html.dark .cm-radio .cm-ring{ border-color:rgba(255,255,255,.30); }
 html.dark .cm-expand[data-open="true"]{ border-top-color:var(--card-border, #232323); }
 .cm-expand > .cm-expand-inner{ overflow:hidden; min-height:0; }
 .cm-keypad{
-  padding:10px 12px 12px;
+  padding:12px;
   opacity:0; transform:translateY(-4px);
   transition:opacity calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--duration-40) * var(--anim-mult, 1)), transform calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out) calc(var(--duration-40) * var(--anim-mult, 1));
 }
 .cm-expand[data-open="true"] .cm-keypad{ opacity:1; transform:translateY(0); }
 
 /* section header: matches cm-title's title3 anchor exactly (test criterion) */
-.cm-keylabel{ display:block; font-size:20px; font-weight:var(--weight-semibold); color:var(--fg1); margin-bottom:9px; }
+.cm-keylabel{ display:block; font-size:14px; font-weight:var(--weight-semibold); letter-spacing:-0.01em; color:var(--fg1); margin-bottom:8px; }
 
-.cm-field{
-  display:flex; align-items:center; gap:7px;
-  border:1.5px solid var(--card-border, #D4D4D4);
-  border-radius:10px; background:var(--card-bg, #FFFFFF);
-  padding:0 7px 0 11px; height:42px;
-  transition:border-color calc(var(--duration-180) * var(--anim-mult,1)) var(--ease-fade), box-shadow calc(var(--duration-180) * var(--anim-mult,1)) var(--ease-fade);
-}
-html.dark .cm-field{ background:var(--card-bg, #1C1C1C); border-color:var(--card-border, #232323); }
-.cm-field[data-focus="true"]{
-  border-color:var(--gray-400);
-  box-shadow:0 0 0 3px var(--gray-100);
-}
-html.dark .cm-field[data-focus="true"]{ box-shadow:0 0 0 3px rgba(255,255,255,.08); }
-.cm-field[data-filled="true"]{ border-color:var(--gray-300); }
+/* cm-field is now a plain flex row: the shared InlineEdit component supplies
+   its own bordered field box (.ie-field in InlineEdit.css), so cm-field only
+   places the lock icon and paste/clear button either side of it. */
+.cm-field{ display:flex; align-items:center; gap:8px; }
+.cm-field .ie-wrap{ flex:1; min-width:0; display:block; }
+.cm-field .ie-field{ width:100%; height:44px; }
+/* Bora's ask: no separate edit button here -- InlineEdit's pencil/save button,
+   cancel button, "saved" toast and its own label are hidden; click-to-edit,
+   Enter-to-commit and Escape-to-cancel keep working via the field itself. */
+.cm-keypad .ie-act,
+.cm-keypad .ie-cancel,
+.cm-keypad .ie-foot,
+.cm-keypad .ie-label,
+.cm-keypad .ie-saved-morph{ display:none; }
 .cm-lock{ color:var(--fg4); display:grid; place-items:center; }
 .cm-lock .material-icons, .cm-lock .material-symbols-outlined{ font-size:15px; }
 .cm-lock[data-filled="true"]{ color:var(--brand-primary-600); }
-.cm-lock[data-secure="true"]{ color:var(--brand-primary-600); animation:cm-lockpop calc(var(--duration-420) * var(--anim-mult,1)) var(--ease-spring-snap); }
+.cm-lock[data-secure="true"]{ color:var(--brand-primary-600); animation:cm-lockpop calc(var(--duration-200) * var(--anim-mult,1)) var(--ease-out); }
 @keyframes cm-lockpop{
-  0%{ transform:scale(1) rotate(0); }
-  35%{ transform:scale(1.22) rotate(-7deg); }
-  60%{ transform:scale(.94) rotate(4deg); }
-  100%{ transform:scale(1) rotate(0); }
+  0%{ transform:scale(1); }
+  50%{ transform:scale(1.12); }
+  100%{ transform:scale(1); }
 }
-.cm-input{
-  flex:1; min-width:0; height:100%;
-  border:none; outline:none; background:transparent;
-  font-family:var(--font-display); font-size:13px; font-weight:var(--weight-semibold);
-  color:var(--fg1); letter-spacing:.01em;
-}
-.cm-input::placeholder{ color:var(--fg4); font-weight:var(--weight-medium); }
 
 .cm-paste{
-  flex:none; display:inline-flex; align-items:center; gap:5px;
+  flex:none; display:inline-flex; align-items:center; gap:4px;
   border:none; cursor:pointer; border-radius:8px;
   height:27px; padding:0 9px;
   background:transparent; color:var(--fg3);
@@ -367,20 +355,20 @@ html.dark .cm-paste:active{ background:color-mix(in srgb, #fff 14%, var(--card-b
 .cm-pasteflash{ color:var(--brand-primary-600) !important; }
 
 /* ---- continue button ---- */
-.cm-footer{ padding-top:13px; }
+.cm-footer{ padding-top:12px; }
 .cm-cta{
   width:100%; height:44px;
   display:inline-flex; align-items:center; justify-content:center; gap:8px;
   border:none; border-radius:12px; cursor:pointer;
-  /* headline (16px/600), one step below the title3 anchor -- Apple's
-     primary-button weight, not the prior extrabold/900. */
-  font-family:var(--font-display); font-weight:var(--weight-semibold); font-size:16px;
+  /* headline (16px/900) -- Montserrat Black, matching the header-level scale. */
+  font-family:var(--font-display); font-weight:var(--weight-black); font-size:16px;
   background:var(--gray-200); color:var(--gray-400);
-  transition:background calc(var(--duration-slow) * var(--anim-mult,1)) var(--ease-fade), color calc(var(--duration-slow) * var(--anim-mult,1)) var(--ease-fade), transform calc(var(--duration-140) * var(--anim-mult,1)) var(--ease-out), box-shadow calc(var(--duration-slow) * var(--anim-mult,1)) var(--ease-fade), filter calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+  transition:background calc(var(--duration-fast) * var(--anim-mult,1)) var(--ease-out), color calc(var(--duration-fast) * var(--anim-mult,1)) var(--ease-out);
   letter-spacing:.005em;
 }
 html.dark .cm-cta{ background-color:#232323; color:var(--gray-500); }
+/* neutralize proximity lift/zoom on the connect CTA (color-shift only, per F13) */
+.cm-cta[data-proximity][data-proximity][data-proximity]{ scale:none; filter:none; }
 .cm-cta[data-enabled="true"]{ cursor:pointer; }
 .cm-cta[data-enabled="true"][data-style="brand"]{
   background-color:var(--brand-primary); color: var(--brand-on-primary);
@@ -391,7 +379,9 @@ html.dark .cm-cta{ background-color:#232323; color:var(--gray-500); }
   background-size:14px 14px;
   box-shadow:var(--shadow-emerald-glow-sm), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -2px 0 rgba(0,0,0,.22), inset 0 0 0 1px rgba(255,255,255,.15);
 }
-.cm-cta[data-enabled="true"][data-style="brand"]:hover{ filter:brightness(1.05); }
+/* calm-ui: hover/press are a gentle color shift only, 120ms ease-out, no transform/shadow */
+.cm-cta[data-enabled="true"][data-style="brand"]:hover{ background-color:color-mix(in srgb, var(--brand-primary) 92%, white); }
+.cm-cta[data-enabled="true"][data-style="brand"]:active{ background-color:color-mix(in srgb, var(--brand-primary) 88%, black); }
 .cm-cta[data-enabled="true"][data-style="black"]{
   background-color:var(--gray-900); color:#fff;
   background-image:
@@ -400,14 +390,15 @@ html.dark .cm-cta{ background-color:#232323; color:var(--gray-500); }
   background-size:14px 14px;
   box-shadow:0 6px 14px -6px rgba(17,17,17,.6), inset 0 1px 0 rgba(255,255,255,.08), inset 0 -2px 0 rgba(0,0,0,.3);
 }
-.cm-cta[data-enabled="true"][data-style="black"]:hover{ filter:brightness(1.12); }
-.cm-cta[data-enabled="true"]:active{ transform:scale(var(--press-card)); }
+.cm-cta[data-enabled="true"][data-style="black"]:hover{ background-color:color-mix(in srgb, var(--gray-900) 88%, white); }
+.cm-cta[data-enabled="true"][data-style="black"]:active{ background-color:color-mix(in srgb, var(--gray-900) 80%, white); }
 .cm-cta:disabled{ cursor:not-allowed; }
 
-/* arrow_forward icon: bolder weight */
+/* arrow_forward icon: classic material-icons ligature has no SVG stroke-width
+   or variable weight axis, so -webkit-text-stroke matches the Black button text */
 .cm-cta-ic{
   font-size:15px;
-  font-variation-settings:'wght' 700;
+  -webkit-text-stroke:0.6px currentColor;
 }
 .cm-spinner{ width:15px; height:15px; border-radius:50%; border:2px solid rgba(255,255,255,.35); border-top-color:#fff; animation:cm-spin calc(var(--duration-700) * var(--anim-mult,1)) var(--ease-linear) infinite; }
 @keyframes cm-spin{ to{ transform:rotate(360deg); } }
@@ -415,8 +406,8 @@ html.dark .cm-cta{ background-color:#232323; color:var(--gray-500); }
 .cm-okcheck path{ stroke:#fff; stroke-width:2.6; fill:none; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:24; stroke-dashoffset:24; animation:cm-draw calc(var(--duration-sweep) * var(--anim-mult,1)) var(--ease-out) forwards; }
 
 .cm-note{
-  display:flex; align-items:center; justify-content:center; gap:5px;
-  margin:20px 0 2px; color:var(--fg4);
+  display:flex; align-items:center; justify-content:center; gap:4px;
+  margin:16px 0 0; color:var(--fg4);
   font-size:10px; font-weight:var(--weight-medium);
 }
 .cm-note .material-icons, .cm-note .material-symbols-outlined{ font-size:12px; }
@@ -428,6 +419,6 @@ html.dark .cm-note a{ border-bottom-color:rgba(255,255,255,.22); }
 @media (prefers-reduced-motion: reduce){
   .cm-card{ animation-duration:.01ms !important; /* motion-sweep: kept, prefers-reduced-motion !important near-zero override, intentionally literal (house pattern, see frontend-motion-contract.md) */ }
   .cm-expand, .cm-keypad, .cm-radio .cm-fill, .cm-cta { transition-duration:.01ms !important; /* motion-sweep: kept, prefers-reduced-motion !important near-zero override, intentionally literal (house pattern, see frontend-motion-contract.md) */ }
-  .cm-radio .cm-fill svg path, .cm-okcheck path, .cm-lock[data-secure="true"]{ animation:none !important; stroke-dashoffset:0 !important; }
+  .cm-radio .cm-fill svg path, .cm-okcheck path, .cm-lock[data-secure="true"], .cm-icontile[data-active="true"]{ animation:none !important; stroke-dashoffset:0 !important; }
   .cm-connector i{ animation:none !important; opacity:.55 !important; transform:none !important; }
 }

@@ -23,7 +23,8 @@ import './proto/variants.css'
 // byte-preserved DOM/CSS/timings per CONVERSION-SOP.md. Motion values are
 // tokenized in MessageDropdown.css where an exact value-identical token
 // exists (see that file's header); the one raw duration with no matching
-// tier (380ms) is carried as a literal, unchanged from source.
+// single tier (380ms) is expressed as a gate-compliant calc composition
+// (200+180) resolving to the same 380ms.
 // ---------------------------------------------------------------------------
 
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react'
@@ -213,6 +214,9 @@ export function MessageDropdown({
       {/* eslint-disable-next-line jsx-a11y/prefer-tag-over-role -- animated popover (opacity/pointer-events driven by .md-root.open); native <dialog> alters show/hide semantics and would fight the CSS transition, same precedent as FileFolder.tsx/Calendar.tsx */}
       <div className="md-panel-content" role="dialog" aria-modal="false" aria-label={label} aria-hidden={!open}>
         <div className="md-header">
+          <span className="material-symbols-outlined" aria-hidden="true">
+            chat_bubble
+          </span>
           <h3>{label}</h3>
           {unread > 0 && (
             <span className="md-count-tag" aria-label={`${unread} new`}>
@@ -248,17 +252,17 @@ export function MessageDropdown({
         </ul>
 
         <div className="md-footer">
-          <button type="button" tabIndex={open ? 0 : -1}>
-            <span className="material-symbols-outlined" aria-hidden="true">
-              arrow_outward
-            </span>
-            <span className="md-btn-label">{viewAllLabel}</span>
-          </button>
           <button type="button" className="md-mark-read" tabIndex={open ? 0 : -1}>
             <span className="material-symbols-outlined" aria-hidden="true">
               done_all
             </span>
             <span className="md-btn-label">Mark all as read</span>
+          </button>
+          <button type="button" tabIndex={open ? 0 : -1}>
+            <span className="material-symbols-outlined" aria-hidden="true">
+              arrow_outward
+            </span>
+            <span className="md-btn-label">{viewAllLabel}</span>
           </button>
         </div>
       </div>

@@ -46,7 +46,9 @@ function HoverStrip(): React.ReactElement {
 function NodeTools(): React.ReactElement {
   return (
     <div className="wf-tools">
-      <button type="button" className="wf-tool connect" data-tip="Connect to next" aria-label="Connect to next node" />
+      <button type="button" className="wf-tool connect" data-tip="Connect to next" aria-label="Connect to next node">
+        <span className="material-icons">link</span>
+      </button>
       <button type="button" className="wf-tool add" data-tip="Add next" aria-label="Add next node">
         <span className="material-icons">add</span>
       </button>

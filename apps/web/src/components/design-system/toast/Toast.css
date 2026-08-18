@@ -55,6 +55,15 @@
   line-height: normal;
 }
 
+/* Resting (pre-effect) state of the useAutoHeight-owned expand region,
+   mirrors ExpandableCard.css's .xc-content -- the hook writes
+   height/overflow/transition inline once mounted, this only holds the
+   collapsed state through first paint so there's no flash of open content. */
+.ts-content {
+  height: 0;
+  overflow: hidden;
+}
+
 /* Verbatim from the raw file's inline <style> block. */
 @keyframes ts-enter {
   from {
@@ -106,10 +115,8 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.55),
     inset 0 -2px 0 rgba(15, 23, 42, 0.18),
     inset 0 0 0 1px rgba(15, 23, 42, 0.1);
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.13) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.13) 1px, transparent 1px);
-  background-size: 7px 7px;
+  background-image: var(--grid-texture-image);
+  background-size: var(--grid-texture-size);
 }
 .badge.tag {
   background: #f1f5f9;
@@ -141,10 +148,8 @@
   z-index: 0;
   border-radius: 9999px;
   background: #10b981;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.13) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.13) 1px, transparent 1px);
-  background-size: 7px 7px;
+  background-image: var(--grid-texture-image);
+  background-size: var(--grid-texture-size);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
     0 2px 8px -1px rgba(16, 185, 129, 0.6);
@@ -207,9 +212,8 @@
   background-color: var(--accent);
   background-image:
     radial-gradient(ellipse at top right, rgba(255, 255, 255, 0.18) 0%, transparent 55%),
-    linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-  background-size: cover, 14px 14px, 14px 14px;
+    var(--grid-texture-image);
+  background-size: cover, var(--grid-texture-size), var(--grid-texture-size);
   box-shadow:
     0 8px 22px -8px var(--ctaglow),
     inset 0 1px 0 rgba(255, 255, 255, 0.45),

@@ -1,9 +1,8 @@
-import { Suspense } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { getBySlug } from '@/lib/component-registry'
 import { GalleryLayout } from '@/components/library/GalleryLayout'
 import { PreviewFrame } from '@/components/library/PreviewFrame'
-import { ComponentErrorBoundary } from '@/components/library/ComponentErrorBoundary'
+import { LazyLoadBoundary } from '@/lib/lazy-retry'
 import { makeRevealRef } from '@/lib/make-reveal-ref'
 
 export const Route = createFileRoute('/components/$slug')({
@@ -38,16 +37,18 @@ function ComponentPreviewPage() {
   return (
     <GalleryLayout activeSlug={slug}>
       <PreviewFrame entry={entry}>
-        <ComponentErrorBoundary componentName={entry.name}>
-          <Suspense
-            fallback={
-              <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
-                Loading component...
-              </div>
-            }
-          >
+        <LazyLoadBoundary
+          key={entry.slug}
+          component={Component}
+          componentName={entry.name}
+          fallback={
+            <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
+              Loading component...
+            </div>
+          }
+        >
+          {(Current) => (
             <div
-              key={entry.slug}
               className={entry.entrance === 'immediate' ? 'anim-immediate' : undefined}
               ref={
                 entry.revealSelector
@@ -55,10 +56,10 @@ function ComponentPreviewPage() {
                   : undefined
               }
             >
-              <Component />
+              <Current />
             </div>
-          </Suspense>
-        </ComponentErrorBoundary>
+          )}
+        </LazyLoadBoundary>
       </PreviewFrame>
     </GalleryLayout>
   )

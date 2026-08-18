@@ -35,6 +35,11 @@ export default function ThemeEditor() {
 
   // Motion toggle (on = normal speed). Off sets --anim-mult: 0 on the preview subtree only.
   const [motionOn, setMotionOn] = useState(true)
+  const resetDefaults = () => {
+    setTextSize(55)
+    setBrightness(68)
+    setMotionOn(true)
+  }
   const teProxRef = useProximityGroup<HTMLDivElement>()
   const teOuterSquircleRef = useSquircle<HTMLDivElement>()
   const tePanelSquircleRef = useSquircle<HTMLDivElement>()
@@ -161,6 +166,9 @@ export default function ThemeEditor() {
             </div>
 
             <div className="te-footer">
+              <button type="button" className="te-reset" data-proximity onClick={resetDefaults}>
+                Reset
+              </button>
               <button type="button" className="te-save" data-proximity>
                 <span className="material-icons" style={{ fontSize: 14 }}>save</span>
                 Save

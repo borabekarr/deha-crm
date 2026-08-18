@@ -13,9 +13,16 @@
    expandable-screen/expandable-screen.html). */
 
 .es-demo-root {
-  position: fixed;
-  inset: 0;
-  z-index: 2147483647;
+  /* Gallery chrome bug fix (ui-motion-sweep step 9): this root used to be
+     `position: fixed; inset: 0; z-index: 2147483647`, i.e. a full-viewport
+     layer that covered the gallery shell (left pane / theme toggle /
+     Agentation bubble) behind it -- the raw standalone-page demo needed
+     that to fill the screen, but inside the gallery's PreviewFrame it must
+     stay in normal flow like every other demo root (xc-root, dir-root)
+     so the shell stays visible and interactive. The morphing overlay
+     itself is unaffected: it's portaled to document.body and carries its
+     own OVERLAY_Z, not this root's z-index. */
+  position: relative;
   /* Tailwind preflight's inherited line-height:1.5 bleeds into text
      descendants that don't declare their own line-height (the "Early
      access"/"Limited spots"/tag-row badge spans, the footer <p>) -- the raw
@@ -35,6 +42,28 @@
 .es-overlay {
   font-family: var(--font-display);
   line-height: normal;
+}
+
+/* Background blur scrim (plan: debt2-expandable Step 1, F25). Stays mounted
+   in both states ([[mounted-through-exit-css-animations]]) so its fade-out
+   plays through the collapse instead of vanishing the instant `open` flips;
+   ExpandableScreen.tsx toggles it via the [data-open] attribute across the
+   whole open period. 12px reuses DynamicIslandReader.css's existing
+   `backdrop-filter: blur(12px)` value already in the codebase as the
+   "medium" tier, not a new magic px. */
+.es-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646; /* below the overlay's OVERLAY_Z, above the page */
+  background: rgba(2, 6, 23, 0.28);
+  backdrop-filter: blur(var(--es-scrim-blur, 12px));
+  -webkit-backdrop-filter: blur(var(--es-scrim-blur, 12px));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out);
+}
+.es-scrim[data-open] {
+  opacity: 1;
 }
 
 .es-close-btn {

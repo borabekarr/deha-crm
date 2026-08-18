@@ -12,12 +12,14 @@ import './BuyerBrain.css'
 // is expressed here as the same arithmetic evaluated once at module scope and
 // rendered declaratively, in the same DOM order the loop produced.
 //
-// Excluded from the port (authoring/page chrome, same precedent as
-// SiriOrb.tsx): the raw page's fixed `.bbq-darktoggle` button (it drives
+// Excluded from the port (authoring/page chrome, same exclusion precedent
+// used elsewhere in the library): the raw page's fixed `.bbq-darktoggle` button (it drives
 // html.dark, which the app owns) and the trailing preview/_slowmo.js script.
-// The raw file's `.bbq-head` / `.bbq-tabs` CSS has no markup behind it — the
-// source ships no header or tab row in <body>, so the port ships none either
-// (the CSS is carried over verbatim regardless, per byte-preservation).
+// The raw file's `.bbq-head` / `.bbq-tabs` CSS had no markup behind it — the
+// source ships no header or tab row in <body>. The `.bbq-tabs`/`.bbq-tab`
+// rules were pruned from BuyerBrain.css on 2026-08-16 (plan anim-mult-wiring)
+// as never-rendered dead weight; `.bbq-head` stays (its avatar/name/score
+// children are live markup below).
 //
 // No motion tokenization in this pass: durations and easings stay source
 // literals, as the plan step directs.
@@ -32,6 +34,19 @@ import {
   type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react'
+import { Shimmer } from '../shimmer/Shimmer'
+
+// Step-7 load diagnosis: the 9 brain pieces are large uncompressed PNGs
+// hosted on i.postimg.cc (third-party, no cache-control/CDN control from
+// this app) and each URL is fetched twice — once for the silhouette backing
+// layer (.bbq-piecebg) and once for the visible cutout (.bbq-piece) — with
+// no priority or decoding hints, so the browser treats all 18 requests as
+// equal-priority alongside the rest of the page. Fix applied: fetchPriority
+// + decoding hints so the visible layer wins the race, plus intrinsic
+// width/height attributes to avoid reflow, plus a shimmer-only loading gate
+// (below) as the required fallback for whatever latency optimization can't
+// remove — remote asset weight/host latency is outside this component's
+// control.
 
 const VARIANTS = ['main'] as const
 const variant = VARIANTS[0]
@@ -81,6 +96,17 @@ const PIECE: Record<string, PieceInfo> = {
 }
 
 type Side = 'left' | 'right' | 'top-l' | 'top-r' | 'bottom'
+
+// Detail-card scale-open origin: approximates "grows from the piece that was
+// clicked" by mapping the piece's side within the brain grid to the nearest
+// edge of the card (the card sits to the right of the stage).
+const CARD_ORIGIN: Record<Side, string> = {
+  left: '0% 50%',
+  right: '100% 50%',
+  'top-l': '50% 0%',
+  'top-r': '50% 0%',
+  bottom: '50% 100%',
+}
 
 interface Region {
   id: string
@@ -270,6 +296,12 @@ type BlurbPhase = 'think' | 'typing' | 'done'
 export default function BuyerBrain() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [hoverId, setHoverId] = useState<string | null>(null)
+  // Loaded count for the visible cutout layer only (bg silhouettes share the
+  // same cached src, so they resolve in lockstep). Gates the whole grid
+  // behind shimmer-only until every piece has a non-zero naturalWidth.
+  const [loadedCount, setLoadedCount] = useState(0)
+  const allLoaded = loadedCount >= REGIONS.length
+  const handlePieceLoad = useCallback(() => setLoadedCount((c) => c + 1), [])
   // Mirrors the raw `detail.innerHTML=''` teardown 300ms after close: the card
   // stays mounted through the collapse transition, then unmounts.
   const [cardId, setCardId] = useState<string | null>(null)
@@ -304,7 +336,8 @@ export default function BuyerBrain() {
     if (closeRef.current) clearTimeout(closeRef.current)
     closeRef.current = setTimeout(() => {
       setCardId(null)
-    }, rmRef.current ? 0 : 300)
+      // matches --duration-420, the token driving bbqCardOpen's reverse exit
+    }, rmRef.current ? 0 : 420)
   }, [clearT])
 
   const select = useCallback(
@@ -379,7 +412,16 @@ export default function BuyerBrain() {
 
           <div className={'bbq-qual show' + (selectedId ? ' detail-open' : '')} id="panelQual">
             <div className={'bbq-stage' + (focused ? ' focused' : '')} id="stage">
-              <div className={'bbq-brain' + (focused ? ' focused' : '')} id="brain">
+              {!allLoaded && (
+                <div className="bbq-stage-shimmer" aria-hidden="true">
+                  <Shimmer isLoading width="100%" height="100%" radius={16} />
+                </div>
+              )}
+              <div
+                className={'bbq-brain' + (focused ? ' focused' : '')}
+                id="brain"
+                style={{ visibility: allLoaded ? 'visible' : 'hidden' }}
+              >
                 <div className="bbq-brainbg">
                   {GEOM.map((g) => (
                     <img
@@ -388,6 +430,11 @@ export default function BuyerBrain() {
                       src={PIECE[g.rg.id].u}
                       alt=""
                       aria-hidden="true"
+                      width={Math.round(PIECE[g.rg.id].nw * PIECE[g.rg.id].s)}
+                      height={Math.round(PIECE[g.rg.id].nh * PIECE[g.rg.id].s)}
+                      decoding="async"
+                      loading="eager"
+                      fetchPriority="low"
                       style={g.bgStyle}
                     />
                   ))}
@@ -399,6 +446,12 @@ export default function BuyerBrain() {
                       data-id={g.rg.id}
                       alt=""
                       src={PIECE[g.rg.id].u}
+                      width={Math.round(PIECE[g.rg.id].nw * PIECE[g.rg.id].s)}
+                      height={Math.round(PIECE[g.rg.id].nh * PIECE[g.rg.id].s)}
+                      decoding="async"
+                      loading="eager"
+                      fetchPriority="high"
+                      onLoad={handlePieceLoad}
                       style={{ ...g.pieceStyle, ['--acc' as string]: g.rg.acc }}
                     />
                     <button
@@ -422,7 +475,13 @@ export default function BuyerBrain() {
                   </Fragment>
                 ))}
               </div>
-              <svg id="lineSvg" viewBox="0 0 560 362" preserveAspectRatio="none" aria-hidden="true">
+              <svg
+                id="lineSvg"
+                viewBox="0 0 560 362"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+                style={{ visibility: allLoaded ? 'visible' : 'hidden' }}
+              >
                 {GEOM.map((g) => (
                   <Fragment key={g.rg.id}>
                     <polyline
@@ -440,29 +499,37 @@ export default function BuyerBrain() {
                   </Fragment>
                 ))}
               </svg>
-              {GEOM.map((g) => (
-                <button
-                  key={g.rg.id}
-                  className={
-                    'bbq-label' + (g.light ? ' lighttext' : '') + (activeId === g.rg.id ? ' on' : '')
-                  }
-                  data-id={g.rg.id}
-                  style={g.labelStyle}
-                  onMouseEnter={() => setHoverId(g.rg.id)}
-                  onMouseLeave={() => setHoverId(null)}
-                  onClick={() => select(g.rg.id)}
-                >
-                  <span className="material-symbols-outlined">{g.rg.icon}</span>
-                  {g.rg.label}
-                </button>
-              ))}
+              {allLoaded &&
+                GEOM.map((g) => (
+                  <button
+                    key={g.rg.id}
+                    className={
+                      'bbq-label' + (g.light ? ' lighttext' : '') + (activeId === g.rg.id ? ' on' : '')
+                    }
+                    data-id={g.rg.id}
+                    style={g.labelStyle}
+                    onMouseEnter={() => setHoverId(g.rg.id)}
+                    onMouseLeave={() => setHoverId(null)}
+                    onClick={() => select(g.rg.id)}
+                  >
+                    <span className="material-symbols-outlined">{g.rg.icon}</span>
+                    {g.rg.label}
+                  </button>
+                ))}
             </div>
 
             <div className="bbq-detail" id="detail">
               {cardRegion && (
                 <div
-                  className={'bbq-detail-card' + (cardLight ? ' lighttext' : '')}
-                  style={{ ['--acc' as string]: cardRegion.acc }}
+                  className={
+                    'bbq-detail-card' +
+                    (cardLight ? ' lighttext' : '') +
+                    (!selectedId ? ' closing' : '')
+                  }
+                  style={{
+                    ['--acc' as string]: cardRegion.acc,
+                    transformOrigin: CARD_ORIGIN[cardRegion.side],
+                  }}
                 >
                   <button
                     className="bbq-back"

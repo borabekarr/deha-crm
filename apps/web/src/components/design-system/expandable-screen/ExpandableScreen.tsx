@@ -1,7 +1,6 @@
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './ExpandableScreen.css'
-import './variants.css'
 
 // ---------------------------------------------------------------------------
 // Expandable Screen — Deha Design System
@@ -35,11 +34,16 @@ import './variants.css'
 // values") — kept in its own named const, decoupled from the transition
 // string it's interpolated into, same as the raw source's own `ease`
 // variable.
+//
+// (plan: debt2-expandable Step 1) Prototype-picker harness (proto/
+// ProtoPicker.tsx, proto/variants.css, proto/picker-css.ts) removed: Bora
+// chose the main Shared-Element variant, so overlayGeometry's sheet/
+// crossfade branches and the picker chrome are gone. main keeps only its
+// own FLIP branch.
 // ---------------------------------------------------------------------------
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
-import { VariantPicker } from './VariantPicker'
 
 type Phase = 'idle' | 'from' | 'open'
 
@@ -70,13 +74,9 @@ const QUICK_MS = 'var(--duration-150)'
 const HOVER_MS = 'var(--duration-200)'
 const TRIGGER_RADIUS = '100px'
 const CONTENT_RADIUS = '24px'
-// Mirror comments for the JS-timed legs derived from DURATION_S (the FLIP math
-// has to stay arithmetic in JS, so the CSS token is named rather than
-// substituted): 0.45s FLIP -- no exact motion-tokens.css tier (between
-// --duration-420 and --duration-560); 0.315s content reveal (DURATION_S*0.7)
-// and 0.1575s content hide (DURATION_S*0.35) -- no tiers; 0.18s trigger
-// re-reveal (DURATION_S*0.4) == --duration-180 exactly; 0.225s close-button
-// delay (DURATION_S*0.5) -- no tier.
+// Expanded surface breathing room (edge-adjacency fix): a consistent inset
+// on all four sides instead of the old flush 0/0/100vw/100vh geometry.
+const SCREEN_INSET = '24px'
 // The overlay is portaled to document.body, so it leaves .es-demo-root's
 // z-index 2147483647 layer; it re-enters at the same top layer (last body
 // child wins the tie) instead of the old in-root z-index 50.
@@ -84,60 +84,40 @@ const OVERLAY_Z = 2147483647
 
 const SYM_STYLE: CSSProperties = { fontFamily: "'Material Symbols Outlined'" }
 
-// ── Prototype variants (ds-review-expandables Step 4) ─────────────────────
-// Harness only. `main` is the untouched Step 3 result and the cherry-pick
-// baseline. Every variant keeps the portal, the FLIP mechanics and every JS
-// timer byte-identical (the LOCKED animation-spam contract for this slug
-// depends on the open/close re-arm timing, and DURATION_S drives it); they
-// diverge on surface chrome and on content choreography only, expressed here
-// and in variants.css. No new useEffect in this component: the picker's own
-// listeners live in the harness file VariantPicker.tsx.
-const VARIANTS = [
-  { id: 'main', label: 'Main' },
-  { id: 'studio', label: 'Studio' },
-  { id: 'parallax', label: 'Parallax' },
-] as const
-type VariantId = (typeof VARIANTS)[number]['id']
-
-// Expanded-screen surface treatment. `main` carries no delta at all.
-const CHROME: Record<VariantId, CSSProperties> = {
-  main: {},
-  studio: {
-    background: '#0B1220',
-    backgroundImage:
-      'linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px), radial-gradient(ellipse at top right, rgba(16,185,129,0.28) 0%, transparent 60%)',
-    boxShadow: '0 24px 60px -20px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.12)',
-  },
-  parallax: {},
-}
-// Closed-state content transform. Parallax has the content trail the surface
-// (~8px, Step 3 finding 8) instead of only scaling with it.
-const CONTENT_FROM: Record<VariantId, string> = {
-  main: 'scale(0.97)',
-  studio: 'scale(0.97)',
-  parallax: 'translateY(8px) scale(0.985)',
+// Byte-preserved FLIP: the overlay's box literally becomes the trigger's
+// measured rect, then top/left/width/height/border-radius interpolate to
+// the inset full-screen geometry.
+function overlayGeometry(open: boolean, rect: Rect | null): { geo: CSSProperties; transition: string } {
+  const geo: CSSProperties = open
+    ? {
+        top: SCREEN_INSET,
+        left: SCREEN_INSET,
+        width: `calc(100vw - ${SCREEN_INSET} * 2)`,
+        height: `calc(100vh - ${SCREEN_INSET} * 2)`,
+        borderRadius: CONTENT_RADIUS,
+      }
+    : rect
+      ? { top: `${rect.top}px`, left: `${rect.left}px`, width: `${rect.width}px`, height: `${rect.height}px`, borderRadius: TRIGGER_RADIUS }
+      : {}
+  return {
+    geo,
+    transition: `top ${DURATION_S}s ${FLIP_EASE}, left ${DURATION_S}s ${FLIP_EASE}, width ${DURATION_S}s ${FLIP_EASE}, height ${DURATION_S}s ${FLIP_EASE}, border-radius ${DURATION_S}s ${FLIP_EASE}`,
+  }
 }
 
 export default function ExpandableScreenDemo() {
   const [phase, setPhase] = useState<Phase>('idle')
   const [closing, setClosing] = useState(false)
   const [joined, setJoined] = useState(false)
+  // [[mounted-through-exit-css-animations]]: driven by an event listener
+  // below, never a setTimeout guess, so it flips the instant the FLIP
+  // collapse's own `width` transition ends.
+  const [textVisible, setTextVisible] = useState(true)
   const rectRef = useRef<Rect | null>(null)
   const triggerElRef = useRef<HTMLButtonElement | null>(null)
   const overlayElRef = useRef<HTMLDivElement | null>(null)
   const pendingOpenRef = useRef(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-  const [variantIndex, setVariantIndex] = useState(() => {
-    const raw = Number.parseInt(new URLSearchParams(window.location.search).get('v') ?? '', 10)
-    return raw >= 1 && raw <= VARIANTS.length ? raw - 1 : 0
-  })
-  const variant = VARIANTS[variantIndex].id
-  const selectVariant = useCallback((i: number) => {
-    setVariantIndex(i)
-    const url = new URL(window.location.href)
-    url.searchParams.set('v', String(i + 1))
-    window.history.replaceState(null, '', url)
-  }, [])
 
   const measure = (): Rect | null => {
     const el = triggerElRef.current
@@ -155,6 +135,7 @@ export default function ExpandableScreenDemo() {
     clearTimeout(timerRef.current)
     document.body.style.overflow = 'hidden'
     setClosing(false)
+    setTextVisible(false)
     setPhase('from')
     pendingOpenRef.current = true
   }, [])
@@ -172,10 +153,32 @@ export default function ExpandableScreenDemo() {
     timerRef.current = setTimeout(() => {
       document.body.style.overflow = ''
       setPhase('idle')
-      setJoined(false)
       setClosing(false)
+      setJoined(false)
+      // Fallback only: if the width transitionend somehow never fires (e.g.
+      // reduced-motion collapses the transition to ~0), the text still
+      // returns once the FLIP settle window elapses.
+      setTextVisible(true)
     }, DURATION_S * 1000 + 60)
   }, [])
+
+  // [[transition-shorthand-replaces-not-merges]]: keys the trigger text's
+  // reappearance to the FLIP surface's own `width` transitionend, so it
+  // shows within one frame of the collapse animation ending instead of a
+  // ~0.5s setTimeout guess. `width` is one of the five properties in
+  // overlayGeometry's transition list and shares FLIP_EASE/DURATION_S with
+  // the rest, so it fires exactly when the collapse visually completes.
+  useEffect(() => {
+    if (!closing) return
+    const el = overlayElRef.current
+    if (!el) return
+    const onEnd = (e: TransitionEvent) => {
+      if (e.propertyName !== 'width') return
+      setTextVisible(true)
+    }
+    el.addEventListener('transitionend', onEnd)
+    return () => el.removeEventListener('transitionend', onEnd)
+  }, [closing])
 
   // Mirrors raw's componentDidUpdate: after 'from' commits on an opening
   // pass (not while closing), force a reflow so the `from` geometry is
@@ -211,11 +214,7 @@ export default function ExpandableScreenDemo() {
   const active = phase !== 'idle' && rectRef.current !== null
   const rect = rectRef.current
 
-  const geo: CSSProperties = open
-    ? { top: '0px', left: '0px', width: '100vw', height: '100vh', borderRadius: CONTENT_RADIUS }
-    : active && rect
-      ? { top: `${rect.top}px`, left: `${rect.left}px`, width: `${rect.width}px`, height: `${rect.height}px`, borderRadius: TRIGGER_RADIUS }
-      : {}
+  const { geo, transition: overlayTransition } = overlayGeometry(open, active ? rect : null)
 
   const overlayStyle: CSSProperties = active
     ? {
@@ -227,9 +226,8 @@ export default function ExpandableScreenDemo() {
           'linear-gradient(to right, rgba(255,255,255,0.07) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.07) 1px, transparent 1px), radial-gradient(ellipse at top right, rgba(255,255,255,0.18) 0%, transparent 55%)',
         backgroundSize: '24px 24px, 24px 24px, 100% 100%',
         boxShadow: '0 10px 40px -10px rgba(16,185,129,0.5), inset 0 1px 0 rgba(255,255,255,0.3)',
-        transition: `top ${DURATION_S}s ${FLIP_EASE}, left ${DURATION_S}s ${FLIP_EASE}, width ${DURATION_S}s ${FLIP_EASE}, height ${DURATION_S}s ${FLIP_EASE}, border-radius ${DURATION_S}s ${FLIP_EASE}`,
+        transition: overlayTransition,
         willChange: 'top, left, width, height',
-        ...CHROME[variant],
         ...geo,
       }
     : { display: 'none' }
@@ -241,7 +239,7 @@ export default function ExpandableScreenDemo() {
     alignItems: 'center',
     justifyContent: 'center',
     opacity: open ? 1 : 0,
-    transform: open ? 'scale(1)' : CONTENT_FROM[variant],
+    transform: open ? 'scale(1)' : 'scale(0.97)',
     transition: open
       ? `opacity ${DURATION_S * 0.7}s ${FADE_EASE} ${DURATION_S * 0.35}s, transform ${DURATION_S * 0.7}s ${FLIP_EASE} ${DURATION_S * 0.35}s`
       : `opacity ${DURATION_S * 0.35}s ${FADE_EASE}, transform ${DURATION_S * 0.35}s ${FLIP_EASE}`,
@@ -267,11 +265,12 @@ export default function ExpandableScreenDemo() {
     transition: `opacity ${QUICK_MS} ${FADE_EASE} ${open ? DURATION_S * 0.5 : 0}s, background ${HOVER_MS} ${FADE_EASE}`,
   }
 
+  // [[transition-shorthand-replaces-not-merges]]: single `opacity` term, zero
+  // transition-delay, so the text shows the instant `textVisible` flips —
+  // no hidden delay term survives here.
   const triggerWrapStyle: CSSProperties = {
-    opacity: active && !closing ? 0 : 1,
-    transition: closing
-      ? `opacity ${DURATION_S * 0.4}s ${FADE_EASE} ${DURATION_S * 0.5}s`
-      : `opacity ${QUICK_MS} ${FADE_EASE}`,
+    opacity: textVisible ? 1 : 0,
+    transition: `opacity ${QUICK_MS} ${FADE_EASE}`,
     pointerEvents: active ? 'none' : 'auto',
   }
 
@@ -358,15 +357,15 @@ export default function ExpandableScreenDemo() {
             geometry (0/0/100vw/100vh) are viewport-relative in either tree. */}
         {createPortal(
           <>
-          {/* Studio's dimming scrim: stays mounted in every variant and is
-              state-classed (mounted-through-exit lesson), display:none outside
-              Studio. Before the overlay in the portal, so it sits above
-              .es-demo-root and below the morphing surface. */}
-          <div className="es-scrim" data-variant={variant} {...(open ? { 'data-open': '' } : null)} />
+          {/* Background blur scrim: stays mounted in every state and is
+              state-classed ([[mounted-through-exit-css-animations]]), so its
+              fade-out plays through the collapse instead of disappearing the
+              instant `open` flips. Before the overlay in the portal, so it
+              sits above .es-demo-root and below the morphing surface. */}
+          <div className="es-scrim" {...(open ? { 'data-open': '' } : null)} />
           <div
             ref={overlayElRef}
             className="es-overlay"
-            data-variant={variant}
             {...(open ? { 'data-open': '' } : null)}
             {...(joined ? { 'data-joined': '' } : null)}
             style={overlayStyle}
@@ -584,13 +583,6 @@ export default function ExpandableScreenDemo() {
             </div>
           </div>
           </div>
-          {/* Picker last in the portal: same z as the overlay, later in the
-              DOM, so variants stay switchable while the screen is expanded. */}
-          <VariantPicker
-            labels={VARIANTS.map((v) => v.label)}
-            index={variantIndex}
-            onSelect={selectVariant}
-          />
           </>,
           document.body,
         )}

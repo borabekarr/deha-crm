@@ -75,7 +75,13 @@
   align-items: center;
   justify-content: center;
   gap: 30px;
-  background: radial-gradient(1100px 760px at 50% 18%, #0d1526 0%, #020617 72%);
+  /* Base value is light: nothing in the component tree ever toggles the
+     raw `.light` modifier class, so it was permanently rendering the dark
+     literal below regardless of app theme. Per app-dark-mode-html-dark-class
+     lesson, the app's real theme switch is `html.dark` on the document
+     root, not this component's inert `.light` class -- route through that
+     selector instead so #stage actually follows the app theme. */
+  background: radial-gradient(1000px 720px at 50% 22%, #eef2f8 0%, #cdd6e3 72%);
   /* raw used background 0.45s ease for this rule.
      0.45s==450ms has no exact motion-token tier (nearest existing tiers are
      420ms/460ms, neither byte-identical) -- composed value-identically from
@@ -83,6 +89,9 @@
      bare `ease` -> --ease-fade (== bare ease per its own definition,
      established mapping, see Dropdown.css). */
   transition: background calc(var(--duration-slower) * 1.5) var(--ease-fade);
+}
+html.dark .stage {
+  background: radial-gradient(1100px 760px at 50% 18%, #0d1526 0%, #020617 72%);
 }
 .stage.light {
   background: radial-gradient(1000px 720px at 50% 22%, #eef2f8 0%, #cdd6e3 72%);
@@ -361,7 +370,13 @@
   transition: width var(--duration-320) var(--ease-standard), background var(--duration-320) var(--ease-fade);
   cursor: pointer;
 }
-.dots .dot.on { width: 26px; background: var(--accent); }
+/* `.below`/`.dots` is a DOM sibling of `.carousel`, not a descendant, so
+   `--accent` (declared on `.carousel`) never inherits down to this pill --
+   `var(--accent)` was an invalid reference here, so the declaration was
+   dropped and the "active" dot silently fell back to the same grey as the
+   inactive dots (the reported invisible active pill). Literal value
+   matches `.carousel`'s `--accent: #10B981` exactly. */
+.dots .dot.on { width: 26px; background: #10B981; }
 .stage.light .dots .dot { background: rgba(100,116,139,0.45); }
 
 .caption {

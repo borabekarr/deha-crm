@@ -28,10 +28,9 @@
  *
  * Motion values are tokenized where an exact value-identical match exists in
  * apps/web/src/styles/motion-tokens.css (see the "raw:" comment beside each
- * substitution). The one raw duration with no matching tier (380ms, the
- * .md-panel-shell transform leg) stays a literal, unchanged from source —
- * the --duration-200 token already present in that same declaration
- * satisfies the motion-token gate for the whole rule.
+ * substitution). The .md-panel-shell transform leg (380ms) has no matching
+ * single tier, so it is expressed as a gate-compliant calc composition
+ * (--duration-200 + --duration-180), resolving to the same 380ms.
  */
 
 /* Inner white panel — demo wrapper only, mirrors the raw Demo()'s .md-panel;
@@ -103,14 +102,26 @@
   /* raw: opacity 200ms ease, transform 380ms cubic-bezier(.22,1,.36,1)
      200ms -> --duration-200; bare `ease` -> --ease-fade (== bare ease per its
      own definition comment); cubic-bezier(.22,1,.36,1) -> --ease-motion-sweep-2236
-     (byte-identical). 380ms has no matching tier in motion-tokens.css and is
-     kept as a literal, unchanged from source. */
-  transition: opacity var(--duration-200) var(--ease-fade), transform 380ms var(--ease-motion-sweep-2236);
+     (byte-identical). 380ms has no matching single tier and is expressed as
+     calc(var(--duration-200) + var(--duration-180)), resolving to the same
+     380ms. */
+  transition: opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade), transform calc((var(--duration-200) + var(--duration-180)) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);
 }
 .md-root.open .md-panel-shell {
   opacity: 1;
   transform: translateX(-50%) scale(1);
   transition-delay: calc(var(--md-dur) * 0.42), calc(var(--md-dur) * 0.42);
+}
+/* ds-motion-sweep step 3: exit = reversed enter. The base (non-.open) rule
+   above carries no delay, so removing .open used to fire every layer -- shell,
+   panel-bg, content, items -- at once instead of retracing the enter stagger
+   backwards. These :not(.open) delays play that same film in reverse: the
+   items that entered last (delay .92/.82/.72/.62) leave first, and the shell
+   that entered first (delay .42, and the panel-bg core geometry that entered
+   with no delay at all) leaves last. Same duration/easing/property list as
+   enter throughout -- only the delay direction changes. */
+.md-root:not(.open) .md-panel-shell {
+  transition-delay: calc(var(--md-dur) * 0.50), calc(var(--md-dur) * 0.50);
 }
 
 /* ---- Gooey shape layer ---- */
@@ -133,12 +144,13 @@
   pointer-events: none;
   /* raw: transform 220ms cubic-bezier(.22,1,.36,1) -> --duration-slow (220ms,
      byte-identical) / --ease-motion-sweep-2236. */
-  transition: transform var(--duration-slow) var(--ease-motion-sweep-2236);
+  transition: transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236),
+    filter calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);
 }
-/* hovering the trigger zooms the whole button (circle), not just the icon.
-   Gated to real pointers so touch does not stick the zoom on after a tap. */
+/* hovering the trigger darkens the whole button (circle) in-shape, not just the icon.
+   Gated to real pointers so touch does not stick the state on after a tap. */
 @media (hover: hover) and (pointer: fine) {
-  .md-root:not(.open):has(.md-trigger:hover) .md-trigger-bg { transform: translateX(-50%) scale(1.06); }
+  .md-root:not(.open):has(.md-trigger:hover) .md-trigger-bg { filter: brightness(1.3); }
 }
 
 /* Panel background — starts as brand-green disk inside trigger (so gooey merge works),
@@ -169,8 +181,8 @@
     height var(--md-dur) var(--ease-spring-open),
     top    var(--md-dur) var(--ease-spring-open),
     border-radius var(--md-dur) var(--ease-spring-open),
-    background-color var(--duration-slow) var(--ease-fade) 0ms,
-    box-shadow var(--duration-slow) var(--ease-fade) 0ms;
+    background-color calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade) 0ms,
+    box-shadow calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade) 0ms;
 }
 .md-root.open .md-panel-bg {
   width: 340px;
@@ -187,6 +199,12 @@
     calc(var(--md-dur) * 0.50),
     calc(var(--md-dur) * 0.50);
 }
+.md-root:not(.open) .md-panel-bg {
+  transition-delay:
+    calc(var(--md-dur) * 0.55), calc(var(--md-dur) * 0.55),
+    calc(var(--md-dur) * 0.55), calc(var(--md-dur) * 0.55),
+    calc(var(--md-dur) * 0.45), calc(var(--md-dur) * 0.45);
+}
 
 /* ---- Interactive (real) trigger button — sits ABOVE the goo layer ---- */
 .md-trigger {
@@ -201,17 +219,17 @@
   display: grid; place-items: center;
   z-index: 4;
   /* raw: transform 220ms cubic-bezier(.22,1,.36,1) -> --duration-slow / --ease-motion-sweep-2236. */
-  transition: transform var(--duration-slow) var(--ease-motion-sweep-2236);
+  transition: transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);
   -webkit-tap-highlight-color: transparent;
 }
 @media (hover: hover) and (pointer: fine) {
-  .md-trigger:hover { transform: translateX(-50%) scale(1.04); }
+  .md-trigger:hover { transform: translateX(-50%); }
 }
 /* Press snaps (120ms), release rides the 220ms base leg back out — asymmetric
    press/release. Duration-only override; the base transition list is untouched. */
 .md-trigger:active {
   transform: translateX(-50%) scale(0.94);
-  transition-duration: var(--duration-fast);
+  transition-duration: calc(var(--duration-fast) * var(--anim-mult, 1));
 }
 .md-trigger:focus-visible {
   outline: 2px solid var(--brand-primary-500);
@@ -222,24 +240,26 @@
   font-variation-settings: '"opsz" 24, "wght" 900, "FILL" 1';
   /* raw: transform 360ms cubic-bezier(.22,1,.36,1) -> --duration-sweep (360ms,
      byte-identical, "ApplyButton background-color sweep") / --ease-motion-sweep-2236. */
-  transition: transform var(--duration-sweep) var(--ease-motion-sweep-2236);
+  transition: transform calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);
   text-shadow: 0 1px 2px rgba(0,0,0,0.25);
 }
 .md-root.open .md-trigger .material-symbols-outlined {
   transform: rotate(-12deg) scale(0.92);
 }
 
-/* Unread count dot on trigger — dark navy for contrast against green trigger */
+/* Unread count dot on trigger — dark navy for contrast against green trigger.
+   Bumped slightly larger per Bora's feedback; pre-change box was
+   min-width:18px height:18px padding:0 4px font-size:11px. */
 .md-trigger-badge {
   position: absolute;
-  top: -4px; right: -4px;
-  min-width: 18px; height: 18px;
-  padding: 0 4px;
+  top: -5px; right: -5px;
+  min-width: 20px; height: 20px;
+  padding: 0 5px;
   border-radius: 9999px;
   background: var(--brand-primary-500);
   color: var(--brand-on-primary);
   font-family: 'Montserrat';
-  font-size: 11px; font-weight: 900;
+  font-size: 12px; font-weight: 900;
   line-height: 1;
   letter-spacing: 0;
   display: inline-flex; align-items: center; justify-content: center;
@@ -259,7 +279,7 @@
   background-size: 6px 6px;
   font-variant-numeric: tabular-nums;
   /* raw: transform 220ms cubic-bezier(.22,1,.36,1) -> --duration-slow / --ease-motion-sweep-2236. */
-  transition: transform var(--duration-slow) var(--ease-motion-sweep-2236);
+  transition: transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);
 }
 .md-root.open .md-trigger-badge { transform: scale(0); }
 
@@ -278,12 +298,15 @@
   pointer-events: none;
   opacity: 0;
   /* raw: opacity 180ms ease -> --duration-180 (byte-identical) / --ease-fade. */
-  transition: opacity var(--duration-180) var(--ease-fade);
+  transition: opacity calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .md-root.open .md-panel-content {
   opacity: 1;
   pointer-events: auto;
   transition-delay: calc(var(--md-dur) * 0.55);
+}
+.md-root:not(.open) .md-panel-content {
+  transition-delay: calc(var(--md-dur) * 0.38);
 }
 
 .md-header {
@@ -297,6 +320,12 @@
   font-size: 17px; font-weight: 900;
   color: var(--fg1);
   letter-spacing: -0.02em;
+}
+/* Header icon — precedes the "Messages" heading text. */
+.md-header .material-symbols-outlined {
+  font-size: 17px;
+  color: var(--fg1);
+  font-variation-settings: '"opsz" 20, "wght" 700, "FILL" 0';
 }
 /* Brand count tag — fills from the active data-primary palette (all 6 themes). */
 .md-count-tag {
@@ -348,15 +377,19 @@
      none is added here either) -> --duration-base (byte-identical, "most common
      transform/box-shadow transition duration in Buttons.css"). */
   transition:
-    opacity var(--duration-280) var(--ease-fade),
-    transform var(--duration-280) var(--ease-motion-sweep-2236),
-    background var(--duration-base);
+    opacity calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236),
+    background calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .md-root.open .md-item { opacity: 1; transform: translateY(0) scale(1); }
 .md-root.open .md-item:nth-child(1) { transition-delay: calc(var(--md-dur) * 0.62), calc(var(--md-dur) * 0.62), 0s; }
 .md-root.open .md-item:nth-child(2) { transition-delay: calc(var(--md-dur) * 0.72), calc(var(--md-dur) * 0.72), 0s; }
 .md-root.open .md-item:nth-child(3) { transition-delay: calc(var(--md-dur) * 0.82), calc(var(--md-dur) * 0.82), 0s; }
 .md-root.open .md-item:nth-child(4) { transition-delay: calc(var(--md-dur) * 0.92), calc(var(--md-dur) * 0.92), 0s; }
+.md-root:not(.open) .md-item:nth-child(1) { transition-delay: calc(var(--md-dur) * 0.30), calc(var(--md-dur) * 0.30), 0s; }
+.md-root:not(.open) .md-item:nth-child(2) { transition-delay: calc(var(--md-dur) * 0.20), calc(var(--md-dur) * 0.20), 0s; }
+.md-root:not(.open) .md-item:nth-child(3) { transition-delay: calc(var(--md-dur) * 0.10), calc(var(--md-dur) * 0.10), 0s; }
+.md-root:not(.open) .md-item:nth-child(4) { transition-delay: 0s, 0s, 0s; }
 .md-item:hover {
   background: color-mix(in srgb, var(--fg1) 7%, transparent);
 }
@@ -388,19 +421,33 @@
   color: var(--fg1);
   letter-spacing: -0.005em;
 }
-/* Colorful tag on unread rows — tinted from the live data-primary palette. */
+/* Colorful tag on unread rows — event-badge treatment copied from
+   pills/Pills.css .badge-event (same radius, glassy background/box-shadow,
+   text style); filled from the live data-primary palette instead of the
+   badge-event per-item inline color. */
 .md-tag {
   flex-shrink: 0;
   margin-right: auto;  /* hug the sender; .md-row1 space-between keeps time right */
-  padding: 1px 6px;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
   border-radius: 9999px;
-  background: color-mix(in srgb, var(--brand-primary-500) 16%, transparent);
-  color: var(--brand-primary-700);
+  background: var(--brand-primary-500);
+  color: var(--brand-on-primary);
   font-family: 'Montserrat';
-  font-size: 9px; font-weight: 900;
+  font-size: 9px; font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  line-height: 1.5;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.55),
+    inset 0 -2px 0 rgba(17,17,17,0.18),
+    inset 0 0 0 1px rgba(17,17,17,0.10);
+  background-image:
+    linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+  background-size: 16px 16px;
 }
 .md-time {
   font-size: 10.5px; font-weight: 600;
@@ -435,20 +482,30 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;  /* icon+label centered as a single unit */
-  gap: 8px;
+  gap: 6px;
   /* House colorful button: filled from the live data-primary palette. The
-     neutral .md-mark-read variant below overrides back to a quiet surface. */
+     neutral .md-mark-read variant below overrides back to a quiet surface.
+     Radius/background-texture/sizing copied from buttons/Buttons.css
+     .btn-primary (radius 14px, grid-texture background-image, 800-weight
+     label) so this footer reads as the same button component. */
   background: var(--brand-primary-500);
   border: 1px solid color-mix(in srgb, var(--brand-primary-700) 45%, transparent);
   color: var(--brand-on-primary);
   font-family: 'Montserrat';
-  font-size: 11.5px; font-weight: 700;
+  font-size: 11.5px; font-weight: 800;
   cursor: pointer;
-  padding: 8px 12px;
-  border-radius: 9px;
+  /* padding/gap match the editorial variant's text treatment (proto/variants.css
+     .mdv-editorial .md-footer button): the 14px inset clipped labels, 10px 8px
+     keeps both fully visible. Colors stay main's own (not copied). */
+  padding: 8px 10px;
+  border-radius: 14px;
+  background-image:
+    linear-gradient(to right,  rgba(255,255,255,0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.07) 1px, transparent 1px);
+  background-size: 14px 14px;
   /* raw: color 160ms, background 160ms, border-color 160ms, box-shadow 160ms
      (no timing-function specified in the raw) -> --duration-base (byte-identical). */
-  transition: color var(--duration-base), background var(--duration-base), border-color var(--duration-base), box-shadow var(--duration-base);
+  transition: color calc(var(--duration-base) * var(--anim-mult, 1)), background calc(var(--duration-base) * var(--anim-mult, 1)), border-color calc(var(--duration-base) * var(--anim-mult, 1)), box-shadow calc(var(--duration-base) * var(--anim-mult, 1));
   letter-spacing: -0.005em;
   box-shadow: 0 2px 6px -2px color-mix(in srgb, var(--brand-primary-500) 55%, transparent), inset 0 1px 0 rgba(255,255,255,0.28);
   text-align: left;
@@ -489,9 +546,14 @@
   outline-offset: 2px;
 }
 
-/* ---- Speed presets via custom prop ---- */
-.md-root[data-speed="normal"] { --md-dur: 560ms; }
-.md-root[data-speed="slow"]   { --md-dur: 1400ms; }
+/* ---- Speed presets via custom prop ----
+   ds-motion-sweep step 3: --md-dur now also folds in --anim-mult so the
+   route's shared slow-toggle control (data-anim-slow on <html>, flips
+   --anim-mult 1 -> 4 in global.css) scales this component the same way it
+   scales every other library component -- previously only the component's
+   own `speed` prop could slow it down. */
+.md-root[data-speed="normal"] { --md-dur: calc(var(--duration-560) * var(--anim-mult, 1)); }
+.md-root[data-speed="slow"]   { --md-dur: calc((var(--duration-700) + var(--duration-700)) * var(--anim-mult, 1)); }
 
 /* Reduce motion */
 @media (prefers-reduced-motion: reduce) {
@@ -518,10 +580,12 @@ html.dark .md-card {
   background: #111111;
   border-color: #232323;
 }
-/* Canon dark shell: 1px #232323 ring on the OUTER shell only, elevation still
-   drop-shadow-only; background comes from --shell-bg. */
+/* Canon dark shell: no ring, matching the card-primitives outer shell
+   (concentric-demo-outer in Cards.css carries no border/box-shadow of its
+   own in either theme); elevation stays drop-shadow-only, background comes
+   from --shell-bg. The previous inset ring here was the stray external
+   line Bora flagged -- card primitives never draws one on this layer. */
 html.dark .md-panel-shell {
-  box-shadow: inset 0 0 0 1px #232323;
   filter: drop-shadow(0 16px 34px rgba(0,0,0,0.55)) drop-shadow(0 3px 8px rgba(0,0,0,0.32));
 }
 html.dark .md-trigger-bg,
@@ -529,7 +593,11 @@ html.dark .md-panel-bg { background: #FFFFFF; }
 html.dark .md-trigger { color: #0F172A; }
 html.dark .md-trigger .material-symbols-outlined { text-shadow: none; }
 html.dark .md-root.open .md-panel-bg {
-  background-color: #1E293B;
+  /* Card-primitives dark surface literal (_shared-feedback.css html.dark
+     --card-bg), used as a literal per this step's guidance since --card-bg
+     is not wired into this component's token chain; the prior #1E293B was
+     a navy/blue value, not the house dark card color. */
+  background-color: #1C1C1C;
   box-shadow:
     0 18px 40px -12px rgba(0,0,0,0.55),
     0 4px 12px -4px rgba(0,0,0,0.35),

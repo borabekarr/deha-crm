@@ -25,16 +25,27 @@ html.dark .tf-shell[data-squircle="on"] {
 /* Squircle conversion (Step 12): tf-shell/tf-card canonical grey-shell/
    white-card concentric pair (mirrors .te-outer/.te-panel, .dp-outer/.dp-panel).
    Depth shadow migrates to filter:drop-shadow (clip-path clips box-shadow). */
+/* P3: unlike other [data-squircle] cards (cm-card etc.), .tf-shell wraps a
+   continuously-transforming drag surface, so a `filter` on the shell forces
+   the browser to recomposite the whole filtered layer on every drag frame.
+   Shadow moves to a static box-shadow on an unclipped ::after sibling layer
+   (per clip-path-shadow-layering lesson item 2) instead of drop-shadow. */
 .tf-shell[data-squircle="on"] {
   --corner-radius: 28px;
   box-shadow: none;
-  filter:
-    drop-shadow(0 10px 30px rgba(17,17,17,0.12))
-    drop-shadow(0 2px 8px rgba(17,17,17,0.06));
+  filter: none;
 }
-.tf-shell[data-squircle="on"]::before,
-.tf-shell[data-squircle="on"]::after {
+.tf-shell[data-squircle="on"]::before {
   content: none;
+}
+.tf-shell[data-squircle="on"]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 28px;
+  box-shadow: 0 10px 30px rgba(17,17,17,0.12), 0 2px 8px rgba(17,17,17,0.06);
+  pointer-events: none;
 }
 html.dark .tf-shell[data-squircle="on"]::before {
   content: '';
@@ -224,8 +235,54 @@ html.dark .tf-preset.active { color: #111111; }
   height: 68px; overflow: hidden; cursor: pointer;
   touch-action: none;
 }
+
+/* F2b: zoom pill — bottom-center under the ruler, mirrors .tf-presets'
+   pill vocabulary (light chip / dark chip, inset shadow, rounded-full). */
+.tf-zoom-pill {
+  position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
+  z-index: 2;
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #F5F5F5;
+  border-radius: 9999px; padding: 2px 3px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+  font-family: 'Montserrat', sans-serif;
+}
+html.dark .tf-zoom-pill { background: #0A0A0A; box-shadow: inset 0 2px 4px rgba(0,0,0,.4); }
+
+.tf-zoom-btn {
+  appearance: none; border: none; background: transparent; cursor: pointer;
+  width: 18px; height: 18px; border-radius: 9999px;
+  display: grid; place-items: center;
+  font-size: 12px; font-weight: 800; color: #6B6B6B; line-height: 1;
+  transition:
+    color calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out);
+}
+html.dark .tf-zoom-btn { color: #A1A1A1; }
+.tf-zoom-btn:hover:not(:disabled) { color: var(--fg2); }
+.tf-zoom-btn:active:not(:disabled) { transform: scale(var(--press-chip)); }
+.tf-zoom-btn:disabled { opacity: .3; cursor: default; }
+.tf-zoom-btn:focus-visible { outline: 2px solid var(--tf-accent); outline-offset: 2px; }
+
+.tf-zoom-pct {
+  font-size: 10px; font-weight: 800; color: var(--fg2);
+  min-width: 26px; text-align: center; letter-spacing: -0.01em;
+}
+html.dark .tf-zoom-pct { color: #A1A1A1; }
 .tf-strip { position: absolute; top: 0; left: 0; height: 100%; }
 .tf-strip[data-anim="true"] { transition: transform calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out); }
+/* P4: promote the strip to its own compositor layer only while dragging, so
+   its translateX doesn't force a repaint of the (formerly filtered, now
+   box-shadowed) shell ancestor on every pointermove frame. */
+.tf-card[data-dragging="true"] .tf-strip { will-change: transform; }
+/* P5: layout-affecting transitions (left/width) stay off during an active
+   drag — data-anim already gates .tf-strip/.tf-sel per-gesture, but
+   .tf-month's `left` transition is unconditional (fires whenever daysVisible
+   changes, incl. the auto zoom-out mid-drag) and .tf-sel needs an explicit
+   `none` (not just an unmatched data-anim selector) to read as none in
+   computed style. */
+.tf-card[data-dragging="true"] .tf-month,
+.tf-card[data-dragging="true"] .tf-sel { transition: none; }
 
 /* base ruler ticks */
 .tf-ruler {
@@ -337,14 +394,28 @@ html.dark .tf-daycount { text-shadow: none; }
   width: 6px; height: 14px; border-radius: 3px;
   background: var(--tf-accent);
   border: 1px solid rgba(255,255,255,.55);
-  box-shadow: 0 1px 3px rgba(17,17,17,.28), 0 2px 6px -1px color-mix(in srgb, var(--tf-accent) 55%, transparent), inset 0 1px 0 rgba(255,255,255,.4);
+  /* F3: the stick intentionally straddles .tf-lens's rounded left/right edge
+     (grip affordance), but .tf-handle is a DOM sibling of .tf-lens, not a
+     clipped child, so .tf-lens's overflow:hidden never contains this pseudo's
+     shadow. The old accent glow (0 2px 6px -1px, ~6px blur) crossed the
+     lens's border-radius curve and painted a green fringe onto the track
+     background right at the corner in both themes. Tightened to a near-zero
+     blur/spread contact shadow so the accent color hugs the stick instead of
+     escaping past the rounded boundary; elevation (dark drop shadow) unchanged. */
+  box-shadow: 0 1px 3px rgba(17,17,17,.28), 0 1px 1px -0.5px color-mix(in srgb, var(--tf-accent) 55%, transparent), inset 0 1px 0 rgba(255,255,255,.4);
   transition: height calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-spring-soft-2), width calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade), box-shadow calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade);
   pointer-events: none;
 }
 /* Grip stays centered on the box for .start, but the .end box is now
    right-anchored (not centered) on the true edge — so its grip needs its
-   own offset to keep straddling that edge visually, matching .start's look. */
-.tf-handle.end::before { left: auto; right: -3px; transform: none; }
+   own offset to keep straddling that edge visually, matching .start's look.
+   F1 fix: the box's right edge sits flush against .tf-track's overflow:hidden
+   clip boundary when the range ends at "today" (flush-right scroll). A
+   negative right offset here pushes part of the grip past that clip, so it
+   gets hard-cut and appears to disappear beneath the track edge. Keeping the
+   grip fully inside the box (right: 0) removes the overhang so nothing is
+   ever clipped, at every scroll position. */
+.tf-handle.end::before { left: auto; right: 0; transform: none; }
 html.dark .tf-handle::before { border-color: rgba(0,0,0,.35); }
 .tf-handle:hover::before { height: 16px; width: 7px; }
 .tf-card[data-dragging="true"] .tf-handle[data-active="true"]::before { height: 17px; width: 7px; }

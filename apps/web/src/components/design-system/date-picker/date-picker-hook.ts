@@ -390,14 +390,12 @@ export function pickerRef(el: HTMLDivElement | null): void {
 
   function closePanel(): void {
     panelOpen = false
-    // Bake the entrance animation's finished transform/opacity in as plain
-    // inline styles BEFORE switching off dp-panel--open. CSS transitions do
-    // not fire for a property change caused by removing a CSS animation (the
-    // dp-panel-enter animation, fill:both) -- without this, opacity/transform
-    // snapped straight to the closed value instead of fading, defeating the
-    // "shell + panel close together" fix below. Freezing the value, removing
-    // the animation, then releasing the inline override (2 reflows) turns the
-    // drop into a plain style change the transition engine picks up normally.
+    // Freeze the open transform/opacity as plain inline styles, swap classes,
+    // then release the inline override (2 reflows). dp-panel--open is now a
+    // pure CSS transition (no keyframe animation, per the no-bounce rule), so
+    // this is defensive rather than load-bearing, but keeps the class swap a
+    // plain style change either way -- the transition engine picks it up
+    // correctly whether the prior state was mid-transition or fully settled.
     $panel.style.transform = 'translateY(0) scale(1)'
     $panel.style.opacity = '1'
     void $panel.offsetHeight

@@ -79,6 +79,11 @@
 
 .pk-root .btn-mi { font-size: 18px; }
 
+/* F8: thicker stroke on confirm-button icons only, same 18px rendered size
+   -- ligature icon font, so weight comes from -webkit-text-stroke, not an
+   SVG stroke-width attribute. Before: 0 (unset). After: 0.6px currentColor. */
+.pk-root .btn-primary .btn-mi { -webkit-text-stroke: 0.6px currentColor; }
+
 /* ---- review pass: press feel (ds-review-inputs step 3) -----------------
    Not raw-source values -- the two additions below are the only non-verbatim
    rules in this file besides the .pk-root preflight normalization.
@@ -96,3 +101,97 @@
 .pk-root .btn-primary:active { transition-duration: calc(var(--duration-fast) * var(--anim-mult, 1)); }
 .pk-root .pk-box[data-open="false"] { -webkit-tap-highlight-color: transparent; }
 .pk-root .pk-box[data-open="false"]:active { transform: scale(0.96); }
+
+/* ---- Step 2: draft-column arrows, separator, footer, trigger pill ----- */
+
+/* Up/down steppers sit inside each wheel's existing 132px spacer zone, so
+   they cost no extra tray height. House hover/press: grey darkening only,
+   no lift or zoom (btn-green-global-never-redefine's sibling motion rule).
+   F9: top/bottom offset pulled from 4px to 32px (28px closer on each side,
+   56px total reduction in arrow-to-value-column distance) -- still lands
+   inside the scroller's fade-to-transparent mask zone (0-98.5px, 32% of the
+   308px wheel), so the arrows stay in their own dedicated spot without
+   overlapping a fully-visible item. Added a resting border (was `border:
+   none`) plus a slightly darker resting background so the circle reads as a
+   button before any interaction, not just on hover. */
+.pk-root .pk-arrow {
+  position: absolute; left: 50%; transform: translateX(-50%); z-index: 3;
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 1px solid rgba(15,23,42,0.10);
+  background: rgba(15,23,42,0.07); color: var(--fg3);
+  display: grid; place-items: center; cursor: pointer;
+  font-size: 16px;
+  transition: background-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), border-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out);
+}
+/* F9: bolder glyph weight, same mechanism F8 used on the confirm-button
+   icons (ligature icon font, so weight comes from -webkit-text-stroke, not
+   an SVG stroke-width). Thinner stroke than F8's 0.6px because this glyph
+   renders at 16px vs. F8's 18px. Before: 0 (unset). After: 0.5px currentColor. */
+.pk-root .pk-arrow .material-icons { font-size: 16px; -webkit-text-stroke: 0.5px currentColor; }
+.pk-root .pk-arrow-up { top: 32px; }
+.pk-root .pk-arrow-down { bottom: 32px; }
+.pk-root .pk-arrow:hover { background: rgba(15,23,42,0.13); border-color: rgba(15,23,42,0.18); }
+.pk-root .pk-arrow:active { background: rgba(15,23,42,0.19); border-color: rgba(15,23,42,0.22); transition-duration: calc(var(--duration-fast) * var(--anim-mult, 1)); }
+
+/* Day/month column separator: a plain flex sibling, so the tray's own
+   `gap: 8px` already puts equal space on both sides -- no extra margin.
+   `.pk-bar` (the white selection highlight, selectionBarStyle in Picker.tsx)
+   is position:absolute with z-index:auto, so within `.pk-tray`'s stacking
+   context it paints AFTER static in-flow siblings regardless of DOM order --
+   it was covering this separator where their spans overlap. Promoting the
+   separator to its own positioned layer above the bar (same pattern already
+   used for the hour/minute colon at Picker.tsx:727) fixes the paint order
+   without touching `.pk-bar` itself. */
+.pk-root .pk-sep { position: relative; z-index: 2; align-self: stretch; width: 1px; background: var(--card-border); }
+
+/* Today/Now footer button: regular (non-green) themed, per
+   btn-green-global-never-redefine -- a new scoped class, .btn-primary itself
+   untouched. */
+.pk-root .pk-today-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 20px; background: rgba(15,23,42,0.06); color: var(--fg2);
+  border: none; border-radius: 14px;
+  font-family: 'Montserrat'; font-size: 14px; font-weight: 800; cursor: pointer;
+  transition: background-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out);
+}
+.pk-root .pk-today-btn:hover { background: rgba(15,23,42,0.12); }
+.pk-root .pk-today-btn:active { background: rgba(15,23,42,0.18); transition-duration: calc(var(--duration-fast) * var(--anim-mult, 1)); }
+
+/* F10: confirmed-state morph, matching pills/Pills.css .badge-event's
+   color/weight/text-shadow treatment -- the emerald + grid-texture fill
+   itself is already painted by boxStyle() in Picker.tsx (same #10B981 +
+   9x9 grid the closed trigger always has), per "copy the event-badge look,
+   don't invent a new style". The box footprint never changes on confirm
+   (boxStyle stays 58px), so this row and its two children -- the calendar
+   icon and the date text -- share that fixed circle instead of the pill
+   growing to fit them. The icon span is the SAME node the unconfirmed state
+   already renders (Picker.tsx no longer swaps it out on confirm), so it
+   never unmounts during the morph; only font-size/margin/opacity/max-width
+   transition. --ease-standard (no overshoot) per no-bounce entrance rule. */
+.pk-root .pk-glyph-row {
+  display: inline-flex; align-items: center; justify-content: center;
+  max-width: 50px; overflow: hidden;
+}
+.pk-root .pk-trigger-icon {
+  color: #fff; font-size: 26px; -webkit-text-stroke: 1px rgba(255,255,255,0.9);
+  transition:
+    font-size calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-standard),
+    margin-right calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-standard),
+    -webkit-text-stroke calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-standard);
+}
+.pk-root .pk-glyph-row[data-confirmed="true"] .pk-trigger-icon {
+  font-size: 12px; margin-right: 4px; -webkit-text-stroke: 0.6px currentColor;
+}
+.pk-root .pk-trigger-badge {
+  display: inline-flex; align-items: center; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+  color: #fff; font-family: 'Montserrat'; font-size: 9px; font-weight: 800;
+  letter-spacing: -0.2px; text-shadow: 0 1px 2px rgba(0,0,0,0.28);
+  max-width: 0; opacity: 0;
+  transition:
+    max-width calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-standard),
+    opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-standard);
+}
+.pk-root .pk-glyph-row[data-confirmed="true"] .pk-trigger-badge {
+  max-width: 32px; opacity: 1;
+}

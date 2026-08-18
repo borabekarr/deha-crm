@@ -1,7 +1,6 @@
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './PieChart.css'
-import './proto/variants.css'
 
 // ---------------------------------------------------------------------------
 // Pie Chart — Deha Design System
@@ -19,7 +18,6 @@ import './proto/variants.css'
 
 import { useState, useRef, useEffect, useMemo, type CSSProperties } from 'react'
 import { pie as d3Pie, arc as d3Arc, type PieArcDatum } from 'd3-shape'
-import { ProtoPicker } from './proto/ProtoPicker'
 
 /* Deha-native slice palette — brand emerald + the semantic accents. */
 const DEHA_PALETTE = ['#10B981', '#3B82F6', '#EAB308', '#F97316', '#8B5CF6', '#EF4444']
@@ -174,10 +172,11 @@ function PieChart({
     // preview route's full container width — same precedent as Shimmer's
     // centering wrapper.
     <div style={{ display: 'grid', placeItems: 'center' }}>
+    <div className="pc-outer-shell">
     <div className="pc-wrap">
       <div className="pc-head">
+        <span className="pc-head-icon material-symbols-outlined" aria-hidden="true">pie_chart</span>
         <div className="pc-title">{title}</div>
-        <span className="pc-total-pill">{formatNumber(total)} total</span>
       </div>
 
       <div className="pc-body">
@@ -267,8 +266,10 @@ function PieChart({
                   onMouseLeave={() => setHovered(null)}
                 >
                   <span className="pc-leg-swatch" style={{ background: d.color }}></span>
-                  <span className="pc-leg-label">{d.label}</span>
+                  <span className="pc-leg-label" title={d.label}>{d.label}</span>
+                  <span className="pc-leg-sep" aria-hidden="true"></span>
                   <span className="pc-leg-val">{formatNumber(d.value)}</span>
+                  <span className="pc-leg-sep" aria-hidden="true"></span>
                   <span className="pc-leg-pct">{share.toFixed(1)}%</span>
                 </li>
               )
@@ -278,48 +279,8 @@ function PieChart({
       </div>
     </div>
     </div>
-  )
-}
-
-// ── prototype surface (ds-review-visuals step 4) ──────────────────────────
-// Three directions behind the prototype skill's picker: Track (chart chrome,
-// donut track ring + no hover glow), Chips (legend treatment, horizontal pill
-// chips instead of vertical rows), Vivid (colour commitment, brand tint on
-// the shell + legend). "Main" is step 3's shipped result untouched and is the
-// cherry-pick baseline (star). Categorical slice hues (DEHA_PALETTE) stay
-// theme-independent by design (step 3 finding); all chrome added by variants
-// routes through data-primary theme tokens so it renders correctly under all
-// six palettes. Variant styling lives in proto/variants.css, keyed off a
-// .pcv-<slug> class mirrored onto <html> and the stage root. No new motion:
-// entrance/hover states are the ones already probed in step 3; replay just
-// re-mounts to re-run the existing mount sweep. Delete this block + proto/ to
-// strip.
-const VARIANT_SLUGS = ['main', 'track', 'chips', 'vivid'] as const
-const VARIANT_NAMES = ['Main', 'Track', 'Chips', 'Vivid']
-
-export default function PieChartDemo() {
-  const [variant, setVariant] = useState(0)
-  const [nonce, setNonce] = useState(0) // replay: re-mount so the mount sweep re-runs
-  const slug = VARIANT_SLUGS[variant]
-
-  useEffect(() => {
-    const cls = 'pcv-' + slug
-    document.documentElement.classList.add(cls)
-    return () => document.documentElement.classList.remove(cls)
-  }, [slug])
-
-  return (
-    <div style={{ display: 'grid', placeItems: 'center' }}>
-      <div className={'pc-proto-root pcv-' + slug} data-variant={slug} key={slug + ':' + nonce}>
-        <PieChart />
-      </div>
-      <ProtoPicker
-        names={VARIANT_NAMES}
-        index={variant}
-        mainIndex={0}
-        onSelect={setVariant}
-        onReplay={() => setNonce((n) => n + 1)}
-      />
     </div>
   )
 }
+
+export default PieChart

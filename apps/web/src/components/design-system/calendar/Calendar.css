@@ -574,7 +574,7 @@ html.dark .cal-ep-customer[data-squircle="on"] {
   background-image: radial-gradient(ellipse at top right, rgba(255,255,255,0.20) 0%, transparent 55%),
     linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
-  background-size: cover, 7px 7px, 7px 7px;
+  background-size: cover, 16px 16px, 16px 16px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(17,17,17,0.20),
     inset 0 0 0 1px rgba(17,17,17,0.12), 0 2px 6px rgba(0,0,0,0.10),
     0 0 10px -2px var(--icon-c, var(--brand-primary));
@@ -734,7 +734,7 @@ html.dark .cal-ep-w { background: none !important; border-color: transparent !im
     radial-gradient(ellipse at top right, rgba(255,255,255,0.20) 0%, transparent 55%),
     linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
-  background-size: cover, 7px 7px, 7px 7px;
+  background-size: cover, 16px 16px, 16px 16px;
   /* (7) Colored glow tinted to --acc accent color */
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(17,17,17,0.20), inset 0 0 0 1px rgba(17,17,17,0.12), 0 2px 6px rgba(0,0,0,0.10),
     0 0 10px -2px var(--acc, var(--brand-primary));

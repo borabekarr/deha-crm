@@ -158,6 +158,10 @@ function cardStyle(open: boolean, v: VariantId): CSSProperties {
     width: `${open ? CARD_WIDTH_EXPANDED : CARD_WIDTH_COLLAPSED}px`,
     boxSizing: 'border-box',
     alignSelf: 'flex-start',
+    // Isolation fix: each card sits in its own fixed-width grid column
+    // (xc-root below), so it must not stretch to fill that column while
+    // collapsed -- otherwise it would render at 420px regardless of `open`.
+    justifySelf: 'start',
     transition:
       `${MOTION[v].width}, ` +
       `transform calc(220ms * var(--anim-mult, 1)) var(--ease-out), ` +
@@ -264,11 +268,18 @@ export default function ExpandableCardDemo() {
         backgroundImage:
           'radial-gradient(ellipse at top right, rgba(16,185,129,0.08) 0%, rgba(248,250,252,1) 50%, #FFFFFF 100%)',
         fontFamily: 'var(--font-display)',
-        display: 'flex',
-        alignItems: 'flex-start',
+        // Isolation fix: a flex row with justifyContent:'center' re-centers
+        // (and so shifts) every sibling whenever any one card's width
+        // changes. Fixed-width grid columns give each card its own
+        // reserved footprint at the card's largest (expanded) size, so a
+        // card growing inside its own column never moves its neighbors --
+        // the "promote to its own layer" isolation the plan calls for,
+        // expressed as layout containment rather than a portal.
+        display: 'grid',
+        gridTemplateColumns: `repeat(3, ${CARD_WIDTH_EXPANDED}px)`,
+        alignItems: 'start',
         justifyContent: 'center',
         gap: '28px',
-        flexWrap: 'wrap',
         padding: '72px 48px',
       }}
     >

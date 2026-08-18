@@ -16,7 +16,16 @@ import './Shimmer.css'
 // tokenization in this pass (deferred to a later value-identical pass).
 // ---------------------------------------------------------------------------
 
-import { createContext, useContext, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from 'react'
 
 // ── presets ──────────────────────────────────────────────────────────────
 
@@ -113,8 +122,30 @@ export function Shimmer({
 
   const { base, hi } = resolveColors(pr, colors)
 
+  // When isLoading flips false mid-sweep, don't cut the animation off — let
+  // the current pass finish (animationiteration/animationend), then reveal.
+  // With reduced motion (or no children to reveal) there is no sweep to
+  // finish, so drop straight through.
+  const outerRef = useRef<HTMLSpanElement>(null)
+  const [finishing, setFinishing] = useState(false)
+  useEffect(() => {
+    if (loading || children == null) return
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const el = outerRef.current
+    if (reduced || !el) return
+    setFinishing(true)
+    const done = () => setFinishing(false)
+    el.addEventListener('animationiteration', done)
+    el.addEventListener('animationend', done)
+    return () => {
+      el.removeEventListener('animationiteration', done)
+      el.removeEventListener('animationend', done)
+    }
+  }, [loading, children])
+  const visualLoading = loading || finishing
+
   // loaded -> render the real content, faded in
-  if (!loading && children != null) {
+  if (!visualLoading && children != null) {
     return (
       <div className="sh-reveal" style={style}>
         {children}
@@ -134,7 +165,7 @@ export function Shimmer({
   }
 
   return (
-    <span className="shimmer" data-variant={vr} data-dir={dir} style={skStyle} aria-hidden="true">
+    <span className="shimmer" data-variant={vr} data-dir={dir} style={skStyle} aria-hidden="true" ref={outerRef}>
       <span className="wave" />
       {/* keep children in the layout (invisible) so the skeleton sizes to them */}
       {children != null && <span style={{ visibility: 'hidden', display: 'block' }}>{children}</span>}
@@ -207,12 +238,14 @@ function ProfileCard({ loading, group }: { loading: boolean; group: ShimmerGroup
 // of the converted component.
 
 export default function ShimmerDemo() {
-  // auto-cycle skeleton <-> loaded so the reveal is visible, same as source
-  const [autoLoading, setAutoLoading] = useState(true)
-  useEffect(() => {
-    const id = setInterval(() => setAutoLoading((v) => !v), 2600)
-    return () => clearInterval(id)
-  }, [])
+  // Button-triggered: idle shows real content, no animation runs until the
+  // trigger fires. Loading then simulates content arriving; the Shimmer
+  // primitive itself finishes the in-flight sweep before crossfading.
+  const [loading, setLoading] = useState(false)
+  const trigger = () => {
+    setLoading(true)
+    window.setTimeout(() => setLoading(false), 2200)
+  }
 
   const group: ShimmerGroupValue = {
     preset: 'light',
@@ -227,12 +260,15 @@ export default function ShimmerDemo() {
     // packaging-only layout need (not part of the byte-preserved .sh-*
     // rule set) so the block-level .sh-stage doesn't stretch to the
     // preview route's full container width.
-    <div style={{ display: 'grid', placeItems: 'center' }}>
+    <div style={{ display: 'grid', placeItems: 'center', gap: 16 }}>
       <div className="sh-stage">
         <div className="sh-surface">
-          <ProfileCard loading={autoLoading} group={group} />
+          <ProfileCard loading={loading} group={group} />
         </div>
       </div>
+      <button type="button" className="sh-trigger" onClick={trigger} disabled={loading}>
+        {loading ? 'Loading…' : 'Trigger loading'}
+      </button>
     </div>
   )
 }

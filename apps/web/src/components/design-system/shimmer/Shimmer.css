@@ -269,3 +269,29 @@
   gap: 10px;
   margin: 22px 0;
 }
+
+/* ---------------- demo: trigger button ---------------- */
+.sh-trigger {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 9999px;
+  background: var(--brand-primary);
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: var(--weight-extrabold);
+  cursor: pointer;
+  transition:
+    filter calc(var(--duration-200) * var(--anim-mult, 1)),
+    transform calc(var(--duration-fast) * var(--anim-mult, 1));
+}
+.sh-trigger:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+.sh-trigger:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.sh-trigger:disabled {
+  cursor: default;
+  opacity: 0.7;
+}

@@ -60,9 +60,13 @@ html.dark .h-title .h-title-icon { color: #FFFFFF; }
   position: absolute; top: 3px; bottom: 3px; left: 0; width: 0;
   background: #111111; border-radius: 9999px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.18); z-index: 0;
+  /* Pill and row content read as one gesture: both resolve --duration-fast
+     (120ms), down from --duration-slower (300ms) which made the pill lag
+     visibly behind the already-120ms row swap. See global [data-panel-state]
+     rule in motion-tokens.css for the row/content side of this pairing. */
   transition:
-    left calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-pill-switch),
-    width calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-pill-switch);
+    left calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-pill-switch),
+    width calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-pill-switch);
 }
 .seg button {
   position: relative; z-index: 1;

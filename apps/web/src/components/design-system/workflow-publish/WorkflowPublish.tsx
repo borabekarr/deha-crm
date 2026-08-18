@@ -62,7 +62,7 @@ export default function WorkflowPublish(): React.ReactElement {
   }
 
   function handleAnimationEnd(e: React.AnimationEvent<HTMLDivElement>): void {
-    if (e.animationName === 'wp-popOut') {
+    if (e.animationName === 'wp-popIn' && closing) {
       setOpen(false)
       setClosing(false)
     }

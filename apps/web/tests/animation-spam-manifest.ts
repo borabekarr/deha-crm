@@ -178,15 +178,9 @@ export const WAIVED: SpamWaiver[] = [
     date: '2026-08-08',
   },
   {
-    slug: 'siri-orb',
-    reason:
-      'Continuous WebGL canvas render: a rAF loop pushes GL uniforms every frame, so the pixels never settle and no computed CSS property distinguishes two states. The click toggle only scales JS uniform multipliers (speed/glow/noise/rotation for listening mode) — no DOM geometry, height, or CSS transition changes, leaving nothing measurable to snap back.',
-    date: '2026-08-08',
-  },
-  {
     slug: 'shimmer',
     reason:
-      'No click trigger exists anywhere in the component: ShimmerDemo auto-cycles isLoading via a bare setInterval(2600ms), and the .wave sweep itself is a continuously-looping CSS animation (--shim-dur, default 1500ms) that never settles to a single computed value. Same continuous-loop-never-settles class as siri-orb — there is nothing a click-driven spam loop could interrupt or measure.',
+      'No click trigger exists anywhere in the component: ShimmerDemo auto-cycles isLoading via a bare setInterval(2600ms), and the .wave sweep itself is a continuously-looping CSS animation (--shim-dur, default 1500ms) that never settles to a single computed value. Same continuous-loop-never-settles class as other rAF/interval-driven components in this manifest — there is nothing a click-driven spam loop could interrupt or measure.',
     date: '2026-08-09',
   },
   {

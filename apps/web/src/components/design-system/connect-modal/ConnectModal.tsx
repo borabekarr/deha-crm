@@ -19,6 +19,7 @@ import { iconClass } from '../../../lib/iconClass'
 import { useCardRef, useTimerRef, useOverlayRef } from './connect-modal-hook'
 import { useSquircle } from '../../../lib/hooks/use-squircle'
 import { useProximityGroup } from '@/lib/hooks'
+import InlineEdit from '../inline-edit/InlineEdit'
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './ConnectModal.css'
@@ -127,7 +128,8 @@ export default function ConnectModal({
   const [dismissed, setDismissed] = useState(false)
   const [method, setMethod] = useState<string | null>(null)
   const [token, setToken] = useState('')
-  const [focused, setFocused] = useState(false)
+  // Stable example key shown as InlineEdit's displayed value until a real token is committed.
+  const [sampleKey] = useState(sampleToken)
   const [secure, setSecure] = useState(false)
   const [pasted, setPasted] = useState(false)
   const [phase, setPhase] = useState<'idle' | 'loading' | 'success'>('idle')
@@ -138,7 +140,8 @@ export default function ConnectModal({
   const lockTimer = useTimerRef()
   const flashTimer = useTimerRef()
 
-  // ---- input ref ----
+  // ---- input ref (stays unset; useCardRef's Enter-in-input guard treats any
+  // focused INPUT as "not the connect trigger" as long as this is null) ----
   const inputRef = useRef<HTMLInputElement | null>(null)
 
   // ---- derived values ----
@@ -155,9 +158,12 @@ export default function ConnectModal({
 
   function selectMethod(id: string) {
     setMethod(id)
-    if (id === 'apikey') {
-      setTimeout(() => inputRef.current?.focus(), 360)
-    }
+  }
+
+  // Fires from InlineEdit's onCommit (Enter key; its save button is hidden here).
+  function commitKey(next: string) {
+    setToken(next)
+    if (next.trim().length >= 8) triggerSecure()
   }
 
   async function handlePaste() {
@@ -174,13 +180,11 @@ export default function ConnectModal({
     setPasted(true)
     triggerSecure()
     flashTimer.set(900, () => setPasted(false))
-    setTimeout(() => inputRef.current?.focus(), 0)
   }
 
   function clearToken() {
     setToken('')
     setPasted(false)
-    inputRef.current?.focus()
   }
 
   function handleClose() {
@@ -198,13 +202,6 @@ export default function ConnectModal({
         onClose?.()
       }, 850)
     }, 1300)
-  }
-
-  function onInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const v = e.target.value
-    const wasEmpty = token.trim().length < 8
-    setToken(v)
-    if (wasEmpty && v.trim().length >= 8) triggerSecure()
   }
 
   // ---- callback refs (replace keyboard/focus effects) ----
@@ -288,11 +285,11 @@ export default function ConnectModal({
               {Array.from({ length: 15 }).map((_, idx) => {
                 const col = idx % 5
                 const row = Math.floor(idx / 5)
-                const rowDelay = [0, 0.3, 0.5][row]
+                const rowDelay = [0, 0.12, 0.2][row]
                 return (
                   <i
                     key={`dot-${row}-${col}`}
-                    style={{ animationDelay: col * 0.14 + rowDelay + 's' }}
+                    style={{ animationDelay: col * 0.07 + rowDelay + 's' }}
                   />
                 )
               })}
@@ -316,7 +313,6 @@ export default function ConnectModal({
                 type="button"
                 key={m.id}
                 className="cm-method"
-                data-proximity
                 role="radio"
                 aria-checked={method === m.id}
                 aria-label={m.label}
@@ -354,37 +350,32 @@ export default function ConnectModal({
             <div className="cm-expand" data-open={needsKey ? 'true' : undefined}>
               <div className="cm-expand-inner">
                 <div className="cm-keypad">
-                  <label className="cm-keylabel" htmlFor="cm-key">
+                  <label className="cm-keylabel">
                     Enter your {target.name} API key
                   </label>
-                  <div
-                    className="cm-field"
-                    data-focus={focused ? 'true' : undefined}
-                    data-filled={token.length > 0 ? 'true' : undefined}
-                  >
+                  {/*
+                    cm-field composes the shared InlineEdit (design-system/inline-edit/InlineEdit.tsx)
+                    with the lock icon and paste/clear button either side. InlineEdit is imported
+                    unmodified: click-to-edit, Enter-to-commit, Escape/click-outside-to-cancel are all
+                    its own normal behavior. Its edit/save pencil button and "saved" toast are hidden
+                    via cm-keypad-scoped CSS -- Bora's ask is no separate edit button here.
+                  */}
+                  <div className="cm-field" data-filled={token.length > 0 ? 'true' : undefined}>
                     <span
                       className="cm-lock"
                       data-secure={secure ? 'true' : undefined}
                       data-filled={token.length > 0 ? 'true' : undefined}
                       aria-hidden="true"
                     >
-                      <span className={iconClass(token.length > 0 || focused ? 'lock' : 'lock_open_right')}>
-                        {token.length > 0 || focused ? 'lock' : 'lock_open_right'}
+                      <span className={iconClass(token.length > 0 ? 'lock' : 'lock_open_right')}>
+                        {token.length > 0 ? 'lock' : 'lock_open_right'}
                       </span>
                     </span>
-                    <input
-                      id="cm-key"
-                      ref={inputRef}
-                      className="cm-input"
-                      type="text"
-                      spellCheck={false}
-                      autoComplete="off"
-                      aria-label={`${target.name} API key`}
-                      placeholder="xoxb-8193726450182-638492017503…"
-                      value={token}
-                      onChange={onInputChange}
-                      onFocus={() => setFocused(true)}
-                      onBlur={() => setFocused(false)}
+                    <InlineEdit
+                      fieldLabel={`${target.name} API key`}
+                      prefix={false}
+                      value={token || sampleKey}
+                      onCommit={commitKey}
                     />
 
                     {token.length > 0 ? (
@@ -394,6 +385,7 @@ export default function ConnectModal({
                         data-proximity
                         data-variant="clear"
                         aria-label="Remove key"
+                        onMouseDown={(e) => e.stopPropagation()}
                         onClick={clearToken}
                       >
                         <span className={iconClass(pasted ? 'check' : 'close')}>
@@ -407,6 +399,7 @@ export default function ConnectModal({
                         data-proximity
                         aria-label="Paste from clipboard"
                         data-variant="paste"
+                        onMouseDown={(e) => e.stopPropagation()}
                         onClick={handlePaste}
                       >
                         <span className={iconClass('content_paste')}>content_paste</span>
