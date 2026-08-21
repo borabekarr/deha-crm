@@ -99,17 +99,24 @@ export function beginDrag(opts: BeginDragOptions): () => void {
     el.setPointerCapture?.(opts.pointerId)
   } catch { /* ignore */ }
 
-  function toIdx(clientX: number): number {
+  // P2: rAF-coalesce pointermove — store only the latest event, process at
+  // most one per animation frame, and call getLive() exactly once per
+  // processed frame (was called twice per raw event: once in toIdx, once
+  // again right after).
+  let pendingEvent: PointerEvent | null = null
+  let rafId = 0
+
+  function processFrame(): void {
+    rafId = 0
+    const ev = pendingEvent
+    pendingEvent = null
+    if (!ev) return
+    if (ev.buttons === 0) { handleUp(); return }
+
     const L = getLive()
     const rect = L.trackRect
-    const localX = rect ? clientX - rect.left + L.scroll : 0
-    return clamp(Math.round(localX / L.ppd), 0, L.totalDays)
-  }
-
-  function handleMove(ev: PointerEvent): void {
-    if (ev.buttons === 0) { handleUp(); return }
-    const idx = toIdx(ev.clientX)
-    const L = getLive()
+    const localX = rect ? ev.clientX - rect.left + L.scroll : 0
+    const idx = clamp(Math.round(localX / L.ppd), 0, L.totalDays)
 
     if (type === 'start') {
       const ns = clamp(idx, 0, L.endIdx - MIN_SPAN)
@@ -135,9 +142,16 @@ export function beginDrag(opts: BeginDragOptions): () => void {
     }
   }
 
+  function handleMove(ev: PointerEvent): void {
+    pendingEvent = ev
+    if (rafId === 0) rafId = requestAnimationFrame(processFrame)
+  }
+
   function handleUp(): void {
     window.removeEventListener('pointermove', handleMove)
     window.removeEventListener('pointerup', handleUp)
+    if (rafId !== 0) { cancelAnimationFrame(rafId); rafId = 0 }
+    pendingEvent = null
     opts.onUp()
   }
 

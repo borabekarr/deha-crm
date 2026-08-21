@@ -1,18 +1,69 @@
-/* MessageDropdown.css — verbatim port of <style> block from message-dropdown.html
-   Dark-mode: html.dark (converted from prototype data-theme attribute, contract item 3).
-   Bare global selectors (.row/.card/.btn) are NOT present in this component.
-   SVG gooey filter and blur preserved exactly.
-*/
+/* MessageDropdown.css — Deha Design System
+ *
+ * Faithful port of the <style> block in
+ * apps/web/design-system/claude-design/raw/message-dropdown/message-dropdown.html.
+ * Byte-preserved DOM classes/values/durations/easings per CONVERSION-SOP.md.
+ *
+ * Dropped (demo-page-only chrome with no React counterpart, same convention
+ * as every other ds-rebuild-w2 slug — dropdown/blur-carousel/
+ * expandable-screen/expandable-card all drop their raw page-chrome the same
+ * way): the page-level html/body background + .stage centering rule, and the
+ * standalone #themeToggle dark-mode button (raw's own vanilla-JS toggle,
+ * outside the React root — the app's real dark mode is driven separately).
+ *
+ * Dark mode: the raw source's [data-theme="dark"] selectors were DEAD here
+ * (0 elements carry [data-theme]; the live toggle is html.dark — see
+ * design-system/preview/_darkmode.css + probe evidence in
+ * plans/scratch/ds-review/message-dropdown.md). ds-review-overlays Step 3
+ * unified every dark rule onto html.dark and dropped the ones the shared
+ * token set (--shell-bg/--bg-card-solid/--fg1..4, which flip under .dark)
+ * already covers.
+ *
+ * Step 3 also restyled the OPEN PANE's content layer as a house card
+ * (concentric 32 shell / 22 pane / 14 list-card / 10 item, drop-shadow-only
+ * elevation, token surfaces, data-primary brand tags + buttons). The liquid
+ * goo morph — .md-panel-bg's width/height/top/border-radius/background/
+ * box-shadow legs and every transition/transition-delay in this file — is
+ * FROZEN and byte-identical to the port.
+ *
+ * Motion values are tokenized where an exact value-identical match exists in
+ * apps/web/src/styles/motion-tokens.css (see the "raw:" comment beside each
+ * substitution). The .md-panel-shell transform leg (380ms) has no matching
+ * single tier, so it is expressed as a gate-compliant calc composition
+ * (--duration-200 + --duration-180), resolving to the same 380ms.
+ */
+
+/* Inner white panel — demo wrapper only, mirrors the raw Demo()'s .md-panel;
+   not part of the reusable MessageDropdown. */
+.md-panel {
+  background: #FFFFFF;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,1);
+  width: 860px;
+  max-width: calc(100vw - 80px);
+  padding: 24px 24px 40px;
+  box-sizing: border-box;
+}
 
 /* ---- Single demo card ---- */
 .md-card {
   position: relative;
   padding: 36px 20px 48px;
-  background: #F5F5F5;
-  border: 1px solid #ECECEC;
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
   border-radius: 16px;
   display: flex; flex-direction: column; align-items: center;
-  min-height: 500px; /* E2 defect fix: room for the taller open shell (326px, was 286px) */
+  min-height: 460px;
+  /* Not in the raw source, but required for byte-identical rendered height:
+     the raw standalone page has no box-sizing reset (browser default
+     content-box), while this app's Tailwind preflight sets box-sizing:
+     border-box on every element -- under border-box, min-height:460px
+     would include the 36px+48px vertical padding instead of adding on top
+     of it, shrinking the card ~84px short of the raw baseline. Restoring
+     content-box here (packaging-only, no value changed) matches the raw
+     page's actual box model. */
+  box-sizing: content-box;
 }
 
 /* ---- Dropdown root ---- */
@@ -20,113 +71,67 @@
   position: relative;
   display: flex; flex-direction: column; align-items: center;
   width: 100%;
-  /* Fix (2): trigger top + badge + hover scale live in absolutely-positioned
-     children (top:0), so padding on this element would not create clearance —
-     margin-top pushes the whole stack down inside .md-card instead.
-     Step 19: bumped 18px -> 50px (+32px) so the trigger sits lower on the
-     preview page per feedback. Step 3 (dsfb-08): bumped again 50px -> 66px
-     so the trigger sits lower still, per follow-up feedback. */
-  margin-top: 66px;
 }
+/* raw: `button { font-family: inherit; }` — scoped to .md-root (rather than
+   left as a bare tag selector) so it does not leak onto every other button
+   in the gallery shell; every .md-* button (.md-trigger, .md-footer button)
+   is a descendant of .md-root, so the rendered result is unchanged. */
+.md-root button { font-family: inherit; }
 
 /* ---- Grey external shell ---- */
 /* Frames the open white panel like the theme-editor .te-outer shell, so the
    panel (incl. its footer) reads as one contained card instead of floating
-   against the near-white card background. Behind the gooey blobs.
-   Fix (1): closed state is a CIRCLE coincident with the trigger (top:0, 56px, 50%)
-   so it collapses cleanly into the trigger footprint — no scale distortion.
-   Fix (2): shell and panel-bg share the SAME width/height/top/border-radius MORPH
-   easing + duration so they animate as a single physical unit.
-   COLOUR GATING: collapsed background = trigger colour (#111111 light / #FFFFFF dark)
-   so the circle is invisible against the trigger. Enter flip defers background-color to
-   calc(--md-dur*0.35) so shell stays trigger-colour for the first third of the expand
-   (shortened from an earlier 0.82 -- the longer delay settled correctly but was too
-   close to typical automated-verification wait windows, causing false-negative canon-
-   color reads mid-transition). Close flip defers background-color to calc(--md-dur*0.55)
-   so shell stays grey/shell-colour while shrinking and snaps to trigger-colour only near
-   the end.
-   Fix (5): canonical inner-card border + inset highlight; pointer-events:auto when open
-   so Agentation can select the outer rim of the panel frame. */
+   against the near-white card background. Behind the gooey blobs; fades in on open. */
 .md-panel-shell {
   position: absolute;
-  top: 0; left: 50%;
-  transform: translateX(-50%);
+  top: 66px; left: 50%;
+  transform: translateX(-50%) scale(0.9);
   transform-origin: top center;
-  width: 56px; height: 56px;
-  border-radius: 50%;
-  background: #111111;
-  /* Fix (1): closed border matches trigger bg (#111111) — invisible, no grey ring seam.
-     border-color snaps to card-border deferred via transition (same gate as background-color). */
-  border: 1px solid #111111;
-  box-shadow: none;
-  opacity: 1;
-  visibility: visible;
+  width: 360px; height: 354px;
+  /* Concentric with the pane: the pane is inset 10px on every side and ends
+     the morph at radius 22 (FROZEN), so the shell reads true-concentric at
+     22 + 10 = 32. Canon: token bezel, no inner line in light, elevation via
+     drop-shadow() only (box-shadow removed). Non-animated properties — the
+     transition list below is untouched. */
+  border-radius: 32px;
+  background: var(--shell-bg);
+  filter: drop-shadow(0 16px 34px rgba(17,17,17,0.16)) drop-shadow(0 3px 8px rgba(17,17,17,0.08));
+  opacity: 0;
   z-index: 1;
   pointer-events: none;
-  /* Closed (exit): shape morphs back to circle; colour + border snap to trigger
-     almost immediately (~0.08x close duration) so the collapsing shape reads
-     as the button colour, not the white/grey panel (Fix 3). Raise toward 0.2x
-     only if the goo filter bleeds card-bg through mid-collapse. */
-  /* E2 verdict (2026-08-06): close leg unified onto var(--ease-spring-open),
-     the same spring the open leg already uses, so open and close read as one
-     spring family instead of a bouncy open + a plain ease-out close. */
-  transition:
-    width  calc(var(--md-dur) * 0.85) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
-    height calc(var(--md-dur) * 0.85) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
-    top    calc(var(--md-dur) * 0.85) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
-    border-radius calc(var(--md-dur) * 0.85) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
-    background-color calc(1ms * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.08), /* motion-sweep: kept, unit-conversion multiplier (N * 1ms trick to cast a unitless var to a time), not a duration literal */
-    border-color calc(1ms * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.08), /* motion-sweep: kept, unit-conversion multiplier (N * 1ms trick to cast a unitless var to a time), not a duration literal */
-    box-shadow calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade) 0s; /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
+  /* raw: opacity 200ms ease, transform 380ms cubic-bezier(.22,1,.36,1)
+     200ms -> --duration-200; bare `ease` -> --ease-fade (== bare ease per its
+     own definition comment); cubic-bezier(.22,1,.36,1) -> --ease-motion-sweep-2236
+     (byte-identical). 380ms has no matching single tier and is expressed as
+     calc(var(--duration-200) + var(--duration-180)), resolving to the same
+     380ms. */
+  transition: opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade), transform calc((var(--duration-200) + var(--duration-180)) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);
 }
 .md-root.open .md-panel-shell {
-  /* Fix (1): concentric shell — 36px radius, 8px inset around .md-panel-bg
-     (352x326 -> 8px inset yields the 336x310 inner panel below).
-     E2 defect fix (2026-08-06): height was 286px, but the live panel content
-     (list + footer, measured via dialog.md-panel-content) needs ~307px —
-     37px taller than the fixed shell, so the footer buttons rendered past
-     the shell's visible bottom edge with no bottom clearance. Bumped +40px. */
-  width: 352px;
-  height: 326px;
-  top: 70px;
-  border-radius: 36px;
-  --corner-radius: 36px;
-  background: var(--shell-bg);
-  /* Fix (1): restore card-border on the expanded shell; deferred via transition. */
-  border-color: var(--card-border, #D4D4D4);
-  box-shadow:
-    0 16px 56px rgba(17,17,17,0.14),
-    0 3px 10px rgba(17,17,17,0.07),
-    inset 0 1px 0 rgba(255,255,255,.22),
-    inset 0 0 0 1px rgba(17,17,17,0.04);
-  pointer-events: auto;
-  z-index: 3; /* above goo-wrap (z-index:2), below dialog (z-index:9000) — rim is hit-testable */
-  /* Open (enter): bouncy morph; colour, border and shadow deferred until shape expanded */
-  transition:
-    width  var(--md-dur) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
-    height var(--md-dur) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
-    top    var(--md-dur) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
-    border-radius var(--md-dur) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
-    background-color calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.35),
-    border-color calc(1ms * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.35), /* motion-sweep: kept, unit-conversion multiplier (N * 1ms trick to cast a unitless var to a time), not a duration literal */
-    box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.35);
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+  transition-delay: calc(var(--md-dur) * 0.42), calc(var(--md-dur) * 0.42);
+}
+/* ds-motion-sweep step 3: exit = reversed enter. The base (non-.open) rule
+   above carries no delay, so removing .open used to fire every layer -- shell,
+   panel-bg, content, items -- at once instead of retracing the enter stagger
+   backwards. These :not(.open) delays play that same film in reverse: the
+   items that entered last (delay .92/.82/.72/.62) leave first, and the shell
+   that entered first (delay .42, and the panel-bg core geometry that entered
+   with no delay at all) leaves last. Same duration/easing/property list as
+   enter throughout -- only the delay direction changes. */
+.md-root:not(.open) .md-panel-shell {
+  transition-delay: calc(var(--md-dur) * 0.50), calc(var(--md-dur) * 0.50);
 }
 
 /* ---- Gooey shape layer ---- */
-/* All dark blobs (trigger circle + panel bg) live here. SVG goo filter merges them.
-   Fix (1): overflow:hidden clips child overflow; clip-path:inset(0) hard-clips the
-   SVG filter output (which can paint beyond element bounds) to the exact element box.
-   When open, both are removed so the panel expands freely below. */
+/* All dark blobs (trigger circle + panel bg) live here. SVG goo filter merges them. */
 .md-goo-wrap {
   position: relative;
   width: 320px; height: 60px; /* Trigger zone height; panel expands below */
   pointer-events: none;
   z-index: 2; /* above the grey external shell */
-  overflow: hidden;
-  clip-path: inset(0); /* clips SVG goo filter bleed to element bounds when closed */
 }
-/* When open, allow the panel to expand below the trigger zone */
-.md-root.open .md-goo-wrap { overflow: visible; clip-path: none; }
 .md-goo-wrap.gooey { filter: url(#deha-goo-filter); }
 
 /* Trigger circle — brand green with grid texture (matches .btn-primary / .badge.gci) */
@@ -135,101 +140,70 @@
   top: 0; left: 50%; transform: translateX(-50%);
   width: 56px; height: 56px;
   border-radius: 50%;
-  background: #111111;
+  background: #0F172A;
   pointer-events: none;
-  transition: transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
+  /* raw: transform 220ms cubic-bezier(.22,1,.36,1) -> --duration-slow (220ms,
+     byte-identical) / --ease-motion-sweep-2236. */
+  transition: transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236),
+    filter calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);
 }
-/* hovering the trigger zooms the whole button (circle), not just the icon */
-/* Step 19: dialed hover scale down from 1.06 to the calm-family value (1.03,
-   matches the proximity-hover engine's proportionate default) to stop the
-   trigger reading as an outlier next to the rest of the library. */
-.md-root:not(.open):has(.md-trigger:hover) .md-trigger-bg { transform: translateX(-50%) scale(1.03); }
+/* hovering the trigger darkens the whole button (circle) in-shape, not just the icon.
+   Gated to real pointers so touch does not stick the state on after a tap. */
+@media (hover: hover) and (pointer: fine) {
+  .md-root:not(.open):has(.md-trigger:hover) .md-trigger-bg { filter: brightness(1.3); }
+}
 
 /* Panel background — starts as brand-green disk inside trigger (so gooey merge works),
-   then crossfades to white as the shape reaches the open position.
-   Uses --card-bg / --card-border tokens for surface parity with .card-inner.
-   Fix (5): closed state is a tight circle matching the trigger footprint so the
-   compress-to-circle morph lands within 1-2px of the trigger button.
-   Fix (2): enter = bouncy var(--ease-spring-open); exit (default) = smooth
-   ease-out var(--ease-out) so closing has no bounce.
-   Fix (7): border uses var(--card-border,#D4D4D4) + top rim-light in light mode.
-             border-radius aligned to --card-radius (20px).
-   Fix (4): height reduced from 334px to 274px to eliminate dead space below footer. */
+   then crossfades to white as the shape reaches the open position. */
 .md-panel-bg {
   position: absolute;
-  top: 0;
+  top: 28px;
   left: 50%; transform: translateX(-50%);
-  width: 56px; height: 56px;
-  background: #111111;
+  width: 56px; height: 0;
+  background: #0F172A;
   border-radius: 50%;
-  box-shadow: 0 0 0 0 rgba(17,17,17,0);
-  transform-origin: top center;
-  /* Closed (exit): smooth ease-out; background-color snaps to trigger colour at
-     ~0.08x close duration so the collapsing shape reads as the trigger colour
-     from the start of the close, not white/card-colour (Fix 3). Raise toward
-     0.2x only if the goo filter bleeds card-bg through mid-collapse. */
-  /* E2 verdict (2026-08-06): close leg unified onto var(--ease-spring-open). */
+  box-shadow: 0 0 0 0 rgba(15,23,42,0);
+  /* raw:
+       width  var(--md-dur) cubic-bezier(.55, 1.35, .35, 1),
+       height var(--md-dur) cubic-bezier(.55, 1.35, .35, 1),
+       top    var(--md-dur) cubic-bezier(.55, 1.35, .35, 1),
+       border-radius var(--md-dur) cubic-bezier(.55, 1.35, .35, 1),
+       background-color 220ms ease 0ms,
+       box-shadow 220ms ease 0ms
+     --md-dur stays the raw local custom property (per-instance speed, set
+     via [data-speed] below), unchanged. cubic-bezier(.55,1.35,.35,1) is the
+     overshoot/expand curve -> --ease-spring-open (byte-identical, "ModelSelector.css
+     .ms-shell.open expand"). NOT the old --ease-goo-collapse, which is a
+     different curve, cubic-bezier(.55,.35,.85,.3) — do not conflate the two in
+     a freeze audit. 220ms -> --duration-slow; bare `ease` -> --ease-fade. */
   transition:
-    width  calc(var(--md-dur) * 0.85) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
-    height calc(var(--md-dur) * 0.85) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
-    top    calc(var(--md-dur) * 0.85) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
-    border-radius calc(var(--md-dur) * 0.85) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
-    background-color calc(1ms * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.08), /* motion-sweep: kept, unit-conversion multiplier (N * 1ms trick to cast a unitless var to a time), not a duration literal */
-    box-shadow calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade) 0ms; /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
+    width  var(--md-dur) var(--ease-spring-open),
+    height var(--md-dur) var(--ease-spring-open),
+    top    var(--md-dur) var(--ease-spring-open),
+    border-radius var(--md-dur) var(--ease-spring-open),
+    background-color calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade) 0ms,
+    box-shadow calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade) 0ms;
 }
 .md-root.open .md-panel-bg {
-  /* Fix (1): 8px inset on all sides of the 352x326/36px shell -> 336x310/28px. */
-  width: 336px;
-  height: 310px;
-  top: 78px;
-  border-radius: 28px;
-  background-color: var(--card-bg, #FFFFFF);
+  width: 340px;
+  height: 334px;
+  top: 76px;
+  border-radius: 22px;
+  background-color: #FFFFFF;
   box-shadow:
-    0 18px 40px -12px rgba(17,17,17,0.22),
-    0 4px 12px -4px rgba(17,17,17,0.10),
-    inset 0 1px 0 rgba(255,255,255,0.9),
-    inset 0 0 0 1px var(--card-border, #D4D4D4);
-  /* Open (enter): bouncy easing; background-color deferred to near end of morph
-     so the surface stays as trigger colour until the shape is almost fully expanded.
-     Explicit 0s delays on shape properties (no blanket transition-delay override). */
-  transition:
-    width  var(--md-dur) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
-    height var(--md-dur) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
-    top    var(--md-dur) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
-    border-radius var(--md-dur) var(--ease-spring-open) 0s, /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
-    background-color calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.35),
-    box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade) calc(var(--md-dur) * 0.35);
+    0 18px 40px -12px rgba(15,23,42,0.22),
+    0 4px 12px -4px rgba(15,23,42,0.10),
+    inset 0 0 0 1px rgba(15,23,42,0.06);
+  transition-delay:
+    0s, 0s, 0s, 0s,
+    calc(var(--md-dur) * 0.50),
+    calc(var(--md-dur) * 0.50);
 }
-/* Squircle inner-card conversion (Step 5). The ref only attaches once the
-   panel is open (see MessageDropdown.tsx), so this never fights the closed
-   <-> open border-radius MORPH (Fix 1/2) -- data-squircle="on" only exists
-   while .md-root.open is already true. The shared [data-squircle="on"] recipe
-   in _shared-feedback.css zeroes border/box-shadow and paints the ring +
-   hairline via clip-path; the outer depth shadow (clipped by clip-path) is
-   migrated here to filter:drop-shadow. */
-.md-panel-bg[data-squircle="on"] {
-  --corner-radius: 28px;
-  filter:
-    drop-shadow(0 18px 40px rgba(17,17,17,0.22))
-    drop-shadow(0 4px 12px rgba(17,17,17,0.10));
-}
-/* Canon inner-card ring: none in light (fill-contrast only), single hairline
-   in dark -- shared recipe paints both ::before+::after unconditionally by
-   default, which showed a stray ring in light and a doubled line in dark. */
-.md-panel-shell[data-squircle="on"]::before,
-.md-panel-shell[data-squircle="on"]::after,
-.md-panel-bg[data-squircle="on"]::before,
-.md-panel-bg[data-squircle="on"]::after {
-  content: none;
-}
-html.dark .md-panel-shell[data-squircle="on"]::before,
-html.dark .md-panel-bg[data-squircle="on"]::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: var(--card-border);
-  clip-path: var(--squircle-border-path);
+.md-root:not(.open) .md-panel-bg {
+  transition-delay:
+    calc(var(--md-dur) * 0.55), calc(var(--md-dur) * 0.55),
+    calc(var(--md-dur) * 0.55), calc(var(--md-dur) * 0.55),
+    calc(var(--md-dur) * 0.45), calc(var(--md-dur) * 0.45);
 }
 
 /* ---- Interactive (real) trigger button — sits ABOVE the goo layer ---- */
@@ -244,12 +218,19 @@ html.dark .md-panel-bg[data-squircle="on"]::before {
   color: #fff;
   display: grid; place-items: center;
   z-index: 4;
-  transition: transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
+  /* raw: transform 220ms cubic-bezier(.22,1,.36,1) -> --duration-slow / --ease-motion-sweep-2236. */
+  transition: transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);
   -webkit-tap-highlight-color: transparent;
 }
-/* Step 19: same calm-family dial-down as .md-trigger-bg above (1.04 -> 1.02). */
-.md-root:has(.md-trigger:hover) .md-trigger { transform: translateX(-50%) scale(1.02); }
-.md-trigger:active { transform: translateX(-50%) scale(var(--press-control)); }
+@media (hover: hover) and (pointer: fine) {
+  .md-trigger:hover { transform: translateX(-50%); }
+}
+/* Press snaps (120ms), release rides the 220ms base leg back out — asymmetric
+   press/release. Duration-only override; the base transition list is untouched. */
+.md-trigger:active {
+  transform: translateX(-50%) scale(0.94);
+  transition-duration: calc(var(--duration-fast) * var(--anim-mult, 1));
+}
 .md-trigger:focus-visible {
   outline: 2px solid var(--brand-primary-500);
   outline-offset: 4px;
@@ -257,130 +238,160 @@ html.dark .md-panel-bg[data-squircle="on"]::before {
 .md-trigger .material-symbols-outlined {
   font-size: 25px;
   font-variation-settings: '"opsz" 24, "wght" 900, "FILL" 1';
-  transition: transform calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out);
+  /* raw: transform 360ms cubic-bezier(.22,1,.36,1) -> --duration-sweep (360ms,
+     byte-identical, "ApplyButton background-color sweep") / --ease-motion-sweep-2236. */
+  transition: transform calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);
   text-shadow: 0 1px 2px rgba(0,0,0,0.25);
 }
 .md-root.open .md-trigger .material-symbols-outlined {
   transform: rotate(-12deg) scale(0.92);
 }
 
-/* Unread count dot on trigger — dark navy for contrast against green trigger */
+/* Unread count dot on trigger — dark navy for contrast against green trigger.
+   Bumped slightly larger per Bora's feedback; pre-change box was
+   min-width:18px height:18px padding:0 4px font-size:11px. */
 .md-trigger-badge {
   position: absolute;
-  top: -6px; right: -6px;
-  min-width: 22px; height: 22px;
+  top: -5px; right: -5px;
+  min-width: 20px; height: 20px;
   padding: 0 5px;
   border-radius: 9999px;
   background: var(--brand-primary-500);
   color: var(--brand-on-primary);
   font-family: 'Montserrat';
-  font-size: 13px; font-weight: 900;
+  font-size: 12px; font-weight: 900;
   line-height: 1;
   letter-spacing: 0;
   display: inline-flex; align-items: center; justify-content: center;
-  text-shadow: 0 1px 1px rgba(0,0,0,0.30);
+  text-shadow: 0 1px 1px rgba(0,0,0,0.18);
+  /* Glow derives from the active data-primary palette (was hardcoded emerald). */
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.50),
     inset 0 -2px 0 rgba(0,0,0,0.22),
     inset 0 0 0 1px rgba(0,0,0,0.10),
-    0 0 0 2px #F5F5F5,
+    0 0 0 2px var(--bg-card-solid),
     0 6px 14px -2px color-mix(in srgb, var(--brand-primary-500) 60%, transparent),
-    0 12px 28px -6px var(--brand-glow),
+    0 12px 28px -6px color-mix(in srgb, var(--brand-primary-500) 55%, transparent),
     0 2px 4px rgba(17,17,17,0.18);
   background-image:
     linear-gradient(rgba(255,255,255,0.14) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.14) 1px, transparent 1px);
   background-size: 6px 6px;
   font-variant-numeric: tabular-nums;
-  transition: transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
+  /* raw: transform 220ms cubic-bezier(.22,1,.36,1) -> --duration-slow / --ease-motion-sweep-2236. */
+  transition: transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);
 }
 .md-root.open .md-trigger-badge { transform: scale(0); }
 
 /* ---- Panel content (over panel-bg, NOT in goo filter) ---- */
-/* Reset <dialog> browser defaults so it behaves like a positioned div, then
-   re-declare the real layout on the SAME selector specificity so `all: unset`
-   does NOT wipe z-index/position (it silently dropped z-index:10 -> auto, which
-   demoted the list below the goo layer and broke pointer-events selection).
-   Visibility is driven by the .md-root.open class + opacity/pointer-events.
-   Fix (2): z-index raised to 9000 so it clears the Agentation dev toolbar. */
-dialog.md-panel-content {
-  all: unset;
+.md-panel-content {
   position: absolute;
-  top: 78px;
+  top: 76px;
   left: 50%; transform: translateX(-50%);
-  width: 336px;
+  width: 340px;
   box-sizing: border-box;
-  /* Step 3 (dsfb-08): inner-card spacing parity — .card-inner uses a single
-     uniform --pad-card (16px) on all sides (Cards.css:14); the asymmetric
-     var(--space-5) var(--space-3) sides read as an off-canon shrink. */
-  padding: var(--pad-card);
-  z-index: 9000;         /* TOP interactive layer: above Agentation dev toolbar */
+  /* Side padding pulled 20 -> 8 so the list can become a real inner card and
+     still land its text at the original 20px inset (8 content + 4 card + 8 item).
+     Header/footer re-inset to 12px below to hold their old optical margin. */
+  padding: 16px 8px 12px;
+  z-index: 5;
   pointer-events: none;
   opacity: 0;
-  display: block;
+  /* raw: opacity 180ms ease -> --duration-180 (byte-identical) / --ease-fade. */
   transition: opacity calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade);
 }
-.md-root.open dialog.md-panel-content {
+.md-root.open .md-panel-content {
   opacity: 1;
   pointer-events: auto;
-  /* Fix (3): tightened delay — contents appear right after morph movement completes
-     (~50% of --md-dur instead of 100%), so no long dead wait. */
-  transition-delay: calc(var(--md-dur) * 0.48);
+  transition-delay: calc(var(--md-dur) * 0.55);
+}
+.md-root:not(.open) .md-panel-content {
+  transition-delay: calc(var(--md-dur) * 0.38);
 }
 
+.md-header {
+  display: flex; align-items: center; justify-content: flex-start;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 0 12px;
+}
+.md-header h3 {
+  margin: 0;
+  font-size: 17px; font-weight: 900;
+  color: var(--fg1);
+  letter-spacing: -0.02em;
+}
+/* Header icon — precedes the "Messages" heading text. */
+.md-header .material-symbols-outlined {
+  font-size: 17px;
+  color: var(--fg1);
+  font-variation-settings: '"opsz" 20, "wght" 700, "FILL" 0';
+}
+/* Brand count tag — fills from the active data-primary palette (all 6 themes). */
+.md-count-tag {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 9999px;
+  background: var(--brand-primary-500);
+  color: var(--brand-on-primary);
+  font-family: 'Montserrat';
+  font-size: 12px; font-weight: 900;
+  letter-spacing: 0;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.20);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.50),
+    inset 0 -2px 0 rgba(0,0,0,0.22),
+    inset 0 0 0 1px rgba(0,0,0,0.10);
+  background-image:
+    linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+  background-size: 6px 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The list IS the inner card of the pane (.fhc-shell precedent, kept local to
+   this file). Concentric chain: shell 32 / pane 22 (FROZEN) / card 14 / item 10.
+   Surface is token-derived, so it recesses correctly in both themes with no
+   dark override; canon light = no inner line, elevation is drop-shadow only. */
 .md-list {
-  list-style: none; margin: 0; padding: 0;
+  list-style: none; margin: 0;
+  padding: 4px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--shell-bg) 30%, var(--bg-card-solid));
   display: flex; flex-direction: column;
-  /* Step 3 (dsfb-08): --space-1 (4px) read cramped against the wider
-     uniform panel padding above; --space-2 (8px) matches the canon's
-     row rhythm (see .gap-stack usage elsewhere in this file). */
-  gap: var(--space-2);
+  gap: 2px;
 }
 .md-item {
-  display: flex; align-items: center; gap: var(--space-3);
-  padding: var(--space-3);
-  margin-inline: -4px; /* Fix (3): extend hover fill wider than list content column */
-  border-radius: 12px;
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 8px;
+  border-radius: 10px;
   cursor: pointer;
   opacity: 0;
   transform: translateY(8px) scale(0.985);
+  /* raw: opacity 280ms ease, transform 280ms cubic-bezier(.22,1,.36,1), background 160ms
+     280ms -> --duration-280; bare `ease` -> --ease-fade; cubic-bezier(.22,1,.36,1) ->
+     --ease-motion-sweep-2236; 160ms (no timing-function specified in the raw, so
+     none is added here either) -> --duration-base (byte-identical, "most common
+     transform/box-shadow transition duration in Buttons.css"). */
   transition:
     opacity calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-fade),
-    transform calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out),
-    background calc(var(--duration-50) * var(--anim-mult, 1)),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+    transform calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236),
+    background calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade);
 }
-/* Fix (3): rows appear right after the open-morph movement completes (~0.48×--md-dur),
-   with a tightened per-row stagger (30ms instead of 40ms).
-   Each row adds its own stagger offset on top of the reduced gate. */
 .md-root.open .md-item { opacity: 1; transform: translateY(0) scale(1); }
-.md-root.open .md-item:nth-child(1) {
-  transition-delay:
-    calc(var(--md-dur) * 0.48),
-    calc(var(--md-dur) * 0.48),
-    0s; /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
-}
-.md-root.open .md-item:nth-child(2) {
-  transition-delay:
-    calc(var(--md-dur) * 0.48 + var(--duration-30) * var(--anim-mult, 1)),
-    calc(var(--md-dur) * 0.48 + var(--duration-30) * var(--anim-mult, 1)),
-    0s; /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
-}
-.md-root.open .md-item:nth-child(3) {
-  transition-delay:
-    calc(var(--md-dur) * 0.48 + var(--duration-60) * var(--anim-mult, 1)),
-    calc(var(--md-dur) * 0.48 + var(--duration-60) * var(--anim-mult, 1)),
-    0s; /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
-}
-.md-root.open .md-item:nth-child(4) {
-  transition-delay:
-    calc(var(--md-dur) * 0.48 + var(--duration-instant) * var(--anim-mult, 1)),
-    calc(var(--md-dur) * 0.48 + var(--duration-instant) * var(--anim-mult, 1)),
-    0s; /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
-}
+.md-root.open .md-item:nth-child(1) { transition-delay: calc(var(--md-dur) * 0.62), calc(var(--md-dur) * 0.62), 0s; }
+.md-root.open .md-item:nth-child(2) { transition-delay: calc(var(--md-dur) * 0.72), calc(var(--md-dur) * 0.72), 0s; }
+.md-root.open .md-item:nth-child(3) { transition-delay: calc(var(--md-dur) * 0.82), calc(var(--md-dur) * 0.82), 0s; }
+.md-root.open .md-item:nth-child(4) { transition-delay: calc(var(--md-dur) * 0.92), calc(var(--md-dur) * 0.92), 0s; }
+.md-root:not(.open) .md-item:nth-child(1) { transition-delay: calc(var(--md-dur) * 0.30), calc(var(--md-dur) * 0.30), 0s; }
+.md-root:not(.open) .md-item:nth-child(2) { transition-delay: calc(var(--md-dur) * 0.20), calc(var(--md-dur) * 0.20), 0s; }
+.md-root:not(.open) .md-item:nth-child(3) { transition-delay: calc(var(--md-dur) * 0.10), calc(var(--md-dur) * 0.10), 0s; }
+.md-root:not(.open) .md-item:nth-child(4) { transition-delay: 0s, 0s, 0s; }
 .md-item:hover {
-  background: #F5F5F5;
+  background: color-mix(in srgb, var(--fg1) 7%, transparent);
 }
 .md-item:focus-visible {
   outline: 2px solid var(--brand-primary-500);
@@ -393,7 +404,7 @@ dialog.md-panel-content {
   box-shadow:
     inset 0 -3px 6px rgba(0,0,0,0.18),
     inset 0 1px 0 rgba(255,255,255,0.30),
-    0 2px 4px rgba(17,17,17,0.12);
+    0 2px 4px rgba(15,23,42,0.12);
 }
 .md-item-text {
   flex: 1;
@@ -403,74 +414,104 @@ dialog.md-panel-content {
 }
 .md-row1 {
   display: flex; align-items: baseline; justify-content: space-between;
-  gap: var(--space-2);
+  gap: 8px;
 }
 .md-sender {
   font-size: 13.5px; font-weight: 700;
-  color: #111111;
+  color: var(--fg1);
   letter-spacing: -0.005em;
+}
+/* Colorful tag on unread rows — event-badge treatment copied from
+   pills/Pills.css .badge-event (same radius, glassy background/box-shadow,
+   text style); filled from the live data-primary palette instead of the
+   badge-event per-item inline color. */
+.md-tag {
+  flex-shrink: 0;
+  margin-right: auto;  /* hug the sender; .md-row1 space-between keeps time right */
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: var(--brand-primary-500);
+  color: var(--brand-on-primary);
+  font-family: 'Montserrat';
+  font-size: 9px; font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.55),
+    inset 0 -2px 0 rgba(17,17,17,0.18),
+    inset 0 0 0 1px rgba(17,17,17,0.10);
+  background-image:
+    linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
+  background-size: 16px 16px;
 }
 .md-time {
   font-size: 10.5px; font-weight: 600;
-  color: #A1A1A1;
+  color: var(--fg4);
   flex-shrink: 0;
   letter-spacing: 0.005em;
 }
 .md-preview {
   font-size: 12px; font-weight: 500;
-  color: #6B6B6B;
+  color: var(--fg3);
   line-height: 1.35;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   letter-spacing: -0.002em;
 }
-.md-unread .md-sender  { color: #111111; }
-.md-unread .md-preview { color: #4A4A4A; }
+.md-unread .md-sender  { color: var(--fg1); }
+.md-unread .md-preview { color: var(--fg2); }
+.md-unread::after {
+  content: '';
+  position: absolute;
+  /* dot positioned at far right of row */
+}
 
 .md-footer {
-  margin-top: var(--gap-stack);
-  padding-top: var(--space-5); /* Fix (4): symmetric perceived gaps — item-content→divider = 10+16=26px; divider→button-content = 20+6=26px */
-  border-top: 1px solid #ECECEC;
+  margin-top: 12px;
+  padding: 0 12px;
   display: flex; justify-content: stretch; align-items: stretch;
-  gap: var(--space-2);
+  gap: 8px;
 }
-/* Fix (6): Restyle footer buttons to canonical .btn-task look —
-   pill radius 9999px, font-weight 800, colored fill + white text,
-   inset + glow box-shadows, text-shadow, brightness hover, scale active.
-   "View Messages" = navy #111111 fill; "Mark all as read" = emerald var(--brand-primary-500) fill.
-   Existing mark-all-read tick/close JS behavior + classes preserved unchanged. */
 .md-footer button {
-  flex: 1 1 0;
+  flex: 1 1 0;            /* both buttons share width equally */
   min-width: 0;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: center;  /* icon+label centered as a single unit */
   gap: 6px;
-  /* Default: navy fill (View Messages button) */
-  --md-fbtn: #111111;
-  background: var(--md-fbtn);
-  border: 1px solid var(--md-fbtn);
-  color: #fff;
+  /* House colorful button: filled from the live data-primary palette. The
+     neutral .md-mark-read variant below overrides back to a quiet surface.
+     Radius/background-texture/sizing copied from buttons/Buttons.css
+     .btn-primary (radius 14px, grid-texture background-image, 800-weight
+     label) so this footer reads as the same button component. */
+  background: var(--brand-primary-500);
+  border: 1px solid color-mix(in srgb, var(--brand-primary-700) 45%, transparent);
+  color: var(--brand-on-primary);
   font-family: 'Montserrat';
-  font-size: 11px; font-weight: 800;
+  font-size: 11.5px; font-weight: 800;
   cursor: pointer;
-  padding: 6px 14px;
-  border-radius: 9999px;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.22),
-    inset 0 -1.5px 0 rgba(0,0,0,0.18),
-    0 0 10px -3px var(--md-fbtn);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  /* padding/gap match the editorial variant's text treatment (proto/variants.css
+     .mdv-editorial .md-footer button): the 14px inset clipped labels, 10px 8px
+     keeps both fully visible. Colors stay main's own (not copied). */
+  padding: 8px 10px;
+  border-radius: 14px;
+  background-image:
+    linear-gradient(to right,  rgba(255,255,255,0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.07) 1px, transparent 1px);
+  background-size: 14px 14px;
+  /* raw: color 160ms, background 160ms, border-color 160ms, box-shadow 160ms
+     (no timing-function specified in the raw) -> --duration-base (byte-identical). */
+  transition: color calc(var(--duration-base) * var(--anim-mult, 1)), background calc(var(--duration-base) * var(--anim-mult, 1)), border-color calc(var(--duration-base) * var(--anim-mult, 1)), box-shadow calc(var(--duration-base) * var(--anim-mult, 1));
   letter-spacing: -0.005em;
-  transition:
-    border-color calc(var(--duration-150) * var(--anim-mult, 1)),
-    color calc(var(--duration-150) * var(--anim-mult, 1)),
-    background calc(var(--duration-150) * var(--anim-mult, 1)),
-    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
-    box-shadow calc(var(--duration-base) * var(--anim-mult, 1)),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+  box-shadow: 0 2px 6px -2px color-mix(in srgb, var(--brand-primary-500) 55%, transparent), inset 0 1px 0 rgba(255,255,255,0.28);
+  text-align: left;
 }
 .md-footer button .md-btn-label {
+  text-align: left;
   line-height: 1;
   white-space: nowrap;
   overflow: hidden;
@@ -481,206 +522,85 @@ dialog.md-panel-content {
   flex-shrink: 0;
   font-variation-settings: '"opsz" 20, "wght" 600, "FILL" 0';
   line-height: 1;
-  color: #fff;
 }
-/* Fix (6): canonical .btn-task hover — brightness + lift + elevated glow (matches .btn-task:hover). */
 .md-footer button:hover {
-  filter: brightness(1.08);
-  transform: translateY(-1px);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.22),
-    inset 0 -1.5px 0 rgba(0,0,0,0.18),
-    0 8px 20px -4px var(--md-fbtn);
+  background: var(--brand-primary-600);
+  border-color: color-mix(in srgb, var(--brand-primary-700) 70%, transparent);
+  box-shadow: 0 4px 12px -3px color-mix(in srgb, var(--brand-primary-500) 65%, transparent), inset 0 1px 0 rgba(255,255,255,0.28);
 }
-.md-footer button:active { transform: scale(0.98); }
-/* Mark-all-as-read gets emerald fill to distinguish from the navy View button */
+/* Quiet secondary — token surface, no brand fill */
 .md-footer .md-mark-read {
-  --md-fbtn: var(--brand-primary-500);
+  background: color-mix(in srgb, var(--shell-bg) 30%, var(--bg-card-solid));
+  border-color: color-mix(in srgb, var(--fg1) 10%, transparent);
+  color: var(--fg3);
+  box-shadow: none;
+}
+.md-footer .md-mark-read:hover {
+  color: var(--fg1);
+  background: color-mix(in srgb, var(--fg1) 7%, transparent);
+  border-color: color-mix(in srgb, var(--fg1) 18%, transparent);
+  box-shadow: none;
+}
+.md-footer button:focus-visible {
+  outline: 2px solid var(--brand-primary-500);
+  outline-offset: 2px;
 }
 
-/* ---- Fix (4): Mark-all-as-read animation sequence ---- */
-
-/* Preview row wrapper: clips sliding overflow at card edge */
-.md-preview-wrap {
-  position: relative;
-  overflow: hidden;
-  line-height: 1.35;
-}
-
-/* Blue double-tick overlay — sits on the right of the preview text.
-   The white shadow behind it is the progressive-blur-style wipe from right.
-   Fix (8): extended gradient stops further left (48/72/100/150) so the wipe
-   reaches further into the preview text for a cleaner reveal effect. */
-.md-tick-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  /* White right-edge wipe hides preview text behind the tick */
-  background: linear-gradient(to left,
-    #FFFFFF 48px,
-    rgba(255,255,255,0.96) 72px,
-    rgba(255,255,255,0.80) 100px,
-    rgba(255,255,255,0) 150px
-  );
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade);
-}
-.md-tick-icon {
-  font-size: 16px;
-  font-variation-settings: '"opsz" 20, "wght" 700, "FILL" 1';
-  color: #3B82F6;
-  margin-right: 2px;
-  flex-shrink: 0;
-  line-height: 1;
-}
-
-/* Phase: ticking -- reveal ticks with per-row stagger */
-.md-mark-state-ticking .md-item:nth-child(1) .md-tick-overlay,
-.md-mark-state-sliding .md-item:nth-child(1) .md-tick-overlay,
-.md-mark-state-done    .md-item:nth-child(1) .md-tick-overlay {
-  opacity: 1;
-  transition-delay: 0ms; /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
-}
-.md-mark-state-ticking .md-item:nth-child(2) .md-tick-overlay,
-.md-mark-state-sliding .md-item:nth-child(2) .md-tick-overlay,
-.md-mark-state-done    .md-item:nth-child(2) .md-tick-overlay {
-  opacity: 1;
-  transition-delay: calc(var(--duration-80) * var(--anim-mult, 1));
-}
-.md-mark-state-ticking .md-item:nth-child(3) .md-tick-overlay,
-.md-mark-state-sliding .md-item:nth-child(3) .md-tick-overlay,
-.md-mark-state-done    .md-item:nth-child(3) .md-tick-overlay {
-  opacity: 1;
-  transition-delay: calc(var(--duration-base) * var(--anim-mult, 1));
-}
-
-/* Phase: sliding -- rows translate right and fade; clipped by .md-preview-wrap overflow:hidden */
-.md-mark-state-sliding .md-item,
-.md-mark-state-done    .md-item {
-  transform: translateX(120%) !important;
-  opacity: 0 !important;
-}
-.md-mark-state-sliding .md-item:nth-child(1),
-.md-mark-state-done    .md-item:nth-child(1) {
-  transition:
-    transform var(--md-dur) var(--ease-goo-collapse),
-    opacity calc(var(--md-dur) * 0.6) var(--ease-fade) !important;
-  transition-delay: 0ms !important; /* motion-sweep: kept, prefers-reduced-motion !important near-zero override, intentionally literal (house pattern, see frontend-motion-contract.md) */
-}
-.md-mark-state-sliding .md-item:nth-child(2),
-.md-mark-state-done    .md-item:nth-child(2) {
-  transition:
-    transform var(--md-dur) var(--ease-goo-collapse),
-    opacity calc(var(--md-dur) * 0.6) var(--ease-fade) !important;
-  transition-delay: calc(60ms * var(--anim-mult, 1)) !important; /* motion-sweep: kept, prefers-reduced-motion !important near-zero override, intentionally literal (house pattern, see frontend-motion-contract.md) */
-}
-.md-mark-state-sliding .md-item:nth-child(3),
-.md-mark-state-done    .md-item:nth-child(3) {
-  transition:
-    transform var(--md-dur) var(--ease-goo-collapse),
-    opacity calc(var(--md-dur) * 0.6) var(--ease-fade) !important;
-  transition-delay: calc(var(--duration-fast) * var(--anim-mult, 1)) !important;
-}
-
-/* ---- Slow-down toggle via global --anim-mult ---- */
-/* Step 19: one tier faster open -- 560ms -> var(--duration-expand) (460ms),
-   the closest existing duration token below the prior literal. Easing curves
-   and the --anim-mult multiplier are untouched.
-   Step 3 (dsfb-08): one more tier faster -- 460ms -> var(--duration-420)
-   (420ms), the next tier down; shell/panel-bg/content all key off --md-dur
-   so this speeds the whole open coherently. */
-.md-root { --md-dur: calc(var(--duration-420) * var(--anim-mult, 1)); }
+/* ---- Speed presets via custom prop ----
+   ds-motion-sweep step 3: --md-dur now also folds in --anim-mult so the
+   route's shared slow-toggle control (data-anim-slow on <html>, flips
+   --anim-mult 1 -> 4 in global.css) scales this component the same way it
+   scales every other library component -- previously only the component's
+   own `speed` prop could slow it down. */
+.md-root[data-speed="normal"] { --md-dur: calc(var(--duration-560) * var(--anim-mult, 1)); }
+.md-root[data-speed="slow"]   { --md-dur: calc((var(--duration-700) + var(--duration-700)) * var(--anim-mult, 1)); }
 
 /* Reduce motion */
 @media (prefers-reduced-motion: reduce) {
-  .md-panel-bg, .md-panel-shell, .md-trigger-bg, .md-trigger,
-  .md-item, .md-panel-content, .md-trigger-badge,
-  .md-trigger .material-symbols-outlined, .md-footer button {
-    transition-duration: 1ms !important; /* motion-sweep: kept, prefers-reduced-motion !important near-zero override, intentionally literal (house pattern, see frontend-motion-contract.md) */
-    animation-duration: 1ms !important; /* motion-sweep: kept, prefers-reduced-motion !important near-zero override, intentionally literal (house pattern, see frontend-motion-contract.md) */
+  .md-panel-bg, .md-trigger, .md-item, .md-panel-content,
+  .md-trigger .material-symbols-outlined {
+    transition-duration: 1ms !important;
   }
 }
 
-/* ===================== Dark mode (html.dark) ===================== */
+/* ===================== Dark mode ===================== */
+/* Unified onto html.dark (the app's live toggle; [data-theme] is dead here —
+   evidence in plans/scratch/ds-review/message-dropdown.md). Rules the shared
+   token set already flips (--fg1..4, --shell-bg, --bg-card-solid) were dropped
+   rather than converted: header/sender/preview/time colours, item hover, both
+   footer buttons and the trigger badge now resolve from tokens in BOTH themes.
+   The .md-panel-bg rules below are FROZEN morph values, byte-identical to the
+   port — only their selector changed so they actually apply. */
+html.dark .md-panel {
+  background: #111111;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+html.dark .md-panel h1 { color: #F5F5F5 !important; }
 html.dark .md-card {
   background: #111111;
-  border-color: #242424;
+  border-color: #232323;
 }
+/* Canon dark shell: no ring, matching the card-primitives outer shell
+   (concentric-demo-outer in Cards.css carries no border/box-shadow of its
+   own in either theme); elevation stays drop-shadow-only, background comes
+   from --shell-bg. The previous inset ring here was the stray external
+   line Bora flagged -- card primitives never draws one on this layer. */
 html.dark .md-panel-shell {
-  /* Collapsed state in dark: trigger colour = #FFFFFF so the circle blends
-     with the white trigger. Box-shadow suppressed (no glow on tiny circle).
-     Fix (1) dark: border-color matches #FFFFFF trigger bg — invisible, no dark ring seam.
-     Colour gating: deferred background-color / border-color flips are inherited from base transitions. */
-  background: #FFFFFF;
-  border-color: #FFFFFF;
-  box-shadow: none;
-}
-html.dark .md-root.open .md-panel-shell {
-  /* Open state in dark: shell surface sits between card (#111111) and panel (#1C1C1C).
-     Mirror light mode's relationship: darker than panel, lighter than card.
-     Fix (1) dark open: restore card-border for the expanded shell frame.
-     Fix (5): dark canonical inner-card border + inset highlight.
-     Fix (5b): brighter top hairline lifts the shell off the dark background. */
-  background: var(--shell-bg);
-  border-color: var(--card-border, #232323);
-  box-shadow:
-    0 16px 56px rgba(0,0,0,0.5),
-    0 3px 10px rgba(0,0,0,0.3),
-    inset 0 1px 0 rgba(255,255,255,.22),
-    inset 0 0 0 1px rgba(17,17,17,0.04);
+  filter: drop-shadow(0 16px 34px rgba(0,0,0,0.55)) drop-shadow(0 3px 8px rgba(0,0,0,0.32));
 }
 html.dark .md-trigger-bg,
 html.dark .md-panel-bg { background: #FFFFFF; }
-html.dark .md-trigger { color: #111111; }
+html.dark .md-trigger { color: #0F172A; }
 html.dark .md-trigger .material-symbols-outlined { text-shadow: none; }
 html.dark .md-root.open .md-panel-bg {
-  /* Fix (7): use canonical --card-bg / --card-border tokens (#1C1C1C / #232323).
-     Top rim-light #232323 (dark) instead of rgba(255,255,255,0.9) (light). */
-  background-color: var(--card-bg, #1C1C1C);
+  /* Card-primitives dark surface literal (_shared-feedback.css html.dark
+     --card-bg), used as a literal per this step's guidance since --card-bg
+     is not wired into this component's token chain; the prior #1E293B was
+     a navy/blue value, not the house dark card color. */
+  background-color: #1C1C1C;
   box-shadow:
     0 18px 40px -12px rgba(0,0,0,0.55),
     0 4px 12px -4px rgba(0,0,0,0.35),
     inset 0 1px 0 rgba(255,255,255,0.06),
-    inset 0 0 0 1px var(--card-border, #232323);
-}
-html.dark .md-item:hover { background: rgba(255,255,255,0.05); }
-html.dark .md-sender,
-html.dark .md-unread .md-sender { color: #F5F5F5; }
-html.dark .md-preview { color: #A1A1A1; }
-html.dark .md-unread .md-preview { color: #D4D4D4; }
-html.dark .md-time { color: #6B6B6B; }
-html.dark .md-trigger-badge {
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.50),
-    inset 0 -2px 0 rgba(0,0,0,0.22),
-    inset 0 0 0 1px rgba(0,0,0,0.10),
-    0 0 0 2px #0A0A0A,
-    0 6px 14px -2px color-mix(in srgb, var(--brand-primary-500) 60%, transparent),
-    0 12px 28px -6px var(--brand-glow),
-    0 2px 4px rgba(0,0,0,0.3);
-}
-html.dark .md-footer { border-color: #232323; }
-/* Fix (6) dark: btn-task fill still works in dark — navy + emerald are both colorful.
-   Just keep the :hover brightness filter consistent (inherited). */
-html.dark .md-footer button {
-  background: var(--md-fbtn);
-  border-color: var(--md-fbtn);
-  color: #fff;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.18),
-    inset 0 -1.5px 0 rgba(0,0,0,0.25),
-    0 0 10px -3px var(--md-fbtn);
-}
-
-/* Fix (8) dark mode: extended gradient stops to match light mode (48/72/100/150) */
-html.dark .md-tick-overlay {
-  background: linear-gradient(to left,
-    #1C1C1C 48px,
-    rgba(28,28,28,0.96) 72px,
-    rgba(28,28,28,0.80) 100px,
-    rgba(28,28,28,0) 150px
-  );
+    inset 0 0 0 1px rgba(255,255,255,0.05);
 }

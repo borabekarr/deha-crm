@@ -16,8 +16,8 @@ import { useAutoHeight } from '../../../lib/hooks/use-auto-height'
 // it stays mounted through collapse (lesson: mounted-through-exit) and its
 // height is driven imperatively by useAutoHeight; opacity crossfade on the
 // divider/panel is a plain CSS class keyed off `open` (see .ms-collapsible.open
-// in ModelSelector.css). Open easing = --ease-spring-open (bounce), close
-// easing = --ease-out (no bounce), matching the header/panel motion checklist.
+// in ModelSelector.css). Open and close both use --ease-out (no bounce,
+// exit mirrors enter), matching the no-overshoot motion house rule.
 // Interaction: togglePanel opens/closes; pick() selects. No other useEffect.
 // ---------------------------------------------------------------------------
 
@@ -107,12 +107,12 @@ export default function ModelSelector() {
   )
 
   // Collapse/expand only the divider+panel; header + shell stay mounted and
-  // sized. Asymmetric easing: open bounces, close is a smooth spring (no
-  // overshoot) — matches Step 27's motion checklist.
+  // sized. Same token easing both directions — no bounce, exit mirrors
+  // enter, per the no-overshoot house rule.
   const { ref: collapsibleRef } = useAutoHeight<HTMLDivElement>({
     open,
     duration: 560,
-    easing: open ? 'var(--ease-spring-open)' : 'var(--ease-out)',
+    easing: 'var(--ease-out)',
   })
 
   // Derived: selected model data + index

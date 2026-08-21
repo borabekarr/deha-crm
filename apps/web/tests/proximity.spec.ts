@@ -46,7 +46,6 @@ const WIRED_SLUGS: WiredSlug[] = [
   { slug: 'date-picker' },
   { slug: 'model-selector' },
   { slug: 'currency-converter' },
-  { slug: 'message-dropdown', openTrigger: '.md-trigger' },
   { slug: 'index-bar' },
   { slug: 'stacked-list', openTrigger: '.sl-bar' },
   { slug: 'pinned-list' },

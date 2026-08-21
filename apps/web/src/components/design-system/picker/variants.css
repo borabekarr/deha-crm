@@ -1,0 +1,213 @@
+/* =========================================================================
+   Picker — prototype variant surface (ds-review-inputs Step 4)
+
+   Two things live here and nothing else:
+     1. The prototype picker chrome, copied VERBATIM from
+        .claude/skills/prototype/PICKER.md (it is a spec, not a design
+        decision: no project tokens, no theme awareness, no restyling).
+     2. The per-variant deltas, keyed off `[data-variant]` on `.pk-root`.
+        `main` has NO rules here at all — it renders byte-identically to the
+        Step 3 result, which is the cherry-pick baseline.
+
+   NO MOTION is declared in the variant blocks: every timing, easing and the
+   whole rAF wheel engine (idle snap, Today/Now goal channel, reduced-motion
+   short-circuit) is shared by all three variants untouched. `!important`
+   appears only where a still-treatment property is computed inline by
+   Picker.tsx's raw-source style tables and a prototype delta has to win the
+   cascade; it is never used on a transition/animation leg.
+   ========================================================================= */
+
+/* ── Picker chrome (verbatim, PICKER.md) ─────────────────────────────── */
+.proto-picker {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(10, 10, 10, 0.82);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  backdrop-filter: blur(12px) saturate(1.4);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+    0 8px 24px rgba(0, 0, 0, 0.24),
+    0 2px 6px rgba(0, 0, 0, 0.12);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.proto-picker-highlight {
+  position: absolute;
+  top: 4px;
+  left: 0;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  will-change: transform;
+}
+
+/* PICKER.md's verbatim `250ms cubic-bezier(0.23, 1, 0.32, 1)` has no token
+   equivalent in motion-tokens.css and minting is forbidden, so the pair
+   arrives value-identically as the `--proto-slide` named constant set from
+   VariantPicker.tsx (CONVERSION-SOP preference 3). Same treatment as
+   expandable-card/variants.css. */
+.proto-picker[data-ready] .proto-picker-highlight {
+  transition:
+    transform var(--proto-slide),
+    width var(--proto-slide);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .proto-picker[data-ready] .proto-picker-highlight {
+    transition: none;
+  }
+}
+
+.proto-picker-item {
+  position: relative; /* sits above the highlight */
+  display: flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  font: inherit;
+  cursor: pointer;
+  /* PICKER.md verbatim `color 150ms ease-out`, expressed value-identically:
+     --duration-150 IS 150ms and --ease-out-native IS the `ease-out` keyword. */
+  transition: color calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-out-native);
+}
+
+.proto-picker-item:hover { color: rgba(255, 255, 255, 0.85); }
+.proto-picker-item:active { transform: scale(0.97); }
+
+.proto-picker-item:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.4);
+  outline-offset: 2px;
+}
+
+.proto-picker-item[data-active] { color: #fff; }
+
+.proto-picker[data-position='top'] { bottom: auto; top: 24px; }
+
+.proto-picker-item[data-main]::after {
+  content: '\2605';
+  margin-left: 4px;
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+/* ── Variant 2 · "Glass" — sheet chrome: the card becomes a frosted sheet ─
+   Axis: material. Step 3's card is an opaque paper panel inside a grey
+   bezel. Here the bezel disappears, the panel is translucent and blurs what
+   is behind it, the wheel tray loses its inset well and the selection bar
+   becomes a floating capsule with an emerald hairline — the "sheet floating
+   over the app" reading instead of "card resting in a tray". The closed FAB
+   drops its grid texture and its heavy emerald glow for a flat pill, so the
+   morph starts from the same quiet material it lands in. */
+.pk-root[data-variant='glass'] [data-screen-label] {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.pk-root[data-variant='glass'] .pk-box[data-open='true'] {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.75) !important;
+  border-radius: 30px !important;
+  box-shadow:
+    0 24px 60px -20px rgba(15, 23, 42, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.6);
+  backdrop-filter: blur(22px) saturate(1.6);
+}
+
+.pk-root[data-variant='glass'] .pk-box[data-open='false'] {
+  background-image: none !important;
+  box-shadow: 0 10px 24px -12px rgba(16, 185, 129, 0.7) !important;
+}
+
+.pk-root[data-variant='glass'] .pk-tray {
+  background: rgba(255, 255, 255, 0.28) !important;
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.06) !important;
+}
+
+.pk-root[data-variant='glass'] .pk-bar {
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  border-color: rgba(16, 185, 129, 0.45) !important;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.18) !important;
+}
+
+html.dark .pk-root[data-variant='glass'] .pk-box[data-open='true'] {
+  background-color: rgba(24, 28, 34, 0.62) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow:
+    0 24px 60px -20px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+html.dark .pk-root[data-variant='glass'] .pk-tray {
+  background: rgba(255, 255, 255, 0.05) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .pk-root[data-variant='glass'] .pk-bar {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(16, 185, 129, 0.55) !important;
+}
+
+/* ── Variant 3 · "Ink" — wheel styling: typographic rule, not a capsule ──
+   Axis: how the selection is expressed. Step 3 (and Glass) draw a filled
+   capsule the selected row sits inside. Here the capsule is gone: the
+   selection reads as two emerald rules bracketing the row, the tray is
+   flat with no well, and the type is bigger and tighter so the wheel itself
+   carries the hierarchy. The FAB accent follows: a squared 18px pill with a
+   flat fill, so the morph reads as a card unfolding rather than a blob
+   inflating. Nothing here touches the engine — font-size/letter-spacing are
+   properties updateWheel() never writes, so the per-frame opacity / blur /
+   rotateX / colour / weight ladder is untouched. */
+.pk-root[data-variant='ink'] .pk-bar {
+  background: transparent !important;
+  border: 0 !important;
+  border-top: 2px solid #10b981 !important;
+  border-bottom: 2px solid #10b981 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.pk-root[data-variant='ink'] .pk-tray {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.pk-root[data-variant='ink'] [data-item] {
+  font-size: 23px;
+  letter-spacing: -0.8px;
+}
+
+.pk-root[data-variant='ink'] .pk-box[data-open='true'] {
+  border-radius: 18px !important;
+}
+
+.pk-root[data-variant='ink'] .pk-box[data-open='false'] {
+  border-radius: 18px !important;
+  background-image: none !important;
+  box-shadow:
+    0 10px 22px -10px rgba(16, 185, 129, 0.65),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2) !important;
+}
+
+html.dark .pk-root[data-variant='ink'] .pk-bar {
+  border-top-color: #34d399 !important;
+  border-bottom-color: #34d399 !important;
+}

@@ -224,11 +224,9 @@ html.dark .fhc-frame { background: #0A0A0A; background-image: none; }
 .fhc-info-divider { height: 1px; background: var(--fhc-divider); margin: 16px 0; }
 
 /* ─────────────────────────────────────────────────────────────────────
-   LOAD ANIMATION (added via .anim-in once mounted)
+   LOAD ANIMATION (added via .anim-in once mounted). Outer card entrance
+   now owned by the shared reveal engine (revealSelector: '.fhc').
    ───────────────────────────────────────────────────────────────────── */
-.fhc.anim-in { animation: fhcCardIn calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-spring-pop) both; }
-@keyframes fhcCardIn { 0%{ opacity:0; transform: scale(.85) translateY(10px); } 100%{ opacity:1; transform: scale(1) translateY(0); } }
-
 .anim-in .fhc-eyebrow { animation: fhcFade calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-out-native) calc(var(--duration-fast) * var(--anim-mult, 1)) both; }
 .anim-in .fhc-num { animation: fhcNumPop calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-spring) calc(var(--duration-200) * var(--anim-mult, 1)) both; }
 @keyframes fhcNumPop {

@@ -19,11 +19,14 @@
 
 import { useState, useCallback, useRef } from 'react'
 import './WorkflowAddElements.css'
+// Ask Jeru button (Item 2): reuse the buttons-page .btn-apply class verbatim,
+// same import precedent as DeleteModal.tsx.
+import '../buttons/Buttons.css'
 import { iconClass } from '../../../lib/iconClass'
 import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 import { usePanelDirection } from '../../../lib/hooks/use-panel-direction'
 import { usePillSpring } from '../../../lib/motion-spring'
-import { clampAEPosition, clampNodesPosition } from './workflow-add-elements-hook'
+import { clampAEPosition, clampNodesPositionForRow } from './workflow-add-elements-hook'
 
 // ---------------------------------------------------------------------------
 // Data (verbatim from source)
@@ -67,15 +70,15 @@ const INTEGRATION_CATS: Category[] = [
 
 const NODES: Record<string, NodeItem[]> = {
   input:     [{ name: 'Text Prompt',     icon: 'notes',           color: '#4F46E5' }, { name: 'URL Fetcher',     icon: 'link',            color: '#4F46E5' }, { name: 'File Upload',     icon: 'upload_file',     color: '#4F46E5' }, { name: 'Audio Upload',    icon: 'mic',             color: '#4F46E5' }, { name: 'Image Upload',    icon: 'image',           color: '#4F46E5' }, { name: 'Form Input',      icon: 'edit_note',       color: '#4F46E5' }, { name: 'Webhook',         icon: 'webhook',         color: '#4F46E5' }, { name: 'Database Query',  icon: 'storage',         color: '#4F46E5' }],
-  output:    [{ name: 'Text Output',     icon: 'text_fields',     color: 'var(--brand-primary-600)' }, { name: 'Audio Output',    icon: 'graphic_eq',      color: 'var(--brand-primary-600)' }, { name: 'Image Output',    icon: 'image',           color: 'var(--brand-primary-600)' }, { name: 'Email Send',      icon: 'send',            color: 'var(--brand-primary-600)' }, { name: 'Slack Message',   icon: 'chat',            color: 'var(--brand-primary-600)' }, { name: 'Webhook Push',    icon: 'webhook',         color: 'var(--brand-primary-600)' }],
-  llm:       [{ name: 'Claude',          icon: 'smart_toy',       color: '#7C3AED' }, { name: 'GPT-4o',          icon: 'smart_toy',       color: '#7C3AED' }, { name: 'Gemini 2.0',      icon: 'neurology',    color: '#7C3AED' }, { name: 'Mistral',         icon: 'psychology',      color: '#7C3AED' }, { name: 'Llama 3',         icon: 'memory',          color: '#7C3AED' }],
-  action:    [{ name: 'Write to Notion', icon: 'edit',            color: '#D97706' }, { name: 'Send Email',      icon: 'email',           color: '#D97706' }, { name: 'HTTP Request',    icon: 'http',            color: '#D97706' }, { name: 'Create Record',   icon: 'add_circle',      color: '#D97706' }, { name: 'Slack Post',      icon: 'chat_bubble',     color: '#D97706' }],
+  output:    [{ name: 'Text Output',     icon: 'text_fields',     color: 'var(--brand-primary-500)' }, { name: 'Audio Output',    icon: 'graphic_eq',      color: 'var(--brand-primary-500)' }, { name: 'Image Output',    icon: 'image',           color: 'var(--brand-primary-500)' }, { name: 'Email Send',      icon: 'send',            color: 'var(--brand-primary-500)' }, { name: 'Slack Message',   icon: 'chat',            color: 'var(--brand-primary-500)' }, { name: 'Webhook Push',    icon: 'webhook',         color: 'var(--brand-primary-500)' }],
+  llm:       [{ name: 'Claude',          icon: 'smart_toy',       color: '#8B5CF6' }, { name: 'GPT-4o',          icon: 'smart_toy',       color: '#8B5CF6' }, { name: 'Gemini 2.0',      icon: 'neurology',    color: '#8B5CF6' }, { name: 'Mistral',         icon: 'psychology',      color: '#8B5CF6' }, { name: 'Llama 3',         icon: 'memory',          color: '#8B5CF6' }],
+  action:    [{ name: 'Write to Notion', icon: 'edit',            color: '#F59E0B' }, { name: 'Send Email',      icon: 'email',           color: '#F59E0B' }, { name: 'HTTP Request',    icon: 'http',            color: '#F59E0B' }, { name: 'Create Record',   icon: 'add_circle',      color: '#F59E0B' }, { name: 'Slack Post',      icon: 'chat_bubble',     color: '#F59E0B' }],
   kb:        [{ name: 'Vector Search',   icon: 'manage_search',   color: '#232323' }, { name: 'Embed Document',  icon: 'upload_file',     color: '#232323' }, { name: 'Semantic Search', icon: 'travel_explore',  color: '#232323' }, { name: 'Hybrid Search',   icon: 'search',          color: '#232323' }],
-  database:  [{ name: 'Query',           icon: 'search',          color: '#DC2626' }, { name: 'Insert Row',      icon: 'add',             color: '#DC2626' }, { name: 'Update Row',      icon: 'edit',            color: '#DC2626' }, { name: 'Delete Row',      icon: 'delete',          color: '#DC2626' }],
-  docreader: [{ name: 'PDF Reader',      icon: 'picture_as_pdf',  color: '#B45309' }, { name: 'Word Document',   icon: 'article',         color: '#B45309' }, { name: 'CSV Parser',      icon: 'table_chart',     color: '#B45309' }, { name: 'HTML Scraper',    icon: 'code',            color: '#B45309' }],
-  logic:     [{ name: 'If / Else',       icon: 'call_split',      color: '#EA580C' }, { name: 'Loop',            icon: 'loop',            color: '#EA580C' }, { name: 'Switch',          icon: 'alt_route',       color: '#EA580C' }, { name: 'Filter',          icon: 'filter_list',     color: '#EA580C' }],
-  utils:     [{ name: 'Delay',           icon: 'timer',           color: '#0F766E' }, { name: 'Transform',       icon: 'transform',       color: '#0F766E' }, { name: 'Format Date',     icon: 'calendar_today',  color: '#0F766E' }, { name: 'JSON Parse',      icon: 'data_object',     color: '#0F766E' }],
-  notion:    [{ name: 'Write Page',      icon: 'article',         color: '#000' },    { name: 'Read Database',   icon: 'table_chart',     color: '#000' },    { name: 'Create Entry',    icon: 'add',             color: '#000' }],
+  database:  [{ name: 'Query',           icon: 'search',          color: '#EF4444' }, { name: 'Insert Row',      icon: 'add',             color: '#EF4444' }, { name: 'Update Row',      icon: 'edit',            color: '#EF4444' }, { name: 'Delete Row',      icon: 'delete',          color: '#EF4444' }],
+  docreader: [{ name: 'PDF Reader',      icon: 'picture_as_pdf',  color: '#D97706' }, { name: 'Word Document',   icon: 'article',         color: '#D97706' }, { name: 'CSV Parser',      icon: 'table_chart',     color: '#D97706' }, { name: 'HTML Scraper',    icon: 'code',            color: '#D97706' }],
+  logic:     [{ name: 'If / Else',       icon: 'call_split',      color: '#F97316' }, { name: 'Loop',            icon: 'loop',            color: '#F97316' }, { name: 'Switch',          icon: 'alt_route',       color: '#F97316' }, { name: 'Filter',          icon: 'filter_list',     color: '#F97316' }],
+  utils:     [{ name: 'Delay',           icon: 'timer',           color: '#0D9488' }, { name: 'Transform',       icon: 'transform',       color: '#0D9488' }, { name: 'Format Date',     icon: 'calendar_today',  color: '#0D9488' }, { name: 'JSON Parse',      icon: 'data_object',     color: '#0D9488' }],
+  notion:    [{ name: 'Write Page',      icon: 'article',         color: '#000000' }, { name: 'Read Database',   icon: 'table_chart',     color: '#000000' }, { name: 'Create Entry',    icon: 'add',             color: '#000000' }],
   slack:     [{ name: 'Send Message',    icon: 'chat',            color: '#4A154B' }, { name: 'DM User',         icon: 'person',          color: '#4A154B' }, { name: 'Post to Channel', icon: 'campaign',        color: '#4A154B' }],
   stripe:    [{ name: 'Create Customer', icon: 'person_add',      color: '#635BFF' }, { name: 'Charge Card',     icon: 'credit_card',     color: '#635BFF' }, { name: 'Create Invoice',  icon: 'receipt',         color: '#635BFF' }],
   airtable:  [{ name: 'Query Records',   icon: 'search',          color: '#EF4444' }, { name: 'Create Record',   icon: 'add',             color: '#EF4444' }, { name: 'Update Record',   icon: 'edit',            color: '#EF4444' }],
@@ -173,6 +176,9 @@ export default function WorkflowAddElements() {
   const nodesOuterRef = useRef<HTMLDivElement | null>(null)
   // Map of category id → item DOM element (for nodes flyout positioning)
   const itemEls = useRef<Map<string, HTMLDivElement>>(new Map())
+  // Item 1: last-hovered category row, mirrored outside state so the mount-time
+  // placement callback (nodesOuterCallbackRef) can read it without a stale closure.
+  const hoveredRowRef = useRef<HTMLDivElement | null>(null)
   // Timer for nodes hide delay
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Timer for search-panel exit animation before unmounting (Item 1)
@@ -181,6 +187,17 @@ export default function WorkflowAddElements() {
   const searchPendingTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Fix 3: timer that unmounts the outgoing tab's ghost list after its exit plays.
   const listLeaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Step 2 fix: mirrors "search results are showing" outside of state so the
+  // mount-time placement callback (nodesOuterCallbackRef, empty deps array)
+  // never reads a stale `filter`/`searchPanelMounted` closure — it decides
+  // row-center vs. top-align off this ref instead.
+  const searchModeRef = useRef(false)
+  // F9: handleDocMouseDown/handleKeyDown are useCallback([]) and must stay
+  // stable, but closeAll is redefined every render and closes over fresh
+  // `state`. Route them through a ref updated at render time (not an effect,
+  // per no-use-effect) so the blank-click/Escape path always calls the
+  // CURRENT closeAll instead of the first render's stale closure.
+  const closeAllRef = useRef<() => void>(() => {})
 
   // Proximity group registered on the shell: every descendant carrying
   // data-proximity (category rows, node rows, the footer button) gets the
@@ -252,15 +269,39 @@ export default function WorkflowAddElements() {
     if (searchLeaveTimer.current) clearTimeout(searchLeaveTimer.current)
     if (searchPendingTimer.current) clearTimeout(searchPendingTimer.current)
     if (listLeaveTimer.current) clearTimeout(listLeaveTimer.current)
-    // Use closedState (not INITIAL) to preserve aeLeft/aeTop so the fade-out
-    // stays in place instead of jumping to the viewport left edge.
-    setState((s) => closedState(s))
+    hoveredRowRef.current = null
+    searchModeRef.current = false
+
+    // F9: when the search flyout is on screen, closeAll must not unmount it
+    // instantly — reuse the flyout's OWN mounted-through-exit close animation
+    // (searchPanelLeaving / wae-search-leaving, the same reverse-morph path
+    // handleSearchClear already drives) instead of writing a new one. Both
+    // popovers then close in the same frame: the AE panel via its existing
+    // .visible transition (it stays mounted, so removing the class alone
+    // animates it) and the flyout via its reverse morph.
+    const wasSearching = state.searchPanelMounted && !state.searchPanelLeaving
+    if (wasSearching) {
+      setState((s) => ({
+        ...closedState(s),
+        searchPanelMounted: true,
+        searchPanelLeaving: true,
+      }))
+      searchLeaveTimer.current = setTimeout(() => {
+        setState((s) => ({ ...s, searchPanelMounted: false, searchPanelLeaving: false }))
+      }, 300)
+    } else {
+      // Use closedState (not INITIAL) to preserve aeLeft/aeTop so the fade-out
+      // stays in place instead of jumping to the viewport left edge.
+      setState((s) => closedState(s))
+    }
   }
+  closeAllRef.current = closeAll
 
   /** Item 1+6: clear search input and play reverse morph before unmounting panel. */
   const handleSearchClear = useCallback(() => {
     if (searchLeaveTimer.current) clearTimeout(searchLeaveTimer.current)
     if (searchPendingTimer.current) clearTimeout(searchPendingTimer.current)
+    searchModeRef.current = false
     // Trigger exit animation
     setState((s) => ({ ...s, search: '', searchPanelLeaving: true, hoveredId: null, nodesVisible: false, searchPending: false }))
     // Unmount panel after exit animation completes (220ms * anim-mult; use 300ms as safe upper bound)
@@ -279,6 +320,10 @@ export default function WorkflowAddElements() {
     if (val) {
       if (searchLeaveTimer.current) clearTimeout(searchLeaveTimer.current)
       if (searchPendingTimer.current) clearTimeout(searchPendingTimer.current)
+      // Search mode always top-aligns with the AE panel — a stale hovered-row
+      // ref from before typing must not leak into the placement callback.
+      hoveredRowRef.current = null
+      searchModeRef.current = true
       setState((s) => ({
         ...s,
         search: val,
@@ -298,6 +343,7 @@ export default function WorkflowAddElements() {
 
   function hideNodes() {
     if (hideTimer.current) clearTimeout(hideTimer.current)
+    hoveredRowRef.current = null
     setState((s) => ({ ...s, nodesVisible: false, hoveredId: null }))
   }
 
@@ -315,6 +361,16 @@ export default function WorkflowAddElements() {
     const initialLeft = x - shellRect.left
     const initialTop  = y - shellRect.top
 
+    // Bug (F7): reopening the AE panel elsewhere previously left the search/nodes
+    // flyout mounted with its stale timers still running — an orphaned popover
+    // that kept the OLD position (wrong corner) or lingered as a blur ghost.
+    // Reopening must fully reset that group, same as closeAll()/closedState().
+    if (hideTimer.current) clearTimeout(hideTimer.current)
+    if (searchLeaveTimer.current) clearTimeout(searchLeaveTimer.current)
+    if (searchPendingTimer.current) clearTimeout(searchPendingTimer.current)
+    hoveredRowRef.current = null
+    searchModeRef.current = false
+
     // Show the panel at the shell-relative coordinates first so the element gets layout.
     // Then clamp in a rAF once the panel has real dimensions.
     setState((s) => ({
@@ -323,8 +379,13 @@ export default function WorkflowAddElements() {
       aeLeft: initialLeft,
       aeTop: initialTop,
       nodesVisible: false,
+      nodesLeft: 0,
+      nodesTop: 0,
       hoveredId: null,
       search: '',
+      searchPanelMounted: false,
+      searchPanelLeaving: false,
+      searchPending: false,
       activeTab: s.activeTab,
     }))
 
@@ -346,12 +407,12 @@ export default function WorkflowAddElements() {
         ae && !ae.contains(e.target as Node) &&
         no && !no.contains(e.target as Node)
       ) {
-        closeAll()
+        closeAllRef.current()
       } else if (
         ae && !ae.contains(e.target as Node) &&
         !no
       ) {
-        closeAll()
+        closeAllRef.current()
       }
     },
     [],
@@ -359,16 +420,19 @@ export default function WorkflowAddElements() {
 
   /** Escape key → close everything. */
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') closeAll()
+    if (e.key === 'Escape') closeAllRef.current()
   }, [])
 
   /** Hover over a category row → show the nodes flyout, anchored to the AE panel. */
   function handleCatMouseEnter(cat: Category) {
     if (hideTimer.current) clearTimeout(hideTimer.current)
 
+    const row = itemEls.current.get(cat.id) ?? null
+    hoveredRowRef.current = row
+
     const aeOuter = aeOuterRef.current
     const nodesOuter = nodesOuterRef.current
-    if (!aeOuter || !nodesOuter) {
+    if (!aeOuter || !nodesOuter || !row) {
       // Nodes panel not in DOM yet; show with placeholder position and let rAF fix it
       setState((s) => ({
         ...s,
@@ -380,8 +444,9 @@ export default function WorkflowAddElements() {
       return
     }
 
-    // Compute position synchronously — all elements are in the DOM
-    const pos = clampNodesPosition(aeOuter, nodesOuter, shellRef.current)
+    // Item 1: align to the hovered row (proportional position), not always the
+    // AE panel's top — compute position synchronously, all elements are in the DOM.
+    const pos = clampNodesPositionForRow(row, aeOuter, nodesOuter, shellRef.current)
     setState((s) => ({
       ...s,
       nodesVisible: true,
@@ -418,13 +483,33 @@ export default function WorkflowAddElements() {
     // setState/early-return, so the flyout is correctly placed on this very
     // frame instead of showing a stale position for a full render cycle.
     const placeRight = () => {
-      const aeRect = aeOuter.getBoundingClientRect()
+      // F7: aeOuter and el are both direct, position:absolute children of the
+      // position:relative shell, so aeOuter.offsetTop/offsetLeft are the
+      // shell-relative LAYOUT box — unaffected by the entrance
+      // scale()/translateY() transform on .wae-pop-outer.visible. Reading
+      // getBoundingClientRect() here instead bakes in whatever fraction of
+      // that transform hasn't settled yet when search opens mid-animation
+      // (the stress-timing case), drifting the flyout's top a few px below
+      // the AE panel's true top. offsetTop/offsetWidth/offsetHeight are
+      // always the settled values, so alignment holds at every moment.
       const shellRect = shell ? shell.getBoundingClientRect() : { left: 0, top: 0 }
       const shInner = shell ? shell.offsetHeight : window.innerHeight
       const nh = el.offsetHeight
-      let nx = (aeRect.right - shellRect.left) + 8
+      let nx = aeOuter.offsetLeft + aeOuter.offsetWidth + 8
       if (nx < 10) nx = 10
-      let ny = aeRect.top - shellRect.top
+      // Item 1: on first mount (no nodesTop state yet), center on the hovered
+      // row when known; fall back to top-aligned with the AE panel otherwise
+      // (e.g. search mode, which has no single hovered row).
+      // F7: search mode is ALWAYS top-aligned, even if a hoveredRowRef survives
+      // from before the search started — searchModeRef is the source of truth.
+      const row = searchModeRef.current ? null : hoveredRowRef.current
+      let ny: number
+      if (row) {
+        const rowRect = row.getBoundingClientRect()
+        ny = rowRect.top + rowRect.height / 2 - shellRect.top - nh / 2
+      } else {
+        ny = aeOuter.offsetTop
+      }
       if (ny + nh > shInner - 10) ny = shInner - nh - 10
       if (ny < 10) ny = 10
       el.style.left = `${nx}px`
@@ -632,8 +717,9 @@ export default function WorkflowAddElements() {
           <div className="wae-ae-footer-wrap">
             <div className="wae-ae-sep" />
             <div className="wae-ae-footer">
-              <button type="button" className="btn-green" data-proximity>
-                <span className={iconClass('neurology')}>neurology</span>
+              {/* Item 2: exact copy of the buttons-page Ask Jeru button, unchanged. */}
+              <button type="button" className="btn-green btn-apply" data-proximity>
+                <span className="material-symbols-outlined btn-apply-icon">neurology</span>
                 AI Recommendations
               </button>
             </div>
@@ -683,7 +769,11 @@ export default function WorkflowAddElements() {
                 <div className="wae-search-col">
                   {searchGroups.general.map(({ cat, nodes }) => (
                     <div key={cat.id} className="wae-search-cat-card">
-                      <div className="wae-search-cat-header">
+                      {/* Item 4: theme by the category's own tag color. */}
+                      <div
+                        className="wae-search-cat-header"
+                        style={{ '--wae-cat-color': cat.color } as React.CSSProperties}
+                      >
                         <div
                           className={`wae-badge-icon wae-badge-lg${DARK_BADGE_IDS.has(cat.id) ? ' wae-badge--ink' : ''}`}
                           style={{ backgroundColor: cat.color }}
@@ -720,7 +810,11 @@ export default function WorkflowAddElements() {
                 <div className="wae-search-col">
                   {searchGroups.integrations.map(({ cat, nodes }) => (
                     <div key={cat.id} className="wae-search-cat-card">
-                      <div className="wae-search-cat-header">
+                      {/* Item 4: theme by the category's own tag color. */}
+                      <div
+                        className="wae-search-cat-header"
+                        style={{ '--wae-cat-color': cat.color } as React.CSSProperties}
+                      >
                         <div
                           className={`wae-badge-icon wae-badge-lg${DARK_BADGE_IDS.has(cat.id) ? ' wae-badge--ink' : ''}`}
                           style={{ backgroundColor: cat.color }}

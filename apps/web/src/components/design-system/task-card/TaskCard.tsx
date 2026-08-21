@@ -864,7 +864,7 @@ export default function TaskCard() {
             <div
               key={card.title}
               className={`task canon-hover ${card.cls}`}
-              style={{ animationDelay: card.delay, '--tag': card.tag } as React.CSSProperties}
+              style={{ '--tag': card.tag } as React.CSSProperties}
               onClick={() => openTask(buildTask(card))}
             >
               <div className="tag-banner">

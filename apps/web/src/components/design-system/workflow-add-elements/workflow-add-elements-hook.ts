@@ -103,3 +103,38 @@ export function clampNodesPosition(
 
   return { left: nx, top: ny }
 }
+
+/**
+ * Item 1 (Step 9): same as `clampNodesPosition`, but vertically aligns the
+ * flyout to the hovered category ROW instead of always top-aligning with the
+ * AE panel — hovering a lower option places the popover lower at the same
+ * proportional position (centered on the row), clamped to the visible area
+ * so an option near the bottom never pushes the popover off-screen.
+ */
+export function clampNodesPositionForRow(
+  rowEl: HTMLElement,
+  aeOuterEl: HTMLElement,
+  nodesEl: HTMLElement,
+  shellEl?: HTMLElement | null,
+): MenuPos {
+  const rowRect = rowEl.getBoundingClientRect()
+  const aeRect = aeOuterEl.getBoundingClientRect()
+  const nw = nodesEl.offsetWidth
+  const nh = nodesEl.offsetHeight
+
+  const shellRect = shellEl ? shellEl.getBoundingClientRect() : { left: 0, top: 0 }
+  const sw = shellEl ? shellEl.offsetWidth : window.innerWidth
+  const sh = shellEl ? shellEl.offsetHeight : window.innerHeight
+
+  let nx = (aeRect.right - shellRect.left) + 8
+  if (nx + nw > sw - 10) nx = (aeRect.left - shellRect.left) - nw - 8
+  if (nx < 10) nx = 10
+
+  // Shell-relative y: center the flyout on the hovered row's vertical center.
+  const rowCenter = rowRect.top + rowRect.height / 2 - shellRect.top
+  let ny = rowCenter - nh / 2
+  if (ny + nh > sh - 10) ny = sh - nh - 10
+  if (ny < 10) ny = 10
+
+  return { left: nx, top: ny }
+}

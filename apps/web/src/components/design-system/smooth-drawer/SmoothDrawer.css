@@ -191,7 +191,10 @@
    identically. */
 .sd-sheet[data-squircle="on"] {
   padding: calc(8px + 1px) calc(var(--space-6, 26px) + 1px) calc(var(--space-6, 26px) + 1px);
-  --corner-radius: 28px;
+  /* Concentric with the 36px outer shell minus its 9px squircle padding
+     (8px + 1px offset) -- was 28px, off by the 1px squircle offset so the
+     inner corner fought the outer curve on left/right variants. */
+  --corner-radius: 27px;
   box-shadow: none;
 }
 

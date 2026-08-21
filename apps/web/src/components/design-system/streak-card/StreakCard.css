@@ -195,13 +195,9 @@ html.dark .stk-root .frame:hover .sc-shell { box-shadow: 0 22px 50px -20px color
 .stk-root .sc-bar-fill.flash { box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -2px 0 rgba(6,78,59,0.25), 0 0 26px color-mix(in srgb, var(--brand-primary-500) 95%, transparent); }
 
 /* ─────────────────────────────────────────────────────────────────────
-   LOAD ANIMATION  (added via .anim-in once mounted)
+   LOAD ANIMATION  (added via .anim-in once mounted). Outer card entrance
+   now owned by the shared reveal engine (revealSelector: '.streak').
    ───────────────────────────────────────────────────────────────────── */
-.stk-root .streak.anim-in { animation: scCardIn calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-card-pop) both; }
-@keyframes scCardIn {
-  0%   { opacity: 0; transform: scale(.85) translateY(10px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
-}
 .stk-root .anim-in .sc-flame { animation: scFlame calc(var(--duration-900) * var(--anim-mult, 1)) var(--ease-out-native) calc(var(--duration-80) * var(--anim-mult, 1)) both; }
 @keyframes scFlame {
   0%   { transform: scale(.7); filter: brightness(.6); }

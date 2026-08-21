@@ -14,10 +14,10 @@ import {
   cleanupSpcModal,
   spcScrollRef,
   cleanupSpcScroll,
-  makeToastTimer,
   makeFlashTimer,
-  makeMorphOutTimer,
 } from './sprint-planner-core-hook'
+import { ToastStage, type ToastStageHandle } from '../toast/Toast'
+import { VARIANTS } from '../toast/proto/variants'
 
 // ---------------------------------------------------------------------------
 // AI STUB
@@ -48,6 +48,10 @@ const DAYS_FULL = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
 const WEEK1_DATES = [18, 19, 20, 21, 22]
 const WEEK2_DATES = [25, 26, 27, 28, 29]
 const TODAY_INDEX = 2 // Wed of week 1 in the reference shot
+
+// item 3: local toast kind → shared toast module (type/icon)
+const TOAST_ICON: Record<'success' | 'danger' | 'info', string> = { success: 'check_circle', danger: 'delete', info: 'info' }
+const TOAST_TYPE: Record<'success' | 'danger' | 'info', string> = { success: 'success', danger: 'error', info: 'info' }
 
 const PRIORITY: Record<string, { color: string; bg: string; label: string; rank: number }> = {
   P0: { color: '#EF4444', bg: '#FEF2F2', label: 'P0', rank: 0 },
@@ -729,116 +733,6 @@ function CommandPalette({ open, onClose, onRun, tickets }: {
 }
 
 // ---------------------------------------------------------------------------
-// Toast
-// ---------------------------------------------------------------------------
-function Toast({ message, kind = 'success', onUndo, onClose, phase, stackOffset = 0 }: {
-  message: string
-  kind?: 'success' | 'danger' | 'info'
-  onUndo?: (() => void) | null
-  onClose: () => void
-  phase: 'in' | 'out'
-  stackOffset?: number
-}) {
-  const toastRef = useProximityGroup<HTMLOutputElement>()
-  if (!message) return null
-  const cfg = {
-    success: { bg: 'var(--brand-primary-500)', label: 'Done',    icon: 'check_circle' },
-    danger:  { bg: '#EF4444', label: 'Removed', icon: 'delete' },
-    info:    { bg: '#3B82F6', label: 'Update',  icon: 'info' },
-  }[kind] ?? { bg: 'var(--brand-primary-500)', label: 'Done', icon: 'check_circle' }
-
-  return (
-    <output
-      ref={toastRef}
-      className={`sp-toast ${phase === 'out' ? 'sp-toast-out' : 'sp-toast-in'}`}
-      style={{
-        marginBottom: stackOffset > 0 ? stackOffset * 8 : 0,
-        background: cfg.bg,
-        backgroundImage: [
-          'radial-gradient(ellipse at top right, rgba(255,255,255,0.14) 0%, transparent 55%)',
-          'linear-gradient(to right,  rgba(255,255,255,0.07) 1px, transparent 1px)',
-          'linear-gradient(to bottom, rgba(255,255,255,0.07) 1px, transparent 1px)',
-        ].join(', '),
-        backgroundSize: 'cover, 24px 24px, 24px 24px',
-        borderRadius: 14,
-        padding: '8px 8px 8px 12px',
-        boxShadow: [
-          `0 8px 22px -8px ${cfg.bg}AA`,
-          '0 2px 6px rgba(17,17,17,0.18)',
-          'inset 0 1px 0 rgba(255,255,255,0.5)',
-          'inset 0 -2px 0 rgba(0,0,0,0.22)',
-          'inset 0 0 0 1px rgba(255,255,255,0.15)',
-        ].join(', '),
-        display: 'flex', alignItems: 'center', gap: 12,
-        whiteSpace: 'nowrap',
-      }}
-    >
-      <span style={{
-        display: 'inline-flex', alignItems: 'center', gap: 5,
-        background: 'rgba(255,255,255,0.95)',
-        color: cfg.bg,
-        padding: '3px 10px 3px 7px',
-        borderRadius: 9999,
-        fontSize: 10.5, fontWeight: 800,
-        letterSpacing: '0.04em', textTransform: 'uppercase',
-        boxShadow: 'inset 0 -2px 4px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.8)',
-      }}>
-        <span className={iconClass(cfg.icon)} style={{ fontSize: 13, color: cfg.bg, lineHeight: 1 }}>{cfg.icon}</span>
-        {cfg.label}
-      </span>
-
-      <span style={{
-        fontSize: 13, fontWeight: 700, color: '#fff',
-        letterSpacing: '-0.005em',
-        textShadow: '0 1px 2px rgba(0,0,0,0.18)',
-      }}>
-        {message}
-      </span>
-
-      {onUndo && (
-        <button
-          type="button"
-          onClick={onUndo}
-          data-proximity
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 5,
-            background: '#111111',
-            color: '#fff',
-            border: 'none',
-            padding: '6px 11px 6px 9px',
-            borderRadius: 8,
-            fontFamily: 'Montserrat',
-            fontSize: 11, fontWeight: 800,
-            letterSpacing: '0.06em',
-            textTransform: 'uppercase',
-            cursor: 'pointer',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.40), 0 2px 6px rgba(0,0,0,0.18)',
-          }}
-        >
-          <span className={iconClass('undo')} style={{ fontSize: 14, lineHeight: 1 }}>undo</span>
-          Undo
-        </button>
-      )}
-
-      <button
-        type="button"
-        onClick={onClose}
-        aria-label="Dismiss"
-        data-proximity
-        style={{
-          width: 22, height: 22, padding: 0, flexShrink: 0,
-          background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)',
-          borderRadius: 8, color: 'rgba(255,255,255,0.85)',
-          cursor: 'pointer', display: 'grid', placeItems: 'center',
-        }}
-      >
-        <span className={iconClass('close')} style={{ fontSize: 13, lineHeight: 1 }}>close</span>
-      </button>
-    </output>
-  )
-}
-
-// ---------------------------------------------------------------------------
 // Header
 // ---------------------------------------------------------------------------
 function SprintHeader({ range, onAskAI }: {
@@ -1052,29 +946,21 @@ export default function SprintPlannerCore() {
   const [addOpen, setAddOpen] = useState(false)
   const [addDay, setAddDay] = useState(0)
   const [draggingId, setDraggingId] = useState<string | null>(null)
-  const panelRef = useSquircle<HTMLDivElement>()
+  const panelSquircleRef = useSquircle<HTMLDivElement>()
+  // F13: card-rect anchor the portaled toast stack docks below-right of.
+  const cardAnchorRef = useRef<HTMLDivElement | null>(null)
+  const panelRef = useCallback((el: HTMLDivElement | null) => {
+    panelSquircleRef(el)
+    cardAnchorRef.current = el
+  }, [panelSquircleRef])
   const outerSquircleRef = useSquircle<HTMLDivElement>()
-  // item 3: toast stack — array of active toasts, newest on top
-  const [toasts, setToasts] = useState<Array<{ id: string; message: string; kind: 'success' | 'danger' | 'info'; undo: boolean; phase: 'in' | 'out' }>>([])
+  // item 3: toast stack, driven by the shared toast module (design-system/toast/Toast.tsx)
+  const toastStageRef = useRef<ToastStageHandle>(null)
   const [successMap, setSuccessMap] = useState<Map<string, string>>(new Map())
 
   const undoRef = useRef<TicketData[] | null>(null)
 
-  // item 5: per-toast timer map (id → {autoTimer, morphOutTimer})
-  const toastTimersRef = useRef<Map<string, { auto: ReturnType<typeof makeToastTimer>; morphOut: ReturnType<typeof makeMorphOutTimer> }>>(new Map())
   const flashTimerRef  = useRef(makeFlashTimer())
-
-  // Close a single toast by id: morph out then remove from stack
-  const closeToast = useCallback((id: string) => {
-    const timers = toastTimersRef.current.get(id)
-    if (timers) timers.auto.cancel()
-    setToasts((ts) => ts.map((t) => t.id === id ? { ...t, phase: 'out' as const } : t))
-    const morphOut = timers?.morphOut ?? makeMorphOutTimer()
-    morphOut.schedule(() => {
-      setToasts((ts) => ts.filter((t) => t.id !== id))
-      toastTimersRef.current.delete(id)
-    })
-  }, [])
 
   // Flash priority-colored success wash on changed tickets
   const flashSuccess = useCallback((entries: [string, string][]) => {
@@ -1082,15 +968,19 @@ export default function SprintPlannerCore() {
     flashTimerRef.current.schedule(() => setSuccessMap(new Map()))
   }, [])
 
-  const showToast = useCallback((next: { message: string; kind: 'success' | 'danger' | 'info'; undo: boolean } | null) => {
+  const showToast = useCallback((next: { message: string; kind: 'success' | 'danger' | 'info'; onUndo?: () => void } | null) => {
     if (!next) return
-    const id = `toast-${Date.now()}-${Math.random()}`
-    const auto = makeToastTimer()
-    const morphOut = makeMorphOutTimer()
-    toastTimersRef.current.set(id, { auto, morphOut })
-    setToasts((ts) => [...ts, { ...next, id, phase: 'in' as const }])
-    auto.schedule(() => closeToast(id))
-  }, [closeToast])
+    const spec = { type: TOAST_TYPE[next.kind], icon: TOAST_ICON[next.kind], title: next.message }
+    toastStageRef.current?.show(next.onUndo ? { ...spec, action: { label: 'Undo', icon: 'undo', onAction: next.onUndo } } : spec)
+  }, [])
+
+  // item 15: undo applies the previous ticket state, then shows an "Undone" toast
+  const runUndo = useCallback(() => {
+    if (!undoRef.current) return
+    setTickets(undoRef.current)
+    undoRef.current = null
+    showToast({ message: 'Undone', kind: 'info' })
+  }, [showToast])
 
   // Cmd/Ctrl-K: wired via callback ref on .sp-outer
   const togglePalette = useCallback(() => setPaletteOpen((o) => !o), [])
@@ -1128,7 +1018,7 @@ export default function SprintPlannerCore() {
       flashSuccess([[draggingId, (ticket.priority || 'p2').toLowerCase()]])
       const dayName = `${DAYS_FULL[dayIdx % 5]} · Week ${dayIdx < 5 ? 1 : 2}`
       const title = ticket.title.length > 36 ? ticket.title.slice(0, 36) + '…' : ticket.title
-      showToast({ message: `”${title}” → ${dayName}`, kind: 'success', undo: true })
+      showToast({ message: `”${title}” → ${dayName}`, kind: 'success', onUndo: runUndo })
     }
     setDraggingId(null)
   }
@@ -1139,7 +1029,7 @@ export default function SprintPlannerCore() {
     if (removed) {
       undoRef.current = tickets
       const title = removed.title.length > 42 ? removed.title.slice(0, 42) + '…' : removed.title
-      showToast({ message: `Removed “${title}”`, kind: 'danger', undo: true })
+      showToast({ message: `Removed “${title}”`, kind: 'danger', onUndo: runUndo })
     }
   }
 
@@ -1151,7 +1041,7 @@ export default function SprintPlannerCore() {
     flashSuccess([[ticket.id, (ticket.priority || 'p2').toLowerCase()]])
     const dayName = `${DAYS_FULL[ticket.day % 5]} · Week ${ticket.day < 5 ? 1 : 2}`
     const title = ticket.title.length > 38 ? ticket.title.slice(0, 38) + '…' : ticket.title
-    showToast({ message: `Added “${title}” to ${dayName}`, kind: 'success', undo: true })
+    showToast({ message: `Added “${title}” to ${dayName}`, kind: 'success', onUndo: runUndo })
   }
 
   const runAI = useCallback((actionId: string): { msg: string } => {
@@ -1166,24 +1056,9 @@ export default function SprintPlannerCore() {
       })
       .map((t): [string, string] => [t.id, (t.priority || 'p2').toLowerCase()])
     if (flashEntries.length) flashSuccess(flashEntries)
-    showToast({ message: msg, kind: 'success', undo: true })
+    showToast({ message: msg, kind: 'success', onUndo: runUndo })
     return { msg }
-  }, [tickets, flashSuccess, showToast])
-
-  // item 15: undo instantly removes the triggering toast, then shows "undone" toast
-  const makeUndo = useCallback((fromToastId: string) => () => {
-    if (undoRef.current) {
-      // Immediately remove the toast that triggered undo (no morph-out delay)
-      const timers = toastTimersRef.current.get(fromToastId)
-      if (timers) timers.auto.cancel()
-      setToasts((ts) => ts.filter((t) => t.id !== fromToastId))
-      toastTimersRef.current.delete(fromToastId)
-      // Apply undo
-      setTickets(undoRef.current)
-      undoRef.current = null
-      showToast({ message: 'Undone', kind: 'info', undo: false })
-    }
-  }, [showToast])
+  }, [tickets, flashSuccess, showToast, runUndo])
 
   const outerRef = useCallback((el: HTMLDivElement | null) => {
     outerSquircleRef(el)
@@ -1249,20 +1124,17 @@ export default function SprintPlannerCore() {
           onSubmit={onAddSubmit}
         />
 
-        {/* Toast layer — item 3: vertical stack, newest on top via flex-direction: column-reverse */}
-        <div className={`sp-toast-layer ${toasts.length > 0 ? 'visible' : ''}`}>
-          {toasts.map((t) => (
-            <Toast
-              key={t.id}
-              message={t.message}
-              kind={t.kind}
-              phase={t.phase}
-              onUndo={t.undo ? makeUndo(t.id) : null}
-              onClose={() => closeToast(t.id)}
-              stackOffset={0}
-            />
-          ))}
-        </div>
+        {/* Toast layer — item 3: shared design-system toast, driven imperatively via
+            showToast/toastStageRef. F13: portaled to document.body, docked below-right
+            of .sp-panel (cardAnchorRef) so it overlays everything instead of being caged
+            under this card's transformed ancestor. */}
+        <ToastStage
+          ref={toastStageRef}
+          cfg={VARIANTS.main}
+          portalTarget={typeof document !== 'undefined' ? document.body : null}
+          anchorRef={cardAnchorRef}
+          hideCard
+        />
       </div>
     </div>
   )

@@ -232,7 +232,8 @@ function TemplateCard({
             onClick={(e) => { e.stopPropagation(); /* no-op: use template */ }}
             data-proximity
           >
-            Use template →
+            <span className="material-icons" aria-hidden="true">add</span>
+            Use template
           </button>
         </div>
 

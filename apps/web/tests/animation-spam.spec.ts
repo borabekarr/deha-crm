@@ -7,7 +7,14 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { test, expect, type Page } from '@playwright/test'
-import { SPAM_TARGETS, EXPANDABLE_FINISHED_SLUGS, type SpamTarget } from './animation-spam-manifest'
+import {
+  SPAM_TARGETS,
+  WAIVED,
+  STATIC,
+  type SpamTarget,
+  type AutoHeightSpamTarget,
+  type ToggleSpamTarget,
+} from './animation-spam-manifest'
 
 const REGISTRY_PATH = path.resolve(new URL('.', import.meta.url).pathname, '../src/lib/component-registry.ts')
 
@@ -61,11 +68,29 @@ async function click(page: Page, selector: string) {
 
 // Alternates trigger/closeTrigger by tracked open state; symmetric targets
 // (no closeTrigger) always click `trigger`, which itself flips state.
+// `isOpen` is a click-pattern alternator ONLY — never an assertion source.
+// Correctness comes from the observed-state assertions after the settle:
+// coalesced clicks can legitimately drop a toggle, so parity is not a
+// prediction the runner is allowed to make.
 function selectorFor(target: SpamTarget, isOpen: boolean): string {
   return isOpen ? (target.closeTrigger ?? target.trigger) : target.trigger
 }
 
-async function runTarget(page: Page, target: SpamTarget) {
+// Settle state for a toggle target: the computed value of one CSS property,
+// or the ABSENT sentinel when the (possibly portal-mounted) surface is not in
+// the DOM at all — absence is itself a valid, assertable settled state.
+const ABSENT = '__absent__'
+
+async function readSettleValue(page: Page, target: ToggleSpamTarget): Promise<string> {
+  const el = page.locator(target.settleSelector).first()
+  if ((await el.count()) === 0) return ABSENT
+  return el.evaluate(
+    (node, prop) => getComputedStyle(node as Element).getPropertyValue(prop).trim(),
+    target.settleProperty,
+  )
+}
+
+async function runAutoHeightTarget(page: Page, target: AutoHeightSpamTarget) {
   const { consoleErrors, pageErrors } = await trackErrors(page)
   await page.goto(`/components/${target.slug}`)
   await settle(page)
@@ -78,6 +103,11 @@ async function runTarget(page: Page, target: SpamTarget) {
   await click(page, target.trigger)
   await page.waitForTimeout(target.durationMs + 300)
   const openRef = await measure(page, target.expandable)
+  // Two references within the 1px tolerance can't be told apart.
+  expect(
+    Math.abs(openRef - closedRef),
+    `${target.slug}: open (${openRef}) and closed (${closedRef}) heights are indistinguishable`,
+  ).toBeGreaterThan(1)
   await click(page, target.closeTrigger ?? target.trigger)
   await page.waitForTimeout(target.durationMs + 300)
   await page.reload()
@@ -101,16 +131,108 @@ async function runTarget(page: Page, target: SpamTarget) {
   await click(page, selectorFor(target, isOpen))
   await page.waitForTimeout(target.durationMs + 400)
 
-  const totalClicks = rapidClicks + 2
-  const expectOpen = totalClicks % 2 === 1
   const finalHeight = await measure(page, target.expandable)
-  const expectedRef = expectOpen ? openRef : closedRef
-
   expect(Number.isFinite(finalHeight)).toBe(true)
   expect(finalHeight).toBeGreaterThanOrEqual(0)
-  expect(Math.abs(finalHeight - expectedRef)).toBeLessThanOrEqual(1)
+
+  // Clean settle: whichever state it landed in, it must be exactly one of the
+  // two references — anything between them is mid-flight residue.
+  const near = (a: number, b: number) => Math.abs(a - b) <= 1
+  expect(
+    near(finalHeight, openRef) || near(finalHeight, closedRef),
+    `${target.slug} settled to ${finalHeight} after spam; expected open (${openRef}) or closed (${closedRef})`,
+  ).toBe(true)
+
+  // No primer replay here: auto-height primers (pinned-list's unpin) are one-shot
+  // page setup, not idempotent — replaying re-pins and shifts both references.
+  const observedOpen = near(finalHeight, openRef)
+
+  // Responsiveness: one deterministic toggle out of the observed state.
+  await click(page, observedOpen ? (target.closeTrigger ?? target.trigger) : target.trigger)
+  await page.waitForTimeout(target.durationMs + 400)
+  const toggledHeight = await measure(page, target.expandable)
+  expect(
+    Math.abs(toggledHeight - (observedOpen ? closedRef : openRef)),
+    `${target.slug} did not respond to a post-spam toggle`,
+  ).toBeLessThanOrEqual(1)
+
   expect(consoleErrors, `console errors on ${target.slug}: ${consoleErrors.join('; ')}`).toEqual([])
   expect(pageErrors, `page errors on ${target.slug}: ${pageErrors.join('; ')}`).toEqual([])
+}
+
+// Same abuse sequence as the height runner (rapid re-trigger, then a
+// mid-animation reversal), but the assertion is the settled computed value of
+// one CSS property rather than a measured height — for morphs driven by CSS
+// transitions on width / flex-basis / opacity / max-height, or by a
+// hardcoded open size, where there is no measured content height to compare.
+async function runToggleTarget(page: Page, target: ToggleSpamTarget) {
+  const { consoleErrors, pageErrors } = await trackErrors(page)
+  const settleMs = target.transitionMs + 300
+  await page.goto(`/components/${target.slug}`)
+  await settle(page)
+  if (target.primerSelector) {
+    await click(page, target.primerSelector)
+    await page.waitForTimeout(settleMs)
+  }
+
+  const closedRef = await readSettleValue(page, target)
+  await click(page, target.trigger)
+  await page.waitForTimeout(settleMs)
+  const openRef = await readSettleValue(page, target)
+  // A target whose two states read identically can't prove anything.
+  expect(openRef, `${target.slug}: ${target.settleProperty} does not change on open`).not.toBe(closedRef)
+  await click(page, target.closeTrigger ?? target.trigger)
+  await page.waitForTimeout(settleMs)
+  await page.reload()
+  await settle(page)
+  if (target.primerSelector) {
+    await click(page, target.primerSelector)
+    await page.waitForTimeout(settleMs)
+  }
+
+  const rapidClicks = target.toggles ?? 8
+  let isOpen = false
+  for (let i = 0; i < rapidClicks; i++) {
+    await click(page, selectorFor(target, isOpen))
+    isOpen = !isOpen
+    await page.waitForTimeout(40 + Math.random() * 20)
+  }
+  // Mid-flight reversal: click, wait half the transition, click again.
+  await click(page, selectorFor(target, isOpen))
+  isOpen = !isOpen
+  await page.waitForTimeout(target.transitionMs * 0.5)
+  await click(page, selectorFor(target, isOpen))
+  await page.waitForTimeout(target.transitionMs + 400)
+
+  // Clean settle: exactly one of the two references (ABSENT sentinel included).
+  const finalValue = await readSettleValue(page, target)
+  expect(
+    [openRef, closedRef],
+    `${target.slug} settled to ${finalValue} after spam; expected open (${openRef}) or closed (${closedRef})`,
+  ).toContain(finalValue)
+
+  let observedOpen = finalValue === openRef
+  if (target.primerSelector) {
+    await click(page, target.primerSelector)
+    await page.waitForTimeout(settleMs)
+    observedOpen = (await readSettleValue(page, target)) === openRef
+  }
+
+  // Responsiveness: one deterministic toggle out of the observed state.
+  await click(page, observedOpen ? (target.closeTrigger ?? target.trigger) : target.trigger)
+  await page.waitForTimeout(target.transitionMs + 400)
+  expect(
+    await readSettleValue(page, target),
+    `${target.slug} did not respond to a post-spam toggle`,
+  ).toBe(observedOpen ? closedRef : openRef)
+
+  expect(consoleErrors, `console errors on ${target.slug}: ${consoleErrors.join('; ')}`).toEqual([])
+  expect(pageErrors, `page errors on ${target.slug}: ${pageErrors.join('; ')}`).toEqual([])
+}
+
+async function runTarget(page: Page, target: SpamTarget) {
+  if (target.kind === 'auto-height') return runAutoHeightTarget(page, target)
+  return runToggleTarget(page, target)
 }
 
 test.describe('animation spam', () => {
@@ -155,13 +277,35 @@ test.describe('animation spam', () => {
     expect(pageErrors).toEqual([])
   })
 
-  // Gate: every Finished expandable slug must carry a spam-manifest entry.
-  test('spam / registry gate — Finished expandables are covered', () => {
+  // Gate: the population is DERIVED from component-registry.ts, not from a
+  // hand-maintained list, so enrollment cannot stay opt-in. Every Finished
+  // slug must be claimed by exactly one of SPAM_TARGETS / WAIVED / STATIC;
+  // an unclassified one fails here the moment its status flips to Finished.
+  test('spam / registry gate — every Finished slug is classified', () => {
     const finished = readRegistryFinishedSlugs()
-    const covered = new Set(SPAM_TARGETS.map((t) => t.slug))
-    for (const slug of EXPANDABLE_FINISHED_SLUGS) {
-      expect(finished, `${slug} listed as Finished-expandable but missing from Finished registry`).toContain(slug)
-      expect(covered, `${slug} is a Finished expandable with no SPAM_TARGETS entry`).toContain(slug)
+    expect(finished.length, 'registry read returned no Finished slugs — regex drifted').toBeGreaterThan(0)
+
+    const enrolled = new Set(SPAM_TARGETS.map((t) => t.slug))
+    const waived = new Set(WAIVED.map((w) => w.slug))
+    const staticSlugs = new Set(STATIC)
+
+    const unclassified = finished.filter((s) => !enrolled.has(s) && !waived.has(s) && !staticSlugs.has(s))
+    expect(
+      unclassified,
+      `Finished with no classification — add to SPAM_TARGETS, WAIVED, or STATIC in animation-spam-manifest.ts: ${unclassified.join(', ')}`,
+    ).toEqual([])
+
+    // Exactly one list, never two — an enrolled slug must not also carry a
+    // waiver, and nothing animated may be parked in STATIC as well.
+    const doubleClaimed = finished.filter(
+      (s) => [enrolled.has(s), waived.has(s), staticSlugs.has(s)].filter(Boolean).length > 1,
+    )
+    expect(doubleClaimed, `claimed by more than one classification list: ${doubleClaimed.join(', ')}`).toEqual([])
+
+    // A waiver is a decision, not a placeholder: real reason, ISO date.
+    for (const w of WAIVED) {
+      expect(w.reason.length, `WAIVED entry ${w.slug} needs a substantive reason`).toBeGreaterThan(20)
+      expect(w.date, `WAIVED entry ${w.slug} needs an ISO date`).toMatch(/^\d{4}-\d{2}-\d{2}$/)
     }
   })
 })

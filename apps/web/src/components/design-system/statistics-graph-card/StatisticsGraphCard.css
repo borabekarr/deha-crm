@@ -72,6 +72,13 @@ html.dark .sg-card {
      canonical --shell-bg dark value */
   background: #0A0A0A;
 }
+/* Hover replaces the old scale/translateY lift with the inner-card grey
+   darkening treatment (no transform) -- darkens .sg-inner directly rather
+   than the grey .sg-card shell so the effect reads on the visible surface. */
+@media (hover: hover) and (pointer: fine) {
+  .sg-card:hover .sg-inner { background: color-mix(in srgb, var(--card-bg, #FFFFFF) 92%, var(--fp-hover)); }
+  html.dark .sg-card:hover .sg-inner { background: color-mix(in srgb, var(--card-bg, #111111) 92%, var(--fp-hover)); }
+}
 /* lighter, sparser AA-safe label colors in dark mode */
 html.dark .sg-card.acc-good { --accent-text:var(--brand-primary-400); }
 html.dark .sg-card.acc-warn { --accent-text:#FACC15; }
@@ -135,6 +142,9 @@ html.dark .sg-inner::before {
   border-radius: 28px;
   box-shadow: inset 0 0 0 1px rgba(17,17,17,0.04);
   overflow: hidden;
+  /* Same duration token the status-card hover darkening uses, so the
+     grey-hover fade isn't instant. */
+  transition: background calc(var(--duration-base) * var(--anim-mult, 1));
 }
 html.dark .sg-inner {
   background: var(--card-bg, #111111);
@@ -229,11 +239,14 @@ html.dark .sg-rangepop {
 }
 .sg-poplabel {
   display: flex; align-items: center; justify-content: center; gap: 6px;
-  font-family: var(--font-display); font-size: 9.5px; font-weight: 900; letter-spacing: 0.09em; text-transform: uppercase;
+  /* Proven Montserrat Black pattern: explicit literal family (not the
+     --font-display alias) + var(--weight-black) on the cascade-winning
+     rule, matching .dg-title / .oc-success-title elsewhere in the library. */
+  font-family: 'Montserrat'; font-size: 9.5px; font-weight: var(--weight-black, 900); letter-spacing: 0.09em; text-transform: uppercase;
   color: var(--fg4, #A1A1A1); margin: 6px 9px 8px;
 }
-/* ITEM 2+7 — bigger icon in poplabel */
-.sg-poplabel .material-symbols-outlined { font-size: 17px; }
+/* ITEM 2+7 — bigger, heavier-stroke icon in poplabel */
+.sg-poplabel .material-symbols-outlined { font-size: 17px; font-variation-settings: 'wght' 700; }
 
 /* vertical segmented control — canonical .seg pill, stacked & left-aligned.
    align-items:stretch makes every button the width of the longest label,
@@ -305,8 +318,6 @@ html.dark .sg-rangechip {
 
 .sg-spacer { flex: 1 1 auto; min-height: 30px; }
 
-/* ITEM 2+7 — Montserrat 900 for both labels; vlabel is now a black pill */
-.sg-vlabel { display: inline-flex; align-self: flex-start; align-items: center; font-family: 'Montserrat', var(--font-display); font-size: 10px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; color: #ffffff; background: #111111; border-radius: 9999px; padding: 3px 7px 3px 9px; margin-bottom: 5px; }
 .sg-value { font-size: 34px; font-weight: 800; letter-spacing: -0.025em; line-height: 1; color: var(--fg1, #111111); font-variant-numeric: tabular-nums; }
 
 /* delta pill — matches metric-card .m-delta exactly (white text on solid color = AA-safe) */

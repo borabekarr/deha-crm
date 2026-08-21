@@ -25,11 +25,11 @@
 .wp-btn {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 10px 18px;
+  gap: 8px;
+  padding: 12px 20px;
   background: #111111;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   font-family: 'Montserrat', sans-serif;
   font-size: 14px;
   font-weight: 800;
@@ -40,6 +40,11 @@
     inset 0 1px 0 rgba(255,255,255,0.10),
     inset 0 -2px 0 rgba(0,0,0,0.25),
     0 2px 6px rgba(17,17,17,0.20);
+  /* Grid texture matches the buttons-page .btn-primary/.btn-cta background family */
+  background-image:
+    linear-gradient(to right,  rgba(255,255,255,0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.07) 1px, transparent 1px);
+  background-size: 14px 14px;
   transition: background calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out);
   letter-spacing: -0.01em;
 }
@@ -96,9 +101,11 @@
   transform-origin: top right;
   animation: wp-popIn calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out) forwards;
 }
-/* Exit animation — identical easing/timing curve reversed */
+/* Exit is the enter animation played backwards: same keyframe, same duration
+   token, same easing — `reverse` guarantees the exit mirrors the enter exactly
+   rather than drifting via a hand-duplicated keyframe. */
 .wp-bezel.closing {
-  animation: wp-popOut calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out) forwards;
+  animation: wp-popIn calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out) reverse forwards;
 }
 
 /* Squircle conversion (Step 7): concentric outer/inner pair, mirrors
@@ -128,11 +135,6 @@ html.dark .wp-bezel[data-squircle="on"]::before {
 @keyframes wp-popIn {
   0%   { opacity: 0; transform: scaleX(0.88) scaleY(0.82); }
   100% { opacity: 1; transform: scaleX(1) scaleY(1); }
-}
-
-@keyframes wp-popOut {
-  from { opacity: 1; transform: scaleX(1) scaleY(1); }
-  to   { opacity: 0; transform: scaleX(0.88) scaleY(0.82); }
 }
 
 /* ── Popover (inner card) ─────────────────────────────────────────────────── */
@@ -211,7 +213,7 @@ html.dark .wp-popover[data-squircle="on"] {
   padding: 13px;
   background: #111111;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   font-family: 'Montserrat', sans-serif;
   font-size: 14px;
   font-weight: 800;
@@ -220,6 +222,10 @@ html.dark .wp-popover[data-squircle="on"] {
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.10),
     inset 0 -2px 0 rgba(0,0,0,0.25);
+  background-image:
+    linear-gradient(to right,  rgba(255,255,255,0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.07) 1px, transparent 1px);
+  background-size: 14px 14px;
   letter-spacing: -0.01em;
   transition: background calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out);
 }
@@ -255,6 +261,13 @@ html.dark .wp-popover[data-squircle="on"] {
     background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+}
+/* House rule: popover option rows get grey darkening only, no lift/zoom.
+   Selector repeats [data-proximity] to outrank hover-tokens.css's own
+   [data-proximity]x3 fallback (0,3,0) without !important. */
+.wp-edited[data-proximity][data-proximity][data-proximity] {
+  scale: none;
+  filter: none;
 }
 
 .wp-edited-left {
@@ -297,6 +310,10 @@ html.dark .wp-popover[data-squircle="on"] {
     background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+}
+.wp-action[data-proximity][data-proximity][data-proximity] {
+  scale: none;
+  filter: none;
 }
 
 .wp-action-left {

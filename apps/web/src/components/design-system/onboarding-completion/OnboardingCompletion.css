@@ -24,8 +24,17 @@ html.dark .oc-panel-wrap { box-shadow: 0 16px 56px rgba(0,0,0,.4), 0 3px 10px rg
    (mirrors task-card .tp-outer / cards .concentric-demo-outer). */
 .oc-panel-wrap[data-squircle="on"] {
   --corner-radius: 36px;
+  /* Canon (matches .mt-dock / .ap-card): squircle mode drops the real
+     border, which the base rule above always paints -- without this the
+     rectangular CSS border kept rendering on top of the clip-path shape,
+     producing the doubled/misaligned "broken" card frame. */
+  border: 0;
   box-shadow: none;
   filter: drop-shadow(0 16px 56px rgba(17,17,17,.14)) drop-shadow(0 3px 10px rgba(17,17,17,.07));
+}
+.oc-panel-wrap[data-squircle="on"]::before,
+.oc-panel-wrap[data-squircle="on"]::after {
+  content: none;
 }
 html.dark .oc-panel-wrap[data-squircle="on"] {
   box-shadow: none;
@@ -316,30 +325,33 @@ html.dark .oc-row.is-done { background: color-mix(in srgb, var(--oc-accent) 17%,
 .oc-ring { position: relative; display: grid; place-items: center; }
 .oc-ring-mid { position: absolute; inset: 0; display: grid; place-items: center; }
 
-/* ===================== Segmented switcher ===================== */
-.oc-seg {
-  position: relative; display: flex; align-items: center;
-  background: var(--gray-100); border-radius: 13px; padding: 3px;
-  box-shadow: var(--shadow-recessed);
+/* ===================== Variant switcher — controls-page pill ===================== */
+/* Local replica of the canonical .seg pill (apps/web/design-system/preview/
+   _controls.css, Locked) — that file is preview-only and not importable here,
+   so the needed rules are duplicated verbatim except for --ease-pill-switch
+   swapped in for the transition curve. .fill (equal-width buttons) is the
+   canon sizing modifier; min-width: 0 keeps "Checklist"'s intrinsic text
+   width from beating flex: 1's equal 3-way split. */
+.oc-variant-switch { width: 100%; }
+.seg.oc-variant-switch {
+  background: #F1F5F9; border-radius: 9999px; padding: 3px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.06);
 }
-.oc-seg-thumb {
-  position: absolute; top: 3px; bottom: 3px; width: calc((100% - 6px) / 3);
-  background: var(--bg-card-solid); border-radius: 10px;
-  box-shadow: 0 1px 2px rgba(17,17,17,.14), 0 2px 6px -2px rgba(17,17,17,.18);
-  transition:left calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-spring-firm),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+.seg.oc-variant-switch .seg-pill {
+  background: #0F172A; border-radius: 9999px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.18);
+  transition:left calc(300ms * var(--anim-mult, 1)) var(--ease-pill-switch),
+    width calc(300ms * var(--anim-mult, 1)) var(--ease-pill-switch);
 }
-.oc-seg-btn {
-  position: relative; z-index: 1; appearance: none; border: none; background: transparent;
-  font-family: inherit; font-size: 14px; font-weight: var(--weight-semibold);
-  color: var(--fg3); padding: 9px 22px; border-radius: 10px; cursor: pointer;
-  transition:color calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+.seg.oc-variant-switch button {
+  flex: 1; min-width: 0; text-align: center;
+  padding: 9px 18px; font-size: 13px; font-weight: 800;
+  color: #64748B;
+  transition:color calc(240ms * var(--anim-mult, 1)),
+    transform calc(120ms * var(--anim-mult, 1)) cubic-bezier(.22,1,.36,1);
 }
-.oc-seg-btn:hover { color: var(--fg2); }
-.oc-seg-btn.is-on { color: var(--fg1); font-weight: var(--weight-bold); }
+.seg.oc-variant-switch button.active { color: #FFFFFF; font-weight: 900; }
+.seg.oc-variant-switch button:active { transform: scale(.93); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; } /* motion-sweep: kept, prefers-reduced-motion override */

@@ -19,6 +19,17 @@
  *   • prize-sheet (.ps-device, .sheet)
  *   • leaderboard  (.lb-outer, .lb, .row) — already the visual reference,
  *                   left untouched so it remains the canonical baseline
+ *   • toast's two floating viewports ([data-screen-label^="Toast viewport"]
+ *                   .shell) — same class of exclusion as .nf-card and the
+ *                   prize-sheet surfaces: a transient overlay that reads as
+ *                   lifted off the page via its own drop shadow, not as a
+ *                   bordered card. Its raw source (claude-design/raw/toast/
+ *                   toast.html) gives each toast bezel a shadow and no line,
+ *                   and that source is the parity truth the pixel gate diffs
+ *                   against, so a hairline here is an app-side deviation
+ *                   rather than canon. The demo/trigger card's own .shell on
+ *                   that same page is NOT excluded — it is a normal card
+ *                   surface and keeps the hairline.
  *   • [data-squircle="on"] surfaces — excluded via :not() below; the squircle
  *                   recipe in _shared-feedback.css owns their external line
  *                   (clip-path ring pseudo-elements), a real border here would
@@ -46,6 +57,7 @@
 .tp-outer,
 .ldx-outer,
 .tb-outer,
+.bc-shell,
 /* Main / inner / popover / nested cards */
 .card-inner,
 .metric,
@@ -87,6 +99,7 @@ html.dark :is(
 .tp-outer,
 .ldx-outer,
 .tb-outer,
+.bc-shell,
 .card-inner,
 .metric,
 .exp-card,
@@ -114,4 +127,17 @@ html.dark :is(
      that owns the actual reference surface (cards page) paints a solid ring,
      not an asymmetric highlight, so this stays visually consistent with it. */
   border: 1px solid #232323;
+}
+
+/* ─── OVERLAY EXCLUSION: toast viewports ─────────────────────────────────── */
+/* Both themes, declared here (the file that owns border for every surface)
+   rather than in Toast.css, per this file's own "do not reimplement border in
+   component CSS" rule. Selected through the raw source's own byte-preserved
+   `data-screen-label` attributes, so no component class had to be invented to
+   carry the exclusion. Listed after both grouped rules and matched with
+   enough specificity to win in dark mode too (0,3,1 vs the dark group's
+   0,2,1). See the toast bullet in WHAT THIS FILE DOES NOT TOUCH above. */
+[data-screen-label^="Toast viewport"] .shell,
+html.dark [data-screen-label^="Toast viewport"] .shell {
+  border: none;
 }

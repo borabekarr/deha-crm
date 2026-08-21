@@ -169,6 +169,18 @@ html.dark .mt-dock-inner {
 html.dark .mt-dock-inner[data-squircle="on"] {
   box-shadow: none;
 }
+/* Closed dock: no divider/panels row is mounted (TSX renders it only when
+   open), so the asymmetric 4/12 padding built for the divider's optical
+   lift has nothing to compensate for -- it just shoves the toolbar (and the
+   active pill inside it) 8px below true vertical center. Measured fix:
+   match the outer .mt-dock's own uniform 8px inset so the toolbar sits
+   symmetrically, keeping the white card concentric with the dock shell. */
+.mt-dock:not(.open) .mt-dock-inner {
+  padding: 8px;
+}
+.mt-dock:not(.open) .mt-dock-inner[data-squircle="on"] {
+  padding: calc(8px + 1px);
+}
 
 /* ── Height morph via CSS grid-rows ─────────────────────────────────────── */
 .mt-panels-wrap {
@@ -392,6 +404,12 @@ html.dark .mt-row-ic--black .material-symbols-outlined {
   align-items: center;
   gap: 6px;
 }
+/* Prior closed-state pill-centering hack (translateX up to 81px on the whole
+   tabwrap) overflowed the dock's overflow:hidden bounds and clipped the
+   rightmost tab off-screen on fresh mount (default active tab is "leads",
+   the largest-magnitude shift). Removed -- .mt-toolbar's existing
+   justify-content:center block-centering is the safe behavior; no tab may
+   ever be pushed outside the dock's clipped viewport. */
 
 /* ── Single gliding emerald indicator ──────────────────────────────────── */
 .mt-ind {
@@ -399,6 +417,7 @@ html.dark .mt-row-ic--black .material-symbols-outlined {
   top: 0;
   bottom: 0;
   left: 0;
+  width: 0;
   height: 48px;
   border-radius: 9999px;
   /* Mirror the canonical .btn-green button: navy in light, emerald in dark, no grid texture */
@@ -406,11 +425,14 @@ html.dark .mt-row-ic--black .material-symbols-outlined {
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.14),
     0 2px 6px rgba(17,17,17,0.28);
-  /* Position (transform x/width) is spring-driven by usePillSpring
-     (motion-spring.ts) per design-system.md §10 — no CSS transition on
-     transform/width here, or it would fight the per-frame inline writes. */
+  /* Measured left/width glide (no DOM measurement math, geometry is derived
+     in TSX) driven imperatively by usePillGlide, same recipe as the controls
+     seg-pill / leaderboard seg-pill: transition (not spring) on left/width
+     using --ease-pill-switch, no overshoot. */
   transform-origin: center;
   transition:
+    left var(--dur-fast) var(--ease-pill-switch),
+    width var(--dur-fast) var(--ease-pill-switch),
     scale calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease),
     filter calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease);
   pointer-events: none;
@@ -479,8 +501,20 @@ html.dark .mt-tabwrap:has(.mt-tab.active:hover) .mt-ind {
   width: calc(16px + 24px + 6px + var(--lw, 46px) + 16px);
   padding: 0 16px;
   justify-content: flex-start;
-  gap: 6px;
   transform-origin: center;
+}
+
+/* Wrapper around icon+label: sole host for the direction-aware
+   [data-panel-state] translateX/opacity keyframe (motion-tokens.css) --
+   its own transform/opacity are untouched by anything else, so the
+   keyframe never fights .mt-iconbox's width transition or .mt-label's
+   collapse transform underneath it. */
+.mt-content {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 /* hold-feedback circle */

@@ -1,9 +1,8 @@
-import { Suspense } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { getBySlug } from '@/lib/component-registry'
 import { GalleryLayout } from '@/components/library/GalleryLayout'
 import { PreviewFrame } from '@/components/library/PreviewFrame'
-import { ComponentErrorBoundary } from '@/components/library/ComponentErrorBoundary'
+import { LazyLoadBoundary } from '@/lib/lazy-retry'
 import { makeRevealRef } from '@/lib/make-reveal-ref'
 
 export const Route = createFileRoute('/components/$slug')({
@@ -18,8 +17,8 @@ function ComponentPreviewPage() {
     return (
       <GalleryLayout>
         <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-          <p className="text-lg font-semibold text-foreground">Component not found</p>
-          <p className="text-sm text-muted-foreground">
+          <p className="anim-immediate text-lg font-semibold text-foreground">Component not found</p>
+          <p className="anim-immediate text-sm text-muted-foreground">
             No component with slug <code className="rounded bg-muted px-1.5 py-0.5 text-xs">{slug}</code> exists in the registry.
           </p>
           <Link
@@ -38,26 +37,29 @@ function ComponentPreviewPage() {
   return (
     <GalleryLayout activeSlug={slug}>
       <PreviewFrame entry={entry}>
-        <ComponentErrorBoundary componentName={entry.name}>
-          <Suspense
-            fallback={
-              <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
-                Loading component...
-              </div>
-            }
-          >
-            <div
-              key={entry.slug}
-              ref={makeRevealRef(
-                entry.revealSelector
-                  ? { selector: entry.revealSelector, from: 'first' }
-                  : {},
-              )}
-            >
-              <Component />
+        <LazyLoadBoundary
+          key={entry.slug}
+          component={Component}
+          componentName={entry.name}
+          fallback={
+            <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
+              Loading component...
             </div>
-          </Suspense>
-        </ComponentErrorBoundary>
+          }
+        >
+          {(Current) => (
+            <div
+              className={entry.entrance === 'immediate' ? 'anim-immediate' : undefined}
+              ref={
+                entry.revealSelector
+                  ? makeRevealRef({ selector: entry.revealSelector, from: 'first' })
+                  : undefined
+              }
+            >
+              <Current />
+            </div>
+          )}
+        </LazyLoadBoundary>
       </PreviewFrame>
     </GalleryLayout>
   )

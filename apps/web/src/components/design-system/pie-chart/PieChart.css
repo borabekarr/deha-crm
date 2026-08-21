@@ -1,0 +1,134 @@
+/* =========================================================================
+   Pie Chart — Deha Design System
+   Byte-preserved from apps/web/design-system/claude-design/raw/pie-chart/pie-chart.html
+   (the .pc-* rule set only; the raw file's .frame/.hint/.shell/.pc-shell/body
+   scaffold is preview chrome, not part of the component, same precedent as
+   other conversions — see disclosure-group's DisclosureGroup.css header).
+   ========================================================================= */
+
+/* Packaging-context normalization (not part of the raw .pc-* rule set):
+   the raw source's stage has no Tailwind preflight, so text descendants
+   that don't declare their own line-height fall back to the browser's UA
+   default (`normal`). The app route's global Tailwind preflight sets an
+   inherited line-height of 1.5, which — absent this override — bleeds
+   into .pc-title, .pc-total-pill, .pc-center-val and the .pc-leg- rows
+   (none of which set their own line-height in the byte-preserved rules
+   below) and inflates
+   the header row + legend rows' rendered height/width versus the raw
+   baseline, same class of fix as DisclosureGroup.css. */
+.pc-wrap {
+  line-height: normal;
+}
+
+/* ── outer shell (ds-review-visuals Step 21: main becomes a card, wrapped
+   in the card-primitives outer-shell edge treatment — same recipe as
+   Cards.css's .concentric-demo-outer). ── */
+.pc-outer-shell {
+  position: relative;
+  background: var(--shell-bg);
+  border-radius: 32px;
+  padding: 8px;
+}
+html.dark .pc-outer-shell { background: var(--shell-bg, #0A0A0A); }
+
+/* ── surface ── */
+.pc-wrap {
+  font-family: var(--font-display);
+  background: var(--bg-card-solid);
+  border-radius: 24px;
+  padding: 22px 24px 24px;
+  box-shadow:
+    0 1px 1px rgba(15,23,42,0.05),
+    inset 0 1px 1px rgba(255,255,255,0.55),
+    inset 0 0 0 1px rgba(255,255,255,0.10),
+    0 18px 40px -22px rgba(15,23,42,0.28);
+}
+html.dark .pc-wrap { background: #1E293B; }
+
+/* header */
+.pc-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.pc-head-icon { font-size: 17px; line-height: 1; color: #000; flex-shrink: 0; }
+html.dark .pc-head-icon { color: var(--fg1); }
+.pc-title { font-size: 17px; font-weight: 800; letter-spacing: -0.02em; color: var(--fg1); }
+
+/* body: donut + legend */
+.pc-body { display: flex; align-items: center; gap: 26px; }
+
+.pc-chart { position: relative; flex-shrink: 0; }
+.pc-chart svg { display: block; overflow: visible; }
+
+.pc-slice {
+  /* Value-identical tokenization (ds-review-visuals Step 3): 160ms/ease ->
+     --duration-base/--ease-fade (byte-identical to the bare `ease` keyword,
+     see motion-tokens.css:76), 360ms -> --duration-sweep, 200ms/ease ->
+     --duration-200/--ease-fade. The 360ms transform curve
+     cubic-bezier(.32,1.18,.42,1) has no byte-identical token in
+     motion-tokens.css (locked this step, no minting) so it stays literal;
+     only its duration leg tokenizes. */
+  transition:
+    opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-sweep) * var(--anim-mult, 1)) cubic-bezier(.32,1.18,.42,1),
+    filter calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade);
+}
+
+/* donut center */
+.pc-center {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; pointer-events: none;
+}
+.pc-center-val {
+  font-size: 27px; font-weight: 900; letter-spacing: -0.03em; color: var(--fg1);
+  line-height: 1; font-variant-numeric: tabular-nums;
+}
+.pc-center-label {
+  display: inline-flex; align-items: center; gap: 5px;
+  margin-top: 8px; font-size: 11px; font-weight: 800; letter-spacing: 0.02em;
+  text-transform: uppercase; max-width: 96px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pc-center-dot { width: 7px; height: 7px; border-radius: 9999px; flex-shrink: 0; }
+.pc-center-pct { margin-top: 4px; font-size: 11px; font-weight: 700; color: var(--fg4); font-variant-numeric: tabular-nums; }
+
+/* Packaging-context normalization (not part of the raw .pc-* rule set):
+   the raw source's stage has no Tailwind preflight, so text descendants
+   that don't declare their own line-height fall back to the browser's UA
+   default (`normal`). The app route's global Tailwind preflight sets an
+   inherited line-height of 1.5, which — absent this override — bleeds into
+   .pc-leg-label/.pc-leg-val/.pc-leg-pct (none of which set their own
+   line-height in the byte-preserved rules below) and inflates each legend
+   row's rendered height a few px versus the raw baseline, same class of
+   fix as DisclosureGroup.css. */
+.pc-legend {
+  line-height: normal;
+}
+
+/* legend — pill rows (ds-review-visuals Step 21: chips pill look ported to
+   main, kept line-by-line). Fixed non-label columns + tabular-nums keep the
+   two separator lines on the same vertical line across every pill even at
+   the width extremes (100.0%, single-digit %, elongated names). */
+.pc-legend { list-style: none; margin: 0; padding: 0; flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.pc-leg-row {
+  display: grid; grid-template-columns: 12px minmax(0, 1fr) 1px 6ch 1px 6ch; align-items: center;
+  column-gap: 9px; padding: 8px 14px 8px 10px; border-radius: 9999px; cursor: pointer;
+  background: var(--bg-chip);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  /* Value-identical tokenization (ds-review-visuals Step 3, gate-triggered):
+     150ms/ease -> --duration-150/--ease-fade, both byte-identical tokens. */
+  transition:
+    background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
+    box-shadow calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
+    opacity calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
+    filter calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade);
+}
+.pc-leg-row.is-hovered { background: var(--bg-card-solid); box-shadow: inset 0 0 0 1px var(--fg4); transform: translateX(2px); }
+/* blur-rest: non-hovered pills blur + fade while a sibling is hovered. */
+.pc-leg-row.is-faded { opacity: 0.42; filter: blur(1.5px); }
+.pc-leg-swatch { width: 12px; height: 12px; border-radius: 4px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 1px 2px rgba(15,23,42,0.18); }
+.pc-leg-label { font-size: 13px; font-weight: 700; color: var(--fg2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pc-leg-sep { width: 1px; height: 12px; background: var(--border-hairline); justify-self: center; }
+.pc-leg-val { font-size: 13px; font-weight: 800; color: var(--fg1); font-variant-numeric: tabular-nums; text-align: right; }
+.pc-leg-pct { font-size: 11px; font-weight: 700; color: var(--fg4); font-variant-numeric: tabular-nums; text-align: right; }
+
+.pc-loading { padding: 40px; text-align: center; color: var(--fg4); font-weight: 700; }

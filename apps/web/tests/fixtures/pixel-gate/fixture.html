@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<!--
+  Bundled fixture for scripts/ds-pixel-gate.sh --self-test.
+  Static markup only (no fonts/network) so a headless render is
+  byte-for-byte reproducible run to run.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+  html, body { margin: 0; padding: 0; background: #101010; }
+  .box {
+    position: absolute;
+    top: 40px;
+    left: 40px;
+    width: 200px;
+    height: 120px;
+    background: #3b82f6;
+    border-radius: 12px;
+  }
+  .label {
+    position: absolute;
+    top: 180px;
+    left: 40px;
+    font: 16px monospace;
+    color: #ffffff;
+  }
+</style>
+</head>
+<body>
+  <div class="box"></div>
+  <div class="label">pixel-gate fixture</div>
+</body>
+</html>

@@ -74,7 +74,7 @@
     inset 0 -2px 0 rgba(17,17,17,0.12);
   backdrop-filter: blur(20px);
   cursor: pointer;
-  transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-base) * var(--anim-mult, 1)), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+  transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .btn-glass:hover {
   background: rgba(255,255,255,0.9);
@@ -94,9 +94,9 @@
   padding: 6px 0;
   cursor: pointer;
   transition:
-    opacity calc(140ms * var(--anim-mult, 1)),
+    opacity calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
-    box-shadow calc(var(--duration-base) * var(--anim-mult, 1)),
+    box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
@@ -142,13 +142,13 @@ html.dark .btn-text { color: var(--brand-primary-400); }
   --color-4: 195 100% 63%;
   --color-5: 90 100% 63%;
   /* Base timing-function is the phase-3 (done -> default) set: width/padding
-     use --ease-out here so the extend-back is a monotonic decelerate, no
-     overshoot-bounce -- the .is-loading override below re-applies
-     --ease-spring for width/padding so phase-1's compact bounce is kept.
+     use --ease-out here so the extend-back is a monotonic decelerate;
+     background-color/transform use --ease-press-calm (no overshoot -- the
+     old --ease-spring bounce read as too powerful on click).
      transition-duration is also overridden per state class below.
      Order: width, padding, background-color, transform, box-shadow, scale. */
   transition-property: width, padding, background-color, transform, box-shadow, scale;
-  transition-timing-function: var(--ease-out), var(--ease-out), var(--ease-spring), var(--ease-out), var(--ease-out), var(--ease-linear);
+  transition-timing-function: var(--ease-out), var(--ease-out), var(--ease-press-calm), var(--ease-press-calm), var(--ease-out), var(--ease-linear);
   /* Resting / phase-3 duration set: width+padding+background-color all
      revert together over ~460ms so the return leg reads as one continuous
      glide instead of the background finishing 100ms early and visually
@@ -157,7 +157,7 @@ html.dark .btn-text { color: var(--brand-primary-400); }
     calc(var(--duration-expand) * var(--anim-mult, 1)),
     calc(var(--duration-expand) * var(--anim-mult, 1)),
     calc(var(--duration-expand) * var(--anim-mult, 1)),
-    calc(var(--duration-fast) * var(--anim-mult, 1)),
+    calc(var(--duration-base) * var(--anim-mult, 1)),
     calc(var(--duration-fast) * var(--anim-mult, 1)),
     calc(var(--duration-instant) * var(--anim-mult, 1));
 }
@@ -253,14 +253,13 @@ html.dark .btn-text { color: var(--brand-primary-400); }
 
 /* Loading: compress to a narrow pill holding the bar.
    Phase-1 (default -> loading) duration override: width/padding compact
-   over ~440ms. Re-applies --ease-spring on width/padding (base rule now
-   defaults those two to --ease-out for phase-3) so the 1.56 overshoot
-   still delivers the requested compact-leg bounce. */
+   over ~440ms. Re-tuned to the calm no-overshoot vocabulary -- the
+   overshoot bounce here read as a click that was too powerful. */
 .btn-apply.is-loading {
   min-width: unset;
   width: 72px;
   padding: 0 10px;
-  transition-timing-function: var(--ease-spring), var(--ease-spring), var(--ease-spring), var(--ease-out), var(--ease-out), var(--ease-linear);
+  transition-timing-function: var(--ease-press-calm), var(--ease-press-calm), var(--ease-press-calm), var(--ease-out), var(--ease-out), var(--ease-linear);
   transition-duration:
     calc(var(--duration-compact) * var(--anim-mult, 1)),
     calc(var(--duration-compact) * var(--anim-mult, 1)),
@@ -395,7 +394,7 @@ html.dark .btn-apply.is-done .btn-apply-check-ic { color: var(--brand-primary-50
   transition:
     border-color calc(var(--duration-base) * var(--anim-mult, 1)),
     background-color calc(var(--duration-base) * var(--anim-mult, 1)),
-    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-press-calm),
     box-shadow calc(var(--duration-base) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
@@ -512,7 +511,7 @@ html.dark .btn-delete {
     inset 0 0 0 1px rgba(255,255,255,0.14);
   transition:
     filter calc(200ms * var(--anim-mult, 1)),
-    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring),
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-press-calm),
     box-shadow calc(200ms * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
@@ -575,8 +574,8 @@ html.dark .btn-page-root .btn-apply:hover {
 .btn-page-root .btn-red[data-proximity] {
   transition:
     background-color calc(180ms * var(--anim-mult, 1)),
-    transform calc(160ms * var(--anim-mult, 1)) var(--ease-spring),
-    box-shadow calc(200ms * var(--anim-mult, 1)),
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-press-calm),
+    box-shadow calc(200ms * var(--anim-mult, 1)) var(--ease-press-calm),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }

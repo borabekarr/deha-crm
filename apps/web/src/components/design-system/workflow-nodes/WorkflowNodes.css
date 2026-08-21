@@ -55,10 +55,9 @@
   box-shadow: 0 12px 40px rgba(17,17,17, 0.10), 0 2px 8px rgba(17,17,17, 0.06);
   display: flex;
   align-items: center;
-  /* Size to content, not the 440px grid track — rest-state content (.wf-body
-     420px + 0 tools + 20px padding) already equals 440px, so this is a
-     visual no-op at rest. On hover .wf-tools grows 36px and the shell's real
-     box grows past 440px into the reserved gap/canvas padding. */
+  /* Size to content — .wf-body (420px) + 20px padding = 440px, fixed. .wf-tools
+     is position: absolute (out of flow), so this box NEVER grows past 440px;
+     the toolbar reveal expands leftward inside this fixed box instead. */
   justify-self: start;
   position: relative;
 }
@@ -104,31 +103,53 @@
   bottom: -16px;
   right: -24px;
   width: 64px;
-  z-index: 5;
+  /* NOT z-indexed above .wf-tools (tooltip-broken-by-stacking-strip): a prior
+     z-index: 5 here forced this aria-hidden strip to paint OVER the revealed
+     .wf-tools rail, intercepting pointer events meant for the buttons
+     underneath — confirmed via elementFromPoint on the rename button's top
+     and middle thirds, which resolved to this strip instead of the button.
+     Leaving z-index unset (auto) keeps this element inside .wf-body's normal
+     paint order, so .wf-tools (its later DOM sibling) paints on top and
+     receives hover/click once revealed, while the strip still triggers its
+     own :hover for the initial reveal before any button exists to cover. */
   cursor: default;
 }
 
 /* ── Hover toolbar — collapsed rail inside the shell's right side ─────────
-   max-width/margin-left animate 0 -> 28px/8px (36px total), which is exactly
-   the shell's real width growth on hover. Bounce via --ease-spring-open,
-   the same token ModelSelector.css uses for its shell-expand transform. */
+   Anchored to .wf-outer's fixed right padding edge (right: 10px) and taken
+   OUT of flex flow (position: absolute) so .wf-outer's own box NEVER grows
+   past its rest-state 440px width (wf-body 420 + 2x10 padding) — the
+   rail's max-width grows LEFTWARD into the card's own content instead of
+   pushing the shell's right edge outward. This is what keeps every frame of
+   the hover/exit animation inside the card's resting bounding box
+   (bounding-box-exit-strip-must-not-grow-shell): the prior flex-flow
+   approach let .wf-outer's real box widen on hover, so mid-exit frames sat
+   past the card's rest-state right edge. No bounce: --ease-out (already
+   canonical, non-overshoot cubic-bezier) replaces --ease-spring-open. */
 .wf-tools {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 10px;
+  margin: auto 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  flex-shrink: 0;
   max-width: 0;
-  margin-left: 0;
   opacity: 0;
+  /* transform-origin flips to the right edge to match the new right-anchor
+     (was left-anchored when the box grew via margin-left). */
+  transform-origin: right center;
+  transform: scaleX(0);
   /* overflow stays visible (not hidden) — the button tooltip pops out to the
      LEFT of .wf-tools and would get clipped by a hidden overflow box. The
-     collapsed rail is fully hidden by opacity:0 + pointer-events:none, and
-     (when squircle is active) by the shell's own clip-path. */
+     collapsed rail is fully hidden by opacity:0 + scaleX(0) + pointer-events
+     :none, and (when squircle is active) by the shell's own clip-path. */
   pointer-events: none;
   transition:
-    max-width calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring-open),
-    margin-left calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring-open),
+    max-width calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
+    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
     opacity calc(var(--duration-150) * var(--anim-mult, 1)) ease;
 }
 
@@ -137,48 +158,52 @@
 .wf-outer:has(.wf-hover-strip:hover) .wf-tools,
 .wf-outer:has(.wf-tools:hover) .wf-tools {
   max-width: 28px;
-  margin-left: 8px;
   opacity: 1;
+  transform: scaleX(1);
   pointer-events: auto;
 }
 
-/* ── Tool buttons ─────────────────────────────────────────────────────────── */
+/* ── Tool buttons — gamified skin: colorful grid-textured field per action,
+   white icon, soft shadow lifting the icon off its color (matches the
+   .wf-tag family's treatment). Same size/position as before — a skin, not a
+   layout change. ───────────────────────────────────────────────────────── */
 .wf-tool {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 1px solid #ECECEC;
-  background: var(--card-bg, #FFFFFF);
+  border: none;
   display: grid;
   place-items: center;
   cursor: pointer;
-  color: #4A4A4A;
+  color: #fff;
   padding: 0;
   position: relative;
-  box-shadow: 0 3px 8px rgba(17,17,17, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.85);
-  transition: background calc(var(--duration-140) * var(--anim-mult, 1)), color calc(var(--duration-140) * var(--anim-mult, 1)), border-color calc(var(--duration-140) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -2px 0 rgba(17,17,17, 0.18),
+    inset 0 0 0 1px rgba(17,17,17, 0.10),
+    0 3px 8px rgba(17,17,17, 0.14);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.13) 1px, transparent 1px);
+  background-size: 6px 6px;
+  transition: filter calc(var(--duration-140) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out);
 }
 
-.wf-tool:hover  { transform: translateY(-1px); }
+.wf-tool:hover  { transform: translateY(-1px); filter: brightness(1.08); }
 .wf-tool:active { transform: scale(var(--press-chip)); }
 
 .wf-tool .material-icons {
   font-size: 15px;
   line-height: 1;
+  color: #fff;
+  filter: drop-shadow(0 1px 2px rgba(17,17,17, 0.35));
 }
 
-/* Connect handle — hollow circle, outline only */
-.wf-tool.connect {
-  background: transparent;
-  border: 2px solid #A1A1A1;
-  cursor: crosshair;
-  box-shadow: none;
-}
-
-.wf-tool.connect:hover { background: transparent; border-color: #4A4A4A; transform: translateY(-1px) scale(1.08); }
-.wf-tool.add:hover     { color: var(--brand-primary-700); background: var(--brand-primary-50); border-color: var(--brand-primary-200); }
-.wf-tool.edit:hover    { color: #111111; background: #FAFAFA; border-color: #D4D4D4; }
-.wf-tool.del:hover     { color: #B91C1C; background: #FEF2F2; border-color: #FECACA; }
+.wf-tool.connect { background-color: #0EA5E9; cursor: crosshair; }
+.wf-tool.add     { background-color: var(--brand-primary-500, #16A34A); }
+.wf-tool.edit    { background-color: #8B5CF6; }
+.wf-tool.del     { background-color: #EF4444; }
 
 /* Tooltip — appears to the LEFT of the toolbar (inside the canvas) */
 .wf-tool::after {
@@ -202,7 +227,7 @@
   pointer-events: none;
   z-index: 40;
   box-shadow: 0 6px 16px rgba(17,17,17, 0.22);
-  transition: opacity calc(var(--duration-140) * var(--anim-mult, 1)) ease, transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-out);
+  transition: opacity calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-out);
 }
 
 .wf-tool::before {
@@ -218,7 +243,7 @@
   opacity: 0;
   pointer-events: none;
   z-index: 40;
-  transition: opacity calc(var(--duration-140) * var(--anim-mult, 1)) ease;
+  transition: opacity calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-fade);
 }
 
 .wf-tool:hover::after  { opacity: 1; transform: translateY(-50%) translateX(0); }
@@ -545,19 +570,14 @@ html.dark .wf-outer[data-squircle="on"]::before {
   clip-path: var(--squircle-border-path);
 }
 
+/* Gamified tool buttons keep their colorful skin in dark mode too — only the
+   outer rim shadow deepens to read against the dark canvas. */
 html.dark .wf-tool {
-  background: #1C1C1C;
-  border-color: #232323;
-  color: #D4D4D4;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.20),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.30),
+    0 3px 10px rgba(0, 0, 0, 0.40);
 }
-
-html.dark .wf-tool.connect { background: transparent; border-color: #6B6B6B; }
-html.dark .wf-tool.connect:hover { border-color: #A1A1A1; }
-
-html.dark .wf-tool.add:hover  { color: var(--brand-primary-300); background: color-mix(in srgb, var(--brand-primary-500) 15%, transparent); border-color: color-mix(in srgb, var(--brand-primary-500) 40%, transparent); }
-html.dark .wf-tool.edit:hover { color: #F5F5F5; background: #242424; border-color: #4A4A4A; }
-html.dark .wf-tool.del:hover  { color: #FCA5A5; background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.40); }
 
 html.dark .wf-card {
   background: #1C1C1C;

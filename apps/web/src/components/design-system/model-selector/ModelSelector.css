@@ -26,12 +26,21 @@
     padding: 10px;
     box-shadow: 0 16px 56px rgba(17,17,17,0.13), 0 3px 10px rgba(17,17,17,0.06);
   }
+  /* Closed-shell geometry fix: .ms-shell's flex `gap` still reserves 8px for
+     .ms-collapsible even once its height animates to 0, reading as extra
+     slack under the header. Collapse the gap itself while closed so the
+     shell's bottom padding is the only space below the header. */
+  .ms-shell:has(.ms-collapsible:not(.open)) {
+    gap: 0;
+  }
 
   /* C5 verdict (2026-08-06): the extra shell scale-bounce (msShellBounceIn)
-     was removed — the panel already opens on a spring via useAutoHeight's
-     --ease-spring-open, so a second overshoot animation on the shell was a
-     duplicate bounce, not the Apple-standard single spring. Open now reads
-     as one spring on height only. */
+     was removed — the panel already opens on a height transition via
+     useAutoHeight, so a second overshoot animation on the shell was a
+     duplicate bounce, not the Apple-standard single motion. No-bounce sweep
+     (this step) later replaced useAutoHeight's own --ease-spring-open with
+     --ease-out, so open now reads as one settle on height only, no overshoot
+     anywhere in the chain. */
 
   /* Squircle conversion (Step 12): ms-shell/ms-panel canonical grey-shell/
      white-panel concentric pair (mirrors .te-outer/.te-panel, .dp-outer/.dp-panel).
@@ -267,7 +276,10 @@
   .ms-row.sel::after { display: none; }
   .ms-row:has(+ .ms-row.sel)::after { display: none; }
 
-  /* ── Sliding selection indicator (bounce, behind rows) ── */
+  /* ── Sliding selection indicator (no bounce, behind rows) ──
+     Same shape of problem as a segmented-control thumb sliding between
+     positions, so it routes through the same sanctioned token
+     (--ease-pill-switch) rather than the overshoot --ease-slide-bounce. */
   .ms-sel-indicator {
     position: absolute;
     top: 0; left: 0; right: 0;
@@ -277,7 +289,7 @@
     pointer-events: none;
     z-index: 0;
     transform: translateY(calc(var(--sel-idx, 0) * var(--ms-row-h, 62px)));
-    transition: transform calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-slide-bounce);
+    transition: transform calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-pill-switch);
   }
 
   /* Make rows sit above indicator */

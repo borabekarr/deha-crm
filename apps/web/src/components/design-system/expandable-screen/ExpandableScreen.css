@@ -1,0 +1,93 @@
+/* ExpandableScreen — packaging-only wrapper + hover/focus states.
+
+   Every other rendered value lives inline in ExpandableScreen.tsx, computed
+   per-render from the raw source's own JS-timed FLIP state machine (phase/
+   rect/closing). Only the values that need a real CSS pseudo-class
+   (:hover / :focus can't be expressed via a React inline style object) live
+   here — moved out of the element's inline style so the pseudo-class can
+   actually win: an inline style always outranks an external stylesheet rule
+   of any specificity, so the base declaration for a property with a hover/
+   focus variant has to live in CSS too, not just the variant. Every value
+   below is byte-identical to the raw source's style-hover / style-focus
+   attribute values (apps/web/design-system/claude-design/raw/
+   expandable-screen/expandable-screen.html). */
+
+.es-demo-root {
+  /* Gallery chrome bug fix (ui-motion-sweep step 9): this root used to be
+     `position: fixed; inset: 0; z-index: 2147483647`, i.e. a full-viewport
+     layer that covered the gallery shell (left pane / theme toggle /
+     Agentation bubble) behind it -- the raw standalone-page demo needed
+     that to fill the screen, but inside the gallery's PreviewFrame it must
+     stay in normal flow like every other demo root (xc-root, dir-root)
+     so the shell stays visible and interactive. The morphing overlay
+     itself is unaffected: it's portaled to document.body and carries its
+     own OVERLAY_Z, not this root's z-index. */
+  position: relative;
+  /* Tailwind preflight's inherited line-height:1.5 bleeds into text
+     descendants that don't declare their own line-height (the "Early
+     access"/"Limited spots"/tag-row badge spans, the footer <p>) -- the raw
+     environment has no such preflight, so those fall back to the UA
+     default `normal`. Reset here, same class of fix as Dropdown.css/
+     OtpInput.css/DisclosureGroup.css/BlurCarousel.css's per-component stage
+     normalize. */
+  line-height: normal;
+}
+
+/* The morphing overlay is portaled to document.body (ExpandableScreen.tsx), so
+   it no longer inherits from .es-demo-root / the stage div. Re-declare exactly
+   the two inherited values it used to pick up there -- the stage's display
+   typeface (var(--font-display), Montserrat) and the root's Tailwind-preflight
+   line-height reset -- so the portaled render is byte-identical to the
+   in-tree one. No motion leg here. */
+.es-overlay {
+  font-family: var(--font-display);
+  line-height: normal;
+}
+
+/* Background blur scrim (plan: debt2-expandable Step 1, F25). Stays mounted
+   in both states ([[mounted-through-exit-css-animations]]) so its fade-out
+   plays through the collapse instead of vanishing the instant `open` flips;
+   ExpandableScreen.tsx toggles it via the [data-open] attribute across the
+   whole open period. 12px reuses DynamicIslandReader.css's existing
+   `backdrop-filter: blur(12px)` value already in the codebase as the
+   "medium" tier, not a new magic px. */
+.es-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646; /* below the overlay's OVERLAY_Z, above the page */
+  background: rgba(2, 6, 23, 0.28);
+  backdrop-filter: blur(var(--es-scrim-blur, 12px));
+  -webkit-backdrop-filter: blur(var(--es-scrim-blur, 12px));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out);
+}
+.es-scrim[data-open] {
+  opacity: 1;
+}
+
+.es-close-btn {
+  background: rgba(255, 255, 255, 0.16);
+}
+.es-close-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.es-input {
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: rgba(6, 78, 59, 0.3);
+}
+.es-input:focus {
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.2);
+}
+.es-input::placeholder {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.es-submit-btn {
+  background: #ffffff;
+}
+.es-submit-btn:hover {
+  background: #ecfdf5;
+}

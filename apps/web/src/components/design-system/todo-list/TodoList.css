@@ -57,7 +57,7 @@ body { background: var(--bg-app); }
   transition: transform calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-spring-snap), color calc(var(--duration-base) * var(--anim-mult, 1)), background calc(var(--duration-base) * var(--anim-mult, 1));
 }
 .td-nav button .material-icons { font-size: 20px; }
-.td-nav button:hover { color: var(--fg1); transform: translateY(-1px); }
+.td-nav button:hover { color: var(--fg1); }
 .td-nav button:active { transform: scale(var(--press-chip)); }
 
 /* ── Calendar week — each day is a SEPARATE VERTICAL pill (item 1) ──── */
@@ -90,7 +90,7 @@ body { background: var(--bg-app); }
 html.dark .td-daybtn { border-color: rgba(255,255,255,0.10); background: rgba(17,17,17,0.45); box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
 .td-daybtn .dow { font-size: 9.5px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg4); }
 .td-daybtn .dnum { font-size: 16px; font-weight: 800; color: var(--fg3); font-variant-numeric: tabular-nums; }
-.td-daybtn:hover { transform: translateY(-1px); border-color: rgba(17,17,17,0.22); }
+.td-daybtn:hover { border-color: rgba(17,17,17,0.22); }
 html.dark .td-daybtn:hover { border-color: rgba(255,255,255,0.2); }
 .td-daybtn:active { transform: scale(.95); transition: transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out); }
 /* Selected day — BLACK pill in light mode (mirrors .td-filt.on / seg pill) */
@@ -99,7 +99,7 @@ html.dark .td-daybtn:hover { border-color: rgba(255,255,255,0.2); }
   border-color: transparent;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 5px 13px -5px rgba(17,17,17,0.45);
 }
-.td-daybtn.active:hover { background: #1C1C1C; transform: translateY(-1px); }
+.td-daybtn.active:hover { background: #1C1C1C; }
 .td-daybtn.active .dow { color: rgba(255,255,255,0.65); }
 .td-daybtn.active .dnum { color: #fff; font-weight: 900; }
 /* Selected day — light pill in dark mode (mirrors existing dark active) */
@@ -179,7 +179,7 @@ html.dark .td-daybtn.active .dnum { color:#111111; font-weight:900; }
 }
 .td-filt .fdot { width: 8px; height: 8px; border-radius: 50%; background: var(--fcolor, var(--fg4)); flex: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); }
 .td-filt .fct { font-variant-numeric: tabular-nums; opacity: 0.55; }
-.td-filt:hover { transform: translateY(-1px); color: var(--fg1); }
+.td-filt:hover { color: var(--fg1); }
 .td-filt:active { transform: scale(0.95); }
 .td-filt.on { background: #111111; color: #fff; border-color: transparent; box-shadow: 0 5px 13px -5px rgba(17,17,17,0.45), inset 0 1px 0 rgba(255,255,255,0.14); }
 .td-filt.on .fct { opacity: 0.7; }
@@ -214,9 +214,11 @@ html.dark .task-row { outline-color: rgba(255,255,255,0.07); }
    .tao-btn rides on .btn-green (== .pc-apply). We only set per-action color,
    sizing for the 3-up row, the entrance bounce, and the hidden-until-revealed
    state. No grid texture, no column tile — clean pill. */
+/* Sized to the library's small-action-control standard (.btn-discuss: 36px
+   height, pill radius) — these were functional but unstyled before this pass. */
 .tao-btn {
   flex: 1; min-width: 0;
-  height: 38px; padding: 0 12px; gap: 6px;
+  height: 36px; padding: 0 12px; gap: 6px;
   border-radius: 9999px;
   font-size: 11px; font-weight: 800; letter-spacing: 0.01em;
   white-space: nowrap;
@@ -231,9 +233,9 @@ html.dark .task-row { outline-color: rgba(255,255,255,0.07); }
   pointer-events: auto;
   opacity: 1;
 }
-/* btn-green already provides scale(1.03) hover + scale(0.96) active + the
-   pipeline-card shadow ramp; just brighten the colored variants. */
-.tao-btn:hover { filter: brightness(1.08); }
+/* Grey-darkening hover, matching the small-action-control house rule — color
+   only, no lift, no scale. btn-green's scale(0.96) :active press is kept. */
+.tao-btn:hover { filter: brightness(0.92); }
 @keyframes tao-bounce {
   0%   { opacity: 0; transform: scale(0.25); }
   60%  { opacity: 1; transform: scale(1.06); }
@@ -307,20 +309,6 @@ html.dark .tao-btn.tao-del      { background: #DC2626; }
 }
 .t-ico .material-icons { font-size: 21px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.35); filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15)); }
 
-/* ── Icon hover animation — UNIFIED (item 2) ─────────────────────────
-   Every task icon uses the same hover animation as the "Read industry
-   report" task (icon: menu_book), which used the default gentle bob.
-   All per-icon-meaning overrides removed so every icon bobs identically. */
-@keyframes td-ico-bob {
-  0%   { transform: translateY(0); }
-  35%  { transform: translateY(-4px); }
-  65%  { transform: translateY(-2px); }
-  100% { transform: translateY(0); }
-}
-.task-row:not(.is-done):hover .t-ico .material-icons {
-  animation: td-ico-bob calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out);
-}
-
 .t-main { flex: 1; min-width: 0; }
 .t-title { font-size: 14.5px; font-weight: 800; color: var(--fg1); letter-spacing: -0.015em; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .t-badge {
@@ -352,7 +340,7 @@ html.dark .tao-btn.tao-del      { background: #DC2626; }
   transition: opacity calc(var(--duration-200) * var(--anim-mult, 1)), transform calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-spring-snap), filter calc(var(--duration-base) * var(--anim-mult, 1));
 }
 .t-complete .material-icons { font-size: 14px; }
-.t-complete:hover { transform: translateX(0) scale(1.04); filter: brightness(1.06); }
+.t-complete:hover { filter: brightness(1.06); }
 .t-complete:active { transform: scale(0.96); }
 
 .task-row.reordering { z-index:5; overflow:visible; }
@@ -405,13 +393,11 @@ html.dark .tao-btn.tao-del      { background: #DC2626; }
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 0 0 0 1px rgba(17,17,17,0.04);
   transition: transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-spring-snap), box-shadow calc(var(--duration-200) * var(--anim-mult, 1));
 }
-.td-bar:hover { transform: translateY(-2px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 0 0 0 1px rgba(17,17,17,0.04), 0 10px 22px -8px rgba(17,17,17,0.28); }
+.td-bar:hover { box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 0 0 0 1px rgba(17,17,17,0.04), 0 10px 22px -8px rgba(17,17,17,0.28); }
 .td-bar:has(.btn-add:hover) {
-  transform: translateY(-2px);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 0 0 0 1px rgba(17,17,17,0.04), 0 12px 26px -8px rgba(17,17,17,0.32);
 }
-.td-bar:has(.btn-add:hover) .btn-add { transform: none; filter: brightness(1.1); }
-.td-bar:has(.btn-add:active) { transform: translateY(-1px); }
+.td-bar:has(.btn-add:hover) .btn-add { filter: brightness(1.1); }
 .td-bar:has(.btn-add:active) .btn-add { transform: scale(var(--press-card)); }
 .bar-ico {
   width: 42px; height: 42px; border-radius: 50%; border: none; cursor: pointer;
@@ -900,5 +886,5 @@ html.dark .td-del-title { color: #F5F5F5; }
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring-snap),
     filter calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-fade);
 }
-.td-del-confirm:hover { filter: brightness(1.10); transform: translateY(-1px); }
+.td-del-confirm:hover { filter: brightness(1.10); }
 .td-del-confirm:active { transform: scale(var(--press-control)); transition-duration: calc(var(--duration-fast) * var(--anim-mult, 1)); }

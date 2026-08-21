@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<!-- NEGATIVE CONTROL: data-dc-script is deliberately unparseable (unterminated
+     object literal). The shim must fail detectably — an error surface plus
+     bindings left as literal {{ }} text — never silently render as if fine.
+     This is the dc-shim analogue of pixel-parity's fixture-shifted pair. -->
+<html>
+<head>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+  <p id="label">{{ label }}</p>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"label":{"default":"hello"}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { label: this.props.label
+  }
+}
+</script>
+</body>
+</html>

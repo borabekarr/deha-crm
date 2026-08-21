@@ -19,24 +19,28 @@
   backdrop-filter: blur(7px);
   opacity: 1;
 
-  /* always-mounted: hidden by default, shown when open */
+  /* always-mounted: hidden by default, shown when open. Overlay and shell
+     share --duration-280 for both the entrance and the exit, so the
+     backdrop and the card read as one gesture (Apple scale-and-fade),
+     and the exit is the exact reverse of the enter -- same token, same
+     properties, mirrored direction. No overshoot easing anywhere here. */
   visibility: hidden;
   pointer-events: none;
   transition:
-    opacity calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-fade),
-    visibility 0s /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */ calc(var(--duration-240) * var(--anim-mult, 1));
+    opacity calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out-soft),
+    visibility calc(var(--duration-280) * 0) calc(var(--duration-280) * var(--anim-mult, 1));
 }
 
 .dm-overlay[data-state='open'] {
   visibility: visible;
   pointer-events: auto;
   transition:
-    opacity calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-fade),
-    visibility 0s /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */ 0s; /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
+    opacity calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out-soft),
+    visibility calc(var(--duration-280) * 0) calc(var(--duration-280) * 0);
 }
 
 .dm-overlay.dm-anim {
-  animation: dm-ov-in calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out);
+  animation: dm-ov-in calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out-soft);
 }
 
 @keyframes dm-ov-in {
@@ -48,7 +52,7 @@
 }
 
 .dm-overlay[data-state='closing'] {
-  animation: dm-ov-out calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-fade) forwards;
+  animation: dm-ov-out calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out-soft) forwards;
 }
 
 @keyframes dm-ov-out {
@@ -67,16 +71,16 @@
   border-radius: 36px;
   padding: 8px;
   box-shadow:
-    0 16px 56px rgba(17,17,17, 0.16),
-    0 3px 10px rgba(17,17,17, 0.07);
+    0 12px 40px rgba(17,17,17, 0.13),
+    0 2px 8px rgba(17,17,17, 0.06);
   opacity: 1;
   transform: none;
 }
 
 html.dark .dm-shell {
   box-shadow:
-    0 16px 56px rgba(0, 0, 0, 0.45),
-    0 3px 10px rgba(0, 0, 0, 0.25),
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
@@ -90,14 +94,14 @@ html.dark .dm-shell {
 .dm-shell[data-squircle="on"] {
   border-radius: 0;
   --corner-radius: 36px;
-  filter: drop-shadow(0 16px 56px rgba(17,17,17, 0.16)) drop-shadow(0 3px 10px rgba(17,17,17, 0.07));
+  filter: drop-shadow(0 12px 40px rgba(17,17,17, 0.13)) drop-shadow(0 2px 8px rgba(17,17,17, 0.06));
 }
 .dm-shell[data-squircle="on"]::before,
 .dm-shell[data-squircle="on"]::after {
   content: none;
 }
 html.dark .dm-shell[data-squircle="on"] {
-  filter: drop-shadow(0 16px 56px rgba(0, 0, 0, 0.45)) drop-shadow(0 3px 10px rgba(0, 0, 0, 0.25));
+  filter: drop-shadow(0 12px 40px rgba(0, 0, 0, 0.4)) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.22));
 }
 html.dark .dm-shell[data-squircle="on"]::before {
   content: '';
@@ -108,25 +112,29 @@ html.dark .dm-shell[data-squircle="on"]::before {
   clip-path: var(--squircle-border-path);
 }
 
+/* Scale-and-fade from the shell's own center -- transform-origin defaults
+   to center, so no explicit origin declaration is needed. Exit below is
+   the byte-exact reverse: same duration token, same easing, same
+   transform, direction flipped. No translateY drift, no overshoot. */
 .dm-overlay.dm-anim .dm-shell {
-  animation: dm-card-in calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-spring);
+  animation: dm-card-in calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out-soft);
 }
 
 @keyframes dm-card-in {
   from {
     opacity: 0;
-    transform: translateY(14px) scale(0.96);
+    transform: scale(0.92);
   }
 }
 
 .dm-overlay[data-state='closing'] .dm-shell {
-  animation: dm-card-out calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-fade) forwards;
+  animation: dm-card-out calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out-soft) forwards;
 }
 
 @keyframes dm-card-out {
   to {
     opacity: 0;
-    transform: translateY(8px) scale(0.97);
+    transform: scale(0.92);
   }
 }
 
@@ -265,8 +273,8 @@ html.dark .dm-close:hover {
 /* ── Deleted-state morph: crossfade instead of a hard content swap ────────
    Triggered by data-done flipping on .dm-card; badge icon glyph, title and
    body copy all dip through a fade rather than snapping to their new text.
-   The badge shell itself gets a small spring pop (existing --ease-spring
-   curve) via .dm-badge--done. Card height never changes here -- the
+   The badge shell itself gets a small settle pop (--ease-out-soft, no
+   overshoot) via .dm-badge--done. Card height never changes here -- the
    actions row (below) stays mounted and fades to zero opacity in place,
    so the card never compacts. */
 @media (prefers-reduced-motion: no-preference) {
@@ -276,7 +284,7 @@ html.dark .dm-close:hover {
     animation: dm-crossfade calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out) both;
   }
   .dm-badge--done {
-    animation: dm-badge-pop calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-spring) both;
+    animation: dm-badge-pop calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-out-soft) both;
   }
 }
 
@@ -299,7 +307,7 @@ html.dark .dm-close:hover {
 /* ── Entrance animations (transform-only, opacity always 1) ──────────────── */
 @media (prefers-reduced-motion: no-preference) {
   .dm-overlay.dm-anim .dm-badge {
-    animation: dm-pop calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-spring)
+    animation: dm-pop calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out-soft)
       calc(var(--duration-80) * var(--anim-mult, 1)) both;
   }
   .dm-overlay.dm-anim .dm-title {

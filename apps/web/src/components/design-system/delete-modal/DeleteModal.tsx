@@ -81,10 +81,13 @@ export function DeleteModal({
       setEntering(true)
       setPhase('idle')
       setShake(false)
-      enterTimer.set(600, () => setEntering(false))
+      // MIRROR: DeleteModal.css longest staggered entrance leg (dm-actions:
+      // 260ms delay + duration-expand 460ms = 720ms).
+      enterTimer.set(720, () => setEntering(false))
     } else {
       setClosing(true)
-      closeTimer.set(260, () => setClosing(false))
+      // MIRROR: DeleteModal.css dm-card-out / dm-ov-out duration-280.
+      closeTimer.set(280, () => setClosing(false))
     }
   }
 

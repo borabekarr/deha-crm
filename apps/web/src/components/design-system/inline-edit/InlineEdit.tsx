@@ -136,7 +136,15 @@ export default function InlineEdit({
         className="ie-field"
         data-editing={String(editing)}
         data-saved={String(saved)}
+        tabIndex={editing ? undefined : 0}
+        role={editing ? undefined : 'button'}
+        aria-label={editing ? undefined : fieldLabel}
         onMouseDown={() => { if (!editing) startEdit() }}
+        onKeyDown={(e) => {
+          if (editing) return
+          if (e.key === 'Enter') { startEdit() }
+          else if (e.key === ' ') { e.preventDefault(); startEdit() }
+        }}
       >
         {/*
           Input region and saved-morph are BOTH always mounted (mounted-through-exit).

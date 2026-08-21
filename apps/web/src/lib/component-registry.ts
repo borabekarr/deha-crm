@@ -1,4 +1,5 @@
-import { lazy, type ComponentType } from 'react'
+import { type ComponentType } from 'react'
+import { lazyWithRetry, type LazyWithRetryComponent } from '@/lib/lazy-retry'
 
 // ---------------------------------------------------------------------------
 // Component registry
@@ -19,9 +20,15 @@ import { lazy, type ComponentType } from 'react'
 // Types
 // ---------------------------------------------------------------------------
 
-// Gate: marking an entry Finished when it has an expandable interaction
-// requires a SPAM_TARGETS entry in apps/web/tests/animation-spam-manifest.ts
-// with the spam spec passing.
+// Gate: EVERY entry marked Finished must be classified in
+// apps/web/tests/animation-spam-manifest.ts, in exactly one of three lists:
+//   SPAM_TARGETS — enrolled in the spam suite, which must pass. kind
+//     'auto-height' (useAutoHeight-measured height) or kind 'toggle' (a
+//     CSS-transition/fixed-size morph asserted via a settled CSS property).
+//   WAIVED — animated but not enrollable; needs a reason and an ISO date.
+//   STATIC — no animated interaction to spam (swatch/scale reference pages).
+// animation-spam.spec.ts derives this population by reading THIS file, so
+// flipping a status to Finished without classifying the slug fails the suite.
 export type ComponentStatus = 'Finished' | 'Proceeding' | 'Waiting'
 
 export type Subcategory =
@@ -54,8 +61,14 @@ export interface RegistryEntry {
    * component root as one block. Leave unset for every other entry.
    */
   revealSelector?: string
+  /**
+   * When set, the route skips the reveal engine entirely and applies the
+   * `anim-immediate` utility to the content wrapper instead (opacity-only
+   * fade on mount, no stagger, no translateY).
+   */
+  entrance?: 'immediate'
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Component: ReturnType<typeof lazy<ComponentType<any>>>
+  Component: LazyWithRetryComponent<ComponentType<any>>
 }
 
 // ---------------------------------------------------------------------------
@@ -86,7 +99,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Neutral gray fg/bg/border scale',
     viewport: { width: 700, height: 160 },
     sourceHtml: '/design-system/preview/colors-neutrals.html',
-    Component: lazy(() => import('@/components/design-system/colors-neutrals/ColorsNeutrals')),
+    Component: lazyWithRetry(() => import('@/components/design-system/colors-neutrals/ColorsNeutrals')),
   },
   {
     slug: 'colors-primary',
@@ -96,7 +109,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Emerald brand scale + extra palettes',
     viewport: { width: 700, height: 560 },
     sourceHtml: '/design-system/preview/colors-primary.html',
-    Component: lazy(() => import('@/components/design-system/colors-primary/ColorsPrimary')),
+    Component: lazyWithRetry(() => import('@/components/design-system/colors-primary/ColorsPrimary')),
   },
   {
     slug: 'colors-semantic',
@@ -106,7 +119,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Success / Warning / Danger / Hot Lead',
     viewport: { width: 700, height: 200 },
     sourceHtml: '/design-system/preview/colors-semantic.html',
-    Component: lazy(() => import('@/components/design-system/colors-semantic/ColorsSemantic')),
+    Component: lazyWithRetry(() => import('@/components/design-system/colors-semantic/ColorsSemantic')),
   },
   {
     slug: 'type-scale',
@@ -115,8 +128,9 @@ export const registry: RegistryEntry[] = [
     category: 'Foundations',
     subtitle: 'Display 1/2, H1–H4, body, meta, micro',
     viewport: { width: 700, height: 480 },
+    entrance: 'immediate',
     sourceHtml: '/design-system/preview/type-scale.html',
-    Component: lazy(() => import('@/components/design-system/type-scale/TypeScale')),
+    Component: lazyWithRetry(() => import('@/components/design-system/type-scale/TypeScale')),
   },
   {
     slug: 'type-display',
@@ -125,8 +139,9 @@ export const registry: RegistryEntry[] = [
     category: 'Foundations',
     subtitle: 'Specimen + weight ladder (300/500/700/900)',
     viewport: { width: 700, height: 230 },
+    entrance: 'immediate',
     sourceHtml: '/design-system/preview/type-display.html',
-    Component: lazy(() => import('@/components/design-system/type-display/TypeDisplay')),
+    Component: lazyWithRetry(() => import('@/components/design-system/type-display/TypeDisplay')),
   },
   {
     slug: 'spacing-scale',
@@ -136,7 +151,7 @@ export const registry: RegistryEntry[] = [
     subtitle: '4-point grid · 4 → 48px',
     viewport: { width: 700, height: 160 },
     sourceHtml: '/design-system/preview/spacing-scale.html',
-    Component: lazy(() => import('@/components/design-system/spacing-scale/SpacingScale')),
+    Component: lazyWithRetry(() => import('@/components/design-system/spacing-scale/SpacingScale')),
   },
   {
     slug: 'spacing-radii',
@@ -146,7 +161,7 @@ export const registry: RegistryEntry[] = [
     subtitle: '6 → 24px + pill',
     viewport: { width: 700, height: 180 },
     sourceHtml: '/design-system/preview/spacing-radii.html',
-    Component: lazy(() => import('@/components/design-system/spacing-radii/SpacingRadii')),
+    Component: lazyWithRetry(() => import('@/components/design-system/spacing-radii/SpacingRadii')),
   },
   {
     slug: 'spacing-shadows',
@@ -156,7 +171,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'glass, glass-sm, recessed, emerald-glow',
     viewport: { width: 700, height: 360 },
     sourceHtml: '/design-system/preview/spacing-shadows.html',
-    Component: lazy(() => import('@/components/design-system/spacing-shadows/SpacingShadows')),
+    Component: lazyWithRetry(() => import('@/components/design-system/spacing-shadows/SpacingShadows')),
   },
   {
     slug: 'iconography',
@@ -165,8 +180,9 @@ export const registry: RegistryEntry[] = [
     category: 'Foundations',
     subtitle: 'Material Icons + Material Symbols Outlined',
     viewport: { width: 700, height: 240 },
+    entrance: 'immediate',
     sourceHtml: '/design-system/preview/iconography.html',
-    Component: lazy(() => import('@/components/design-system/iconography/Iconography')),
+    Component: lazyWithRetry(() => import('@/components/design-system/iconography/Iconography')),
   },
   {
     slug: 'background-gradient',
@@ -176,7 +192,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Flat white default · grid-on-white for highlighted sections',
     viewport: { width: 700, height: 240 },
     sourceHtml: '/design-system/preview/background-gradient.html',
-    Component: lazy(() => import('@/components/design-system/background-gradient/BackgroundGradient')),
+    Component: lazyWithRetry(() => import('@/components/design-system/background-gradient/BackgroundGradient')),
   },
   {
     slug: 'cards',
@@ -186,7 +202,8 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Glass, inner & accent surfaces',
     viewport: { width: 700, height: 280 },
     sourceHtml: '/design-system/preview/components-cards.html',
-    Component: lazy(() => import('@/components/design-system/cards/Cards')),
+    revealSelector: '.card-accent, .concentric-demo',
+    Component: lazyWithRetry(() => import('@/components/design-system/cards/Cards')),
   },
   {
     slug: 'animated-list',
@@ -196,7 +213,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Real-time push feed — absolute-slot model with slide/fade/scale variants',
     viewport: { width: 700, height: 560 },
     sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/animated-list',
-    Component: lazy(() => import('@/components/design-system/animated-list/AnimatedList')),
+    Component: lazyWithRetry(() => import('@/components/design-system/animated-list/AnimatedList')),
   },
   {
     slug: 'number-flow',
@@ -206,7 +223,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Animated number transitions in Montserrat Black, currency/compact/percent formats',
     viewport: { width: 700, height: 560 },
     sourceHtml: 'https://number-flow.barvian.me/',
-    Component: lazy(() => import('@/components/design-system/number-flow/NumberFlowDemo')),
+    Component: lazyWithRetry(() => import('@/components/design-system/number-flow/NumberFlowDemo')),
   },
   {
     slug: 'prize-sheet',
@@ -216,7 +233,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Mobile bottom sheet + desktop dialog with confetti claim flow',
     viewport: { width: 760, height: 1240 },
     sourceHtml: '/design-system/preview/components-prize-sheet.html',
-    Component: lazy(() => import('@/components/design-system/prize-sheet/PrizeSheet')),
+    Component: lazyWithRetry(() => import('@/components/design-system/prize-sheet/PrizeSheet')),
   },
   {
     slug: 'ai-caveat',
@@ -226,7 +243,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Warning banner shown below AI chatbot responses',
     viewport: { width: 700, height: 120 },
     sourceHtml: '/design-system/preview/components-ai-caveat.html',
-    Component: lazy(() => import('@/components/design-system/ai-caveat/AiCaveat')),
+    Component: lazyWithRetry(() => import('@/components/design-system/ai-caveat/AiCaveat')),
   },
   {
     slug: 'ai-message-box',
@@ -236,7 +253,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Chat input with Extend-with-AI + generating state',
     viewport: { width: 600, height: 280 },
     sourceHtml: '/design-system/preview/components-ai-message-box.html',
-    Component: lazy(() => import('@/components/design-system/ai-message-box/AiMessageBox')),
+    Component: lazyWithRetry(() => import('@/components/design-system/ai-message-box/AiMessageBox')),
   },
   {
     slug: 'metric-circle',
@@ -247,7 +264,7 @@ export const registry: RegistryEntry[] = [
     viewport: { width: 700, height: 320 },
     sourceHtml: '/design-system/preview/components-metric-circle.html',
     revealSelector: '.pill-shell',
-    Component: lazy(() => import('@/components/design-system/metric-circle/MetricCircle')),
+    Component: lazyWithRetry(() => import('@/components/design-system/metric-circle/MetricCircle')),
   },
   {
     slug: 'streak-card',
@@ -257,7 +274,8 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Animated streak + steps progress — light & dark',
     viewport: { width: 700, height: 560 },
     sourceHtml: '/design-system/preview/components-streak-card.html',
-    Component: lazy(() => import('@/components/design-system/streak-card/StreakCard')),
+    revealSelector: '.streak',
+    Component: lazyWithRetry(() => import('@/components/design-system/streak-card/StreakCard')),
   },
   {
     slug: 'pipeline-card',
@@ -268,7 +286,7 @@ export const registry: RegistryEntry[] = [
     viewport: { width: 700, height: 1500 },
     sourceHtml: '/design-system/preview/components-pipeline-card.html',
     revealSelector: '.shell',
-    Component: lazy(() => import('@/components/design-system/pipeline-card/PipelineCard')),
+    Component: lazyWithRetry(() => import('@/components/design-system/pipeline-card/PipelineCard')),
   },
   {
     slug: 'dynamic-calendar',
@@ -278,20 +296,160 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Dynamic Island calendar — compact/preview/expanded morph',
     viewport: { width: 1180, height: 720 },
     sourceHtml: '/design-system/preview/brand-dynamic-calendar.html',
-    Component: lazy(() => import('@/components/design-system/dynamic-calendar/DynamicCalendar')),
+    Component: lazyWithRetry(() => import('@/components/design-system/dynamic-calendar/DynamicCalendar')),
   },
-
-  // ══ Proceeding ════════════════════════════════════════════════════════════
   {
     slug: 'buttons',
     name: 'Buttons',
-    status: 'Proceeding',
+    status: 'Finished',
     category: 'Primitives',
     subtitle: 'Primary, inverse, glass, text',
     viewport: { width: 700, height: 140 },
     sourceHtml: '/design-system/preview/components-buttons.html',
     revealSelector: '.btn-row > *',
-    Component: lazy(() => import('@/components/design-system/buttons/Buttons')),
+    Component: lazyWithRetry(() => import('@/components/design-system/buttons/Buttons')),
+  },
+
+  // ══ Proceeding ════════════════════════════════════════════════════════════
+  {
+    slug: 'disclosure-group',
+    name: 'Disclosure Group',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Composable expandable section · measured height spring · accordion mode',
+    viewport: { width: 460, height: 460 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/disclosure-group',
+    Component: lazyWithRetry(() => import('@/components/design-system/disclosure-group/DisclosureGroup')),
+  },
+  {
+    slug: 'delete-button',
+    name: 'Delete Button',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Destructive action · countdown-to-confirm morph · cancelable',
+    viewport: { width: 560, height: 380 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/delete-button',
+    Component: lazyWithRetry(() => import('@/components/design-system/delete-button/DeleteButton')),
+  },
+  {
+    slug: 'shimmer',
+    name: 'Shimmer',
+    status: 'Finished',
+    category: 'Animations',
+    subtitle: 'Skeleton loading primitive · sweeping wave + pulse variants',
+    viewport: { width: 460, height: 460 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/shimmer',
+    Component: lazyWithRetry(() => import('@/components/design-system/shimmer/Shimmer')),
+  },
+  {
+    slug: 'pie-chart',
+    name: 'Pie Chart',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Composable donut · mount sweep · hover pop-out · synced legend',
+    viewport: { width: 700, height: 460 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/pie-chart',
+    Component: lazyWithRetry(() => import('@/components/design-system/pie-chart/PieChart')),
+  },
+  {
+    slug: 'otp-input',
+    name: 'OTP Input',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Animated one-time-code entry · focus bounce · digit entrance · shake-on-error',
+    viewport: { width: 620, height: 500 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/otp-input',
+    Component: lazyWithRetry(() => import('@/components/design-system/otp-input/OtpInput')),
+  },
+  {
+    slug: 'dropdown',
+    name: 'Dropdown',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Composable contextual menu · smart auto-positioning · spring scale+blur entrance',
+    viewport: { width: 660, height: 620 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/dropdown',
+    Component: lazyWithRetry(() => import('@/components/design-system/dropdown/Dropdown')),
+  },
+  {
+    slug: 'blur-carousel',
+    name: 'Blur Carousel',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Cover-flow carousel · center item sharp, side items scale, fade & soft-blur as you scroll',
+    viewport: { width: 900, height: 760 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/blur-carousel',
+    Component: lazyWithRetry(() => import('@/components/design-system/blur-carousel/BlurCarousel')),
+  },
+  {
+    slug: 'expandable-screen',
+    name: 'Expandable Screen',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Trigger card morphs (CSS FLIP) into a full-screen overlay · Escape / close button collapse back',
+    viewport: { width: 900, height: 700 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/expandable-screen',
+    Component: lazyWithRetry(() => import('@/components/design-system/expandable-screen/ExpandableScreen')),
+  },
+  {
+    slug: 'expandable-card',
+    name: 'Expandable Card',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Three cards spring-expand width & reveal measured-height content · click or Enter/Space to toggle',
+    viewport: { width: 1260, height: 480 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/expandable-card',
+    Component: lazyWithRetry(() => import('@/components/design-system/expandable-card/ExpandableCard')),
+  },
+  {
+    slug: 'message-dropdown',
+    name: 'Message Dropdown',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Gooey notification dropdown · SVG-filter liquid morph trigger-to-panel · outside-click / Escape dismiss',
+    viewport: { width: 920, height: 800 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/message-dropdown',
+    Component: lazyWithRetry(() => import('@/components/design-system/message-dropdown/MessageDropdown')),
+  },
+  {
+    slug: 'animated-header-scroll',
+    name: 'Animated Header Scroll',
+    status: 'Finished',
+    category: 'Components',
+    subtitle: 'Large title collapses into a blurred pinned header on scroll · iOS-style',
+    viewport: { width: 420, height: 760 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/animated-header-scroll',
+    Component: lazyWithRetry(() => import('@/components/design-system/animated-header-scroll/AnimatedHeaderScroll')),
+  },
+  {
+    slug: 'toast',
+    name: 'Toast',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Stacked toasts with semantic fills, top/bottom viewports & expandable rows',
+    viewport: { width: 760, height: 560 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/toast',
+    Component: lazyWithRetry(() => import('@/components/design-system/toast/Toast')),
+  },
+  {
+    slug: 'picker',
+    name: 'Picker',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'FAB-expanding day/month & hour/minute wheel pickers · iOS 3D scroll columns with idle snap',
+    viewport: { width: 800, height: 620 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/picker',
+    Component: lazyWithRetry(() => import('@/components/design-system/picker/Picker')),
+  },
+  {
+    slug: 'buyer-brain',
+    name: 'Buyer-Brain Qualification',
+    status: 'Proceeding',
+    category: 'Components',
+    subtitle: 'Interactive 9-lobe buyer-psychology brain — real artwork, pop-on-select, dark mode',
+    viewport: { width: 960, height: 620 },
+    sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/buyer-brain',
+    Component: lazyWithRetry(() => import('@/components/design-system/buyer-brain/BuyerBrain')),
   },
   {
     slug: 'pills',
@@ -302,7 +460,7 @@ export const registry: RegistryEntry[] = [
     viewport: { width: 700, height: 230 },
     sourceHtml: '/design-system/preview/components-pills.html',
     revealSelector: '.pill-priority, .pill-tab, .badge, .badge-event, .icon-badge',
-    Component: lazy(() => import('@/components/design-system/pills/Pills')),
+    Component: lazyWithRetry(() => import('@/components/design-system/pills/Pills')),
   },
   {
     slug: 'controls',
@@ -313,7 +471,7 @@ export const registry: RegistryEntry[] = [
     viewport: { width: 700, height: 240 },
     sourceHtml: '/design-system/preview/components-controls.html',
     revealSelector: '.sw-base, .seg, .slider',
-    Component: lazy(() => import('@/components/design-system/controls/Controls')),
+    Component: lazyWithRetry(() => import('@/components/design-system/controls/Controls')),
   },
   {
     slug: 'smooth-drawer',
@@ -324,17 +482,7 @@ export const registry: RegistryEntry[] = [
     viewport: { width: 700, height: 560 },
     sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/smooth-drawer',
     revealSelector: '.sd-trigger',
-    Component: lazy(() => import('@/components/design-system/smooth-drawer/SmoothDrawer')),
-  },
-  {
-    slug: 'drag-dismiss-sheet',
-    name: 'Drag Dismiss Sheet',
-    status: 'Proceeding',
-    category: 'Animations',
-    subtitle: 'Bottom sheet with projected-endpoint drag-to-dismiss physics',
-    viewport: { width: 420, height: 640 },
-    sourceHtml: '/design-system/preview/components-drag-dismiss-sheet.html',
-    Component: lazy(() => import('@/components/design-system/drag-dismiss-sheet/DragDismissSheet')),
+    Component: lazyWithRetry(() => import('@/components/design-system/smooth-drawer/SmoothDrawer')),
   },
   {
     slug: 'inline-edit',
@@ -344,7 +492,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Click-to-edit inline field with save / cancel controls',
     viewport: { width: 700, height: 240 },
     sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/blob/main/inline-edit/inline-edit.html',
-    Component: lazy(() => import('@/components/design-system/inline-edit/InlineEdit')),
+    Component: lazyWithRetry(() => import('@/components/design-system/inline-edit/InlineEdit')),
   },
   {
     slug: 'adjust-timeframe',
@@ -354,7 +502,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Draggable timeline range scrubber — emerald accent',
     viewport: { width: 880, height: 620 },
     sourceHtml: '/design-system/preview/brand-adjust-timeframe.html',
-    Component: lazy(() => import('@/components/design-system/adjust-timeframe/AdjustTimeframe')),
+    Component: lazyWithRetry(() => import('@/components/design-system/adjust-timeframe/AdjustTimeframe')),
   },
   {
     slug: 'date-picker',
@@ -364,7 +512,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'iOS wheel day/month/year picker with snap + depth fade',
     viewport: { width: 700, height: 560 },
     sourceHtml: '/design-system/preview/components-date-picker.html',
-    Component: lazy(() => import('@/components/design-system/date-picker/DatePicker')),
+    Component: lazyWithRetry(() => import('@/components/design-system/date-picker/DatePicker')),
   },
   {
     slug: 'github-calendar',
@@ -374,7 +522,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'GitHub-style contribution heatmap calendar',
     viewport: { width: 900, height: 220 },
     sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/blob/main/github-calendar/github-calendar.html',
-    Component: lazy(() => import('@/components/design-system/github-calendar/GithubCalendar')),
+    Component: lazyWithRetry(() => import('@/components/design-system/github-calendar/GithubCalendar')),
   },
   {
     slug: 'pinned-list',
@@ -384,7 +532,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Items spring between Pinned and All sections via FLIP layout animation',
     viewport: { width: 700, height: 560 },
     sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/pinned-list',
-    Component: lazy(() => import('@/components/design-system/pinned-list/PinnedList')),
+    Component: lazyWithRetry(() => import('@/components/design-system/pinned-list/PinnedList')),
   },
   {
     slug: 'currency-converter',
@@ -395,7 +543,7 @@ export const registry: RegistryEntry[] = [
     viewport: { width: 720, height: 720 },
     sourceHtml: '/design-system/preview/brand-currency-converter.html',
     revealSelector: '.cc-pill, .cc-swap',
-    Component: lazy(() => import('@/components/design-system/currency-converter/CurrencyConverter')),
+    Component: lazyWithRetry(() => import('@/components/design-system/currency-converter/CurrencyConverter')),
   },
   {
     slug: 'model-selector',
@@ -405,7 +553,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'AI chatbot model picker — Auto/Instant/Reasoning/Pro',
     viewport: { width: 500, height: 480 },
     sourceHtml: '/design-system/preview/components-model-selector.html',
-    Component: lazy(() => import('@/components/design-system/model-selector/ModelSelector')),
+    Component: lazyWithRetry(() => import('@/components/design-system/model-selector/ModelSelector')),
   },
   {
     slug: 'status-card',
@@ -416,7 +564,7 @@ export const registry: RegistryEntry[] = [
     viewport: { width: 520, height: 360 },
     sourceHtml: '/design-system/preview/brand-status-card.html',
     revealSelector: '.sc-card',
-    Component: lazy(() => import('@/components/design-system/status-card/StatusCard')),
+    Component: lazyWithRetry(() => import('@/components/design-system/status-card/StatusCard')),
   },
   {
     slug: 'multisteps',
@@ -426,7 +574,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Morphing emerald capsule indicator + ripple buttons',
     viewport: { width: 700, height: 460 },
     sourceHtml: '/design-system/preview/components-multisteps.html',
-    Component: lazy(() => import('@/components/design-system/multisteps/Multisteps')),
+    Component: lazyWithRetry(() => import('@/components/design-system/multisteps/Multisteps')),
   },
   {
     slug: 'delete-modal',
@@ -436,7 +584,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Confirmation dialog for destructive delete actions',
     viewport: { width: 700, height: 500 },
     sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/blob/main/delete-modal/delete-modal.html',
-    Component: lazy(() => import('@/components/design-system/delete-modal/DeleteModal')),
+    Component: lazyWithRetry(() => import('@/components/design-system/delete-modal/DeleteModal')),
   },
   {
     slug: 'fab',
@@ -446,7 +594,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Expanding floating action button (light/dark)',
     viewport: { width: 700, height: 720 },
     sourceHtml: '/design-system/preview/components-fab.html',
-    Component: lazy(() => import('@/components/design-system/fab/Fab')),
+    Component: lazyWithRetry(() => import('@/components/design-system/fab/Fab')),
   },
   {
     slug: 'motion-tabs',
@@ -457,7 +605,7 @@ export const registry: RegistryEntry[] = [
     viewport: { width: 700, height: 440 },
     sourceHtml: '/design-system/preview/components-motion-tabs.html',
     revealSelector: '.mt-tab',
-    Component: lazy(() => import('@/components/design-system/motion-tabs/MotionTabs')),
+    Component: lazyWithRetry(() => import('@/components/design-system/motion-tabs/MotionTabs')),
   },
   {
     slug: 'avatar-picker',
@@ -467,17 +615,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Profile-setup avatar stage with rotate/scale swap + validated username',
     viewport: { width: 700, height: 560 },
     sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/avatar-picker',
-    Component: lazy(() => import('@/components/design-system/avatar-picker/AvatarPicker')),
-  },
-  {
-    slug: 'message-dropdown',
-    name: 'Message Dropdown',
-    status: 'Proceeding',
-    category: 'Components',
-    subtitle: 'Gooey message dropdown — dark, side-by-side demo',
-    viewport: { width: 920, height: 800 },
-    sourceHtml: '/design-system/preview/brand-message-dropdown.html',
-    Component: lazy(() => import('@/components/design-system/message-dropdown/MessageDropdown')),
+    Component: lazyWithRetry(() => import('@/components/design-system/avatar-picker/AvatarPicker')),
   },
   {
     slug: 'metric-card',
@@ -487,7 +625,8 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Numeral + delta + sparkline; click to expand',
     viewport: { width: 700, height: 320 },
     sourceHtml: '/design-system/preview/components-metric-card.html',
-    Component: lazy(() => import('@/components/design-system/metric-card/MetricCard')),
+    revealSelector: '.shell.zoom',
+    Component: lazyWithRetry(() => import('@/components/design-system/metric-card/MetricCard')),
   },
   {
     slug: 'statistics-graph-card',
@@ -497,8 +636,8 @@ export const registry: RegistryEntry[] = [
     subtitle: 'CRM deal pipeline widget — live value, trend chart & quick actions',
     viewport: { width: 700, height: 900 },
     sourceHtml: '/design-system/preview/components-statistics-graph-card.html',
-    revealSelector: '.sg-sync, .sg-rangechip, .sg-cta',
-    Component: lazy(() => import('@/components/design-system/statistics-graph-card/StatisticsGraphCard')),
+    revealSelector: '.shell.zoom',
+    Component: lazyWithRetry(() => import('@/components/design-system/statistics-graph-card/StatisticsGraphCard')),
   },
   {
     slug: 'financial-health-card',
@@ -508,7 +647,8 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Animated score card — glowing segmented health bar',
     viewport: { width: 700, height: 620 },
     sourceHtml: '/design-system/preview/components-financial-health-card.html',
-    Component: lazy(() => import('@/components/design-system/financial-health-card/FinancialHealthCard')),
+    revealSelector: '.fhc',
+    Component: lazyWithRetry(() => import('@/components/design-system/financial-health-card/FinancialHealthCard')),
   },
   {
     slug: 'leaderboard',
@@ -519,7 +659,7 @@ export const registry: RegistryEntry[] = [
     viewport: { width: 700, height: 400 },
     sourceHtml: '/design-system/preview/components-leaderboard.html',
     revealSelector: '.seg button, .row',
-    Component: lazy(() => import('@/components/design-system/leaderboard/Leaderboard')),
+    Component: lazyWithRetry(() => import('@/components/design-system/leaderboard/Leaderboard')),
   },
   {
     slug: 'news-feed',
@@ -529,7 +669,8 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Crypto news feed — bullish/bearish cards, light + dark',
     viewport: { width: 500, height: 460 },
     sourceHtml: '/design-system/preview/components-news-feed.html',
-    Component: lazy(() => import('@/components/design-system/news-feed/NewsFeed')),
+    revealSelector: '.nf-card',
+    Component: lazyWithRetry(() => import('@/components/design-system/news-feed/NewsFeed')),
   },
   {
     slug: 'index-bar',
@@ -539,7 +680,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'CRM pipeline dashboard overview — metrics + stage index bar',
     viewport: { width: 700, height: 560 },
     sourceHtml: '/design-system/preview/components-index-bar.html',
-    Component: lazy(() => import('@/components/design-system/index-bar/IndexBar')),
+    Component: lazyWithRetry(() => import('@/components/design-system/index-bar/IndexBar')),
   },
   {
     slug: 'calendar',
@@ -549,7 +690,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Month navigator + day selection with event panel',
     viewport: { width: 420, height: 680 },
     sourceHtml: '/design-system/preview/components-calendar.html',
-    Component: lazy(() => import('@/components/design-system/calendar/Calendar')),
+    Component: lazyWithRetry(() => import('@/components/design-system/calendar/Calendar')),
   },
   {
     slug: 'file-folder',
@@ -559,7 +700,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Animated file-folder app icon — blue/normal + red/hot, light & dark',
     viewport: { width: 620, height: 520 },
     sourceHtml: '/design-system/preview/components-file-folder.html',
-    Component: lazy(() => import('@/components/design-system/file-folder/FileFolder')),
+    Component: lazyWithRetry(() => import('@/components/design-system/file-folder/FileFolder')),
   },
   {
     slug: 'stacked-list',
@@ -569,7 +710,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Stacked item list with avatars, labels and actions',
     viewport: { width: 700, height: 480 },
     sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/blob/main/stacked-list/stacked-list.html',
-    Component: lazy(() => import('@/components/design-system/stacked-list/StackedList')),
+    Component: lazyWithRetry(() => import('@/components/design-system/stacked-list/StackedList')),
   },
   {
     slug: 'task-card',
@@ -580,7 +721,7 @@ export const registry: RegistryEntry[] = [
     viewport: { width: 700, height: 680 },
     sourceHtml: '/design-system/preview/components-task-card.html',
     revealSelector: '.task',
-    Component: lazy(() => import('@/components/design-system/task-card/TaskCard')),
+    Component: lazyWithRetry(() => import('@/components/design-system/task-card/TaskCard')),
   },
   {
     slug: 'connect-modal',
@@ -590,7 +731,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'OAuth / API Key connection modal — emerald CTA',
     viewport: { width: 1280, height: 900 },
     sourceHtml: '/design-system/preview/brand-connect-modal.html',
-    Component: lazy(() => import('@/components/design-system/connect-modal/ConnectModal')),
+    Component: lazyWithRetry(() => import('@/components/design-system/connect-modal/ConnectModal')),
   },
   {
     slug: 'workflow-add-elements',
@@ -600,7 +741,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Right-click canvas menu — category + nodes flyout with segmented tabs',
     viewport: { width: 1200, height: 800 },
     sourceHtml: '/design-system/preview/components-workflow-add-elements.html',
-    Component: lazy(() => import('@/components/design-system/workflow-add-elements/WorkflowAddElements')),
+    Component: lazyWithRetry(() => import('@/components/design-system/workflow-add-elements/WorkflowAddElements')),
   },
   {
     slug: 'workflow-nodes',
@@ -610,7 +751,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Trigger / Action / Output node cards for the workflow canvas',
     viewport: { width: 900, height: 1100 },
     sourceHtml: '/design-system/preview/components-workflow-nodes.html',
-    Component: lazy(() => import('@/components/design-system/workflow-nodes/WorkflowNodes')),
+    Component: lazyWithRetry(() => import('@/components/design-system/workflow-nodes/WorkflowNodes')),
   },
   {
     slug: 'workflow-publish',
@@ -620,7 +761,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Publish button + popover for the AI workflow editor',
     viewport: { width: 480, height: 520 },
     sourceHtml: '/design-system/preview/components-workflow-publish.html',
-    Component: lazy(() => import('@/components/design-system/workflow-publish/WorkflowPublish')),
+    Component: lazyWithRetry(() => import('@/components/design-system/workflow-publish/WorkflowPublish')),
   },
   {
     slug: 'workflow-template-cards',
@@ -630,7 +771,8 @@ export const registry: RegistryEntry[] = [
     subtitle: 'AI workflow template card grid with flow preview and hover CTA',
     viewport: { width: 700, height: 620 },
     sourceHtml: '/design-system/preview/components-workflow-template-cards.html',
-    Component: lazy(() => import('@/components/design-system/workflow-template-cards/WorkflowTemplateCards')),
+    revealSelector: '.wtc-card',
+    Component: lazyWithRetry(() => import('@/components/design-system/workflow-template-cards/WorkflowTemplateCards')),
   },
   {
     slug: 'task-board',
@@ -641,7 +783,7 @@ export const registry: RegistryEntry[] = [
     viewport: { width: 1100, height: 800 },
     sourceHtml: '/design-system/preview/brand-taskboard.html',
     revealSelector: '.tb-column, .tb-card',
-    Component: lazy(() => import('@/components/design-system/task-board/TaskBoard')),
+    Component: lazyWithRetry(() => import('@/components/design-system/task-board/TaskBoard')),
   },
   {
     slug: 'sprint-planner-core',
@@ -652,7 +794,7 @@ export const registry: RegistryEntry[] = [
     viewport: { width: 1280, height: 900 },
     sourceHtml: '/design-system/preview/brand-sprint-planner-core.html',
     revealSelector: '.ticket, .day-cell',
-    Component: lazy(() => import('@/components/design-system/sprint-planner-core/SprintPlannerCore')),
+    Component: lazyWithRetry(() => import('@/components/design-system/sprint-planner-core/SprintPlannerCore')),
   },
   {
     slug: 'todo-list',
@@ -662,7 +804,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Animated daily to-do — drag-right to complete',
     viewport: { width: 700, height: 720 },
     sourceHtml: '/design-system/preview/components-todo-list.html',
-    Component: lazy(() => import('@/components/design-system/todo-list/TodoList')),
+    Component: lazyWithRetry(() => import('@/components/design-system/todo-list/TodoList')),
   },
   {
     slug: 'theme-editor',
@@ -673,7 +815,7 @@ export const registry: RegistryEntry[] = [
     viewport: { width: 480, height: 620 },
     sourceHtml: '/design-system/preview/components-theme-editor.html',
     revealSelector: '.te-mode, .te-sw',
-    Component: lazy(() => import('@/components/design-system/theme-editor/ThemeEditor')),
+    Component: lazyWithRetry(() => import('@/components/design-system/theme-editor/ThemeEditor')),
   },
   {
     slug: 'morph-surface-feedback',
@@ -683,7 +825,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Pill trigger morphs into a feedback surface with gliding brand dot',
     viewport: { width: 700, height: 360 },
     sourceHtml: 'https://github.com/borabekarr/deha-claude-design-htmls/tree/main/morph-surface-feedback',
-    Component: lazy(() => import('@/components/design-system/morph-surface-feedback/MorphSurface')),
+    Component: lazyWithRetry(() => import('@/components/design-system/morph-surface-feedback/MorphSurface')),
   },
   {
     slug: 'onboarding-completion',
@@ -694,7 +836,7 @@ export const registry: RegistryEntry[] = [
     viewport: { width: 480, height: 620 },
     sourceHtml: '/design-system/preview/brand-onboarding-completion.html',
     revealSelector: '.oc-row',
-    Component: lazy(() => import('@/components/design-system/onboarding-completion/OnboardingCompletion')),
+    Component: lazyWithRetry(() => import('@/components/design-system/onboarding-completion/OnboardingCompletion')),
   },
   {
     slug: 'dynamic-island-reader',
@@ -704,7 +846,7 @@ export const registry: RegistryEntry[] = [
     subtitle: 'Light-mode article + animated Dynamic Island progress',
     viewport: { width: 520, height: 940 },
     sourceHtml: '/design-system/preview/brand-dynamic-island-reader.html',
-    Component: lazy(() => import('@/components/design-system/dynamic-island-reader/DynamicIslandReader')),
+    Component: lazyWithRetry(() => import('@/components/design-system/dynamic-island-reader/DynamicIslandReader')),
   },
 
   // ══ Waiting ═══════════════════════════════════════════════════════════════

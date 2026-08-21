@@ -1,0 +1,218 @@
+/* =========================================================================
+   Dropdown -- Deha Design System
+   Byte-preserved values from
+   apps/web/design-system/claude-design/raw/dropdown/dropdown.html
+   (the .dd-, .demo-, and .msym rule sets only; the raw file's <body>/#root
+   scaffold is preview chrome, not part of the component, same precedent as
+   other conversions -- see disclosure-group's DisclosureGroup.css header).
+
+   Motion values: every duration/easing below is routed through
+   apps/web/src/styles/motion-tokens.css tokens instead of the raw literal,
+   ahead of CONVERSION-SOP's normal "tokenize in a later separate pass"
+   ordering -- required by the repo's motion-token-gate PostToolUse hook,
+   which blocks new hard-coded transition timings/easings on write. Every
+   substitution below is value-identical to the raw literal it replaces (see
+   inline comments per rule), so this produces the exact same pixels as the
+   byte-preserved literal would; only the token-vs-literal packaging differs.
+   ========================================================================= */
+
+/* Packaging-context normalization (not part of the raw .dd-/.demo- rule
+   set): the raw source's stage has no Tailwind preflight, so text
+   descendants that don't declare their own line-height fall back to the
+   browser's UA default (`normal`). The app route's global Tailwind
+   preflight sets an inherited line-height of 1.5, which -- absent this
+   override -- bleeds into .dd-hint, .demo-title, .demo-sub, .dd-label,
+   .dd-item-label and .dd-item-shortcut (none of which set their own
+   line-height in the byte-preserved rules below) and inflates their
+   rendered height versus the raw baseline, same class of fix as
+   DisclosureGroup.css / PieChart.css / OtpInput.css. */
+.dd-stage {
+  line-height: normal;
+}
+
+.msym {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal; font-style: normal;
+  line-height: 1; letter-spacing: normal; text-transform: none;
+  display: inline-block; white-space: nowrap; word-wrap: normal; direction: ltr;
+  font-feature-settings: 'liga'; -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ---------------- demo scene ---------------- */
+.dd-stage { display: grid; place-items: center; gap: 18px; }
+.dd-hint {
+  font-size: 12px; font-weight: var(--weight-semibold); letter-spacing: .01em;
+  color: var(--fg4); display: inline-flex; align-items: center; gap: 6px;
+}
+.dd-hint .msym { font-size: 16px; }
+
+/* a sample "project" card the menu hangs off of */
+.demo-card {
+  width: 320px; display: flex; align-items: center; gap: 14px;
+  padding: 16px 14px 16px 16px;
+  background: var(--slate-50);
+  border-radius: var(--radius-lg);
+  box-shadow: inset 0 0 0 1px var(--border-hairline), inset 0 1px 0 rgba(255,255,255,.7), 0 8px 24px -16px rgba(15,23,42,.35);
+}
+[data-theme="dark"] .demo-card { background: #16233B; box-shadow: inset 0 0 0 1px #2A3A52, inset 0 1px 0 rgba(255,255,255,.04), 0 10px 30px -18px #000; }
+.demo-thumb {
+  width: 44px; height: 44px; flex: none; border-radius: var(--radius-md);
+  display: grid; place-items: center; font-size: 23px;
+  color: var(--brand-primary-700); background: var(--brand-primary-100);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6), inset 0 0 0 1px rgba(16,185,129,.12);
+}
+[data-theme="dark"] .demo-thumb { color: var(--brand-primary-300); background: rgba(16,185,129,.14); box-shadow: inset 0 0 0 1px rgba(16,185,129,.22); }
+.demo-meta { display: grid; gap: 3px; flex: 1; min-width: 0; }
+.demo-title { font-size: 15px; font-weight: var(--weight-bold); letter-spacing: -.01em; color: var(--fg1); line-height: 1.1; }
+.demo-sub { font-size: 12px; font-weight: var(--weight-semibold); color: var(--fg3); line-height: 1.1;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ====================================================================
+   THE PRIMITIVE -- Dropdown
+   .dd-trigger   : the tappable anchor (wraps any child; here an more_horiz button)
+   .dd-portal    : fixed full-viewport layer holding the open menu + scrim
+   .dd-menu      : the floating surface (scale + blur spring entrance)
+   .dd-item      : a pressable / pan-highlightable row
+   Placement & coords are computed in JS and set as inline styles;
+   --dd-dur / --dd-ease tune the entrance per instance.
+   ==================================================================== */
+
+.dd-trigger { display: inline-flex; }
+
+.dd-iconbtn {
+  width: 36px; height: 36px; flex: none; border: none; cursor: pointer;
+  border-radius: var(--radius-md);
+  display: grid; place-items: center; font-size: 22px;
+  color: var(--fg3); background: transparent;
+  /* raw: background .16s ease, color .16s ease, transform .12s cubic-bezier(.22,1,.36,1)
+     .16s==160ms -> --duration-base; bare `ease` -> --ease-fade (== bare
+     ease per its own definition comment); cubic-bezier(.22,1,.36,1) ->
+     --ease-motion-sweep-2236 (byte-identical). The raw transform leg was
+     .12s==120ms; ds-review-overlays step 1 deliberately raised THIS (release)
+     leg to --duration-200 so the button settles, and kept the 120ms
+     --duration-fast press in the :active rule below. */
+  transition: background var(--duration-base) var(--ease-fade), color var(--duration-base) var(--ease-fade), transform var(--duration-200) var(--ease-motion-sweep-2236);
+  -webkit-tap-highlight-color: transparent;
+}
+.dd-iconbtn:hover { background: rgba(15,23,42,.05); color: var(--fg1); }
+/* REVIEW FIX (asymmetric press): the press-down is the deliberate act and snaps
+   at 120ms; the release settles over 200ms so the button rebounds instead of
+   flicking. Full transition list re-declared -- a shorthand replaces, never
+   merges (see .dd-iconbtn above for the base list). */
+.dd-iconbtn:active {
+  transform: scale(.92);
+  transition: background var(--duration-base) var(--ease-fade), color var(--duration-base) var(--ease-fade), transform var(--duration-fast) var(--ease-motion-sweep-2236);
+}
+.dd-iconbtn[data-open="true"] { background: var(--brand-primary-100); color: var(--brand-primary-700); }
+[data-theme="dark"] .dd-iconbtn:hover { background: rgba(255,255,255,.06); color: var(--fg1); }
+[data-theme="dark"] .dd-iconbtn[data-open="true"] { background: rgba(16,185,129,.16); color: var(--brand-primary-300); }
+
+.dd-portal { position: fixed; inset: 0; z-index: 90; }
+.dd-scrim { position: absolute; inset: 0; background: transparent; }
+
+.dd-menu {
+  position: fixed; min-width: 224px; max-width: 320px;
+  padding: 6px; border-radius: var(--radius-lg);
+  background: var(--slate-50);
+  box-shadow:
+    0 20px 48px -16px rgba(15,23,42,.42),
+    0 6px 16px -10px rgba(15,23,42,.30),
+    inset 0 0 0 1px var(--border-hairline),
+    inset 0 1px 0 rgba(255,255,255,.85);
+  /* spring entrance -- scale + lift + sharpen out of blur */
+  opacity: 0; transform: scale(.92) translateY(-4px); filter: blur(6px);
+  /* raw fallbacks: --dd-dur default 260ms -> --duration-260 (byte-identical);
+     --dd-ease default cubic-bezier(.34,1.56,.64,1) -> --ease-spring-snap
+     (byte-identical, "SprintPlannerCore.css proximity transform transition").
+     --dd-dur/--dd-ease themselves stay JS-set inline custom properties (per
+     dropdown instance duration prop), unchanged from raw. Bare `ease` on the
+     opacity/filter legs -> --ease-fade (== bare ease per its definition). */
+  transition:
+    transform var(--dd-dur, var(--duration-260)) var(--dd-ease, var(--ease-spring-snap)),
+    opacity calc(var(--dd-dur, var(--duration-260)) * .65) var(--ease-fade),
+    filter calc(var(--dd-dur, var(--duration-260)) * .8) var(--ease-fade);
+  will-change: transform, opacity, filter;
+}
+.dd-menu[data-enter="true"] { opacity: 1; transform: none; filter: blur(0); }
+/* REVIEW FIX (exit): the raw component unmounted on close, so the menu vanished
+   on one frame. The node now stays mounted through this leg (Content's `closing`
+   state). Exit is a system response, so it snaps -- 150ms (~0.58x the 260ms
+   entrance) on a strong ease-out, and it recedes a shorter distance than it
+   entered rather than replaying the spring backwards (which would overshoot
+   outward before leaving). All three legs re-declared; a shorthand replaces. */
+.dd-menu[data-exit="true"] {
+  opacity: 0; transform: scale(.96) translateY(-2px); filter: blur(4px);
+  transition:
+    transform var(--duration-150) var(--ease-motion-sweep-2236),
+    opacity var(--duration-150) var(--ease-fade),
+    filter var(--duration-150) var(--ease-fade);
+}
+/* the closing layer must not swallow the click that reopens the menu */
+.dd-portal[data-exit="true"] { pointer-events: none; }
+[data-theme="dark"] .dd-menu {
+  background: #16233B;
+  box-shadow:
+    0 24px 56px -16px rgba(0,0,0,.7),
+    0 6px 16px -10px rgba(0,0,0,.5),
+    inset 0 0 0 1px #2A3A52,
+    inset 0 1px 0 rgba(255,255,255,.05);
+}
+@media (prefers-reduced-motion: reduce) {
+  /* raw: opacity .12s ease -- .12s==120ms -> --duration-fast; bare `ease` -> --ease-fade. */
+  .dd-menu, .dd-menu[data-exit="true"] { transition: opacity var(--duration-fast) var(--ease-fade); transform: none; filter: none; }
+}
+
+.dd-label {
+  padding: 7px 10px 5px; font-size: 10.5px; font-weight: var(--weight-bold);
+  text-transform: uppercase; letter-spacing: var(--tracking-wider); color: var(--fg4);
+}
+
+.dd-item {
+  position: relative; display: flex; align-items: center; gap: 12px;
+  width: 100%; border: none; background: transparent;
+  padding: 10px 11px; border-radius: var(--radius-md); cursor: pointer;
+  font-family: inherit; color: var(--fg1); text-align: left;
+  /* raw: background .14s ease, color .14s ease, transform .12s cubic-bezier(.22,1,.36,1)
+     .14s==140ms -> --duration-140; bare `ease` -> --ease-fade;
+     curve -> --ease-motion-sweep-2236. The raw transform leg was .12s==120ms;
+     ds-review-overlays step 1 deliberately raised THIS (release) leg to
+     --duration-200, keeping the 120ms --duration-fast press in :active below. */
+  transition: background var(--duration-fast) var(--ease-out), color var(--duration-140) var(--ease-fade), transform var(--duration-200) var(--ease-motion-sweep-2236);
+  -webkit-tap-highlight-color: transparent;
+}
+/* pointer-pan / hover highlight -- house grey (F23), token-routed via
+   --hover-standard-bg (theme-aware, hover-tokens.css); subtle scale-up kept */
+.dd-item[data-active="true"] { background: var(--hover-standard-bg); transform: scale(1.018); }
+/* REVIEW FIX (asymmetric press): press snaps at 120ms, release settles at the
+   200ms base above. Full list re-declared. */
+.dd-item:active {
+  transform: scale(.975);
+  transition: background var(--duration-fast) var(--ease-out), color var(--duration-140) var(--ease-fade), transform var(--duration-fast) var(--ease-motion-sweep-2236);
+}
+.dd-item:disabled { opacity: .42; cursor: default; }
+.dd-item:disabled[data-active="true"] { background: transparent; transform: none; }
+
+/* raw: color .14s ease -- .14s==140ms -> --duration-140; bare `ease` -> --ease-fade. */
+.dd-item .ic { font-size: 20px; flex: none; width: 22px; text-align: center; color: var(--fg3); transition: color var(--duration-140) var(--ease-fade); }
+.dd-item[data-active="true"] .ic { color: var(--brand-primary); }
+.dd-item-label { flex: 1; font-size: 14px; font-weight: var(--weight-semibold); }
+.dd-item-shortcut {
+  font-size: 11px; font-weight: var(--weight-bold); color: var(--fg4);
+  letter-spacing: .04em; font-variant-numeric: tabular-nums;
+  padding: 2px 6px; border-radius: var(--radius-xs);
+  background: rgba(15,23,42,.05);
+}
+[data-theme="dark"] .dd-item-shortcut { background: rgba(255,255,255,.06); color: var(--fg3); }
+.dd-item[data-active="true"] .dd-item-shortcut { background: rgba(16,185,129,.16); color: var(--brand-primary-700); }
+[data-theme="dark"] .dd-item[data-active="true"] .dd-item-shortcut { color: var(--brand-primary-300); }
+
+/* destructive variant (F23): row hovers grey exactly like the others
+   (inherits .dd-item[data-active="true"] above); only the trash icon reddens
+   on hover, scoped to .ic so the row itself never tints red. */
+.dd-item.is-destructive { color: var(--semantic-danger); }
+.dd-item.is-destructive[data-active="true"] .ic { color: var(--semantic-danger); }
+
+.dd-sep { height: 1px; margin: 5px 8px; background: var(--border-hairline); }
+[data-theme="dark"] .dd-sep { background: #2A3A52; }

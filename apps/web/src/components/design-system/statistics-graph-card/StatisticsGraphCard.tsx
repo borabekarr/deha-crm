@@ -209,9 +209,6 @@ function CardItem({ data, cap }: CardItemProps) {
 
               <div className="sg-spacer" />
 
-              <div className="sg-vlabel">
-                {d.vlabel}
-              </div>
               <div className="sg-value" data-value />
 
               <div className="sg-sub2">
@@ -247,21 +244,21 @@ function CardItem({ data, cap }: CardItemProps) {
             </div>
             <fieldset ref={rangeFieldsetRef} className="seg vert" aria-label="Trend range" style={{ margin: 0, border: 0, padding: 0, minWidth: 0 }}>
               <span className="seg-pill" />
-              <button type="button" data-r="Today" data-proximity>
+              <button type="button" data-r="Today">
                 <span className="material-symbols-outlined">today</span>Today
               </button>
-              <button type="button" data-r="Weekly" data-proximity>
+              <button type="button" data-r="Weekly">
                 <RangeIconSvgWeekly />
                 Weekly
               </button>
-              <button type="button" className="active" data-r="Monthly" data-proximity>
+              <button type="button" className="active" data-r="Monthly">
                 <span className="material-symbols-outlined">calendar_month</span>Monthly
               </button>
-              <button type="button" data-r="Quarterly" data-proximity>
+              <button type="button" data-r="Quarterly">
                 <RangeIconSvgQuarterly />
                 Quarterly
               </button>
-              <button type="button" data-r="Yearly" data-proximity>
+              <button type="button" data-r="Yearly">
                 <span className="material-symbols-outlined">event_repeat</span>Yearly
               </button>
             </fieldset>

@@ -59,13 +59,21 @@ export default function AdjustTimeframe() {
     { id: 'd90',   label: '90D',     start: Math.max(0, todayIdx - 89), end: todayIdx },
   ]
 
+  /* F2b: zoom pill — fixed levels, default 50%. Higher % = more zoomed in
+     (fewer days visible); level 100 -> MIN_DAYS, level 25 -> near totalDays. */
+  const ZOOM_LEVELS = [25, 50, 75, 100]
+  const levelToDays = (level: number, total: number): number =>
+    clamp(Math.round(total * (1 - level / 100) + MIN_DAYS * (level / 100)), MIN_DAYS, total)
+  const DEFAULT_DAYS_VISIBLE = levelToDays(50, totalDays)
+
   /* ── State ───────────────────────────────────────────────────────────── */
   /* Default preset: "30D" (index 1). */
   const defaultPreset = presets[1]
   const [startIdx,    setStartIdx]    = useState(() => clamp(defaultPreset.start, 0, todayIdx))
   const [endIdx,      setEndIdx]      = useState(todayIdx)
   const [trackW,      setTrackW]      = useState(0)
-  const [daysVisible, setDaysVisible] = useState(() => clamp(105, MIN_DAYS, totalDays))
+  const [daysVisible, setDaysVisible] = useState(() => DEFAULT_DAYS_VISIBLE)
+  const [zoomLevel,   setZoomLevel]   = useState(50)
   const [scroll,      setScroll]      = useState(0)
   const [anim,        setAnim]        = useState(false)
   const [drag,        setDrag]        = useState<'start' | 'end' | 'move' | null>(null)
@@ -77,22 +85,22 @@ export default function AdjustTimeframe() {
 
   /* ── Derived display values ──────────────────────────────────────────── */
   const ppd     = trackW > 0 ? trackW / clamp(daysVisible, MIN_DAYS, totalDays) : 6
-  /* criterion_3 fix: .tf-handle is a 22px-wide hit box centered on its index's
-     pixel position, so at either domain edge (index 0 or todayIdx) half the
-     handle overhangs past the strip's true (date-accurate) content width.
-     EDGE_PAD (18px, > the handle's 11px half-width) already gave the LEFT
-     overhang room via minScroll's -EDGE_PAD allowance. The right side had no
-     equivalent, so a selection ending at "today" always clipped the right
-     handle against .tf-track's overflow:hidden edge, at every zoom level.
-     Symmetric fix: widen stripW itself by EDGE_PAD on the right (the ruler's
-     ticks + edge mask extend into it automatically since both read stripW),
-     so the headroom is real strip content -- not a blank gap -- and
-     criterion_2's "no blank region right of the strip" still holds because
-     maxScroll is still defined as exactly stripW - trackW. */
+  /* .tf-handle.start is a 22px hit box CENTERED on index 0's pixel position
+     (left:0 + translate(-50%)), so it overhangs 11px past the strip's true
+     left content edge -- EDGE_PAD reserves that as pure SCROLL headroom via
+     minScroll's -EDGE_PAD allowance (blank track background, no strip
+     content needed there). .tf-handle.end is right-anchored (right:0) fully
+     INSIDE .tf-sel (see AdjustTimeframe.css ".tf-handle.end" comment), so it
+     never overhangs past the strip's right content edge -- stripW/maxScroll
+     must NOT carry the same EDGE_PAD on the right, or the default/flush-right
+     view (and the post-zoom clamp) both anchor short/long by that padding. */
   const EDGE_PAD = 18
-  const stripW  = totalDays * ppd + EDGE_PAD
+  const stripW  = totalDays * ppd
   const maxScroll = Math.max(0, stripW - trackW)
   const minScroll = -EDGE_PAD
+  /* Ruler now spans the strip's full (unpadded) width -- ticks stop exactly
+     at todayIdx and the strip/ruler right edges coincide. */
+  const rulerW = stripW
 
   const selLeft  = startIdx * ppd
   const selWidth = (endIdx - startIdx) * ppd
@@ -114,16 +122,21 @@ export default function AdjustTimeframe() {
      calls (e.g. React Strict Mode double-invocation of callback refs) and only
      clamp scroll when the track actually resizes. */
   const lastTrackW  = useRef(0)
+  /* P2/P6: cached track getBoundingClientRect(), refreshed only at drag
+     start, in the RO callback, and after each zoom step -- NOT on every
+     pointermove. getLive() below reads this cache instead of calling
+     getBoundingClientRect() per event. */
+  const trackRectRef = useRef<DOMRect | null>(null)
   /* Item 6: live-scroll ref so drag math always sees current scroll.
      Updated via setScrollLive (wraps setScroll) — never written during render. */
   const scrollRef   = useRef(0)
-  /* Drag-clamp fix: the move-drag's onMove closure is registered once at
-     pointerdown and outlives re-renders, so a plain `daysVisible` read
-     inside it would be stale once the auto zoom-out below changes it
-     mid-gesture. Synced during render (no effect) so onMove always sees
-     the latest value. */
-  const daysVisibleRef = useRef(daysVisible)
-  daysVisibleRef.current = daysVisible
+  /* FAIL 2 fix: onMove's closure (registered once at pointerdown) can go
+     stale mid-gesture if ppd changes (e.g. track resize). ensureVisible's
+     clamp math needs the CURRENT ppd to place the settle position inside
+     the track -- so it's synced during render (no effect) and read via
+     ppdRef.current at both ensureVisible call sites below. */
+  const ppdRef = useRef(ppd)
+  ppdRef.current = ppd
 
   /* ── Proximity groups (hover glow, locked convention: radius 80, dy×3) ─
      tf-month / tf-handle / tf-lens-hit live inside .tf-strip, which
@@ -189,18 +202,18 @@ export default function AdjustTimeframe() {
   const onTrackWidth = useCallback((w: number) => {
     if (!didInit.current) {
       // First-time: derive ppd from initial daysVisible and center the selection
-      const nppd = w / clamp(105, MIN_DAYS, totalDays)
-      const nStrip = totalDays * nppd + EDGE_PAD // keep in sync with stripW's right-edge headroom
+      const nppd = w / DEFAULT_DAYS_VISIBLE
+      const nStrip = totalDays * nppd // keep in sync with stripW (no right-edge pad)
       const nMaxScroll = Math.max(0, nStrip - w)
       // startIdx/endIdx at this point are the initial preset values
       // We use functional state to compute the right center scroll
       lastTrackW.current = w
       setTrackW(w)
-      setScrollLive(clamp(
-        ((defaultPreset.start + todayIdx) / 2) * nppd - w / 2,
-        -EDGE_PAD,
-        nMaxScroll,
-      ))
+      trackRectRef.current = trackElRef.current?.getBoundingClientRect() ?? null
+      /* B1: default selection anchored flush right — scroll all the way to
+         maxScroll so the selection end (todayIdx) sits at the ruler's right
+         edge instead of centering the initial view. */
+      setScrollLive(nMaxScroll)
       didInit.current = true
     } else if (w !== lastTrackW.current) {
       // Only clamp-to-fit scroll when the track element genuinely resizes.
@@ -209,19 +222,53 @@ export default function AdjustTimeframe() {
       // with a stale upper bound.
       lastTrackW.current = w
       setTrackW(w)
-      setScrollLive((s) => clamp(s, -EDGE_PAD, Math.max(0, totalDays * (w / clamp(105, MIN_DAYS, totalDays)) + EDGE_PAD - w)))
+      trackRectRef.current = trackElRef.current?.getBoundingClientRect() ?? null
+      setScrollLive((s) => clamp(s, -EDGE_PAD, Math.max(0, totalDays * (w / DEFAULT_DAYS_VISIBLE) - w)))
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // intentionally empty — only fires from ResizeObserver, not from React re-renders
+
+  /* P1: stable callback ref for .tf-track (was an inline arrow — recreated
+     every render). useCallback with empty deps means React only invokes this
+     ref on actual mount/unmount, not per-render, so the ResizeObserver is
+     created/torn down exactly once per element lifetime instead of racing a
+     detach branch that nulled trackElRef before the "already registered"
+     check ran. */
+  const trackCallbackRef = useCallback((el: HTMLDivElement | null) => {
+    if (el) {
+      trackElRef.current = el
+      trackRef(el, { onTrackWidth })
+    } else {
+      cleanupTrack(trackElRef.current)
+      trackElRef.current = null
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  /* Step 4 (B3): shared fit pass — keeps [s,e] (+ the .tf-handle grip's own
+     HANDLE_PAD half-width) inside [target, target+tw] after a manual zoom()
+     step, so a fast zoom never leaves a handle clipped outside the viewport. */
+  const HANDLE_PAD = 12
+  function fitScroll(target: number, s: number, e: number, nppd: number, tw: number, minS: number, maxS: number): number {
+    let t = target
+    const l = s * nppd - HANDLE_PAD
+    const r = e * nppd + HANDLE_PAD
+    if (l < t) t = Math.max(minS, l)
+    else if (r > t + tw) t = Math.min(maxS, r - tw)
+    return clamp(t, minS, maxS)
+  }
 
   /* ── Scroll helpers ──────────────────────────────────────────────────── */
   function ensureVisible(idx: number, curScroll: number, curPpd: number, curTrackW: number): void {
     const x = idx * curPpd - curScroll
     const margin = 26
+    /* Fresh maxScroll from curPpd (not the render-scope `maxScroll` const,
+       which is stale once curPpd diverges from the render's own ppd mid-drag). */
+    const curMaxScroll = Math.max(0, totalDays * curPpd - curTrackW)
     if (x < margin) {
-      setScrollLive(clamp(idx * curPpd - margin, minScroll, maxScroll))
+      setScrollLive(clamp(idx * curPpd - margin, minScroll, curMaxScroll))
     } else if (x > curTrackW - margin) {
-      setScrollLive(clamp(idx * curPpd - curTrackW + margin, minScroll, maxScroll))
+      setScrollLive(clamp(idx * curPpd - curTrackW + margin, minScroll, curMaxScroll))
     }
   }
 
@@ -231,8 +278,12 @@ export default function AdjustTimeframe() {
     setAnim(false)
     setDrag(type)
 
+    // P6: refresh the cached track rect once at drag start; getLive() below
+    // reads this cache for the rest of the gesture instead of calling
+    // getBoundingClientRect() on every pointermove.
+    trackRectRef.current = trackElRef.current?.getBoundingClientRect() ?? null
+
     // Snapshot current values at drag-start for closures
-    const snapPpd     = ppd
     const snapTrackW  = trackW
     const snapStart   = startIdx
     const snapEnd     = endIdx
@@ -243,13 +294,19 @@ export default function AdjustTimeframe() {
       pointerId: e.pointerId,
       currentTarget: e.currentTarget,
       getLive: () => {
-        const rect = trackElRef.current?.getBoundingClientRect() ?? null
+        /* P2/P6: cached rect (refreshed at drag start / RO / zoom), not a
+           fresh getBoundingClientRect() per pointermove. */
+        const rect = trackRectRef.current
         /* Item 6: read live scroll from ref so drag math stays accurate near edges */
         const liveScroll = scrollRef.current
         return {
           startIdx:   snapStart,
           endIdx:     snapEnd,
-          ppd:        snapPpd,
+          /* Live ppd, not the drag-start snapshot: ppd can still change
+             mid-drag (e.g. track resize), and the hook uses this value every
+             frame to convert pointer position -> index, so a stale ppd here
+             would keep computing indices against the old scale. */
+          ppd:        ppdRef.current,
           scroll:     liveScroll,
           todayIdx,
           totalDays,
@@ -264,7 +321,7 @@ export default function AdjustTimeframe() {
       onMove: (ns, ne, focusIdx) => {
         setStartIdx(ns)
         setEndIdx(ne)
-        ensureVisible(focusIdx, scrollRef.current, snapPpd, snapTrackW)
+        ensureVisible(focusIdx, scrollRef.current, ppdRef.current, snapTrackW)
         // Item 3: slide glider when drag lands exactly on a preset. Pass the matched
         // id so measureGlider reads THAT pill directly — the `.active` class has not
         // committed yet, so a bare measure would read the stale (old) active pill.
@@ -279,37 +336,12 @@ export default function AdjustTimeframe() {
           // undefined and the glider's data-on="false" spring+blur fade-out fires.
           setPickedPreset(null)
         }
-        // Item 4/2: auto zoom-out whenever focal point is off-screen (edge condition),
-        // regardless of whether scroll moved — drive off focal check alone.
-        // The zoom-out changes ppd for the NEXT render, but this onMove closure
-        // (registered once at pointerdown) keeps using snapPpd/snapTrackW for the
-        // rest of the gesture. Left uncorrected, a scroll value clamped against
-        // the OLD ppd's maxScroll no longer matches the NEW (smaller) stripW,
-        // exposing blank track past today on a fast rightward drag. Fix: clamp
-        // scroll against the NEW ppd/maxScroll at this same update source,
-        // right when daysVisible changes — not just at the render-derived value.
-        const focalPx = focusIdx * snapPpd - scrollRef.current
-        if (focalPx < 26 || focalPx > snapTrackW - 26) {
-          const prevDv = daysVisibleRef.current
-          const nextDv = clamp(Math.round(prevDv * 1.5), MIN_DAYS, totalDays)
-          if (nextDv !== prevDv) {
-            daysVisibleRef.current = nextDv
-            const nppd   = snapTrackW / nextDv
-            const nStrip = totalDays * nppd + EDGE_PAD // keep in sync with stripW's right-edge headroom
-            setDaysVisible(nextDv)
-            setScrollLive(clamp(
-              focusIdx * nppd - snapTrackW / 2,
-              minScroll,
-              Math.max(0, nStrip - snapTrackW),
-            ))
-          }
-        }
       },
       onUp: () => {
         setDrag(null)
         setAnim(true)
       },
-      ensureVisible: (idx) => ensureVisible(idx, scrollRef.current, snapPpd, snapTrackW),
+      ensureVisible: (idx) => ensureVisible(idx, scrollRef.current, ppdRef.current, snapTrackW),
     })
   }
 
@@ -355,42 +387,49 @@ export default function AdjustTimeframe() {
      computing the center-anchored scroll, fit-check it against .tf-sel's new
      pixel bounds (+ handle half-width padding) and nudge it back in if the
      zoom step would otherwise clip either edge. */
-  function zoom(dir: number) {
-    const next =
-      dir < 0
-        ? Math.min(Math.round(daysVisible * 1.5), totalDays)
-        : Math.max(Math.round(daysVisible / 1.5), MIN_DAYS)
+  /* F2b: steps through ZOOM_LEVELS by index delta (+1 for "+", -1 for "-"). */
+  function stepZoom(dir: number) {
+    const idx = ZOOM_LEVELS.indexOf(zoomLevel)
+    const nextIdx = clamp(idx + dir, 0, ZOOM_LEVELS.length - 1)
+    if (nextIdx === idx) return
+    const nextLevel = ZOOM_LEVELS[nextIdx]
+    const next = levelToDays(nextLevel, totalDays)
+    setZoomLevel(nextLevel)
     if (next === daysVisible) return
     const nppd      = trackW / next
-    const nStrip    = totalDays * nppd + EDGE_PAD // keep in sync with stripW's right-edge headroom
+    const nStrip    = totalDays * nppd // keep in sync with stripW (no right-edge pad)
     const nMaxScroll = Math.max(0, nStrip - trackW)
     /* viewport-center anchor: index currently centered on-screen, measured
        with the pre-zoom ppd, kept centered after ppd changes */
     const viewCenterIdx = (scroll + trackW / 2) / ppd
-    let targetScroll = clamp(viewCenterIdx * nppd - trackW / 2, minScroll, nMaxScroll)
-
-    /* Fit pass: HANDLE_PAD covers the .tf-handle grip (22px wide, centered on
-       the selection edge) so the handle itself never straddles the viewport
-       boundary, not just the bare .tf-sel edge. */
-    const HANDLE_PAD  = 12
-    const selLeftNew  = startIdx * nppd - HANDLE_PAD
-    const selRightNew = endIdx * nppd + HANDLE_PAD
-    if (selLeftNew < targetScroll) {
-      targetScroll = Math.max(minScroll, selLeftNew)
-    } else if (selRightNew > targetScroll + trackW) {
-      targetScroll = Math.min(nMaxScroll, selRightNew - trackW)
-    }
-    /* Final safety clamp: the fit-pass branches above only clamp against ONE
-       bound each (left branch never re-checks nMaxScroll, right branch never
-       re-checks minScroll). On a narrow track where a selection's pad-adjusted
-       width exceeds trackW, that single-sided clamp could leave targetScroll
-       outside [minScroll, nMaxScroll] — re-clamp here so it always matches the
-       same bounds the .tf-strip render-time clamp (Step 2) uses. */
-    targetScroll = clamp(targetScroll, minScroll, nMaxScroll)
+    const centerScroll = clamp(viewCenterIdx * nppd - trackW / 2, minScroll, nMaxScroll)
+    /* Fit pass (B3): HANDLE_PAD covers
+       the .tf-handle grip so it never straddles the viewport boundary, not
+       just the bare .tf-sel edge; final clamp keeps it in [minScroll, nMaxScroll]
+       even on a narrow track where the padded selection exceeds trackW. */
+    const targetScroll = fitScroll(centerScroll, startIdx, endIdx, nppd, trackW, minScroll, nMaxScroll)
 
     setAnim(true)
     setDaysVisible(next)
     setScrollLive(targetScroll)
+    // P6: refresh the cached rect after a manual zoom step too.
+    trackRectRef.current = trackElRef.current?.getBoundingClientRect() ?? null
+  }
+
+  /* F2b: routing (pan) — moves the visible window without changing zoom. */
+  function panBy(dir: number) {
+    const step = trackW * 0.8 * dir
+    setAnim(true)
+    setScrollLive((s) => clamp(s + step, minScroll, maxScroll))
+  }
+
+  /* F2b: ArrowLeft/ArrowRight routes only while the shell itself is the
+     focused element (not a descendant like a handle or pill button), so
+     this handler never needs a global window/document listener. */
+  function handleShellKey(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (e.target !== e.currentTarget) return
+    if (e.key === 'ArrowLeft') { e.preventDefault(); panBy(-1) }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); panBy(1) }
   }
 
   function selectMonth(m: MonthInfo) {
@@ -428,7 +467,7 @@ export default function AdjustTimeframe() {
 
   /* ── Render ─────────────────────────────────────────────────────────── */
   return (
-    <div className="tf-shell" ref={shellSquircleRef}>
+    <div className="tf-shell" ref={shellSquircleRef} tabIndex={0} onKeyDown={handleShellKey}>
       <div
         className="tf-card"
         ref={cardSquircleRef}
@@ -438,14 +477,17 @@ export default function AdjustTimeframe() {
       >
         <fieldset className="tf-head">
           {/* Item 2: plain Montserrat 900 header — no pill chrome */}
-          <div
-            className={'tf-range' + (bumpKey ? ' bump' : '')}
-            key={bumpKey}
-            aria-live="polite"
-          >
-            <span className="tf-seg start">{fmtDate(startDate)}</span>
-            <span className="tf-dash">–</span>
-            <span className="tf-seg end">{endIsToday ? 'Today' : fmtDate(endDate)}</span>
+          <div className="tf-range-group">
+            <span className="material-symbols-outlined tf-range-icon" aria-hidden="true">calendar_month</span>
+            <div
+              className={'tf-range' + (bumpKey ? ' bump' : '')}
+              key={bumpKey}
+              aria-live="polite"
+            >
+              <span className="tf-seg start">{fmtDate(startDate)}</span>
+              <span className="tf-dash">–</span>
+              <span className="tf-seg end">{endIsToday ? 'Today' : fmtDate(endDate)}</span>
+            </div>
           </div>
 
           {/* Item 1: segmented pill track with sliding glider */}
@@ -483,39 +525,24 @@ export default function AdjustTimeframe() {
             type="button"
             className="tf-pan"
             data-proximity
-            aria-label="Zoom out"
-            title="Zoom out"
-            disabled={daysVisible >= totalDays}
-            onClick={() => zoom(-1)}
+            aria-label="Pan left"
+            title="Pan left"
+            disabled={scroll <= minScroll}
+            onClick={() => panBy(-1)}
           >
             <span className="material-symbols-outlined">keyboard_double_arrow_left</span>
           </button>
 
           <div
             className="tf-track"
-            ref={(el) => {
-              if (el) {
-                /* Only register the ResizeObserver once per element mount.
-                   The callback-ref fires on every render; calling trackRef
-                   again on the same element would re-measure and overwrite
-                   scroll state (clamping with stale closure values). */
-                if (trackElRef.current !== el) {
-                  trackElRef.current = el
-                  trackRef(el, { onTrackWidth })
-                }
-              } else {
-                cleanupTrack(trackElRef.current)
-                trackElRef.current = null
-              }
-            }}
+            ref={trackCallbackRef}
             onPointerDown={onTrackDown}
           >
             <div
               className="tf-strip"
               data-anim={anim ? 'true' : 'false'}
               /* Render-time safety clamp: `scroll` state can momentarily race
-                 ahead of a mid-drag daysVisible/ppd change (auto zoom-out
-                 during a fast rightward move-drag), which would otherwise let
+                 ahead of a mid-drag daysVisible/ppd change, which would otherwise let
                  the translate expose blank track past today. minScroll/
                  maxScroll are recomputed fresh every render from the CURRENT
                  ppd/stripW, so clamping here is always in sync — no matter
@@ -523,7 +550,7 @@ export default function AdjustTimeframe() {
                  can never fall short of the track's right edge. */
               style={{ width: stripW + 'px', transform: `translateX(${-clamp(scroll, minScroll, maxScroll)}px)` }}
             >
-              <div className="tf-ruler" style={{ width: stripW + 'px' }} />
+              <div className="tf-ruler" style={{ width: rulerW + 'px' }} />
 
               {months.map((m) =>
                 m.startIdx === 0 ? null : (
@@ -598,16 +625,38 @@ export default function AdjustTimeframe() {
                 />
               </div>
             </div>
+
+            <div className="tf-zoom-pill" role="group" aria-label="Zoom level">
+              <button
+                type="button"
+                className="tf-zoom-btn"
+                aria-label="Zoom out"
+                disabled={ZOOM_LEVELS.indexOf(zoomLevel) <= 0}
+                onClick={() => stepZoom(-1)}
+              >
+                −
+              </button>
+              <span className="tf-zoom-pct">{zoomLevel}%</span>
+              <button
+                type="button"
+                className="tf-zoom-btn"
+                aria-label="Zoom in"
+                disabled={ZOOM_LEVELS.indexOf(zoomLevel) >= ZOOM_LEVELS.length - 1}
+                onClick={() => stepZoom(1)}
+              >
+                +
+              </button>
+            </div>
           </div>
 
           <button
             type="button"
             className="tf-pan"
             data-proximity
-            aria-label="Zoom in"
-            title="Zoom in"
-            disabled={daysVisible <= MIN_DAYS || (endIdx - startIdx + 1) >= Math.max(Math.round(daysVisible / 1.5), MIN_DAYS)}
-            onClick={() => zoom(1)}
+            aria-label="Pan right"
+            title="Pan right"
+            disabled={scroll >= maxScroll}
+            onClick={() => panBy(1)}
           >
             <span className="material-symbols-outlined">keyboard_double_arrow_right</span>
           </button>

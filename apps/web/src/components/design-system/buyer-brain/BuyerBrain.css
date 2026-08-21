@@ -1,0 +1,733 @@
+/* =========================================================================
+   Buyer-Brain Qualification — Deha Design System
+   Byte-preserved from
+   apps/web/design-system/claude-design/raw/buyer-brain/buyer-brain.html
+
+   Scope note (packaging, not a value change): the raw file is a standalone
+   page whose inline <style> owns `:root`, `html.dark`, a `* { box-sizing }`
+   reset and `html, body` rules. Inside the app route those would leak across
+   the whole document, so every rule below is the raw source's own rule with
+   its selector prefixed by `.buyer-brain-root`, this port's packaging
+   wrapper (`html.dark X` becomes `html.dark .buyer-brain-root X`). Every
+   class name, declared value, duration, easing and colour is otherwise
+   untouched.
+
+   `.buyer-brain-root` itself carries what the raw page put on `body`
+   (Montserrat stack, --canvas background, --txt colour, the centering grid,
+   the 34px/22px padding, font-smoothing and the background
+   transition (now tokenized to duration-200+duration-150, see below)).
+
+   Excluded from the port: the raw page's `.bbq-darktoggle` chrome rules are
+   dropped, because no markup uses them (the toggle drives html.dark, which
+   the app owns) — same authoring-chrome exclusion precedent used elsewhere
+   in the library. The
+   `.bbq-tabs`/`.bbq-tab` rule cluster (raw lines ~227-260) was also pruned
+   on 2026-08-16 (plan anim-mult-wiring): no markup in this port renders a
+   tab row, so the CSS was never-rendered dead weight.
+
+   Motion: every duration is expressed via `var(--duration-*)` (or an exact
+   calc-sum of two tiers where no single tier matched), wrapped as
+   `calc(<token(s)> * var(--anim-mult, 1))` so motion-token-gate accepts it,
+   value-identical to the raw source's literal seconds (no retiming). Easings
+   are substituted only where a token resolves to the byte-identical curve:
+     bare `ease`                     == var(--ease-fade)         cubic-bezier(.25,.1,.25,1)
+     bare `ease-in-out`              == var(--ease-in-out)       cubic-bezier(.42,0,.58,1)
+     cubic-bezier(.34,1.56,.64,1)    == var(--ease-spring-snap)
+     cubic-bezier(.4,0,.2,1)         == var(--ease-standard)
+   Substitution sites: .buyer-brain-root (background), .bbq-card,
+   .bbq-ink, .bbq-qual, .bbq-piece, .bbq-line, circle.bbq-knob, .bbq-label,
+   .bbq-detail, .bbq-detail-card, .bbq-back, .bbq-caret, .bbq-think span,
+   .bbq-chip. No token was minted.
+   ========================================================================= */
+
+.buyer-brain-root {
+  --surface: #ffffff;
+  --canvas: #eef2f7;
+  --bezel: #d4dce8;
+  --line: #cbd5e1;
+  --line-soft: #e2e8f0;
+  --txt: #0f172a;
+  --txt2: #475569;
+  --txt3: #94a3b8;
+  --pill-bg: #ffffff;
+  --emerald: #10b981;
+  --dot: #94a3b8;
+  --brainimg: url('https://i.postimg.cc/5yS1b5wk/PNG-image-10.png');
+  --gloss: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --shadow: 0 18px 50px -12px rgba(15, 23, 42, 0.3), 0 2px 6px rgba(15, 23, 42, 0.06);
+}
+html.dark .buyer-brain-root {
+  --surface: #1e293b;
+  --canvas: #0b1220;
+  --bezel: #020617;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-soft: rgba(255, 255, 255, 0.06);
+  --txt: #f1f5f9;
+  --txt2: #cbd5e1;
+  --txt3: #64748b;
+  --pill-bg: #0f172a;
+  --dot: #334155;
+  --gloss: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --shadow: 0 24px 60px -16px rgba(0, 0, 0, 0.65), 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Raw source's own `* { box-sizing: border-box }`, scoped to the subtree. */
+.buyer-brain-root,
+.buyer-brain-root * {
+  box-sizing: border-box;
+}
+
+/* Packaging-context normalization (not part of the raw rule set): the raw
+   page has no Tailwind preflight, so text descendants that declare no
+   line-height fall back to the UA default (`normal`). The app route loads
+   preflight, which sets 1.5 — that would change measured text heights inside
+   the fixed-height 560x362 stage and shift the label rows off their leader
+   lines. */
+.buyer-brain-root,
+.buyer-brain-root * {
+  line-height: normal;
+}
+
+/* Raw `body` rule, reproduced on the wrapper. */
+.buyer-brain-root {
+  font-family: 'Montserrat', system-ui, sans-serif;
+  background: var(--canvas);
+  color: var(--txt);
+  display: grid;
+  place-items: center;
+  padding: 34px 22px;
+  -webkit-font-smoothing: antialiased;
+  transition: background calc((var(--duration-200) + var(--duration-150)) * var(--anim-mult, 1)) var(--ease-fade);
+}
+
+.buyer-brain-root .material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  direction: ltr;
+}
+
+/* ─── CARD ─────────────────────────────────────────────────────── */
+.buyer-brain-root .bbq-card {
+  width: 912px;
+  max-width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow), var(--gloss);
+  overflow: hidden;
+  transition: background calc((var(--duration-200) + var(--duration-150)) * var(--anim-mult, 1)) var(--ease-fade),
+    border-color calc((var(--duration-200) + var(--duration-150)) * var(--anim-mult, 1)) var(--ease-fade);
+}
+.buyer-brain-root .bbq-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 22px 14px;
+}
+.buyer-brain-root .bbq-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  flex: none;
+  position: relative;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(160deg, #34d399, #10b981 60%, #059669);
+  color: #fff;
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: 0.02em;
+  box-shadow: 0 6px 14px -4px rgba(16, 185, 129, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -3px 6px rgba(4, 120, 87, 0.5);
+}
+.buyer-brain-root .bbq-avatar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 13px;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+  background-size: 7px 7px;
+  mix-blend-mode: overlay;
+}
+.buyer-brain-root .bbq-id {
+  flex: 1;
+  min-width: 0;
+}
+.buyer-brain-root .bbq-name {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+.buyer-brain-root .bbq-sub {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--txt2);
+  margin-top: 3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.buyer-brain-root .bbq-sub .dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--txt3);
+}
+.buyer-brain-root .bbq-sub .hot {
+  color: #f97316;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.buyer-brain-root .bbq-sub .hot .material-symbols-outlined {
+  font-size: 14px;
+}
+.buyer-brain-root .bbq-score {
+  flex: none;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 8px 14px;
+  border-radius: 11px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(160deg, #34d399, #10b981 65%, #059669);
+  box-shadow: 0 6px 16px -6px rgba(16, 185, 129, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -3px 6px rgba(4, 120, 87, 0.45);
+}
+.buyer-brain-root .bbq-score::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+  background-size: 7px 7px;
+  mix-blend-mode: overlay;
+}
+.buyer-brain-root .bbq-score b {
+  font-size: 21px;
+  font-weight: 900;
+  line-height: 1;
+  position: relative;
+}
+.buyer-brain-root .bbq-score small {
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0.85;
+  position: relative;
+}
+
+/* tab underline indicator (`.bbq-tabs`/`.bbq-tab` chrome pruned 2026-08-16,
+   plan anim-mult-wiring — never rendered, no markup) */
+.buyer-brain-root .bbq-ink {
+  position: absolute;
+  bottom: -1px;
+  height: 2.5px;
+  border-radius: 2px;
+  background: var(--emerald);
+  transition: left calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-spring-snap),
+    width calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-spring-snap);
+}
+
+/* panels — enlarged toward blur-carousel's 262x364 background-tile scale
+   (pre-change baseline: padding 18px 22px 24px, computed box ~576x291 at the
+   fixed 560x362 stage) */
+.buyer-brain-root .bbq-panel {
+  padding: 30px 38px 40px;
+}
+
+/* shimmer-only loading gate: covers the stage while brain pieces are still
+   fetching; the brain/svg/labels stay mounted underneath (visibility:hidden,
+   images still load) so onLoad fires without a remount once ready */
+.buyer-brain-root .bbq-stage-shimmer {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+}
+.buyer-brain-root .bbq-stage-shimmer .shimmer {
+  display: block;
+}
+.buyer-brain-root .bbq-behaviour {
+  display: none;
+  min-height: 330px;
+  place-items: center;
+  color: var(--txt3);
+}
+.buyer-brain-root .bbq-behaviour.show {
+  display: grid;
+}
+.buyer-brain-root .bbq-behaviour .ph {
+  text-align: center;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.buyer-brain-root .bbq-behaviour .material-symbols-outlined {
+  font-size: 34px;
+  display: block;
+  margin: 0 auto 8px;
+  opacity: 0.55;
+}
+
+.buyer-brain-root .bbq-qual {
+  display: flex;
+  align-items: stretch;
+  padding-left: 153px;
+  transition: padding-left calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-standard);
+}
+.buyer-brain-root .bbq-qual:not(.show) {
+  display: none;
+}
+.buyer-brain-root .bbq-qual.detail-open {
+  padding-left: 0;
+}
+
+/* stage holds brain + abs-positioned labels + leader lines */
+.buyer-brain-root .bbq-stage {
+  position: relative;
+  width: 560px;
+  height: 362px;
+  flex: none;
+}
+
+/* dotted radial backdrop behind brain only */
+.buyer-brain-root .bbq-brain {
+  position: absolute;
+  left: 130px;
+  top: 31px;
+  width: 300px;
+  height: 300px;
+}
+/* black fill behind each piece — fills the seam gaps following each piece's shape (no top cap) */
+.buyer-brain-root .bbq-brainbg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.buyer-brain-root .bbq-piecebg {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  transform-origin: var(--ox) var(--oy);
+  filter: brightness(0);
+}
+.buyer-brain-root .bbq-brain::before {
+  content: '';
+  position: absolute;
+  inset: -16px;
+  border-radius: 50%;
+  z-index: 0;
+  background-image: radial-gradient(var(--dot) 1px, transparent 1.5px);
+  background-size: 18px 18px;
+  opacity: 0.5;
+  -webkit-mask-image: radial-gradient(closest-side, #000 62%, transparent 100%);
+  mask-image: radial-gradient(closest-side, #000 62%, transparent 100%);
+}
+/* assembled from cutout pieces — all visible at rest; dim when a region is focused */
+.buyer-brain-root .bbq-piece {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  display: block;
+  will-change: transform, filter;
+  transform: scale(1);
+  transform-origin: var(--ox) var(--oy);
+  transition: filter calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-spring-snap);
+}
+.buyer-brain-root .bbq-brain.focused .bbq-piece:not(.on) {
+  filter: brightness(0.5) saturate(0.82);
+}
+.buyer-brain-root .bbq-piece.on {
+  z-index: 6;
+  transform: scale(1.05);
+  filter: brightness(1.05) saturate(1.12) drop-shadow(0 0 8px var(--acc));
+}
+/* transparent rectangular hit zones (interaction + keyboard) — .bbq-hit
+   itself is invisible; hover/focus motion renders on its .bbq-line/
+   .bbq-knob siblings below, not on the hit zone. */
+.buyer-brain-root .bbq-hit {
+  position: absolute;
+  z-index: 4;
+  appearance: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 7px;
+}
+.buyer-brain-root .bbq-hit:focus {
+  outline: none;
+}
+.buyer-brain-root .bbq-hit:focus-visible {
+  box-shadow: 0 0 0 2.5px var(--acc);
+}
+html.dark .buyer-brain-root .bbq-hit:focus-visible {
+  box-shadow: 0 0 0 2.5px #fff;
+}
+
+/* leader lines */
+.buyer-brain-root #lineSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 3;
+}
+.buyer-brain-root .bbq-line {
+  fill: none;
+  stroke: var(--acc);
+  stroke-width: 1.5;
+  opacity: 0.55;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
+    stroke-width calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade);
+}
+.buyer-brain-root .bbq-line.on {
+  opacity: 1;
+  stroke-width: 2.4;
+}
+.buyer-brain-root circle.bbq-knob {
+  fill: var(--acc);
+  opacity: 0.55;
+  transition: opacity calc(var(--duration-200) * var(--anim-mult, 1)), r calc(var(--duration-200) * var(--anim-mult, 1));
+}
+.buyer-brain-root circle.bbq-knob.on {
+  opacity: 1;
+  r: 4.5;
+}
+
+/* labels — solid accent stat-badges (matches components-pills "+12% / -34%") */
+.buyer-brain-root .bbq-label {
+  position: absolute;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: var(--acc);
+  border: 0;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 900;
+  color: #fff;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), inset 0 -2px 5px rgba(0, 0, 0, 0.18),
+    0 2px 6px rgba(15, 23, 42, 0.14);
+  cursor: pointer;
+  user-select: none;
+  transition: box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
+    filter calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade);
+}
+.buyer-brain-root .bbq-label .material-symbols-outlined {
+  font-size: 15px;
+  color: #fff;
+  font-variation-settings: 'wght' 700, 'FILL' 1, 'GRAD' 0;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+}
+.buyer-brain-root .bbq-label.lighttext {
+  color: #0f172a;
+  text-shadow: none;
+}
+.buyer-brain-root .bbq-label.lighttext .material-symbols-outlined {
+  color: #0f172a;
+  text-shadow: none;
+}
+.buyer-brain-root .bbq-label:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px;
+}
+.buyer-brain-root .bbq-label.on {
+  transform: scale(1.06);
+}
+/* When brain is focused, dim the tags that are NOT active — mirrors the piece dimming */
+.buyer-brain-root .bbq-stage.focused .bbq-label:not(.on) {
+  filter: brightness(0.6) saturate(0.75);
+  transform: scale(0.97);
+}
+
+/* ─── DETAIL PANEL ─────────────────────────────────────────────── */
+.buyer-brain-root .bbq-detail {
+  flex: 0 0 0px;
+  width: 0;
+  min-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin-left: 0;
+  min-height: 362px;
+  display: flex;
+  transition: flex-basis calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-standard),
+    opacity calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade),
+    margin-left calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-standard);
+}
+.buyer-brain-root .bbq-qual.detail-open .bbq-detail {
+  flex-basis: 270px;
+  opacity: 1;
+  margin-left: 36px;
+}
+.buyer-brain-root .bbq-empty {
+  flex: 1;
+  min-width: 270px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: var(--bezel);
+  color: var(--txt3);
+}
+.buyer-brain-root .bbq-empty .material-symbols-outlined {
+  font-size: 42px;
+  margin-bottom: 6px;
+  opacity: 0.6;
+}
+.buyer-brain-root .bbq-empty .et {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.buyer-brain-root .bbq-detail-card {
+  flex: 1;
+  min-width: 270px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: var(--gloss);
+  /* Apple open/exit rule: scale+fade from the piece that was clicked
+     (transform-origin set inline per region side), exit is the reverse of
+     the same animation on the same token duration/easing. */
+  animation: bbqCardOpen calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-standard);
+}
+.buyer-brain-root .bbq-detail-card.closing {
+  animation: bbqCardOpen calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-standard) reverse both;
+}
+@keyframes bbqCardOpen {
+  from {
+    opacity: 0;
+    transform: scale(0.86);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.buyer-brain-root .bbq-back {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 3;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--txt2);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+  /* touched leg: 0.15s -> var(--duration-150), byte-identical (150ms) */
+  transition: transform calc(var(--duration-150) * var(--anim-mult, 1)),
+    border-color calc(var(--duration-150) * var(--anim-mult, 1)),
+    color calc(var(--duration-150) * var(--anim-mult, 1));
+}
+@media (hover: hover) and (pointer: fine) {
+  .buyer-brain-root .bbq-back:hover {
+    transform: translateX(-2px);
+    color: var(--txt);
+    border-color: var(--txt3);
+  }
+}
+/* press: was fully unaffordanced (no :active anywhere in the file); asymmetric
+   with the 150ms hover above per emil-design-eng "buttons must feel responsive" */
+.buyer-brain-root .bbq-back:active {
+  transform: scale(0.94);
+  transition-duration: calc(var(--duration-fast) * var(--anim-mult, 1));
+}
+.buyer-brain-root .bbq-back:focus-visible {
+  outline: 2px solid var(--emerald);
+  outline-offset: 2px;
+}
+.buyer-brain-root .bbq-back .material-symbols-outlined {
+  font-size: 18px;
+}
+.buyer-brain-root .bbq-band {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px 16px 52px;
+  position: relative;
+  background-color: var(--acc);
+  background-image: linear-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+  background-size: 7px 7px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.14);
+}
+.buyer-brain-root .bbq-band-ic {
+  width: auto;
+  height: auto;
+  flex: none;
+  display: grid;
+  place-items: center;
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+.buyer-brain-root .bbq-band-ic .material-symbols-outlined {
+  font-size: 26px;
+  color: #fff;
+  font-variation-settings: 'wght' 700, 'FILL' 1, 'GRAD' 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
+}
+.buyer-brain-root .bbq-band-tx .kicker {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+}
+.buyer-brain-root .bbq-band-tx .ttl {
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  margin-top: 2px;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+}
+.buyer-brain-root .bbq-detail-card.lighttext .bbq-band {
+  border-bottom-color: rgba(0, 0, 0, 0.16);
+  background-image: linear-gradient(rgba(0, 0, 0, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.035) 1px, transparent 1px);
+}
+.buyer-brain-root .bbq-detail-card.lighttext .bbq-band-ic .material-symbols-outlined {
+  color: #0f172a;
+  text-shadow: none;
+}
+.buyer-brain-root .bbq-detail-card.lighttext .bbq-band-tx .kicker {
+  color: rgba(15, 23, 42, 0.66);
+}
+.buyer-brain-root .bbq-detail-card.lighttext .bbq-band-tx .ttl {
+  color: #0f172a;
+  text-shadow: none;
+}
+.buyer-brain-root .bbq-detail-body {
+  padding: 22px 22px 24px;
+  overflow-y: auto;
+}
+.buyer-brain-root .bbq-blurb {
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.65;
+  color: var(--txt);
+  text-wrap: pretty;
+  min-height: 74px;
+  letter-spacing: -0.005em;
+}
+.buyer-brain-root .bbq-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--acc);
+  margin-left: 1px;
+  vertical-align: -2px;
+  animation: caret calc((var(--duration-800) + var(--duration-200)) * var(--anim-mult, 1)) steps(1) infinite;
+}
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+.buyer-brain-root .bbq-think {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  height: 1em;
+}
+.buyer-brain-root .bbq-think span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--acc);
+  opacity: 0.4;
+  animation: think calc((var(--duration-800) + var(--duration-200)) * var(--anim-mult, 1)) var(--ease-in-out) infinite;
+}
+.buyer-brain-root .bbq-think span:nth-child(2) {
+  /* raw: 0.15s -> --duration-150 */
+  animation-delay: calc(var(--duration-150) * var(--anim-mult, 1));
+}
+.buyer-brain-root .bbq-think span:nth-child(3) {
+  /* raw: 0.3s -> --duration-slower */
+  animation-delay: calc(var(--duration-slower) * var(--anim-mult, 1));
+}
+@keyframes think {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+.buyer-brain-root .bbq-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+.buyer-brain-root .bbq-chip {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--acc) 12%, var(--surface));
+  color: color-mix(in srgb, var(--acc) 72%, var(--txt));
+  border: 1px solid color-mix(in srgb, var(--acc) 34%, transparent);
+  opacity: 0;
+  transform: translateY(6px);
+  animation: chipin calc((var(--duration-200) + var(--duration-140)) * var(--anim-mult, 1)) var(--ease-spring-snap) forwards;
+}
+@keyframes chipin {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .buyer-brain-root *,
+  .buyer-brain-root {
+    transition: none !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  .buyer-brain-root .bbq-chip {
+    opacity: 1;
+    transform: none;
+  }
+}
