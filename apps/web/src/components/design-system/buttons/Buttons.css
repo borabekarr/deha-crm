@@ -264,8 +264,8 @@ html.dark .btn-text { color: var(--brand-primary-400); }
     calc(var(--duration-compact) * var(--anim-mult, 1)),
     calc(var(--duration-compact) * var(--anim-mult, 1)),
     calc(var(--duration-sweep) * var(--anim-mult, 1)),
-    calc(240ms * var(--anim-mult, 1)),
-    calc(240ms * var(--anim-mult, 1)),
+    calc(var(--duration-240) * var(--anim-mult, 1)),
+    calc(var(--duration-240) * var(--anim-mult, 1)),
     calc(var(--duration-instant) * var(--anim-mult, 1));
 }
 
@@ -283,8 +283,8 @@ html.dark .btn-text { color: var(--brand-primary-400); }
     calc(var(--duration-compact) * var(--anim-mult, 1)),
     calc(var(--duration-compact) * var(--anim-mult, 1)),
     calc(var(--duration-sweep) * var(--anim-mult, 1)),
-    calc(240ms * var(--anim-mult, 1)),
-    calc(240ms * var(--anim-mult, 1)),
+    calc(var(--duration-240) * var(--anim-mult, 1)),
+    calc(var(--duration-240) * var(--anim-mult, 1)),
     calc(var(--duration-instant) * var(--anim-mult, 1));
 }
 
@@ -454,11 +454,11 @@ html.dark .btn-delete {
     0 0 10px -3px var(--fbtn, #111111);
   text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   transition:
-    border-color calc(150ms * var(--anim-mult, 1)),
-    color calc(150ms * var(--anim-mult, 1)),
-    background calc(150ms * var(--anim-mult, 1)),
+    border-color calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
+    color calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
+    background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
-    box-shadow calc(var(--duration-base) * var(--anim-mult, 1)),
+    box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
@@ -510,9 +510,9 @@ html.dark .btn-delete {
     inset 0 -2px 0 rgba(0,0,0,0.22),
     inset 0 0 0 1px rgba(255,255,255,0.14);
   transition:
-    filter calc(200ms * var(--anim-mult, 1)),
+    filter calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-press-calm),
-    box-shadow calc(200ms * var(--anim-mult, 1)),
+    box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .btn-cta:hover {
@@ -573,9 +573,9 @@ html.dark .btn-page-root .btn-apply:hover {
 .btn-page-root .btn-yellow[data-proximity],
 .btn-page-root .btn-red[data-proximity] {
   transition:
-    background-color calc(180ms * var(--anim-mult, 1)),
+    background-color calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-press-calm),
-    box-shadow calc(200ms * var(--anim-mult, 1)) var(--ease-press-calm),
+    box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-press-calm),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
