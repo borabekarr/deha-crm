@@ -26,7 +26,7 @@ import { useProximityGroup } from '@/lib/hooks'
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
 import '../../../../design-system/preview/_shared-feedback.css'
-import '../buttons/Buttons.css'
+import { Button } from '@/components/design-system/buttons/Buttons'
 import './DeleteModal.css'
 
 // ---------------------------------------------------------------------------
@@ -242,10 +242,9 @@ export function DeleteModal({
               exit fade below can actually play (a removed subtree cannot
               animate) and the card's reserved height never snaps shorter. */}
           <div className={`dm-actions${isDone ? ' dm-actions--done' : ''}`}>
-            <button
-              type="button"
-              className="dm-btn btn-discuss"
-              data-proximity
+            <Button
+              variant="discuss"
+              className="dm-btn"
               disabled={phase !== 'idle'}
               onClick={() => phase === 'idle' && onClose?.()}
             >
@@ -253,11 +252,10 @@ export function DeleteModal({
                 arrow_back
               </span>
               {cancelLabel}
-            </button>
-            <button
-              type="button"
-              className="dm-btn btn-delete"
-              data-proximity
+            </Button>
+            <Button
+              variant="delete"
+              className="dm-btn"
               disabled={phase !== 'idle'}
               onClick={handleConfirm}
             >
@@ -267,7 +265,7 @@ export function DeleteModal({
                 </span>
               )}
               {confirmContent}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -287,17 +285,16 @@ function DeleteModalPreview() {
   return (
     <>
       <div className="dm-preview-trigger" ref={triggerProxRef}>
-        <button
-          type="button"
-          className="btn-delete dm-preview-btn"
-          data-proximity
+        <Button
+          variant="delete"
+          className="dm-preview-btn"
           onClick={() => setOpen(true)}
         >
           <span className="material-symbols-outlined" aria-hidden="true">
             delete
           </span>
           Delete account
-        </button>
+        </Button>
       </div>
       <DeleteModal open={open} onClose={() => setOpen(false)} />
     </>

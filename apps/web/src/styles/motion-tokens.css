@@ -26,10 +26,11 @@
   --duration-slow: 220ms;    /* .btn-cta / .btn-delete / .btn-apply / .btn-apply-label background-color & filter transitions */
 
   /* Easing.
-   * --ease-spring and --ease-out are now canonically defined below,
-   * byte-identical to ../../design-system/preview/_shared-feedback.css
-   * (lines 214-215), which retains its own copy for standalone preview
-   * consumers and is otherwise untouched. Promoted here (plan:
+   * --ease-spring and --ease-out are canonically defined below; the
+   * duplicate definition previously in
+   * ../../design-system/preview/_shared-feedback.css has been removed
+   * (step-2, plan: shared-foundations-registry) so this is the single
+   * definition site. Promoted here (plan:
    * motion-token-debt) because ~66/47 app files resolved these vars only
    * through the preview file's global load order, a fragile cross-file
    * dependency. Buttons.css previously guarded one usage with a literal

@@ -3,9 +3,9 @@
 .ss-ru-sm  { width: 55px; }
 .ss-ru-md  { width: 65px; }
 .ss-bar { background: var(--brand-primary-500); border-radius: 4px; width: 100%; }
-.ss-b1  { height: 4px; }  .ss-b2 { height: 8px; }  .ss-b3 { height: 12px; }
-.ss-b4  { height: 16px; } .ss-b5 { height: 20px; } .ss-b6 { height: 24px; }
-.ss-b8  { height: 32px; } .ss-b10 { height: 40px; } .ss-b12 { height: 48px; }
+.ss-b1  { height: var(--space-1); }  .ss-b2 { height: var(--space-2); }  .ss-b3 { height: var(--space-3); }
+.ss-b4  { height: var(--space-4); } .ss-b5 { height: var(--space-5); } .ss-b6 { height: var(--space-6); }
+.ss-b8  { height: var(--space-8); } .ss-b10 { height: var(--space-10); } .ss-b12 { height: var(--space-12); }
 .ss-label { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 10px; color: #6B6B6B; }
 .ss-role  { font-size: 10px; font-weight: 700; color: #111111; text-align:center; }
 

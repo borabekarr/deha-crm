@@ -1,5 +1,5 @@
 import { type ComponentType } from 'react'
-import { lazyWithRetry, type LazyWithRetryComponent } from '@/lib/lazy-retry'
+import { lazyWithRetry, type LazyWithRetryComponent } from '@/lib/lazy-retry-loader'
 
 // ---------------------------------------------------------------------------
 // Component registry
@@ -75,9 +75,9 @@ export interface RegistryEntry {
 // Canonical ordering
 // ---------------------------------------------------------------------------
 
-export const STATUS_ORDER = ['Finished', 'Proceeding', 'Waiting'] as const
+const STATUS_ORDER = ['Finished', 'Proceeding', 'Waiting'] as const
 
-export const SUBCATEGORY_ORDER = [
+const SUBCATEGORY_ORDER = [
   'Foundations',
   'Primitives',
   'Animations',
@@ -299,6 +299,16 @@ export const registry: RegistryEntry[] = [
     Component: lazyWithRetry(() => import('@/components/design-system/dynamic-calendar/DynamicCalendar')),
   },
   {
+    slug: 'spring-showcase',
+    name: 'Spring Showcase',
+    status: 'Proceeding',
+    category: 'Animations',
+    subtitle: 'Elegant vs Bouyant spring comparison — reorder + flick demos',
+    viewport: { width: 700, height: 560 },
+    sourceHtml: '/design-system/preview/components-spring-showcase.html',
+    Component: lazyWithRetry(() => import('@/components/design-system/spring-showcase/SpringShowcase')),
+  },
+  {
     slug: 'buttons',
     name: 'Buttons',
     status: 'Finished',
@@ -308,6 +318,19 @@ export const registry: RegistryEntry[] = [
     sourceHtml: '/design-system/preview/components-buttons.html',
     revealSelector: '.btn-row > *',
     Component: lazyWithRetry(() => import('@/components/design-system/buttons/Buttons')),
+  },
+  {
+    slug: 'animations-registry',
+    name: 'Animations Registry',
+    status: 'Finished',
+    category: 'Animations',
+    subtitle: 'Live demos + usage guide for every Finished animation',
+    viewport: { width: 900, height: 640 },
+    // No legacy HTML prototype — this page is new, assembled from existing
+    // Finished animation exports; nothing to link back to.
+    sourceHtml: '',
+    revealSelector: '.areg-card',
+    Component: lazyWithRetry(() => import('@/components/design-system/animations-registry/AnimationsRegistry')),
   },
 
   // ══ Proceeding ════════════════════════════════════════════════════════════

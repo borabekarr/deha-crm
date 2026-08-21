@@ -196,6 +196,12 @@ export const WAIVED: SpamWaiver[] = [
     date: '2026-08-09',
   },
   {
+    slug: 'animations-registry',
+    reason:
+      "Composite page embedding the same demo exports already individually waived on their own routes for the same properties: animated-list's absolute-slot push feed has no stable settle element, number-flow's shuffle trigger sets Math.random() values with no reference to snap back to, and shimmer auto-cycles via setInterval with no click trigger. prize-sheet's own trigger is enrolled as a toggle target on its own route; embedding it a second time here does not create a new independent settle surface to assert against. Stacking these four in one grid does not produce a page-level two-state pair a click-loop could interrupt.",
+    date: '2026-08-21',
+  },
+  {
     slug: 'otp-input',
     reason:
       "Attempted real toggle enrollment (trigger '.otp-row' focus / closeTrigger '.otp-title' blur, settleProperty 'border-color' on '.otp-cell.active') and ran it live: OtpInputDemo passes autoFocus={true}, so the field is already focused (the 'open' CSS state) on first paint before any click fires, leaving no reachable 'closed' baseline for the runner's initial-state read (closedRef read rgb(16,185,129), identical to the post-click openRef). Focus/blur is real state but not a click-driven two-settled-state pair this harness can prove from a cold load.",

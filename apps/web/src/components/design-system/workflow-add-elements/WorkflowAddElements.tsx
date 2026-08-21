@@ -19,9 +19,9 @@
 
 import { useState, useCallback, useRef } from 'react'
 import './WorkflowAddElements.css'
-// Ask Jeru button (Item 2): reuse the buttons-page .btn-apply class verbatim,
-// same import precedent as DeleteModal.tsx.
-import '../buttons/Buttons.css'
+// Ask Jeru button (Item 2): live-import the shared Button specimen instead
+// of copying markup + Buttons.css (Toast-style split, step 5).
+import { Button } from '@/components/design-system/buttons/Buttons'
 import { iconClass } from '../../../lib/iconClass'
 import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 import { usePanelDirection } from '../../../lib/hooks/use-panel-direction'
@@ -717,11 +717,11 @@ export default function WorkflowAddElements() {
           <div className="wae-ae-footer-wrap">
             <div className="wae-ae-sep" />
             <div className="wae-ae-footer">
-              {/* Item 2: exact copy of the buttons-page Ask Jeru button, unchanged. */}
-              <button type="button" className="btn-green btn-apply" data-proximity>
+              {/* Item 2: live import of the shared Button specimen. */}
+              <Button variant="green" variant2="apply">
                 <span className="material-symbols-outlined btn-apply-icon">neurology</span>
                 AI Recommendations
-              </button>
+              </Button>
             </div>
           </div>
         </div>

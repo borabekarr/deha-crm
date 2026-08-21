@@ -17,6 +17,7 @@
  * motion-tokens.css and before any component stylesheet. See
  * styles/hover-tokens.css for the token/rule source-of-truth. */
 @import "./hover-tokens.css";
+@import "./spacing-radius-tokens.css";
 
 /* Shared dotted-grid texture recipe (pill's 16px recipe wins over the
  * divergent toast copies). See styles/grid-texture.css for the

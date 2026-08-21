@@ -245,11 +245,9 @@ html.dark .sem.hot     { background: #2a1506 !important; color: #FDBA74 !importa
 
 /* --------------------------------------------------------------------------
  * Motion vocabulary
+ * --ease-spring / --ease-out now defined once in motion-tokens.css
+ * (loaded earlier via global.css); this file only consumes them.
  * -------------------------------------------------------------------------- */
-:root {
-  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
-  --ease-out: cubic-bezier(.22, 1, .36, 1);
-}
 
 /* Fade + rise — enter/exit pair */
 @keyframes db-enter {
