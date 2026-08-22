@@ -133,10 +133,10 @@ html.dark .tb-outer[data-squircle="on"]::before {
 .tb-card:hover {
   z-index: 3;
   border-color: #B0B0B0;
-  background-color: rgba(17,17,17,0.03);
+  background-color: var(--fp-hover);
 }
 html.dark .tb-card { border-color: rgba(255,255,255,0.16); box-shadow: none; }
-html.dark .tb-card:hover { border-color: rgba(255,255,255,0.24); background-color: rgba(255,255,255,0.03); }
+html.dark .tb-card:hover { border-color: rgba(255,255,255,0.24); }
 /* Search/filter highlight always wins over rest + hover border/background
    (declared after :hover, equal specificity -> source order decides) */
 .tb-card.tb-highlight { border: 2px dashed var(--brand-primary-500); background-color: var(--tb-card-hl); }
@@ -152,11 +152,11 @@ html.dark .tb-card:hover { border-color: rgba(255,255,255,0.24); background-colo
   height: 380px;
   box-sizing: border-box;
   overflow: hidden;
-  transition: background calc(var(--duration-base) * var(--anim-mult, 1)), outline-color calc(var(--duration-base) * var(--anim-mult, 1));
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), outline-color calc(var(--duration-base) * var(--anim-mult, 1));
 }
 .tb-column.drop-target {
   outline-offset: -1px;
-  transition: background calc(var(--duration-base) * var(--anim-mult, 1)), outline-color calc(var(--duration-base) * var(--anim-mult, 1));
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), outline-color calc(var(--duration-base) * var(--anim-mult, 1));
 }
 .tb-column.drop-target[data-col="todo"]     { background: #FAFAFA !important; outline: 1.5px dashed rgba(100,116,139,0.55); }
 .tb-column.drop-target[data-col="progress"] { background: #FFF7ED !important; outline: 1.5px dashed rgba(249,115,22,0.55); }
@@ -339,18 +339,21 @@ html.dark .tb-card:hover { border-color: rgba(255,255,255,0.24); background-colo
   border-radius: 8px; color: rgba(255,255,255,0.85);
   cursor: pointer; display: grid; place-items: center;
 }
-/* Morph IN: blur + scale-up from a small puff into the final pill */
+/* Morph IN: blur + scale-up from a small puff into the final pill. Shape
+   (scale/blur/translateY distances) is this component's own and unchanged;
+   duration/easing converge on the toast family tokens (motion-tokens.css
+   --toast-dur/--toast-ease, plan: motion-family-rules step 7) instead of the
+   former --duration-320/--ease-bounce-soft (bounce-family, denylisted).
+   Morph OUT is now the same keyframe reversed rather than a duplicate.
+   Morph OUT's duration moved to --toast-exit-dur (faster-exits rule, plan:
+   faster-exits-rule step 6) so the close leg is one tier faster than the
+   open leg; morph IN stays on --toast-dur. */
 @keyframes toastMorphIn {
   0%   { opacity: 0; transform: scale(0.55) translateY(14px); filter: blur(6px); }
   100% { opacity: 1; transform: scale(1)    translateY(0);    filter: blur(0); }
 }
-/* Morph OUT: shrink + blur back down */
-@keyframes toastMorphOut {
-  0%   { opacity: 1; transform: scale(1)    translateY(0);    filter: blur(0); }
-  100% { opacity: 0; transform: scale(0.6)  translateY(10px); filter: blur(5px); }
-}
-.tb-toast-layer .tb-toast.tb-toast-in  { animation: toastMorphIn  calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-bounce-soft) both; }
-.tb-toast-layer .tb-toast.tb-toast-out { animation: toastMorphOut calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-accel) both; }
+.tb-toast-layer .tb-toast.tb-toast-in  { animation: toastMorphIn calc(var(--toast-dur) * var(--anim-mult, 1)) var(--toast-ease) both; }
+.tb-toast-layer .tb-toast.tb-toast-out { animation: toastMorphIn calc(var(--toast-exit-dur) * var(--anim-mult, 1)) var(--toast-ease) both reverse; }
 
 /* ---- Column scrollbar — visible (slim, design-system grey) ---- */
 /* Cards are border-only (no shadow), so the scroll wrapper padding stays
@@ -368,7 +371,7 @@ html.dark .tb-card:hover { border-color: rgba(255,255,255,0.24); background-colo
 .tb-column-scroll::-webkit-scrollbar-thumb {
   background: #D4D4D4;
   border-radius: 3px;
-  transition: background calc(var(--duration-200) * var(--anim-mult, 1));
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .tb-column-scroll::-webkit-scrollbar-thumb:hover { background: #A1A1A1; }
 
@@ -443,7 +446,7 @@ html.dark .tb-card:hover { border-color: rgba(255,255,255,0.24); background-colo
   flex: 0 0 auto; width: 26px; height: 26px; border-radius: 9999px; cursor: pointer;
   display: grid; place-items: center;
   border: 1px solid var(--tb-col-border); background: var(--tb-col-bg); color: var(--tb-fg3);
-  transition: background calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade),
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
               border-color calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade),
               transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-spring-snap);
 }
@@ -520,7 +523,11 @@ html.dark .tb-column-scroll::-webkit-scrollbar-thumb:hover{ background:#4A4A4A; 
   60%  { opacity: 1; transform: scale(1.18); }
   100% { opacity: 1; transform: scale(1); }
 }
-.tb-check-pop { animation: checkPop calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-bounce-soft); }
+/* Overshoot now lives entirely in the keyframe's own 60% scale(1.18) beat;
+   --ease-bounce-soft (bounce-family, denylisted) replaced with the toast
+   family's --toast-ease per the no-bounce rule (plan: motion-family-rules
+   step 7). */
+.tb-check-pop { animation: checkPop calc(var(--toast-dur) * var(--anim-mult, 1)) var(--toast-ease); }
 @keyframes panelIn {
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }

@@ -35,6 +35,8 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react'
 import { Shimmer } from '../shimmer/Shimmer'
+import { BuyerBrainDetailCard } from './BuyerBrainDetailCard'
+import type { Side } from './buyer-brain-shared'
 
 // Step-7 load diagnosis: the 9 brain pieces are large uncompressed PNGs
 // hosted on i.postimg.cc (third-party, no cache-control/CDN control from
@@ -95,20 +97,7 @@ const PIECE: Record<string, PieceInfo> = {
   purchase_factors: { u: 'https://i.postimg.cc/C5gY3rfr/PNG-image-9.png', fcx: 571.3, fcy: 596.7, ccx: 141.3, ccy: 162.8, nw: 311, nh: 379, s: 0.6511 },
 }
 
-type Side = 'left' | 'right' | 'top-l' | 'top-r' | 'bottom'
-
-// Detail-card scale-open origin: approximates "grows from the piece that was
-// clicked" by mapping the piece's side within the brain grid to the nearest
-// edge of the card (the card sits to the right of the stage).
-const CARD_ORIGIN: Record<Side, string> = {
-  left: '0% 50%',
-  right: '100% 50%',
-  'top-l': '50% 0%',
-  'top-r': '50% 0%',
-  bottom: '50% 100%',
-}
-
-interface Region {
+export interface Region {
   id: string
   r: number
   c: number
@@ -291,7 +280,7 @@ GEOM.forEach((g, i) => {
 })
 
 // ─── component ─────────────────────────────────────────────────────────────
-type BlurbPhase = 'think' | 'typing' | 'done'
+export type BlurbPhase = 'think' | 'typing' | 'done'
 
 export default function BuyerBrain() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -455,6 +444,7 @@ export default function BuyerBrain() {
                       style={{ ...g.pieceStyle, ['--acc' as string]: g.rg.acc }}
                     />
                     <button
+                      type="button"
                       className="bbq-hit"
                       data-id={g.rg.id}
                       aria-label={g.rg.title}
@@ -502,6 +492,7 @@ export default function BuyerBrain() {
               {allLoaded &&
                 GEOM.map((g) => (
                   <button
+                    type="button"
                     key={g.rg.id}
                     className={
                       'bbq-label' + (g.light ? ' lighttext' : '') + (activeId === g.rg.id ? ' on' : '')
@@ -518,76 +509,20 @@ export default function BuyerBrain() {
                 ))}
             </div>
 
-            <div className="bbq-detail" id="detail">
-              {cardRegion && (
-                <div
-                  className={
-                    'bbq-detail-card' +
-                    (cardLight ? ' lighttext' : '') +
-                    (!selectedId ? ' closing' : '')
-                  }
-                  style={{
-                    ['--acc' as string]: cardRegion.acc,
-                    transformOrigin: CARD_ORIGIN[cardRegion.side],
-                  }}
-                >
-                  <button
-                    className="bbq-back"
-                    aria-label="Back to brain"
-                    onClick={() => {
-                      const id = cardRegion.id
-                      closeDetail()
-                      hitRefs.current[id]?.focus()
-                    }}
-                  >
-                    <span className="material-symbols-outlined">arrow_back</span>
-                  </button>
-                  <div className="bbq-band">
-                    <div className="bbq-band-ic">
-                      <span className="material-symbols-outlined">{cardRegion.icon}</span>
-                    </div>
-                    <div className="bbq-band-tx">
-                      <div className="kicker">AI Profiling</div>
-                      <div className="ttl">{cardRegion.title}</div>
-                    </div>
-                  </div>
-                  <div className="bbq-detail-body">
-                    <div className="bbq-blurb" id="blurb">
-                      {phase === 'think' && (
-                        <span className="bbq-think">
-                          <span />
-                          <span />
-                          <span />
-                        </span>
-                      )}
-                      {phase === 'typing' && (
-                        <>
-                          <span id="bt">{typed}</span>
-                          <span className="bbq-caret" />
-                        </>
-                      )}
-                      {phase === 'done' && cardRegion.blurb}
-                    </div>
-                    <div
-                      className="bbq-chips"
-                      id="chips"
-                      style={{ visibility: phase === 'done' ? 'visible' : 'hidden' }}
-                    >
-                      {phase === 'done' &&
-                        cardRegion.chips.map((c, i) => (
-                          <span
-                            key={c}
-                            className="bbq-chip"
-                            style={{ animationDelay: (rmRef.current ? 0 : i * 45) + 'ms' }}
-                          >
-                            {c}
-                          </span>
-                        ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            <BuyerBrainDetailCard
+              cardRegion={cardRegion}
+              cardLight={cardLight}
+              selectedId={selectedId}
+              phase={phase}
+              typed={typed}
+              reducedMotion={rmRef.current}
+              onBack={() => {
+                if (!cardRegion) return
+                const id = cardRegion.id
+                closeDetail()
+                hitRefs.current[id]?.focus()
+              }}
+            />
           </div>
         </div>
       </div>

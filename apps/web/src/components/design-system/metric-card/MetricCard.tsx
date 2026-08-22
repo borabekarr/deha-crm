@@ -169,7 +169,18 @@ export default function MetricCard() {
 
           {/* New Leads card */}
           <div className="shell zoom" data-proximity>
-            <div className="metric" onClick={() => openExpanded('leads')}>
+            <div
+              className="metric"
+              role="button"
+              tabIndex={0}
+              onClick={() => openExpanded('leads')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  openExpanded('leads')
+                }
+              }}
+            >
               <div className="m-left">
                 <div className="m-label">
                   <span className="material-symbols-outlined">group</span>
@@ -201,7 +212,18 @@ export default function MetricCard() {
 
           {/* Predicted Value card */}
           <div className="shell zoom" data-proximity>
-            <div className="metric" onClick={() => openExpanded('value')}>
+            <div
+              className="metric"
+              role="button"
+              tabIndex={0}
+              onClick={() => openExpanded('value')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  openExpanded('value')
+                }
+              }}
+            >
               <div className="m-left">
                 <div className="m-label">
                   <span className="material-symbols-outlined">payments</span>
@@ -238,6 +260,7 @@ export default function MetricCard() {
       {/* Expanded detail overlay — wired via state + callback ref for Escape */}
       <div
         className={`exp-overlay${open ? ' open' : ''}`}
+        role="presentation"
         onClick={handleOverlayClick}
         onTransitionEnd={(e) => {
           if (!open && e.propertyName === 'opacity') setActiveKey(null)

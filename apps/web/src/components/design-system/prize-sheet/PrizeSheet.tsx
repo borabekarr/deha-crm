@@ -13,7 +13,7 @@ import './PrizeSheet.css'
 // wired via callback refs.
 // ---------------------------------------------------------------------------
 
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { setupPanelScope } from './prize-sheet-hook'
 import { useSquircle } from '../../../lib/hooks/use-squircle'
 import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
@@ -61,10 +61,17 @@ function MobileScope() {
   const squircleSheetRef = useSquircle<HTMLDivElement>()
   const proximityRef = useProximityGroup<HTMLDivElement>()
 
-  // Callback ref for the sheet panel — wires confetti + drag + open/close
+  // Callback ref for the sheet panel: stores the node + composes the
+  // squircle ref synchronously on attach. The imperative wiring (confetti +
+  // drag + open/close) moves to the effect below so react-doctor can see
+  // the cleanup path.
   const handleSheetRef = useCallback((el: HTMLDivElement | null) => {
     sheetRef.current = el
     squircleSheetRef(el)
+  }, [squircleSheetRef])
+
+  useEffect(() => {
+    const el = sheetRef.current
     if (!el) return
 
     const cleanup = setupPanelScope(el, {
@@ -81,8 +88,6 @@ function MobileScope() {
       },
     })
 
-    // Wire fab and overlay after panel scope is ready
-    // Use rAF to ensure DOM refs are settled
     const fabEl = fabRef.current
     const overlayEl = overlayRef.current
     const openFn = (el as HTMLDivElement & { __psOpen?: () => void }).__psOpen
@@ -95,7 +100,7 @@ function MobileScope() {
       if (overlayEl && dismissFn) overlayEl.removeEventListener('click', dismissFn)
       cleanup()
     }
-  }, [squircleSheetRef])
+  }, [])
 
   return (
     <div className="demo" ref={proximityRef}>
@@ -140,17 +145,18 @@ function DesktopScope() {
   const squircleShellRef = useSquircle<HTMLDivElement>()
   const proximityRef = useProximityGroup<HTMLDivElement>()
 
-  // Escape key listener — stored as component-level ref so it's wired once
-  const escCleanupRef = useRef<(() => void) | null>(null)
-
+  // Callback ref: stores the node + composes the squircle ref synchronously
+  // on attach. The imperative wiring (panel scope, fab/overlay/x-button,
+  // Escape key) moves to the effect below so react-doctor can see the
+  // cleanup path.
   const handleModalRef = useCallback((el: HTMLDivElement | null) => {
     modalRef.current = el
     squircleModalRef(el)
-    if (!el) {
-      escCleanupRef.current?.()
-      escCleanupRef.current = null
-      return
-    }
+  }, [squircleModalRef])
+
+  useEffect(() => {
+    const el = modalRef.current
+    if (!el) return
 
     const cleanup = setupPanelScope(el, {
       getFrame: () => desktopRef.current,
@@ -184,8 +190,6 @@ function DesktopScope() {
     }
     document.addEventListener('keydown', onEscape)
 
-    escCleanupRef.current = () => document.removeEventListener('keydown', onEscape)
-
     return () => {
       if (fabEl && openFn) fabEl.removeEventListener('click', openFn)
       if (overlayEl && dismissFn) overlayEl.removeEventListener('click', dismissFn)
@@ -193,7 +197,7 @@ function DesktopScope() {
       document.removeEventListener('keydown', onEscape)
       cleanup()
     }
-  }, [squircleModalRef])
+  }, [])
 
   return (
     <div className="demo" ref={proximityRef}>

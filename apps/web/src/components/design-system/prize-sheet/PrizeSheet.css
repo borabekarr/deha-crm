@@ -39,7 +39,7 @@
   position: absolute; top: 16px; right: 16px; z-index: 5;
   width: 30px; height: 30px; border-radius: 50%; border: none; cursor: pointer;
   display: grid; place-items: center; color: var(--desc);
-  background: var(--wallet-bg); transition: background calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1));
+  background: var(--wallet-bg); transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-fast) * var(--anim-mult, 1));
 }
 .panel-x:hover { transform: scale(1.06); }
 .panel-x:active { transform: scale(var(--press-chip)); }
@@ -130,7 +130,7 @@
 .panel.claimed .success { opacity: 1; transform: translateY(0); }
 .panel.claimed .prize, .panel.claimed .claim-btn {
   opacity: 0; transform: translateY(-14px) scale(0.96); pointer-events: none;
-  /* override the staggered entrance transition (which delays opacity 440ms) so the
+  /* override the staggered entrance transition (which delays opacity via --duration-compact) so the
      button fades out promptly on click instead of lingering opaque over the success screen */
   transition: transform calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-spring-loose), opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade);
 }
@@ -292,7 +292,10 @@ html.dark .sheet[data-squircle="on"]::before {
   padding: 9px; border-radius: 28px; background: var(--shell-bg, #D9D9D9);
   box-shadow: 0 32px 70px -22px rgba(4,7,11,0.5), 0 8px 20px rgba(17,17,17,0.14);
   transform: translate(-50%, -46%) scale(0.9); opacity: 0; pointer-events: none;
-  transition: transform calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-spring-wide), opacity calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade);
+  /* --ease-spring-wide (bounce-adjacent) replaced with the overlay-morph
+     family easing, per the no-bounce rule; exit reuses the same rule
+     (.modal-open toggle mirrors enter/exit through this one transition). */
+  transition: transform calc(var(--duration-560) * var(--anim-mult, 1)) var(--overlay-morph-ease), opacity calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .ps-desktop.modal-open .ps-modal-shell { transform: translate(-50%, -50%) scale(1); opacity: 1; pointer-events: auto; }
 /* Squircle outer shell of the desktop concentric pair (.modal nests inside).

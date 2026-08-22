@@ -63,6 +63,14 @@ export interface ToggleSpamTarget extends SpamTargetBase {
   settleProperty: string
   /** Longest open/close transition on `settleSelector` (ms) — settle wait. */
   transitionMs: number
+  /**
+   * For targets with no fixed CSS transition duration (e.g. native
+   * scrollTo({behavior:'smooth'})): poll this DOM attribute to the given
+   * value instead of a plain timeout before reading the settle property.
+   * `transitionMs` is still used for the mid-flight-reversal interrupt
+   * timing, just not for the final settle wait.
+   */
+  awaitAttribute?: { selector: string; attribute: string; value: string }
 }
 
 export type SpamTarget = AutoHeightSpamTarget | ToggleSpamTarget
@@ -152,12 +160,6 @@ export const WAIVED: SpamWaiver[] = [
     reason:
       "SyncFeed's trigger is disabled mid-cycle and drives a ~2s multi-phase async timeline, not a click-flips-two-states toggle. animation-spam.spec.ts covers it with a dedicated bespoke test instead.",
     date: '2026-07-14',
-  },
-  {
-    slug: 'blur-carousel',
-    reason:
-      'nextBtn/prevBtn drive rail.scrollTo({behavior: "smooth"}) instead of a CSS transition, so there is no fixed transitionMs to settle on: under rapid click-reversal spam the native smooth-scroll animation gets interrupted mid-flight and the rAF listener commits an intermediate transform instead of snapping to the target card (observed: matrix(0.82,0,0,0.82,0) instead of the expected fully-centered matrix(1,0,0,1,0,0) after settle+400ms). See debt/blur-carousel-scroll-interruption.md.',
-    date: '2026-08-08',
   },
   {
     slug: 'toast',
@@ -267,12 +269,13 @@ export const SPAM_TARGETS: SpamTarget[] = [
   },
   {
     // FAB-to-card morph: the box only ever opens on click (raw source guards
-    // with `if (!openDate)`), so closing needs the in-card close button — the
-    // first <button> inside the Date picker screen.
+    // with `if (!openDate)`), so closing needs the in-card close button —
+    // the explicit close button, not the FAB trigger button that now also
+    // renders inside the Date picker screen.
     kind: 'toggle',
     slug: 'picker',
     trigger: '[data-screen-label="Date picker"] > div',
-    closeTrigger: '[data-screen-label="Date picker"] button',
+    closeTrigger: '[data-screen-label="Date picker"] button[aria-label="Close date picker"]',
     settleSelector: '[data-screen-label="Date picker"] > div',
     settleProperty: 'width',
     transitionMs: 520,
@@ -397,6 +400,21 @@ export const SPAM_TARGETS: SpamTarget[] = [
     settleSelector: '.dg-clip',
     settleProperty: 'grid-template-rows',
     transitionMs: 380,
+  },
+  {
+    // nextBtn/prevBtn drive rail.scrollTo({behavior:'smooth'}), which has no
+    // fixed duration — awaitAttribute polls #rail's data-scrolling back to
+    // 'false' (set by scrollend / the 120ms idle debounce) instead of a
+    // timed wait. Settle read is card 0's transform: scale(1) when centered
+    // (prevBtn / closed) vs scale(0.82) one step off-center (nextBtn / open).
+    kind: 'toggle',
+    slug: 'blur-carousel',
+    trigger: '#nextBtn',
+    closeTrigger: '#prevBtn',
+    settleSelector: '.card[data-index="0"]',
+    settleProperty: 'transform',
+    transitionMs: 400,
+    awaitAttribute: { selector: '#rail', attribute: 'data-scrolling', value: 'false' },
   },
 ]
 

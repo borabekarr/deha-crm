@@ -540,7 +540,7 @@
    mapping doesn't snap, mirroring Buttons.css's row-3 pattern. */
 .ap-submit[data-proximity] {
   transition:
-    background-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade),
+    background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     filter calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade),
     box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-press-calm),

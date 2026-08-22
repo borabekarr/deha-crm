@@ -1,5 +1,4 @@
 import '../../../../design-system/preview/_base.css'
-import '../../../../design-system/preview/_controls.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './Pills.css'
 
@@ -79,8 +78,8 @@ export default function Pills() {
 
       <span className="pills-label" style={{ marginTop: 16 }}>Stat badges</span>
       <div className="pills-row">
-        {STAT_BADGES.map((spec, i) => (
-          <StatBadge key={`${spec.tone}-${i}`} {...spec} />
+        {STAT_BADGES.map((spec) => (
+          <StatBadge key={spec.label} {...spec} />
         ))}
       </div>
       <span className="pills-label" style={{ marginTop: 16 }}>Task board column tags</span>

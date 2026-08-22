@@ -7,9 +7,6 @@
  * No Deha token was invented — only existing tokens are used.
  */
 
-@import '../../../../design-system/preview/_base.css';
-@import '../../../../design-system/preview/_darkmode.css';
-
 /* ── Surface ───────────────────────────────────────────────────────────── */
 .ms-surface {
   width: 100%;

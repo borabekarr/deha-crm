@@ -60,10 +60,17 @@
   -webkit-backdrop-filter: blur(var(--es-scrim-blur, 12px));
   opacity: 0;
   pointer-events: none;
-  transition: opacity calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out);
+  transition: opacity calc(var(--panel-settle-dur) * var(--anim-mult, 1)) var(--panel-settle-ease);
 }
 .es-scrim[data-open] {
   opacity: 1;
+}
+
+/* Faster-exits rule (plan: faster-exits-debts step 7): the collapse is
+   always programmatic, so the scrim's closing leg runs the same faster
+   --duration-380 tier as the FLIP surface instead of --panel-settle-dur. */
+.es-scrim:not([data-open]) {
+  transition-duration: calc(var(--duration-380) * var(--anim-mult, 1));
 }
 
 .es-close-btn {

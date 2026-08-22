@@ -17,7 +17,7 @@ import {
   makeFlashTimer,
 } from './sprint-planner-core-hook'
 import { ToastStage, type ToastStageHandle } from '../toast/Toast'
-import { VARIANTS } from '../toast/proto/variants'
+import { VARIANTS } from '../toast/variants'
 
 // ---------------------------------------------------------------------------
 // AI STUB
@@ -96,11 +96,17 @@ const newId = () => `t${++_uid}`
 // ---------------------------------------------------------------------------
 // AI action engine (deterministic, no backend needed)
 // ---------------------------------------------------------------------------
+function emptyDayIndices(counts: number[]): number[] {
+  const empty: number[] = []
+  for (let i = 0; i < counts.length; i++) if (counts[i] === 0) empty.push(i)
+  return empty
+}
+
 function runAction(actionId: string, state: TicketData[]): { state: TicketData[]; msg: string } {
   const ts = state.map((t) => ({ ...t }))
   switch (actionId) {
     case 'rebalance': {
-      const sorted = [...ts].sort((a, b) => (PRIORITY[a.priority]?.rank ?? 9) - (PRIORITY[b.priority]?.rank ?? 9))
+      const sorted = ts.toSorted((a, b) => (PRIORITY[a.priority]?.rank ?? 9) - (PRIORITY[b.priority]?.rank ?? 9))
       sorted.forEach((t, i) => { t.day = i % 10 })
       return { state: sorted, msg: `Rebalanced ${sorted.length} tickets across all 10 days` }
     }
@@ -117,7 +123,7 @@ function runAction(actionId: string, state: TicketData[]): { state: TicketData[]
     case 'fill': {
       const counts = Array(10).fill(0)
       ts.forEach((t) => counts[t.day]++)
-      const empty = counts.map((c, i) => ({ c, i })).filter((x) => x.c === 0).map((x) => x.i)
+      const empty = emptyDayIndices(counts)
       const added: TicketData[] = []
       empty.forEach((d, i) => {
         const sample = SAMPLE_FILL[i % SAMPLE_FILL.length]
@@ -142,7 +148,7 @@ function runAction(actionId: string, state: TicketData[]): { state: TicketData[]
     case 'add_buffer': {
       const counts = Array(10).fill(0)
       ts.forEach((t) => counts[t.day]++)
-      const empty = counts.map((c, i) => ({ c, i })).filter((x) => x.c === 0).map((x) => x.i)
+      const empty = emptyDayIndices(counts)
       const added = empty.map((d) => ({
         id: newId(),
         title: 'Buffer day — protected time for unknowns',
@@ -499,7 +505,7 @@ function WeekSection({ label, range, dates, todayIdx, tickets, weekIndex, succes
           const idx = weekIndex * 5 + i
           return (
             <DayCell
-              key={idx}
+              key={`${weekIndex}-${d}`}
               idx={idx}
               dayLabel={d}
               date={dates[i]}
@@ -613,6 +619,7 @@ function CommandPalette({ open, onClose, onRun, tickets }: {
       ref={(el) => { paletteCallbackRef(el); paletteProxRef(el) }}
       className="palette-backdrop sp-palette-centered"
       data-open={open ? 'true' : 'false'}
+      role="presentation"
       onClick={(e) => {
         const t = e.target as HTMLElement
         if (t.classList.contains('palette-backdrop') || t.classList.contains('sp-palette-centered')) onClose()
@@ -860,6 +867,7 @@ function AddTicketModal({ open, day, onClose, onSubmit }: {
       ref={(el) => { modalCallbackRef(el); modalProxRef(el) }}
       className="sp-modal-backdrop"
       data-open={open ? 'true' : 'false'}
+      role="presentation"
       onClick={(e) => { if ((e.target as HTMLElement).classList.contains('sp-modal-backdrop')) onClose() }}
     >
       {/* item 4: dialog centered on the component via translate(-50%,-50%), inner-card look */}
@@ -960,12 +968,13 @@ export default function SprintPlannerCore() {
 
   const undoRef = useRef<TicketData[] | null>(null)
 
-  const flashTimerRef  = useRef(makeFlashTimer())
+  const flashTimerRef  = useRef<ReturnType<typeof makeFlashTimer> | undefined>(undefined)
+  if (!flashTimerRef.current) flashTimerRef.current = makeFlashTimer()
 
   // Flash priority-colored success wash on changed tickets
   const flashSuccess = useCallback((entries: [string, string][]) => {
     setSuccessMap(new Map(entries))
-    flashTimerRef.current.schedule(() => setSuccessMap(new Map()))
+    flashTimerRef.current!.schedule(() => setSuccessMap(new Map()))
   }, [])
 
   const showToast = useCallback((next: { message: string; kind: 'success' | 'danger' | 'info'; onUndo?: () => void } | null) => {
@@ -1049,12 +1058,11 @@ export default function SprintPlannerCore() {
     const { state, msg } = runAction(actionId, tickets)
     setTickets(state)
     const prevById = new Map(tickets.map((t) => [t.id, t]))
-    const flashEntries = state
-      .filter((t) => {
-        const prev = prevById.get(t.id)
-        return !prev || prev.day !== t.day
-      })
-      .map((t): [string, string] => [t.id, (t.priority || 'p2').toLowerCase()])
+    const flashEntries: [string, string][] = []
+    for (const t of state) {
+      const prev = prevById.get(t.id)
+      if (!prev || prev.day !== t.day) flashEntries.push([t.id, (t.priority || 'p2').toLowerCase()])
+    }
     if (flashEntries.length) flashSuccess(flashEntries)
     showToast({ message: msg, kind: 'success', onUndo: runUndo })
     return { msg }

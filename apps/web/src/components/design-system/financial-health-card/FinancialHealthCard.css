@@ -266,7 +266,7 @@ html.dark .fhc-frame { background: #0A0A0A; background-image: none; }
   background: rgba(255,255,255,0.85); color: #4A4A4A;
   border: 1px solid #ECECEC;
   box-shadow: 0 2px 8px rgba(17,17,17,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
-  transition: transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-base) * var(--anim-mult, 1)), color calc(var(--duration-base) * var(--anim-mult, 1)), border-color calc(var(--duration-base) * var(--anim-mult, 1)),
+  transition: transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), color calc(var(--duration-base) * var(--anim-mult, 1)), border-color calc(var(--duration-base) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }

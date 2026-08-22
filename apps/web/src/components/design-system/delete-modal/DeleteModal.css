@@ -20,10 +20,10 @@
   opacity: 1;
 
   /* always-mounted: hidden by default, shown when open. Overlay and shell
-     share --duration-280 for both the entrance and the exit, so the
-     backdrop and the card read as one gesture (Apple scale-and-fade),
-     and the exit is the exact reverse of the enter -- same token, same
-     properties, mirrored direction. No overshoot easing anywhere here. */
+     share --duration-280 for the entrance (Apple scale-and-fade); the exit
+     is the reverse animation on the --overlay-morph-exit-dur family alias
+     (one tier faster, faster-exits rule), same properties, mirrored
+     direction. No overshoot easing anywhere here. */
   visibility: hidden;
   pointer-events: none;
   transition:
@@ -52,7 +52,7 @@
 }
 
 .dm-overlay[data-state='closing'] {
-  animation: dm-ov-out calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out-soft) forwards;
+  animation: dm-ov-out calc(var(--overlay-morph-exit-dur) * var(--anim-mult, 1)) var(--ease-out-soft) forwards;
 }
 
 @keyframes dm-ov-out {
@@ -114,8 +114,9 @@ html.dark .dm-shell[data-squircle="on"]::before {
 
 /* Scale-and-fade from the shell's own center -- transform-origin defaults
    to center, so no explicit origin declaration is needed. Exit below is
-   the byte-exact reverse: same duration token, same easing, same
-   transform, direction flipped. No translateY drift, no overshoot. */
+   the same easing and transform, direction flipped, but runs one tier
+   faster on --overlay-morph-exit-dur (faster-exits family rule). No
+   translateY drift, no overshoot. */
 .dm-overlay.dm-anim .dm-shell {
   animation: dm-card-in calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out-soft);
 }
@@ -128,7 +129,7 @@ html.dark .dm-shell[data-squircle="on"]::before {
 }
 
 .dm-overlay[data-state='closing'] .dm-shell {
-  animation: dm-card-out calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out-soft) forwards;
+  animation: dm-card-out calc(var(--overlay-morph-exit-dur) * var(--anim-mult, 1)) var(--ease-out-soft) forwards;
 }
 
 @keyframes dm-card-out {
@@ -221,7 +222,7 @@ html.dark .dm-card[data-squircle="on"] {
   place-items: center;
   color: #111111;
   transition:
-    background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     color calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
@@ -429,7 +430,7 @@ html.dark .dm-body b {
   padding: 0 18px !important;
   gap: 7px !important;
   transition:
-    background calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
     box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out);
 }
@@ -498,7 +499,7 @@ html.dark .dm-card .dm-btn.btn-discuss:hover {
    snap, mirroring Buttons.css's row-3 pattern. */
 .dm-card .dm-btn.btn-delete[data-proximity] {
   transition:
-    background-color calc(var(--duration-slow) * var(--anim-mult, 1)),
+    background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out),
     box-shadow calc(var(--duration-slow) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,

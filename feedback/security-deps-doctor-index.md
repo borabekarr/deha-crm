@@ -6,7 +6,7 @@ Split into two part-plans on 2026-08-18 after the user directed that every React
 
 | F | Part plan | Status |
 |---|---|---|
-| F1 | security-deps-doctor-p2 | PENDING (part 2 not yet run) |
+| F1 | security-deps-doctor-p2 | DONE |
 | F2 | security-deps-doctor-p1 | DONE |
 | F3 | security-deps-doctor-p1 | DEBT (fix DONE, alert closure gated) |
 | F4 | security-deps-doctor-p1 | DONE |
@@ -34,6 +34,34 @@ Split into two part-plans on 2026-08-18 after the user directed that every React
 
 `gh pr list --state open --author app/dependabot` returns an empty array: all three Dependabot pull
 requests are closed.
+
+## Part 2 outcome (run 2026-08-22)
+
+- **F1 -- DONE.** Scanner version aligned: CI pin and lockfile both resolve `react-doctor@0.9.12`
+  (up from 0.5.8). `ignore.files` in `apps/web/doctor.config.json` is used on 0.9.12 without the
+  crash that blocked it before. Baseline was 241 errors / 39 warnings; full-scope scan now returns
+  0 errors and 0 warnings outside `apps/web/src/components/library/**` and outside
+  `design-system/preview` (the six documented preview false positives). Rule families cleared
+  across the run: `effect-needs-cleanup`, `dialog-has-accessible-name`, `click-events-have-key-events`,
+  `no-static-element-interactions`, `prefer-html-dialog`, `only-export-components`,
+  `no-giant-component`, and the `react-hooks`/refs taint family. HIG keyboard patterns adopted:
+  role/tabIndex/onKeyDown-onKeyUp parity on custom interactive elements, roving tabindex for
+  tabs/listbox/menu/grid via `apps/web/src/lib/keyboard-nav.ts`, native `<dialog>` with
+  `showModal()` for `DeleteModal` and `<dialog open>` for popover surfaces, sibling-module
+  extraction for 12 oversized components, and removal of the `TaskBoard` giant-component
+  suppression once it was split.
+- **Exclusion recorded.** The only remaining diagnostics after the fix run are 6 findings inside
+  `apps/web/src/components/library/**` (`MobileNavSheet.tsx`: 1 `effect-needs-cleanup` error,
+  1 `click-events-have-key-events` warning, 1 `no-static-element-interactions` warning,
+  1 `prefer-html-dialog` warning; `use-fit-scale.ts`: 2 `effect-needs-cleanup` errors). These are
+  owned by a concurrent "library mobile responsive" session actively editing that directory and
+  are explicitly out of scope for this plan; they were verified to be the only non-preview,
+  non-`library/**` findings are zero.
+- **Visual/lockfile.** `pnpm-lock.yaml` refresh after Step 1's `@use-gesture/react` removal only
+  touched that package (18 lines removed). Full visual suite (minus `buttons`/`buyer-brain`) is
+  71/71 passed; `buttons` retains its pre-existing pixel drift from the uncommitted Buttons/Pills
+  split on this branch (unrelated to this plan) and `buyer-brain` passed. Animation spam suite:
+  22 passed / 22 skipped, exit 0.
 
 ## Run order
 

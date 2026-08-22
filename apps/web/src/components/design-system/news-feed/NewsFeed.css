@@ -101,7 +101,7 @@
   .nf-shell:active:not(:has(.nf-arrow:active)) { transform: scale(0.99); transition-duration: calc(var(--duration-fast) * var(--anim-mult, 1)); }
   .nf-shell:hover .nf-card { box-shadow: var(--nf-shadow), 0 20px 44px -24px var(--nf-c-strong); }
   /* Root cause of the reported hover "beeping": this used to speed up the
-     infinite nfPulse animation from 2200ms to --duration-fast (~120ms) on
+     infinite nfPulse animation from --duration-2200 to --duration-fast on
      hover, an ~18x speedup that reads as rapid strobing/flashing rather than
      an energized pulse. Removed — the glow keeps its calm resting cadence
      while hovered. */
@@ -238,7 +238,9 @@
      (revealSelector: '.nf-card'); content still staggers via .anim-in.
      ───────────────────────────────────────────────────────────────────── */
   .anim-in .nf-kicker { animation: nfFade calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-out) calc(var(--duration-200) * var(--anim-mult, 1)) both; }
-  .anim-in .nf-arrow  { animation: nfPopSm calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-spring) calc(var(--duration-sweep) * var(--anim-mult, 1)) both; }
+  /* --ease-spring is the legacy overshoot alias, denylisted by the no-bounce
+     rule; the settled --ease-out matches the sibling .nf-title/.nf-date pops. */
+  .anim-in .nf-arrow  { animation: nfPopSm calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out) calc(var(--duration-sweep) * var(--anim-mult, 1)) both; }
   .anim-in .nf-title  { animation: nfTitlePop calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out) calc(var(--duration-sweep) * var(--anim-mult, 1)) both; }
   .anim-in .nf-date   { animation: nfGlowFade calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out) calc(var(--duration-560) * var(--anim-mult, 1)) both; }
   .anim-in .nf-seg    { animation: nfFade calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out) both; animation-delay: calc(var(--i) * calc(var(--duration-60) * var(--anim-mult, 1)) + calc(var(--duration-560) * var(--anim-mult, 1))); }
@@ -297,7 +299,7 @@
     display: inline-flex; align-items: center; gap: 6px;
     background: rgba(28,28,28,0.7); color: #D4D4D4; border: 1px solid #232323;
     box-shadow: 0 2px 10px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
-    transition: transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-base) * var(--anim-mult, 1)), color calc(var(--duration-base) * var(--anim-mult, 1)), border-color calc(var(--duration-base) * var(--anim-mult, 1));
+    transition: transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), color calc(var(--duration-base) * var(--anim-mult, 1)), border-color calc(var(--duration-base) * var(--anim-mult, 1));
   }
   .nf-btn .material-icons { font-size: 16px; }
   /* Proximity: own transition (0,1,0) beats hover-tokens.css's [data-proximity]x3
@@ -306,13 +308,13 @@
   .nf-btn[data-proximity] {
     transition:
       transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-out),
-      background calc(var(--duration-base) * var(--anim-mult, 1)),
+      background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
       color calc(var(--duration-base) * var(--anim-mult, 1)),
       border-color calc(var(--duration-base) * var(--anim-mult, 1)),
       scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
       filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
   }
-  .nf-btn:hover { transform: translateY(-1px); color: #F5F5F5; border-color: #4A4A4A; background: rgba(39,52,73,0.8); }
+  .nf-btn:hover { transform: translateY(-1px); color: #F5F5F5; border-color: #4A4A4A; background: var(--fp-hover-on-dark); }
   .nf-btn:active { transform: scale(0.96); }
 
   @media (max-width: 720px) {

@@ -12,7 +12,7 @@
  * Direct effect-hook count in this file: 0.
  */
 
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useEffect } from 'react'
 
 export type DrawerSide = 'bottom' | 'top' | 'left' | 'right'
 
@@ -51,32 +51,36 @@ export function useSheetRef(opts: {
   open: boolean
   onClose: () => void
 }) {
-  const cleanupRef = useRef<(() => void) | null>(null)
+  const elRef = useRef<HTMLDivElement | null>(null)
 
-  const sheetRef = useCallback(
-    (el: HTMLDivElement | null) => {
-      if (cleanupRef.current) {
-        cleanupRef.current()
-        cleanupRef.current = null
-      }
-      if (!el) return
+  // Stable callback ref: only stores the node. Listener wiring lives in the
+  // useEffect below so react-doctor can see the cleanup path; the exported
+  // shape stays a plain (el) => void the caller composes with other refs.
+  const sheetRef = useCallback((el: HTMLDivElement | null) => {
+    elRef.current = el
+  }, [])
 
-      const onKey = (e: KeyboardEvent) => {
-        if (e.key === 'Escape' && opts.open) {
-          e.preventDefault()
-          opts.onClose()
-        }
-      }
+  useEffect(() => {
+    const el = elRef.current
+    if (!el) return
 
-      if (opts.open) {
-        document.addEventListener('keydown', onKey)
-        cleanupRef.current = () => document.removeEventListener('keydown', onKey)
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && opts.open) {
+        e.preventDefault()
+        opts.onClose()
       }
-    },
-    // Re-create whenever values the listener closes over change.
+    }
+
+    if (opts.open) {
+      document.addEventListener('keydown', onKey)
+    }
+
+    return () => {
+      document.removeEventListener('keydown', onKey)
+    }
+    // Re-run whenever values the listener closes over change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [opts.open, opts.onClose],
-  )
+  }, [opts.open, opts.onClose])
 
   return sheetRef
 }
@@ -103,62 +107,63 @@ export function useHandleRef(opts: {
   const threshold = opts.dismissThreshold ?? 110
   const side = opts.side ?? 'bottom'
   const startCoord = useRef<number | null>(null)
-  const cleanupRef = useRef<(() => void) | null>(null)
+  const elRef = useRef<HTMLDivElement | null>(null)
 
-  const handleRef = useCallback(
-    (el: HTMLDivElement | null) => {
-      if (cleanupRef.current) {
-        cleanupRef.current()
-        cleanupRef.current = null
+  // Stable callback ref: only stores the node. Pointer wiring lives in the
+  // useEffect below so react-doctor can see the cleanup path; the exported
+  // shape stays a plain (el) => void the caller composes with other refs.
+  const handleRef = useCallback((el: HTMLDivElement | null) => {
+    elRef.current = el
+  }, [])
+
+  useEffect(() => {
+    const el = elRef.current
+    if (!el) return
+
+    const isVertical = side === 'bottom' || side === 'top'
+    // Sign: which direction is "dismiss"? positive for bottom/right, negative for top/left
+    const dismissSign = side === 'bottom' || side === 'right' ? 1 : -1
+
+    const getCoord = (e: PointerEvent) => isVertical ? e.clientY : e.clientX
+
+    const onDown = (e: PointerEvent) => {
+      startCoord.current = getCoord(e)
+      opts.onDragChange(0, true)
+      try { el.setPointerCapture(e.pointerId) } catch (_) { /* ignore */ }
+    }
+
+    const onMove = (e: PointerEvent) => {
+      if (startCoord.current == null) return
+      const raw = getCoord(e) - startCoord.current
+      // Clamp: only allow drag in the dismiss direction (no reverse drag)
+      const delta = dismissSign > 0 ? Math.max(0, raw) : Math.min(0, raw)
+      opts.onDragChange(delta, true)
+    }
+
+    const onUp = (e: PointerEvent) => {
+      if (startCoord.current == null) return
+      const raw = getCoord(e) - startCoord.current
+      startCoord.current = null
+      opts.onDragChange(0, false)
+      // Dismiss if dragged past threshold in closing direction
+      if (raw * dismissSign > threshold) {
+        opts.onDismiss()
       }
-      if (!el) return
+    }
 
-      const isVertical = side === 'bottom' || side === 'top'
-      // Sign: which direction is "dismiss"? positive for bottom/right, negative for top/left
-      const dismissSign = side === 'bottom' || side === 'right' ? 1 : -1
+    el.addEventListener('pointerdown', onDown)
+    el.addEventListener('pointermove', onMove)
+    el.addEventListener('pointerup', onUp)
+    el.addEventListener('pointercancel', onUp)
 
-      const getCoord = (e: PointerEvent) => isVertical ? e.clientY : e.clientX
-
-      const onDown = (e: PointerEvent) => {
-        startCoord.current = getCoord(e)
-        opts.onDragChange(0, true)
-        try { el.setPointerCapture(e.pointerId) } catch (_) { /* ignore */ }
-      }
-
-      const onMove = (e: PointerEvent) => {
-        if (startCoord.current == null) return
-        const raw = getCoord(e) - startCoord.current
-        // Clamp: only allow drag in the dismiss direction (no reverse drag)
-        const delta = dismissSign > 0 ? Math.max(0, raw) : Math.min(0, raw)
-        opts.onDragChange(delta, true)
-      }
-
-      const onUp = (e: PointerEvent) => {
-        if (startCoord.current == null) return
-        const raw = getCoord(e) - startCoord.current
-        startCoord.current = null
-        opts.onDragChange(0, false)
-        // Dismiss if dragged past threshold in closing direction
-        if (raw * dismissSign > threshold) {
-          opts.onDismiss()
-        }
-      }
-
-      el.addEventListener('pointerdown', onDown)
-      el.addEventListener('pointermove', onMove)
-      el.addEventListener('pointerup', onUp)
-      el.addEventListener('pointercancel', onUp)
-
-      cleanupRef.current = () => {
-        el.removeEventListener('pointerdown', onDown)
-        el.removeEventListener('pointermove', onMove)
-        el.removeEventListener('pointerup', onUp)
-        el.removeEventListener('pointercancel', onUp)
-      }
-    },
+    return () => {
+      el.removeEventListener('pointerdown', onDown)
+      el.removeEventListener('pointermove', onMove)
+      el.removeEventListener('pointerup', onUp)
+      el.removeEventListener('pointercancel', onUp)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [opts.onDragChange, opts.onDismiss, threshold, side],
-  )
+  }, [opts.onDragChange, opts.onDismiss, threshold, side])
 
   return handleRef
 }

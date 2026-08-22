@@ -66,13 +66,13 @@ html.dark .cal-shell[data-squircle="on"]::before {
 .cal-month-yr { font-size: 20px; font-weight: 900; color: #111111; letter-spacing: -0.02em; }
 .cal-count { background: #ECECEC; color: #6B6B6B; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 9999px; }
 .cal-actions { display: flex; gap: 5px; align-items: center; }
-.cal-today-btn { background: #111111; border: 1px solid transparent; border-radius: 9999px; padding: 6px 14px; font-family: 'Montserrat'; font-size: 12px; font-weight: 800; color: #fff; cursor: pointer; transition: background calc(var(--duration-150) * var(--anim-mult, 1)), color calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out); box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.22); }
-.cal-today-btn:hover { background: #1C1C1C; }
+.cal-today-btn { background: #111111; border: 1px solid transparent; border-radius: 9999px; padding: 6px 14px; font-family: 'Montserrat'; font-size: 12px; font-weight: 800; color: #fff; cursor: pointer; transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), color calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out); box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.22); }
+.cal-today-btn:hover { background: var(--fp-hover); }
 .cal-today-btn:active { transform: scale(var(--press-control)); }
 .cal-today-btn.is-today { background: #ECECEC; color: #111111; border-color: #D4D4D4; box-shadow: inset 0 2px 4px rgba(0,0,0,0.10), inset 0 1px 2px rgba(0,0,0,0.06); }
 .cal-today-btn.is-today:hover { background: #D8E0EA; }
-.cal-nav-btn { background: #fff; border: 1px solid #ECECEC; border-radius: 50%; width: 30px; height: 30px; display: grid; place-items: center; cursor: pointer; transition: background calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out); box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgba(0,0,0,0.04); }
-.cal-nav-btn:hover { background: #FAFAFA; }
+.cal-nav-btn { background: #fff; border: 1px solid #ECECEC; border-radius: 50%; width: 30px; height: 30px; display: grid; place-items: center; cursor: pointer; transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out); box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgba(0,0,0,0.04); }
+.cal-nav-btn:hover { background: var(--fp-hover); }
 .cal-nav-btn:active { transform: scale(var(--press-chip)); }
 .cal-nav-btn .material-icons { font-size: 17px; color: #6B6B6B; }
 
@@ -96,10 +96,16 @@ html.dark .cal-shell[data-squircle="on"]::before {
   pointer-events: none;
 }
 .cal-grid[data-panel-state="entering-right"],
-.cal-grid[data-panel-state="entering-left"],
+.cal-grid[data-panel-state="entering-left"] {
+  animation-duration: calc(var(--duration-280) * var(--anim-mult, 1));
+  animation-timing-function: var(--ease-out);
+}
+/* Exit one tier faster than enter (faster-exits family rule): the
+   --panel-slide-exit-dur alias (motion-tokens.css) resolves to
+   --duration-240 here. */
 .cal-grid[data-panel-state="exiting-left"],
 .cal-grid[data-panel-state="exiting-right"] {
-  animation-duration: calc(var(--duration-280) * var(--anim-mult, 1));
+  animation-duration: calc(var(--panel-slide-exit-dur) * var(--anim-mult, 1));
   animation-timing-function: var(--ease-out);
 }
 
@@ -110,7 +116,7 @@ html.dark .cal-shell[data-squircle="on"]::before {
 }
 /* No background on the whole cell — hover scoped to number only.
    Fill token matches the global option hover (fab/Fab.css .fab-item):
-   var(--fp-hover), 150ms, zero delay, resolves per-mode on its own. */
+   var(--fp-hover), --duration-fast, zero delay, resolves per-mode on its own. */
 .cal-date-num {
   width: 30px; height: 30px; border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
@@ -158,7 +164,7 @@ html.dark .cal-dot-more { color: #6B6B6B; }
    every other option's smooth fill. Fix: border-radius promoted to a base
    property (was hover-only, causing a corner-radius pop) and the option
    converges on the global hover (fab/Fab.css .fab-item): background
-   var(--fp-hover), 150ms zero-delay fade, press scale(0.97). */
+   var(--fp-hover), --duration-fast zero-delay fade, press scale(0.97). */
 .cal-ev-item { display: flex; align-items: center; width: 100%; padding: 10px 2px; border: 0; border-bottom: 1px solid #FAFAFA; border-radius: 8px; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; appearance: none; transition: transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade) 0ms /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */; }
 .cal-ev-item:hover { background: var(--hover-grey-bg, var(--fp-hover)); }
 .cal-ev-item:active { transform: scale(var(--press-control)); }
@@ -199,8 +205,8 @@ html.dark .cal-dot-more { color: #6B6B6B; }
 .cev-badge .material-icons { font-size: 12px; color: rgba(255,255,255,0.85); }
 .cal-no-events { font-size: 13px; font-weight: 500; color: #D4D4D4; padding: 6px 0 4px; }
 /* Bottom option of .cal-events — converges on the global option hover
-   (fab/Fab.css .fab-item): background var(--fp-hover), 150ms zero-delay
-   fade, press scale(0.97). The idle 0.7 opacity ghost-affordance is kept
+   (fab/Fab.css .fab-item): background var(--fp-hover), --duration-fast
+   zero-delay fade, press scale(0.97). The idle 0.7 opacity ghost-affordance is kept
    (pre-existing, not part of the broken-hover report). */
 .cal-add-row { display: flex; align-items: center; gap: 10px; padding: 10px 2px 4px; cursor: pointer; opacity: 0.7; border-radius: 8px; transition: opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade), background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade) 0ms /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */; }
 .cal-add-row:hover { opacity: 1; background: var(--fp-hover); }
@@ -211,7 +217,7 @@ html.dark .cal-dot-more { color: #6B6B6B; }
 .cal-add-row[data-proximity] {
   transition:
     opacity calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
-    background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade) 0ms /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */,
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade) 0ms /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */,
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
@@ -227,11 +233,11 @@ html.dark .cal-month-yr{ color:var(--gray-100); }
 html.dark .cal-count{ background:var(--gray-700); color:var(--gray-300); }
 /* FIX 3: dark Today btn = white bg + black text */
 html.dark .cal-today-btn{ background:#FFFFFF; color:#111111; box-shadow:inset 0 1px 0 rgba(255,255,255,1), inset 0 -2px 0 rgba(0,0,0,.08); }
-html.dark .cal-today-btn:hover{ background:#F5F5F5; color:#111111; }
+html.dark .cal-today-btn:hover{ background:var(--fp-hover); color:#111111; }
 html.dark .cal-today-btn.is-today{ background:var(--gray-700); color:var(--gray-100); border-color:var(--gray-600); box-shadow:inset 0 2px 4px rgba(0,0,0,.3); }
 html.dark .cal-today-btn.is-today:hover{ background:#242424; }
 html.dark .cal-nav-btn{ background:var(--gray-800); border-color:var(--gray-700); box-shadow:inset 0 1px 0 rgba(255,255,255,.05); }
-html.dark .cal-nav-btn:hover{ background:var(--gray-900); }
+html.dark .cal-nav-btn:hover{ background:var(--fp-hover); }
 html.dark .cal-nav-btn .material-icons{ color:var(--gray-400); }
 html.dark .cal-date-num{ color:var(--gray-100); }
 html.dark .cal-cell.other-month .cal-date-num{ color:var(--gray-600); }
@@ -248,7 +254,7 @@ html.dark .cal-no-events{ color:#A1A1A1; }
 html.dark .cal-add-row .cal-add-icon{ background:var(--gray-700); color:var(--gray-300); }
 html.dark .cal-add-row .cal-add-text{ color:var(--gray-400); }
 html.dark .cal-ep-donut-mid { background: #1C1C1C; }
-html.dark .cal-ep-cust-act:hover { background: #242424; }
+html.dark .cal-ep-cust-act:hover { background: var(--fp-hover); }
 
 /* Morph-in when switching days (event panel rebuilds → fresh nodes replay this) */
 @keyframes calEvIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -326,9 +332,9 @@ html.dark .cal-ep-cust-act:hover { background: #242424; }
   background: #F5F5F5; border: none; border-radius: 10px;
   padding: 9px 16px; font-family: 'Montserrat', sans-serif;
   font-size: 13px; font-weight: 700; color: #6B6B6B;
-  cursor: pointer; transition: background calc(var(--duration-fast) * var(--anim-mult, 1));
+  cursor: pointer; transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
-.cal-pop-cancel:hover { background: #ECECEC; }
+.cal-pop-cancel:hover { background: var(--fp-hover); }
 .cal-pop-add {
   background: var(--brand-primary-500); border: none; border-radius: 10px;
   padding: 9px 20px; font-family: 'Montserrat', sans-serif;
@@ -464,7 +470,7 @@ html.dark .cal-ep-card { background: #1C1C1C; }
   width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%;
   background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.32);
   cursor: pointer; display: grid; place-items: center; color: #fff; padding: 0;
-  transition: background calc(var(--duration-base) * var(--anim-mult, 1));
+  transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .cal-ep-close:hover { background: rgba(255,255,255,0.34); }
 .cal-ep-close .material-icons { font-size: 17px; }
@@ -593,7 +599,7 @@ html.dark .cal-ep-cust-sub { color: var(--fg3) !important; }
 .cal-ep-cust-act {
   width: 32px; height: 32px; flex-shrink: 0; border-radius: 10px; cursor: pointer;
   display: grid; place-items: center; border: 1px solid var(--border-hairline); background: var(--bg-chip); color: var(--fg2);
-  transition: background calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1));
+  transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-fast) * var(--anim-mult, 1));
 }
 .cal-ep-cust-act:hover { background: var(--bg-card-solid); }
 .cal-ep-cust-act:active { transform: scale(0.93); }
@@ -918,7 +924,7 @@ html.dark .cal-ep-chain-step { box-shadow: inset 0 1px 0 rgba(255,255,255,0.07);
   border: 1px solid var(--fbtn, #111111);
   padding: 6px 14px; border-radius: 9999px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1.5px 0 rgba(0,0,0,0.18), 0 0 10px -3px var(--fbtn, #111111);
-  transition: border-color calc(var(--duration-150) * var(--anim-mult, 1)), color calc(var(--duration-150) * var(--anim-mult, 1)), background calc(var(--duration-150) * var(--anim-mult, 1)), filter calc(var(--duration-150) * var(--anim-mult, 1));
+  transition: border-color calc(var(--duration-150) * var(--anim-mult, 1)), color calc(var(--duration-150) * var(--anim-mult, 1)), background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), filter calc(var(--duration-150) * var(--anim-mult, 1));
 }
 .cal-ep-foot-btn .material-icons { color: #fff; font-size: 16px; }
 .cal-ep-foot-btn:hover { background: var(--fbtn, var(--brand-primary)); border-color: var(--fbtn, var(--brand-primary)); color: var(--brand-on-primary); filter: brightness(1.08); }
@@ -972,7 +978,7 @@ html.dark .cal-pop-input { background: var(--gray-900); border-color: var(--gray
 html.dark .cal-pop-input:focus { border-color: var(--brand-primary); }
 html.dark .cal-pop-color-btn.active { border-color: var(--gray-100); }
 html.dark .cal-pop-cancel { background: var(--gray-700); color: var(--gray-300); }
-html.dark .cal-pop-cancel:hover { background: #242424; }
+html.dark .cal-pop-cancel:hover { background: var(--fp-hover); }
 html.dark .cal-popover-backdrop { background: rgba(0,0,0,.55); }
 
 /* ── Events scroll + blur masks + left-edge scrollbar (item i) ── */

@@ -2,11 +2,12 @@ import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './ModelSelector.css'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { iconClass } from '../../../lib/iconClass'
 import { useProximityGroup } from '@/lib/hooks'
 import { useSquircle } from '../../../lib/hooks/use-squircle'
 import { useAutoHeight } from '../../../lib/hooks/use-auto-height'
+import { rovingTabIndex } from '../../../lib/keyboard-nav'
 
 // ---------------------------------------------------------------------------
 // ModelSelector — AI chatbot model picker
@@ -87,6 +88,11 @@ const MODELS: ModelOption[] = [
 export default function ModelSelector() {
   const [open, setOpen] = useState(true)
   const [selectedId, setSelectedId] = useState<string>('auto')
+  // Roving-tabindex bookkeeping (WAI-ARIA APG listbox pattern): which row
+  // currently carries tabIndex 0 / real DOM focus, independent of `selectedId`.
+  const [focusedId, setFocusedId] = useState<string>('auto')
+  const rowRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const headerRef = useRef<HTMLButtonElement>(null)
   // Single group over the shell — model rows are its wired members
   // (locked convention: radius 80, dy×3). Step 27 removed the separate
   // close (X) button: .ms-header is now the sole open/close control, so a
@@ -127,6 +133,16 @@ export default function ModelSelector() {
     setSelectedId(id)
   }
 
+  // Listbox opens (mouse or ArrowDown) -> focus follows the selection in,
+  // matching the WAI-ARIA APG listbox pattern. Rows stay mounted-through-
+  // collapse (see header comment) so refs are always attachable.
+  useEffect(() => {
+    if (!open) return
+    setFocusedId(selectedId)
+    rowRefs.current[selectedId]?.focus()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
+
   return (
     <div className="ms-card">
 
@@ -144,7 +160,14 @@ export default function ModelSelector() {
         <button
           type="button"
           className="ms-header"
+          ref={headerRef}
           onClick={togglePanel}
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowDown' && !open) {
+              e.preventDefault()
+              setOpen(true)
+            }
+          }}
           aria-expanded={open}
           aria-controls="ms-collapsible-panel"
           aria-label={open ? 'Collapse model selector' : `Select model: ${selected.name}`}
@@ -189,6 +212,8 @@ export default function ModelSelector() {
           <div
             className="ms-panel"
             ref={panelSquircleRef}
+            role="listbox"
+            aria-label="Select model"
             style={{ '--sel-idx': selectedIndex } as React.CSSProperties}
           >
 
@@ -206,7 +231,37 @@ export default function ModelSelector() {
                   key={model.id}
                   className={rowCls}
                   data-proximity
+                  role="option"
+                  ref={(el) => { rowRefs.current[model.id] = el }}
+                  tabIndex={model.id === focusedId ? 0 : -1}
+                  aria-selected={isSel}
                   onClick={(e) => { e.stopPropagation(); pick(model.id); }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      pick(model.id)
+                    } else if (
+                      e.key === 'ArrowDown' ||
+                      e.key === 'ArrowUp' ||
+                      e.key === 'Home' ||
+                      e.key === 'End'
+                    ) {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      const curIdx = MODELS.findIndex((m) => m.id === focusedId)
+                      const nextIdx = rovingTabIndex(e.key, curIdx, MODELS.length, 'vertical')
+                      if (nextIdx === null) return
+                      const nextId = MODELS[nextIdx].id
+                      setFocusedId(nextId)
+                      rowRefs.current[nextId]?.focus()
+                    } else if (e.key === 'Escape') {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      setOpen(false)
+                      headerRef.current?.focus()
+                    }
+                  }}
                 >
                   {/* Icon */}
                   <div

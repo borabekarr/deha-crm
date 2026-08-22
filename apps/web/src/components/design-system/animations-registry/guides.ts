@@ -15,6 +15,76 @@ export interface AnimationGuide {
   dontLine: string
 }
 
+/** One global duration/easing rule per recurring interaction family (plan:
+ * motion-family-rules), mirroring hover-tokens.css `.hover-standard`. Source
+ * of truth is the "Motion family rules" block in motion-tokens.css; this is
+ * the human-facing audit trail, not a duplicate definition.
+ *
+ * Global rule: exit runs one tier faster than enter for open/close pairs
+ * (popover, tooltip, accordion, overlay morph, toast). Sliding panel and
+ * stagger are excluded from this rule because they are not enter/exit
+ * pairs — sliding panel is a live-drag settle and stagger is a per-item
+ * DOM-order reveal. */
+export interface FamilyRule {
+  family: string
+  tokens: string
+  source: string
+  usage: string
+  band: string
+}
+
+export const FAMILY_RULES: FamilyRule[] = [
+  {
+    family: 'Popover',
+    tokens: '--popover-dur / --popover-exit-dur / --popover-ease',
+    source: 'Dropdown.css + MessageDropdown.css (settled curve wins)',
+    usage: 'Use .motion-popover for any anchored open/close (menus, comboboxes).',
+    band: '200ms open / 150ms close (exit one tier faster).',
+  },
+  {
+    family: 'Tooltip',
+    tokens: '--tooltip-dur / --tooltip-exit-dur / --tooltip-ease / --tooltip-transform-ease',
+    source: 'WorkflowNodes .wf-tool::after (cleanest monotonic curve)',
+    usage: 'Use .motion-tooltip for hover/focus-triggered labels.',
+    band: '200ms open / 150ms close (exit one tier faster; recipe defaulted 140ms at component scale).',
+  },
+  {
+    family: 'Sliding panel / drawer',
+    tokens: '--panel-settle-dur / --panel-settle-ease',
+    source: 'SmoothDrawer.css settle transition (open/close, not live drag)',
+    usage: 'Governs the settle only; [data-panel-state] keyframes stay the live-drag primitive.',
+    band: 'Fast tier + --ease-out — deviates from a fixed band because live-drag gesture settle is Apple-physics-justified, not a static open/close.',
+  },
+  {
+    family: 'Overlay morph',
+    tokens: '--overlay-morph-dur / --overlay-morph-exit-dur / --overlay-morph-ease',
+    source: 'MorphSurface.css --ms2-ease/--ms2-morph-dur',
+    usage: 'Use .motion-overlay-morph for width/height/border-radius surface morphs.',
+    band: '300ms open / 240ms close (exit one tier faster) — MorphSurface itself keeps its local 360ms (--duration-sweep) as a documented dynamic-island-style exception.',
+  },
+  {
+    family: 'Accordion',
+    tokens: '--accordion-dur / --accordion-exit-dur / --accordion-ease',
+    source: 'DisclosureGroup.css --dg-dur/--dg-ease (easing aliased to house, overshoot dropped)',
+    usage: 'Use .motion-accordion for expand/collapse; grid-template-rows stays the documented layout-property exception.',
+    band: '380ms open / 260ms close (exit one tier faster), preserved from the recipe rather than compressed to a house band.',
+  },
+  {
+    family: 'Toast',
+    tokens: '--toast-dur / --toast-exit-dur / --toast-ease',
+    source: 'Toast.css ts-enter keyframe',
+    usage: 'Use .motion-toast / .motion-toast.is-exiting (animation-direction: reverse mirrors enter, no second keyframe).',
+    band: 'Base tier open (160ms) / 120ms close (exit one tier faster, --duration-fast) — house bands, not a popover/overlay band.',
+  },
+  {
+    family: 'Stagger',
+    tokens: '--stagger-item-dur / --stagger-item-ease + --stagger-entrance',
+    source: 'AnimatedList.css entry transition + existing --stagger-entrance increment',
+    usage: 'Use .motion-stagger-item with --stagger-index set per row for DOM-order reveal.',
+    band: '240ms per-item + 100ms DOM-order increment.',
+  },
+]
+
 export const GUIDES: Record<string, AnimationGuide> = {
   'animated-list': {
     when: 'Live/real-time feeds where rows arrive continuously and older rows must age out (activity streams, notifications).',

@@ -55,7 +55,7 @@ function ShowcasePage() {
                       >
                         <span className="flex items-center justify-between text-sm font-semibold text-foreground">
                           {entry.name}
-                          <svg className="size-3.5 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="size-3.5 opacity-0 transition-[transform,opacity] duration-[var(--duration-fast)] ease-[var(--ease-fade)] group-hover:translate-x-0.5 group-hover:opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
                         </span>

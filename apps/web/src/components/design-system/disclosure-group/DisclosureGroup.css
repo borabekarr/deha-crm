@@ -70,16 +70,17 @@
   padding: 14px 14px; cursor: pointer; text-align: left;
   font-family: inherit; color: var(--fg1);
   /* Review fix (ds-review-expandables step 5): hover tint and press-scale are
-     feedback legs, not expansion legs — they must not inherit --dg-dur (600ms
-     in the demo). Both properties are re-declared in one shorthand so the
-     added transform leg cannot drop the pre-existing background leg. */
-  transition: background calc(var(--duration-base) * var(--anim-mult, 1)) var(--dg-ease, var(--ease-motion-sweep-2236)),
+     feedback legs, not expansion legs — they must not inherit --dg-dur.
+     Both properties are re-declared in one shorthand so the added transform
+     leg cannot drop the pre-existing background leg. background is a hover
+     fill, moved to the standard hover-fade pair per the no-exceptions ruling. */
+  transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
               transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--dg-ease, var(--ease-motion-sweep-2236));
   -webkit-tap-highlight-color: transparent;
 }
-.dg-trigger:hover { background: rgba(15,23,42,.025); }
+.dg-trigger:hover { background: var(--fp-hover); }
 .dg-trigger:active { transform: scale(.992); }
-[data-theme="dark"] .dg-trigger:hover { background: rgba(255,255,255,.03); }
+[data-theme="dark"] .dg-trigger:hover { background: var(--fp-hover); }
 
 .dg-tile {
   width: 38px; height: 38px; flex: none; border-radius: var(--radius-md);
@@ -97,7 +98,7 @@
 .dg-chevron {
   flex: none; font-size: 22px; color: var(--fg4); margin-left: 4px;
   /* the chevron is a 22px glyph: it reads as lag when it rotates on the panel's
-     expansion clock, so it keeps its own fixed 280ms instead of --dg-dur */
+     expansion clock, so it keeps its own fixed --duration-280 instead of --dg-dur */
   transition: transform calc(var(--duration-280) * var(--anim-mult, 1)) var(--dg-ease, var(--ease-motion-sweep-2236)),
               color calc(var(--duration-200) * var(--anim-mult, 1)) ease;
 }
@@ -110,9 +111,18 @@
   display: grid;
   grid-template-rows: 0fr;
   overflow: hidden;
-  transition: grid-template-rows var(--dg-dur, 380ms) var(--dg-ease, cubic-bezier(.34,1.56,.64,1));
+  /* motion-family: accordion (motion-tokens.css) — --dg-dur/--dg-ease
+     fallbacks aliased to the family tokens; --ease-spring-snap overshot,
+     denylisted as a family default. */
+  transition: grid-template-rows var(--dg-dur, var(--accordion-dur)) var(--dg-ease, var(--accordion-ease));
 }
 .dg[data-open="true"] .dg-clip { grid-template-rows: 1fr; }
+/* Collapsed (exit) leg -- same layout-property exception as the base rule
+   above (grid-template-rows animates a layout property, not transform/
+   opacity), faster-exits rule anchors the close to --accordion-exit-dur. */
+.dg:not([data-open="true"]) .dg-clip {
+  transition: grid-template-rows var(--dg-exit-dur, var(--accordion-exit-dur)) var(--dg-ease, var(--accordion-ease));
+}
 @media (prefers-reduced-motion: reduce) {
   .dg-clip, .dg-chevron, .dg-trigger { transition: none !important; }
   /* gentler, not zero: movement and blur go, the reveal's opacity fade stays */
@@ -132,12 +142,19 @@
   opacity: 0;
   transform: translateY(-10px);
   filter: blur(var(--dg-blur, 0px));
-  transition: transform var(--dg-dur, 380ms) var(--dg-ease, cubic-bezier(.34,1.56,.64,1)),
-              opacity calc(var(--dg-dur, 380ms) * .7) ease,
-              filter var(--dg-dur, 380ms) var(--dg-ease, cubic-bezier(.34,1.56,.64,1));
+  transition: transform var(--dg-dur, var(--accordion-dur)) var(--dg-ease, var(--accordion-ease)),
+              opacity calc(var(--dg-dur, var(--accordion-dur)) * .7) var(--dg-ease, var(--accordion-ease)),
+              filter var(--dg-dur, var(--accordion-dur)) var(--dg-ease, var(--accordion-ease));
   scrollbar-width: thin; scrollbar-color: var(--slate-300) transparent;
 }
 .dg[data-open="true"] .dg-scroll { opacity: 1; transform: none; --dg-blur: 0px; }
+/* Collapsed (exit) leg -- faster-exits rule anchors the close to
+   --accordion-exit-dur; * .7 opacity ratio and easing tokens unchanged. */
+.dg:not([data-open="true"]) .dg-scroll {
+  transition: transform var(--dg-exit-dur, var(--accordion-exit-dur)) var(--dg-ease, var(--accordion-ease)),
+              opacity calc(var(--dg-exit-dur, var(--accordion-exit-dur)) * .7) var(--dg-ease, var(--accordion-ease)),
+              filter var(--dg-exit-dur, var(--accordion-exit-dur)) var(--dg-ease, var(--accordion-ease));
+}
 [data-theme="dark"] .dg-scroll { border-top-color: #2A3A52; scrollbar-color: var(--slate-700) transparent; }
 .dg-scroll::-webkit-scrollbar { width: 8px; }
 .dg-scroll::-webkit-scrollbar-thumb { background: var(--slate-300); border-radius: 4px; border: 2px solid transparent; background-clip: content-box; }

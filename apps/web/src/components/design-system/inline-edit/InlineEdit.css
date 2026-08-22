@@ -78,7 +78,7 @@ html.dark .ie-field {
 
 /* saved flash on the field ring */
 .ie-field[data-saved="true"] {
-  animation: ieSaved calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out); /* 620ms — no exact tier, left as literal per recipe */
+  animation: ieSaved calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-out); /* no exact tier for the raw source value, --duration-560 used per recipe */
 }
 
 @keyframes ieSaved {
@@ -161,7 +161,7 @@ html.dark .ie-input::selection {
   cursor: pointer;
   background: none;
   transition:
-    background-color calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-out),
+    background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     color            calc(var(--duration-260) * var(--anim-mult, 1)),
     box-shadow       calc(var(--duration-260) * var(--anim-mult, 1)),
     border-color     calc(var(--duration-260) * var(--anim-mult, 1)),
@@ -181,11 +181,11 @@ html.dark .ie-input::selection {
   transform: scale(0.7);
 }
 
-/* Press/confirm state: scale down while the commit timer is pending (~200ms). */
+/* Press/confirm state: scale down while the commit timer is pending (--duration-200). */
 .ie-act.is-confirming {
   transform: scale(.86);
   transition:
-    background-color calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-out),
+    background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     color            calc(var(--duration-260) * var(--anim-mult, 1)),
     box-shadow       calc(var(--duration-260) * var(--anim-mult, 1)),
     border-color     calc(var(--duration-260) * var(--anim-mult, 1)),
@@ -204,7 +204,7 @@ html.dark .ie-input::selection {
 
 .ie-act[data-mode="edit"]:hover {
   color: var(--fg1, #111111);
-  background: #FAFAFA;
+  background: var(--fp-hover);
 }
 
 html.dark .ie-act[data-mode="edit"] {
@@ -212,7 +212,7 @@ html.dark .ie-act[data-mode="edit"] {
 }
 
 html.dark .ie-act[data-mode="edit"]:hover {
-  background: color-mix(in srgb, #fff 10%, var(--bg-card-solid, #1C1C1C));
+  background: var(--fp-hover);
 }
 
 /* check / save state — mirrors .btn-green pill treatment */
@@ -259,7 +259,7 @@ html.dark .ie-act[data-mode="edit"]:hover {
   transition:
     opacity   calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
     transform calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-spring),
-    background-color calc(var(--duration-200) * var(--anim-mult, 1)),
+    background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     color     calc(var(--duration-200) * var(--anim-mult, 1)),
     scale     calc(var(--duration-140) * var(--anim-mult, 1)),
     filter    calc(var(--duration-140) * var(--anim-mult, 1));
@@ -403,7 +403,7 @@ html.dark .ie-saved-morph {
   color: var(--brand-primary-300, var(--brand-primary-300));
 }
 
-/* Visible state when saved=true: eases in AFTER input/prefix have faded out (~200ms). */
+/* Visible state when saved=true: eases in AFTER input/prefix have faded out (--duration-200). */
 .ie-field[data-saved="true"] .ie-saved-morph {
   opacity: 1;
   transform: scale(1);
@@ -411,7 +411,7 @@ html.dark .ie-saved-morph {
   transition-delay: calc(var(--duration-200) * var(--anim-mult, 1));
 }
 
-/* Exit from saved: input and prefix fade back in only after saved-morph is gone (~200ms).
+/* Exit from saved: input and prefix fade back in only after saved-morph is gone (--duration-200).
    Explicit transition rewrite so only opacity is delayed; color stays instant. */
 .ie-field[data-saved="false"] .ie-input {
   transition:

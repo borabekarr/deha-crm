@@ -18,11 +18,18 @@
  * CSS visibility/opacity (mounted-through-exit pattern).
  */
 
-import { useState, useCallback, type ReactNode } from 'react'
+import { useState, useCallback, useRef, type ReactNode } from 'react'
 import { iconClass } from '../../../lib/iconClass'
-import { useCardRef, useTimerRef, useOverlayRef } from './delete-modal-hook'
+import {
+  useTimerRef,
+  useOverlayRef,
+  useDialogCancelListener,
+  useDialogCloseTimer,
+  useDialogBackdropDismiss,
+} from './delete-modal-hook'
 import { useSquircle } from '../../../lib/hooks/use-squircle'
 import { useProximityGroup } from '@/lib/hooks'
+import { tokenMs } from '@/lib/token-ms'
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
 import '../../../../design-system/preview/_shared-feedback.css'
@@ -65,10 +72,10 @@ export function DeleteModal({
   const [shake, setShake] = useState(false)
 
   const [prevOpen, setPrevOpen] = useState(open)
+  const dialogElRef = useRef<HTMLDialogElement | null>(null)
 
   // ---- timer helpers (callback-ref pattern, no effect hooks) ----
   const enterTimer = useTimerRef()
-  const closeTimer = useTimerRef()
   const shakeTimer = useTimerRef()
   const loadTimer = useTimerRef()
   const resolveTimer = useTimerRef()
@@ -81,13 +88,14 @@ export function DeleteModal({
       setEntering(true)
       setPhase('idle')
       setShake(false)
+      if (dialogElRef.current && !dialogElRef.current.open) dialogElRef.current.showModal()
       // MIRROR: DeleteModal.css longest staggered entrance leg (dm-actions:
       // 260ms delay + duration-expand 460ms = 720ms).
       enterTimer.set(720, () => setEntering(false))
     } else {
+      // The dialog stays open (native `open` attribute) through the CSS exit
+      // leg; useDialogCloseTimer below owns the actual dialog.close() call.
       setClosing(true)
-      // MIRROR: DeleteModal.css dm-card-out / dm-ov-out duration-280.
-      closeTimer.set(280, () => setClosing(false))
     }
   }
 
@@ -127,30 +135,47 @@ export function DeleteModal({
     [],
   )
 
-  // ---- callback refs (replace keyboard/focus effects) ----
-  const cardRef = useCardRef({ open, phase, onClose })
+  // ---- callback refs (native <dialog> gives Esc + focus-trap + open-focus
+  // for free; we only keep squircle/proximity hover wiring here) ----
   const squircleRef = useSquircle<HTMLDivElement>()
   const shellSquircleRef = useSquircle<HTMLDivElement>()
   const proxRef = useProximityGroup<HTMLDivElement>()
   const setCardRefs = useCallback(
     (el: HTMLDivElement | null) => {
-      cardRef(el)
       squircleRef(el)
       proxRef(el)
     },
-    [cardRef, squircleRef, proxRef],
+    [squircleRef, proxRef],
   )
 
   // overlay ref: teardown timers when overlay unmounts
   const clearAll = useCallback(() => {
     enterTimer.clear()
-    closeTimer.clear()
     shakeTimer.clear()
     loadTimer.clear()
     resolveTimer.clear()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   const overlayRef = useOverlayRef(clearAll)
+  // Stable identity (empty-ish deps via [overlayRef], itself stable) so React
+  // does not detach/reattach this ref on every re-render -- an inline arrow
+  // ref here caused overlayRef(null) -> clearAll() to fire on every render,
+  // cancelling the pending close timer before it could ever run.
+  const setDialogRef = useCallback(
+    (el: HTMLDialogElement | null) => {
+      dialogElRef.current = el
+      overlayRef(el)
+    },
+    [overlayRef],
+  )
+  // cancel = native Escape; intercept so the CSS exit leg plays before close()
+  useDialogCancelListener(dialogElRef, { phase, onClose })
+  // Owns the exit-leg timer: after --overlay-morph-exit-dur (+ settle
+  // buffer), flips `closing` back off and calls dialog.close().
+  useDialogCloseTimer(dialogElRef, closing, tokenMs('--overlay-morph-exit-dur', 240) + 20, setClosing)
+  // Backdrop click: the dialog is its own scrim, so dismissal is wired via a
+  // native listener (not a JSX handler prop) from the hook file.
+  useDialogBackdropDismiss(dialogElRef, { phase, onClose })
 
   // ---- derived values ----
   const isDone = phase === 'done'
@@ -185,13 +210,16 @@ export function DeleteModal({
   )
 
   return (
-    <div
-      ref={overlayRef}
+    <dialog
+      ref={setDialogRef}
       className={`dm-overlay${entering ? ' dm-anim' : ''}`}
       data-state={overlayState}
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget && phase === 'idle') onClose?.()
-      }}
+      // Neutralise the UA <dialog> box model (border/margin/max-size); the
+      // scrim background + padding stay entirely CSS-owned in DeleteModal.css
+      // (`.dm-overlay`), unchanged.
+      style={{ border: 'none', margin: 0, maxWidth: 'none', maxHeight: 'none', color: 'inherit' }}
+      aria-labelledby="dm-title"
+      aria-describedby="dm-body"
     >
       <div
         ref={shellSquircleRef}
@@ -202,11 +230,6 @@ export function DeleteModal({
           ref={setCardRefs}
           className="dm-card"
           data-done={isDone}
-          tabIndex={-1}
-          role="alertdialog"
-          aria-modal="true"
-          aria-labelledby="dm-title"
-          aria-describedby="dm-body"
         >
           <button
             type="button"
@@ -269,7 +292,7 @@ export function DeleteModal({
           </div>
         </div>
       </div>
-    </div>
+    </dialog>
   )
 }
 

@@ -30,6 +30,10 @@
    like .dp-panel -- JS adds dp-panel--open synchronously at mount, so there
    is no flash. */
 .dp-outer {
+  /* Faster-exits rule: close runs one tier below the 220ms open transition;
+     date-picker-hook.ts reads this same custom property at close time
+     (exitDurMs), so CSS and the JS timer never drift again. */
+  --dp-exit-dur: var(--duration-180);
   position: relative;
   padding: 10px;
   background: var(--shell-bg, #d4dce8);
@@ -57,9 +61,9 @@
 .dp-outer.dp-panel--closing {
   transform: translateY(-16px) scale(0.95);
   opacity: 0;
-  transition:
-    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
-    opacity   calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
+  transition-property: transform, opacity;
+  transition-duration: calc(var(--dp-exit-dur) * var(--anim-mult, 1));
+  transition-timing-function: var(--ease-out);
 }
 
 /* Dark: canonical dark shell + external line (top rim: translucent white) */
@@ -123,7 +127,7 @@ html.dark .dp-outer[data-squircle="on"] {
 .dp-trigger[data-proximity],
 .dp-confirm[data-proximity] {
   transition:
-    background-color calc(var(--duration-180) * var(--anim-mult, 1)),
+    background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
     box-shadow calc(var(--duration-200) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
@@ -196,9 +200,9 @@ html.dark #dp-open-btn:hover {
   opacity: 0;
   pointer-events: none;
   animation: none;
-  transition:
-    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
-    opacity   calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
+  transition-property: transform, opacity;
+  transition-duration: calc(var(--dp-exit-dur) * var(--anim-mult, 1));
+  transition-timing-function: var(--ease-out);
 }
 
 /* ── Squircle conversion (Step 5): inner of the dp-outer/dp-panel concentric
@@ -264,7 +268,7 @@ html.dark .dp-panel[data-squircle="on"] {
   margin: -2px -4px 0 0;
 }
 
-.dp-head-close:hover { background: var(--gray-200); }
+.dp-head-close:hover { background: var(--fp-hover); }
 
 /* Proximity — scale+filter channels appended; no local transform/filter
    hover rule on .dp-head-close to remove (hover only recolors). */
@@ -473,7 +477,7 @@ html.dark .dp-wheel-mask-inner .dp-item {
    .dp-confirm's own centering translateX(-50%) instead of dropping it. */
 .dp-confirm.btn-green:hover {
   transform: translateX(-50%);
-  background-color: color-mix(in srgb, #111111 88%, black);
+  background-color: var(--fp-hover);
   transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
 
@@ -510,7 +514,7 @@ html.dark .dp-head-close {
   color: var(--fg4);
 }
 
-html.dark .dp-head-close:hover { background: var(--gray-600); }
+html.dark .dp-head-close:hover { background: var(--fp-hover); }
 
 html.dark .dp-wheel + .dp-wheel {
   border-left-color: var(--gray-700);

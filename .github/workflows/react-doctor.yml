@@ -40,6 +40,6 @@ jobs:
           comment: true
           review-comments: true
           commit-status: true
-          version: "0.5.8"         # pin npm pkg too — Action otherwise runs npx ...@latest in the runner
+          version: "0.9.12"        # pin npm pkg too — matches pnpm-lock.yaml (Action otherwise runs npx ...@latest in the runner)
         env:
           DO_NOT_TRACK: "1"        # best-effort telemetry opt-out (industry-standard var)

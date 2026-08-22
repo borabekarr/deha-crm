@@ -197,7 +197,7 @@
     inset 0 1px 0 rgba(255,255,255,0.9),
     inset 0 0 0 1px rgba(17,17,17,0.04);
   transition:
-    background calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade),
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     color calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade);
 }
 
@@ -261,14 +261,16 @@
     inset 0 1px 0 rgba(255,255,255,0.7),
     inset 0 0 0 1px rgba(17,17,17,0.04);
   transition:
-    background calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     color calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
-    box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade);
+    box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
+    background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
 
 .pl-pin span {
   font-size: 18px;
-  transition: transform calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-spring);
+  /* --ease-spring (bounce-family overshoot) denylisted; settled --ease-out. */
+  transition: transform calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out);
 }
 
 .pl-pin:hover { color: var(--fg2); }
@@ -345,7 +347,7 @@ html.dark .pl-pin {
     inset 0 0 0 1px rgba(255,255,255,0.05);
 }
 
-html.dark .pl-pin:hover { background: var(--gray-700, #232323); }
+html.dark .pl-pin:hover { background: var(--fp-hover); }
 html.dark .pl-head .pl-count { color: var(--fg3); }
 
 /* ── Responsive ───────────────────────────────────────────────────────── */

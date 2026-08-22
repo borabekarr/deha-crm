@@ -163,8 +163,10 @@ function StatusCardInner({
   const [alertCount, setAlertCount] = useState(alerts)
   const cancelCountRef = useRef<(() => void) | null>(null)
 
-  // copy-link handle — stable object, created once
-  const copyHandleRef = useRef(makeCopyHandle())
+  // copy-link handle — stable object, created once (lazy init: guard avoids
+  // rebuilding it on every render just to throw the result away)
+  const copyHandleRef = useRef<ReturnType<typeof makeCopyHandle> | undefined>(undefined)
+  if (!copyHandleRef.current) copyHandleRef.current = makeCopyHandle()
   const proximityRef = useProximityGroup<HTMLElement>()
   const stageSquircleRef = useSquircle<HTMLDivElement>()
   const cardSquircleRef = useSquircle<HTMLElement>()
@@ -174,21 +176,19 @@ function StatusCardInner({
 
   /* ---- toggle open ---- */
   const handleToggle = useCallback(() => {
-    setOpen((o) => {
-      const next = !o
-      if (next) {
-        // card is opening: reset counter and launch count-up
-        setAlertCount(0)
-        if (cancelCountRef.current) cancelCountRef.current()
-        cancelCountRef.current = startCountUp(alerts, 520, setAlertCount)
-      } else {
-        // card is closing: cancel in-flight count and snap to target
-        if (cancelCountRef.current) { cancelCountRef.current(); cancelCountRef.current = null }
-        setAlertCount(alerts)
-      }
-      return next
-    })
-  }, [alerts])
+    const next = !open
+    setOpen(next)
+    if (next) {
+      // card is opening: reset counter and launch count-up
+      setAlertCount(0)
+      if (cancelCountRef.current) cancelCountRef.current()
+      cancelCountRef.current = startCountUp(alerts, 520, setAlertCount)
+    } else {
+      // card is closing: cancel in-flight count and snap to target
+      if (cancelCountRef.current) { cancelCountRef.current(); cancelCountRef.current = null }
+      setAlertCount(alerts)
+    }
+  }, [open, alerts])
 
   /* ---- pointer / ripple ---- */
   const onHeaderDown = useCallback((e: React.PointerEvent<HTMLButtonElement>) => {
@@ -202,7 +202,7 @@ function StatusCardInner({
     e.stopPropagation()
     const link = `https://app.deha.io/issues/${issueId}`
     try { navigator.clipboard?.writeText(link) } catch { /* clipboard unavailable */ }
-    copyHandleRef.current.trigger({
+    copyHandleRef.current!.trigger({
       onCopied:  () => { setCopied(true); setExiting(false) },
       onExiting: () => { setCopied(false); setExiting(true) },
       onDone:    () => setExiting(false),

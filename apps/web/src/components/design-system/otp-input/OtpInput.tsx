@@ -63,45 +63,70 @@ export function OtpInput({ count, expected, variant, mask, autoFocus, onChange, 
   const [shake, setShake] = useState(false)
   const [pop, setPop] = useState(-1) // index of the freshly-entered digit
   const inputRef = useRef<HTMLInputElement>(null)
-  const timers = useRef<ReturnType<typeof setTimeout>[]>([])
   const popTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const target = expected.replace(/\D/g, '').slice(0, count)
 
-  const clearTimers = () => {
-    timers.current.forEach(clearTimeout)
-    timers.current = []
-  }
-  const later = (fn: () => void, ms: number) => {
-    const id = setTimeout(fn, ms)
-    timers.current.push(id)
-  }
-
-  // reset when the shape changes
+  // reset when the shape changes; status flipping away from 'verifying'/
+  // 'error' below cancels the verify/shake/reset timers via their own
+  // cleanups, so this effect only owns the autofocus timer.
   useEffect(() => {
-    clearTimers()
     setValue('')
     setStatus('idle')
-    if (autoFocus && inputRef.current) later(() => inputRef.current?.focus(), 60)
-    return clearTimers
+    if (!autoFocus || !inputRef.current) return
+    const id = setTimeout(() => inputRef.current?.focus(), 60)
+    return () => clearTimeout(id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [count, expected])
 
   const focus = useCallback(() => inputRef.current && inputRef.current.focus(), [])
 
+  // Verify sequence: 620ms after entering the last digit, decide success or
+  // error. Timing is behavioural, not motion — kept as literals per the
+  // header comment.
+  useEffect(() => {
+    if (status !== 'verifying') return
+    const id = setTimeout(() => {
+      if (value === target) {
+        setStatus('success')
+      } else {
+        setStatus('error')
+        setShake(true)
+      }
+    }, 620)
+    return () => clearTimeout(id)
+  }, [status, value, target])
+
+  // Error sequence: shake clears at 520ms, full reset (+refocus) at 880ms.
+  // Both fire off the same 'error' entry, independent of each other.
+  useEffect(() => {
+    if (status !== 'error') return
+    const id = setTimeout(() => setShake(false), 520)
+    return () => clearTimeout(id)
+  }, [status])
+
+  useEffect(() => {
+    if (status !== 'error') return
+    const id = setTimeout(() => {
+      setValue('')
+      setStatus('idle')
+      focus()
+    }, 880)
+    return () => clearTimeout(id)
+  }, [status, focus])
+
   function commit(raw: string) {
     if (status === 'success' || status === 'verifying') return
     const v = raw.replace(/\D/g, '').slice(0, count)
-    setValue((prev) => {
-      if (v.length > prev.length) {
-        // a digit was added — pop the newest, strip the flag via a timer so the
-        // resting digit stays visible even where the animation clock is frozen
-        setPop(v.length - 1)
-        clearTimeout(popTimer.current)
-        popTimer.current = setTimeout(() => setPop(-1), 320)
-      }
-      return v
-    })
+    const grew = v.length > value.length
+    setValue(v)
+    if (grew) {
+      // a digit was added — pop the newest, strip the flag via a timer so the
+      // resting digit stays visible even where the animation clock is frozen
+      setPop(v.length - 1)
+      clearTimeout(popTimer.current)
+      popTimer.current = setTimeout(() => setPop(-1), 320)
+    }
     setStatus('idle')
     onChange && onChange(v)
     if (v.length === count) verify(v)
@@ -110,20 +135,8 @@ export function OtpInput({ count, expected, variant, mask, autoFocus, onChange, 
   function verify(v: string) {
     onFinished && onFinished(v)
     setStatus('verifying')
-    later(() => {
-      if (v === target) {
-        setStatus('success')
-      } else {
-        setStatus('error')
-        setShake(true)
-        later(() => setShake(false), 520)
-        later(() => {
-          setValue('')
-          setStatus('idle')
-          focus()
-        }, 880)
-      }
-    }, 620)
+    // decision + shake/reset timing lives in the effects above, gated on
+    // `status` and reading `value` (already `v` by the time they run)
   }
 
   const locked = status === 'success' || status === 'verifying'
@@ -156,7 +169,7 @@ export function OtpInput({ count, expected, variant, mask, autoFocus, onChange, 
 
   return (
     <>
-      <div className={rowClass} data-variant={variant} onClick={focus}>
+      <div className={rowClass} data-variant={variant} role="presentation" onClick={focus}>
         {cells}
         <input
           ref={inputRef}
@@ -180,14 +193,15 @@ export function OtpInput({ count, expected, variant, mask, autoFocus, onChange, 
 
 // ── status line ──────────────────────────────────────────────────────────
 
+const STATUS_MAP: Record<OtpStatus, [string | null, string]> = {
+  idle: [null, 'Enter the code sent to your device'],
+  verifying: ['spin', 'Verifying…'],
+  error: ['warn', 'Incorrect code — try again'],
+  success: ['check', 'Verified'],
+}
+
 function StatusLine({ status }: { status: OtpStatus }) {
-  const map: Record<OtpStatus, [string | null, string]> = {
-    idle: [null, 'Enter the code sent to your device'],
-    verifying: ['spin', 'Verifying…'],
-    error: ['warn', 'Incorrect code — try again'],
-    success: ['check', 'Verified'],
-  }
-  const [ico, text] = map[status]
+  const [ico, text] = STATUS_MAP[status]
   return (
     <div className="otp-status" data-s={status}>
       {ico === 'spin' && <span className="otp-spin" />}
@@ -221,7 +235,7 @@ function Resend() {
         <>Resend code in {String(left).padStart(2, '0')}s</>
       ) : (
         <>
-          Didn’t get it? <button onClick={() => setLeft(30)}>Resend code</button>
+          Didn’t get it? <button type="button" onClick={() => setLeft(30)}>Resend code</button>
         </>
       )}
     </p>

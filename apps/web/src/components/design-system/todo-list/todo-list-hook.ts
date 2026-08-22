@@ -135,7 +135,7 @@ export function startOfWeek(d: Date): Date {
 
 // ── Stat counter tween ───────────────────────────────────────────────────────
 
-export function tween(el: HTMLElement, from: number, to: number): void {
+function tween(el: HTMLElement, from: number, to: number): void {
   if (from === to) { el.textContent = String(to); return }
   const t0 = performance.now()
   const dur = 420
@@ -153,7 +153,7 @@ export function tween(el: HTMLElement, from: number, to: number): void {
 
 // ── FLIP reorder animation ───────────────────────────────────────────────────
 
-export function flip(list: HTMLElement, mutate: () => void): void {
+function flip(list: HTMLElement, mutate: () => void): void {
   const rows = Array.from(list.children) as HTMLElement[]
   const first = rows.map(r => r.getBoundingClientRect().top)
   mutate()
@@ -161,12 +161,10 @@ export function flip(list: HTMLElement, mutate: () => void): void {
     if (!r.isConnected || r.parentNode !== list) return
     const dy = first[i] - r.getBoundingClientRect().top
     if (!dy) return
-    r.style.transition = 'none'
-    r.style.transform = 'translateY(' + dy + 'px)'
+    Object.assign(r.style, { transition: 'none', transform: 'translateY(' + dy + 'px)' })
     void r.offsetWidth
-    r.style.transition = 'transform 520ms cubic-bezier(.2,1.1,.3,1)'
-    r.style.transform = ''
-    setTimeout(() => { r.style.transition = ''; r.style.transform = '' }, 580)
+    Object.assign(r.style, { transition: 'transform 520ms cubic-bezier(.2,1.1,.3,1)', transform: '' })
+    setTimeout(() => { Object.assign(r.style, { transition: '', transform: '' }) }, 580)
   })
 }
 
@@ -402,7 +400,7 @@ export function updateStats(
 
 // ── Tag filter show/hide ──────────────────────────────────────────────────────
 
-export function hideRowFilter(r: HTMLElement): void {
+function hideRowFilter(r: HTMLElement): void {
   if (r.classList.contains('filtered-out') || r.dataset.filtering) return
   r.dataset.filtering = '1'
   const h = r.offsetHeight
@@ -426,7 +424,7 @@ export function hideRowFilter(r: HTMLElement): void {
   }, 540)
 }
 
-export function showRowFilter(r: HTMLElement): void {
+function showRowFilter(r: HTMLElement): void {
   if (!r.classList.contains('filtered-out')) return
   r.classList.remove('filtered-out')
   r.style.maxHeight = 'none'
@@ -454,7 +452,7 @@ export function showRowFilter(r: HTMLElement): void {
 
 // ── Make a task row DOM element ───────────────────────────────────────────────
 
-export function makeRow(
+function makeRow(
   task: Task,
   delay: number | null,
   list: HTMLElement,
@@ -506,7 +504,7 @@ export function makeRow(
 
 // ── Per-row drag wiring ───────────────────────────────────────────────────────
 
-export function wireRow(
+function wireRow(
   row: HTMLDivElement,
   list: HTMLElement,
   statDone: HTMLElement | null,
@@ -648,7 +646,7 @@ export function wireRow(
 
 // ── Tag filters ───────────────────────────────────────────────────────────────
 
-export function buildFilters(
+function buildFilters(
   filtersEl: HTMLElement,
   list: HTMLElement,
   activeFilterRef: { current: string },
@@ -688,7 +686,7 @@ export function refreshFilters(
   applyFilter(list, activeFilterRef, false)
 }
 
-export function applyFilter(
+function applyFilter(
   list: HTMLElement,
   activeFilterRef: { current: string },
   animate: boolean,
@@ -737,11 +735,15 @@ export function changeDay(
   if (old.length) {
     old.forEach(r => {
       const h = r.offsetHeight
-      r.style.overflow = 'hidden'; r.style.maxHeight = h + 'px'
+      Object.assign(r.style, { overflow: 'hidden', maxHeight: h + 'px' })
       void r.offsetWidth
-      r.style.transition = 'max-height 460ms cubic-bezier(.4,0,.2,1), margin-bottom 460ms cubic-bezier(.4,0,.2,1), opacity 280ms ease, transform 360ms cubic-bezier(.4,0,.2,1)'
-      r.style.opacity = '0'; r.style.transform = 'scale(.96)'
-      r.style.maxHeight = '0px'; r.style.marginBottom = '-11px'
+      Object.assign(r.style, {
+        transition: 'max-height 460ms cubic-bezier(.4,0,.2,1), margin-bottom 460ms cubic-bezier(.4,0,.2,1), opacity 280ms ease, transform 360ms cubic-bezier(.4,0,.2,1)',
+        opacity: '0',
+        transform: 'scale(.96)',
+        maxHeight: '0px',
+        marginBottom: '-11px',
+      })
     })
     setTimeout(mountNew, 470)
   } else {
@@ -789,7 +791,7 @@ export function insertTask(
 // ── Progressive blur scroll helpers ──────────────────────────────────────────
 
 /** Updates the mask-image class on .td-list based on scroll position. */
-export function updateListScrollBlur(el: HTMLElement): void {
+function updateListScrollBlur(el: HTMLElement): void {
   const { scrollTop, scrollHeight, clientHeight } = el
   const atTop = scrollTop <= 4
   const atBottom = scrollTop + clientHeight >= scrollHeight - 4
@@ -799,7 +801,7 @@ export function updateListScrollBlur(el: HTMLElement): void {
 }
 
 /** Wires the scroll listener for .td-list vertical blur. No useEffect. */
-export function wireListScrollBlur(el: HTMLElement): (() => void) {
+function wireListScrollBlur(el: HTMLElement): (() => void) {
   const handler = () => updateListScrollBlur(el)
   el.addEventListener('scroll', handler, { passive: true })
   // Initial state
@@ -808,7 +810,7 @@ export function wireListScrollBlur(el: HTMLElement): (() => void) {
 }
 
 /** Updates the mask-image class on .td-filters based on horizontal scroll position. */
-export function updateFiltersScrollBlur(el: HTMLElement): void {
+function updateFiltersScrollBlur(el: HTMLElement): void {
   const { scrollLeft, scrollWidth, clientWidth } = el
   const atLeft = scrollLeft <= 4
   const atRight = scrollLeft + clientWidth >= scrollWidth - 4
@@ -818,7 +820,7 @@ export function updateFiltersScrollBlur(el: HTMLElement): void {
 }
 
 /** Wires the scroll listener for .td-filters horizontal blur. No useEffect. */
-export function wireFiltersScrollBlur(el: HTMLElement): (() => void) {
+function wireFiltersScrollBlur(el: HTMLElement): (() => void) {
   const handler = () => updateFiltersScrollBlur(el)
   el.addEventListener('scroll', handler, { passive: true })
   // Initial state
@@ -893,4 +895,374 @@ export function todoCleanupRef(el: HTMLDivElement | null): void {
   delete s.__todoTimer
   s.__blurCleanup?.()
   delete s.__blurCleanup
+}
+
+// ── Week strip helpers (react-doctor no-giant-component split) ──────────────
+
+/** Rebuild the week days array for the given date's week. */
+export function computeWeekForDate(d: Date): { days: Date[]; idx: number } {
+  const mon = startOfWeek(d)
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const x = new Date(mon); x.setDate(mon.getDate() + i); return x
+  })
+  return { days, idx: (d.getDay() + 6) % 7 }
+}
+
+export function afterWeekUpdate(weekEl: HTMLElement | null, weekPill: HTMLElement | null): void {
+  requestAnimationFrame(() => {
+    if (weekEl && weekPill) {
+      movePill(weekEl, weekPill)
+      requestAnimationFrame(() => {
+        weekPill.classList.remove('no-anim')
+      })
+    }
+  })
+}
+
+export function slideWeekAnimation(
+  dir: 1 | -1,
+  weekEl: HTMLDivElement,
+  curDate: Date,
+  setWeekDays: (days: Date[]) => void,
+  setActiveIdx: (idx: number) => void,
+  listRef: HTMLDivElement | null,
+  statDoneRef: HTMLElement | null,
+  statWaitRef: HTMLElement | null,
+  activeFilterRef: { current: string },
+  filtersRef: HTMLDivElement | null,
+  onOpenTaskPopover?: (task: Task) => void,
+): void {
+  const outX = dir > 0 ? -34 : 34
+  weekEl.style.transition = 'transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-week-slide), opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade)'
+  weekEl.style.transform = 'translateX(' + outX + 'px)'
+  weekEl.style.opacity = '0'
+  setTimeout(() => {
+    const { days, idx } = computeWeekForDate(curDate)
+    setWeekDays(days)
+    setActiveIdx(idx)
+    const tasks = getTasksForDay(curDate)
+    if (listRef) {
+      changeDay(listRef, tasks, statDoneRef, statWaitRef, activeFilterRef, filtersRef, onOpenTaskPopover)
+    }
+    weekEl.style.transition = 'none'
+    weekEl.style.transform = 'translateX(' + (-outX) + 'px)'
+    weekEl.style.opacity = '0'
+    void weekEl.offsetWidth
+    weekEl.style.transition = 'transform calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out), opacity calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade)'
+    weekEl.style.transform = 'translateX(0)'
+    weekEl.style.opacity = '1'
+    setTimeout(() => { weekEl.style.transition = ''; weekEl.style.transform = '' }, 400)
+  }, 200)
+}
+
+// ── Task editor popover (.td-pop) helpers (react-doctor no-giant-component
+// split) — all imperative DOM writes for the schedule/priority pop live here;
+// TodoList.tsx keeps only state/refs and thin wrappers around these. ────────
+
+export interface PopState {
+  pri: PriorityKey
+  repeat: 'once' | 'repeat'
+  cad: string
+  dow: number
+  dom: number
+}
+
+export interface PopoverRefs {
+  titleEl: HTMLInputElement | null
+  timeEl: HTMLInputElement | null
+  prisEl: HTMLDivElement | null
+  icEl: HTMLElement | null
+  hdEl: HTMLDivElement | null
+  cadsEl: HTMLDivElement | null
+  onBoxEl: HTMLDivElement | null
+  onLblEl: HTMLElement | null
+  daysEl: HTMLDivElement | null
+  domEl: HTMLSelectElement | null
+  saveTxtEl: HTMLElement | null
+  saveIcEl: HTMLElement | null
+  segEl: HTMLDivElement | null
+  segPillEl: HTMLSpanElement | null
+}
+
+/** Ref bundle handed to TodoTaskEditorPopover; a React.RefObject wrapper
+ *  around each PopoverRefs field. Declared here so the parent's call sites
+ *  and this resolver share one shape. */
+export interface PopoverElRefs {
+  segRef: { current: HTMLDivElement | null }
+  segPillRef: { current: HTMLSpanElement | null }
+  titleRef: { current: HTMLInputElement | null }
+  timeRef: { current: HTMLInputElement | null }
+  prisRef: { current: HTMLDivElement | null }
+  icRef: { current: HTMLElement | null }
+  hdRef: { current: HTMLDivElement | null }
+  repBoxRef: { current: HTMLDivElement | null }
+  cadsRef: { current: HTMLDivElement | null }
+  onBoxRef: { current: HTMLDivElement | null }
+  onLblRef: { current: HTMLElement | null }
+  daysRef: { current: HTMLDivElement | null }
+  domRef: { current: HTMLSelectElement | null }
+  saveTxtRef: { current: HTMLElement | null }
+  saveIcRef: { current: HTMLElement | null }
+}
+
+/** Resolves the live DOM nodes off a PopoverElRefs bundle (built at call
+ *  time so it always reflects the latest ref assignments). */
+export function resolvePopoverRefs(refs: PopoverElRefs): PopoverRefs {
+  return {
+    titleEl: refs.titleRef.current, timeEl: refs.timeRef.current, prisEl: refs.prisRef.current,
+    icEl: refs.icRef.current, hdEl: refs.hdRef.current, cadsEl: refs.cadsRef.current,
+    onBoxEl: refs.onBoxRef.current, onLblEl: refs.onLblRef.current, daysEl: refs.daysRef.current,
+    domEl: refs.domRef.current, saveTxtEl: refs.saveTxtRef.current, saveIcEl: refs.saveIcRef.current,
+    segEl: refs.segRef.current, segPillEl: refs.segPillRef.current,
+  }
+}
+
+export function moveSegPill(seg: HTMLElement | null, pill: HTMLElement | null, repeat: 'once' | 'repeat'): void {
+  if (!seg || !pill) return
+  const btn = seg.querySelector<HTMLElement>('[data-rep="' + repeat + '"]')
+  if (!btn) return
+  pill.style.width = btn.offsetWidth + 'px'
+  pill.style.left = btn.offsetLeft + 'px'
+}
+
+export function moveFreqPill(wrap: HTMLDivElement | null): void {
+  if (!wrap) return
+  const pill = wrap.querySelector<HTMLElement>('.td-freq-pill')
+  const active = wrap.querySelector<HTMLElement>('.td-freq-opt.on')
+  if (!pill || !active) return
+  pill.style.width = active.offsetWidth + 'px'
+  pill.style.left = active.offsetLeft + 'px'
+}
+
+/** Redraws the repeat-schedule section (days / frequency chips) for `st`.
+ *  `onChange` is called with the next PopState whenever a day/frequency chip
+ *  is clicked; `getState` returns the live PopState so click handlers that
+ *  outlive this call (the frequency chips are only built once) always read
+ *  the current value instead of a stale closure. */
+export function syncScheduleDOM(
+  refs: PopoverRefs,
+  st: PopState,
+  onChange: (next: PopState) => void,
+  getState: () => PopState,
+): void {
+  const rep = st.repeat === 'repeat'
+  // Container open/close is class-driven (item 16) — handled in JSX via
+  // popState.repeat; we only populate inner content when repeating.
+  if (!rep) return
+  const { cad, dow, dom } = st
+  if (cad === 'daily') {
+    if (refs.onBoxEl) refs.onBoxEl.hidden = true
+  } else if (cad === 'weekly') {
+    if (refs.onBoxEl) refs.onBoxEl.hidden = false
+    if (refs.onLblEl) refs.onLblEl.textContent = 'On'
+    if (refs.daysEl) refs.daysEl.hidden = false
+    if (refs.domEl) refs.domEl.hidden = true
+  } else {
+    if (refs.onBoxEl) refs.onBoxEl.hidden = false
+    if (refs.onLblEl) refs.onLblEl.textContent = 'On day'
+    if (refs.daysEl) refs.daysEl.hidden = true
+    if (refs.domEl) { refs.domEl.hidden = false; refs.domEl.value = String(dom) }
+  }
+  // Render days
+  if (refs.daysEl) {
+    const daysEl = refs.daysEl
+    const dayButtons = DOWS.map((d, i) => {
+      const b = document.createElement('button')
+      b.type = 'button'
+      b.className = 'td-pop-dow' + (i === dow ? ' on' : '')
+      b.dataset.dow = String(i)
+      b.textContent = d
+      b.addEventListener('click', () => {
+        onChange({ ...getState(), dow: i })
+      })
+      return b
+    })
+    daysEl.replaceChildren(...dayButtons)
+  }
+  // Render the frequency selector (item 17) — segmented chips + sliding pill.
+  if (refs.cadsEl) {
+    const cadsEl = refs.cadsEl
+    const exists = cadsEl.querySelector('.td-freq-track')
+    if (!exists) {
+      cadsEl.innerHTML =
+        '<div class="td-freq-track">' +
+          '<span class="td-freq-pill"></span>' +
+          CADS.map(c =>
+            '<button type="button" class="td-freq-opt' + (c === cad ? ' on' : '') + '" data-cad="' + c + '">' +
+              '<span class="td-freq-lbl">' + CADLBL[c] + '</span>' +
+            '</button>'
+          ).join('') +
+        '</div>'
+      cadsEl.querySelectorAll<HTMLElement>('[data-cad]').forEach(b => {
+        b.addEventListener('click', () => {
+          const newCad = b.dataset.cad!
+          cadsEl.querySelectorAll('.td-freq-opt').forEach(x => x.classList.toggle('on', x === b))
+          moveFreqPill(cadsEl)
+          onChange({ ...getState(), cad: newCad })
+        })
+      })
+    } else {
+      cadsEl.querySelectorAll<HTMLElement>('.td-freq-opt').forEach(b => {
+        b.classList.toggle('on', b.dataset.cad === cad)
+      })
+    }
+    requestAnimationFrame(() => moveFreqPill(cadsEl))
+  }
+}
+
+export function renderPrisDOM(
+  container: HTMLDivElement | null,
+  pri: PriorityKey,
+  onChange: (newPri: PriorityKey) => void,
+): void {
+  if (!container) return
+  container.innerHTML = (Object.keys(PRIORITY) as PriorityKey[]).map(k => {
+    const p = PRIORITY[k]
+    return '<button class="td-pop-pri' + (k === pri ? ' on' : '') + '" data-pri="' + k + '" style="--tag:' + p.color + '">' + badgeHTML(p) + '</button>'
+  }).join('')
+  container.querySelectorAll<HTMLElement>('[data-pri]').forEach(b => {
+    b.addEventListener('click', () => {
+      const newPri = b.dataset.pri as PriorityKey
+      container.querySelectorAll('.td-pop-pri').forEach(x => x.classList.toggle('on', x === b))
+      onChange(newPri)
+    })
+  })
+}
+
+export function syncIconDOM(
+  icEl: HTMLElement | null,
+  pri: PriorityKey,
+  mode: 'view' | 'edit' | 'add',
+  row: (HTMLElement & { _task: Task }) | null,
+): void {
+  const p = PRIORITY[pri] || PRIORITY[DEFAULT_PRI]
+  if (icEl) {
+    const ic = icEl.querySelector<HTMLElement>('.material-icons')
+    if (ic) ic.textContent = (mode !== 'add' && row) ? row._task.icon : p.bi
+    icEl.style.setProperty('--tag', p.color)
+    icEl.style.setProperty('--tag-bg', p.bg)
+  }
+}
+
+export function openTaskEditor(
+  row: (HTMLElement & { _task: Task }) | null,
+  mode: 'view' | 'edit' | 'add',
+  refs: PopoverRefs,
+  popModeRef: { current: 'view' | 'edit' | 'add' },
+  popRowRef: { current: (HTMLElement & { _task: Task }) | null },
+  setPopStateSynced: (v: PopState) => void,
+  onPriChange: (newPri: PriorityKey) => void,
+  onScheduleChange: (next: PopState) => void,
+  getState: () => PopState,
+  setPopOpen: (v: boolean) => void,
+): void {
+  popModeRef.current = mode
+  popRowRef.current = row
+  let st: PopState
+  if (row) {
+    const t = row._task
+    st = {
+      pri: t.priority,
+      repeat: (t.repeat || 'once') as 'once' | 'repeat',
+      cad: t.cad || 'weekly',
+      dow: t.dow != null ? t.dow : 1,
+      dom: t.dom != null ? t.dom : 1,
+    }
+    if (refs.titleEl) refs.titleEl.value = t.title
+    if (refs.timeEl) refs.timeEl.value = t.time
+    if (refs.hdEl) refs.hdEl.textContent = mode === 'edit' ? 'Edit task' : 'Task details'
+    if (refs.saveTxtEl) refs.saveTxtEl.textContent = 'Save changes'
+    if (refs.saveIcEl) refs.saveIcEl.textContent = 'check'
+  } else {
+    st = { pri: DEFAULT_PRI, repeat: 'once', cad: 'weekly', dow: 1, dom: 1 }
+    if (refs.titleEl) refs.titleEl.value = ''
+    if (refs.timeEl) refs.timeEl.value = ''
+    if (refs.hdEl) refs.hdEl.textContent = 'New task'
+    if (refs.saveTxtEl) refs.saveTxtEl.textContent = 'Add task'
+    if (refs.saveIcEl) refs.saveIcEl.textContent = 'add'
+  }
+  setPopStateSynced(st)
+  renderPrisDOM(refs.prisEl, st.pri, onPriChange)
+  syncScheduleDOM(refs, st, onScheduleChange, getState)
+  syncIconDOM(refs.icEl, st.pri, mode, row)
+  setPopOpen(true)
+  // Position the segmented active pill once the popover is laid out.
+  requestAnimationFrame(() => requestAnimationFrame(() => moveSegPill(refs.segEl, refs.segPillEl, st.repeat)))
+  if (mode === 'edit' || mode === 'add') {
+    setTimeout(() => {
+      refs.titleEl?.focus()
+      if (mode === 'edit') refs.titleEl?.select()
+    }, 140)
+  }
+}
+
+export function saveTaskEditor(
+  state: PopState,
+  popModeRef: { current: 'view' | 'edit' | 'add' },
+  popRowRef: { current: (HTMLElement & { _task: Task }) | null },
+  refs: PopoverRefs,
+  listRef: HTMLDivElement | null,
+  statDoneRef: HTMLElement | null,
+  statWaitRef: HTMLElement | null,
+  activeFilterRef: { current: string },
+  filtersRef: HTMLDivElement | null,
+  onOpenTaskPopover?: (task: Task) => void,
+): void {
+  const p = PRIORITY[state.pri] || PRIORITY[DEFAULT_PRI]
+  if (popModeRef.current === 'add') {
+    const task: Task = {
+      id: nextUid(),
+      title: refs.titleEl?.value.trim() || 'New task',
+      time: refs.timeEl?.value.trim() || 'Anytime',
+      priority: state.pri,
+      icon: p.bi,
+      repeat: state.repeat,
+      cad: state.cad,
+      dow: state.dow,
+      dom: state.dom,
+    }
+    if (listRef) {
+      insertTask(task, listRef, statDoneRef, statWaitRef, activeFilterRef, filtersRef, onOpenTaskPopover)
+    }
+    return
+  }
+  const popRow = popRowRef.current
+  if (!popRow) return
+  const t = popRow._task
+  t.title = refs.titleEl?.value.trim() || t.title
+  t.time = refs.timeEl?.value.trim() || t.time
+  t.priority = state.pri
+  t.repeat = state.repeat
+  t.cad = state.cad
+  t.dow = state.dow
+  t.dom = state.dom
+  const card = popRow.querySelector<HTMLElement>('.task')
+  if (card) { card.style.setProperty('--tag', p.color); card.style.setProperty('--tag-bg', p.bg) }
+  popRow.dataset.pri = t.priority
+  popRow.classList.toggle('is-repeat', t.repeat === 'repeat')
+  const titleEl = popRow.querySelector<HTMLElement>('.t-title')
+  if (titleEl) titleEl.textContent = t.title
+  const timeEl = popRow.querySelector<HTMLElement>('.t-time')
+  if (timeEl) timeEl.textContent = t.time
+  const badge = popRow.querySelector<HTMLElement>('.t-badge')
+  if (badge) {
+    badge.innerHTML = badgeHTML(p)
+    badge.classList.remove('pop'); void badge.offsetWidth; badge.classList.add('pop')
+  }
+  if (listRef) {
+    updateStats(listRef, statDoneRef, statWaitRef, () => refreshFilters(listRef, filtersRef, activeFilterRef))
+  }
+}
+
+// ── Task detail popover (.tdp-*) helpers ─────────────────────────────────────
+
+/** Applies an edited title to the DOM row so the list stays in sync without
+ *  a full re-render (mirrors the previous inline logic in TodoList.tsx). */
+export function applyTaskTitleEdit(listEl: HTMLDivElement | null, taskId: string, newTitle: string): void {
+  if (!listEl) return
+  const row = listEl.querySelector<HTMLElement>('[data-id="' + taskId + '"]')
+  if (row) {
+    const titleEl = row.querySelector<HTMLElement>('.t-title')
+    if (titleEl) titleEl.textContent = newTitle
+  }
 }

@@ -1,5 +1,4 @@
 import '../../../../design-system/preview/_base.css'
-import '../../../../design-system/preview/_controls.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './FileFolder.css'
 
@@ -67,18 +66,21 @@ function FolderIcon({
   const menuProximityRef = useProximityGroup<HTMLDivElement>()
 
   return (
-    // eslint-disable-next-line jsx-a11y/prefer-tag-over-role -- wraps a nested <button> (folder menu); a native <button> cannot contain interactive children
     <div
       className={classes}
       id={id}
       ref={folderRef}
       onClick={onClick}
       data-proximity
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } }}
+      role="presentation"
     >
-      <div className="ff-clip">
+      <div
+        className="ff-clip"
+        role="button"
+        tabIndex={0}
+        aria-label="Open folder"
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } }}
+      >
         <div className="ff-grad" />
         <div className="ff-papers">
           <Paper variant="back" />
@@ -263,6 +265,7 @@ export default function FileFolder() {
       {/* Scrim */}
       <div
         className={`ff-scrim${popState.isOpen ? ' show' : ''}`}
+        role="presentation"
         onClick={closePop}
       />
 
@@ -271,17 +274,21 @@ export default function FileFolder() {
         <div className="ff-menu-catch" onClick={closeMenu} aria-hidden="true" />
       )}
 
-      {/* File list popover — role="dialog" div so opacity/scale fade works (native <dialog> is display:none when closed) */}
+      {/* File list popover. Native non-modal <dialog> rendered `open`
+          unconditionally (never toggling the attribute) so the existing
+          opacity/scale fade on .ff-pop-outer.show keeps driving show/hide
+          exactly as before; .ff-pop already sets its own background/border/
+          padding so only margin/max-size UA defaults need neutralising. */}
       <div
         className={`ff-pop-outer${popState.isOpen ? ' show' : ''}`}
         ref={popRef}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* eslint-disable-next-line jsx-a11y/prefer-tag-over-role -- native <dialog> is display:none when closed, which kills the opacity/scale fade; an animated popover must stay a role="dialog" div */}
-        <div
+        <dialog
+          open
           className="ff-pop"
-          role="dialog"
           aria-label="Folder files"
+          style={{ margin: 0, maxWidth: 'none', maxHeight: 'none', color: 'inherit' }}
         >
           <div className="ff-pop-head">
             <div>
@@ -312,7 +319,7 @@ export default function FileFolder() {
               <FileRow key={f.name} file={f} onClick={handleFileClick} />
             ))}
           </div>
-        </div>
+        </dialog>
       </div>
     </div>
   )

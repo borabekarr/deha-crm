@@ -4,6 +4,7 @@
  * NO raw useEffect anywhere in the pipeline-card/ folder.
  * All side-effects are expressed via callback refs or event handlers.
  */
+import { tokenMs } from '@/lib/token-ms'
 
 // ---------------------------------------------------------------------------
 // Count-up tween (wired via callback ref on elements that have data-impact / data-pot)
@@ -13,6 +14,9 @@
 function ease(t: number): number {
   return 1 - Math.pow(1 - t, 3)
 }
+
+// Faster-exits rule (plan: faster-exits-debts step 5): read the CSS token
+// live via the shared helper, see lib/token-ms.ts.
 
 /** Start a count-up tween. Returns a cleanup function. */
 export function startCountUp(
@@ -281,7 +285,7 @@ export function wireDiscussInput(
       pulseSend()
       onTriggerGlobalChat(text)
       // small delay so the send-pulse animation completes before panel closes
-      setTimeout(() => onClosePanel(), 160)
+      setTimeout(() => onClosePanel(), tokenMs('--duration-base', 160))
       return
     }
 

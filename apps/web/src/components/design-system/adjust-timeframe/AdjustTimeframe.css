@@ -56,11 +56,11 @@ html.dark .tf-shell[data-squircle="on"]::before {
   clip-path: var(--squircle-border-path);
 }
 /* ---- dark-mode polish ---- */
-html.dark .tf-pan:hover:not(:disabled) { background: color-mix(in srgb, #fff 10%, var(--card-bg)); color: var(--fg1); }
+html.dark .tf-pan:hover:not(:disabled) { background: var(--fp-hover); color: var(--fg1); }
 html.dark .tf-preset-glider { background: #F5F5F5; box-shadow: 0 1px 2px rgba(0,0,0,.30); }
 html.dark .tf-preset.active { color: #111111; }
 html.dark .tf-preset.active:hover { color: #111111; }
-html.dark .tf-month:hover { background: color-mix(in srgb, #fff 8%, var(--card-bg)); }
+html.dark .tf-month:hover { background: var(--fp-hover); }
 html.dark .tf-ruler { background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.16) 0 1px, transparent 1px var(--ppd)); }
 html.dark .tf-monthtick { background: rgba(255,255,255,.26); }
 .tf-card {
@@ -211,9 +211,9 @@ html.dark .tf-preset.active { color: #111111; }
   /* Item 4: align button center to ruler centerline (ruler center ≈ 17.5px from track top).
      Button is 26px tall; half = 13px. Offset = 17.5 - 13 = 4.5px → 5px */
   margin-top: 5px; align-self: flex-start;
-  transition: background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade), color calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade), opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), color calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade), opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
-.tf-pan:hover:not(:disabled) { background: var(--gray-100); color: var(--fg2); }
+.tf-pan:hover:not(:disabled) { background: var(--fp-hover); color: var(--fg2); }
 .tf-pan:active:not(:disabled) { transform: scale(var(--press-chip)); }
 .tf-pan:disabled { opacity: .25; cursor: default; }
 
@@ -221,7 +221,7 @@ html.dark .tf-preset.active { color: #111111; }
    hover rule on .tf-pan to remove (hover only recolors background). */
 .tf-pan.tf-pan[data-proximity] {
   transition:
-    background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     color calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
     opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
@@ -303,9 +303,9 @@ html.dark .tf-zoom-pct { color: #A1A1A1; }
   font-size: 11px; font-weight: var(--weight-semibold); color: var(--fg4);
   letter-spacing: -0.01em; white-space: nowrap; cursor: pointer;
   padding: 2px 6px; border-radius: 7px;
-  transition: color calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade), font-weight calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade), background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade), left calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out);
+  transition: color calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade), font-weight calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade), background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), left calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out);
 }
-.tf-month:hover { color: var(--fg2); background: var(--gray-100); }
+.tf-month:hover { color: var(--fg2); background: var(--fp-hover); }
 .tf-month:active { transform: translateX(-50%) scale(var(--press-control)); }
 .tf-month[data-in="true"] { color: var(--fg1); font-weight: var(--weight-bold); }
 .tf-month:focus-visible { outline: 2px solid var(--tf-accent); outline-offset: 1px; }

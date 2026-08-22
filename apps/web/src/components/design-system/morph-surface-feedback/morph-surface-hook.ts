@@ -8,14 +8,14 @@
  * Direct effect-hook count in this file: 0.
  */
 
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useEffect } from 'react'
 
 // ---------------------------------------------------------------------------
 // useTimerRef
 // Thin wrapper that stores a setTimeout id in a ref so it can be cancelled
 // from a callback ref without triggering re-renders.
 // ---------------------------------------------------------------------------
-export function useTimerRef() {
+function useTimerRef() {
   const idRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const set = useCallback((ms: number, fn: () => void) => {
@@ -72,42 +72,41 @@ export function useTextareaRef(open: boolean) {
 // Re-created whenever `open` or `onClose` change.
 // ---------------------------------------------------------------------------
 export function useClickOutside(open: boolean, onClose: () => void) {
-  const cleanupRef = useRef<(() => void) | null>(null)
+  const elRef = useRef<HTMLDivElement | null>(null)
 
-  const rootRef = useCallback(
-    (el: HTMLDivElement | null) => {
-      // Teardown any previous listeners
-      if (cleanupRef.current) {
-        cleanupRef.current()
-        cleanupRef.current = null
-      }
+  // Stable callback ref: only stores the node. Listener wiring lives in the
+  // useEffect below so react-doctor can see the cleanup path; the exported
+  // shape stays a plain (el) => void the caller composes with proximityRef.
+  const rootRef = useCallback((el: HTMLDivElement | null) => {
+    elRef.current = el
+  }, [])
 
-      if (!el || !open) return
+  useEffect(() => {
+    const el = elRef.current
+    if (!el || !open) return
 
-      let startedOutside = false
+    let startedOutside = false
 
-      const isOutside = (e: PointerEvent | MouseEvent) =>
-        !el.contains(e.target as Node)
+    const isOutside = (e: PointerEvent | MouseEvent) =>
+      !el.contains(e.target as Node)
 
-      const down = (e: PointerEvent) => {
-        startedOutside = isOutside(e)
-      }
-      const up = (e: MouseEvent) => {
-        if (startedOutside && isOutside(e)) onClose()
-        startedOutside = false
-      }
+    const down = (e: PointerEvent) => {
+      startedOutside = isOutside(e)
+    }
+    const up = (e: MouseEvent) => {
+      if (startedOutside && isOutside(e)) onClose()
+      startedOutside = false
+    }
 
-      document.addEventListener('pointerdown', down)
-      document.addEventListener('click', up)
+    document.addEventListener('pointerdown', down)
+    document.addEventListener('click', up)
 
-      cleanupRef.current = () => {
-        document.removeEventListener('pointerdown', down)
-        document.removeEventListener('click', up)
-      }
-    },
-    // Re-create whenever values the listener closes over change.
-    [open, onClose],
-  )
+    return () => {
+      document.removeEventListener('pointerdown', down)
+      document.removeEventListener('click', up)
+    }
+    // Re-run whenever values the listener closes over change.
+  }, [open, onClose])
 
   return rootRef
 }

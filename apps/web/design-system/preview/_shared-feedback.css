@@ -23,13 +23,6 @@ html.dark {
   --card-border: #232323;
 }
 
-.grid-texture {
-  background-image:
-    linear-gradient(to right, rgba(255, 255, 255, var(--grid-alpha)) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, var(--grid-alpha)) 1px, transparent 1px);
-  background-size: 7px 7px;
-}
-
 /* --------------------------------------------------------------------------
  * .btn-green -- canonical green pill button
  * Mirrors .pc-apply from _pipeline-card.css (class name swapped).

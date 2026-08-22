@@ -1,3 +1,10 @@
+/* Motion sweep (no-bounce rule, motion-tokens.css): the bounce-family
+   --ease-spring-snap easing (overshoot cubic-bezier) was denylisted by the
+   no-bounce rule and replaced with --ease-out across every transform
+   transition in this file (checkboxes, chips, day/filter buttons, delete
+   confirm). TodoList is not a stagger-family member; it has no DOM-order
+   reveal. Flagged explicitly rather than folded into a generic "normalize"
+   since it changes the settle feel, not just the token name. */
 body { background: var(--bg-app); }
 .material-icons {
   font-family: 'Material Icons'; font-weight: normal; font-style: normal;
@@ -54,7 +61,7 @@ body { background: var(--bg-app); }
   background: var(--tdo-card); color: var(--fg3); cursor: pointer;
   display: grid; place-items: center; padding: 0;
   box-shadow: inset 0 1px 0 rgba(255,255,255,1), 0 2px 6px -3px rgba(17,17,17,0.2);
-  transition: transform calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-spring-snap), color calc(var(--duration-base) * var(--anim-mult, 1)), background calc(var(--duration-base) * var(--anim-mult, 1));
+  transition: transform calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-out), color calc(var(--duration-base) * var(--anim-mult, 1)), background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .td-nav button .material-icons { font-size: 20px; }
 .td-nav button:hover { color: var(--fg1); }
@@ -81,8 +88,8 @@ body { background: var(--bg-app); }
   background: var(--tdo-card);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
   font-family: var(--font-display);
-  transition: transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-spring-snap),
-              background calc(var(--duration-180) * var(--anim-mult, 1)),
+  transition: transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out),
+              background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
               border-color calc(var(--duration-180) * var(--anim-mult, 1)),
               box-shadow calc(var(--duration-180) * var(--anim-mult, 1)),
               color calc(var(--duration-180) * var(--anim-mult, 1));
@@ -175,7 +182,7 @@ html.dark .td-daybtn.active .dnum { color:#111111; font-weight:900; }
   background: var(--tdo-card); color: var(--fg3); font-family: var(--font-display);
   font-size: 11px; font-weight: 800; letter-spacing: 0.02em; white-space: nowrap;
   box-shadow: var(--tdo-cardshadow);
-  transition: background calc(var(--duration-base) * var(--anim-mult, 1)), color calc(var(--duration-base) * var(--anim-mult, 1)), border-color calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring-snap);
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), color calc(var(--duration-base) * var(--anim-mult, 1)), border-color calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out);
 }
 .td-filt .fdot { width: 8px; height: 8px; border-radius: 50%; background: var(--fcolor, var(--fg4)); flex: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); }
 .td-filt .fct { font-variant-numeric: tabular-nums; opacity: 0.55; }
@@ -285,9 +292,9 @@ html.dark .tao-btn.tao-del      { background: #DC2626; }
   border: 2px solid var(--gray-300); background: var(--tdo-card);
   display: grid; place-items: center; cursor: pointer; padding: 0;
   color: #fff; position: relative;
-  transition: transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring-snap), border-color calc(var(--duration-200) * var(--anim-mult, 1)), background calc(var(--duration-200) * var(--anim-mult, 1));
+  transition: transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out), border-color calc(var(--duration-200) * var(--anim-mult, 1)), background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
-.t-check .material-icons { font-size: 16px; opacity: 0; transform: scale(0.4); transition: opacity calc(var(--duration-200) * var(--anim-mult, 1)), transform calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-spring-snap); }
+.t-check .material-icons { font-size: 16px; opacity: 0; transform: scale(0.4); transition: opacity calc(var(--duration-200) * var(--anim-mult, 1)), transform calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-out); }
 .t-check:hover { border-color: var(--brand-primary-300); }
 
 /* icon tile */
@@ -305,7 +312,7 @@ html.dark .tao-btn.tao-del      { background: #DC2626; }
     inset 0 -2px 0 rgba(17,17,17,0.20),
     inset 0 0 0 1px rgba(17,17,17,0.12),
     0 2px 6px rgba(0,0,0,0.10);
-  transition: transform calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-spring-snap);
+  transition: transform calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-out);
 }
 .t-ico .material-icons { font-size: 21px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.35); filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15)); }
 
@@ -337,7 +344,7 @@ html.dark .tao-btn.tao-del      { background: #DC2626; }
   background-image: linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
   background-size: 9px 9px;
   opacity: 0; transform: translateX(8px) scale(0.9); pointer-events: none;
-  transition: opacity calc(var(--duration-200) * var(--anim-mult, 1)), transform calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-spring-snap), filter calc(var(--duration-base) * var(--anim-mult, 1));
+  transition: opacity calc(var(--duration-200) * var(--anim-mult, 1)), transform calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-out), filter calc(var(--duration-base) * var(--anim-mult, 1));
 }
 .t-complete .material-icons { font-size: 14px; }
 .t-complete:hover { filter: brightness(1.06); }
@@ -391,7 +398,7 @@ html.dark .tao-btn.tao-del      { background: #DC2626; }
   background: var(--shell-bg);
   border: none;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 0 0 0 1px rgba(17,17,17,0.04);
-  transition: transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-spring-snap), box-shadow calc(var(--duration-200) * var(--anim-mult, 1));
+  transition: transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-200) * var(--anim-mult, 1));
 }
 .td-bar:hover { box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 0 0 0 1px rgba(17,17,17,0.04), 0 10px 22px -8px rgba(17,17,17,0.28); }
 .td-bar:has(.btn-add:hover) {
@@ -402,9 +409,9 @@ html.dark .tao-btn.tao-del      { background: #DC2626; }
 .bar-ico {
   width: 42px; height: 42px; border-radius: 50%; border: none; cursor: pointer;
   background: transparent; color: var(--fg3); display: grid; place-items: center; padding: 0;
-  transition: background calc(var(--duration-base) * var(--anim-mult, 1)), color calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-spring-snap);
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), color calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-out);
 }
-.bar-ico:hover { background: var(--bg-chip); color: var(--fg1); }
+.bar-ico:hover { background: var(--fp-hover); color: var(--fg1); }
 .bar-ico:active { transform: scale(var(--press-chip)); }
 .bar-ico .material-icons { font-size: 22px; }
 .btn-add {
@@ -415,10 +422,10 @@ html.dark .tao-btn.tao-del      { background: #DC2626; }
   background-image: linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
   background-size: 9px 9px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -2px 0 rgba(0,0,0,0.4), 0 8px 20px -8px rgba(17,17,17,0.6);
-  transition: transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-spring-snap), filter calc(var(--duration-base) * var(--anim-mult, 1)), box-shadow calc(var(--duration-200) * var(--anim-mult, 1));
+  transition: transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out), filter calc(var(--duration-base) * var(--anim-mult, 1)), box-shadow calc(var(--duration-200) * var(--anim-mult, 1));
 }
 .btn-add { font-weight: 900; }
-.btn-add .material-icons { font-size: 22px; -webkit-text-stroke: 0.7px currentColor; transition: transform calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-spring-snap); }
+.btn-add .material-icons { font-size: 22px; -webkit-text-stroke: 0.7px currentColor; transition: transform calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out); }
 .btn-add:hover { filter: brightness(1.12); box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -2px 0 rgba(0,0,0,0.4), 0 10px 22px -10px rgba(17,17,17,0.6); }
 .btn-add:active { transform: scale(var(--press-control)); }
 .btn-add.flash { animation: add-flash calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-out); }
@@ -514,7 +521,7 @@ html.dark .td-scrim { background:rgba(0,0,0,0.5); }
   padding:4px 10px 4px 8px; border-radius:9999px; cursor:pointer; border:none; color:#fff;
   background:var(--tag); text-shadow:0 1px 2px rgba(0,0,0,0.30);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), inset 0 -1.5px 0 rgba(0,0,0,0.18), inset 0 0 0 1px rgba(0,0,0,0.06);
-  opacity:0.42; filter:saturate(0.7); transition:opacity calc(var(--duration-base) * var(--anim-mult, 1)), filter calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-spring-snap);
+  opacity:0.42; filter:saturate(0.7); transition:opacity calc(var(--duration-base) * var(--anim-mult, 1)), filter calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-out);
 }
 .td-pop-pri .material-icons { font-size:11px; margin-left:-1px; }
 .td-pop-pri.on { opacity:1; filter:none; }
@@ -612,7 +619,7 @@ html.dark .td-freq-track { background: #111111; box-shadow: inset 0 2px 4px rgba
 
 /* ── day-of-week pills ── */
 .td-pop-days { display:flex; gap:5px; }
-.td-pop-dow { flex:1; min-width:0; height:34px; border-radius:9px; border:1px solid var(--tdo-card-bd); background:var(--tdo-card); color:var(--fg3); font-family:var(--font-display); font-size:11px; font-weight:800; cursor:pointer; transition:background calc(var(--duration-150) * var(--anim-mult, 1)), color calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-spring-snap); }
+.td-pop-dow { flex:1; min-width:0; height:34px; border-radius:9px; border:1px solid var(--tdo-card-bd); background:var(--tdo-card); color:var(--fg3); font-family:var(--font-display); font-size:11px; font-weight:800; cursor:pointer; transition:background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), color calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-out); }
 .td-pop-dow.on { background:#111111; color:#fff; border-color:transparent; }
 html.dark .td-pop-dow.on { background:var(--brand-primary); }
 .td-pop-dow:active { transform:scale(var(--press-chip)); }
@@ -632,7 +639,7 @@ html.dark .td-pop-dow.on { background:var(--brand-primary); }
   position: absolute; inset: 0; z-index: 40;
   background: rgba(17,17,17,0); border-radius: 40px;
   pointer-events: none;
-  transition: background calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade);
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .tdp-overlay.tdp-open {
   background: rgba(17,17,17,0.45);
@@ -655,7 +662,7 @@ html.dark .td-pop-dow.on { background:var(--brand-primary); }
   transform: translateY(32px) scale(0.94);
   opacity: 0;
   transition:
-    transform calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-spring-snap),
+    transform calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-out),
     opacity calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .tdp-overlay.tdp-open .tdp-card {
@@ -680,9 +687,9 @@ html.dark .td-pop-dow.on { background:var(--brand-primary); }
   flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; border: none; cursor: pointer;
   display: grid; place-items: center;
   background: var(--tdo-ico-bg); color: var(--fg3);
-  transition: background calc(var(--duration-150) * var(--anim-mult, 1)), color calc(var(--duration-150) * var(--anim-mult, 1));
+  transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), color calc(var(--duration-150) * var(--anim-mult, 1));
 }
-.tdp-close:hover { background: var(--gray-200); color: var(--fg1); }
+.tdp-close:hover { background: var(--fp-hover); color: var(--fg1); }
 .tdp-close .material-icons { font-size: 16px; }
 .tdp-badge {
   display: inline-flex; align-items: center; gap: 4px; margin-bottom: 14px;
@@ -699,7 +706,7 @@ html.dark .td-pop-dow.on { background:var(--brand-primary); }
   flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   padding: 11px 10px; border-radius: 14px; border: none; cursor: pointer;
   font-family: var(--font-display); font-size: 12px; font-weight: 800;
-  transition: filter calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-spring-snap);
+  transition: filter calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-out);
 }
 .tdp-action-btn .material-icons { font-size: 16px; }
 .tdp-action-btn:active { transform: scale(0.95); }
@@ -797,7 +804,7 @@ html.dark .tdp-btn-muted { background: #1C1C1C !important; }
   transition:
     backdrop-filter calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade),
     -webkit-backdrop-filter calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade),
-    background calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-fade);
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .td-del-overlay.td-del-visible {
   -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
@@ -883,7 +890,7 @@ html.dark .td-del-title { color: #F5F5F5; }
     inset 0 1px 0 rgba(255,255,255,0.30),
     inset 0 -2px 0 rgba(0,0,0,0.18);
   transition:
-    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring-snap),
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
     filter calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .td-del-confirm:hover { filter: brightness(1.10); }

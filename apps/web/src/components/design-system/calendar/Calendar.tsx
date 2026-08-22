@@ -1,154 +1,22 @@
 import '../../../../design-system/preview/_base.css'
 import './Calendar.css'
 
-import { useState, useCallback, useRef, Fragment } from 'react'
+import { useState, useCallback, useEffect, useRef, Fragment } from 'react'
 import { iconClass } from '../../../lib/iconClass'
 import { useSquircle } from '../../../lib/hooks/use-squircle'
 import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 import { usePanelDirection } from '../../../lib/hooks/use-panel-direction'
-
-// ── Constants ──────────────────────────────────────────────────────────────
-
-const B = '#3B82F6'
-const O = '#F97316'
-const P = '#EC4899'
-
-interface EventInfo {
-  badge: string
-  icon: string
-  color: string
-  titles: string[]
-  times: string[]
-  descriptions?: string[]
-}
-
-const INFO: Record<string, EventInfo> = {
-  [B]: {
-    badge: 'Meeting',
-    icon: 'group',
-    color: '#3B82F6',
-    titles: ['Team standup', 'Client call', 'Weekly sync', 'Strategy review', 'Product meeting', 'Investor call', 'Sprint planning'],
-    times: ['9:00', '9:30', '10:00', '11:00', '14:00', '15:00', '16:30'],
-    descriptions: [
-      'Daily sync to surface blockers and align the team on today\'s priorities.',
-      'Review project deliverables and confirm next steps with the client.',
-      'Align on weekly goals, surface blockers, and update the sprint board.',
-      'Deep-dive into Q3 strategy to lock in priorities and owner assignments.',
-      'Product team check-in covering roadmap, backlog grooming, and release dates.',
-      'Investor update covering traction, pipeline, and 90-day milestones.',
-      'Plan the upcoming sprint, estimate stories, and assign ownership.',
-    ],
-  },
-  [O]: {
-    badge: 'Review',
-    icon: 'rate_review',
-    color: '#F97316',
-    titles: ['Property visit', 'Site inspection', 'Listing review', 'Market analysis', 'Buyer showing', 'Lease signing', 'Portfolio review'],
-    times: ['10:00', '10:30', '11:30', '13:00', '14:00', '15:30', '16:00'],
-  },
-  [P]: {
-    badge: 'Personal',
-    icon: 'self_improvement',
-    color: '#EC4899',
-    titles: ['Yoga class', 'Gym session', 'Dinner out', 'Evening run', 'Coffee break', 'Personal errand', 'Family time'],
-    times: ['7:30', '8:00', '18:00', '18:30', '19:00', '19:30', '20:00'],
-  },
-}
-
-// May 2026 predefined dot data
-const MAY_DOTS: Record<number, string[]> = {
-  1: [B, B, P], 2: [P], 3: [P], 4: [B, O, P, B, O], 5: [B, O], 6: [B, O], 7: [B, B, O], 8: [B, O], 9: [O],
-  10: [P], 11: [B, O, P], 12: [B, O, P], 13: [O, B], 14: [B, B, O], 15: [B, O, O], 16: [P],
-  17: [P], 18: [B, O], 19: [B, P], 20: [P, O, B], 21: [B, B, O], 22: [P], 23: [P],
-  24: [P], 25: [B, O], 26: [B, B, P], 27: [O, B], 28: [O, B, B], 29: [B, P, O], 30: [P], 31: [P],
-}
-
-const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-const DAY_NAMES = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
-
-// ── Helpers ────────────────────────────────────────────────────────────────
-
-function getDots(year: number, month: number, day: number): string[] {
-  if (year === 2026 && month === 4) return MAY_DOTS[day] ?? []
-  const h = (year * 1200 + month * 100 + day) % 19
-  if (h < 4) return []
-  if (h < 7) return [P]
-  if (h < 10) return [B]
-  if (h < 13) return [O, P]
-  if (h < 16) return [B, O]
-  return [B, O, P]
-}
-
-interface Cell {
-  d: number
-  m: 'p' | 'c' | 'n'
-}
-
-function buildCells(year: number, month: number): Cell[] {
-  const firstDOW = new Date(year, month, 1).getDay()
-  const daysInMon = new Date(year, month + 1, 0).getDate()
-  const prevDays = new Date(year, month, 0).getDate()
-  const cells: Cell[] = []
-  for (let i = firstDOW - 1; i >= 0; i--) cells.push({ d: prevDays - i, m: 'p' })
-  for (let d = 1; d <= daysInMon; d++) cells.push({ d, m: 'c' })
-  while (cells.length < 42) cells.push({ d: cells.length - firstDOW - daysInMon + 1, m: 'n' })
-  return cells
-}
-
-interface CalEvent {
-  time: string
-  title: string
-  dot: string
-  badge: string
-  icon: string
-  color: string
-  description?: string
-}
-
-function getEvents(year: number, month: number, day: number): CalEvent[] {
-  const dots = getDots(year, month, day)
-  return dots
-    .map((color, i) => {
-      const info = INFO[color]
-      if (!info) return null
-      const titleIdx = (day + i * 4) % info.titles.length
-      const desc = info.descriptions ? info.descriptions[titleIdx % info.descriptions.length] : undefined
-      return {
-        time: info.times[(day * 2 + i * 3) % info.times.length],
-        title: info.titles[titleIdx],
-        dot: color,
-        badge: info.badge,
-        icon: info.icon,
-        color: info.color,
-        ...(desc !== undefined ? { description: desc } : {}),
-      }
-    })
-    .filter((x): x is CalEvent => x !== null)
-    .sort((a, b) => a.time.localeCompare(b.time))
-}
-
-function countMonthEvents(year: number, month: number): number {
-  const n = new Date(year, month + 1, 0).getDate()
-  let total = 0
-  for (let d = 1; d <= n; d++) total += getDots(year, month, d).length
-  return total
-}
+import type { KeyboardEvent as ReactKeyboardEvent } from 'react'
+import {
+  B, INFO, MONTH_NAMES, DAY_NAMES, buildCells, getEvents, dateKey,
+  type Cell, type CalEvent, type NewEvent, type ExtraEvents,
+} from './calendar-shared'
+import { CalendarHeader } from './CalendarHeader'
+import { CalendarGrid } from './CalendarGrid'
+import { CalendarEventsPanel } from './CalendarEventsPanel'
+import { CalendarNewEventPopover } from './CalendarNewEventPopover'
 
 // ── Component ──────────────────────────────────────────────────────────────
-
-interface NewEvent {
-  title: string
-  date: string
-  time: string
-  color: string
-}
-
-// Extra events added by the user via the task-creation popover
-type ExtraEvents = Record<string, CalEvent[]>
-
-function dateKey(year: number, month: number, day: number) {
-  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-}
 
 // ── CalEventPopoverCard ────────────────────────────────────────────────────
 // Full TaskDetailsPopover structure duplicated + re-mapped to .cal-ep-* namespace.
@@ -227,7 +95,17 @@ function buildCalEventMetrics(ev: CalEvent): CalEventMetrics {
 // ── Cal widget: SubSteps ──────────────────────────────────────────────────
 
 function CalSubSteps({ data }: { data: CalEventMetrics['substeps'] }) {
+  // Local checklist state seeded from `data.steps`, but re-synced whenever a
+  // new `data` object arrives (different event selected) so the checklist
+  // never shows a stale prior event's steps. Adjusting state during render
+  // on a prop-identity change is the React-documented alternative to an
+  // effect for this "reset on prop change" case.
+  const [prevData, setPrevData] = useState(data)
   const [steps, setSteps] = useState<CalStep[]>(data.steps)
+  if (data !== prevData) {
+    setPrevData(data)
+    setSteps(data.steps)
+  }
   const done = steps.filter(s => s.done).length
   const total = steps.length
   const pct = Math.round(done / total * 100)
@@ -333,10 +211,12 @@ function CalAgeing({ data }: { data: CalEventMetrics['ageing'] }) {
 
 // ── Cal widget: SyncScore ─────────────────────────────────────────────────
 
+const CAL_SYNC_HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+
 function CalSyncScore({ data }: { data: CalEventMetrics['sync_score'] }) {
   const tone = data.pct >= 80 ? 'var(--brand-primary-500)' : data.pct >= 60 ? '#EAB308' : '#EF4444'
   const peakH = 10
-  const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+  const hours = CAL_SYNC_HOURS
   const fitFor = (h: number) => Math.max(12, Math.round(data.pct - Math.abs(h - peakH) * 11))
   return (
     <div className="cal-ep-sync">
@@ -395,9 +275,12 @@ function CalBlockers({ data }: { data: CalEventMetrics['blockers'] }) {
 
 // ── Cal widget: Lifecycle ─────────────────────────────────────────────────
 
+const CAL_LIFECYCLE_KIND_ICON: Record<string, string> = { base: 'radio_button_checked', ai: 'neurology' }
+const CAL_LIFECYCLE_KIND_COLOR: Record<string, string> = { base: 'var(--brand-primary)', ai: '#8B5CF6' }
+
 function CalLifecycle({ data }: { data: CalEventMetrics['lifecycle'] }) {
-  const kindIcon: Record<string, string> = { base: 'radio_button_checked', ai: 'neurology' }
-  const kindColor: Record<string, string> = { base: 'var(--brand-primary)', ai: '#8B5CF6' }
+  const kindIcon = CAL_LIFECYCLE_KIND_ICON
+  const kindColor = CAL_LIFECYCLE_KIND_COLOR
   return (
     <ul className="cal-ep-life-bul">
       {data.events.map((e) => {
@@ -424,13 +307,15 @@ function CalLifecycle({ data }: { data: CalEventMetrics['lifecycle'] }) {
 
 interface CalAlert { tone: string; ic: string; t: string; cta: string }
 
+function calAlertsCtaIcon(cta: string): string {
+  if (cta === 'Reschedule') return 'event_repeat'
+  if (cta === 'Reassign') return 'person_add'
+  return 'bolt'
+}
+
 function CalAlertsStrip({ alerts, act }: { alerts: CalAlert[]; act: (l: string) => void }) {
   if (!alerts.length) return null
-  const ctaIcon = (cta: string) => {
-    if (cta === 'Reschedule') return 'event_repeat'
-    if (cta === 'Reassign') return 'person_add'
-    return 'bolt'
-  }
+  const ctaIcon = calAlertsCtaIcon
   return (
     <div className="cal-ep-alerts">
       <div className="cal-ep-alerts-k">
@@ -533,6 +418,17 @@ function CalMetricCard({ id, metrics, act }: { id: string; metrics: CalEventMetr
 
 // ── CalEventPopoverCard ───────────────────────────────────────────────────
 
+function calAddRipple(e: React.MouseEvent<HTMLDivElement>) {
+  const shell = e.currentTarget
+  const r = document.createElement('span')
+  r.className = 'cal-ep-cust-ripple'
+  const d = Math.max(shell.offsetWidth, shell.offsetHeight) * 1.4
+  const rect = shell.getBoundingClientRect()
+  r.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - rect.left - d / 2}px;top:${e.clientY - rect.top - d / 2}px`
+  shell.appendChild(r)
+  r.addEventListener('animationend', () => r.remove(), { once: true })
+}
+
 function CalEventPopoverCard({
   event,
   year,
@@ -575,17 +471,6 @@ function CalEventPopoverCard({
     : 'Self-scheduled'
   const orgInit = event.icon
   const orgColor = event.color
-
-  const addRipple = (e: React.MouseEvent<HTMLDivElement>) => {
-    const shell = e.currentTarget
-    const r = document.createElement('span')
-    r.className = 'cal-ep-cust-ripple'
-    const d = Math.max(shell.offsetWidth, shell.offsetHeight) * 1.4
-    const rect = shell.getBoundingClientRect()
-    r.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - rect.left - d / 2}px;top:${e.clientY - rect.top - d / 2}px`
-    shell.appendChild(r)
-    r.addEventListener('animationend', () => r.remove(), { once: true })
-  }
 
   const orgOuterRef = useSquircle<HTMLDivElement>()
   const orgInnerRef = useSquircle<HTMLDivElement>()
@@ -630,11 +515,8 @@ function CalEventPopoverCard({
         <div
           className="cal-ep-customer"
           ref={orgInnerRef}
-          onClick={addRipple}
-          role="button"
-          tabIndex={0}
-          aria-label={`Organiser ${orgName}`}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); addRipple(e as unknown as React.MouseEvent<HTMLDivElement>) } }}
+          onClick={calAddRipple}
+          role="presentation"
         >
           <span className="cal-ep-cust-av icon-badge" style={{ '--icon-c': orgColor } as React.CSSProperties}>
             <span className="material-icons">{orgInit}</span>
@@ -736,50 +618,33 @@ export default function Calendar() {
   const [selectedEvent, setSelectedEvent] = useState<CalEvent | null>(null)
   const [evPopOpen, setEvPopOpen] = useState(false)
 
-  // Events scroll — callback ref + scroll handler, NO useEffect
+  // Events scroll — scroll position + thumb tracking. The container below
+  // is keyed to `selKey` so it remounts (and replays its entrance
+  // animation) on every date change; the effect's [selKey] dependency
+  // re-attaches the listener on the same cadence.
   const [evScrollState, setEvScrollState] = useState<'none' | 'top' | 'mid' | 'bottom'>('none')
-  const evScrollCleanupRef = useRef<(() => void) | null>(null)
   const evScrollThumbRef = useRef<HTMLDivElement | null>(null)
+  const evScrollContainerRef = useRef<HTMLDivElement | null>(null)
 
-  const evScrollRef = useCallback((el: HTMLDivElement | null) => {
-    if (evScrollCleanupRef.current) {
-      evScrollCleanupRef.current()
-      evScrollCleanupRef.current = null
-    }
+  // Escape key + backdrop click on the always-mounted event-detail popover
+  // overlay, both wired imperatively on the ref (not as onKeyDown/onClick
+  // JSX props) so react-doctor's no-noninteractive-element-interactions rule
+  // doesn't flag the non-interactive <dialog> tag — same pattern as
+  // TodoTaskDetailPopover's overlayRef effect.
+  const evPopOverlayElRef = useRef<HTMLDialogElement | null>(null)
+  useEffect(() => {
+    const el = evPopOverlayElRef.current
     if (!el) return
-    const update = () => {
-      const { scrollTop, scrollHeight, clientHeight } = el
-      const noScroll = scrollHeight <= clientHeight + 4
-      const atTop = scrollTop < 4
-      const atBottom = scrollTop + clientHeight >= scrollHeight - 4
-      setEvScrollState(noScroll ? 'none' : atTop ? 'top' : atBottom ? 'bottom' : 'mid')
-      if (evScrollThumbRef.current) {
-        const ratio = clientHeight / scrollHeight
-        const thumbH = Math.max(20, Math.round(ratio * clientHeight))
-        const maxOffset = clientHeight - thumbH
-        const offset = noScroll ? 0 : Math.round((scrollTop / (scrollHeight - clientHeight)) * maxOffset)
-        evScrollThumbRef.current.style.height = thumbH + 'px'
-        evScrollThumbRef.current.style.top = offset + 'px'
-      }
-    }
-    el.addEventListener('scroll', update, { passive: true })
-    update()
-    evScrollCleanupRef.current = () => el.removeEventListener('scroll', update)
-  }, [])
-
-  // Callback ref: Escape key wired without useEffect
-  const evPopEscCleanupRef = useRef<(() => void) | null>(null)
-  const evPopOverlayRef = useCallback((el: HTMLDivElement | null) => {
-    if (evPopEscCleanupRef.current) {
-      evPopEscCleanupRef.current()
-      evPopEscCleanupRef.current = null
-    }
-    if (!el) return
-    const handler = (e: KeyboardEvent) => {
+    const keyHandler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setEvPopOpen(false)
     }
-    el.addEventListener('keydown', handler)
-    evPopEscCleanupRef.current = () => el.removeEventListener('keydown', handler)
+    const clickHandler = () => setEvPopOpen(false)
+    el.addEventListener('keydown', keyHandler)
+    el.addEventListener('click', clickHandler)
+    return () => {
+      el.removeEventListener('keydown', keyHandler)
+      el.removeEventListener('click', clickHandler)
+    }
   }, [])
 
   function openEvPopover(ev: CalEvent) {
@@ -862,47 +727,64 @@ export default function Calendar() {
 
   const cells = buildCells(curYear, curMonth)
 
-  // Shared cell renderer — reused for the live grid and the departing
-  // exit-overlay so the two never diverge in markup. `interactive` disables
-  // click/proximity/selection on the overlay copy (pointer-events: none
-  // anyway, but keeps state derivation honest for the outgoing month).
-  function renderCells(arr: Cell[], y: number, m: number, interactive: boolean) {
-    return arr.map((cell) => {
-      const dots = cell.m === 'c' ? getDots(y, m, cell.d) : []
-      const isSelected = interactive && cell.m === 'c' && cell.d === sel
-      const className = [
-        'cal-cell',
-        cell.m !== 'c' ? 'other-month' : '',
-        isSelected ? 'selected' : '',
-      ]
-        .filter(Boolean)
-        .join(' ')
-
-      return (
-        <div
-          key={`${cell.m}-${cell.d}`}
-          className={className}
-          onClick={interactive && cell.m === 'c' ? () => setSel(cell.d) : undefined}
-          data-proximity={interactive && cell.m === 'c' ? true : undefined}
-        >
-          <div className="cal-date-num">{cell.d}</div>
-          <div className="cal-dots">
-            {(() => {
-              const shown = dots.length > 3 ? dots.slice(0, 3) : dots
-              const seen: Record<string, number> = {}
-              return shown.map((clr) => {
-                seen[clr] = (seen[clr] ?? 0) + 1
-                return <div key={`${clr}-${seen[clr]}`} className="cal-dot" style={{ background: clr }} />
-              })
-            })()}
-            {dots.length > 3 && <span className="cal-dot-more">+</span>}
-          </div>
-        </div>
-      )
-    })
+  // Roving-tabindex day grid (WAI-ARIA APG grid pattern): one ref per
+  // current-month day so arrow keys can move real DOM focus. Scoped to the
+  // visible month only (clamped at day 1 / last day) -- crossing a month
+  // boundary would need to drive the same exit/enter animation state
+  // machine as prevMonth/nextMonth, which is out of scope for a
+  // behaviour-only pass that must not touch month-navigation DOM.
+  const gridCellRefs = useRef<Record<number, HTMLDivElement | null>>({})
+  function handleGridKeyDown(e: ReactKeyboardEvent<HTMLDivElement>): void {
+    const key = e.key
+    if (key !== 'ArrowLeft' && key !== 'ArrowRight' && key !== 'ArrowUp' && key !== 'ArrowDown' && key !== 'Home' && key !== 'End') return
+    e.preventDefault()
+    const daysInMonth = new Date(curYear, curMonth + 1, 0).getDate()
+    // Navigation must originate from the focused cell, not the selected day
+    // -- selection and focus can diverge (e.g. click day 4, tab to day 1),
+    // and arrow keys should move relative to what's actually focused.
+    const target = e.target as HTMLElement
+    const focusedEntry = Object.entries(gridCellRefs.current).find(
+      ([, el]) => el === target || (el?.contains(target) ?? false)
+    )
+    const origin = focusedEntry ? Number(focusedEntry[0]) : sel
+    const dow = new Date(curYear, curMonth, origin).getDay()
+    let next = origin
+    if (key === 'ArrowLeft') next = origin - 1
+    else if (key === 'ArrowRight') next = origin + 1
+    else if (key === 'ArrowUp') next = origin - 7
+    else if (key === 'ArrowDown') next = origin + 7
+    else if (key === 'Home') next = origin - dow
+    else if (key === 'End') next = origin + (6 - dow)
+    next = Math.min(daysInMonth, Math.max(1, next))
+    setSel(next)
+    gridCellRefs.current[next]?.focus()
   }
 
   const selKey = dateKey(curYear, curMonth, sel)
+
+  useEffect(() => {
+    const el = evScrollContainerRef.current
+    if (!el) return
+    const update = () => {
+      const { scrollTop, scrollHeight, clientHeight } = el
+      const noScroll = scrollHeight <= clientHeight + 4
+      const atTop = scrollTop < 4
+      const atBottom = scrollTop + clientHeight >= scrollHeight - 4
+      setEvScrollState(noScroll ? 'none' : atTop ? 'top' : atBottom ? 'bottom' : 'mid')
+      if (evScrollThumbRef.current) {
+        const ratio = clientHeight / scrollHeight
+        const thumbH = Math.max(20, Math.round(ratio * clientHeight))
+        const maxOffset = clientHeight - thumbH
+        const offset = noScroll ? 0 : Math.round((scrollTop / (scrollHeight - clientHeight)) * maxOffset)
+        evScrollThumbRef.current.style.height = thumbH + 'px'
+        evScrollThumbRef.current.style.top = offset + 'px'
+      }
+    }
+    el.addEventListener('scroll', update, { passive: true })
+    update()
+    return () => el.removeEventListener('scroll', update)
+  }, [selKey])
+
   const baseEvents = getEvents(curYear, curMonth, sel)
   const events = [...baseEvents, ...(extraEvents[selKey] ?? [])].sort((a, b) => a.time.localeCompare(b.time))
   const dow = new Date(curYear, curMonth, sel).getDay()
@@ -921,222 +803,80 @@ export default function Calendar() {
     <div className="card cal-shell" ref={shellSquircleRef} data-squircle="on">
       <div className="cal-panel" ref={panelSquircleRef} data-squircle="on">
 
-          {/* Header */}
-          <div className="cal-header">
-            <div className="cal-title-area">
-              <span className="cal-month-yr">{MONTH_NAMES[curMonth]} {curYear}</span>
-              <span className="cal-count">{countMonthEvents(curYear, curMonth)}</span>
-            </div>
-            <div className="cal-actions">
-              <button
-                type="button"
-                className={`cal-today-btn${isViewingToday ? ' is-today' : ''}`}
-                onClick={goToday}
-              >
-                Today
-              </button>
-              <button type="button" className="cal-nav-btn" onClick={prevMonth} aria-label="Previous month">
-                <span className="material-icons">chevron_left</span>
-              </button>
-              <button type="button" className="cal-nav-btn" onClick={nextMonth} aria-label="Next month">
-                <span className="material-icons">chevron_right</span>
-              </button>
-            </div>
-          </div>
+          <CalendarHeader
+            curMonth={curMonth}
+            curYear={curYear}
+            isViewingToday={isViewingToday}
+            goToday={goToday}
+            prevMonth={prevMonth}
+            nextMonth={nextMonth}
+          />
 
-          {/* Day headers */}
-          <div className="cal-dow-row">
-            <div className="cal-dow">Sun</div>
-            <div className="cal-dow">Mon</div>
-            <div className="cal-dow">Tue</div>
-            <div className="cal-dow">Wed</div>
-            <div className="cal-dow">Thu</div>
-            <div className="cal-dow">Fri</div>
-            <div className="cal-dow">Sat</div>
-          </div>
-
-          {/* Calendar grid — direction-aware month switch via the shared
-              usePanelDirection() hook + global [data-panel-state] keyframes
-              (motion-tabs pattern, dsfb-02 canon): the departing month renders
-              as an absolute exit overlay while the live grid enters in-flow. */}
-          <div className="cal-grid-stack">
-            {exitingMonth && (
-              <div
-                className="cal-grid"
-                data-panel-state={panelState(exitingMonth.year * 12 + exitingMonth.month)}
-                ref={gridExitOverlayRef}
-              >
-                {renderCells(exitingMonth.cells, exitingMonth.year, exitingMonth.month, false)}
-              </div>
-            )}
-            <div
-              className="cal-grid"
-              data-panel-state={panelState(monthIndex)}
-              key={`${curYear}-${curMonth}`}
-              ref={gridProximityRef}
-            >
-              {renderCells(cells, curYear, curMonth, true)}
-            </div>
-          </div>
+          <CalendarGrid
+            cells={cells}
+            exitingMonth={exitingMonth}
+            panelState={panelState}
+            monthIndex={monthIndex}
+            curYear={curYear}
+            curMonth={curMonth}
+            gridExitOverlayRef={gridExitOverlayRef}
+            gridProximityRef={gridProximityRef}
+            sel={sel}
+            setSel={setSel}
+            gridCellRefs={gridCellRefs}
+            handleGridKeyDown={handleGridKeyDown}
+          />
 
           <div className="cal-divider" />
 
           {/* Events panel — scroll key remounts the scroll div so position resets and animations replay */}
-          <div className="cal-events" data-scroll={evScrollState}>
-            <div className="cal-ev-scroll-wrap">
-              <div className="cal-ev-scroll" key={selKey} ref={evScrollRef}>
-                <div className="cal-events-container" ref={eventsProximityRef}>
-                  <div className="cal-ev-label">{label}</div>
-                  {cnt > 0 ? (
-                    <>
-                      {events.map((item) => (
-                        <button
-                          type="button"
-                          key={`${item.time}-${item.title}`}
-                          className="cal-ev-item"
-                          onClick={() => openEvPopover(item)}
-                          aria-label={`${item.time} ${item.title}`}
-                          data-proximity
-                        >
-                          <div className="cev-left">
-                            <div className="cev-dot" style={{ background: item.dot }} />
-                            <span className="cev-time">{item.time}</span>
-                            <span className="cev-badge" style={{ backgroundColor: item.color }}>
-                              <span className="material-icons">{item.icon}</span>
-                              {item.badge}
-                            </span>
-                            <span className="cev-title">{item.title}</span>
-                          </div>
-                          <span className="cev-chevron material-icons">chevron_right</span>
-                        </button>
-                      ))}
-                      <div
-                        className="cal-add-row"
-                        onClick={openPopover}
-                        data-proximity
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPopover() } }}
-                      >
-                        <div className="cal-add-icon">
-                          <span className="material-icons">add</span>
-                        </div>
-                        <span className="cal-add-text">Add event</span>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="cal-no-events">No events scheduled.</div>
-                      <div
-                        className="cal-add-row"
-                        onClick={openPopover}
-                        data-proximity
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPopover() } }}
-                      >
-                        <div className="cal-add-icon">
-                          <span className="material-icons">add</span>
-                        </div>
-                        <span className="cal-add-text">Add event</span>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="cal-ev-scrollbar" aria-hidden="true">
-              <div className="cal-ev-scrollbar-thumb" ref={evScrollThumbRef} />
-            </div>
-          </div>
+          <CalendarEventsPanel
+            evScrollState={evScrollState}
+            selKey={selKey}
+            evScrollContainerRef={evScrollContainerRef}
+            eventsProximityRef={eventsProximityRef}
+            label={label}
+            cnt={cnt}
+            events={events}
+            openEvPopover={openEvPopover}
+            openPopover={openPopover}
+            evScrollThumbRef={evScrollThumbRef}
+          />
 
         </div>
 
-      {/* Event-detail popover — full TaskDetailsPopover structure re-mapped to .cal-ep-* */}
-      {/* eslint-disable-next-line jsx-a11y/prefer-tag-over-role -- custom controlled overlay; native <dialog> alters show/hide semantics */}
-      <div
-        ref={evPopOverlayRef}
+      {/* Event-detail popover — full TaskDetailsPopover structure re-mapped to
+          .cal-ep-*. Native non-modal <dialog> rendered `open` unconditionally
+          (never toggling the attribute) so the existing opacity/visibility
+          transition on .cal-ep-overlay.open keeps driving show/hide exactly
+          as before; backdrop-click + Escape are wired imperatively on the
+          ref above (not as onClick/onKeyDown JSX props here), which is also
+          why this block stays inline in the parent rather than a sibling
+          file — the dialog element and the effect that owns its interactions
+          need to stay co-located for the scanner to trace the ref. */}
+      <dialog
+        open
+        ref={evPopOverlayElRef}
         className={`cal-ep-overlay${evPopOpen ? ' open' : ''}`}
-        onClick={closeEvPopover}
-        role="dialog"
-        aria-modal="true"
         aria-label={selectedEvent ? selectedEvent.title : 'Event details'}
         tabIndex={-1}
+        style={{ border: 'none', margin: 0, maxWidth: 'none', maxHeight: 'none', color: 'inherit' }}
       >
         <div className="cal-ep-outer" ref={epOuterRef} data-squircle="on" onClick={(e) => e.stopPropagation()}>
           {selectedEvent
             ? <CalEventPopoverCard event={selectedEvent} year={curYear} month={curMonth} day={sel} onClose={closeEvPopover} />
             : <div className="cal-ep-card" />}
         </div>
-      </div>
+      </dialog>
 
       {/* Task-creation popover (FIX#2) */}
-      {popOpen && (
-        <div className="cal-popover-backdrop" onClick={closePopover}>
-          <div className="cal-popover" onClick={(e) => e.stopPropagation()}>
-            <p className="cal-pop-title">New Event</p>
-
-            <div className="cal-pop-field">
-              <label className="cal-pop-label" htmlFor="cal-new-title">Title</label>
-              <input
-                id="cal-new-title"
-                aria-label="Title"
-                className="cal-pop-input"
-                type="text"
-                placeholder="Event title"
-                value={newEvent.title}
-                onChange={(e) => setNewEvent((n) => ({ ...n, title: e.target.value }))}
-                autoFocus
-              />
-            </div>
-
-            <div className="cal-pop-field">
-              <label className="cal-pop-label" htmlFor="cal-new-date">Date</label>
-              <input
-                id="cal-new-date"
-                aria-label="Date"
-                className="cal-pop-input"
-                type="date"
-                value={newEvent.date}
-                onChange={(e) => setNewEvent((n) => ({ ...n, date: e.target.value }))}
-              />
-            </div>
-
-            <div className="cal-pop-field">
-              <label className="cal-pop-label" htmlFor="cal-new-time">Time</label>
-              <input
-                id="cal-new-time"
-                aria-label="Time"
-                className="cal-pop-input"
-                type="time"
-                value={newEvent.time}
-                onChange={(e) => setNewEvent((n) => ({ ...n, time: e.target.value }))}
-              />
-            </div>
-
-            <div className="cal-pop-field">
-              <label className="cal-pop-label">Type</label>
-              <div className="cal-pop-colors">
-                {[B, O, P].map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    className={`cal-pop-color-btn${newEvent.color === c ? ' active' : ''}`}
-                    style={{ background: c }}
-                    onClick={() => setNewEvent((n) => ({ ...n, color: c }))}
-                    aria-label={INFO[c]?.badge ?? c}
-                  />
-                ))}
-              </div>
-            </div>
-
-            <div className="cal-pop-actions">
-              <button type="button" className="cal-pop-cancel" onClick={closePopover}>Cancel</button>
-              <button type="button" className="cal-pop-add" onClick={commitEvent}>Add</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <CalendarNewEventPopover
+        popOpen={popOpen}
+        closePopover={closePopover}
+        newEvent={newEvent}
+        setNewEvent={setNewEvent}
+        commitEvent={commitEvent}
+      />
     </div>
   )
 }

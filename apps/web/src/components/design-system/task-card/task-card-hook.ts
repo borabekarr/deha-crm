@@ -1,76 +1,50 @@
 /**
  * task-card-hook.ts — timer / tween helpers for TaskCard + TaskDetailsPopover.
  *
- * NO raw useEffect anywhere in the task-card folder.
- *
  * Strategy for timers / animation:
- *  - useTween: drives a number from 0→target via RAF/setTimeout stored on a
- *    plain ref object.  The hook starts the loop synchronously on the first
- *    render (guarded by a "started" ref) and cleans up via the returned
- *    callback-ref teardown.
- *  - Countdown interval (popover "now" tick): wired via a callback ref on the
- *    overlay element. Cleanup is stored on the element itself.
- *  - Toast timer: plain useRef holding the timeout ID — no effect needed.
- *  - Keyboard listener (Escape): attached/detached via a callback ref on the
- *    outermost overlay div.
+ *  - useTween: drives a number from 0→target via setTimeout, started once on
+ *    mount in a useEffect with a literal clearTimeout cleanup.
+ *  - Countdown interval (popover "now" tick): stored node via a stable
+ *    callback ref, listener wiring in a useEffect (react-doctor needs the
+ *    setInterval call inside an effect body to see the cleanup path).
+ *  - Keyboard listener (Escape): same stored-node + effect pattern.
  */
 
-import { useState, useRef, useCallback } from 'react'
-
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-interface OverlayEl extends HTMLDivElement {
-  __overlayCleanup?: () => void
-}
+import { useState, useRef, useCallback, useEffect } from 'react'
 
 // ── useTween ──────────────────────────────────────────────────────────────────
 //
 // Animates 0 → target over `dur` ms using a cubic ease-out curve.
-// Uses setTimeout (16 ms cadence) stored in a plain ref — no useEffect.
-// The loop is started synchronously on first call (guarded by a startedRef).
-// Callers must call the returned `stop` function on unmount (via callback ref
-// teardown stored on the element, exactly like streak-card-hook.ts).
+// Uses setTimeout (16 ms cadence). The loop starts once on mount; `target`
+// changes are read live via targetRef so the loop is never restarted.
 
 export function useTween(target: number, dur: number): number {
   const [v, setV] = useState(0)
-  const idRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const startedRef = useRef(false)
   const targetRef = useRef(target)
-  const setVRef = useRef(setV)
-  // Sync latest-value refs during render — safe: these refs are never used for
-  // rendering (only read inside the tick closure and event callbacks).
-  // eslint-disable-next-line react-hooks/refs
-  setVRef.current = setV
-  // eslint-disable-next-line react-hooks/refs
-  targetRef.current = target
 
-  // Run-once guard: start the tween loop on the first call only.
-  // startedRef.current read/write is safe here: this block is the only place
-  // that reads it and the value is not used for rendering.
-  // eslint-disable-next-line react-hooks/refs
-  if (!startedRef.current) {
-    startedRef.current = true
-    // Capture start time once at first render — not recomputed on re-renders.
-    // eslint-disable-next-line react-hooks/purity, local/no-nondeterministic-render
+  useEffect(() => {
+    targetRef.current = target
+  }, [target])
+
+  useEffect(() => {
     const T = typeof performance !== 'undefined' ? performance.now() : Date.now()
-
-    const tick = () => {
-      // eslint-disable-next-line react-hooks/purity
+    // setInterval (not recursive setTimeout) so the tick loop is a single
+    // timer with one owner: the id below both starts and stops it.
+    const id = setInterval(() => {
       const now = typeof performance !== 'undefined' ? performance.now() : Date.now()
       const p = Math.min(1, (now - T) / (dur || 760))
       const eased = targetRef.current * (1 - Math.pow(1 - p, 3))
-      setVRef.current(eased)
-      if (p < 1) {
-        idRef.current = setTimeout(tick, 16)
-      } else {
-        setVRef.current(targetRef.current)
+      setV(eased)
+      if (p >= 1) {
+        setV(targetRef.current)
+        clearInterval(id)
       }
-    }
-    // Kick off the first tick synchronously during first render — safe: only
-    // fires once (startedRef guard above) and idRef is not read for rendering.
-    // eslint-disable-next-line react-hooks/refs
-    idRef.current = setTimeout(tick, 16)
-  }
+    }, 16)
+    return () => clearInterval(id)
+    // Run-once: the loop reads target/dur live via targetRef and the `dur`
+    // closure, it never needs to restart when either changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return v
 }
@@ -89,28 +63,23 @@ export function useCountdownRef(
   setNow: (n: number) => void,
   open: boolean,
 ): (el: HTMLDivElement | null) => void {
-  const openRef = useRef(open)
-  // eslint-disable-next-line react-hooks/refs
-  openRef.current = open
+  const elRef = useRef<HTMLDivElement | null>(null)
   const setNowRef = useRef(setNow)
-  // eslint-disable-next-line react-hooks/refs
-  setNowRef.current = setNow
+  useEffect(() => {
+    setNowRef.current = setNow
+  }, [setNow])
 
+  // Stable callback ref: only stores the node so the caller can still
+  // compose it with useKeydownRef's ref on the same element.
   const ref = useCallback((el: HTMLDivElement | null) => {
-    if (!el) return
-
-    const e = el as OverlayEl
-    // Clear any previous interval on re-attach
-    e.__overlayCleanup?.()
-
-    if (!openRef.current) {
-      e.__overlayCleanup = undefined
-      return
-    }
-
-    const id = setInterval(() => setNowRef.current(Date.now()), 1000)
-    e.__overlayCleanup = () => clearInterval(id)
+    elRef.current = el
   }, [])
+
+  useEffect(() => {
+    if (!elRef.current || !open) return
+    const id = setInterval(() => setNowRef.current(Date.now()), 1000)
+    return () => clearInterval(id)
+  }, [open])
 
   return ref
 }
@@ -127,20 +96,25 @@ export function useCountdownRef(
 export function useKeydownRef(
   onClose: () => void,
 ): (el: HTMLDivElement | null) => void {
+  const elRef = useRef<HTMLDivElement | null>(null)
   const onCloseRef = useRef(onClose)
-  // eslint-disable-next-line react-hooks/refs
-  onCloseRef.current = onClose
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
 
+  // Stable callback ref: only stores the node so the caller can still
+  // compose it with useCountdownRef's ref on the same element.
   const ref = useCallback((el: HTMLDivElement | null) => {
-    if (!el) return
-    const e = el as OverlayEl
-    e.__overlayCleanup?.()
+    elRef.current = el
+  }, [])
 
+  useEffect(() => {
+    if (!elRef.current) return
     const handler = (ev: KeyboardEvent) => {
       if (ev.key === 'Escape') onCloseRef.current()
     }
     window.addEventListener('keydown', handler)
-    e.__overlayCleanup = () => window.removeEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
   }, [])
 
   return ref

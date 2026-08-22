@@ -1,0 +1,103 @@
+.ss-root {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 24px;
+  font-family: var(--font-display);
+  color: var(--fg1);
+}
+
+.ss-zone-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.ss-zone-title {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg1);
+}
+
+.ss-zone-hint {
+  font-size: 12px;
+  color: var(--fg3);
+}
+
+.ss-shuffle-btn {
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--fg1);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-press-calm),
+    background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
+}
+.ss-shuffle-btn:hover { background: color-mix(in srgb, var(--brand-primary-500) 10%, var(--card-bg)); }
+.ss-shuffle-btn:active { transform: scale(0.96); }
+
+.ss-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.ss-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  padding: 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg1);
+  box-shadow: inset 0 0 0 1px rgba(17, 17, 17, 0.04);
+}
+
+.ss-flick-row {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.ss-flick-lane {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.ss-flick-track {
+  position: relative;
+  width: 220px;
+  height: 44px;
+  border-radius: 22px;
+  background: var(--shell-bg);
+  border: 1px solid var(--card-border);
+}
+
+.ss-ball {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--brand-primary-500);
+  cursor: grab;
+  touch-action: none;
+}
+.ss-ball:active { cursor: grabbing; }
+
+.ss-flick-caption {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg3);
+}

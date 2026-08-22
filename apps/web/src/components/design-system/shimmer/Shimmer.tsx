@@ -224,7 +224,7 @@ function ProfileCard({ loading, group }: { loading: boolean; group: ShimmerGroup
 
       {/* action */}
       <Shimmer height={46} radius={16}>
-        <button className="pc-btn">View profile</button>
+        <button type="button" className="pc-btn">View profile</button>
       </Shimmer>
     </ShimmerGroup>
   )
@@ -237,6 +237,13 @@ function ProfileCard({ loading, group }: { loading: boolean; group: ShimmerGroup
 // (never checked into the repo, see pixel-gate harness) and is not part
 // of the converted component.
 
+const DEMO_GROUP: ShimmerGroupValue = {
+  preset: 'light',
+  duration: 1500,
+  direction: 'leftToRight',
+  variant: 'shimmer',
+}
+
 export default function ShimmerDemo() {
   // Button-triggered: idle shows real content, no animation runs until the
   // trigger fires. Loading then simulates content arriving; the Shimmer
@@ -247,12 +254,7 @@ export default function ShimmerDemo() {
     window.setTimeout(() => setLoading(false), 2200)
   }
 
-  const group: ShimmerGroupValue = {
-    preset: 'light',
-    duration: 1500,
-    direction: 'leftToRight',
-    variant: 'shimmer',
-  }
+  const group = DEMO_GROUP
 
   return (
     // The raw source's <body>{display:grid;place-items:center} shrinks

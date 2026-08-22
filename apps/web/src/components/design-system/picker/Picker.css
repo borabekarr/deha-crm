@@ -46,6 +46,32 @@
    ExpandableCard.css / Dropdown.css / OtpInput.css / DisclosureGroup.css. */
 .pk-root {
   line-height: normal;
+  /* Step-4 no-inline-exhaustive-style migration (plan: security-deps-doctor-p2). */
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding: 40px 24px;
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  font-family: var(--font-display);
+  background: var(--bg-app);
+}
+
+/* Step-4 no-inline-exhaustive-style migration (plan: security-deps-doctor-p2)
+   -- shared static half of the two .pk-tray wrappers; the day/month tray
+   additionally sets gap: 8px inline (kept there, single property, no longer
+   flagged) since the hour/minute tray below it renders with no gap. */
+.pk-root .pk-tray {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  background: var(--bg-chip);
+  border-radius: 16px;
+  padding: 6px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+  margin-top: var(--gap-stack);
 }
 
 /* ---- _buttons.css (verbatim values) ----------------------------------- */
@@ -89,14 +115,14 @@
    rules in this file besides the .pk-root preflight normalization.
 
    1. Asymmetric press on the Today/Now button. The vendored rule above runs
-      press-in and release at the same --duration-base (160ms); per the Emil
+      press-in and release at the same --duration-base; per the Emil
       bar, the system's response to a press should be the fastest tier while
       the release settles. Shortening only the :active duration makes the
-      press-in read as instant and leaves the 160ms release untouched.
+      press-in read as instant and leaves the --duration-base release untouched.
    2. Press acknowledgement on the closed FAB pill, which previously had none.
       Gated on [data-open="false"] so an open 328x466 card never scales; the
       transform's transition leg is declared inline in Picker.tsx boxStyle()
-      (120ms / --duration-fast), because that element's transition list is an
+      (--duration-fast), because that element's transition list is an
       inline style and would otherwise win over anything declared here. */
 .pk-root .btn-primary:active { transition-duration: calc(var(--duration-fast) * var(--anim-mult, 1)); }
 .pk-root .pk-box[data-open="false"] { -webkit-tap-highlight-color: transparent; }
@@ -121,7 +147,7 @@
   background: rgba(15,23,42,0.07); color: var(--fg3);
   display: grid; place-items: center; cursor: pointer;
   font-size: 16px;
-  transition: background-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), border-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out);
+  transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), border-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out);
 }
 /* F9: bolder glyph weight, same mechanism F8 used on the confirm-button
    icons (ligature icon font, so weight comes from -webkit-text-stroke, not
@@ -130,7 +156,7 @@
 .pk-root .pk-arrow .material-icons { font-size: 16px; -webkit-text-stroke: 0.5px currentColor; }
 .pk-root .pk-arrow-up { top: 32px; }
 .pk-root .pk-arrow-down { bottom: 32px; }
-.pk-root .pk-arrow:hover { background: rgba(15,23,42,0.13); border-color: rgba(15,23,42,0.18); }
+.pk-root .pk-arrow:hover { background: var(--fp-hover); border-color: rgba(15,23,42,0.18); }
 .pk-root .pk-arrow:active { background: rgba(15,23,42,0.19); border-color: rgba(15,23,42,0.22); transition-duration: calc(var(--duration-fast) * var(--anim-mult, 1)); }
 
 /* Day/month column separator: a plain flex sibling, so the tray's own
@@ -152,9 +178,9 @@
   padding: 12px 20px; background: rgba(15,23,42,0.06); color: var(--fg2);
   border: none; border-radius: 14px;
   font-family: 'Montserrat'; font-size: 14px; font-weight: 800; cursor: pointer;
-  transition: background-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out);
+  transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
-.pk-root .pk-today-btn:hover { background: rgba(15,23,42,0.12); }
+.pk-root .pk-today-btn:hover { background: var(--fp-hover); }
 .pk-root .pk-today-btn:active { background: rgba(15,23,42,0.18); transition-duration: calc(var(--duration-fast) * var(--anim-mult, 1)); }
 
 /* F10: confirmed-state morph, matching pills/Pills.css .badge-event's

@@ -216,13 +216,8 @@ export function squirclePath(width: number, height: number, radius: number | Cor
   return shapeToPath(buildShape(width, height, radius, smoothing));
 }
 
-/** Same outline as squirclePath, opposite winding -- for nonzero-rule ring composition. */
-export function squirclePathReversed(width: number, height: number, radius: number, smoothing = 0.6): string {
-  return shapeToPath(reverseShape(buildShape(width, height, radius, smoothing)));
-}
-
 /** Parallel-curve offset of a corner radius: inner = max(outer - inset, 0). */
-export function concentricRadius(outer: number, inset: number, min = 0): number {
+function concentricRadius(outer: number, inset: number, min = 0): number {
   return Math.max(outer - inset, min);
 }
 

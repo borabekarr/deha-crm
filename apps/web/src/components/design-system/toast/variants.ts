@@ -28,6 +28,9 @@ export interface VariantCfg {
   enterScale: number
   /** The wrap's transition string; also what the gesture hands back to. */
   wrapTransition: string
+  /** The wrap's exit-phase transition string (faster-exits rule: exit tokenized
+   *  to --toast-exit-dur, distinct from the enter/settle baseline above). */
+  wrapTransitionExit: string
   /** Swipe commit thresholds (px of travel / px per ms of velocity). */
   swipeDistance: number
   swipeVelocity: number
@@ -50,8 +53,13 @@ export const VARIANTS: Record<VariantSlug, VariantCfg> = {
     scaleMin: 0.86,
     enterY: 110,
     enterScale: 0.9,
-    // Raw-source literals (500/280) kept as-is: this variant IS the baseline.
+    // Enter and settle legs keep the raw-source literals (500/280) as-is:
+    // this variant IS the baseline. The exit leg is tokenized separately
+    // (wrapTransitionExit, below) per the faster-exits rule.
     wrapTransition: `transform calc(500ms * var(--anim-mult, 1)) var(--ease-spring-pop), opacity calc(280ms * var(--anim-mult, 1)) var(--ease-out)`,
+    // Faster-exits rule: exit leg reads --toast-exit-dur (motion-tokens.css,
+    // the --duration-fast tier) instead of the enter/settle baseline above.
+    wrapTransitionExit: `transform calc(var(--toast-exit-dur) * var(--anim-mult, 1)) var(--ease-out), opacity calc(var(--toast-exit-dur) * var(--anim-mult, 1)) var(--ease-out)`,
     swipeDistance: 72,
     swipeVelocity: 0.5,
     flingMs: 200, // mirrors --duration-200
@@ -60,5 +68,3 @@ export const VARIANTS: Record<VariantSlug, VariantCfg> = {
     surface: 'gridded',
   },
 }
-
-export const VARIANT_SLUGS: VariantSlug[] = ['main']

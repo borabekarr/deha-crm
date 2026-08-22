@@ -348,7 +348,9 @@ html.dark .gc-legend-cell.gc-l4 { background: var(--dl4); }
   gap: 5px;
   align-items: baseline;
   box-shadow: 0 10px 24px -8px rgba(17,17,17, 0.5);
-  animation: gcTip calc(var(--duration-140) * var(--anim-mult, 1)) ease;
+  /* motion-family-rules step 3: tooltip family (motion-tokens.css --tooltip-dur/-ease) */
+  /* faster-exits step 4: no exit leg: tip unmounts; exit rule not applicable (no --tooltip-exit-dur leg) */
+  animation: gcTip calc(var(--tooltip-dur) * var(--anim-mult, 1)) var(--tooltip-ease);
 }
 
 html.dark .gc-tip {

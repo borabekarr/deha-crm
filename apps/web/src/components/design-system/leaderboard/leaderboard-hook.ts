@@ -111,8 +111,7 @@ export function runFlip(
   ids.forEach((id) => {
     const el = rowEls[id]
     if (!el) return
-    el.style.transition = 'none'
-    el.style.transform = ''
+    el.style.cssText = 'transition:none;transform:'
     natural[id] = el.getBoundingClientRect().top
   })
 
@@ -127,8 +126,7 @@ export function runFlip(
       if (Math.abs(dy) > 0.5) {
         el.style.transform = `translateY(${dy}px)`
         el.getBoundingClientRect() // force layout to commit offset
-        el.style.transition = 'transform var(--duration-560) var(--ease-motion-sweep-2236)'
-        el.style.transform = ''
+        el.style.cssText = 'transition:transform var(--duration-560) var(--ease-motion-sweep-2236);transform:'
       }
     }
     flipState.prevRects[id] = nr

@@ -37,29 +37,32 @@ export function useAutoHeight<T extends HTMLElement>({
   onSettled,
 }: UseAutoHeightOptions): UseAutoHeightResult<T> {
   const ref = useRef<T | null>(null);
-  const cancelPendingRef = useRef<(() => void) | null>(null);
   const animatingRef = useRef(false);
   const mountedRef = useRef(false);
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el) return undefined;
 
-    // every new toggle cancels pending settle handlers first
-    cancelPendingRef.current?.();
-    cancelPendingRef.current = null;
+    // React runs this effect's own returned cleanup (below) before
+    // re-running it on the next toggle, so a mid-transition timer/listener
+    // is always released before the new toggle starts — no separate
+    // cancel-previous-run bookkeeping needed.
 
     const finalHeight = open ? 'auto' : `${collapsedHeight}px`;
 
-    // skip animation on first mount, snap straight to the resting state
-    if (!mountedRef.current) {
-      mountedRef.current = true;
+    // skip animation on first mount (snap straight to the resting state) or
+    // when the user prefers reduced motion — same snap, two triggers.
+    const firstMount = !mountedRef.current;
+    if (firstMount) mountedRef.current = true;
+
+    if (firstMount || prefersReducedMotion()) {
       el.style.transition = 'none';
       el.style.height = finalHeight;
       el.style.overflow = open ? '' : 'hidden';
       animatingRef.current = false;
       onSettled?.(open);
-      return;
+      return undefined;
     }
 
     const settle = () => {
@@ -69,15 +72,6 @@ export function useAutoHeight<T extends HTMLElement>({
       el.style.overflow = open ? '' : 'hidden';
       onSettled?.(open);
     };
-
-    if (prefersReducedMotion()) {
-      el.style.transition = 'none';
-      el.style.height = finalHeight;
-      el.style.overflow = open ? '' : 'hidden';
-      animatingRef.current = false;
-      onSettled?.(open);
-      return;
-    }
 
     let startHeight: number;
     if (open) {
@@ -118,19 +112,14 @@ export function useAutoHeight<T extends HTMLElement>({
     // this fallback must always be armed and race the listener above
     const timeoutId = window.setTimeout(finish, effectiveDuration + 80);
 
-    cancelPendingRef.current = () => {
+    // Releases the listener + fallback timer on unmount, or before this
+    // effect re-runs for the next toggle (React calls this automatically).
+    return () => {
       window.clearTimeout(timeoutId);
       el.removeEventListener('transitionend', onTransitionEnd);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, duration, easing, collapsedHeight]);
-
-  useEffect(() => {
-    return () => {
-      cancelPendingRef.current?.();
-      cancelPendingRef.current = null;
-    };
-  }, []);
 
   // Content growth while `open` stays true never reruns the toggle effect
   // above (its deps are [open, duration, easing, collapsedHeight]), so a

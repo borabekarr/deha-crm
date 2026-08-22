@@ -8,10 +8,10 @@
 import { useState, useRef, useCallback } from 'react'
 import { useProximityGroup } from '@/lib/hooks'
 import '../../../../design-system/preview/_base.css'
-import '../../../../design-system/preview/_pipeline-card.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './PipelineCard.css'
 import { startCountUp, spawnRipple, spawnShellRipple, runApply, animateRemove, mountAiChat, wireDiscussInput } from './pipeline-card-hook'
+import { tokenMs } from '@/lib/token-ms'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -305,7 +305,17 @@ function LeftPanel({ d, priority, whyOpen, onToggleWhy }: LeftPanelProps) {
     <div ref={leftProxRef} style={{ display: 'contents' }}>
     <div
       className={`pc-left pri-${priority}${d.isError ? ' is-error' : ''}${whyOpen ? ' why-open' : ''}`}
+      role="button"
+      tabIndex={0}
+      aria-expanded={whyOpen}
       onClick={(e) => { e.stopPropagation(); onToggleWhy() }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          e.stopPropagation()
+          onToggleWhy()
+        }
+      }}
       data-proximity
     >
       <div className="pc-pri"><span className="pc-pri-dot"></span>{PRI[priority].label}</div>
@@ -396,6 +406,7 @@ function RightPanel({
   return (
     <div
       className="pc-right"
+      role="presentation"
       onClick={(e) => {
         if ((e.target as Element).closest('button, input, a, .pc-pop, .pc-discuss')) return
         onOpenDetail()
@@ -403,7 +414,14 @@ function RightPanel({
     >
       {/* Header row */}
       <div className="pc-r-head">
-        <CatTag d={d} />
+        <button
+          type="button"
+          style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer' }}
+          aria-label="Open card details"
+          onClick={onOpenDetail}
+        >
+          <CatTag d={d} />
+        </button>
         <div className="pc-head-tools" ref={headToolsRef}>
           <div className="pc-snooze-wrap">
             <button
@@ -475,6 +493,7 @@ function RightPanel({
           ></div>
           <div
             className="pc-discuss-input"
+            role="presentation"
             onClick={(e) => {
               // fix #4: clicking anywhere on the pill (outside send btn) focuses input
               e.stopPropagation()
@@ -753,17 +772,25 @@ function DetailOverlay({ d, open, onClose, onClosed, onApply, onToast, onRemoveC
       about:  'About this card type',
     }
     onToast(m[sec] || 'Done')
-    if (sec === 'snooze' && d) { onClose(); setTimeout(() => onRemoveCard(d.id), 280) }
+    // faster-exits rule (plan: faster-exits-debts step 5): reads --duration-260
+    // live plus a documented +20 buffer for the remove animation to finish.
+    if (sec === 'snooze' && d) { onClose(); setTimeout(() => onRemoveCard(d.id), tokenMs('--duration-260', 260) + 20) }
   }
 
   return (
     <div
       className={`pcx-overlay${open ? ' open' : ''}`}
+      role="presentation"
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
       onTransitionEnd={(e) => { if (!open && e.propertyName === 'opacity') onClosed() }}
     >
       <div className="pcx-outer">
-        <div className="pcx-card" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="pcx-card"
+          role="presentation"
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
           {d && <>
             {/* Sticky inverted header */}
             <div className={`pcx-head ${headCls}`}>
@@ -784,8 +811,17 @@ function DetailOverlay({ d, open, onClose, onClosed, onApply, onToast, onRemoveC
                 <div className="pcx-head-stats">
                   <div
                     className={`pcx-hstat pcx-imp${impactOpen ? ' open' : ''}`}
+                    role="button"
+                    tabIndex={0}
                     aria-expanded={impactOpen}
                     onClick={(e) => { e.stopPropagation(); setImpactOpen((v) => !v) }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        setImpactOpen((v) => !v)
+                      }
+                    }}
                   >
                     <div className="pcx-hstat-n">{d.impact}<span className="pcx-hstat-pct">%</span></div>
                     <div className="pcx-hstat-l">Impact score<span className="material-symbols-outlined pcx-impact-chev">expand_more</span></div>
@@ -813,7 +849,9 @@ function DetailOverlay({ d, open, onClose, onClosed, onApply, onToast, onRemoveC
                       if (xApplyRef.current) {
                         onApply(e, xApplyRef.current, () => {
                           onClose()
-                          setTimeout(() => onRemoveCard(d.id), 280)
+                          // faster-exits rule (plan: faster-exits-debts step 5): reads
+                          // --duration-260 live plus a documented +20 buffer.
+                          setTimeout(() => onRemoveCard(d.id), tokenMs('--duration-260', 260) + 20)
                         })
                       }
                     }}
@@ -900,23 +938,20 @@ function Toast({ msg, visible }: { msg: string; visible: boolean }) {
 // Empty state
 // ---------------------------------------------------------------------------
 
+const EMPTY_STATE_BARS = [
+  { day: 'mon', h: 5 }, { day: 'tue', h: 3 }, { day: 'wed', h: 7 },
+  { day: 'thu', h: 4 }, { day: 'fri', h: 6 }, { day: 'sat', h: 2 }, { day: 'sun', h: 4 },
+]
+
 function EmptyState() {
-  const bars = [
-    { day: 'mon', h: 5 }, { day: 'tue', h: 3 }, { day: 'wed', h: 7 },
-    { day: 'thu', h: 4 }, { day: 'fri', h: 6 }, { day: 'sat', h: 2 }, { day: 'sun', h: 4 },
-  ]
+  const bars = EMPTY_STATE_BARS
   return (
     <div className="shell">
       <div style={{
         background: 'var(--r-bg,#fff)', borderRadius: '24px', padding: '34px 26px', textAlign: 'center',
         fontFamily: "'Montserrat'", boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6)',
       }}>
-        <div style={{
-          width: '54px', height: '54px', borderRadius: '16px', margin: '0 auto 14px',
-          display: 'grid', placeItems: 'center', color: '#fff',
-          background: 'linear-gradient(150deg,var(--brand-primary-400),var(--brand-primary-500))',
-          boxShadow: '0 8px 22px color-mix(in srgb, var(--brand-primary-500) 34%, transparent),inset 0 1px 0 rgba(255,255,255,0.5)',
-        }}>
+        <div className="pc-empty-icon">
           <span className="material-symbols-outlined" style={{ fontSize: '28px' }}>task_alt</span>
         </div>
         <div style={{ fontSize: '16px', fontWeight: 800, color: '#111111', letterSpacing: '-0.01em' }}>No actions for today</div>
@@ -994,8 +1029,20 @@ function BriefingCard({ d, onOpenDetail, onRemove, onDemote, onToast }: Briefing
     if (shellRef.current) spawnShellRipple(e, shellRef.current)
   }
 
+  // Keyboard equivalent: Escape dismisses the transient snooze popover (HIG)
+  function handleRootKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (e.key === 'Escape' && snoozeOpen) setSnoozeOpen(false)
+  }
+
   return (
-    <div className="shell" data-id={d.id} ref={shellRef} onClick={handleRootClick}>
+    <div
+      className="shell"
+      data-id={d.id}
+      ref={shellRef}
+      role="presentation"
+      onClick={handleRootClick}
+      onKeyDown={handleRootKeyDown}
+    >
       <div className="pc">
         <LeftPanel
           d={d}
@@ -1071,7 +1118,7 @@ export default function PipelineCard() {
   }
 
   return (
-    <div className="card" style={{ padding: 0 }} onKeyDown={handleKeyDown} tabIndex={-1}>
+    <div className="card" style={{ padding: 0 }} role="presentation" onKeyDown={handleKeyDown} tabIndex={-1}>
       <div className="frame">
         <div className="stack">
           {cards.length === 0 ? (

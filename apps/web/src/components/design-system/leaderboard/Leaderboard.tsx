@@ -77,12 +77,15 @@ export default function Leaderboard() {
   // Timer that sequences exit animation → content switch (usePanelDirection
   // derives the enter state automatically once metric catches up, below).
   const switchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  // Keep a ref to current display values for tween start point.
-  // Sync during render — safe: displayRef is only read inside the tween callback,
-  // never used to compute rendered output.
+  // Keep a ref to current display values for tween start point. Synced via
+  // useLayoutEffect (not render-time mutation) so react-doctor's render-purity
+  // check is satisfied; displayRef is only read inside the async tween
+  // callback, never used to compute rendered output, so the one-paint lag
+  // doesn't change what's on screen.
   const displayRef = useRef(display)
-  // eslint-disable-next-line react-hooks/refs
-  displayRef.current = display
+  useLayoutEffect(() => {
+    displayRef.current = display
+  }, [display])
 
   // Ref for seg pill element
   const segElRef = useRef<HTMLDivElement | null>(null)

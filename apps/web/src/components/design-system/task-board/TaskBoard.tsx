@@ -7,11 +7,12 @@ import { useAutoHeight } from '@/lib/hooks/use-auto-height';
 import { useSquircle } from '@/lib/hooks/use-squircle';
 import { useProximityGroup } from '@/lib/hooks';
 import { makeTaskBoardTimers, type SyncPhase, type TaskBoardTimers } from './task-board-hook';
+import { reorderTask } from './task-board-reducer';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
-interface Task {
+export interface Task {
   id: string;
   title: string;
   importance: 'ui' | 'urgent' | 'important';
@@ -244,20 +245,7 @@ function Toast({
     <div
       ref={toastRef}
       className={`tb-toast ${phase === 'out' ? 'tb-toast-out' : 'tb-toast-in'}`}
-      style={{
-        display: 'inline-flex', alignItems: 'center', gap: 10,
-        padding: '9px 10px 9px 12px',
-        borderRadius: 14,
-        background: cfg.bg,
-        backgroundImage: 'linear-gradient(rgba(255,255,255,0.10) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.10) 1px, transparent 1px)',
-        backgroundSize: '7px 7px',
-        color: '#fff',
-        fontSize: 12.5, fontWeight: 700,
-        letterSpacing: '-0.005em',
-        boxShadow: '0 8px 24px -6px rgba(17,17,17,0.35), inset 0 1px 0 rgba(255,255,255,0.20)',
-        maxWidth: 360,
-        whiteSpace: 'nowrap',
-      }}
+      style={{ background: cfg.bg }}
     >
       <SymIcon name="check_circle" size={15} />
       <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{message}</span>
@@ -266,11 +254,7 @@ function Toast({
           type="button"
           onClick={onUndo}
           data-proximity
-          style={{
-            padding: '3px 9px', borderRadius: 8,
-            background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.30)',
-            color: '#fff', fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
-          }}
+          className="tb-toast-undo"
         >
           Undo
         </button>
@@ -280,12 +264,7 @@ function Toast({
         onClick={onClose}
         aria-label="Dismiss"
         data-proximity
-        style={{
-          width: 22, height: 22, padding: 0, flexShrink: 0,
-          background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)',
-          borderRadius: 8, color: 'rgba(255,255,255,0.85)',
-          cursor: 'pointer', display: 'grid', placeItems: 'center',
-        }}
+        className="tb-toast-dismiss"
       >
         <SymIcon name="close" size={13} />
       </button>
@@ -453,17 +432,6 @@ function Column({
           }
         }));
       }}
-      style={{
-        background: 'var(--tb-col-bg)',
-        border: 'var(--tb-col-dash)',
-        borderRadius: 12,
-        padding: 10,
-        display: 'flex', flexDirection: 'column', gap: 14,
-        height: 380,
-        boxSizing: 'border-box',
-        overflow: 'hidden',
-        transition: 'background calc(var(--duration-base) * var(--anim-mult, 1)), outline-color calc(var(--duration-base) * var(--anim-mult, 1))',
-      }}
     >
       {/* Column header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 2px 0', flexShrink: 0 }}>
@@ -505,14 +473,6 @@ function Column({
           <div
             aria-hidden="true"
             className="tb-fade tb-fade-top"
-            style={{
-              position: 'absolute',
-              top: 0, left: 2, right: 6,
-              height: 44,
-              background: 'linear-gradient(to top, var(--tb-fade1) 0%, var(--tb-fade2) 58%, var(--tb-fade3) 100%)',
-              pointerEvents: 'none',
-              zIndex: 2,
-            }}
           />
         )}
 
@@ -887,6 +847,8 @@ function buildSequence(args: {
 // ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
+const COL_RANK: Record<string, number> = { todo: 0, progress: 1, review: 2, done: 3 };
+
 export default function TaskBoard() {
   const [tasks, setTasks]               = React.useState<Task[]>(INITIAL_TASKS);
   const [phase, setPhase]               = React.useState<SyncPhase>('idle');
@@ -930,8 +892,6 @@ export default function TaskBoard() {
     timersApiRef.current?.registerSyncTimer(t);
   }, []);
 
-  const COL_RANK: Record<string, number> = { todo: 0, progress: 1, review: 2, done: 3 };
-
   // FLIP helpers — capture card positions before a reorder, animate after the commit.
   const moveTasks = React.useCallback((updater: (curr: Task[]) => Task[]) => {
     timersApiRef.current?.captureFlip();
@@ -966,24 +926,7 @@ export default function TaskBoard() {
     const insertIdx = isForward ? 0 : (taskHistoryRef.current[draggingId]?.[colId] ?? 0);
     const draggedId = draggingId;
 
-    moveTasks((curr) => {
-      const moved   = { ...curr.find((t) => t.id === draggedId)!, col: colId };
-      const others  = curr.filter((t) => t.id !== draggedId);
-      const result: Task[] = [];
-      let destSeen = 0;
-      let placed   = false;
-      for (const t of others) {
-        if (t.col === colId) {
-          if (!placed && destSeen === insertIdx) { result.push(moved); placed = true; }
-          result.push(t);
-          destSeen++;
-        } else {
-          result.push(t);
-        }
-      }
-      if (!placed) result.push(moved);
-      return result;
-    });
+    moveTasks((curr) => reorderTask(curr, draggedId, colId, insertIdx));
 
     triggerMoveEffects(draggingId, fromCol, colId, oldIdxInFromCol, task.title);
     setDraggingId(null);
@@ -994,24 +937,8 @@ export default function TaskBoard() {
     const u = undoRef.current;
     if (!u) return;
     moveTasks((curr) => {
-      const target = curr.find((t) => t.id === u.id);
-      if (!target) return curr;
-      const others = curr.filter((t) => t.id !== u.id);
-      const moved  = { ...target, col: u.from };
-      const result: Task[] = [];
-      let destSeen = 0;
-      let placed   = false;
-      for (const t of others) {
-        if (t.col === u.from) {
-          if (!placed && destSeen === (u.fromIdx ?? 0)) { result.push(moved); placed = true; }
-          result.push(t);
-          destSeen++;
-        } else {
-          result.push(t);
-        }
-      }
-      if (!placed) result.push(moved);
-      return result;
+      if (!curr.some((t) => t.id === u.id)) return curr;
+      return reorderTask(curr, u.id, u.from, u.fromIdx ?? 0);
     });
     undoRef.current = null;
     setHasUndo(false);
@@ -1052,33 +979,25 @@ export default function TaskBoard() {
   // The updater captures from-column info into locals so the success wash + toast
   // can fire afterward with the same values.
   const syncMove = React.useCallback((id: string, toCol: string) => {
-    let moveInfo: { fromCol: string; oldIdx: number; title: string } | null = null;
+    // Read the committed `tasks` state directly (same pattern onDrop uses
+    // above) to derive from-column info, instead of writing to a captured
+    // variable inside the setTasks updater.
+    const task = tasks.find((t) => t.id === id);
+    if (!task || task.col === toCol) return;
+    const fromCol = task.col;
+    const oldIdx  = tasks.filter((t) => t.col === fromCol).findIndex((t) => t.id === id);
+    const title   = task.title;
+
     timersApiRef.current?.captureFlip();
     setTasks((c) => {
-      const task = c.find((t) => t.id === id);
-      if (!task || task.col === toCol) return c;
-      const fromCol = task.col;
-      const oldIdx  = c.filter((t) => t.col === fromCol).findIndex((t) => t.id === id);
-      moveInfo = { fromCol, oldIdx, title: task.title };
-
-      const others = c.filter((t) => t.id !== id);
-      const moved  = { ...task, col: toCol };
-      const result: Task[] = [];
-      let placed = false;
-      for (const t of others) {
-        if (!placed && t.col === toCol) { result.push(moved); placed = true; }
-        result.push(t);
-      }
-      if (!placed) result.push(moved);
-      return result;
+      const cur = c.find((t) => t.id === id);
+      if (!cur || cur.col === toCol) return c;
+      return reorderTask(c, id, toCol, 0);
     });
     timersApiRef.current?.scheduleFlip();
 
-    if (moveInfo) {
-      const { fromCol, oldIdx, title } = moveInfo;
-      triggerMoveEffects(id, fromCol, toCol, oldIdx, title);
-    }
-  }, [triggerMoveEffects]);
+    triggerMoveEffects(id, fromCol, toCol, oldIdx, title);
+  }, [tasks, triggerMoveEffects]);
 
   const startSync = () => {
     timersApiRef.current?.clearSyncTimers();

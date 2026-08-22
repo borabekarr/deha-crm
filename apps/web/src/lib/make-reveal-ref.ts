@@ -101,8 +101,7 @@ function armOnVisibleReveal(
   // Hidden state applied synchronously, before the observer exists, so
   // there is no frame where content is visible pre-observe.
   items.forEach((item) => {
-    item.style.opacity = '0'
-    item.style.transform = `translateY(${opts.y}px) rotate(${opts.rotate}deg)`
+    Object.assign(item.style, { opacity: '0', transform: `translateY(${opts.y}px) rotate(${opts.rotate}deg)` })
   })
 
   const aug = container as AugContainer
@@ -150,8 +149,7 @@ function playReveal(
 
   const clearInline = () => {
     items.forEach((item) => {
-      item.style.opacity = ''
-      item.style.transform = ''
+      Object.assign(item.style, { opacity: '', transform: '' })
     })
   }
 

@@ -23,11 +23,12 @@
  * CSS state classes .is-open / .is-closing + transform/opacity.
  */
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useId } from 'react'
 import { iconClass } from '../../../lib/iconClass'
 import { useTimerRef, useSheetRef, useHandleRef, type DrawerSide } from './smooth-drawer-hook'
 import { useSquircle } from '../../../lib/hooks/use-squircle'
 import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
+import { tokenMs } from '@/lib/token-ms'
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './SmoothDrawer.css'
@@ -36,6 +37,12 @@ import './SmoothDrawer.css'
 // Types
 // ---------------------------------------------------------------------------
 const INNER_SHEET_STYLE: React.CSSProperties = {}
+
+// Faster-exits rule (plan: faster-exits-debts step 7): a drag release keeps
+// the open-tier momentum curve (Apple sheets settle from the finger's
+// velocity); a programmatic close (button, backdrop tap, Escape) runs one
+// duration tier faster. Reads the token live via the shared helper, see
+// lib/token-ms.ts.
 
 export interface SmoothDrawerProps {
   title?: string
@@ -82,6 +89,7 @@ function DrawerInstance({
   // ---- animation state ----
   // shown: true  = .is-open  (fully revealed)
   // closing: true = .is-closing (exit transition in progress)
+  const titleId = `sd-title-${useId()}`
   const [shown, setShown] = useState(defaultOpen)
   const [closing, setClosing] = useState(false)
 
@@ -92,11 +100,16 @@ function DrawerInstance({
   // ---- timers ----
   const closeTimer = useTimerRef()
 
+  // ---- close-source tracking (drag release keeps momentum; programmatic
+  // closes run one tier faster) ----
+  const closedByDragRef = useRef(false)
+
   // ---- open / close helpers ----
   const openDrawer = useCallback(() => {
     closeTimer.clear()
     setDrag(0)
     setClosing(false)
+    closedByDragRef.current = false
     // Double rAF to let the browser paint before applying .is-open
     requestAnimationFrame(() =>
       requestAnimationFrame(() => setShown(true)),
@@ -108,8 +121,17 @@ function DrawerInstance({
     setDrag(0)
     setShown(false)
     setClosing(true)
-    closeTimer.set(460, () => setClosing(false))
+    const ms = closedByDragRef.current
+      ? tokenMs('--duration-expand', 460)
+      : tokenMs('--duration-420', 420)
+    closeTimer.set(ms, () => setClosing(false))
   }, [closeTimer])
+
+  // Drag-dismiss goes through this so closeDrawer knows to keep momentum.
+  const closeDrawerFromDrag = useCallback(() => {
+    closedByDragRef.current = true
+    closeDrawer()
+  }, [closeDrawer])
 
   // ---- drag callbacks (stable, passed to useHandleRef) ----
   const handleDragChange = useCallback((delta: number, isDragging: boolean) => {
@@ -121,7 +143,7 @@ function DrawerInstance({
   const sheetRef = useSheetRef({ open: shown, onClose: closeDrawer })
   const handleRef = useHandleRef({
     onDragChange: handleDragChange,
-    onDismiss: closeDrawer,
+    onDismiss: closeDrawerFromDrag,
     side,
   })
 
@@ -150,11 +172,16 @@ function DrawerInstance({
       ? `translateY(${drag}px)`
       : `translateX(${drag}px)`
 
+  // Programmatic closes (button/backdrop/Escape) run one tier faster than the
+  // open tier; drag-released closes keep the open tier's momentum curve.
+  const sheetDurationVar =
+    closing && !closedByDragRef.current ? '--duration-420' : '--duration-expand'
+
   const sheetStyle: React.CSSProperties = {
     transform: shown ? openTranslate : closedTranslate,
     transition: dragging
       ? 'none'
-      : 'transform calc(var(--duration-expand) * var(--anim-mult, 1)) cubic-bezier(.32,1.45,.45,1)', /* motion-sweep: kept, easing curve used <3x, no exact/near token */
+      : `transform calc(var(${sheetDurationVar}) * var(--anim-mult, 1)) cubic-bezier(.32,1.45,.45,1)`, /* motion-sweep: kept, easing curve used <3x, no exact/near token */
   }
 
   // The outer bezel shell and inner card sheet always animate as ONE unit on
@@ -199,8 +226,13 @@ function DrawerInstance({
         Open {side.charAt(0).toUpperCase() + side.slice(1)}
       </button>
 
-      {/* Overlay always mounted — exit animation plays before visibility hides */}
-      <div className={overlayClass} aria-hidden={!shown}>
+      {/* Overlay always mounted — exit animation plays before visibility hides.
+          Native <dialog> (non-modal `open`, no showModal()) so the drag-to-
+          dismiss gesture and the existing manual Escape listener (sheet-hook)
+          keep working unchanged; box-model UA defaults neutralised inline so
+          .sd-overlay's own CSS (no background/border of its own) still governs
+          every pixel exactly as the plain div did. */}
+      <dialog open className={overlayClass} aria-hidden={!shown} aria-labelledby={titleId} style={{ background: 'none', border: 'none', margin: 0, maxWidth: 'none', maxHeight: 'none', color: 'inherit' }}>
         <div
           className="sd-scrim"
           style={scrimStyle}
@@ -216,7 +248,6 @@ function DrawerInstance({
           ref={combinedSheetRef}
           className="sd-sheet"
           style={innerSheetStyle}
-          aria-modal="true"
           aria-label={title}
           aria-live="polite"
           data-screen-label="Smooth Drawer"
@@ -239,7 +270,7 @@ function DrawerInstance({
                     check
                   </span>
                 </span>
-                <span className="sd-title">{title}</span>
+                <span className="sd-title" id={titleId}>{title}</span>
               </div>
             </div>
 
@@ -278,7 +309,7 @@ function DrawerInstance({
           </div>
         </div>
         </div>
-      </div>
+      </dialog>
     </>
   )
 }
@@ -287,8 +318,10 @@ function DrawerInstance({
 // Default export — Showcase: four cards, one per side
 // The component-registry imports this via slug `smooth-drawer`.
 // ---------------------------------------------------------------------------
+const SD_SIDES: DrawerSide[] = ['bottom', 'top', 'left', 'right']
+
 export default function SmoothDrawer(props: SmoothDrawerProps) {
-  const sides: DrawerSide[] = ['bottom', 'top', 'left', 'right']
+  const sides = SD_SIDES
   // One group covers all 4 stages' triggers + sheet action buttons (overlay
   // divs are always mounted per the mounted-through-exit pattern above, so
   // they're valid DOM descendants of .sd-showcase even before a drawer opens).

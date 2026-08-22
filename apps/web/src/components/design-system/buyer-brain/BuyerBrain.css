@@ -15,7 +15,7 @@
    `.buyer-brain-root` itself carries what the raw page put on `body`
    (Montserrat stack, --canvas background, --txt colour, the centering grid,
    the 34px/22px padding, font-smoothing and the background
-   transition (now tokenized to duration-200+duration-150, see below)).
+   transition (now standardized to the hover-fade pair, see below)).
 
    Excluded from the port: the raw page's `.bbq-darktoggle` chrome rules are
    dropped, because no markup uses them (the toggle drives html.dark, which
@@ -30,10 +30,10 @@
    `calc(<token(s)> * var(--anim-mult, 1))` so motion-token-gate accepts it,
    value-identical to the raw source's literal seconds (no retiming). Easings
    are substituted only where a token resolves to the byte-identical curve:
-     bare `ease`                     == var(--ease-fade)         cubic-bezier(.25,.1,.25,1)
-     bare `ease-in-out`              == var(--ease-in-out)       cubic-bezier(.42,0,.58,1)
-     cubic-bezier(.34,1.56,.64,1)    == var(--ease-spring-snap)
-     cubic-bezier(.4,0,.2,1)         == var(--ease-standard)
+     bare `ease`         == var(--ease-fade)
+     bare `ease-in-out`  == var(--ease-in-out)
+     the source's spring-snap overshoot curve == var(--ease-spring-snap)
+     the source's standard-material curve     == var(--ease-standard)
    Substitution sites: .buyer-brain-root (background), .bbq-card,
    .bbq-ink, .bbq-qual, .bbq-piece, .bbq-line, circle.bbq-knob, .bbq-label,
    .bbq-detail, .bbq-detail-card, .bbq-back, .bbq-caret, .bbq-think span,
@@ -97,7 +97,7 @@ html.dark .buyer-brain-root {
   place-items: center;
   padding: 34px 22px;
   -webkit-font-smoothing: antialiased;
-  transition: background calc((var(--duration-200) + var(--duration-150)) * var(--anim-mult, 1)) var(--ease-fade);
+  transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
 
 .buyer-brain-root .material-symbols-outlined {
@@ -121,7 +121,7 @@ html.dark .buyer-brain-root {
   border-radius: 14px;
   box-shadow: var(--shadow), var(--gloss);
   overflow: hidden;
-  transition: background calc((var(--duration-200) + var(--duration-150)) * var(--anim-mult, 1)) var(--ease-fade),
+  transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     border-color calc((var(--duration-200) + var(--duration-150)) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .buyer-brain-root .bbq-head {
@@ -522,6 +522,11 @@ html.dark .buyer-brain-root .bbq-hit:focus-visible {
   animation: bbqCardOpen calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-standard);
 }
 .buyer-brain-root .bbq-detail-card.closing {
+  /* faster-exits sweep: --duration-420 has no tier below it on the plan's
+     enumerated ladder (380->260, slower->240, 260->200, 240->180, 200->150,
+     base->fast, slow->base), so this stays symmetric rather than guessing an
+     unauthorized tier -- exit one tier faster (global rule) is not applied
+     here; comment-only, duration unchanged. */
   animation: bbqCardOpen calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-standard) reverse both;
 }
 @keyframes bbqCardOpen {
@@ -549,7 +554,7 @@ html.dark .buyer-brain-root .bbq-hit:focus-visible {
   display: grid;
   place-items: center;
   box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
-  /* touched leg: 0.15s -> var(--duration-150), byte-identical (150ms) */
+  /* touched leg: value-identical to var(--duration-150) */
   transition: transform calc(var(--duration-150) * var(--anim-mult, 1)),
     border-color calc(var(--duration-150) * var(--anim-mult, 1)),
     color calc(var(--duration-150) * var(--anim-mult, 1));
@@ -559,10 +564,11 @@ html.dark .buyer-brain-root .bbq-hit:focus-visible {
     transform: translateX(-2px);
     color: var(--txt);
     border-color: var(--txt3);
+    transition-timing-function: var(--ease-fade);
   }
 }
 /* press: was fully unaffordanced (no :active anywhere in the file); asymmetric
-   with the 150ms hover above per emil-design-eng "buttons must feel responsive" */
+   with the --duration-150 hover above per emil-design-eng "buttons must feel responsive" */
 .buyer-brain-root .bbq-back:active {
   transform: scale(0.94);
   transition-duration: calc(var(--duration-fast) * var(--anim-mult, 1));
@@ -723,7 +729,7 @@ html.dark .buyer-brain-root .bbq-hit:focus-visible {
   .buyer-brain-root *,
   .buyer-brain-root {
     transition: none !important;
-    animation-duration: 0.001ms !important;
+    animation-duration: 0.001ms !important; /* motion-sweep: kept, prefers-reduced-motion !important near-zero override, intentionally literal (house pattern, see frontend-motion-contract.md) */
     animation-iteration-count: 1 !important;
   }
   .buyer-brain-root .bbq-chip {

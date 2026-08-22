@@ -203,14 +203,10 @@ function TemplateCard({
   const outerSquircleRef = useSquircle<HTMLDivElement>()
   const innerSquircleRef = useSquircle<HTMLDivElement>()
   return (
-    // eslint-disable-next-line jsx-a11y/prefer-tag-over-role -- wraps a nested <button> (Use template); a native <button> cannot contain interactive children
     <div
       className={`wtc-outer${expanded ? ' wtc-expanded' : ''}`}
       onClick={onToggle}
-      role="button"
-      tabIndex={0}
-      aria-expanded={expanded}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggle() } }}
+      role="presentation"
       ref={outerSquircleRef}
     >
       <div className="wtc-card" ref={innerSquircleRef}>
@@ -238,7 +234,13 @@ function TemplateCard({
         </div>
 
         {/* Info section: title row + description */}
-        <div className="wtc-info">
+        <div
+          className="wtc-info"
+          role="button"
+          tabIndex={0}
+          aria-expanded={expanded}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggle() } }}
+        >
           <div className="wtc-title-row">
             <span className="wtc-title">{card.title}</span>
             {card.badge && (

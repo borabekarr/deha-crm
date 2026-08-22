@@ -125,7 +125,7 @@
    (bounding-box-exit-strip-must-not-grow-shell): the prior flex-flow
    approach let .wf-outer's real box widen on hover, so mid-exit frames sat
    past the card's rest-state right edge. No bounce: --ease-out (already
-   canonical, non-overshoot cubic-bezier) replaces --ease-spring-open. */
+   canonical, non-overshoot curve) replaces --ease-spring-open. */
 .wf-tools {
   position: absolute;
   top: 0;
@@ -227,7 +227,8 @@
   pointer-events: none;
   z-index: 40;
   box-shadow: 0 6px 16px rgba(17,17,17, 0.22);
-  transition: opacity calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-out);
+  /* faster-exits step 4: hidden state uses the exit token; shown state (below) re-declares with the enter token */
+  transition: opacity calc(var(--tooltip-exit-dur) * var(--anim-mult, 1)) var(--tooltip-ease), transform calc(var(--tooltip-exit-dur) * var(--anim-mult, 1)) var(--tooltip-transform-ease);
 }
 
 .wf-tool::before {
@@ -243,11 +244,12 @@
   opacity: 0;
   pointer-events: none;
   z-index: 40;
-  transition: opacity calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-fade);
+  /* faster-exits step 4: hidden state uses the exit token; shown state (below) re-declares with the enter token */
+  transition: opacity calc(var(--tooltip-exit-dur) * var(--anim-mult, 1)) var(--tooltip-ease);
 }
 
-.wf-tool:hover::after  { opacity: 1; transform: translateY(-50%) translateX(0); }
-.wf-tool:hover::before { opacity: 1; }
+.wf-tool:hover::after  { opacity: 1; transform: translateY(-50%) translateX(0); transition: opacity calc(var(--tooltip-dur) * var(--anim-mult, 1)) var(--tooltip-ease), transform calc(var(--tooltip-dur) * var(--anim-mult, 1)) var(--tooltip-transform-ease); }
+.wf-tool:hover::before { opacity: 1; transition: opacity calc(var(--tooltip-dur) * var(--anim-mult, 1)) var(--tooltip-ease); }
 
 /* ── Tag (semantic-pill: trigger / action / output) ──────────────────────── */
 .wf-tag {
@@ -356,7 +358,7 @@
   flex-shrink: 0;
 }
 
-.wf-menu:hover { background: #F5F5F5; color: #4A4A4A; }
+.wf-menu:hover { background: var(--fp-hover); color: #4A4A4A; }
 
 .wf-menu .material-icons {
   font-size: 18px;
@@ -427,10 +429,10 @@
   gap: 6px;
   cursor: pointer;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), inset 0 -1px 0 rgba(17,17,17, 0.04);
-  transition: background calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out);
+  transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out);
 }
 
-.wf-connect:hover  { background: #FAFAFA; }
+.wf-connect:hover  { background: var(--fp-hover); }
 .wf-connect:active { transform: scale(var(--press-card)); }
 
 /* Proximity: append scale/filter channels (existing background/transform
@@ -588,7 +590,7 @@ html.dark .wf-card {
 html.dark .wf-title { color: #F5F5F5; }
 html.dark .wf-title .ic { color: #D4D4D4; }
 
-html.dark .wf-menu:hover { background: #242424; color: #D4D4D4; }
+html.dark .wf-menu:hover { background: var(--fp-hover); color: #D4D4D4; }
 
 html.dark .wf-chip {
   background: #111111;
@@ -607,7 +609,7 @@ html.dark .wf-connect {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.20);
 }
 
-html.dark .wf-connect:hover { background: #242424; }
+html.dark .wf-connect:hover { background: var(--fp-hover); }
 html.dark .wf-connect .ic { color: #D4D4D4; }
 
 html.dark .wf-desc { color: #D4D4D4; }

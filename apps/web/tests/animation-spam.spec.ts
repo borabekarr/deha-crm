@@ -165,6 +165,20 @@ async function runAutoHeightTarget(page: Page, target: AutoHeightSpamTarget) {
 // one CSS property rather than a measured height — for morphs driven by CSS
 // transitions on width / flex-basis / opacity / max-height, or by a
 // hardcoded open size, where there is no measured content height to compare.
+// Settle wait for a toggle target: polls `awaitAttribute` to its target value
+// when present (for targets with no fixed CSS transition duration, e.g.
+// native smooth-scroll), otherwise falls back to the plain timeout.
+async function settleWait(page: Page, target: ToggleSpamTarget, timeoutMs: number) {
+  if (!target.awaitAttribute) return page.waitForTimeout(timeoutMs)
+  const { selector, attribute, value } = target.awaitAttribute
+  const loc = page.locator(selector).first()
+  // A click's scroll may not have started yet — the attribute can still read
+  // as the rest value from the PREVIOUS settle. Give it a beat to flip away
+  // before polling for it to return, so we never read state pre-scroll.
+  await page.waitForTimeout(50)
+  await expect(loc).toHaveAttribute(attribute, value, { timeout: timeoutMs + 2000 })
+}
+
 async function runToggleTarget(page: Page, target: ToggleSpamTarget) {
   const { consoleErrors, pageErrors } = await trackErrors(page)
   const settleMs = target.transitionMs + 300
@@ -172,22 +186,22 @@ async function runToggleTarget(page: Page, target: ToggleSpamTarget) {
   await settle(page)
   if (target.primerSelector) {
     await click(page, target.primerSelector)
-    await page.waitForTimeout(settleMs)
+    await settleWait(page, target, settleMs)
   }
 
   const closedRef = await readSettleValue(page, target)
   await click(page, target.trigger)
-  await page.waitForTimeout(settleMs)
+  await settleWait(page, target, settleMs)
   const openRef = await readSettleValue(page, target)
   // A target whose two states read identically can't prove anything.
   expect(openRef, `${target.slug}: ${target.settleProperty} does not change on open`).not.toBe(closedRef)
   await click(page, target.closeTrigger ?? target.trigger)
-  await page.waitForTimeout(settleMs)
+  await settleWait(page, target, settleMs)
   await page.reload()
   await settle(page)
   if (target.primerSelector) {
     await click(page, target.primerSelector)
-    await page.waitForTimeout(settleMs)
+    await settleWait(page, target, settleMs)
   }
 
   const rapidClicks = target.toggles ?? 8
@@ -202,7 +216,7 @@ async function runToggleTarget(page: Page, target: ToggleSpamTarget) {
   isOpen = !isOpen
   await page.waitForTimeout(target.transitionMs * 0.5)
   await click(page, selectorFor(target, isOpen))
-  await page.waitForTimeout(target.transitionMs + 400)
+  await settleWait(page, target, target.transitionMs + 400)
 
   // Clean settle: exactly one of the two references (ABSENT sentinel included).
   const finalValue = await readSettleValue(page, target)
@@ -214,13 +228,13 @@ async function runToggleTarget(page: Page, target: ToggleSpamTarget) {
   let observedOpen = finalValue === openRef
   if (target.primerSelector) {
     await click(page, target.primerSelector)
-    await page.waitForTimeout(settleMs)
+    await settleWait(page, target, settleMs)
     observedOpen = (await readSettleValue(page, target)) === openRef
   }
 
   // Responsiveness: one deterministic toggle out of the observed state.
   await click(page, observedOpen ? (target.closeTrigger ?? target.trigger) : target.trigger)
-  await page.waitForTimeout(target.transitionMs + 400)
+  await settleWait(page, target, target.transitionMs + 400)
   expect(
     await readSettleValue(page, target),
     `${target.slug} did not respond to a post-spam toggle`,

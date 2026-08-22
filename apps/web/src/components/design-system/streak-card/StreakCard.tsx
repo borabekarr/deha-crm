@@ -193,34 +193,31 @@ export default function StreakCard() {
   }
 
   function handleMarkDone() {
-    setState((prev) => {
-      const d = prev.days[prev.cur]
-      if (!d || d.done) return prev
-      const newDays = prev.days.map((day, i) => (i === prev.cur ? { ...day, done: true } : day))
-      const fromStreak = prev.streakDays
-      const newStreakDays = prev.streakDays + 1
+    const d = state.days[state.cur]
+    if (!d || d.done) return
+    const newDays = state.days.map((day, i) => (i === state.cur ? { ...day, done: true } : day))
+    const fromStreak = state.streakDays
+    const newStreakDays = state.streakDays + 1
+    setState({ ...state, days: newDays, streakDays: newStreakDays })
 
-      // tween streak number
-      if (streakNumRef.current) {
-        tween(streakNumRef.current, fromStreak, newStreakDays, 520, (v) => String(Math.round(v)), () => {
-          if (streakNumRef.current) {
-            streakNumRef.current.textContent = String(newStreakDays)
-            streakNumRef.current.classList.remove('elastic')
-            void streakNumRef.current.offsetWidth
-            streakNumRef.current.classList.add('elastic')
-          }
-        })
-      }
+    // tween streak number
+    if (streakNumRef.current) {
+      tween(streakNumRef.current, fromStreak, newStreakDays, 520, (v) => String(Math.round(v)), () => {
+        if (streakNumRef.current) {
+          streakNumRef.current.textContent = String(newStreakDays)
+          streakNumRef.current.classList.remove('elastic')
+          void streakNumRef.current.offsetWidth
+          streakNumRef.current.classList.add('elastic')
+        }
+      })
+    }
 
-      // flare flame
-      if (flameRef.current) {
-        flameRef.current.classList.remove('flare')
-        void flameRef.current.offsetWidth
-        flameRef.current.classList.add('flare')
-      }
-
-      return { ...prev, days: newDays, streakDays: newStreakDays }
-    })
+    // flare flame
+    if (flameRef.current) {
+      flameRef.current.classList.remove('flare')
+      void flameRef.current.offsetWidth
+      flameRef.current.classList.add('flare')
+    }
   }
 
   function handleNextDay() {
@@ -239,39 +236,36 @@ export default function StreakCard() {
         newDays = [...newDays, { label: nextWeekday(lastLabel), done: false }]
       }
 
-      // draw ring after state update on next frame
-      requestAnimationFrame(() => {
-        if (cardRef.current) drawRing(cardRef.current)
-      })
-
       return { ...prev, days: newDays, cur: newCur }
+    })
+
+    // draw ring after state update on next frame
+    requestAnimationFrame(() => {
+      if (cardRef.current) drawRing(cardRef.current)
     })
   }
 
   function handleAddSteps() {
-    setState((prev) => {
-      const fromSteps = prev.steps
-      const newSteps = Math.min(prev.maxSteps, prev.steps + 1250)
-      const fromPct = pctOf(fromSteps, prev.maxSteps)
-      const newPct = pctOf(newSteps, prev.maxSteps)
+    const fromSteps = state.steps
+    const newSteps = Math.min(state.maxSteps, state.steps + 1250)
+    const fromPct = pctOf(fromSteps, state.maxSteps)
+    const newPct = pctOf(newSteps, state.maxSteps)
+    setState({ ...state, steps: newSteps })
 
-      if (stepsValRef.current) {
-        tween(stepsValRef.current, fromSteps, newSteps, 880, fmt, () => {
-          if (stepsValRef.current) {
-            stepsValRef.current.textContent = fmt(newSteps)
-            stepsValRef.current.classList.remove('bump')
-            void stepsValRef.current.offsetWidth
-            stepsValRef.current.classList.add('bump')
-          }
-        })
-      }
-      if (stepsPctRef.current) {
-        tween(stepsPctRef.current, fromPct, newPct, 880, (v) => Math.round(v) + '%')
-      }
-      if (barRef.current) setBarWidth(barRef.current, newPct, true)
-
-      return { ...prev, steps: newSteps }
-    })
+    if (stepsValRef.current) {
+      tween(stepsValRef.current, fromSteps, newSteps, 880, fmt, () => {
+        if (stepsValRef.current) {
+          stepsValRef.current.textContent = fmt(newSteps)
+          stepsValRef.current.classList.remove('bump')
+          void stepsValRef.current.offsetWidth
+          stepsValRef.current.classList.add('bump')
+        }
+      })
+    }
+    if (stepsPctRef.current) {
+      tween(stepsPctRef.current, fromPct, newPct, 880, (v) => Math.round(v) + '%')
+    }
+    if (barRef.current) setBarWidth(barRef.current, newPct, true)
   }
 
   // ---------------------------------------------------------------------------

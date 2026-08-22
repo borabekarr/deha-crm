@@ -151,12 +151,12 @@ html.dark .exp-top { border-bottom-color: #232323; }
   width: 26px; height: 26px; border-radius: 50%;
   background: #F5F5F5; border: none; cursor: pointer;
   display: grid; place-items: center; color: #6B6B6B;
-  transition: background calc(var(--duration-150) * var(--anim-mult, 1)),
+  transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
   flex-shrink: 0;
 }
-.exp-close:hover { background: #ECECEC; }
+.exp-close:hover { background: var(--fp-hover-on-light); }
 .exp-close .material-icons { font-size: 15px; }
 
 .exp-body { padding: 16px 16px 0; }

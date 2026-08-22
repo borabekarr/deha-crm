@@ -2,10 +2,12 @@ import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './MotionTabs.css'
 import { useState, useCallback, useLayoutEffect, useRef } from 'react'
+import type { KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { mtRootRef, cleanupMtRoot } from './motion-tabs-hook'
 import { useSquircle } from '../../../lib/hooks/use-squircle'
 import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 import { usePanelDirection } from '../../../lib/hooks/use-panel-direction'
+import { rovingTabIndex } from '../../../lib/keyboard-nav'
 
 // Measured left/width glide for the tab indicator -- mirrors the controls
 // seg-pill / leaderboard seg-pill recipe (imperative style writes, animation
@@ -108,6 +110,10 @@ export default function MotionTabs() {
   // Proximity: tab buttons only — the sliding .mt-ind indicator is a MOVING
   // element and must never be wired (it would chase itself).
   const mtTabwrapProximityRef = useProximityGroup<HTMLDivElement>()
+  // Roving tabindex bookkeeping (WAI-ARIA APG tabs pattern): one ref per
+  // tab button so ArrowLeft/ArrowRight/Home/End can move real DOM focus
+  // after switching the selected tab.
+  const tabButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({})
 
   function close(): void {
     setView('default')
@@ -120,6 +126,18 @@ export default function MotionTabs() {
     }
     setActive(key)
     setView(key)
+  }
+
+  function onTabsKeyDown(e: ReactKeyboardEvent<HTMLDivElement>): void {
+    const key = e.key
+    if (key !== 'ArrowLeft' && key !== 'ArrowRight' && key !== 'Home' && key !== 'End') return
+    e.preventDefault()
+    const curIdx = TABS.findIndex((t) => t.key === active)
+    const nextIdx = rovingTabIndex(key, curIdx, TABS.length, 'horizontal')
+    if (nextIdx === null) return
+    const nextTab = TABS[nextIdx]
+    onTab(nextTab.key)
+    tabButtonRefs.current[nextTab.key]?.focus()
   }
 
   // Direction-aware enter/exit state per panel (dir = Math.sign(toIdx -
@@ -163,6 +181,7 @@ export default function MotionTabs() {
             {/* Overlay: tap outside to close */}
             <div
               className={`mt-overlay${isOpen ? ' open' : ''}`}
+              role="presentation"
               onClick={close}
             />
 
@@ -216,9 +235,11 @@ export default function MotionTabs() {
                 <div
                   className="mt-tabwrap"
                   ref={mtTabwrapProximityRef}
+                  role="tablist"
+                  onKeyDown={onTabsKeyDown}
                 >
                 {/* Single gliding indicator */}
-                <div className="mt-ind" ref={mtIndRef} />
+                <div className="mt-ind" ref={mtIndRef} aria-hidden="true" />
 
                 {TABS.map((tab, i) => {
                   const isActiveTab = active === tab.key
@@ -234,7 +255,10 @@ export default function MotionTabs() {
                       className={`mt-tab${isActiveTab ? ' active' : ''}`}
                       style={{ '--lw': `${tab.lw}px` } as React.CSSProperties}
                       onClick={() => onTab(tab.key)}
-                      aria-pressed={isActiveTab}
+                      ref={(el) => { tabButtonRefs.current[tab.key] = el }}
+                      role="tab"
+                      aria-selected={isActiveTab}
+                      tabIndex={isActiveTab ? 0 : -1}
                       aria-label={tab.label}
                       data-tab-index={i}
                       data-proximity

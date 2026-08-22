@@ -12,7 +12,7 @@ import './TaskCard.css'
 // See task-card-hook.ts for the timer/tween utilities.
 // ---------------------------------------------------------------------------
 
-import { useState, useRef, useCallback, Fragment } from 'react'
+import { useState, useRef, useCallback, useEffect, Fragment } from 'react'
 import { useTween, useCountdownRef, useKeydownRef, fmtShort, competeCount } from './task-card-hook'
 import { iconClass } from '../../../lib/iconClass'
 import { useProximityGroup, useSquircle } from '@/lib/hooks'
@@ -220,8 +220,15 @@ function buildTask(card: typeof TASK_CARDS[0]): Task {
 // ── Widget: SubSteps ──────────────────────────────────────────────────────────
 
 function SubSteps({ data }: { data: NonNullable<TaskMetrics['substeps']> }) {
-  // Steps are local state; synced to props via key (parent sets key=task.id+':substeps')
+  // Steps are local state; the parent already keys this on task.id+':substeps'
+  // (remounts on a different task), but also re-sync in render on data
+  // identity change so a same-key data swap never shows stale steps.
+  const [prevData, setPrevData] = useState(data)
   const [steps, setSteps] = useState<Step[]>(data.steps)
+  if (data !== prevData) {
+    setPrevData(data)
+    setSteps(data.steps)
+  }
   const stepsProxRef = useProximityGroup<HTMLUListElement>()
   const done = steps.filter(s => s.done).length
   const total = steps.length
@@ -334,10 +341,12 @@ function Ageing({ data }: { data: NonNullable<TaskMetrics['ageing']> }) {
 
 // ── Widget: SyncScore ─────────────────────────────────────────────────────────
 
+const TC_SYNC_HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+
 function SyncScore({ data }: { data: NonNullable<TaskMetrics['sync_score']> }) {
   const tone = data.pct >= 80 ? 'var(--brand-primary-500)' : data.pct >= 60 ? '#EAB308' : '#EF4444'
   const peakH = 11
-  const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+  const hours = TC_SYNC_HOURS
   const fitFor = (h: number) => Math.max(12, Math.round(data.pct - Math.abs(h - peakH) * 11))
   const v = useTween(data.pct, 840)
   return (
@@ -411,9 +420,12 @@ function Blockers({ data }: { data: NonNullable<TaskMetrics['blockers']> }) {
 
 // ── Widget: Lifecycle ─────────────────────────────────────────────────────────
 
+const TC_LIFECYCLE_KIND_ICON: Record<string, string> = { base: 'radio_button_checked', ai: 'neurology' }
+const TC_LIFECYCLE_KIND_COLOR: Record<string, string> = { base: 'var(--acc, var(--brand-primary))', ai: '#8B5CF6' }
+
 function Lifecycle({ data }: { data: NonNullable<TaskMetrics['lifecycle']> }) {
-  const kindIcon: Record<string, string> = { base: 'radio_button_checked', ai: 'neurology' }
-  const kindColor: Record<string, string> = { base: 'var(--acc, var(--brand-primary))', ai: '#8B5CF6' }
+  const kindIcon = TC_LIFECYCLE_KIND_ICON
+  const kindColor = TC_LIFECYCLE_KIND_COLOR
   return (
     <ul className="tp-life-bul">
       {data.events.map((e) => {
@@ -551,15 +563,17 @@ function MetricCard({ schema, data, status, act, taskId }: WidgetProps) {
 
 interface Alert { tone: string; ic: string; t: string; cta: string }
 
+function tcAlertsCtaIcon(cta: string): string {
+  if (cta === 'Reschedule') return 'event_repeat'
+  if (cta === 'Reassign') return 'person_add'
+  if (cta === 'Advance stage') return 'arrow_upward'
+  return 'bolt'
+}
+
 function AlertsStrip({ alerts, act }: { alerts: Alert[]; act: (l: string) => void }) {
   const alertsProxRef = useProximityGroup<HTMLDivElement>()
   if (!alerts.length) return null
-  const ctaIcon = (cta: string) => {
-    if (cta === 'Reschedule') return 'event_repeat'
-    if (cta === 'Reassign') return 'person_add'
-    if (cta === 'Advance stage') return 'arrow_upward'
-    return 'bolt'
-  }
+  const ctaIcon = tcAlertsCtaIcon
   return (
     <div className="tp-alerts">
       <div className="tp-alerts-k">
@@ -590,6 +604,9 @@ function AlertsStrip({ alerts, act }: { alerts: Alert[]; act: (l: string) => voi
 //   - "now" ticking: callback ref on the overlay element starts the interval
 //   - Escape key: callback ref on the outer div
 //   - toast timer: plain ref, no effect needed
+
+// TODO: route to lead details page once route exists
+function openLeadDetails(): void { /* TODO: route to lead details */ }
 
 function TaskDetailsPopover({
   task,
@@ -624,17 +641,17 @@ function TaskDetailsPopover({
     task ? Date.now() + task.metrics.time_to_deadzone.mins * 60000 : 0
   )
   const taskKeyRef = useRef<string | null>(task?.title ?? null)
-  // Derived-state-from-props: when the task identity changes, update the
-  // deadline synchronously so the countdown reflects the new task immediately.
-  // taskKeyRef read/write is safe — it is never used for rendering, only for
-  // change detection. Date.now() here fires at most once per task change.
-  // eslint-disable-next-line react-hooks/refs
-  if (task && taskKeyRef.current !== task.title) {
-    // eslint-disable-next-line react-hooks/refs
-    taskKeyRef.current = task.title
-    // eslint-disable-next-line react-hooks/purity, local/no-nondeterministic-render
-    setDeadline(Date.now() + task.metrics.time_to_deadzone.mins * 60000)
-  }
+  // When the task identity changes, update the deadline so the countdown
+  // reflects the new task. Moved into a useEffect (was a guarded
+  // render-time ref write + setState) so react-doctor's render-purity check
+  // passes; the popover is only shown while `open`, and this effect commits
+  // before the next paint, so there's no visible stale-deadline frame.
+  useEffect(() => {
+    if (task && taskKeyRef.current !== task.title) {
+      taskKeyRef.current = task.title
+      setDeadline(Date.now() + task.metrics.time_to_deadzone.mins * 60000)
+    }
+  }, [task])
 
   // Countdown tick — callback ref on the overlay element (starts when open)
   const countdownRef = useCountdownRef(setNow, open)
@@ -656,9 +673,6 @@ function TaskDetailsPopover({
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
     toastTimerRef.current = setTimeout(() => setToast(null), 2200)
   }
-
-  // TODO: route to lead details page once route exists
-  const openLeadDetails = () => { /* TODO: route to lead details */ }
 
   if (!task) return <div className="tp-overlay" />
 
@@ -724,7 +738,7 @@ function TaskDetailsPopover({
               </span>
             </div>
 
-            <div className="tp-cust-shell" onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+            <div className="tp-cust-shell" role="presentation" onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                 // (7) Press ripple — paints the grey frame behind the white customer card
                 const shell = e.currentTarget
                 const r = document.createElement('span')
@@ -735,17 +749,18 @@ function TaskDetailsPopover({
                 shell.appendChild(r)
                 r.addEventListener('animationend', () => r.remove(), { once: true })
               }}>
-              {/* eslint-disable-next-line jsx-a11y/prefer-tag-over-role -- wraps nested <button>s (Message / Ask AI); a native <button> cannot contain interactive children */}
-              <div className="tp-customer tp-customer-link" role="button" tabIndex={0}
+              <div className="tp-customer tp-customer-link" role="presentation"
                 onClick={openLeadDetails}
-                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') openLeadDetails() }}
-                aria-label={`Open ${task.link === 'company' ? 'company' : 'customer'} details`}
               >
-                <span className="tp-cust-av" style={{ background: task.entity.color }}>
+                <button type="button" className="tp-cust-av"
+                  style={{ background: task.entity.color, border: '1.5px solid rgba(255,255,255,0.35)', padding: 0, font: 'inherit', cursor: 'pointer' }}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLeadDetails() } }}
+                  aria-label={`Open ${task.link === 'company' ? 'company' : 'customer'} details`}
+                >
                   {entIsIcon
                     ? <span className="material-icons">{entInit}</span>
                     : entInit}
-                </span>
+                </button>
                 <div className="tp-cust-meta">
                   <div className="tp-cust-k">{task.link === 'company' ? 'Related company' : 'Related customer'}</div>
                   <div className="tp-cust-name-row">
@@ -865,6 +880,7 @@ export default function TaskCard() {
               key={card.title}
               className={`task canon-hover ${card.cls}`}
               style={{ '--tag': card.tag } as React.CSSProperties}
+              role="presentation"
               onClick={() => openTask(buildTask(card))}
             >
               <div className="tag-banner">

@@ -27,10 +27,10 @@
  * FROZEN and byte-identical to the port.
  *
  * Motion values are tokenized where an exact value-identical match exists in
- * apps/web/src/styles/motion-tokens.css (see the "raw:" comment beside each
- * substitution). The .md-panel-shell transform leg (380ms) has no matching
- * single tier, so it is expressed as a gate-compliant calc composition
- * (--duration-200 + --duration-180), resolving to the same 380ms.
+ * apps/web/src/styles/motion-tokens.css (see the notes beside each
+ * substitution). The .md-panel-shell transform leg has no matching single
+ * tier, so it is expressed as a gate-compliant calc composition
+ * (--duration-200 + --duration-180).
  */
 
 /* Inner white panel — demo wrapper only, mirrors the raw Demo()'s .md-panel;
@@ -99,12 +99,9 @@
   opacity: 0;
   z-index: 1;
   pointer-events: none;
-  /* raw: opacity 200ms ease, transform 380ms cubic-bezier(.22,1,.36,1)
-     200ms -> --duration-200; bare `ease` -> --ease-fade (== bare ease per its
-     own definition comment); cubic-bezier(.22,1,.36,1) -> --ease-motion-sweep-2236
-     (byte-identical). 380ms has no matching single tier and is expressed as
-     calc(var(--duration-200) + var(--duration-180)), resolving to the same
-     380ms. */
+  /* opacity -> --duration-200 / --ease-fade; transform -> --ease-motion-sweep-2236,
+     no matching single duration tier so expressed as
+     calc(var(--duration-200) + var(--duration-180)). */
   transition: opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade), transform calc((var(--duration-200) + var(--duration-180)) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);
 }
 .md-root.open .md-panel-shell {
@@ -121,6 +118,10 @@
    with no delay at all) leaves last. Same duration/easing/property list as
    enter throughout -- only the delay direction changes. */
 .md-root:not(.open) .md-panel-shell {
+  /* faster-exits rule: the closed leg runs one tier faster than the open leg
+     (--popover-exit-dur instead of --duration-200); the transform leg keeps
+     its + --duration-180 composition. */
+  transition-duration: calc(var(--popover-exit-dur) * var(--anim-mult, 1)), calc((var(--popover-exit-dur) + var(--duration-180)) * var(--anim-mult, 1));
   transition-delay: calc(var(--md-dur) * 0.50), calc(var(--md-dur) * 0.50);
 }
 
@@ -142,8 +143,7 @@
   border-radius: 50%;
   background: #0F172A;
   pointer-events: none;
-  /* raw: transform 220ms cubic-bezier(.22,1,.36,1) -> --duration-slow (220ms,
-     byte-identical) / --ease-motion-sweep-2236. */
+  /* transform -> --duration-slow (byte-identical) / --ease-motion-sweep-2236. */
   transition: transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236),
     filter calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);
 }
@@ -163,26 +163,20 @@
   background: #0F172A;
   border-radius: 50%;
   box-shadow: 0 0 0 0 rgba(15,23,42,0);
-  /* raw:
-       width  var(--md-dur) cubic-bezier(.55, 1.35, .35, 1),
-       height var(--md-dur) cubic-bezier(.55, 1.35, .35, 1),
-       top    var(--md-dur) cubic-bezier(.55, 1.35, .35, 1),
-       border-radius var(--md-dur) cubic-bezier(.55, 1.35, .35, 1),
-       background-color 220ms ease 0ms,
-       box-shadow 220ms ease 0ms
-     --md-dur stays the raw local custom property (per-instance speed, set
-     via [data-speed] below), unchanged. cubic-bezier(.55,1.35,.35,1) is the
-     overshoot/expand curve -> --ease-spring-open (byte-identical, "ModelSelector.css
-     .ms-shell.open expand"). NOT the old --ease-goo-collapse, which is a
-     different curve, cubic-bezier(.55,.35,.85,.3) — do not conflate the two in
-     a freeze audit. 220ms -> --duration-slow; bare `ease` -> --ease-fade. */
+  /* --md-dur stays the raw local custom property (per-instance speed, set
+     via [data-speed] below), unchanged. The overshoot/expand curve ->
+     --ease-spring-open (byte-identical, "ModelSelector.css .ms-shell.open
+     expand"). NOT the old --ease-goo-collapse, which is a different curve
+     (a different overshoot curve) — do not conflate the two in a freeze
+     audit. The background-color leg moves to the standard hover-fade pair
+     per the no-exceptions ruling (box-shadow keeps its own tier). */
   transition:
     width  var(--md-dur) var(--ease-spring-open),
     height var(--md-dur) var(--ease-spring-open),
     top    var(--md-dur) var(--ease-spring-open),
     border-radius var(--md-dur) var(--ease-spring-open),
-    background-color calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade) 0ms,
-    box-shadow calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade) 0ms;
+    background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
+    box-shadow calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade) 0ms /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */;
 }
 .md-root.open .md-panel-bg {
   width: 340px;
@@ -218,14 +212,14 @@
   color: #fff;
   display: grid; place-items: center;
   z-index: 4;
-  /* raw: transform 220ms cubic-bezier(.22,1,.36,1) -> --duration-slow / --ease-motion-sweep-2236. */
+  /* transform -> --duration-slow / --ease-motion-sweep-2236. */
   transition: transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);
   -webkit-tap-highlight-color: transparent;
 }
 @media (hover: hover) and (pointer: fine) {
   .md-trigger:hover { transform: translateX(-50%); }
 }
-/* Press snaps (120ms), release rides the 220ms base leg back out — asymmetric
+/* Press snaps fast, release rides the base leg back out — asymmetric
    press/release. Duration-only override; the base transition list is untouched. */
 .md-trigger:active {
   transform: translateX(-50%) scale(0.94);
@@ -238,8 +232,8 @@
 .md-trigger .material-symbols-outlined {
   font-size: 25px;
   font-variation-settings: '"opsz" 24, "wght" 900, "FILL" 1';
-  /* raw: transform 360ms cubic-bezier(.22,1,.36,1) -> --duration-sweep (360ms,
-     byte-identical, "ApplyButton background-color sweep") / --ease-motion-sweep-2236. */
+  /* transform -> --duration-sweep (byte-identical, "ApplyButton background-color
+     sweep") / --ease-motion-sweep-2236. */
   transition: transform calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);
   text-shadow: 0 1px 2px rgba(0,0,0,0.25);
 }
@@ -278,7 +272,7 @@
     linear-gradient(90deg, rgba(255,255,255,0.14) 1px, transparent 1px);
   background-size: 6px 6px;
   font-variant-numeric: tabular-nums;
-  /* raw: transform 220ms cubic-bezier(.22,1,.36,1) -> --duration-slow / --ease-motion-sweep-2236. */
+  /* transform -> --duration-slow / --ease-motion-sweep-2236. */
   transition: transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);
 }
 .md-root.open .md-trigger-badge { transform: scale(0); }
@@ -297,7 +291,7 @@
   z-index: 5;
   pointer-events: none;
   opacity: 0;
-  /* raw: opacity 180ms ease -> --duration-180 (byte-identical) / --ease-fade. */
+  /* opacity -> --duration-180 (byte-identical) / --ease-fade. */
   transition: opacity calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .md-root.open .md-panel-content {
@@ -371,15 +365,13 @@
   cursor: pointer;
   opacity: 0;
   transform: translateY(8px) scale(0.985);
-  /* raw: opacity 280ms ease, transform 280ms cubic-bezier(.22,1,.36,1), background 160ms
-     280ms -> --duration-280; bare `ease` -> --ease-fade; cubic-bezier(.22,1,.36,1) ->
-     --ease-motion-sweep-2236; 160ms (no timing-function specified in the raw, so
-     none is added here either) -> --duration-base (byte-identical, "most common
-     transform/box-shadow transition duration in Buttons.css"). */
+  /* opacity -> --duration-280 / --ease-fade; transform -> --duration-280 /
+     --ease-motion-sweep-2236; background is a hover fill, moved to the
+     standard hover-fade pair per the no-exceptions ruling. */
   transition:
     opacity calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236),
-    background calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade);
+    background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .md-root.open .md-item { opacity: 1; transform: translateY(0) scale(1); }
 .md-root.open .md-item:nth-child(1) { transition-delay: calc(var(--md-dur) * 0.62), calc(var(--md-dur) * 0.62), 0s; }
@@ -391,7 +383,7 @@
 .md-root:not(.open) .md-item:nth-child(3) { transition-delay: calc(var(--md-dur) * 0.10), calc(var(--md-dur) * 0.10), 0s; }
 .md-root:not(.open) .md-item:nth-child(4) { transition-delay: 0s, 0s, 0s; }
 .md-item:hover {
-  background: color-mix(in srgb, var(--fg1) 7%, transparent);
+  background: var(--fp-hover);
 }
 .md-item:focus-visible {
   outline: 2px solid var(--brand-primary-500);
@@ -503,9 +495,10 @@
     linear-gradient(to right,  rgba(255,255,255,0.07) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255,255,255,0.07) 1px, transparent 1px);
   background-size: 14px 14px;
-  /* raw: color 160ms, background 160ms, border-color 160ms, box-shadow 160ms
-     (no timing-function specified in the raw) -> --duration-base (byte-identical). */
-  transition: color calc(var(--duration-base) * var(--anim-mult, 1)), background calc(var(--duration-base) * var(--anim-mult, 1)), border-color calc(var(--duration-base) * var(--anim-mult, 1)), box-shadow calc(var(--duration-base) * var(--anim-mult, 1));
+  /* color/border-color/box-shadow -> --duration-base (byte-identical, no
+     timing-function specified originally). background is a hover fill, moved
+     to the standard hover-fade pair per the no-exceptions ruling. */
+  transition: color calc(var(--duration-base) * var(--anim-mult, 1)), background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), border-color calc(var(--duration-base) * var(--anim-mult, 1)), box-shadow calc(var(--duration-base) * var(--anim-mult, 1));
   letter-spacing: -0.005em;
   box-shadow: 0 2px 6px -2px color-mix(in srgb, var(--brand-primary-500) 55%, transparent), inset 0 1px 0 rgba(255,255,255,0.28);
   text-align: left;
@@ -537,7 +530,7 @@
 }
 .md-footer .md-mark-read:hover {
   color: var(--fg1);
-  background: color-mix(in srgb, var(--fg1) 7%, transparent);
+  background: var(--fp-hover);
   border-color: color-mix(in srgb, var(--fg1) 18%, transparent);
   box-shadow: none;
 }
@@ -559,7 +552,7 @@
 @media (prefers-reduced-motion: reduce) {
   .md-panel-bg, .md-trigger, .md-item, .md-panel-content,
   .md-trigger .material-symbols-outlined {
-    transition-duration: 1ms !important;
+    transition-duration: 1ms !important; /* motion-sweep: kept, prefers-reduced-motion !important near-zero override, intentionally literal (house pattern, see frontend-motion-contract.md) */
   }
 }
 

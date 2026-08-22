@@ -19,7 +19,7 @@ import { iconClass } from '../../../lib/iconClass'
 import { useCardRef, useTimerRef, useOverlayRef } from './connect-modal-hook'
 import { useSquircle } from '../../../lib/hooks/use-squircle'
 import { useProximityGroup } from '@/lib/hooks'
-import InlineEdit from '../inline-edit/InlineEdit'
+import { ConnectModalMethods } from './ConnectModalMethods'
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './ConnectModal.css'
@@ -59,8 +59,10 @@ function AcmeMark() {
   )
 }
 
+const PETAL_COLORS = { a: '#36C5F0', b: '#2EB67D', c: '#ECB22E', d: '#E01E5A' }
+
 function PetalMark() {
-  const c = { a: '#36C5F0', b: '#2EB67D', c: '#ECB22E', d: '#E01E5A' }
+  const c = PETAL_COLORS
   return (
     <svg viewBox="0 0 48 48" aria-hidden="true">
       {/* bottom-left blue */}
@@ -79,7 +81,7 @@ function PetalMark() {
   )
 }
 
-function CheckPath() {
+export function CheckPath() {
   return (
     <svg viewBox="0 0 16 16" aria-hidden="true">
       <path d="M3.5 8.5l3 3 6-7" />
@@ -305,115 +307,21 @@ export default function ConnectModal({
             and get started today.
           </p>
 
-          <div className="cm-methods" role="radiogroup" aria-label="Connection method">
-            {methods.map((m) => (
-              // radio group members: button + role="radio" is the correct ARIA pattern
-              // eslint-disable-next-line jsx-a11y/prefer-tag-over-role
-              <button
-                type="button"
-                key={m.id}
-                className="cm-method"
-                role="radio"
-                aria-checked={method === m.id}
-                aria-label={m.label}
-                onClick={() => selectMethod(m.id)}
-              >
-                <span
-                  className="cm-icontile"
-                  data-active={method === m.id && valid ? 'true' : undefined}
-                  aria-hidden="true"
-                >
-                  <span className={iconClass(m.icon)}>{m.icon}</span>
-                </span>
-                <span className="cm-mbody">
-                  <span className="cm-mhead">
-                    <span className="cm-mname">{m.label}</span>
-                    {m.recommended && (
-                      <span className="cm-badge-rec">
-                        <span className={iconClass('verified')}>verified</span>
-                        Recommended
-                      </span>
-                    )}
-                  </span>
-                  <span className="cm-mdesc">{m.desc}</span>
-                </span>
-                <span className="cm-radio" aria-hidden="true">
-                  <span className="cm-ring" />
-                  <span className="cm-fill">
-                    <CheckPath />
-                  </span>
-                </span>
-              </button>
-            ))}
-
-            {/* expanding API-key panel */}
-            <div className="cm-expand" data-open={needsKey ? 'true' : undefined}>
-              <div className="cm-expand-inner">
-                <div className="cm-keypad">
-                  <label className="cm-keylabel">
-                    Enter your {target.name} API key
-                  </label>
-                  {/*
-                    cm-field composes the shared InlineEdit (design-system/inline-edit/InlineEdit.tsx)
-                    with the lock icon and paste/clear button either side. InlineEdit is imported
-                    unmodified: click-to-edit, Enter-to-commit, Escape/click-outside-to-cancel are all
-                    its own normal behavior. Its edit/save pencil button and "saved" toast are hidden
-                    via cm-keypad-scoped CSS -- Bora's ask is no separate edit button here.
-                  */}
-                  <div className="cm-field" data-filled={token.length > 0 ? 'true' : undefined}>
-                    <span
-                      className="cm-lock"
-                      data-secure={secure ? 'true' : undefined}
-                      data-filled={token.length > 0 ? 'true' : undefined}
-                      aria-hidden="true"
-                    >
-                      <span className={iconClass(token.length > 0 ? 'lock' : 'lock_open_right')}>
-                        {token.length > 0 ? 'lock' : 'lock_open_right'}
-                      </span>
-                    </span>
-                    <InlineEdit
-                      fieldLabel={`${target.name} API key`}
-                      prefix={false}
-                      value={token || sampleKey}
-                      onCommit={commitKey}
-                    />
-
-                    {token.length > 0 ? (
-                      <button
-                        type="button"
-                        className={`cm-paste${pasted ? ' cm-pasteflash' : ''}`}
-                        data-proximity
-                        data-variant="clear"
-                        aria-label="Remove key"
-                        onMouseDown={(e) => e.stopPropagation()}
-                        onClick={clearToken}
-                      >
-                        <span className={iconClass(pasted ? 'check' : 'close')}>
-                          {pasted ? 'check' : 'close'}
-                        </span>
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        className="cm-paste"
-                        data-proximity
-                        aria-label="Paste from clipboard"
-                        data-variant="paste"
-                        onMouseDown={(e) => e.stopPropagation()}
-                        onClick={handlePaste}
-                      >
-                        <span className={iconClass('content_paste')}>content_paste</span>
-                        <span aria-hidden="true">Paste</span>
-                        <span className="cm-tip" role="tooltip">
-                          Paste from clipboard
-                        </span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <ConnectModalMethods
+            methods={methods}
+            method={method}
+            valid={valid}
+            selectMethod={selectMethod}
+            needsKey={needsKey}
+            token={token}
+            sampleKey={sampleKey}
+            secure={secure}
+            pasted={pasted}
+            targetName={target.name}
+            commitKey={commitKey}
+            clearToken={clearToken}
+            handlePaste={handlePaste}
+          />
 
           <div className="cm-footer">
             <button
@@ -432,7 +340,7 @@ export default function ConnectModal({
               <span className={iconClass('info')} aria-hidden="true">info</span>
               <span>
                 By clicking Continue, you agree to the{' '}
-                <a href="#" onClick={(e) => e.preventDefault()}>
+                <a href="https://www.deha.io/privacy" target="_blank" rel="noopener noreferrer">
                   Privacy Policy
                 </a>
               </span>

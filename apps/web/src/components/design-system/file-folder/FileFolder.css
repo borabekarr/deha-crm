@@ -30,7 +30,7 @@ html.dark .card:has(.folder) { background:transparent !important; background-ima
   color:var(--fg3); background:#FFFFFF; border:1px solid var(--border-hairline);
   padding:6px 12px; border-radius:9999px; cursor:pointer;
   box-shadow:0 2px 6px rgba(17,17,17,0.07), inset 0 1px 0 rgba(255,255,255,0.9);
-  transition:transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-out), color calc(var(--duration-150) * var(--anim-mult, 1)), background calc(var(--duration-150) * var(--anim-mult, 1));
+  transition:transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-out), color calc(var(--duration-150) * var(--anim-mult, 1)), background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .ff-replay:hover { background:var(--fp-hover); color:var(--fg1); }
 .ff-replay:active { transform:scale(0.95); }
@@ -164,10 +164,9 @@ html.dark .card:has(.folder) { background:transparent !important; background-ima
   color:var(--ff-sub); display:flex; align-items:center; gap:4px;
   padding:6px; margin:0; border:none; border-radius:9999px; background:transparent;
   cursor:pointer; -webkit-tap-highlight-color:transparent;
-  transition:background calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-fade), color calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
+  transition:background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), color calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
-.ff-dots:hover { background:rgba(17,17,17,0.06); color:var(--ff-title); }
-html.dark .ff-dots:hover { background:rgba(255,255,255,0.08); }
+.ff-dots:hover { background:var(--fp-hover); color:var(--ff-title); }
 .ff-dots:active { transform:scale(var(--press-chip)); }
 .ff-dots.open { background:rgba(17,17,17,0.08); color:var(--ff-title); }
 html.dark .ff-dots.open { background:rgba(255,255,255,0.10); }
@@ -194,7 +193,7 @@ html.dark .ff-menu {
   padding:8px 10px; margin:0; border:none; border-radius:9px; background:transparent;
   font-family:'Montserrat'; font-size:12.5px; font-weight:700; letter-spacing:-0.005em;
   color:var(--ff-title); text-align:left; cursor:pointer;
-  transition:background calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-fade);
+  transition:background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
 /* Option hover converged on the global option pattern (fab/Fab.css .fab-item). */
 .ff-menu-item:hover { background:var(--fp-hover); }
@@ -204,7 +203,7 @@ html.dark .ff-menu-item { color:#F5F5F5; }
    mapping doesn't snap, mirroring .ff-file[data-proximity]. */
 .ff-menu-item[data-proximity] {
   transition:
-    background calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-fade),
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
@@ -326,7 +325,7 @@ html.dark .ff-pop {
 .ff-pop-close {
   flex:none; width:26px; height:26px; border-radius:9999px; border:none; cursor:pointer;
   display:grid; place-items:center; background:var(--ff-row); color:var(--ff-pop-fg3);
-  transition:background calc(var(--duration-140) * var(--anim-mult, 1)), color calc(var(--duration-140) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1));
+  transition:background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), color calc(var(--duration-140) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1));
 }
 .ff-pop-close:hover { background:var(--ff-row-hover); color:var(--ff-pop-fg); }
 .ff-pop-close:active { transform:scale(var(--press-chip)); }
@@ -360,7 +359,7 @@ html.dark .ff-pop {
   transition:background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade) 0ms; /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
 }
 /* Option hover converged on the global option pattern (fab/Fab.css .fab-item):
-   background var(--fp-hover) fill, zero-delay ~150ms transition, press scale(0.97). */
+   background var(--fp-hover) fill, zero-delay fast (--duration-fast) transition, press scale(0.97). */
 .ff-file:hover { background:var(--fp-hover); }
 .ff-file:active { transform:scale(var(--press-control)); }
 /* Proximity: own transition beats hover-tokens.css's [data-proximity]x3

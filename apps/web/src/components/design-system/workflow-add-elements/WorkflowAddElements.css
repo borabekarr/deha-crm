@@ -750,7 +750,7 @@ html.dark .wae-search-cat-header {
    global [data-panel-state] enter/exit keyframes (styles/motion-tokens.css),
    mirroring MotionTabs.css's .mt-panel[data-panel-state] consumption — the
    translateX/opacity animation itself is the shared one; this block only
-   scopes layout/positioning plus the component's ~180ms --ease-out retune
+   scopes layout/positioning plus the component's --duration-180 --ease-out retune
    (locked decision, same override motion-tabs applies over the keyframes'
    default --duration-fast). The outgoing tab (.wae-ae-list-exit, a
    non-interactive ghost layer) and the incoming tab (.wae-ae-list-enter,
@@ -758,6 +758,10 @@ html.dark .wae-search-cat-header {
    as a single sequenced swap, not two unrelated fades. */
 .wae-ae-list-wrap {
   position: relative;
+  /* Local override of the shared --panel-slide-exit-dur family alias
+     (motion-tokens.css): this panel opens on --duration-180, one tier
+     below is --duration-150 (faster-exits rule). */
+  --panel-slide-exit-dur: var(--duration-150);
 }
 
 .wae-ae-list-exit {
@@ -787,9 +791,15 @@ html.dark .wae-search-cat-header {
 .wae-ae-list-wrap [data-panel-state="exiting-left"]   { animation-name: wae-list-slide-exit-right; }
 .wae-ae-list-wrap [data-panel-state="exiting-right"]  { animation-name: wae-list-slide-exit-left; }
 
-.wae-ae-list-enter[data-panel-state],
-.wae-ae-list-exit[data-panel-state] {
+.wae-ae-list-enter[data-panel-state] {
   animation-duration: calc(var(--duration-180) * var(--anim-mult, 1));
+  animation-timing-function: var(--ease-pill-switch);
+}
+
+/* Exit one tier faster than enter (faster-exits family rule), on the
+   --panel-slide-exit-dur local override set above. */
+.wae-ae-list-exit[data-panel-state] {
+  animation-duration: calc(var(--panel-slide-exit-dur) * var(--anim-mult, 1));
   animation-timing-function: var(--ease-pill-switch);
 }
 
@@ -819,11 +829,12 @@ html.dark .wae-search-cat-header {
   animation: wae-search-morph-in calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-out) both;
 }
 
-/* Exit is the enter animation played backwards: same keyframe, same duration
-   token, same easing. `reverse` guarantees the exit exactly mirrors the enter
-   instead of drifting via a hand-duplicated keyframe. */
+/* Exit is the enter animation played backwards: same keyframe, same easing.
+   `reverse` guarantees the exit exactly mirrors the enter transform/opacity
+   path; the duration drops one tier from --duration-320 to --duration-280
+   (faster-exits rule). */
 .wae-search-leaving {
-  animation: wae-search-morph-in calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-out) reverse both;
+  animation: wae-search-morph-in calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out) reverse both;
   pointer-events: none;
 }
 
@@ -870,7 +881,7 @@ html.dark .wae-search-cat-header {
 }
 
 .wae-ae-search-clear:hover {
-  background: #A1A1A1;
+  background: var(--fp-hover);
 }
 
 .wae-ae-search-clear:hover .material-icons {
@@ -886,7 +897,7 @@ html.dark .wae-ae-search-clear .material-icons {
 }
 
 html.dark .wae-ae-search-clear:hover {
-  background: #4A4A4A;
+  background: var(--fp-hover);
 }
 
 /* ── Item 4: scrollable region + progressive-blur edge fade on .wae-search-cols ──

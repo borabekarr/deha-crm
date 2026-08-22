@@ -73,8 +73,8 @@ const FEED: FeedRow[] = [
 function Actions() {
   return (
     <div className="actions">
-      <button className="icon-btn" aria-label="Search"><span className="material-icons">search</span></button>
-      <button className="icon-btn accent" aria-label="Add deal"><span className="material-icons">add</span></button>
+      <button type="button" className="icon-btn" aria-label="Search"><span className="material-icons">search</span></button>
+      <button type="button" className="icon-btn accent" aria-label="Add deal"><span className="material-icons">add</span></button>
     </div>
   )
 }

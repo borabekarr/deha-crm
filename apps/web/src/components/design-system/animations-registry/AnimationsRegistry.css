@@ -52,3 +52,42 @@
   color: var(--foreground, #111827);
 }
 
+.areg-family-rules {
+  padding: 20px 18px 24px;
+  border-top: 1px solid var(--border, #e5e7eb);
+}
+
+.areg-family-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.areg-family-intro {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted-foreground, #6b7280);
+  margin-bottom: 12px;
+  max-width: 720px;
+}
+
+.areg-family-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.areg-family-table th,
+.areg-family-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 6px 10px 6px 0;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+}
+
+.areg-family-table th {
+  color: var(--muted-foreground, #6b7280);
+  font-weight: 600;
+}
+
