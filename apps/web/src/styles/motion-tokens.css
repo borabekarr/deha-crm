@@ -41,6 +41,8 @@
    * removed as part of this migration.
    */
   --ease-spring: cubic-bezier(.34, 1.56, .64, 1); /* overshoot curve retained only for legacy references; new work uses the no-bounce vocabulary */
+  /* Approved overshoot: sanctioned ceiling is 1.32, set by Bora on
+     2026-08-23 (feedback/2026-08-23-motion-hover-overshoot.md F4). */
   --ease-out: cubic-bezier(.22, 1, .36, 1);
   --ease-in-out: cubic-bezier(0.42, 0, 0.58, 1); /* standard ease-in-out; no literal instance existed in Buttons.css to extract from -- added to complete the easing set requested for this step, currently unused by Buttons.css */
   --ease-press-calm: cubic-bezier(0.23, 1, 0.32, 1); /* Apple-calm press curve (plan: motion-debt-fixes step 1) -- ease-out family, no overshoot; replaces --ease-spring on press/click transforms across .btn-green/.btn-cta/[data-proximity]. Duration reuses --duration-base (160ms), already in the house state-change band. */
@@ -52,8 +54,9 @@
    * curve byte-for-byte, so no visual change accompanies the migration. */
   --ease-standard:    cubic-bezier(.4, 0, .2, 1);    /* Fab.css .fab-plus transform */
   --ease-accel:       cubic-bezier(.4, 0, 1, 1);     /* Toast.css exit anims; InlineEdit.css ieIcOut / .ie-act.is-confirming */
+  /* Approved overshoot: sanctioned ceiling is 1.32, set by Bora on
+     2026-08-23 (feedback/2026-08-23-motion-hover-overshoot.md F4). */
   --ease-spring-soft: cubic-bezier(.32, 1.32, .5, 1); /* Fab.css .fab-menu-hd */
-  --ease-spring-soft-2: cubic-bezier(.34, 1.4, .5, 1); /* InlineEdit.css ieIcIn */
 
   /* Step-7 motion-token migration (plan: fix-all-debts) -- extracted verbatim
    * from pre-existing literal curves in TaskBoard.css / TaskBoard.tsx flagged
@@ -94,19 +97,22 @@
      extracted verbatim from a pre-existing literal curve in FileFolder.css
      flagged by motion-token-gate.sh; no existing token byte-matched it. */
   --ease-spring-strong: cubic-bezier(.34, 1.5, .64, 1); /* FileFolder.css .ff-pop-outer/.folder enter transform */
+  /* Approved overshoot: sanctioned ceiling is 1.32, set by Bora on
+     2026-08-23 (feedback/2026-08-23-motion-hover-overshoot.md F4). */
   --ease-spring-pop:    cubic-bezier(.34, 1.2, .5,  1); /* Calendar.css .cal-cell.selected calSelPop keyframe */
 
   /* Step-1 motion-token migration (plan: reveal-shell-debts) -- extracted
      verbatim from pre-existing literal curves in SprintPlannerCore.css; no
      existing token byte-matched these curves, so they are added here. */
+  /* Approved overshoot: sanctioned ceiling is 1.32, set by Bora on
+     2026-08-23 (feedback/2026-08-23-motion-hover-overshoot.md F4). */
   --ease-toast-pop:   cubic-bezier(.34, 1.16, .64, 1); /* SprintPlannerCore.css toastMorphIn */
-  --ease-spring-snap: cubic-bezier(.34, 1.56, .64, 1); /* SprintPlannerCore.css proximity transform transition */
 
   /* Step-1 motion-token migration (plan: ds-motion-parity) -- extracted
      verbatim from a pre-existing literal curve in MotionTabs.css .mt-ic
      transform transition; no existing token byte-matched it (closest was
-     --ease-spring-snap, whose last control point is .64 vs .5 here) --
-     softer-settle sibling of --ease-spring-snap. */
+     a curve of cubic-bezier(.34, 1.56, .64, 1), whose last control point is
+     .64 vs .5 here) -- softer-settle sibling of that curve. */
   --ease-spring-snap-soft: cubic-bezier(.34, 1.56, .5, 1); /* MotionTabs.css .mt-ic transform transition */
 
   /* Step-2 motion-gate-pilot-fix migration (plan: motion-gate-pilot-fix) --

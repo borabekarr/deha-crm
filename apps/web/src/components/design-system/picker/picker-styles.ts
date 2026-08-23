@@ -16,6 +16,14 @@ import type { CSSProperties } from 'react'
 // difference brings both to 16px without touching the top gap.
 const OPEN_W = 328
 const OPEN_H = 453
+// F7: closed+confirmed pill width. Date label (`${days[di]} ${months[mi].slice(0,3)}`,
+// e.g. "22 Aug") is at most 6 chars; time label (`${hours[hi]}:${minutes[ni]}`, e.g.
+// "14:30") is always 5 -- both bounded by construction, so the box never needs to grow
+// to fit them. A live probe measured the "22 Aug" badge at scrollWidth 31px against
+// clientWidth 31px, confirming no clipping. Paired with the 58px height and 9999px
+// radius, 112 reads as an elongated pill (not a fixed-58px circle). Unrelated to the
+// '112px' wheel-column width literal used elsewhere in Picker.tsx.
+const CONFIRMED_W = 112
 
 const t = (ms: number) => `calc(${ms}ms * var(--anim-mult, 1))`
 
@@ -29,15 +37,17 @@ export const shellStyle = (open: boolean): CSSProperties => ({
 })
 
 // FAB-style morph styles (mirrors _fab.css timings/beziers)
-export const boxStyle = (open: boolean): CSSProperties => {
+// F7: `confirmed` (closed state only) widens the circle into an elongated
+// pill -- badge-event's shape, per pills/Pills.css -- instead of clipping
+// the label into a fixed 58px circle. Width is the only new axis; it rides
+// the same width transition leg the open/close morph already declares
+// below, so the confirm reveal and this widen stay one clock, not two.
+export const boxStyle = (open: boolean, confirmed = false): CSSProperties => {
   const common = `width ${t(500)} var(--ease-spring-pop), height ${t(500)} var(--ease-spring-pop), border-radius ${t(500)} var(--ease-standard), background-color ${t(300)} var(--ease-fade), border-color ${t(300)} var(--ease-fade), box-shadow ${t(300)} var(--ease-fade), transform ${t(120)} var(--ease-standard)`
   return {
     position: 'relative', overflow: 'hidden', boxSizing: 'border-box',
     cursor: open ? 'default' : 'pointer',
-    // F10: the confirmed pill keeps the SAME footprint as the unconfirmed
-    // 58px button (no auto/padding growth) -- the glyph row inside morphs,
-    // the box itself never resizes on confirm.
-    width: open ? `${OPEN_W}px` : '58px',
+    width: open ? `${OPEN_W}px` : confirmed ? `${CONFIRMED_W}px` : '58px',
     height: open ? `${OPEN_H}px` : '58px',
     borderRadius: open ? 'var(--card-radius)' : '9999px',
     backgroundColor: open ? 'var(--card-bg)' : '#10B981',
@@ -62,14 +72,28 @@ export const glyphStyle = (open: boolean): CSSProperties => ({
   transition: `opacity ${t(180)} var(--ease-fade), transform ${t(280)} var(--ease-standard)`,
 })
 
+// F6/F8: the face used to fade/slide in on its own 500ms transition while
+// `.pk-box` morphed its width/height on a separate 500ms transition -- two
+// clocks that could visibly drift, reading as the card opening empty and
+// then filling. Fixed by collapsing to one timing source: on open the face
+// is drawn at its final, fixed 328x453 size and full opacity from the very
+// first frame (no fade, no transform, no transition of its own) and is
+// simply revealed by `.pk-box`'s own `overflow: hidden` as the box's
+// width/height animate (boxStyle's single spring-pop transition). Closing
+// mirrors that instead of blanking early: the face stays fully opaque for
+// the box's entire collapse and only disappears once the box has actually
+// finished shrinking, via a transition-delay equal to the box's own
+// width/height duration (`t(500)`, the same literal boxStyle() uses) with a
+// zero-duration opacity leg -- an instant flip timed off the box's clock,
+// not a second independent fade animation. `pointerEvents` still flips
+// immediately since it isn't a visual leg.
 export const contentStyle = (open: boolean): CSSProperties => ({
   position: 'absolute', top: '0', left: '0',
   width: `${OPEN_W}px`, height: `${OPEN_H}px`, boxSizing: 'border-box',
   padding: 'var(--pad-card)', display: 'flex', flexDirection: 'column',
   opacity: open ? 1 : 0,
-  transform: open ? 'none' : 'translateY(12px)',
   pointerEvents: open ? 'auto' : 'none',
-  transition: `opacity ${t(500)} var(--ease-spring-pop), transform ${t(500)} var(--ease-spring-pop)`,
+  transition: open ? 'none' : `opacity ${t(0)} var(--ease-standard) ${t(500)}`,
 })
 
 export const closeStyle = (open: boolean): CSSProperties => ({

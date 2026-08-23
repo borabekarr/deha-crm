@@ -510,7 +510,7 @@
 .sd-buy[data-proximity] {
   transition:
     background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
-    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring-snap),
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-toast-pop),
     box-shadow calc(var(--duration-200) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;

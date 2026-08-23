@@ -17,7 +17,6 @@ import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/colors_and_type.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './Picker.css'
-import { VariantPicker } from './VariantPicker'
 import { PickerFace } from './PickerFace'
 import { usePickerWheelEngine, type WheelName } from './picker-wheel-engine'
 
@@ -149,15 +148,7 @@ export interface PickerProps {
   startOpen?: boolean
 }
 
-// ds-review-inputs step 4: prototype variant directions. `main` is the Step 3
-// result verbatim; `glass` and `ink` are pure still-treatment deltas in
-// variants.css (see the header there). The wheel engine below — rAF goal
-// channel, 140ms idle threshold, SNAP_DUR settle, reduced-motion
-// short-circuit, Today/Now jump — is shared by all three, unmodified.
-const VARIANTS = ['main', 'glass', 'ink'] as const
-type VariantId = (typeof VARIANTS)[number]
-
-function PickerBody({ minuteStep = '1', startOpen = false, variant = 'main' }: PickerProps & { variant?: VariantId }) {
+function PickerBody({ minuteStep = '1', startOpen = false }: PickerProps) {
   const rootRef = useRef<HTMLDivElement>(null)
 
   const [openDate, setOpenDate] = useState(!!startOpen)
@@ -275,7 +266,6 @@ function PickerBody({ minuteStep = '1', startOpen = false, variant = 'main' }: P
     <div
       ref={rootRef}
       className="pk-root"
-      data-variant={variant}
     >
       {/* ============ Day · Month picker (FAB-expanding) ============ */}
       <PickerFace
@@ -343,34 +333,10 @@ function PickerBody({ minuteStep = '1', startOpen = false, variant = 'main' }: P
 }
 
 /**
- * Prototype harness (ds-review-inputs step 4). The registry renders this
- * default export; the component itself is `PickerBody`, unchanged apart from
- * the `data-variant` attribute it now stamps on `.pk-root`.
- *
- * Keying the body on the variant id re-mounts it on every switch, so the wheel
- * engine re-seeds exactly as it does on a fresh load (PICKER.md: "switching
- * re-mounts the variant"). Selection persists across reload via `?v=N`.
- * No effect is added: the URL write happens in the click handler and the
- * initial read is a lazy useState initializer.
+ * The registry renders this default export; the component itself is
+ * `PickerBody`, unchanged. The prototype variant switcher (ds-review-inputs
+ * step 4) has been removed per F9: only the main look ships.
  */
 export default function Picker(props: PickerProps) {
-  const [index, setIndex] = useState(() => {
-    if (typeof window === 'undefined') return 0
-    const raw = Number.parseInt(new URLSearchParams(window.location.search).get('v') ?? '', 10)
-    return raw >= 1 && raw <= VARIANTS.length ? raw - 1 : 0
-  })
-
-  const select = (i: number) => {
-    setIndex(i)
-    const url = new URL(window.location.href)
-    url.searchParams.set('v', String(i + 1))
-    window.history.replaceState(null, '', url)
-  }
-
-  return (
-    <>
-      <PickerBody key={VARIANTS[index]} variant={VARIANTS[index]} {...props} />
-      <VariantPicker labels={VARIANTS} index={index} onSelect={select} />
-    </>
-  )
+  return <PickerBody {...props} />
 }

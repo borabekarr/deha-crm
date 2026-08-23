@@ -186,7 +186,7 @@ export function playBars(barsEl: HTMLElement, _sweepEl: HTMLElement): void {
 
     // Phase 2: spring this bar back to full height
     setTimeout(() => {
-      bars[i].style.transition = `transform ${springDur}ms var(--ease-spring-snap), opacity ${Math.round(springDur * 0.5)}ms ease-out`
+      bars[i].style.transition = `transform ${springDur}ms var(--ease-toast-pop), opacity ${Math.round(springDur * 0.5)}ms ease-out`
       bars[i].style.transform = 'scaleY(1)'
       bars[i].style.opacity = '1'
     }, startDelay + squashDur)

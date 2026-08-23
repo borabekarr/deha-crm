@@ -63,7 +63,7 @@ export function PickerFace({
       <div
         className="pk-box"
         data-open={open ? 'true' : 'false'}
-        style={boxStyle(open)}
+        style={boxStyle(open, !!badgeLabel)}
         role="presentation"
         onClick={onBoxClick}
       >

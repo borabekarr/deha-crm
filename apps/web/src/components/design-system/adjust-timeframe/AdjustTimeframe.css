@@ -120,8 +120,8 @@ html.dark .tf-card:not([data-squircle="on"]) {
 .tf-range .tf-seg.end { color: var(--fg1); }
 /* tiny pop when the range text changes (own class — `seg`/`dash` collide with the
    global preview control styles in _controls.css that paint a pill background) */
-.tf-range .tf-seg { display: inline-block; background: none; padding: 0; border-radius: 0; transition: transform calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-spring-soft-2); }
-.tf-range.bump .tf-seg { animation: tfBump calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-spring-soft-2); }
+.tf-range .tf-seg { display: inline-block; background: none; padding: 0; border-radius: 0; transition: transform calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-spring-pop); }
+.tf-range.bump .tf-seg { animation: tfBump calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-spring-pop); }
 @keyframes tfBump { 0%{ transform: translateY(2px); opacity:.5; } 100%{ transform: translateY(0); opacity:1; } }
 
 /* ---- Item 2: segmented presets — mirrors .seg.accent pattern exactly ---- */
@@ -232,15 +232,41 @@ html.dark .tf-preset.active { color: #111111; }
 
 .tf-track {
   position: relative; flex: 1; min-width: 0;
-  height: 68px; overflow: hidden; cursor: pointer;
+  /* F3: track now holds only the ruler/monthtick/month-label/selection
+     content (occupies ~8-57px); the zoom pill used to overlap the month
+     row by sitting bottom:2 in this same box (68px) and moved to its own
+     .tf-zoom-row band below .tf-body instead. Height trimmed to the
+     content's own footprint + a little breathing room; this does not
+     move the ruler/monthtick/.tf-sel top offsets the centering comments
+     below depend on. */
+  height: 64px; cursor: pointer;
   touch-action: none;
 }
+/* F4 (third report, real fix): overflow:hidden used to live directly on
+   .tf-track, clipping EVERYTHING inside it including the handle grips --
+   measured live, .tf-handle.end's right edge landed a fraction of a pixel
+   past the clip edge and got cut. Two earlier attempts (see .tf-handle.end
+   and .tf-handle.end::before comments below) nudged the handle/grip offset
+   instead and both failed, because the box can legitimately sit flush
+   against a scroll-clamped edge where even sub-pixel rounding gets clipped.
+   Real fix: the clip moves off .tf-track onto .tf-track-clip below, which
+   occupies the identical box (inset:0 inside the same positioned ancestor,
+   so ruler/month content clips at exactly the same edge as before -- no
+   new spill past the card) but contains only ruler/monthtick/month-label
+   content. The handles live in a second, sibling .tf-strip (.tf-strip-sel)
+   that shares .tf-track's now-unclipped box, so no clip boundary can ever
+   cut a grip again. */
+.tf-track-clip {
+  position: absolute; inset: 0;
+  overflow: hidden;
+}
 
-/* F2b: zoom pill — bottom-center under the ruler, mirrors .tf-presets'
-   pill vocabulary (light chip / dark chip, inset shadow, rounded-full). */
+/* F3: zoom pill now lives in its own row below .tf-body (see
+   .tf-zoom-row), not absolutely positioned inside .tf-track, so it can
+   never overlap the month labels regardless of zoom/scroll state.
+   Chrome unchanged — mirrors .tf-presets' pill vocabulary (light chip /
+   dark chip, inset shadow, rounded-full). */
 .tf-zoom-pill {
-  position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
-  z-index: 2;
   display: inline-flex; align-items: center; gap: 4px;
   background: #F5F5F5;
   border-radius: 9999px; padding: 2px 3px;
@@ -248,6 +274,18 @@ html.dark .tf-preset.active { color: #111111; }
   font-family: 'Montserrat', sans-serif;
 }
 html.dark .tf-zoom-pill { background: #0A0A0A; box-shadow: inset 0 2px 4px rgba(0,0,0,.4); }
+
+/* F3: own band beneath the pan/track/pan row — centered under the card
+   (pan buttons are equal-width either side of the track, so centering
+   under the full card reads as centered under the track too). Top
+   padding adds to .tf-body's own 14px bottom padding + the track's now-
+   spare ~7px, so the gap from the month row to the pill reads as
+   deliberate rather than crowded; bottom padding balances against
+   .tf-head's 14px top padding for even card-edge rhythm. */
+.tf-zoom-row {
+  display: flex; justify-content: center;
+  padding: var(--space-2, 8px) 14px var(--space-4, 16px);
+}
 
 .tf-zoom-btn {
   appearance: none; border: none; background: transparent; cursor: pointer;
@@ -271,6 +309,26 @@ html.dark .tf-zoom-btn { color: #A1A1A1; }
 html.dark .tf-zoom-pct { color: #A1A1A1; }
 .tf-strip { position: absolute; top: 0; left: 0; height: 100%; }
 .tf-strip[data-anim="true"] { transition: transform calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out); }
+/* F4 (challenge-round correction): an UNBOUNDED unclipped handle layer was
+   measured to be its own defect -- mid-pan-transition, .tf-handle.end's
+   box crosses x=[1045,1071], the "Pan right" button's own rect, painting
+   the grip over a live control. .tf-handle-clip reinstates a clip, sized
+   3px larger than .tf-track on each side: enough to clear the measured
+   1.55px sub-pixel overhang that caused the original report (see
+   .tf-track-clip above), with 1px of hard clearance still short of the
+   pan buttons -- .tf-body's flex `gap: 4px` (line 204) is a fixed layout
+   constant, not date-math-derived, so this margin holds at any zoom
+   level. .tf-strip-sel's own `left` is nudged +3px to cancel the
+   wrapper's -3px inset and land .tf-sel back on its original origin. */
+.tf-handle-clip {
+  position: absolute; inset: 0 -3px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.tf-strip.tf-strip-sel { left: 3px; }
+.tf-strip-sel { pointer-events: none; }
+.tf-strip-sel .tf-lens-hit,
+.tf-strip-sel .tf-handle { pointer-events: auto; }
 /* P4: promote the strip to its own compositor layer only while dragging, so
    its translateX doesn't force a repaint of the (formerly filtered, now
    box-shadowed) shell ancestor on every pointermove frame. */
@@ -371,8 +429,9 @@ html.dark .tf-daycount { text-shadow: none; }
    it. Centering (like .start) would leave 11px overhanging past the edge, which
    depended on EDGE_PAD headroom in .tf-track and could clip/leave only a sliver
    of the grip visible (the reported "grey stub"). Anchoring the box's own right
-   edge to 100% keeps it fully inside .tf-sel and guarantees a flush, unclipped
-   right edge regardless of zoom/scroll. */
+   edge to 100% keeps it fully inside .tf-sel, which is still correct and kept --
+   but this offset alone did NOT stop the clip (see .tf-track-clip above): the
+   real fix is that .tf-track no longer clips this handle at all. */
 .tf-handle.end { left: auto; right: 0; transform: translateY(-50%); }
 /* range input thumb: hide native thumb, use ::before pseudo for the bar */
 .tf-handle::-webkit-slider-thumb { -webkit-appearance: none; width: 0; height: 0; }
@@ -403,18 +462,18 @@ html.dark .tf-daycount { text-shadow: none; }
      blur/spread contact shadow so the accent color hugs the stick instead of
      escaping past the rounded boundary; elevation (dark drop shadow) unchanged. */
   box-shadow: 0 1px 3px rgba(17,17,17,.28), 0 1px 1px -0.5px color-mix(in srgb, var(--tf-accent) 55%, transparent), inset 0 1px 0 rgba(255,255,255,.4);
-  transition: height calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-spring-soft-2), width calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade), box-shadow calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade);
+  transition: height calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-spring-pop), width calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade), box-shadow calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade);
   pointer-events: none;
 }
 /* Grip stays centered on the box for .start, but the .end box is now
    right-anchored (not centered) on the true edge — so its grip needs its
    own offset to keep straddling that edge visually, matching .start's look.
-   F1 fix: the box's right edge sits flush against .tf-track's overflow:hidden
-   clip boundary when the range ends at "today" (flush-right scroll). A
-   negative right offset here pushes part of the grip past that clip, so it
-   gets hard-cut and appears to disappear beneath the track edge. Keeping the
-   grip fully inside the box (right: 0) removes the overhang so nothing is
-   ever clipped, at every scroll position. */
+   Keeping the grip fully inside the box (right: 0) is still correct and
+   kept, but this alone did not stop the clip: the handle box could still
+   sit flush against .tf-track's old overflow:hidden boundary and lose a
+   sub-pixel sliver to rounding. F4: the clip itself moved to
+   .tf-track-clip, which never contains this handle, so no offset here can
+   be clipped again regardless of scroll/zoom position. */
 .tf-handle.end::before { left: auto; right: 0; transform: none; }
 html.dark .tf-handle::before { border-color: rgba(0,0,0,.35); }
 .tf-handle:hover::before { height: 16px; width: 7px; }

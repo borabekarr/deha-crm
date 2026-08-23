@@ -19,7 +19,7 @@ export default function AdjustTimeframe() {
     scroll,
     ppd, stripW, maxScroll, minScroll, rulerW,
     selLeft, selWidth, days, startDate, endDate, endIsToday, todayIdx, totalDays,
-    activeId, gliderStyle,
+    activeId, gliderStyle, canZoomIn,
     panGroupRef, shellSquircleRef, cardSquircleRef, presetsCallbackRef, trackCallbackRef,
     handleBeginDrag, onTrackDown, applyPreset, stepZoom, panBy, handleShellKey, selectMonth, onHandleKey,
   } = useAdjustTimeframeController()
@@ -76,6 +76,7 @@ export default function AdjustTimeframe() {
           onHandleKey={onHandleKey}
           zoomLevel={zoomLevel}
           stepZoom={stepZoom}
+          canZoomIn={canZoomIn}
         />
       </div>
     </div>

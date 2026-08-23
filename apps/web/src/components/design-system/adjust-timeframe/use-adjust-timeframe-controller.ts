@@ -70,7 +70,31 @@ export function useAdjustTimeframeController() {
   const [pickedPreset, setPickedPreset] = useState<string | null>(defaultPreset.id)
 
   /* ── Derived display values ──────────────────────────────────────────── */
-  const ppd     = trackW > 0 ? trackW / clamp(daysVisible, MIN_DAYS, totalDays) : 6
+  /* Stop-if resolution (Bora, dated 2026-08-22): zoom-in must refuse a step
+     that would cut the selection off, rather than the reverse (never
+     achievable — see the plan's Step 3 record). `HANDLE_PAD` moved up from
+     below (still the single source `fitScroll` also uses) so the deepest
+     containable level can be derived before `ppd`. maxZoomIdx/effective*
+     recompute every render from live trackW/startIdx/endIdx, so widening the
+     selection via ANY path (drag, preset, month, keyboard) reacts the same
+     way a zoom click does — no effect, no extra dispatch on drag needed.
+     `zoomLevel` state keeps storing the level the user asked for;
+     `effectiveZoomLevel` is what's actually safe to render and is what the
+     pill/ppd/stepZoom all read, so narrowing the selection again silently
+     restores the requested level once it fits again. */
+  const HANDLE_PAD = 12
+  let maxZoomIdx = 0
+  for (let i = 0; i < ZOOM_LEVELS.length; i++) {
+    const candidatePpd = trackW > 0 ? trackW / levelToDays(ZOOM_LEVELS[i], totalDays) : 0
+    const fits = trackW === 0 || (endIdx - startIdx) * candidatePpd + 2 * HANDLE_PAD <= trackW
+    if (fits) maxZoomIdx = i
+    else break
+  }
+  const effectiveZoomIdx     = Math.min(ZOOM_LEVELS.indexOf(zoomLevel), maxZoomIdx)
+  const effectiveZoomLevel   = ZOOM_LEVELS[effectiveZoomIdx]
+  const effectiveDaysVisible = levelToDays(effectiveZoomLevel, totalDays)
+  const canZoomIn = effectiveZoomIdx < maxZoomIdx
+  const ppd     = trackW > 0 ? trackW / clamp(effectiveDaysVisible, MIN_DAYS, totalDays) : 6
   /* .tf-handle.start is a 22px hit box CENTERED on index 0's pixel position
      (left:0 + translate(-50%)), so it overhangs 11px past the strip's true
      left content edge -- EDGE_PAD reserves that as pure SCROLL headroom via
@@ -87,6 +111,15 @@ export function useAdjustTimeframeController() {
   /* Ruler now spans the strip's full (unpadded) width -- ticks stop exactly
      at todayIdx and the strip/ruler right edges coincide. */
   const rulerW = stripW
+  /* Render-time fit, every render, not only inside stepZoom: when the
+     selection outgrows the requested level (maxZoomIdx drops below
+     zoomIdx above) ppd widens on THIS render already, so the raw `scroll`
+     state -- last set by whatever drag/pan touched it -- may no longer
+     frame the now-wider selection. fitScroll (defined below; function
+     declarations hoist) nudges minimally off `scroll`, exactly like the
+     zoom-step fit pass, and is a no-op whenever the selection already
+     fits, so ordinary pan/drag rendering is unchanged. */
+  const viewScroll = fitScroll(scroll, startIdx, endIdx, ppd, trackW, minScroll, maxScroll)
 
   const selLeft  = startIdx * ppd
   const selWidth = (endIdx - startIdx) * ppd
@@ -205,10 +238,24 @@ export function useAdjustTimeframeController() {
       // Skipping same-width calls prevents React Strict Mode double-invocation
       // (and callback-ref re-runs on re-renders) from overwriting scroll state
       // with a stale upper bound.
+      /* Step 3 seam fix: StrictMode's synchronous double-invoke measures the
+         track before its final layout settles (e.g. 436px), so the flush-
+         right init above pins scroll to THAT width's maxScroll. When the
+         real ResizeObserver later reports the settled, wider width (438px),
+         a plain clamp leaves scroll short of the NEW maxScroll (it was
+         already inside the wider bound), so .tf-strip's right edge no
+         longer lines up with .tf-track's — a sub-pixel seam where .tf-sel
+         overhangs the track by the exact width delta. Re-anchor to the new
+         max only when scroll was already pinned to the old one, so a
+         flush-right view stays flush-right across the resize; any other
+         scroll position still just clamps as before. */
+      const oldMaxScroll = Math.max(0, totalDays * (lastTrackW.current / DEFAULT_DAYS_VISIBLE) - lastTrackW.current)
+      const newMaxScroll = Math.max(0, totalDays * (w / DEFAULT_DAYS_VISIBLE) - w)
+      const wasFlushRight = scrollRef.current >= oldMaxScroll - 0.5
       lastTrackW.current = w
       setTrackW(w)
       trackRectRef.current = trackElRef.current?.getBoundingClientRect() ?? null
-      setScrollLive((s) => clamp(s, -EDGE_PAD, Math.max(0, totalDays * (w / DEFAULT_DAYS_VISIBLE) - w)))
+      setScrollLive(wasFlushRight ? newMaxScroll : (s) => clamp(s, -EDGE_PAD, newMaxScroll))
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // intentionally empty — only fires from ResizeObserver, not from React re-renders
@@ -232,8 +279,10 @@ export function useAdjustTimeframeController() {
 
   /* Step 4 (B3): shared fit pass — keeps [s,e] (+ the .tf-handle grip's own
      HANDLE_PAD half-width) inside [target, target+tw] after a manual zoom()
-     step, so a fast zoom never leaves a handle clipped outside the viewport. */
-  const HANDLE_PAD = 12
+     step, so a fast zoom never leaves a handle clipped outside the viewport.
+     HANDLE_PAD itself now lives above (with maxZoomIdx) — this is a plain
+     `function` declaration, so it's hoisted and callable from render-time
+     `viewScroll` above despite being defined later in the file. */
   function fitScroll(target: number, s: number, e: number, nppd: number, tw: number, minS: number, maxS: number): number {
     let t = target
     const l = s * nppd - HANDLE_PAD
@@ -372,10 +421,14 @@ export function useAdjustTimeframeController() {
      computing the center-anchored scroll, fit-check it against .tf-sel's new
      pixel bounds (+ handle half-width padding) and nudge it back in if the
      zoom step would otherwise clip either edge. */
-  /* F2b: steps through ZOOM_LEVELS by index delta (+1 for "+", -1 for "-"). */
+  /* F2b: steps through ZOOM_LEVELS by index delta (+1 for "+", -1 for "-").
+     Stop-if resolution: zooming further IN is capped at maxZoomIdx (the
+     deepest level that still contains the whole selection) so a step can
+     never land past it; zooming OUT is never constrained by containment. */
   function stepZoom(dir: number) {
-    const idx = ZOOM_LEVELS.indexOf(zoomLevel)
-    const nextIdx = clamp(idx + dir, 0, ZOOM_LEVELS.length - 1)
+    const idx = effectiveZoomIdx
+    const upperBound = dir > 0 ? maxZoomIdx : ZOOM_LEVELS.length - 1
+    const nextIdx = clamp(idx + dir, 0, upperBound)
     if (nextIdx === idx) return
     const nextLevel = ZOOM_LEVELS[nextIdx]
     const next = levelToDays(nextLevel, totalDays)
@@ -452,8 +505,13 @@ export function useAdjustTimeframeController() {
 
   return {
     accent, months, presets,
-    startIdx, endIdx, zoomLevel, drag, bumpKey, anim,
-    trackW, scroll,
+    startIdx, endIdx, drag, bumpKey, anim,
+    /* zoomLevel/scroll exposed here are the EFFECTIVE (render-safe) values,
+       not the raw requested/stored ones — the pill label, its disabled
+       checks, and the painted strip position all read the value that is
+       actually being shown. */
+    zoomLevel: effectiveZoomLevel, canZoomIn,
+    trackW, scroll: viewScroll,
     ppd, stripW, maxScroll, minScroll, rulerW,
     selLeft, selWidth, days, startDate, endDate, endIsToday, todayIdx, totalDays,
     activeId, gliderStyle,

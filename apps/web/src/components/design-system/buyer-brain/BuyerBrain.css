@@ -32,7 +32,7 @@
    are substituted only where a token resolves to the byte-identical curve:
      bare `ease`         == var(--ease-fade)
      bare `ease-in-out`  == var(--ease-in-out)
-     the source's spring-snap overshoot curve == var(--ease-spring-snap)
+     the source's spring-snap overshoot curve == var(--ease-toast-pop)
      the source's standard-material curve     == var(--ease-standard)
    Substitution sites: .buyer-brain-root (background), .bbq-card,
    .bbq-ink, .bbq-qual, .bbq-piece, .bbq-line, circle.bbq-knob, .bbq-label,
@@ -235,8 +235,8 @@ html.dark .buyer-brain-root {
   height: 2.5px;
   border-radius: 2px;
   background: var(--emerald);
-  transition: left calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-spring-snap),
-    width calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-spring-snap);
+  transition: left calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-toast-pop),
+    width calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-toast-pop);
 }
 
 /* panels — enlarged toward blur-carousel's 262x364 background-tile scale
@@ -343,7 +343,7 @@ html.dark .buyer-brain-root {
   transform: scale(1);
   transform-origin: var(--ox) var(--oy);
   transition: filter calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-fade),
-    transform calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-spring-snap);
+    transform calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-toast-pop);
 }
 .buyer-brain-root .bbq-brain.focused .bbq-piece:not(.on) {
   filter: brightness(0.5) saturate(0.82);
@@ -716,7 +716,7 @@ html.dark .buyer-brain-root .bbq-hit:focus-visible {
   border: 1px solid color-mix(in srgb, var(--acc) 34%, transparent);
   opacity: 0;
   transform: translateY(6px);
-  animation: chipin calc((var(--duration-200) + var(--duration-140)) * var(--anim-mult, 1)) var(--ease-spring-snap) forwards;
+  animation: chipin calc((var(--duration-200) + var(--duration-140)) * var(--anim-mult, 1)) var(--ease-toast-pop) forwards;
 }
 @keyframes chipin {
   to {

@@ -187,16 +187,17 @@
    color/weight/text-shadow treatment -- the emerald + grid-texture fill
    itself is already painted by boxStyle() in Picker.tsx (same #10B981 +
    9x9 grid the closed trigger always has), per "copy the event-badge look,
-   don't invent a new style". The box footprint never changes on confirm
-   (boxStyle stays 58px), so this row and its two children -- the calendar
-   icon and the date text -- share that fixed circle instead of the pill
-   growing to fit them. The icon span is the SAME node the unconfirmed state
+   don't invent a new style". F7: the box now widens to 112px on confirm
+   (boxStyle(open, confirmed)) so this row and its two children -- the
+   calendar icon and the date text -- read as an elongated pill (badge-event
+   shape) instead of clipping into the unconfirmed 58px circle. The icon
+   span is the SAME node the unconfirmed state
    already renders (Picker.tsx no longer swaps it out on confirm), so it
    never unmounts during the morph; only font-size/margin/opacity/max-width
    transition. --ease-standard (no overshoot) per no-bounce entrance rule. */
 .pk-root .pk-glyph-row {
   display: inline-flex; align-items: center; justify-content: center;
-  max-width: 50px; overflow: hidden;
+  max-width: 96px; overflow: hidden;
 }
 .pk-root .pk-trigger-icon {
   color: #fff; font-size: 26px; -webkit-text-stroke: 1px rgba(255,255,255,0.9);
@@ -219,5 +220,5 @@
     opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-standard);
 }
 .pk-root .pk-glyph-row[data-confirmed="true"] .pk-trigger-badge {
-  max-width: 32px; opacity: 1;
+  max-width: 72px; opacity: 1;
 }

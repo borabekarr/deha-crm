@@ -90,7 +90,7 @@ html.dark .oc-card[data-squircle="on"] { box-shadow: none; }
     inset 0 1px 0 rgba(255,255,255,.55),
     inset 0 -2px 0 rgba(17,17,17,.20),
     inset 0 0 0 1px rgba(17,17,17,.12);
-  transition:transform calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-spring-soft-2), opacity calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade),
+  transition:transform calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-spring-pop), opacity calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }

@@ -325,7 +325,7 @@ html.dark .ie-cancel:hover {
   }
   /* edit icon re-enters (grow+fade) when returning to edit mode */
   .ie-act[data-ie-ready][data-mode="edit"] .ie-ic--edit {
-    animation: ieIcIn calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-spring-soft-2) forwards;
+    animation: ieIcIn calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-spring-pop) forwards;
   }
   /* save icon exits (shrink+fade) when returning to edit mode */
   .ie-act[data-ie-ready][data-mode="edit"] .ie-ic--save {
@@ -333,7 +333,7 @@ html.dark .ie-cancel:hover {
   }
   /* save icon enters (grow+fade) when entering save mode */
   .ie-act[data-ie-ready][data-mode="save"] .ie-ic--save {
-    animation: ieIcIn calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-spring-soft-2) forwards;
+    animation: ieIcIn calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-spring-pop) forwards;
   }
 }
 

@@ -163,7 +163,7 @@
      of snapping a frame ahead of it. All legs restated together -- a
      transition shorthand replaces the whole list, it never merges. */
   transition:
-    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring-snap),
+    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-toast-pop),
     box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
     border-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out);
   overflow: hidden;
@@ -232,7 +232,7 @@
     linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
   background-size: 7px 7px;
-  animation: otpWin calc((var(--duration-420) + var(--duration-80)) * var(--anim-mult, 1)) var(--ease-spring-snap);
+  animation: otpWin calc((var(--duration-420) + var(--duration-80)) * var(--anim-mult, 1)) var(--ease-toast-pop);
 }
 @media (prefers-reduced-motion: no-preference) {
   /* Per-cell win stagger (no byte-identical token tier for this leg, so it
@@ -301,7 +301,7 @@
     animation: vSlideDown calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);
   }
   .otp-row[data-variant='fadeScale'] .otp-digit.pop {
-    animation: vScale calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-spring-snap);
+    animation: vScale calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-toast-pop);
   }
   .otp-row[data-variant='slideUp'] .otp-digit.pop {
     animation: vSlideUp calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);

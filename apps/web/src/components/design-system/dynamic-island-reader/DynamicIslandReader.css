@@ -63,7 +63,7 @@
   55%  { transform: scale(1.15); opacity: 1; }
   100% { transform: scale(1); opacity: 1; }
 }
-.di-check-pop { animation: diCheckPop calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-spring-soft-2) both; }
+.di-check-pop { animation: diCheckPop calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-spring-pop) both; }
 @keyframes diCheckDraw {
   to { stroke-dashoffset: 0; }
 }
