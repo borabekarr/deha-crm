@@ -76,6 +76,49 @@ function selectorFor(target: SpamTarget, isOpen: boolean): string {
   return isOpen ? (target.closeTrigger ?? target.trigger) : target.trigger
 }
 
+// The isOpen alternator is an optimistic predictor, not an assertion source
+// (see the comment above selectorFor): a click can be legitimately swallowed
+// mid-spam, e.g. expandable-screen's full-screen FLIP surface temporarily
+// sits on top of its own trigger (pointer-events: none while active), so a
+// force-click at the trigger's coordinates lands on the overlay instead and
+// never fires onExpand. When that happens the tracked isOpen drifts from the
+// real DOM: the *next* alternator click targets a control that has since
+// gone display:none (zero box), which `.click({ force: true })` cannot
+// resolve to a screen point ("Element is not visible") even though force
+// bypasses the ordinary visibility/actionability checks. Rather than crash
+// on that legitimate drift, resync to the control that's actually present
+// before clicking, and report back the real resulting isOpen so the caller's
+// alternation stays correct going forward.
+async function clickToggleAlternator(page: Page, target: ToggleSpamTarget, isOpen: boolean): Promise<boolean> {
+  // The box check and the click itself are two separate round-trips, so the
+  // real DOM state can drift again in the gap between them (same swallowed-
+  // click race the resync above targets). Retry the resync on that race
+  // rather than crashing: this is not a blanket timeout/assertion weakening,
+  // it re-derives which control is actually live before every attempt.
+  const maxAttempts = 5
+  let lastError: unknown
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    let assumedOpen = isOpen
+    let selector = selectorFor(target, assumedOpen)
+    let box = await page.locator(selector).first().boundingBox()
+    if (!box) {
+      // The assumed-open control has no box: state actually drifted to the
+      // opposite of what the tracker predicted. Target the real one.
+      assumedOpen = !assumedOpen
+      selector = selectorFor(target, assumedOpen)
+      box = await page.locator(selector).first().boundingBox()
+    }
+    if (!box) continue // both controls momentarily boxless mid-transition; retry
+    try {
+      await page.locator(selector).first().click({ force: true, timeout: 2000 })
+      return !assumedOpen
+    } catch (e) {
+      lastError = e
+    }
+  }
+  throw lastError
+}
+
 // Settle state for a toggle target: the computed value of one CSS property,
 // or the ABSENT sentinel when the (possibly portal-mounted) surface is not in
 // the DOM at all — absence is itself a valid, assertable settled state.
@@ -207,15 +250,13 @@ async function runToggleTarget(page: Page, target: ToggleSpamTarget) {
   const rapidClicks = target.toggles ?? 8
   let isOpen = false
   for (let i = 0; i < rapidClicks; i++) {
-    await click(page, selectorFor(target, isOpen))
-    isOpen = !isOpen
+    isOpen = await clickToggleAlternator(page, target, isOpen)
     await page.waitForTimeout(40 + Math.random() * 20)
   }
   // Mid-flight reversal: click, wait half the transition, click again.
-  await click(page, selectorFor(target, isOpen))
-  isOpen = !isOpen
+  isOpen = await clickToggleAlternator(page, target, isOpen)
   await page.waitForTimeout(target.transitionMs * 0.5)
-  await click(page, selectorFor(target, isOpen))
+  await clickToggleAlternator(page, target, isOpen)
   await settleWait(page, target, target.transitionMs + 400)
 
   // Clean settle: exactly one of the two references (ABSENT sentinel included).
