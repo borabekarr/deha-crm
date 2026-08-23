@@ -1,4 +1,5 @@
 import { iconClass } from '@/lib/iconClass';
+import { useProximityGroup } from '@/lib/hooks';
 import { DOW } from './task-board-week-hook';
 
 // Pure two-week day-pill row component, factored out of TaskBoard
@@ -42,8 +43,14 @@ export function WeekRow({
   onPrevWeek: () => void;
   onNextWeek: () => void;
 }) {
+  // The nav chevrons carry data-proximity but this row previously sat
+  // outside both of TaskBoard's registered groups (toastRef/statusBarRef),
+  // so the engine never measured or drove --prox on them. Register this
+  // row as its own proximity group so the chevrons actually ramp.
+  const weekRowRef = useProximityGroup<HTMLDivElement>();
+
   return (
-    <div className="tb-week-row">
+    <div className="tb-week-row" ref={weekRowRef}>
       <button type="button" data-proximity className="tb-week-nav" aria-label="Previous week" onClick={onPrevWeek}>
         <WeekNavIcon name="chevron_left" size={16} />
       </button>

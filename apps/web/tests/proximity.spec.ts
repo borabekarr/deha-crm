@@ -157,10 +157,15 @@ test('ramp: scale grows with edge proximity and resets on departure (default pro
   await expect.poll(() => getScale(page, target), { timeout: 3000 }).toBeGreaterThan(1.001)
   await expect.poll(() => getScale(page, target), { timeout: 3000 }).toBeLessThan(1.01)
 
-  // Center: pointer over the rect, dist 0 — near max ramp (scale max 1.02).
+  // Center: pointer over the rect, dist 0 — full ramp, scale reaches the
+  // effective --hover-scale-max. Read from the target itself (not :root):
+  // components commonly scope their own --hover-scale-max override (e.g.
+  // Buttons.css dials the control down to 1.008), so deriving from the
+  // token instead of a hardcoded pair keeps this in sync with whatever the
+  // page under test actually renders.
   await page.mouse.move(cx, cy, { steps: 5 })
-  await expect.poll(() => getScale(page, target), { timeout: 3000 }).toBeGreaterThanOrEqual(1.016)
-  await expect.poll(() => getScale(page, target), { timeout: 3000 }).toBeLessThanOrEqual(1.021)
+  const scaleMax = await target.evaluate((el) => parseFloat(getComputedStyle(el).getPropertyValue('--hover-scale-max')))
+  await expect.poll(() => getScale(page, target), { timeout: 3000 }).toBeCloseTo(scaleMax, 3)
 
   // Departure: far away — back to rest, --prox removed.
   await page.mouse.move(cx + 400, cy + 400, { steps: 5 })
