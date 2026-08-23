@@ -124,6 +124,18 @@ export function BlurCarousel() {
   // when the browser's own `scrollend` event fires, with a 120ms
   // scroll-idle debounce as the fallback for engines without scrollend
   // support (reset on every scroll frame; see the mount effect below).
+  //
+  // Both completion paths race the rAF-throttled `update()` scheduled by the
+  // final 'scroll' event: `update` runs on the next animation frame, while
+  // 'scrollend' (a microtask-adjacent DOM event) and the setTimeout debounce
+  // are macrotask-scheduled — under load either can fire and flip the flag
+  // to 'false' one tick before that last rAF actually runs, so a caller
+  // polling the flag can observe it go false while the card's transform
+  // still reflects the second-to-last frame (a few percent off the true
+  // resting scale, e.g. scale(0.97) instead of scale(1)). Force a
+  // synchronous `update()` right before flipping the flag on both paths so
+  // the transform is guaranteed current at the moment 'false' becomes
+  // observable, regardless of which path won the race.
   const scrollIdleTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const markScrolling = useCallback(() => {
     const rail = railRef.current
@@ -131,9 +143,10 @@ export function BlurCarousel() {
     rail.dataset.scrolling = 'true'
     if (scrollIdleTimer.current) clearTimeout(scrollIdleTimer.current)
     scrollIdleTimer.current = setTimeout(() => {
+      update()
       rail.dataset.scrolling = 'false'
     }, 120)
-  }, [])
+  }, [update])
 
   const onScroll = useCallback(() => {
     markScrolling()
@@ -159,7 +172,9 @@ export function BlurCarousel() {
     const onResize = () => update()
     window.addEventListener('resize', onResize)
     const onScrollEnd = () => {
-      if (rail) rail.dataset.scrolling = 'false'
+      if (!rail) return
+      update()
+      rail.dataset.scrolling = 'false'
     }
     rail?.addEventListener('scrollend', onScrollEnd)
     const raf1 = requestAnimationFrame(() => {

@@ -124,6 +124,20 @@ async function clickToggleAlternator(page: Page, target: ToggleSpamTarget, isOpe
 // the DOM at all — absence is itself a valid, assertable settled state.
 const ABSENT = '__absent__'
 
+// Compares settle-property reads either exactly (default) or, when the
+// target declares `settleTolerance`, by the numeric distance between the
+// first numeric token in each value — see settleTolerance's doc comment in
+// animation-spam-manifest.ts for why continuous-geometry-derived reads (e.g.
+// scroll-offset-driven transforms) need this instead of exact string match.
+function settleValuesMatch(target: ToggleSpamTarget, a: string, b: string): boolean {
+  if (a === b) return true
+  if (!target.settleTolerance) return false
+  const na = Number(a.match(/-?\d+(\.\d+)?/)?.[0])
+  const nb = Number(b.match(/-?\d+(\.\d+)?/)?.[0])
+  if (Number.isNaN(na) || Number.isNaN(nb)) return false
+  return Math.abs(na - nb) <= target.settleTolerance
+}
+
 async function readSettleValue(page: Page, target: ToggleSpamTarget): Promise<string> {
   const el = page.locator(target.settleSelector).first()
   if ((await el.count()) === 0) return ABSENT
@@ -216,10 +230,46 @@ async function settleWait(page: Page, target: ToggleSpamTarget, timeoutMs: numbe
   const { selector, attribute, value } = target.awaitAttribute
   const loc = page.locator(selector).first()
   // A click's scroll may not have started yet — the attribute can still read
-  // as the rest value from the PREVIOUS settle. Give it a beat to flip away
-  // before polling for it to return, so we never read state pre-scroll.
-  await page.waitForTimeout(50)
+  // as the rest value from the PREVIOUS settle. A fixed pre-poll delay here
+  // is a race, not a guarantee: under load the browser can take longer than
+  // any fixed guess to dispatch the first 'scroll' event for the new click,
+  // so polling for `value` immediately after the delay can observe the
+  // stale prior-settle read and return before the new scroll has even
+  // started — the caller then samples the settle property mid-flight one
+  // tick later. Explicitly wait for the attribute to flip away from `value`
+  // first (proving the new scroll actually started) before polling for it
+  // to return; only fall back to a flat delay if it never flips away at all
+  // (legitimate: e.g. a boundary click whose trigger is disabled and
+  // produces no scroll to await).
+  try {
+    await expect(loc).not.toHaveAttribute(attribute, value, { timeout: 400 })
+  } catch {
+    // No scroll started within 400ms — likely a no-op click (disabled
+    // trigger at a boundary). Nothing to await; fall through to the
+    // unconditional settle-value poll below, which is a no-op if the
+    // attribute never changes.
+  }
   await expect(loc).toHaveAttribute(attribute, value, { timeout: timeoutMs + 2000 })
+  // The attribute reaching `value` proves the app's own completion signal
+  // fired, but that signal (native 'scrollend' / an idle-debounce timer) is
+  // not the thing under test — `target.settleProperty` is. Trusting the
+  // attribute alone still leaves a gap: a legitimate trailing scroll frame
+  // (compositor lag past 'scrollend', or a fresh click racing the idle
+  // debounce) can land after the attribute flips but before this function
+  // returns, so the caller's next read of settleProperty can still catch a
+  // value the geometry hasn't fully caught up to yet — this was observed
+  // directly (matrix(0.9773,...) instead of matrix(1,...), a partial-step
+  // read, not sub-pixel noise). Poll settleProperty itself until two
+  // consecutive reads, 60ms apart, agree — the actual value under test is
+  // the only oracle that can prove it has genuinely stopped changing.
+  // Bounded iteration count, not a blanket timeout increase.
+  let previous: string | null = null
+  for (let i = 0; i < 10; i++) {
+    const current = await readSettleValue(page, target)
+    if (current === previous) return
+    previous = current
+    await page.waitForTimeout(60)
+  }
 }
 
 async function runToggleTarget(page: Page, target: ToggleSpamTarget) {
@@ -262,24 +312,40 @@ async function runToggleTarget(page: Page, target: ToggleSpamTarget) {
   // Clean settle: exactly one of the two references (ABSENT sentinel included).
   const finalValue = await readSettleValue(page, target)
   expect(
-    [openRef, closedRef],
+    settleValuesMatch(target, finalValue, openRef) || settleValuesMatch(target, finalValue, closedRef),
     `${target.slug} settled to ${finalValue} after spam; expected open (${openRef}) or closed (${closedRef})`,
-  ).toContain(finalValue)
+  ).toBe(true)
 
-  let observedOpen = finalValue === openRef
+  let observedOpen = settleValuesMatch(target, finalValue, openRef)
   if (target.primerSelector) {
     await click(page, target.primerSelector)
     await settleWait(page, target, settleMs)
-    observedOpen = (await readSettleValue(page, target)) === openRef
+    observedOpen = settleValuesMatch(target, await readSettleValue(page, target), openRef)
   }
 
   // Responsiveness: one deterministic toggle out of the observed state.
-  await click(page, observedOpen ? (target.closeTrigger ?? target.trigger) : target.trigger)
-  await settleWait(page, target, target.transitionMs + 400)
+  // Most targets jump straight to the opposite reference on a single click.
+  // A stepper (e.g. blur-carousel's next/prev, postSpamSteps > 1) only
+  // advances one position per click, so a lone click is not guaranteed to
+  // reach the boundary reference from wherever the spam sequence left it —
+  // repeat, re-clicking the same trigger each time, until the reference is
+  // reached or the step budget is exhausted. Each click is a genuine,
+  // separately-verifiable interaction; this proves responsiveness without
+  // assuming single-click reversibility that only holds for true 2-state
+  // toggles.
+  const postSpamTrigger = observedOpen ? (target.closeTrigger ?? target.trigger) : target.trigger
+  const postSpamTarget = observedOpen ? closedRef : openRef
+  let postSpamValue = ''
+  for (let i = 0; i < (target.postSpamSteps ?? 1); i++) {
+    await click(page, postSpamTrigger)
+    await settleWait(page, target, target.transitionMs + 400)
+    postSpamValue = await readSettleValue(page, target)
+    if (settleValuesMatch(target, postSpamValue, postSpamTarget)) break
+  }
   expect(
-    await readSettleValue(page, target),
-    `${target.slug} did not respond to a post-spam toggle`,
-  ).toBe(observedOpen ? closedRef : openRef)
+    settleValuesMatch(target, postSpamValue, postSpamTarget),
+    `${target.slug} did not respond to a post-spam toggle: got ${postSpamValue}, expected ${postSpamTarget}`,
+  ).toBe(true)
 
   expect(consoleErrors, `console errors on ${target.slug}: ${consoleErrors.join('; ')}`).toEqual([])
   expect(pageErrors, `page errors on ${target.slug}: ${pageErrors.join('; ')}`).toEqual([])

@@ -71,6 +71,33 @@ export interface ToggleSpamTarget extends SpamTargetBase {
    * timing, just not for the final settle wait.
    */
   awaitAttribute?: { selector: string; attribute: string; value: string }
+  /**
+   * Number of times to click the post-spam responsiveness trigger before
+   * asserting it reached the opposite reference (default 1). Most toggle
+   * targets jump straight to the open/closed boundary on a single click, so
+   * one click is sufficient proof of responsiveness. A stepper control
+   * (e.g. blur-carousel's next/prev, which advances one card per click)
+   * needs up to (state count - 1) clicks to guarantee reaching the boundary
+   * reference from wherever the spam sequence left it — the settle read
+   * only distinguishes "at the boundary" from "anywhere else" so a single
+   * step within the "anywhere else" region reads as no change even though
+   * the control genuinely responded and moved.
+   */
+  postSpamSteps?: number
+  /**
+   * Numeric tolerance for comparing `settleProperty` reads (matched against
+   * the first numeric token in the value, e.g. the `0.82` in
+   * `matrix(0.82, 0, 0, 0.82, 0, 0)`), instead of requiring an exact string
+   * match. Needed when the settle value is derived from a native scroll
+   * offset: the offset the browser lands on after `scrollTo({behavior:
+   * "smooth"})` is subject to sub-pixel/device-pixel rounding, so a
+   * genuinely-at-rest read can differ from the reference read by a few
+   * ten-thousandths (0.8204 vs 0.8200) despite both being the same visually
+   * and functionally settled state. Omit (default: exact string match) for
+   * settle properties that are discrete/enumerated rather than derived from
+   * continuous geometry.
+   */
+  settleTolerance?: number
 }
 
 export type SpamTarget = AutoHeightSpamTarget | ToggleSpamTarget
@@ -415,6 +442,27 @@ export const SPAM_TARGETS: SpamTarget[] = [
     settleProperty: 'transform',
     transitionMs: 400,
     awaitAttribute: { selector: '#rail', attribute: 'data-scrolling', value: 'false' },
+    // 6 cards (indices 0-5): card 0's settle read only distinguishes
+    // "active===0" (scale 1) from "active is any other index" (scale 0.82,
+    // saturated — every off-center index reads identically). The spam loop
+    // can leave `active` anywhere in 1-5, so the post-spam responsiveness
+    // check's single click of prevBtn (which steps back by exactly one
+    // index) is not guaranteed to reach index 0 — up to 5 steps are needed
+    // in the worst case. See debt investigation, 2026-08-23.
+    postSpamSteps: 5,
+    // The scale read is `clamp(cardCenter-distance / step, 0, 1)` fed
+    // through a smoothstep — mathematically exact only when the scroll
+    // offset lands exactly on a card boundary. Chromium's native smooth
+    // scroll settles to a device-pixel-rounded offset that is regularly a
+    // pixel or two short of that exact boundary even once truly at rest,
+    // producing e.g. scale 0.8235 instead of the clamped 0.8200 — observed
+    // up to ~0.007 off in practice. 0.008 comfortably absorbs that rounding
+    // while still failing any genuine mid-transition/partial-settle read,
+    // which differs from either reference by several percent (0.02+), not
+    // thousandths — the actual settle-timing gap that produced those larger
+    // reads is closed at the source in settleWait's value-stability poll,
+    // not by tolerance. See debt investigation, 2026-08-23.
+    settleTolerance: 0.008,
   },
 ]
 
