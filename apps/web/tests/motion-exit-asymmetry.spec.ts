@@ -38,12 +38,38 @@ test.describe('faster-exits: exit duration < enter duration', () => {
     const openDuration = parseDuration(await menu.evaluate((el) => getComputedStyle(el).transitionDuration))
 
     // .dd-scrim (position: fixed; inset: 0) sits above the trigger while the
-    // menu is open, so a second trigger click would hit the scrim instead —
-    // dismiss with Escape (the component's documented outside-tap/Escape
-    // dismiss path) and read the transition before the exit-timer unmount.
+    // menu is open, so a second trigger click would hit the scrim instead.
+    // Dismiss with Escape, the component's documented outside-tap/Escape
+    // dismiss path.
+    //
+    // .dd-menu unmounts on its own exit timer. On a loaded CI runner that
+    // unmount lands between the data-exit assertion and a separate evaluate
+    // call, so the read hits a detached node, getComputedStyle returns empty
+    // strings, and parseDuration yields NaN. Arm the observer BEFORE the
+    // keypress and read the duration in-page the instant data-exit flips,
+    // the same idiom the WorkflowAddElements case below uses. The observer
+    // replaces the toHaveAttribute poll: it waits on exactly that condition,
+    // and a poll of its own would race the unmount the same way.
+    await page.evaluate(() => {
+      ;(window as unknown as { __ddExitDuration: Promise<string> }).__ddExitDuration = new Promise((resolve) => {
+        const read = () => {
+          const el = document.querySelector('.dd-menu[data-exit="true"]')
+          if (!el) return false
+          resolve(getComputedStyle(el).transitionDuration)
+          return true
+        }
+        if (read()) return
+        const observer = new MutationObserver(() => {
+          if (read()) observer.disconnect()
+        })
+        observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-exit'] })
+      })
+    })
+
     await page.keyboard.press('Escape')
-    await expect(menu).toHaveAttribute('data-exit', 'true')
-    const closedDuration = parseDuration(await menu.evaluate((el) => getComputedStyle(el).transitionDuration))
+    const closedDuration = parseDuration(
+      await page.evaluate(() => (window as unknown as { __ddExitDuration: Promise<string> }).__ddExitDuration),
+    )
 
     // Dropdown sets an inline `--dd-dur: 260ms` override on the open leg, so
     // comparing closed-vs-open alone can't catch a regression in the shared
@@ -251,15 +277,39 @@ test.describe('faster-exits: exit duration < enter duration', () => {
     await page.goto('/components/calendar')
     await settle(page)
 
+    // The exiting month panel is removed as soon as its animation ends, so a
+    // click-then-waitFor-then-evaluate sequence races that removal on a
+    // loaded CI runner: the read lands on a detached node, getComputedStyle
+    // returns empty strings, and parseDuration yields NaN. Arm the observer
+    // BEFORE the click and read both panels in one in-page call, the same
+    // idiom the WorkflowAddElements case below uses.
+    await page.evaluate(() => {
+      ;(window as unknown as { __calDurations: Promise<{ exit: string; enter: string }> }).__calDurations = new Promise((resolve) => {
+        const read = () => {
+          const exitEl = document.querySelector('.cal-grid[data-panel-state^="exiting"]')
+          const enterEl = document.querySelector('.cal-grid[data-panel-state^="entering"]')
+          if (!exitEl || !enterEl) return false
+          resolve({
+            exit: getComputedStyle(exitEl).animationDuration,
+            enter: getComputedStyle(enterEl).animationDuration,
+          })
+          return true
+        }
+        if (read()) return
+        const observer = new MutationObserver(() => {
+          if (read()) observer.disconnect()
+        })
+        observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-panel-state'] })
+      })
+    })
+
     await page.locator('.cal-nav-btn[aria-label="Next month"]').click()
+    const durations = await page.evaluate(
+      () => (window as unknown as { __calDurations: Promise<{ exit: string; enter: string }> }).__calDurations,
+    )
 
-    const exiting = page.locator('.cal-grid[data-panel-state^="exiting"]')
-    const entering = page.locator('.cal-grid[data-panel-state^="entering"]')
-    await exiting.waitFor({ state: 'attached' })
-    await entering.waitFor({ state: 'attached' })
-
-    const exitDuration = parseDuration(await exiting.evaluate((el) => getComputedStyle(el).animationDuration))
-    const enterDuration = parseDuration(await entering.evaluate((el) => getComputedStyle(el).animationDuration))
+    const exitDuration = parseDuration(durations.exit)
+    const enterDuration = parseDuration(durations.enter)
 
     expect(exitDuration).toBeLessThan(enterDuration)
   })
