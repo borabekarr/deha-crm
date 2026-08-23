@@ -9,14 +9,14 @@ import './Dropdown.css'
 // highlighting, destructive items, and outside-tap / Escape dismiss.
 //
 // Composable API (mirrors the raw source):
-//   <Dropdown>
-//     <Dropdown.Trigger>…</Dropdown.Trigger>
-//     <Dropdown.Content position="auto">
-//       <Dropdown.Label>…</Dropdown.Label>
-//       <Dropdown.Item icon shortcut onPress disabled destructive>…</Dropdown.Item>
-//       <Dropdown.Separator />
-//     </Dropdown.Content>
-//   </Dropdown>
+//   <DropdownBase>
+//     <Trigger>…</Trigger>
+//     <Content position="auto">
+//       <Label>…</Label>
+//       <Item icon shortcut onPress disabled destructive>…</Item>
+//       <Separator />
+//     </Content>
+//   </DropdownBase>
 //
 // Faithful port of
 // apps/web/design-system/claude-design/raw/dropdown/dropdown.jsx —
@@ -39,12 +39,14 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactElement,
   type ReactNode,
   type RefObject,
 } from 'react'
 import { createPortal } from 'react-dom'
+import { rovingTabIndex } from '../../../lib/keyboard-nav'
 
 // ── placement math ──────────────────────────────────────────────────────
 
@@ -121,7 +123,7 @@ function haptic() {
 interface DropdownCtxValue {
   open: boolean
   setOpen: (open: boolean) => void
-  triggerRef: RefObject<HTMLSpanElement | null>
+  triggerRef: RefObject<HTMLButtonElement | null>
   position: DropdownPosition
   duration: number
   gap: number
@@ -140,9 +142,9 @@ export interface DropdownProps {
   children?: ReactNode
 }
 
-function DropdownBase({ position = 'auto', duration = 260, gap = 8, padding = 12, children }: DropdownProps) {
+export function DropdownBase({ position = 'auto', duration = 260, gap = 8, padding = 12, children }: DropdownProps) {
   const [open, setOpen] = useState(false)
-  const triggerRef = useRef<HTMLSpanElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
   const ctx = useMemo<DropdownCtxValue>(
     () => ({ open, setOpen, triggerRef, position, duration, gap, padding }),
     [open, position, duration, gap, padding],
@@ -158,13 +160,14 @@ function DropdownBase({ position = 'auto', duration = 260, gap = 8, padding = 12
 
 export interface TriggerProps {
   children?: ReactNode
+  ariaLabel?: string
 }
 
-function Trigger({ children }: TriggerProps) {
+export function Trigger({ children, ariaLabel }: TriggerProps) {
   const { open, setOpen, triggerRef } = useContext(DropdownCtx)!
   const suppressClick = useRef(false)
 
-  const onPointerDown = (e: ReactPointerEvent<HTMLSpanElement>) => {
+  const onPointerDown = (e: ReactPointerEvent<HTMLButtonElement>) => {
     if (e.button != null && e.button !== 0) return
     const startX = e.clientX
     const startY = e.clientY
@@ -197,13 +200,36 @@ function Trigger({ children }: TriggerProps) {
     setOpen(!open)
   }
 
+  const onTriggerKeyDown = (e: ReactKeyboardEvent<HTMLButtonElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      setOpen(!open)
+    } else if (e.key === 'ArrowDown' && !open) {
+      // Roving-tabindex listbox pattern: ArrowDown on the closed trigger
+      // opens the menu; Content's own open-effect focuses the first option.
+      e.preventDefault()
+      setOpen(true)
+    }
+  }
+
   return (
-    <span className="dd-trigger" ref={triggerRef} onPointerDown={onPointerDown} onClick={onClick}>
+    <button
+      type="button"
+      className="dd-trigger"
+      ref={triggerRef}
+      style={{ background: 'none', border: 'none', padding: 0, margin: 0, font: 'inherit', color: 'inherit', cursor: 'pointer' }}
+      aria-expanded={open}
+      aria-haspopup="menu"
+      aria-label={ariaLabel}
+      onPointerDown={onPointerDown}
+      onClick={onClick}
+      onKeyDown={onTriggerKeyDown}
+    >
       {/* clone so an arbitrary trigger child reflects open state for styling */}
       {Children.map(children, (c) =>
         isValidElement(c) ? cloneElement(c as ReactElement<{ 'data-open'?: boolean }>, { 'data-open': open }) : c,
       )}
-    </span>
+    </button>
   )
 }
 
@@ -217,7 +243,7 @@ export interface ContentProps {
   children?: ReactNode
 }
 
-function Content({ position, children }: ContentProps) {
+export function Content({ position, children }: ContentProps) {
   const ctx = useContext(DropdownCtx)!
   const { open, setOpen, triggerRef, duration, gap, padding } = ctx
   const pos = position || ctx.position
@@ -228,6 +254,19 @@ function Content({ position, children }: ContentProps) {
   const [closing, setClosing] = useState(false) // mounted-through-exit window
   const [active, setActive] = useState(-1) // pan/keyboard highlighted index
   const wasOpen = useRef(false)
+  // Roving-tabindex focus targets, one per rendered Item (index-keyed).
+  const itemRefs = useRef<Record<number, HTMLButtonElement | null>>({})
+  const registerItemRef = (idx: number, el: HTMLButtonElement | null) => {
+    itemRefs.current[idx] = el
+  }
+  // Kept in sync every commit (not during render) so the keydown handler
+  // below can read the latest `active` without a stale closure, while still
+  // avoiding side effects (haptic/focus) inside the setActive functional
+  // updater.
+  const activeRef = useRef(active)
+  useEffect(() => {
+    activeRef.current = active
+  })
 
   // collect Item children so pan + keyboard can target them by index
   const flat = Children.toArray(children)
@@ -266,8 +305,18 @@ function Content({ position, children }: ContentProps) {
     if (!trig || !menu) return
     const place = () => setCoords(computePlacement(trig, menu.offsetWidth, menu.offsetHeight, pos, gap, padding))
     place()
-    const r = requestAnimationFrame(() => setEnter(true))
+    const r = requestAnimationFrame(() => {
+      setEnter(true)
+      // Roving-tabindex: moving DOM focus into the menu on open matches the
+      // WAI-ARIA APG listbox pattern (focus follows selection into the popup).
+      if (itemIdx.length) {
+        const first = itemIdx[0]
+        setActive(first)
+        itemRefs.current[first]?.focus()
+      }
+    })
     return () => cancelAnimationFrame(r)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, pos, gap, padding, triggerRef])
 
   // dismissal + reposition listeners
@@ -275,18 +324,26 @@ function Content({ position, children }: ContentProps) {
     if (!open) return
     const close = () => setOpen(false)
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') close()
-      else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      if (e.key === 'Escape') {
+        close()
+        triggerRef.current?.focus()
+      } else if (
+        e.key === 'ArrowDown' ||
+        e.key === 'ArrowUp' ||
+        e.key === 'Home' ||
+        e.key === 'End'
+      ) {
         e.preventDefault()
-        setActive((a) => {
-          const cur = itemIdx.indexOf(a)
-          const next =
-            e.key === 'ArrowDown'
-              ? itemIdx[Math.min(itemIdx.length - 1, cur + 1)]
-              : itemIdx[Math.max(0, cur - 1)]
-          if (next !== a) haptic()
-          return next ?? itemIdx[0]
-        })
+        if (!itemIdx.length) return
+        const a = activeRef.current
+        const cur = itemIdx.indexOf(a)
+        const nextPos = rovingTabIndex(e.key, cur === -1 ? 0 : cur, itemIdx.length, 'vertical')
+        const next = nextPos === null ? a : itemIdx[nextPos]
+        if (next !== a) {
+          haptic()
+          itemRefs.current[next]?.focus()
+        }
+        setActive(next)
       }
     }
     window.addEventListener('keydown', onKey)
@@ -344,7 +401,7 @@ function Content({ position, children }: ContentProps) {
 
   const menu = (
     <div className="dd-portal" data-exit={closing ? 'true' : 'false'}>
-      <div className="dd-scrim" onClick={() => setOpen(false)} />
+      <div className="dd-scrim" role="presentation" onClick={() => setOpen(false)} />
       <div
         ref={menuRef}
         className="dd-menu"
@@ -372,6 +429,7 @@ function Content({ position, children }: ContentProps) {
               _active: active === i,
               _onActivate: () => setActive(i),
               _select: select,
+              _registerRef: registerItemRef,
             })
           }
           return cloneElement(c, { key: i })
@@ -395,9 +453,10 @@ export interface ItemProps {
   _active?: boolean
   _onActivate?: () => void
   _select?: (onPress?: () => void) => void
+  _registerRef?: (idx: number, el: HTMLButtonElement | null) => void
 }
 
-function Item({
+export function Item({
   icon,
   shortcut,
   children,
@@ -408,12 +467,15 @@ function Item({
   _active,
   _onActivate,
   _select,
+  _registerRef,
 }: ItemProps) {
   return (
     <button
       className={'dd-item' + (destructive ? ' is-destructive' : '')}
       type="button"
       role="menuitem"
+      ref={(el) => { if (_registerRef && _idx !== undefined) _registerRef(_idx, el) }}
+      tabIndex={_active ? 0 : -1}
       data-idx={_idx}
       data-active={_active ? 'true' : 'false'}
       disabled={disabled}
@@ -433,16 +495,14 @@ function Item({
 
 // ── Label / Separator ───────────────────────────────────────────────────
 
-function Label({ children }: { children?: ReactNode }) {
+export function Label({ children }: { children?: ReactNode }) {
   return <div className="dd-label">{children}</div>
 }
 
-function Separator() {
-  return <div className="dd-sep" role="separator" />
+export function Separator() {
+  return <hr className="dd-sep" style={{ border: 'none' }} />
 }
 
-// attach sub-components (composable namespace API)
-export const Dropdown = Object.assign(DropdownBase, { Trigger, Content, Item, Label, Separator })
 
 // ── icon ─────────────────────────────────────────────────────────────────
 
@@ -473,32 +533,32 @@ function Demo() {
           <span className="demo-sub">Edited 2h ago · 48 files</span>
         </span>
 
-        <Dropdown position="auto" duration={260}>
-          <Dropdown.Trigger>
-            <button className="dd-iconbtn" aria-label="More actions">
+        <DropdownBase position="auto" duration={260}>
+          <Trigger ariaLabel="More actions">
+            <span className="dd-iconbtn">
               <Sym name="more_horiz" />
-            </button>
-          </Dropdown.Trigger>
-          <Dropdown.Content>
-            <Dropdown.Label>Actions</Dropdown.Label>
-            <Dropdown.Item icon="edit" shortcut={shortcuts ? '⌘E' : undefined} onPress={() => {}}>
+            </span>
+          </Trigger>
+          <Content>
+            <Label>Actions</Label>
+            <Item icon="edit" shortcut={shortcuts ? '⌘E' : undefined} onPress={() => {}}>
               Rename
-            </Dropdown.Item>
-            <Dropdown.Item icon="content_copy" shortcut={shortcuts ? '⌘D' : undefined} onPress={() => {}}>
+            </Item>
+            <Item icon="content_copy" shortcut={shortcuts ? '⌘D' : undefined} onPress={() => {}}>
               Duplicate
-            </Dropdown.Item>
-            <Dropdown.Item icon="drive_file_move" onPress={() => {}}>
+            </Item>
+            <Item icon="drive_file_move" onPress={() => {}}>
               Move to…
-            </Dropdown.Item>
-            <Dropdown.Item icon="archive" onPress={() => {}}>
+            </Item>
+            <Item icon="archive" onPress={() => {}}>
               Archive
-            </Dropdown.Item>
-            <Dropdown.Separator />
-            <Dropdown.Item icon="delete" destructive shortcut={shortcuts ? '⌫' : undefined} onPress={() => {}}>
+            </Item>
+            <Separator />
+            <Item icon="delete" destructive shortcut={shortcuts ? '⌫' : undefined} onPress={() => {}}>
               Delete
-            </Dropdown.Item>
-          </Dropdown.Content>
-        </Dropdown>
+            </Item>
+          </Content>
+        </DropdownBase>
       </div>
 
       <span className="dd-hint">

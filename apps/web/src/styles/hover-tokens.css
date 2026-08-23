@@ -18,12 +18,14 @@
 
   /* --fp-hover: shared hover-fill token, originally FAB-local. Promoted here
    * so other components (e.g. file-folder, workflow-add-elements) can reuse
-   * the same fill instead of hardcoding local copies. */
+   * the same fill instead of hardcoding local copies. Apple translucent-
+   * overlay model: translucent black on light surfaces, translucent white
+   * on dark surfaces -- flips value under html.dark, not a solid fill. */
   --fp-hover: rgba(17, 17, 17, 0.05);
 }
 
 html.dark {
-  --fp-hover: #242424;
+  --fp-hover: rgba(255, 255, 255, 0.07);
 }
 
 /* ---------------------------------------------------------------------
@@ -37,6 +39,11 @@ html.dark {
  * ------------------------------------------------------------------- */
 :root {
   --hover-standard-bg: var(--fp-hover);
+
+  /* Fixed surface-scoped hover fills for widgets whose look does not follow
+   * the page theme. Never redefine these under html.dark. */
+  --fp-hover-on-dark: rgba(255, 255, 255, 0.07);
+  --fp-hover-on-light: rgba(17, 17, 17, 0.05);
 }
 .hover-standard {
   transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);

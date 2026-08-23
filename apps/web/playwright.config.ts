@@ -21,6 +21,7 @@ export default defineConfig({
     {
       name: 'default',
       use: { ...devices['Desktop Chrome'] },
+      testIgnore: /library-mobile\.spec\.ts/,
     },
     {
       name: 'reduced-motion',
@@ -28,6 +29,13 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         contextOptions: { reducedMotion: 'reduce' },
       },
+      testIgnore: /library-mobile\.spec\.ts/,
+    },
+    {
+      name: 'mobile',
+      // WebKit cannot launch in this environment; Chromium mobile emulation keeps the iPhone 14 viewport/DPR/touch/UA (orchestrator-authorized deviation).
+      use: { ...devices['iPhone 14'], browserName: 'chromium' },
+      testMatch: /library-mobile\.spec\.ts/,
     },
   ],
   expect: {

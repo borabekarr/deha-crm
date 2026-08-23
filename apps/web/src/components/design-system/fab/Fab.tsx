@@ -84,14 +84,31 @@ export default function Fab() {
                 </div>
               </div>
 
-              {/* Blur veil (click to close) */}
-              <div className="fab-veil" onClick={() => toggle(false)} />
+              {/* Blur veil (click to close) — decorative scrim, Escape handles dismissal (fabScreenRef) */}
+              <div className="fab-veil" role="presentation" onClick={() => toggle(false)} />
 
               {/* Morphing FAB */}
-              <div className="fab" onClick={onFabClick}>
-                <span className="fab-plus">
+              <div
+                className="fab"
+                role="presentation"
+                onClick={onFabClick}
+              >
+                <button
+                  type="button"
+                  className="fab-plus"
+                  style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer' }}
+                  tabIndex={open ? -1 : 0}
+                  aria-expanded={open}
+                  aria-label="Quick create"
+                  onKeyDown={(e) => {
+                    if (!open && (e.key === 'Enter' || e.key === ' ')) {
+                      e.preventDefault()
+                      onFabClick()
+                    }
+                  }}
+                >
                   <span className="material-icons">add</span>
-                </span>
+                </button>
 
                 <div className="fab-menu">
 
@@ -120,8 +137,16 @@ export default function Fab() {
                   {/* New lead — emerald */}
                   <div
                     className="fab-item" data-proximity
+                    role="menuitem"
+                    tabIndex={0}
                     style={{ '--ic-bg': '#10B981' } as React.CSSProperties}
                     onClick={(e) => onPickItem(e)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        onPickItem(e as unknown as React.MouseEvent)
+                      }
+                    }}
                   >
                     <div className="fab-item-ic">
                       <span className="material-symbols-outlined">person_add</span>
@@ -136,8 +161,16 @@ export default function Fab() {
                   {/* Log activity — blue */}
                   <div
                     className="fab-item" data-proximity
+                    role="menuitem"
+                    tabIndex={0}
                     style={{ '--ic-bg': '#3B82F6' } as React.CSSProperties}
                     onClick={(e) => onPickItem(e)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        onPickItem(e as unknown as React.MouseEvent)
+                      }
+                    }}
                   >
                     <div className="fab-item-ic">
                       <span className="material-symbols-outlined">bolt</span>
@@ -152,8 +185,16 @@ export default function Fab() {
                   {/* Create task — violet */}
                   <div
                     className="fab-item" data-proximity
+                    role="menuitem"
+                    tabIndex={0}
                     style={{ '--ic-bg': '#8B5CF6' } as React.CSSProperties}
                     onClick={(e) => onPickItem(e)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        onPickItem(e as unknown as React.MouseEvent)
+                      }
+                    }}
                   >
                     <div className="fab-item-ic">
                       <span className="material-symbols-outlined">check_circle</span>
@@ -168,8 +209,16 @@ export default function Fab() {
                   {/* New deal — orange */}
                   <div
                     className="fab-item" data-proximity
+                    role="menuitem"
+                    tabIndex={0}
                     style={{ '--ic-bg': '#F97316' } as React.CSSProperties}
                     onClick={(e) => onPickItem(e)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        onPickItem(e as unknown as React.MouseEvent)
+                      }
+                    }}
                   >
                     <div className="fab-item-ic">
                       <span className="material-symbols-outlined">handshake</span>

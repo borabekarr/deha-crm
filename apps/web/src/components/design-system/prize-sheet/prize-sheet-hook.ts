@@ -33,7 +33,7 @@ const DPR = Math.min(typeof window !== 'undefined' ? window.devicePixelRatio || 
 
 // ── Confetti engine ────────────────────────────────────────────────────────
 
-export function makeConfetti(canvas: HTMLCanvasElement): ConfettiEngine {
+function makeConfetti(canvas: HTMLCanvasElement): ConfettiEngine {
   const ctx = canvas.getContext('2d')!
   let parts: ConfettiPart[] = []
   let raf: number | null = null

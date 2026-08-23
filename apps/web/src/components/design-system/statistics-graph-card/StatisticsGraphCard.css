@@ -144,7 +144,7 @@ html.dark .sg-inner::before {
   overflow: hidden;
   /* Same duration token the status-card hover darkening uses, so the
      grey-hover fade isn't instant. */
-  transition: background calc(var(--duration-base) * var(--anim-mult, 1));
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
 html.dark .sg-inner {
   background: var(--card-bg, #111111);
@@ -228,14 +228,18 @@ html.dark .sg-card.filters-open .sg-scrim { background: rgba(2,6,23,0.40); }
   transform: translate(-50%, calc(-50% + 12px)) scale(0.95);
   transform-origin: 50% 50%;
   pointer-events: none; visibility: hidden;
-  transition: opacity calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-out-soft), transform calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out-soft), visibility 0s /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */ var(--ease-linear) calc(var(--duration-sweep) * var(--anim-mult, 1));
+  /* Popover family (faster-exits rule, plan: faster-exits-rule step 3): the
+     hidden state is the exit leg -- opacity/transform/visibility-delay run
+     on --popover-exit-dur (one tier faster than the popover open band).
+     The open leg below still runs on the entrance token. */
+  transition: opacity calc(var(--popover-exit-dur) * var(--anim-mult, 1)) var(--tooltip-ease), transform calc(var(--popover-exit-dur) * var(--anim-mult, 1)) var(--popover-ease), visibility 0s /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */ var(--ease-linear) calc(var(--popover-exit-dur) * var(--anim-mult, 1));
 }
 html.dark .sg-rangepop {
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.04);
 }
 .sg-card.filters-open .sg-rangepop {
   opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; visibility: visible;
-  transition: opacity calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-out-soft), transform calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out-soft);
+  transition: opacity calc(var(--popover-dur) * var(--anim-mult, 1)) var(--tooltip-ease), transform calc(var(--popover-dur) * var(--anim-mult, 1)) var(--popover-ease);
 }
 .sg-poplabel {
   display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -259,19 +263,19 @@ html.dark .sg-rangepop {
   left: 4px; right: 4px; width: auto; top: 10px; bottom: auto; height: 0; border-radius: 9999px;
   transition: top calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out), height calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out);
 }
-.sg-rangepop .seg.vert button { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 8px 16px; text-align: center; border-radius: 9999px; font-size: 12px; transition: color calc(var(--duration-200) * var(--anim-mult, 1)), background calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out),
+.sg-rangepop .seg.vert button { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 8px 16px; text-align: center; border-radius: 9999px; font-size: 12px; transition: color calc(var(--duration-200) * var(--anim-mult, 1)), background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear; }
 .sg-rangepop .seg.vert button .material-symbols-outlined { font-size: 16px; }
-.sg-rangepop .seg.vert button:not(.active):hover { color: var(--fg1, #111111); background: rgba(17,17,17,0.05); }
-html.dark .sg-rangepop .seg.vert button:not(.active):hover { color: #fff; background: rgba(255,255,255,0.07); }
+.sg-rangepop .seg.vert button:not(.active):hover { color: var(--fg1, #111111); background: var(--fp-hover); }
+html.dark .sg-rangepop .seg.vert button:not(.active):hover { color: #fff; }
 .sg-rangepop .seg.vert button:active { transform: scale(0.96); }
 /* brief highlight pulse on the just-picked option */
 .sg-rangepop .seg.vert button.just-picked { animation: sg-pick calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-spring); }
 @keyframes sg-pick { 0%{ transform: scale(0.96);} 45%{ transform: scale(1.04);} 100%{ transform: scale(1);} }
 
 /* "applying…" loader bar — collapses to zero height when idle so it adds no bottom space */
-/* ITEM 5 — speed reduced to ~450ms to match hook setTimeout */
+/* ITEM 5 — speed reduced to ~450ms to match hook setTimeout — motion-sweep: kept, external JS setTimeout reference, not a CSS duration token */
 .sg-poploader { height: 0; border-radius: 9999px; margin: 0 6px; background: var(--bg-chip, #F5F5F5); overflow: hidden; opacity: 0; transition: opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade), height calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade), margin calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade); }
 html.dark .sg-poploader { background: rgba(255,255,255,0.08); }
 .sg-poploader::after { content: ''; display: block; height: 100%; width: 0; border-radius: inherit; background: var(--accent); }
@@ -292,7 +296,7 @@ html.dark .sg-poploader { background: rgba(255,255,255,0.08); }
   padding: 4px 9px; line-height: 1;
   box-shadow: 0 1px 2px rgba(0,0,0,0.18);
   /* overshoot bounce on press -- same cubic as canonical .seg-pill transition */
-  transition: transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-spring), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)), background calc(var(--duration-base) * var(--anim-mult, 1)),
+  transition: transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-spring), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)), background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
 }
@@ -369,7 +373,7 @@ html.dark .sg-meter-track::after { background-image: linear-gradient(90deg, rgba
   box-shadow: 0 8px 22px -8px var(--ctaglow), inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -2px 0 rgba(0,0,0,0.22), inset 0 0 0 1px rgba(255,255,255,0.14);
   transition: filter calc(var(--duration-200) * var(--anim-mult, 1)), transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring), box-shadow calc(var(--duration-200) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
-  /* note: filter already listed above (200ms channel) covers the incoming
+  /* note: filter already listed above (--duration-200 channel) covers the incoming
      --prox brightness/drop-shadow filter -- no separate filter-instant
      channel needed here, unlike other wired elements. */
 }

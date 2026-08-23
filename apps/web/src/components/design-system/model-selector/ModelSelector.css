@@ -110,8 +110,8 @@
     cursor: pointer;
     /* ① Click/press feedback + box-shadow settle */
     transition:
-      box-shadow calc(150ms * var(--anim-mult, 1)),
-      transform calc(120ms * var(--anim-mult, 1)) var(--ease-out);
+      box-shadow calc(var(--duration-150) * var(--anim-mult, 1)),
+      transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out);
   }
   .ms-header:active { transform: scale(var(--press-card)); }
   .ms-header:focus-visible {
@@ -126,7 +126,8 @@
       linear-gradient(rgba(255,255,255,0.13) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255,255,255,0.13) 1px, transparent 1px);
     background-size: cover, 5px 5px, 5px 5px;
-    transition: background-color calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out);
+    /* hover-fill background leg standardized per the no-exceptions ruling */
+    transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
   }
   .ms-t-icon-tag .material-icons,
   .ms-t-icon-tag .material-symbols-outlined {
@@ -171,6 +172,12 @@
     flex-direction: column;
     gap: 8px;
   }
+
+  /* faster-exits sweep: kept symmetric on purpose (global rule exception) --
+     this collapse toggle is a single CSS transition keyed off `.open`, not a
+     JS-driven open/closing phase machine, so the same duration token
+     necessarily governs both directions by CSS mechanics; no per-file
+     selector exists to split an exit-only leg without adding a new class. */
 
   /* Divider + panel crossfade in/out with the collapse (own transition,
      independent of the wrapper's imperative height transition above).
@@ -243,7 +250,7 @@
     padding: 12px 14px;
     cursor: pointer; user-select: none;
     position: relative;
-    transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out);
+    transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out);
   }
   .ms-row::after {
     content: ''; position: absolute;

@@ -7,11 +7,14 @@ import { useAutoHeight } from '@/lib/hooks/use-auto-height';
 import { useSquircle } from '@/lib/hooks/use-squircle';
 import { useProximityGroup } from '@/lib/hooks';
 import { makeTaskBoardTimers, type SyncPhase, type TaskBoardTimers } from './task-board-hook';
+import { reorderTask } from './task-board-reducer';
+import { WeekRow } from './TaskBoardWeekRow';
+import { useWeekRow } from './task-board-week-hook';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
-interface Task {
+export interface Task {
   id: string;
   title: string;
   importance: 'ui' | 'urgent' | 'important';
@@ -38,21 +41,9 @@ const IMPORTANCE: Record<string, { label: string; color: string; cls: string }> 
 };
 const IMPORTANCE_KEYS = Object.keys(IMPORTANCE) as Array<keyof typeof IMPORTANCE>;
 
-const DOW = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
-
-// Today's index — computed once at module level, Mon=0…Sun=6.
-const TODAY_IDX = (new Date().getDay() + 6) % 7;
-
-// Builds the Mon–Sun span for the week `offset` weeks from the current one
-// (Step 5: week navigation arrows shift this offset, keeping activeDayIdx
-// fixed so the same weekday stays selected across the jump).
-function buildWeekDays(offset: number): Date[] {
-  const monday = new Date();
-  monday.setDate(monday.getDate() - TODAY_IDX + offset * 7);
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(monday); d.setDate(monday.getDate() + i); return d;
-  });
-}
+// DOW, TODAY_IDX, buildWeekDays, WeekRow and its state hook now live in
+// ./TaskBoardWeekRow + ./task-board-week-hook (react-doctor no-giant-component extraction — same
+// local pattern as task-board-reducer.ts / task-board-hook.ts).
 
 const INITIAL_TASKS: Task[] = [
   { id: 't1',  title: 'Investigate billing webhook timeout',        importance: 'ui',        day: 0, col: 'todo' },
@@ -244,20 +235,7 @@ function Toast({
     <div
       ref={toastRef}
       className={`tb-toast ${phase === 'out' ? 'tb-toast-out' : 'tb-toast-in'}`}
-      style={{
-        display: 'inline-flex', alignItems: 'center', gap: 10,
-        padding: '9px 10px 9px 12px',
-        borderRadius: 14,
-        background: cfg.bg,
-        backgroundImage: 'linear-gradient(rgba(255,255,255,0.10) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.10) 1px, transparent 1px)',
-        backgroundSize: '7px 7px',
-        color: '#fff',
-        fontSize: 12.5, fontWeight: 700,
-        letterSpacing: '-0.005em',
-        boxShadow: '0 8px 24px -6px rgba(17,17,17,0.35), inset 0 1px 0 rgba(255,255,255,0.20)',
-        maxWidth: 360,
-        whiteSpace: 'nowrap',
-      }}
+      style={{ background: cfg.bg }}
     >
       <SymIcon name="check_circle" size={15} />
       <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{message}</span>
@@ -266,11 +244,7 @@ function Toast({
           type="button"
           onClick={onUndo}
           data-proximity
-          style={{
-            padding: '3px 9px', borderRadius: 8,
-            background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.30)',
-            color: '#fff', fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
-          }}
+          className="tb-toast-undo"
         >
           Undo
         </button>
@@ -280,12 +254,7 @@ function Toast({
         onClick={onClose}
         aria-label="Dismiss"
         data-proximity
-        style={{
-          width: 22, height: 22, padding: 0, flexShrink: 0,
-          background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)',
-          borderRadius: 8, color: 'rgba(255,255,255,0.85)',
-          cursor: 'pointer', display: 'grid', placeItems: 'center',
-        }}
+        className="tb-toast-dismiss"
       >
         <SymIcon name="close" size={13} />
       </button>
@@ -453,17 +422,6 @@ function Column({
           }
         }));
       }}
-      style={{
-        background: 'var(--tb-col-bg)',
-        border: 'var(--tb-col-dash)',
-        borderRadius: 12,
-        padding: 10,
-        display: 'flex', flexDirection: 'column', gap: 14,
-        height: 380,
-        boxSizing: 'border-box',
-        overflow: 'hidden',
-        transition: 'background calc(var(--duration-base) * var(--anim-mult, 1)), outline-color calc(var(--duration-base) * var(--anim-mult, 1))',
-      }}
     >
       {/* Column header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 2px 0', flexShrink: 0 }}>
@@ -505,14 +463,6 @@ function Column({
           <div
             aria-hidden="true"
             className="tb-fade tb-fade-top"
-            style={{
-              position: 'absolute',
-              top: 0, left: 2, right: 6,
-              height: 44,
-              background: 'linear-gradient(to top, var(--tb-fade1) 0%, var(--tb-fade2) 58%, var(--tb-fade3) 100%)',
-              pointerEvents: 'none',
-              zIndex: 2,
-            }}
           />
         )}
 
@@ -550,9 +500,10 @@ function Header({ total }: { total: number }) {
     // Flat flex row — inner container div removed (feedback #6)
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '18px 20px 16px' }}>
       <h1 style={headerTitleStyle}>
-        {/* Same glyph as the live-count badge below ('assignment'), rendered
-            ~1.3x the badge icon's 13px so header and badge read as one family. */}
-        <span className={iconClass('assignment')} aria-hidden style={{ fontSize: 17, lineHeight: 1, fontVariationSettings: '"opsz" 24, "wght" 500' }}>assignment</span>
+        {/* Same glyph as the live-count badge below ('assignment'); bumped
+            17px -> 21px (F13) for a clearly larger header icon while staying
+            proportionate to the 19px title text next to it. */}
+        <span className={iconClass('assignment')} aria-hidden style={{ fontSize: 21, lineHeight: 1, fontVariationSettings: '"opsz" 24, "wght" 500' }}>assignment</span>
         Task Board
       </h1>
       {/* Round live-count badge — recipe from message-dropdown's .md-trigger-badge
@@ -568,48 +519,6 @@ function Header({ total }: { total: number }) {
           AI Sync
         </span>
       </div>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Week pill row (Change 3) — mirrors todo-list's weekDays + activeIdx pattern
-// and .td-daybtn recipe (todo-list/TodoList.tsx / TodoList.css), local tb- names.
-// ---------------------------------------------------------------------------
-function WeekRow({
-  weekDays,
-  activeIdx,
-  onSelect,
-  onPrevWeek,
-  onNextWeek,
-}: {
-  weekDays: Date[];
-  activeIdx: number;
-  onSelect: (i: number) => void;
-  onPrevWeek: () => void;
-  onNextWeek: () => void;
-}) {
-  return (
-    <div className="tb-week-row">
-      <button type="button" data-proximity className="tb-week-nav" aria-label="Previous week" onClick={onPrevWeek}>
-        <SymIcon name="chevron_left" size={16} />
-      </button>
-      <div className="tb-week">
-        {weekDays.map((d, i) => (
-          <button
-            key={d.toISOString().slice(0, 10)}
-            type="button"
-            className={`tb-daybtn hover-standard${i === activeIdx ? ' active' : ''}`}
-            onClick={() => onSelect(i)}
-          >
-            <span className="dow">{DOW[i]}</span>
-            <span className="dnum">{d.getDate()}</span>
-          </button>
-        ))}
-      </div>
-      <button type="button" data-proximity className="tb-week-nav" aria-label="Next week" onClick={onNextWeek}>
-        <SymIcon name="chevron_right" size={16} />
-      </button>
     </div>
   );
 }
@@ -887,6 +796,8 @@ function buildSequence(args: {
 // ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
+const COL_RANK: Record<string, number> = { todo: 0, progress: 1, review: 2, done: 3 };
+
 export default function TaskBoard() {
   const [tasks, setTasks]               = React.useState<Task[]>(INITIAL_TASKS);
   const [phase, setPhase]               = React.useState<SyncPhase>('idle');
@@ -901,13 +812,12 @@ export default function TaskBoard() {
   const [syncBtnAnim, setSyncBtnAnim]   = React.useState<string | null>(null);
   // hasUndo tracks whether undoRef holds a value — avoids reading .current during render
   const [hasUndo, setHasUndo]           = React.useState(false);
-  // Week-day + badge filters (Change 3) — today active by default, both compose (AND)
-  const [activeDayIdx, setActiveDayIdx] = React.useState(TODAY_IDX);
+  // Week-day + badge filters (Change 3) — today active by default, both compose (AND).
+  // Week-pill state (weekDays/weekDays2/activePillIdx/activeWeekday + arrow
+  // handlers) lives in useWeekRow (./task-board-week-hook) — extraction, no
+  // behavior change.
+  const { weekDays, weekDays2, activePillIdx, setActivePillIdx, activeWeekday, onPrevWeek, onNextWeek } = useWeekRow();
   const [activeBadge, setActiveBadge]   = React.useState<'all' | keyof typeof IMPORTANCE>('all');
-  // Week navigation (Step 5) — offset in whole weeks from the current one;
-  // activeDayIdx is untouched by the jump so the selected weekday carries over.
-  const [weekOffset, setWeekOffset]     = React.useState(0);
-  const weekDays = React.useMemo(() => buildWeekDays(weekOffset), [weekOffset]);
 
   // Refs for mutable state that timers need to read without stale closures
   const undoRef            = React.useRef<{ id: string; from: string; fromIdx: number } | null>(null);
@@ -930,13 +840,11 @@ export default function TaskBoard() {
     timersApiRef.current?.registerSyncTimer(t);
   }, []);
 
-  const COL_RANK: Record<string, number> = { todo: 0, progress: 1, review: 2, done: 3 };
-
-  // FLIP helpers — capture card positions before a reorder, animate after the commit.
+  // Manual drop / undo / sync-reset all land here. No FLIP slide: the destination
+  // card settles in place and the success wash (see triggerMoveEffects) alone signals
+  // the move, matching the sprint planner's drop treatment (F15, 2026-08-23).
   const moveTasks = React.useCallback((updater: (curr: Task[]) => Task[]) => {
-    timersApiRef.current?.captureFlip();
     setTasks(updater);
-    timersApiRef.current?.scheduleFlip();
   }, []);
 
   // ---- Manual drag/drop ----
@@ -966,24 +874,7 @@ export default function TaskBoard() {
     const insertIdx = isForward ? 0 : (taskHistoryRef.current[draggingId]?.[colId] ?? 0);
     const draggedId = draggingId;
 
-    moveTasks((curr) => {
-      const moved   = { ...curr.find((t) => t.id === draggedId)!, col: colId };
-      const others  = curr.filter((t) => t.id !== draggedId);
-      const result: Task[] = [];
-      let destSeen = 0;
-      let placed   = false;
-      for (const t of others) {
-        if (t.col === colId) {
-          if (!placed && destSeen === insertIdx) { result.push(moved); placed = true; }
-          result.push(t);
-          destSeen++;
-        } else {
-          result.push(t);
-        }
-      }
-      if (!placed) result.push(moved);
-      return result;
-    });
+    moveTasks((curr) => reorderTask(curr, draggedId, colId, insertIdx));
 
     triggerMoveEffects(draggingId, fromCol, colId, oldIdxInFromCol, task.title);
     setDraggingId(null);
@@ -994,24 +885,8 @@ export default function TaskBoard() {
     const u = undoRef.current;
     if (!u) return;
     moveTasks((curr) => {
-      const target = curr.find((t) => t.id === u.id);
-      if (!target) return curr;
-      const others = curr.filter((t) => t.id !== u.id);
-      const moved  = { ...target, col: u.from };
-      const result: Task[] = [];
-      let destSeen = 0;
-      let placed   = false;
-      for (const t of others) {
-        if (t.col === u.from) {
-          if (!placed && destSeen === (u.fromIdx ?? 0)) { result.push(moved); placed = true; }
-          result.push(t);
-          destSeen++;
-        } else {
-          result.push(t);
-        }
-      }
-      if (!placed) result.push(moved);
-      return result;
+      if (!curr.some((t) => t.id === u.id)) return curr;
+      return reorderTask(curr, u.id, u.from, u.fromIdx ?? 0);
     });
     undoRef.current = null;
     setHasUndo(false);
@@ -1052,33 +927,29 @@ export default function TaskBoard() {
   // The updater captures from-column info into locals so the success wash + toast
   // can fire afterward with the same values.
   const syncMove = React.useCallback((id: string, toCol: string) => {
-    let moveInfo: { fromCol: string; oldIdx: number; title: string } | null = null;
+    // Read the committed `tasks` state directly (same pattern onDrop uses
+    // above) to derive from-column info, instead of writing to a captured
+    // variable inside the setTasks updater.
+    const task = tasks.find((t) => t.id === id);
+    if (!task || task.col === toCol) return;
+    const fromCol = task.col;
+    const oldIdx  = tasks.filter((t) => t.col === fromCol).findIndex((t) => t.id === id);
+    const title   = task.title;
+
+    // Intentionally kept: this is the automated Slack/GitHub/Notion sync spectacle,
+    // not a user-driven drag. Bora's complaint (F15) was about manual drag-drop only;
+    // the FLIP slide here visualizes an external system moving the card, which is a
+    // different signal than a hand-dropped card and was left untouched.
     timersApiRef.current?.captureFlip();
     setTasks((c) => {
-      const task = c.find((t) => t.id === id);
-      if (!task || task.col === toCol) return c;
-      const fromCol = task.col;
-      const oldIdx  = c.filter((t) => t.col === fromCol).findIndex((t) => t.id === id);
-      moveInfo = { fromCol, oldIdx, title: task.title };
-
-      const others = c.filter((t) => t.id !== id);
-      const moved  = { ...task, col: toCol };
-      const result: Task[] = [];
-      let placed = false;
-      for (const t of others) {
-        if (!placed && t.col === toCol) { result.push(moved); placed = true; }
-        result.push(t);
-      }
-      if (!placed) result.push(moved);
-      return result;
+      const cur = c.find((t) => t.id === id);
+      if (!cur || cur.col === toCol) return c;
+      return reorderTask(c, id, toCol, 0);
     });
     timersApiRef.current?.scheduleFlip();
 
-    if (moveInfo) {
-      const { fromCol, oldIdx, title } = moveInfo;
-      triggerMoveEffects(id, fromCol, toCol, oldIdx, title);
-    }
-  }, [triggerMoveEffects]);
+    triggerMoveEffects(id, fromCol, toCol, oldIdx, title);
+  }, [tasks, triggerMoveEffects]);
 
   const startSync = () => {
     timersApiRef.current?.clearSyncTimers();
@@ -1102,10 +973,13 @@ export default function TaskBoard() {
     });
   };
 
-  // Derived — day + badge filters compose (AND) before grouping by column
+  // Derived — day + badge filters compose (AND) before grouping by column.
+  // activeWeekday (from useWeekRow) is weekday-only — byte-identical to the
+  // pre-Step-5 single-week filter for the same weekday, regardless of which
+  // of the 14 pills (week 1 or week 2) is visually active.
   const filteredTasks = React.useMemo(
-    () => tasks.filter((t) => t.day === activeDayIdx && (activeBadge === 'all' || t.importance === activeBadge)),
-    [tasks, activeDayIdx, activeBadge],
+    () => tasks.filter((t) => t.day === activeWeekday && (activeBadge === 'all' || t.importance === activeBadge)),
+    [tasks, activeWeekday, activeBadge],
   );
   const tasksByCol = React.useMemo(() => {
     const map = Object.fromEntries(COLUMNS.map((c) => [c.id, [] as Task[]]));
@@ -1148,10 +1022,11 @@ export default function TaskBoard() {
 
         <WeekRow
           weekDays={weekDays}
-          activeIdx={activeDayIdx}
-          onSelect={setActiveDayIdx}
-          onPrevWeek={() => setWeekOffset((o) => o - 1)}
-          onNextWeek={() => setWeekOffset((o) => o + 1)}
+          weekDays2={weekDays2}
+          activePillIdx={activePillIdx}
+          onSelect={setActivePillIdx}
+          onPrevWeek={onPrevWeek}
+          onNextWeek={onNextWeek}
         />
         <BadgeFilterRow active={activeBadge} onSelect={setActiveBadge} />
 

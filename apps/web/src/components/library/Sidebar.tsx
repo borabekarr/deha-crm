@@ -6,6 +6,11 @@ const grouped = getGroupedByStatus()
 
 type StatusGroups = Map<string, Map<string, RegistryEntry[]>>
 
+interface SidebarContentProps {
+  activeSlug?: string
+  onNavigate?: () => void
+}
+
 interface SidebarProps {
   activeSlug?: string
 }
@@ -38,12 +43,12 @@ function statusCount(sub: Map<string, RegistryEntry[]>): number {
   return n
 }
 
-export function Sidebar({ activeSlug }: SidebarProps) {
+export function SidebarContent({ activeSlug, onNavigate }: SidebarContentProps) {
   const [query, setQuery] = useState('')
   const filtered = filterGroups(query)
 
   return (
-    <aside className="flex w-56 shrink-0 flex-col gap-4 border-r border-border bg-background px-3 py-4">
+    <>
       {/* Brand */}
       <div className="px-1">
         <Link to="/" className="text-sm font-semibold tracking-tight text-foreground hover:text-foreground/80">
@@ -94,6 +99,7 @@ export function Sidebar({ activeSlug }: SidebarProps) {
                         <Link
                           to="/components/$slug"
                           params={{ slug: entry.slug }}
+                          onClick={onNavigate}
                           className={[
                             'block rounded-md px-2 py-1.5 text-sm transition-colors',
                             isActive
@@ -112,6 +118,14 @@ export function Sidebar({ activeSlug }: SidebarProps) {
           </div>
         ))}
       </nav>
+    </>
+  )
+}
+
+export function Sidebar({ activeSlug }: SidebarProps) {
+  return (
+    <aside className="hidden md:flex w-56 shrink-0 flex-col gap-4 border-r border-border bg-background px-3 py-4">
+      <SidebarContent activeSlug={activeSlug} />
     </aside>
   )
 }

@@ -45,6 +45,23 @@
    OtpInput.css / DisclosureGroup.css's per-component stage normalize. */
 .xc-root {
   line-height: normal;
+  /* Step-4 no-inline-exhaustive-style migration (plan: security-deps-doctor-p2)
+     -- static root layout moved from inline style; CARD_WIDTH_EXPANDED (420)
+     inlined verbatim, the same fixed constant the TSX used. Fixed-width grid
+     columns give each card its own reserved footprint at its largest
+     (expanded) size so a card growing inside its own column never shifts
+     its siblings -- the isolation a centered flex row would break. */
+  min-height: 100vh;
+  box-sizing: border-box;
+  background: #FFFFFF;
+  background-image: radial-gradient(ellipse at top right, rgba(16,185,129,0.08) 0%, rgba(248,250,252,1) 50%, #FFFFFF 100%);
+  font-family: var(--font-display);
+  display: grid;
+  grid-template-columns: repeat(3, 420px);
+  align-items: start;
+  justify-content: center;
+  gap: 28px;
+  padding: 72px 48px;
 }
 
 /* Resting (pre-effect) state of the useAutoHeight-owned content wrapper.
@@ -55,6 +72,18 @@
 .xc-content {
   height: 0;
   overflow: hidden;
+}
+
+/* Step-4 no-inline-exhaustive-style migration (plan: security-deps-doctor-p2). */
+.xc-avatar {
+  width: 32px; height: 32px; border-radius: 50%; background: var(--xc-avatar-bg);
+  color: #fff; display: inline-grid; place-items: center; font-size: 11px; font-weight: 900;
+  border: 2px solid #fff; margin-left: -6px;
+  box-shadow: inset 0 -1.5px 0 rgba(0,0,0,0.18); text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+}
+.xc-track {
+  flex: 1; height: 5px; border-radius: 9999px; background: #F1F5F9;
+  overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.06);
 }
 
 /* CTA hover fix: .btn-green (Join meeting) is width:100% inside .card-inner,
@@ -210,15 +239,10 @@
     inset 0 -1.5px 0 rgba(0, 0, 0, 0.18),
     0 0 10px -3px var(--fbtn, #0f172a);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  /* 150ms below is the raw _buttons.css literal for these three
-     properties -- no motion-tokens.css tier lands on it exactly
-     (--duration-fast=120ms, --duration-base=160ms), so per
-     CONVERSION-SOP ("never mint tokens, never change values") it stays a
-     literal, same precedent as ExpandableScreen.tsx's FLIP_EASE. */
   transition:
-    border-color calc(150ms * var(--anim-mult, 1)),
-    color calc(150ms * var(--anim-mult, 1)),
-    background calc(150ms * var(--anim-mult, 1)),
+    border-color calc(var(--duration-150) * var(--anim-mult, 1)),
+    color calc(var(--duration-150) * var(--anim-mult, 1)),
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
     box-shadow calc(var(--duration-base) * var(--anim-mult, 1));
 }
@@ -251,12 +275,12 @@
   border: 1.5px solid #cbd5e1;
   transition:
     border-color calc(var(--duration-base) * var(--anim-mult, 1)),
-    background-color calc(var(--duration-base) * var(--anim-mult, 1)),
+    background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
     box-shadow calc(var(--duration-base) * var(--anim-mult, 1));
 }
 .btn-discuss:hover {
-  background: rgba(15, 23, 42, 0.06);
+  background: var(--fp-hover);
   border-color: #64748b;
   transform: translateY(-1px);
   box-shadow: 0 6px 18px -4px rgba(100, 116, 139, 0.22);

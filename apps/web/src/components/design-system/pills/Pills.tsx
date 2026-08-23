@@ -1,28 +1,67 @@
 import '../../../../design-system/preview/_base.css'
-import '../../../../design-system/preview/_controls.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './Pills.css'
 
 import { useProximityGroup } from '@/lib/hooks'
+import {
+  COLUMN_TAGS,
+  EVENT_BADGES,
+  ICON_BADGES,
+  PRIORITY_PILLS,
+  STAT_BADGES,
+  type ColumnTagSpec,
+  type EventBadgeSpec,
+  type IconBadgeSpec,
+  type PriorityPillSpec,
+  type StatBadgeSpec,
+} from './variants'
 
-const EVENT_BADGES = [
-  { color: '#EC4899', icon: 'self_improvement', label: 'Personal' },
-  { color: '#3B82F6', icon: 'event', label: 'Meeting' },
-  { color: '#F97316', icon: 'call', label: 'Call' },
-  { color: 'var(--brand-primary-500)', icon: 'task_alt', label: 'Done' },
-  { color: '#EF4444', icon: 'warning', label: 'Urgent' },
-  { color: '#111111', icon: 'lock', label: 'Private', tone: 'black' },
-  { color: '#EAB308', icon: 'star', label: 'Featured' },
-]
+// ---------------------------------------------------------------------------
+// Importable Pill/Badge specimens (Toast-style split: data lives in
+// variants.ts, this module exports only components).
+// ---------------------------------------------------------------------------
 
-const ICON_BADGES = [
-  { color: 'var(--brand-primary-500)', icon: 'bolt' },
-  { color: '#EF4444', icon: 'favorite' },
-  { color: '#F97316', icon: 'schedule' },
-  { color: '#3B82F6', icon: 'insights' },
-  { color: '#EAB308', icon: 'lock' },
-  { color: '#111111', icon: 'dark_mode', tone: 'black' },
-]
+export function PriorityPill({ color, label }: PriorityPillSpec) {
+  return (
+    <span className="pill-priority" data-proximity>
+      <span className="dot" style={{ background: color }}></span> {label}
+    </span>
+  )
+}
+
+export function StatBadge({ tone, icon, prefix, label }: StatBadgeSpec) {
+  return (
+    <span className={`badge ${tone}`}>
+      {prefix ? <span>{prefix}</span> : icon ? <span className="material-icons">{icon}</span> : null}
+      {' '}
+      {label}
+    </span>
+  )
+}
+
+export function ColumnTagBadge({ tone, icon, label, count }: ColumnTagSpec) {
+  return (
+    <span className={`badge col-tag ${tone}`}>
+      <span className="material-icons">{icon}</span> {label} <span className="count">{count}</span>
+    </span>
+  )
+}
+
+export function EventBadge({ color, icon, label, tone }: EventBadgeSpec) {
+  return (
+    <span className="badge-event" data-tone={tone} style={{ backgroundColor: color }}>
+      <span className="material-icons">{icon}</span> {label}
+    </span>
+  )
+}
+
+export function IconBadge({ color, icon, tone }: IconBadgeSpec) {
+  return (
+    <div className="icon-badge icon-badge--lg" data-tone={tone} style={{ '--icon-c': color } as React.CSSProperties}>
+      <span className="material-icons">{icon}</span>
+    </div>
+  )
+}
 
 export default function Pills() {
   const filterRowRef = useProximityGroup<HTMLDivElement>()
@@ -31,45 +70,36 @@ export default function Pills() {
     <div className="card">
       <span className="pills-label">Priority filter</span>
       <div className="pills-row" ref={filterRowRef}>
-        <span className="pill-priority" data-proximity><span className="dot" style={{ background: '#EF4444' }}></span> Yüksek</span>
-        <span className="pill-priority" data-proximity><span className="dot" style={{ background: '#EAB308' }}></span> Orta</span>
-        <span className="pill-priority" data-proximity><span className="dot" style={{ background: 'var(--brand-primary-500)' }}></span> Düşük</span>
+        {PRIORITY_PILLS.map((spec) => (
+          <PriorityPill key={spec.label} {...spec} />
+        ))}
         <span className="pill-tab dark" data-proximity>Tümü</span>
       </div>
 
       <span className="pills-label" style={{ marginTop: 16 }}>Stat badges</span>
       <div className="pills-row">
-        <span className="badge success"><span className="material-icons">trending_up</span> +12%</span>
-        <span className="badge danger"><span className="material-icons">trending_down</span> -34%</span>
-        <span className="badge gci"><span>$</span> 45K GCI</span>
-        <span className="badge time"><span className="material-icons">schedule</span> 12:00</span>
-        <span className="badge tag"><span className="material-icons">home_work</span> Değerleme</span>
-        <span className="badge tag"><span className="material-icons">sell</span> Satış</span>
-        <span className="badge tag"><span className="material-icons">volunteer_activism</span> Nurture</span>
+        {STAT_BADGES.map((spec) => (
+          <StatBadge key={spec.label} {...spec} />
+        ))}
       </div>
       <span className="pills-label" style={{ marginTop: 16 }}>Task board column tags</span>
       <div className="pills-row">
-        <span className="badge col-tag todo"><span className="material-icons">inbox</span> Todo <span className="count">4</span></span>
-        <span className="badge col-tag progress"><span className="material-icons">bolt</span> In Progress <span className="count">3</span></span>
-        <span className="badge col-tag review"><span className="material-icons">visibility</span> Review <span className="count">2</span></span>
-        <span className="badge col-tag done"><span className="material-icons">task_alt</span> Done <span className="count">3</span></span>
+        {COLUMN_TAGS.map((spec) => (
+          <ColumnTagBadge key={spec.tone} {...spec} />
+        ))}
       </div>
 
       <span className="pills-label" style={{ marginTop: 16 }}>Event badges</span>
       <div className="pills-row">
-        {EVENT_BADGES.map(({ color, icon, label, tone }) => (
-          <span key={label} className="badge-event" data-tone={tone} style={{ backgroundColor: color }}>
-            <span className="material-icons">{icon}</span> {label}
-          </span>
+        {EVENT_BADGES.map((spec) => (
+          <EventBadge key={spec.label} {...spec} />
         ))}
       </div>
 
       <span className="pills-label" style={{ marginTop: 16 }}>Icon badges</span>
       <div className="pills-row">
-        {ICON_BADGES.map(({ color, icon, tone }) => (
-          <div key={icon} className="icon-badge icon-badge--lg" data-tone={tone} style={{ '--icon-c': color } as React.CSSProperties}>
-            <span className="material-icons">{icon}</span>
-          </div>
+        {ICON_BADGES.map((spec) => (
+          <IconBadge key={spec.icon} {...spec} />
         ))}
       </div>
     </div>

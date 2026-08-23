@@ -37,14 +37,19 @@ html.dark .ldx-overlay {
   width: min(640px, calc(100vw - 28px)); max-height: calc(100vh - 36px);
   display: flex; flex-direction: column;
   box-shadow: 0 36px 90px rgba(0,0,0,0.30), 0 8px 24px rgba(0,0,0,0.14);
-  transform: translateY(14px) scale(0.96); transition: transform calc(260ms * var(--anim-mult, 1)) var(--ease-out);
+  transform: translateY(14px) scale(0.96);
+  /* Popover family (faster-exits rule, plan: faster-exits-rule step 3): the
+     closed state is the exit leg -- runs on --popover-exit-dur (one tier
+     faster than the popover open band). The open leg below still mirrors
+     the entrance token. */
+  transition: transform calc(var(--popover-exit-dur) * var(--anim-mult, 1)) var(--popover-ease);
 }
 /* Canon (corrected): outer shell needs exactly one dark-mode line -- plain
    border since .ldx-outer isn't squircle-driven. */
 html.dark .ldx-outer { background: #020617; border: 1px solid var(--card-border, #232323); }
 .ldx-overlay.open .ldx-outer {
   transform: translateY(0) scale(1);
-  transition: transform calc(360ms * var(--anim-mult, 1)) var(--ease-spring);
+  transition: transform calc(var(--popover-dur) * var(--anim-mult, 1)) var(--popover-ease);
 }
 .ldx-card { position: relative; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--card-radius); overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
 /* Squircle inner-card conversion (Step 5): useSquircle attached in
@@ -1136,8 +1141,8 @@ html.dark .ldx-heat-box.l4 { background: #059669 !important; }
    Qualification Brain Stage — three-zone interactive brain widget.
    Layout: filter column (left) · floating brain (centre/left in compact) ·
    detail panel (right, collapsed by default, expanded when compact).
-   Spring entrance curve reused from .ldx-outer: cubic-bezier(.34,1.56,.64,1)
-   Bounce settle curve reused from controls seg-pill: cubic-bezier(.34,1.3,.64,1)
+   Spring entrance curve reused from .ldx-outer: var(--popover-ease)
+   Bounce settle curve reused from controls seg-pill: var(--ease-spring)
    ========================================================================= */
 
 /* ── Stage container ─────────────────────────────────────────────────────── */

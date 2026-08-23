@@ -108,6 +108,17 @@ export function runFlip(
   const natural: Record<string, number> = {}
 
   // 1. Clear any in-flight transforms and measure natural positions
+  //
+  // NOTE: these used to be `el.style.cssText = '...'` wholesale overwrites.
+  // cssText replaces the ENTIRE inline style attribute, which silently wiped
+  // out any other inline style/custom-property a row carried -- notably the
+  // proximity engine's `--prox` (see lib/hooks/proximity-engine.ts), which
+  // rows opt into via `data-proximity`. Since this effect reruns on every
+  // render (deliberately, no deps array) and the revenue/growth number-tween
+  // drives several renders per hover, a hovered row's --prox got clobbered
+  // moments after being set, so the ramp never visibly stuck. Setting the
+  // individual properties instead of the whole cssText leaves --prox (and
+  // anything else) intact.
   ids.forEach((id) => {
     const el = rowEls[id]
     if (!el) return

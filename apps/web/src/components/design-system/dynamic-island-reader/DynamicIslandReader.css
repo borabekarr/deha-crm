@@ -12,18 +12,18 @@
 /* =====================================================================
    DYNAMIC ISLAND — motion system
    All transforms/opacity only (GPU-friendly). The pill itself morphs
-   via a width/height/border-radius transition on .di-pill (260ms spring).
+   via a width/height/border-radius transition on .di-pill (spring curve).
    ===================================================================== */
 
 /* The morph transition for the pill silhouette.
-   cubic-bezier below is a gentle overshoot ("spring-ish") ease. */
+   --ease-island-morph below is a gentle overshoot ("spring-ish") curve. */
 .di-pill {
   transition:
     width   calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-island-morph),
     height  calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-island-morph),
     border-radius calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-island-morph),
     box-shadow calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-fade),
-    background calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade);
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
   will-change: width, height;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -63,7 +63,7 @@
   55%  { transform: scale(1.15); opacity: 1; }
   100% { transform: scale(1); opacity: 1; }
 }
-.di-check-pop { animation: diCheckPop calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-spring-soft-2) both; }
+.di-check-pop { animation: diCheckPop calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-spring-pop) both; }
 @keyframes diCheckDraw {
   to { stroke-dashoffset: 0; }
 }

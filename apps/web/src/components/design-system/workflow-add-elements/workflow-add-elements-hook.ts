@@ -12,7 +12,13 @@
  *  - Segmented control pill: the component drives it directly via
  *    usePillSpring (src/lib/motion-spring.ts), not the shared CSS-transition
  *    segRef — see WorkflowAddElements.tsx for the wiring.
+ *  - closeAll/context-menu/tab-switch state transitions (react-doctor
+ *    no-giant-component split) — WorkflowAddElements.tsx keeps only thin
+ *    wrappers around these.
  */
+
+import { tokenMs } from '@/lib/token-ms'
+import { closedState, type MenuState, type Tab } from './workflow-add-elements-shared'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -69,43 +75,7 @@ export function clampAEPosition(
 // ---------------------------------------------------------------------------
 
 /**
- * Compute shell-relative `{left, top}` for the Nodes flyout panel.
- * Anchored immediately to the right of the Add Elements outer element,
- * top-aligned with it (never row-relative — a per-row anchor drifted the
- * flyout out of the "immediately adjacent, top-aligned" spec as the user
- * hovered further down the list). Matches the showNodes() logic in the source.
- *
- * All returned coords are relative to shellEl (for `position: absolute`).
- * When shellEl is not provided, returns viewport-absolute coords (legacy).
- */
-export function clampNodesPosition(
-  aeOuterEl: HTMLElement,
-  nodesEl: HTMLElement,
-  shellEl?: HTMLElement | null,
-): MenuPos {
-  const aeRect = aeOuterEl.getBoundingClientRect()
-  const nw = nodesEl.offsetWidth
-  const nh = nodesEl.offsetHeight
-
-  const shellRect = shellEl ? shellEl.getBoundingClientRect() : { left: 0, top: 0 }
-  const sw = shellEl ? shellEl.offsetWidth : window.innerWidth
-  const sh = shellEl ? shellEl.offsetHeight : window.innerHeight
-
-  // Shell-relative x: immediately to the right of the AE panel
-  let nx = (aeRect.right - shellRect.left) + 8
-  if (nx + nw > sw - 10) nx = (aeRect.left - shellRect.left) - nw - 8
-  if (nx < 10) nx = 10
-
-  // Shell-relative y: top-aligned with the AE panel
-  let ny = aeRect.top - shellRect.top
-  if (ny + nh > sh - 10) ny = sh - nh - 10
-  if (ny < 10) ny = 10
-
-  return { left: nx, top: ny }
-}
-
-/**
- * Item 1 (Step 9): same as `clampNodesPosition`, but vertically aligns the
+ * Item 1 (Step 9): vertically aligns the
  * flyout to the hovered category ROW instead of always top-aligning with the
  * AE panel — hovering a lower option places the popover lower at the same
  * proportional position (centered on the row), clamped to the visible area
@@ -137,4 +107,204 @@ export function clampNodesPositionForRow(
   if (ny < 10) ny = 10
 
   return { left: nx, top: ny }
+}
+
+// ---------------------------------------------------------------------------
+// Nodes flyout mount/update placement (callback ref body)
+// ---------------------------------------------------------------------------
+
+/** Keeps the nodes flyout pinned immediately right of and top-aligned with
+ *  the AE panel — hover- and search-driven content share the same anchor
+ *  (Fix 1). If the right-placed flyout overflows the shell, slides the AE
+ *  card left so the flyout still fits (never flips it to the left). */
+export function placeNodesFlyout(
+  el: HTMLDivElement,
+  aeOuter: HTMLDivElement,
+  shell: HTMLDivElement | null,
+  hoveredRowRef: { current: HTMLDivElement | null },
+  searchModeRef: { current: boolean },
+  setAeLeft: (left: number) => void,
+): void {
+  const placeRight = () => {
+    // F7: aeOuter and el are both direct, position:absolute children of the
+    // position:relative shell, so offsetTop/offsetLeft are the settled
+    // shell-relative layout box — unaffected by the entrance transform.
+    const shellRect = shell ? shell.getBoundingClientRect() : { left: 0, top: 0 }
+    const shInner = shell ? shell.offsetHeight : window.innerHeight
+    const nh = el.offsetHeight
+    let nx = aeOuter.offsetLeft + aeOuter.offsetWidth + 8
+    if (nx < 10) nx = 10
+    // F7: search mode is ALWAYS top-aligned, even if a hoveredRowRef survives
+    // from before the search started — searchModeRef is the source of truth.
+    const row = searchModeRef.current ? null : hoveredRowRef.current
+    let ny: number
+    if (row) {
+      const rowRect = row.getBoundingClientRect()
+      ny = rowRect.top + rowRect.height / 2 - shellRect.top - nh / 2
+    } else {
+      ny = aeOuter.offsetTop
+    }
+    if (ny + nh > shInner - 10) ny = shInner - nh - 10
+    if (ny < 10) ny = 10
+    el.style.left = `${nx}px`
+    el.style.top = `${ny}px`
+  }
+
+  // Place the flyout at its final position on this frame (no jump).
+  placeRight()
+
+  const aeRect = aeOuter.getBoundingClientRect()
+  const shellRect = shell ? shell.getBoundingClientRect() : { left: 0, top: 0 }
+  const sw = shell ? shell.offsetWidth : window.innerWidth
+  const nw = el.offsetWidth
+  const aeLeftShell = aeRect.left - shellRect.left
+  const nx0 = (aeRect.right - shellRect.left) + 8
+  const overflow = nx0 + nw - (sw - 10)
+  if (overflow > 0.5) {
+    const newAeLeft = Math.max(10, aeLeftShell - overflow)
+    if (Math.abs(newAeLeft - aeLeftShell) > 0.5) {
+      setAeLeft(newAeLeft)
+      // Re-place the flyout against the shifted AE card next frame so it
+      // tracks the new right edge — it never visibly jumps because
+      // placeRight() above already set a valid position for this frame.
+      requestAnimationFrame(placeRight)
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Menu state transitions
+// ---------------------------------------------------------------------------
+
+export interface CloseTimers {
+  hideTimer: { current: ReturnType<typeof setTimeout> | null }
+  searchLeaveTimer: { current: ReturnType<typeof setTimeout> | null }
+  searchPendingTimer: { current: ReturnType<typeof setTimeout> | null }
+  listLeaveTimer: { current: ReturnType<typeof setTimeout> | null }
+}
+
+/** Closes both popovers. When the search flyout is on screen, reuses its own
+ *  mounted-through-exit close animation instead of unmounting it instantly,
+ *  so both popovers close in the same frame. */
+export function closeAllMenus(
+  timers: CloseTimers,
+  hoveredRowRef: { current: HTMLDivElement | null },
+  searchModeRef: { current: boolean },
+  state: MenuState,
+  setState: (updater: (s: MenuState) => MenuState) => void,
+): void {
+  if (timers.hideTimer.current) clearTimeout(timers.hideTimer.current)
+  if (timers.searchLeaveTimer.current) clearTimeout(timers.searchLeaveTimer.current)
+  if (timers.searchPendingTimer.current) clearTimeout(timers.searchPendingTimer.current)
+  if (timers.listLeaveTimer.current) clearTimeout(timers.listLeaveTimer.current)
+  hoveredRowRef.current = null
+  searchModeRef.current = false
+
+  const wasSearching = state.searchPanelMounted && !state.searchPanelLeaving
+  if (wasSearching) {
+    setState((s) => ({ ...closedState(s), searchPanelMounted: true, searchPanelLeaving: true }))
+    // Unmount after the flyout's reverse-morph exit (--duration-280, live
+    // read via tokenMs) plus a 20ms buffer.
+    timers.searchLeaveTimer.current = setTimeout(() => {
+      setState((s) => ({ ...s, searchPanelMounted: false, searchPanelLeaving: false }))
+    }, tokenMs('--duration-280', 280) + 20)
+  } else {
+    // Use closedState (not INITIAL) to preserve aeLeft/aeTop so the fade-out
+    // stays in place instead of jumping to the viewport left edge.
+    setState((s) => closedState(s))
+  }
+}
+
+/** Open the Add Elements panel clamped to the right-click position (F7:
+ *  reopening elsewhere fully resets the search/nodes flyout group first, so
+ *  no orphaned popover keeps a stale position or lingers as a blur ghost). */
+export function openContextMenu(
+  e: { preventDefault: () => void; clientX: number; clientY: number },
+  shellEl: HTMLDivElement | null,
+  aeOuterRef: { current: HTMLDivElement | null },
+  timers: Pick<CloseTimers, 'hideTimer' | 'searchLeaveTimer' | 'searchPendingTimer'>,
+  hoveredRowRef: { current: HTMLDivElement | null },
+  searchModeRef: { current: boolean },
+  setState: (updater: (s: MenuState) => MenuState) => void,
+): void {
+  e.preventDefault()
+  const x = e.clientX
+  const y = e.clientY
+
+  // Convert viewport coords to shell-relative coords immediately so the panel
+  // is never placed at shell-relative 0,0 (top-left) on the first render.
+  const shellRect = shellEl ? shellEl.getBoundingClientRect() : { left: 0, top: 0 }
+  const initialLeft = x - shellRect.left
+  const initialTop = y - shellRect.top
+
+  if (timers.hideTimer.current) clearTimeout(timers.hideTimer.current)
+  if (timers.searchLeaveTimer.current) clearTimeout(timers.searchLeaveTimer.current)
+  if (timers.searchPendingTimer.current) clearTimeout(timers.searchPendingTimer.current)
+  hoveredRowRef.current = null
+  searchModeRef.current = false
+
+  // Show the panel at the shell-relative coordinates first so the element gets layout.
+  // Then clamp in a rAF once the panel has real dimensions.
+  setState((s) => ({
+    ...s,
+    aeVisible: true,
+    aeLeft: initialLeft,
+    aeTop: initialTop,
+    nodesVisible: false,
+    nodesLeft: 0,
+    nodesTop: 0,
+    hoveredId: null,
+    search: '',
+    searchPanelMounted: false,
+    searchPanelLeaving: false,
+    searchPending: false,
+  }))
+
+  // Clamp after layout is computed (panel must be in DOM for offsetWidth/Height)
+  requestAnimationFrame(() => {
+    const outer = aeOuterRef.current
+    if (!outer) return
+    const pos = clampAEPosition(x, y, outer, shellEl)
+    setState((s) => ({ ...s, aeLeft: pos.left, aeTop: pos.top }))
+  })
+}
+
+/** True when `target` is outside both the AE panel and the nodes flyout
+ *  (verbatim De Morgan form of the original two-branch condition). */
+export function isOutsideBothPanels(
+  target: Node,
+  aeOuter: HTMLDivElement | null,
+  nodesOuter: HTMLDivElement | null,
+): boolean {
+  if (aeOuter && !aeOuter.contains(target) && nodesOuter && !nodesOuter.contains(target)) return true
+  if (aeOuter && !aeOuter.contains(target) && !nodesOuter) return true
+  return false
+}
+
+/** Direction-aware category-list tab switch (Fix 3): the outgoing tab stays
+ *  mounted as a ghost layer until its exit animation completes. */
+export function switchTabAnimation(
+  tab: Tab,
+  state: MenuState,
+  setState: (updater: (s: MenuState) => MenuState) => void,
+  listLeaveTimer: { current: ReturnType<typeof setTimeout> | null },
+  measurePill: (tab: Tab) => void,
+  listWrapEl: HTMLDivElement | null,
+): void {
+  if (tab === state.activeTab) return
+  if (listLeaveTimer.current) clearTimeout(listLeaveTimer.current)
+  setState((s) => ({
+    ...s,
+    activeTab: tab,
+    listLeavingTab: s.activeTab,
+    hoveredId: null,
+    nodesVisible: false,
+  }))
+  measurePill(tab)
+  // Unmount the ghost layer once its exit animation completes: reads the
+  // scoped --panel-slide-exit-dur override on .wae-ae-list-wrap live via
+  // tokenMs, plus a 20ms buffer.
+  listLeaveTimer.current = setTimeout(() => {
+    setState((s) => ({ ...s, listLeavingTab: null }))
+  }, tokenMs('--panel-slide-exit-dur', 150, listWrapEl ?? document.documentElement) + 20)
 }

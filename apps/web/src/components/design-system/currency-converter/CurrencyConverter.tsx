@@ -307,14 +307,7 @@ function EditableAmount({
   const display = formatAmount(value, currency)
 
   return (
-    <span
-      style={{
-        display: 'block', textAlign: 'right',
-        fontWeight: 900, fontSize: 28, letterSpacing: '0.04em',
-        color: 'var(--cc-fg1)', lineHeight: 1,
-        fontFamily: 'Montserrat',
-      }}
-    >
+    <span className="cc-amount-display">
       <Roll value={display} />
     </span>
   )
@@ -449,6 +442,7 @@ function CurrencyPicker({
     <div ref={keyRef} style={{ display: 'contents' }}>
       <div
         className="cc-pop-backdrop"
+        role="presentation"
         onClick={(e) => {
           if ((e.target as HTMLElement).classList.contains('cc-pop-backdrop')) onClose()
         }}
@@ -485,23 +479,14 @@ function CurrencyPicker({
               onKeyDown={onKey}
               placeholder="Search currency..."
               aria-label="Search currency"
-              style={{
-                flex: 1, border: 'none', outline: 'none',
-                fontFamily: 'Montserrat', fontSize: 14, fontWeight: 500,
-                color: 'var(--cc-fg1)', background: 'transparent',
-              }}
+              className="cc-search-input"
             />
             <button
               type="button"
               data-proximity
               onClick={onClose}
               aria-label="Close currency picker"
-              style={{
-                fontFamily: 'Montserrat', fontSize: 10.5, fontWeight: 700,
-                color: '#6B6B6B', background: 'var(--cc-chip)',
-                border: 'none', padding: '3px 9px', borderRadius: 6,
-                cursor: 'pointer', letterSpacing: '0.04em',
-              }}
+              className="cc-esc-btn"
             >
               Esc
             </button>
@@ -519,11 +504,7 @@ function CurrencyPicker({
                   onMouseEnter={() => setActive(rowIdx)}
                   aria-label={`${c.name} (${c.code})${disabled ? ' — in use' : ''}`}
                 >
-                  <span style={{
-                    width: 26, height: 26, borderRadius: '50%', overflow: 'hidden',
-                    boxShadow: 'inset 0 0 0 1px rgba(17,17,17,0.10), 0 1px 2px rgba(17,17,17,0.06)',
-                    display: 'grid', placeItems: 'center', flexShrink: 0,
-                  }}>
+                  <span className="cc-flag-wrap">
                     <Flag code={c.flag} size={26} />
                   </span>
                   <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
@@ -561,8 +542,8 @@ function CurrencyPicker({
 // Main component
 // ---------------------------------------------------------------------------
 export default function CurrencyConverter() {
-  const [source, setSource] = useState<Currency>(byCode('EUR'))
-  const [target, setTarget] = useState<Currency>(byCode('USD'))
+  const [source, setSource] = useState<Currency>(() => byCode('EUR'))
+  const [target, setTarget] = useState<Currency>(() => byCode('USD'))
   const [sourceAmt, setSourceAmt] = useState(920)
   const [pickerFor, setPickerFor] = useState<'source' | 'target' | null>(null)
   const [pickerAnchor, setPickerAnchor] = useState<{ centerX: number; centerY: number } | null>(null)
@@ -649,7 +630,7 @@ export default function CurrencyConverter() {
           marginBottom: 16, gap: 10,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <h1 style={{ margin: 0, display: 'inline-flex', alignItems: 'center', gap: 13, fontSize: 18, fontWeight: 900, letterSpacing: '-0.025em', color: 'var(--cc-fg1)' }}>
+            <h1 className="cc-header-title">
               <span
                 className="material-symbols-outlined"
                 style={{ fontSize: 27, color: 'var(--cc-fg1)', fontVariationSettings: '"FILL" 1, "wght" 700, "GRAD" 0, "opsz" 24' }}
@@ -659,14 +640,7 @@ export default function CurrencyConverter() {
               </span>
               Convert
             </h1>
-            <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              padding: '4px 10px',
-              background: 'var(--cc-chip)',
-              border: '1px solid rgba(17,17,17,0.04)',
-              borderRadius: 9999,
-              boxShadow: 'inset 0 -2px 4px rgba(0,0,0,0.04), inset 0 1px 0 var(--cc-inset-hi)',
-            }}>
+            <div className="cc-rate-chip">
               <span className="cc-mono" style={{ fontSize: 11, fontWeight: 600, color: 'var(--cc-fg3)', letterSpacing: '0' }}>
                 1 {source.code} = {formatRate(rate)} {target.code}
               </span>

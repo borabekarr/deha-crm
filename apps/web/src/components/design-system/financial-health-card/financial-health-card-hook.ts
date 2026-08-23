@@ -21,10 +21,10 @@ export const ZONES = [
   { name: 'Great', max: 100 },
 ]
 
-export const ZONE_HEX  = { red:'#EF4444', yellow:'#EAB308', blue:'#3B82F6', green:'#10B981' }
-export const ZONE_GLOW = { red:'var(--g-red)', yellow:'var(--g-yellow)', blue:'var(--g-blue)', green:'var(--g-green)' }
-export const ZONE_HALO = { red:'rgba(239,68,68,0.16)', yellow:'rgba(234,179,8,0.16)', blue:'rgba(59,130,246,0.16)', green:'rgba(16,185,129,0.18)' }
-export const ZONE_KEYS = ['red','yellow','blue','green'] as const
+const ZONE_HEX  = { red:'#EF4444', yellow:'#EAB308', blue:'#3B82F6', green:'#10B981' }
+const ZONE_GLOW = { red:'var(--g-red)', yellow:'var(--g-yellow)', blue:'var(--g-blue)', green:'var(--g-green)' }
+const ZONE_HALO = { red:'rgba(239,68,68,0.16)', yellow:'rgba(234,179,8,0.16)', blue:'rgba(59,130,246,0.16)', green:'rgba(16,185,129,0.18)' }
+const ZONE_KEYS = ['red','yellow','blue','green'] as const
 
 export type ZoneKey = typeof ZONE_KEYS[number]
 
@@ -38,7 +38,7 @@ export interface FhcRefs {
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
-export function activeZoneIndex(score: number): number {
+function activeZoneIndex(score: number): number {
   for (let i = 0; i < ZONES.length; i++) if (score <= ZONES[i].max) return i
   return ZONES.length - 1
 }

@@ -86,27 +86,25 @@
   border-radius: var(--radius-md);
   display: grid; place-items: center; font-size: 22px;
   color: var(--fg3); background: transparent;
-  /* raw: background .16s ease, color .16s ease, transform .12s cubic-bezier(.22,1,.36,1)
-     .16s==160ms -> --duration-base; bare `ease` -> --ease-fade (== bare
-     ease per its own definition comment); cubic-bezier(.22,1,.36,1) ->
-     --ease-motion-sweep-2236 (byte-identical). The raw transform leg was
-     .12s==120ms; ds-review-overlays step 1 deliberately raised THIS (release)
-     leg to --duration-200 so the button settles, and kept the 120ms
-     --duration-fast press in the :active rule below. */
-  transition: background var(--duration-base) var(--ease-fade), color var(--duration-base) var(--ease-fade), transform var(--duration-200) var(--ease-motion-sweep-2236);
+  /* color -> --duration-base / --ease-fade; transform release leg was
+     deliberately raised (ds-review-overlays step 1) to --duration-200 so
+     the button settles, keeping --duration-fast for the press in the
+     :active rule below. background is a hover fill, moved to the standard
+     hover-fade pair per the no-exceptions ruling. */
+  transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), color var(--duration-base) var(--ease-fade), transform var(--duration-200) var(--ease-motion-sweep-2236);
   -webkit-tap-highlight-color: transparent;
 }
-.dd-iconbtn:hover { background: rgba(15,23,42,.05); color: var(--fg1); }
+.dd-iconbtn:hover { background: var(--fp-hover); color: var(--fg1); }
 /* REVIEW FIX (asymmetric press): the press-down is the deliberate act and snaps
-   at 120ms; the release settles over 200ms so the button rebounds instead of
+   fast; the release settles slower so the button rebounds instead of
    flicking. Full transition list re-declared -- a shorthand replaces, never
    merges (see .dd-iconbtn above for the base list). */
 .dd-iconbtn:active {
   transform: scale(.92);
-  transition: background var(--duration-base) var(--ease-fade), color var(--duration-base) var(--ease-fade), transform var(--duration-fast) var(--ease-motion-sweep-2236);
+  transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), color var(--duration-base) var(--ease-fade), transform var(--duration-fast) var(--ease-motion-sweep-2236);
 }
 .dd-iconbtn[data-open="true"] { background: var(--brand-primary-100); color: var(--brand-primary-700); }
-[data-theme="dark"] .dd-iconbtn:hover { background: rgba(255,255,255,.06); color: var(--fg1); }
+[data-theme="dark"] .dd-iconbtn:hover { background: var(--fp-hover); color: var(--fg1); }
 [data-theme="dark"] .dd-iconbtn[data-open="true"] { background: rgba(16,185,129,.16); color: var(--brand-primary-300); }
 
 .dd-portal { position: fixed; inset: 0; z-index: 90; }
@@ -123,31 +121,32 @@
     inset 0 1px 0 rgba(255,255,255,.85);
   /* spring entrance -- scale + lift + sharpen out of blur */
   opacity: 0; transform: scale(.92) translateY(-4px); filter: blur(6px);
-  /* raw fallbacks: --dd-dur default 260ms -> --duration-260 (byte-identical);
-     --dd-ease default cubic-bezier(.34,1.56,.64,1) -> --ease-spring-snap
-     (byte-identical, "SprintPlannerCore.css proximity transform transition").
-     --dd-dur/--dd-ease themselves stay JS-set inline custom properties (per
-     dropdown instance duration prop), unchanged from raw. Bare `ease` on the
-     opacity/filter legs -> --ease-fade (== bare ease per its definition). */
+  /* Popover family (motion-family-rules step 1): --dd-dur/--dd-ease default
+     to the popover family tokens rather than the local --duration-260/
+     --ease-spring-snap pair. --dd-dur/--dd-ease themselves stay JS-set
+     inline custom properties (per dropdown instance duration prop),
+     unchanged from raw. Bare `ease` on the opacity/filter legs -> --ease-fade
+     (== bare ease per its definition). */
   transition:
-    transform var(--dd-dur, var(--duration-260)) var(--dd-ease, var(--ease-spring-snap)),
-    opacity calc(var(--dd-dur, var(--duration-260)) * .65) var(--ease-fade),
-    filter calc(var(--dd-dur, var(--duration-260)) * .8) var(--ease-fade);
+    transform var(--dd-dur, var(--popover-dur)) var(--dd-ease, var(--popover-ease)),
+    opacity calc(var(--dd-dur, var(--popover-dur)) * .65) var(--ease-fade),
+    filter calc(var(--dd-dur, var(--popover-dur)) * .8) var(--ease-fade);
   will-change: transform, opacity, filter;
 }
 .dd-menu[data-enter="true"] { opacity: 1; transform: none; filter: blur(0); }
 /* REVIEW FIX (exit): the raw component unmounted on close, so the menu vanished
    on one frame. The node now stays mounted through this leg (Content's `closing`
-   state). Exit is a system response, so it snaps -- 150ms (~0.58x the 260ms
-   entrance) on a strong ease-out, and it recedes a shorter distance than it
-   entered rather than replaying the spring backwards (which would overshoot
-   outward before leaving). All three legs re-declared; a shorthand replaces. */
+   state). Exit is a system response, so it snaps -- --popover-exit-dur (the
+   faster-exits family rule, plan: faster-exits-rule) on a strong ease-out,
+   and it recedes a shorter distance than it entered rather than replaying
+   the spring backwards (which would overshoot outward before leaving). All
+   three legs re-declared; a shorthand replaces. */
 .dd-menu[data-exit="true"] {
   opacity: 0; transform: scale(.96) translateY(-2px); filter: blur(4px);
   transition:
-    transform var(--duration-150) var(--ease-motion-sweep-2236),
-    opacity var(--duration-150) var(--ease-fade),
-    filter var(--duration-150) var(--ease-fade);
+    transform var(--popover-exit-dur) var(--ease-motion-sweep-2236),
+    opacity var(--popover-exit-dur) var(--ease-fade),
+    filter var(--popover-exit-dur) var(--ease-fade);
 }
 /* the closing layer must not swallow the click that reopens the menu */
 .dd-portal[data-exit="true"] { pointer-events: none; }
@@ -160,7 +159,7 @@
     inset 0 1px 0 rgba(255,255,255,.05);
 }
 @media (prefers-reduced-motion: reduce) {
-  /* raw: opacity .12s ease -- .12s==120ms -> --duration-fast; bare `ease` -> --ease-fade. */
+  /* raw: opacity -> --duration-fast; bare `ease` -> --ease-fade. */
   .dd-menu, .dd-menu[data-exit="true"] { transition: opacity var(--duration-fast) var(--ease-fade); transform: none; filter: none; }
 }
 
@@ -174,27 +173,27 @@
   width: 100%; border: none; background: transparent;
   padding: 10px 11px; border-radius: var(--radius-md); cursor: pointer;
   font-family: inherit; color: var(--fg1); text-align: left;
-  /* raw: background .14s ease, color .14s ease, transform .12s cubic-bezier(.22,1,.36,1)
-     .14s==140ms -> --duration-140; bare `ease` -> --ease-fade;
-     curve -> --ease-motion-sweep-2236. The raw transform leg was .12s==120ms;
-     ds-review-overlays step 1 deliberately raised THIS (release) leg to
-     --duration-200, keeping the 120ms --duration-fast press in :active below. */
-  transition: background var(--duration-fast) var(--ease-out), color var(--duration-140) var(--ease-fade), transform var(--duration-200) var(--ease-motion-sweep-2236);
+  /* color -> --duration-140 / --ease-fade; transform release leg was
+     deliberately raised (ds-review-overlays step 1) to --duration-200,
+     keeping --duration-fast for the press in :active below. background is
+     a hover fill, standardized to the hover-fade pair (was mixing
+     --ease-out) per the no-exceptions ruling. */
+  transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), color var(--duration-140) var(--ease-fade), transform var(--duration-200) var(--ease-motion-sweep-2236);
   -webkit-tap-highlight-color: transparent;
 }
 /* pointer-pan / hover highlight -- house grey (F23), token-routed via
    --hover-standard-bg (theme-aware, hover-tokens.css); subtle scale-up kept */
 .dd-item[data-active="true"] { background: var(--hover-standard-bg); transform: scale(1.018); }
-/* REVIEW FIX (asymmetric press): press snaps at 120ms, release settles at the
-   200ms base above. Full list re-declared. */
+/* REVIEW FIX (asymmetric press): press snaps fast, release settles at the
+   base above. Full list re-declared. */
 .dd-item:active {
   transform: scale(.975);
-  transition: background var(--duration-fast) var(--ease-out), color var(--duration-140) var(--ease-fade), transform var(--duration-fast) var(--ease-motion-sweep-2236);
+  transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), color var(--duration-140) var(--ease-fade), transform var(--duration-fast) var(--ease-motion-sweep-2236);
 }
 .dd-item:disabled { opacity: .42; cursor: default; }
 .dd-item:disabled[data-active="true"] { background: transparent; transform: none; }
 
-/* raw: color .14s ease -- .14s==140ms -> --duration-140; bare `ease` -> --ease-fade. */
+/* raw: color -> --duration-140; bare `ease` -> --ease-fade. */
 .dd-item .ic { font-size: 20px; flex: none; width: 22px; text-align: center; color: var(--fg3); transition: color var(--duration-140) var(--ease-fade); }
 .dd-item[data-active="true"] .ic { color: var(--brand-primary); }
 .dd-item-label { flex: 1; font-size: 14px; font-weight: var(--weight-semibold); }

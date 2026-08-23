@@ -44,6 +44,9 @@ import './ExpandableScreen.css'
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
+import { tokenMs } from '@/lib/token-ms'
+import { ExpandableScreenTrigger } from './ExpandableScreenTrigger'
+import { ExpandableScreenOverlayContent } from './ExpandableScreenOverlayContent'
 
 type Phase = 'idle' | 'from' | 'open'
 
@@ -60,10 +63,13 @@ interface Rect {
 // are ambient authoring tooling outside the component, same exclusion as
 // BlurCarousel.tsx's `.controls` panel; this port fixes them at their
 // documented defaults.
-const DURATION_S = 0.45
 // Raw source: const ease = 'cubic-bezier(0.32, 0.72, 0, 1)'. No token in
 // motion-tokens.css matches this curve exactly.
 const FLIP_EASE = 'cubic-bezier(0.32, 0.72, 0, 1)'
+// Apple standard (house rule): present in 0.4s, no bounce, on the sheet
+// curve above (FLIP_EASE); wired to --anim-mult so the global multiplier
+// reaches the open leg. Close stays one tier faster on --duration-380.
+const OPEN_DUR = 'calc(var(--duration-400) * var(--anim-mult, 1))'
 // Raw source's bare `ease` keyword (opacity fades) == motion-tokens.css
 // --ease-fade's cubic-bezier(.25, .1, .25, 1) expansion exactly (that
 // token's own comment states it is the bare-keyword equivalent).
@@ -84,10 +90,16 @@ const OVERLAY_Z = 2147483647
 
 const SYM_STYLE: CSSProperties = { fontFamily: "'Material Symbols Outlined'" }
 
+// Faster-exits rule (plan: faster-exits-debts step 7): collapse is always a
+// programmatic close (no drag path on this component), so it always runs the
+// faster --duration-380 tier while the open (expand) leg keeps its
+// OPEN_DUR (--duration-400, Apple standard). Reads the token live via the
+// shared helper, see lib/token-ms.ts.
+
 // Byte-preserved FLIP: the overlay's box literally becomes the trigger's
 // measured rect, then top/left/width/height/border-radius interpolate to
 // the inset full-screen geometry.
-function overlayGeometry(open: boolean, rect: Rect | null): { geo: CSSProperties; transition: string } {
+function overlayGeometry(open: boolean, rect: Rect | null, closing: boolean): { geo: CSSProperties; transition: string } {
   const geo: CSSProperties = open
     ? {
         top: SCREEN_INSET,
@@ -99,9 +111,10 @@ function overlayGeometry(open: boolean, rect: Rect | null): { geo: CSSProperties
     : rect
       ? { top: `${rect.top}px`, left: `${rect.left}px`, width: `${rect.width}px`, height: `${rect.height}px`, borderRadius: TRIGGER_RADIUS }
       : {}
+  const dur = closing ? 'calc(var(--duration-380) * var(--anim-mult, 1))' : OPEN_DUR
   return {
     geo,
-    transition: `top ${DURATION_S}s ${FLIP_EASE}, left ${DURATION_S}s ${FLIP_EASE}, width ${DURATION_S}s ${FLIP_EASE}, height ${DURATION_S}s ${FLIP_EASE}, border-radius ${DURATION_S}s ${FLIP_EASE}`,
+    transition: `top ${dur} ${FLIP_EASE}, left ${dur} ${FLIP_EASE}, width ${dur} ${FLIP_EASE}, height ${dur} ${FLIP_EASE}, border-radius ${dur} ${FLIP_EASE}`,
   }
 }
 
@@ -159,14 +172,14 @@ export default function ExpandableScreenDemo() {
       // reduced-motion collapses the transition to ~0), the text still
       // returns once the FLIP settle window elapses.
       setTextVisible(true)
-    }, DURATION_S * 1000 + 60)
+    }, tokenMs('--duration-380', 380) + 60)
   }, [])
 
   // [[transition-shorthand-replaces-not-merges]]: keys the trigger text's
   // reappearance to the FLIP surface's own `width` transitionend, so it
   // shows within one frame of the collapse animation ending instead of a
   // ~0.5s setTimeout guess. `width` is one of the five properties in
-  // overlayGeometry's transition list and shares FLIP_EASE/DURATION_S with
+  // overlayGeometry's transition list and shares FLIP_EASE/OPEN_DUR with
   // the rest, so it fires exactly when the collapse visually completes.
   useEffect(() => {
     if (!closing) return
@@ -214,7 +227,7 @@ export default function ExpandableScreenDemo() {
   const active = phase !== 'idle' && rectRef.current !== null
   const rect = rectRef.current
 
-  const { geo, transition: overlayTransition } = overlayGeometry(open, active ? rect : null)
+  const { geo, transition: overlayTransition } = overlayGeometry(open, active ? rect : null, closing)
 
   const overlayStyle: CSSProperties = active
     ? {
@@ -241,8 +254,8 @@ export default function ExpandableScreenDemo() {
     opacity: open ? 1 : 0,
     transform: open ? 'scale(1)' : 'scale(0.97)',
     transition: open
-      ? `opacity ${DURATION_S * 0.7}s ${FADE_EASE} ${DURATION_S * 0.35}s, transform ${DURATION_S * 0.7}s ${FLIP_EASE} ${DURATION_S * 0.35}s`
-      : `opacity ${DURATION_S * 0.35}s ${FADE_EASE}, transform ${DURATION_S * 0.35}s ${FLIP_EASE}`,
+      ? `opacity calc(var(--duration-400) * var(--anim-mult, 1) * 0.7) ${FADE_EASE} calc(var(--duration-400) * var(--anim-mult, 1) * 0.35), transform calc(var(--duration-400) * var(--anim-mult, 1) * 0.7) ${FLIP_EASE} calc(var(--duration-400) * var(--anim-mult, 1) * 0.35)`
+      : `opacity calc(var(--duration-380) * var(--anim-mult, 1) * 0.35) ${FADE_EASE}, transform calc(var(--duration-380) * var(--anim-mult, 1) * 0.35) ${FLIP_EASE}`,
     overflowY: open ? 'auto' : 'hidden',
     pointerEvents: open ? 'auto' : 'none',
     willChange: 'opacity, transform',
@@ -262,7 +275,7 @@ export default function ExpandableScreenDemo() {
     justifyContent: 'center',
     cursor: 'pointer',
     opacity: open ? 1 : 0,
-    transition: `opacity ${QUICK_MS} ${FADE_EASE} ${open ? DURATION_S * 0.5 : 0}s, background ${HOVER_MS} ${FADE_EASE}`,
+    transition: `opacity ${QUICK_MS} ${FADE_EASE} ${open ? 'calc(var(--duration-400) * var(--anim-mult, 1) * 0.5)' : '0s'}, background ${HOVER_MS} ${FADE_EASE}`,
   }
 
   // [[transition-shorthand-replaces-not-merges]]: single `opacity` term, zero
@@ -295,60 +308,7 @@ export default function ExpandableScreenDemo() {
         }}
       >
         {/* Trigger card */}
-        <div style={triggerWrapStyle}>
-          <div
-            className="card-glass"
-            style={{
-              maxWidth: '620px',
-              padding: '48px 56px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              textAlign: 'center',
-              gap: '16px',
-            }}
-          >
-            <span className="pill pill--success" style={{ textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-              <span className="material-symbols-outlined" style={{ ...SYM_STYLE, fontSize: '14px' }}>
-                bolt
-              </span>
-              Early access
-            </span>
-            <h1
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                fontSize: '36px',
-                fontWeight: 900,
-                letterSpacing: '-0.02em',
-                color: '#0F172A',
-                lineHeight: 1.15,
-                margin: 0,
-              }}
-            >
-              <span className="material-symbols-outlined" style={{ ...SYM_STYLE, fontSize: '34px', color: '#10B981' }}>
-                rocket_launch
-              </span>
-              Join the waitlist
-            </h1>
-            <p style={{ fontSize: '15px', fontWeight: 500, color: '#64748B', lineHeight: 1.6, margin: 0, maxWidth: '460px' }}>
-              Be among the first to experience our next-generation platform. Get early access to exclusive
-              features and help shape the future of productivity.
-            </p>
-            <button
-              className="btn-primary"
-              onClick={expand}
-              ref={triggerElRef}
-              style={{ marginTop: '8px', padding: '14px 28px', borderRadius: '100px', fontSize: '15px' }}
-            >
-              Get early access
-              <span className="material-symbols-outlined" style={{ ...SYM_STYLE, fontSize: '18px' }}>
-                arrow_forward
-              </span>
-            </button>
-          </div>
-        </div>
+        <ExpandableScreenTrigger wrapStyle={triggerWrapStyle} onExpand={expand} triggerRef={triggerElRef} />
 
         {/* Morphing overlay — portaled to document.body so no transformed
             ancestor (the gallery reveal wrapper) can re-cage its position:fixed
@@ -370,217 +330,14 @@ export default function ExpandableScreenDemo() {
             {...(joined ? { 'data-joined': '' } : null)}
             style={overlayStyle}
           >
-          <button className="es-close-btn" onClick={collapse} aria-label="Close" style={closeBtnStyle}>
+          <button type="button" className="es-close-btn" onClick={collapse} aria-label="Close" style={closeBtnStyle}>
             <span className="material-symbols-outlined" style={{ ...SYM_STYLE, fontSize: '22px', color: '#FFFFFF' }}>
               close
             </span>
           </button>
 
           <div className="es-content" style={contentStyle}>
-            <div
-              style={{
-                width: '100%',
-                maxWidth: '560px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                textAlign: 'center',
-                gap: '20px',
-                padding: '48px',
-              }}
-            >
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '6px 14px',
-                  borderRadius: '16px',
-                  background: 'rgba(6,78,59,0.45)',
-                  border: '1px solid rgba(255,255,255,0.45)',
-                  fontSize: '12px',
-                  fontWeight: 800,
-                  color: '#FFFFFF',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                  textShadow: '0 1px 2px rgba(0,0,0,0.25)',
-                }}
-              >
-                <span className="material-symbols-outlined" style={{ ...SYM_STYLE, fontSize: '14px' }}>
-                  local_fire_department
-                </span>
-                Limited spots
-              </span>
-              <h2
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '14px',
-                  fontSize: '44px',
-                  fontWeight: 900,
-                  letterSpacing: '-0.02em',
-                  color: '#FFFFFF',
-                  lineHeight: 1.1,
-                  margin: 0,
-                  textShadow: '0 2px 4px rgba(0,0,0,0.28)',
-                }}
-              >
-                <span className="material-symbols-outlined" style={{ ...SYM_STYLE, fontSize: '40px' }}>
-                  rocket_launch
-                </span>
-                You're almost in
-              </h2>
-              <p
-                style={{
-                  fontSize: '16px',
-                  fontWeight: 600,
-                  color: '#FFFFFF',
-                  lineHeight: 1.6,
-                  margin: 0,
-                  maxWidth: '440px',
-                  textShadow: '0 1px 2px rgba(0,0,0,0.22)',
-                }}
-              >
-                Leave your details and we'll send your invite as soon as your spot opens up.
-              </p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px' }}>
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '5px 12px',
-                    borderRadius: '16px',
-                    background: 'rgba(6,78,59,0.4)',
-                    border: '1px solid rgba(255,255,255,0.35)',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    color: '#FFFFFF',
-                  }}
-                >
-                  <span className="material-symbols-outlined" style={{ ...SYM_STYLE, fontSize: '14px' }}>
-                    verified
-                  </span>
-                  Priority invite
-                </span>
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '5px 12px',
-                    borderRadius: '16px',
-                    background: 'rgba(6,78,59,0.4)',
-                    border: '1px solid rgba(255,255,255,0.35)',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    color: '#FFFFFF',
-                  }}
-                >
-                  <span className="material-symbols-outlined" style={{ ...SYM_STYLE, fontSize: '14px' }}>
-                    science
-                  </span>
-                  Beta features
-                </span>
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '5px 12px',
-                    borderRadius: '16px',
-                    background: 'rgba(6,78,59,0.4)',
-                    border: '1px solid rgba(255,255,255,0.35)',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    color: '#FFFFFF',
-                  }}
-                >
-                  <span className="material-symbols-outlined" style={{ ...SYM_STYLE, fontSize: '14px' }}>
-                    sell
-                  </span>
-                  Founder pricing
-                </span>
-              </div>
-
-              <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
-                <input
-                  type="text"
-                  placeholder="Full name"
-                  className="es-input"
-                  style={{
-                    width: '100%',
-                    boxSizing: 'border-box',
-                    padding: '15px 20px',
-                    borderRadius: '16px',
-                    color: '#FFFFFF',
-                    fontFamily: 'var(--font-display)',
-                    fontSize: '15px',
-                    fontWeight: 500,
-                    outline: 'none',
-                  }}
-                />
-                <input
-                  type="email"
-                  placeholder="Work email"
-                  className="es-input"
-                  style={{
-                    width: '100%',
-                    boxSizing: 'border-box',
-                    padding: '15px 20px',
-                    borderRadius: '16px',
-                    color: '#FFFFFF',
-                    fontFamily: 'var(--font-display)',
-                    fontSize: '15px',
-                    fontWeight: 500,
-                    outline: 'none',
-                  }}
-                />
-                <button
-                  onClick={submit}
-                  className="es-submit-btn"
-                  style={{
-                    width: '100%',
-                    padding: '15px 20px',
-                    borderRadius: '16px',
-                    border: 'none',
-                    color: '#047857',
-                    fontFamily: 'var(--font-display)',
-                    fontSize: '15px',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                  }}
-                >
-                  <span className="material-symbols-outlined" style={{ ...SYM_STYLE, fontSize: '18px' }}>
-                    {submitIcon}
-                  </span>
-                  {submitLabel}
-                </button>
-              </div>
-
-              <p
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  color: '#FFFFFF',
-                  margin: 0,
-                  textShadow: '0 1px 2px rgba(0,0,0,0.22)',
-                }}
-              >
-                <span className="material-symbols-outlined" style={{ ...SYM_STYLE, fontSize: '14px' }}>
-                  lock
-                </span>
-                No spam. Unsubscribe anytime.
-              </p>
-            </div>
+            <ExpandableScreenOverlayContent submitLabel={submitLabel} submitIcon={submitIcon} onSubmit={submit} />
           </div>
           </div>
           </>,

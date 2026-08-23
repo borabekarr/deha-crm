@@ -18,7 +18,7 @@ export interface FeedItem {
 
 export type Tone = 'bull' | 'bear'
 
-export const FEEDS: Record<Tone, FeedItem[]> = {
+const FEEDS: Record<Tone, FeedItem[]> = {
   bull: [
     { title: 'Hong Kong Expands Cryptocurrency Market with New Exchange Approvals.', sub: 'The market is bullish today', date: 'December 5, 2024' },
     { title: 'Bitcoin ETF Inflows Hit a Record High as Institutions Pile In.',        sub: 'The market is bullish today', date: 'December 22, 2024' },

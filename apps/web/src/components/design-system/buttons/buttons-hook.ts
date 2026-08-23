@@ -53,7 +53,7 @@ export function cleanupBtnRoot(el: HTMLElement | null): void {
  *
  * Call from inside click handlers (event-driven, not an effect).
  */
-export function registerBtnTimer(
+function registerBtnTimer(
   el: HTMLElement | null,
   onExpire: () => void,
   ms: number,

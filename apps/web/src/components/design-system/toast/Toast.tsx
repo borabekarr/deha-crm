@@ -1,7 +1,11 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent } from 'react'
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { useAutoHeight } from '@/lib/hooks/use-auto-height'
-import { VARIANTS, type VariantCfg } from './proto/variants'
+import { tokenMs } from '@/lib/token-ms'
+import { VARIANTS, type VariantCfg } from './variants'
+import { ToastCard } from './ToastCard'
+import { ToastDemoCard } from './ToastDemoCard'
+import { useToastSwipe } from './toast-swipe'
+import { MULT, DEFAULT_DURATION, vm, type Phase, type Position, type ToastSpec, type ToastItem, type ToastVm } from './toast-vm'
 // Same two per-component imports as Dropdown.tsx / ExpandableScreen.tsx /
 // ExpandableCard.tsx et al: _base.css supplies `.shell` / `.shell.zoom` /
 // `.label`, and (via its own `@import url('../colors_and_type.css')`, which
@@ -51,6 +55,13 @@ import './Toast.css'
 // below is the source literal, except the one spring curve noted at
 // SPRING_EASE, which the repo's motion-token-gate hook requires be written
 // as its byte-identical token.
+//
+// react-doctor no-giant-component split: the per-toast view-model (vm()),
+// its supporting constants and the ToastVm/ToastItem/ToastSpec/Phase/
+// Position types now live in toast-vm.ts; the per-card render (ToastCard)
+// and the demo/trigger card render (ToastDemoCard) are sibling components.
+// State, refs, timers and the swipe gesture stay owned by ToastStage below
+// exactly as before — only render-only JSX and pure value logic moved.
 // ---------------------------------------------------------------------------
 
 // Raw source: `const spring = 'cubic-bezier(.34,1.2,.5,1)'`. Written as the
@@ -60,419 +71,8 @@ import './Toast.css'
 // transition on write. Same value-identical-substitution precedent as
 // BlurCarousel.css; the rendered curve is unchanged.
 // It, the wrap's resting transition and the swipe-commit thresholds live in
-// proto/variants.ts as the "main" variant config (ds-review-overlays step 6);
+// variants.ts as the "main" variant config (ds-review-overlays step 6);
 // "main" carries the same values this file shipped with.
-
-// Raw source: `mult() { return this.props.slowMotion ? 4 : 1 }` with
-// slowMotion's tweaks-panel default of false.
-const MULT = 1
-
-// Raw source: `duration: this.props.duration ?? 3500` (the tweaks-panel
-// range's default).
-const DEFAULT_DURATION = 3500
-
-// Raw source: `COLORS = { ... }`.
-const COLORS: Record<string, string> = {
-  success: '#10B981',
-  error: '#EF4444',
-  warning: '#F59E0B',
-  info: '#3B82F6',
-  notification: '#6366F1',
-}
-
-// F12: per-glyph optical-center nudges (transform only, no size change).
-// Each Material Icons glyph carries different visual weight, so the offset
-// is judged per glyph rather than applied uniformly.
-const ICON_OPTICAL_NUDGE: Record<string, string> = {
-  check_circle: 'translate(0.5px, -0.5px)',
-  error: 'translate(0.5px, -0.5px)',
-  warning: 'translate(0, -0.5px)',
-  info: 'translate(0.5px, 0)',
-  notifications: 'translate(0.5px, -0.5px)',
-  delete: 'translate(0.5px, -0.5px)',
-}
-
-// Expand choreography mirrored byte-for-byte from ExpandableCard.tsx's
-// "main" variant (DURATION_S 0.5 / HEIGHT_EASING var(--ease-spring), the
-// inner reveal's opacity+translateY legs and delays) so the expandable
-// toast expands and collapses on the identical curve as the expandable
-// card, per this step's brief.
-const EXPAND_DURATION_S = 0.5
-const EXPAND_DURATION_MS = EXPAND_DURATION_S * 1000
-const EXPAND_HEIGHT_EASING = 'var(--ease-spring)'
-function expandInnerStyle(open: boolean): CSSProperties {
-  return {
-    opacity: open ? 1 : 0,
-    transform: open ? 'translateY(0)' : 'translateY(14px)',
-    transition:
-      `opacity ${EXPAND_DURATION_S * 0.7}s var(--ease-out) ${open ? EXPAND_DURATION_S * 0.25 : 0}s, ` +
-      `transform ${EXPAND_DURATION_S}s var(--ease-spring) ${open ? EXPAND_DURATION_S * 0.2 : 0}s`,
-  }
-}
-
-// Raw source: `const ms = (n) => 'calc(' + n + 'ms * var(--anim-mult, 1))'`.
-const ms = (n: number) => `calc(${n}ms * var(--anim-mult, 1))`
-
-// The wrap's resting transition (hoisted so the swipe hand-back restores the
-// exact string React last wrote, see onSwipeEnd) and the swipe-commit
-// thresholds come from cfg.wrapTransition / cfg.swipeDistance /
-// cfg.swipeVelocity / cfg.flingMs / cfg.fadeMs in proto/variants.ts. Every
-// JS-timed value there mirrors a motion-tokens.css duration by name.
-
-type Phase = 'enter' | 'shown' | 'exit' | 'gone'
-type Position = 'top' | 'bottom'
-
-export interface ToastSpec {
-  type: string
-  icon: string
-  title: string
-  message?: string
-  duration?: number
-  action?: { label: string; icon: string; onAction?: () => void }
-  expandText?: string
-}
-
-// Imperative handle exposed by ToastStage so an external host (e.g. the
-// sprint-planner substitution step) can drive toasts without owning the
-// stage's internal show()/state -- the module previously had no cross-host
-// API, only ToastDemo's own button handlers calling its local `show`.
-export interface ToastStageHandle {
-  show: (spec: ToastSpec) => void
-}
-
-// Toast-with-undo variant: same main toast look, an Undo action pill in
-// place of (or beside) the close button. Stable export name -- the
-// sprint-planner substitution step imports this to build its own undo
-// toasts against this module's ToastSpec shape.
-export function withUndo(spec: Omit<ToastSpec, 'action'>): ToastSpec {
-  return { ...spec, action: { label: 'Undo', icon: 'undo' } }
-}
-
-interface ToastItem extends ToastSpec {
-  id: string
-  phase: Phase
-  position: Position
-  duration: number
-  /** Stack slot frozen at exit time so the toast leaves from its own slot. */
-  exitIndex?: number
-}
-
-interface ToastVm {
-  key: string
-  icon: string
-  title: string
-  message: string
-  wrapStyle: CSSProperties
-  surfaceStyle: CSSProperties
-  iconBoxStyle: CSSProperties
-  closeStyle: CSSProperties
-  titleStyle: CSSProperties
-  messageStyle: CSSProperties
-  hasAction: boolean
-  actionLabel: string
-  actionIcon: string
-  actionOnAction?: () => void
-  actionStyle: CSSProperties
-  hasExpand: boolean
-  expandText: string
-  expandStyle: CSSProperties
-  expandBodyStyle: CSSProperties
-  onPress: () => void
-}
-
-// ---------------------------------------------------------------------------
-// Per-toast view-model — the raw source's `vm(t, index)`, value for value.
-// ---------------------------------------------------------------------------
-function vm(t: ToastItem, index: number, expanded: boolean, cfg: VariantCfg, fanned: boolean): ToastVm {
-  const top = t.position === 'top'
-  const dir = top ? 1 : -1
-  // Hover deck fan-out: each slot gets its own full row instead of a
-  // shallow peek so every stacked toast is separately visible, per this
-  // step's brief. FAN_STEP is a generous card-height estimate; the reveal
-  // still rides cfg.wrapTransition (the same token-driven transition used
-  // at rest), so the fan-in/out is that transition's stagger, not a new one.
-  const FAN_STEP = 84
-  const peek = fanned ? index * FAN_STEP : Math.min(index * cfg.peekStep, cfg.peekMax)
-  const scale = fanned ? 1 : Math.max(1 - index * cfg.scaleStep, cfg.scaleMin)
-  let y: number
-  let sc: number
-  let op: number
-  let hidden = false
-  if (t.phase === 'enter') {
-    y = -dir * cfg.enterY
-    sc = cfg.enterScale
-    op = 0
-  } else if (t.phase === 'exit') {
-    y = dir * peek - dir * 44
-    sc = 0.92
-    op = 0
-  } else if (t.phase === 'gone') {
-    y = dir * peek - dir * 44
-    sc = 0.92
-    op = 0
-    hidden = true
-  } else {
-    y = dir * peek
-    sc = scale
-    op = fanned || index <= 2 ? 1 : 0
-  }
-
-  const semantic = !!COLORS[t.type]
-  const color = COLORS[t.type]
-
-  const wrapStyle: CSSProperties = {
-    position: 'absolute',
-    right: 0,
-    left: 'auto',
-    top: top ? '0' : 'auto',
-    bottom: top ? 'auto' : '0',
-    width: 'min(420px, calc(100vw - 48px))',
-    boxSizing: 'border-box',
-    pointerEvents: op === 0 ? 'none' : 'auto',
-    visibility: hidden ? 'hidden' : 'visible',
-    zIndex: 100 - index,
-    transform: `translateY(${y}px) scale(${sc})`,
-    transformOrigin: top ? 'top right' : 'bottom right',
-    opacity: op,
-    transition: cfg.wrapTransition,
-    transitionDelay: fanned ? `calc(${index} * var(--stagger-entrance))` : '0ms',
-    willChange: 'transform, opacity',
-  }
-
-  // Deck's flat treatment: the gridded highlight and the inset bevel come off,
-  // the radius widens, and depth moves to a single soft drop shadow — the
-  // stack no longer signals depth through scale, so the card carries it.
-  const flat = cfg.surface === 'flat'
-  const surfaceStyle: CSSProperties = flat
-    ? {
-        borderRadius: '22px',
-        overflow: 'hidden',
-        cursor: t.expandText ? 'pointer' : 'default',
-        background: semantic ? color : 'var(--card-bg)',
-        color: semantic ? '#fff' : undefined,
-        border: semantic ? 'none' : '1px solid var(--card-border)',
-        boxShadow: '0 10px 26px rgba(15,23,42,0.16), 0 2px 6px rgba(15,23,42,0.08)',
-      }
-    : semantic
-    ? {
-        borderRadius: '17px',
-        overflow: 'hidden',
-        cursor: t.expandText ? 'pointer' : 'default',
-        backgroundColor: color,
-        color: '#fff',
-        textShadow: '0 1px 2px rgba(0,0,0,0.22)',
-        backgroundImage:
-          'linear-gradient(rgba(255,255,255,0.10) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.10) 1px, transparent 1px)',
-        backgroundSize: '9px 9px',
-        boxShadow:
-          'inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -2px 0 rgba(0,0,0,0.22), inset 0 0 0 1px rgba(255,255,255,0.15)',
-      }
-    : {
-        borderRadius: '17px',
-        overflow: 'hidden',
-        cursor: t.expandText ? 'pointer' : 'default',
-        background: 'var(--card-bg)',
-        border: '1px solid var(--card-border)',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), inset 0 0 0 1px rgba(15,23,42,0.04)',
-      }
-
-  const iconBoxStyle: CSSProperties = {
-    flex: 'none',
-    width: '34px',
-    height: '34px',
-    borderRadius: '9999px',
-    display: 'grid',
-    placeItems: 'center',
-    background: semantic ? 'rgba(255,255,255,0.2)' : '#10B981',
-    color: '#fff',
-    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -1.5px 0 rgba(0,0,0,0.18)',
-  }
-
-  const pill = (filled: boolean): CSSProperties => ({
-    flex: 'none',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '5px',
-    border: 'none',
-    cursor: 'pointer',
-    fontFamily: 'var(--font-display)',
-    fontSize: '12px',
-    fontWeight: 800,
-    padding: '6px 12px',
-    borderRadius: '9999px',
-    background: semantic ? 'rgba(255,255,255,0.22)' : filled ? '#10B981' : 'var(--bg-chip)',
-    color: semantic || filled ? '#fff' : 'var(--fg2)',
-    textShadow: semantic || filled ? '0 1px 2px rgba(0,0,0,0.22)' : 'none',
-    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1.5px 0 rgba(0,0,0,0.12)',
-    // Press/release legs moved to .ts-pill-btn / .ts-close-btn in Toast.css so
-    // the :active rule can shorten them (inline styles outrank class rules);
-    // the raw source's unspecified `filter` easing defaulted to UA `ease`,
-    // which ramps in on a press.
-  })
-
-  const closeStyle: CSSProperties = {
-    flex: 'none',
-    width: '26px',
-    height: '26px',
-    borderRadius: '9999px',
-    border: 'none',
-    display: 'grid',
-    placeItems: 'center',
-    cursor: 'pointer',
-    background: semantic ? 'rgba(255,255,255,0.18)' : 'var(--bg-chip)',
-    color: semantic ? '#fff' : 'var(--fg4)',
-    // Press/release legs moved to .ts-pill-btn / .ts-close-btn in Toast.css so
-    // the :active rule can shorten them (inline styles outrank class rules);
-    // the raw source's unspecified `filter` easing defaulted to UA `ease`,
-    // which ramps in on a press.
-  }
-
-  return {
-    key: t.id,
-    icon: t.icon,
-    title: t.title,
-    message: t.message || '',
-    wrapStyle,
-    surfaceStyle,
-    iconBoxStyle,
-    closeStyle,
-    titleStyle: { fontSize: '13px', fontWeight: 800, color: semantic ? '#fff' : 'var(--fg1)', lineHeight: 1.35 },
-    messageStyle: {
-      fontSize: '12px',
-      fontWeight: 600,
-      color: semantic ? 'rgba(255,255,255,0.82)' : 'var(--fg4)',
-      lineHeight: 1.4,
-    },
-    hasAction: !!t.action,
-    actionLabel: t.action ? t.action.label : '',
-    actionIcon: t.action ? t.action.icon : '',
-    actionOnAction: t.action?.onAction,
-    actionStyle: pill(true),
-    hasExpand: !!t.expandText,
-    expandText: t.expandText || '',
-    // Height leg now owned by useAutoHeight in ToastCard (mirrors
-    // ExpandableCard's `.xc-content` pattern); this only carries the inner
-    // reveal's opacity+translateY choreography.
-    expandStyle: expandInnerStyle(expanded),
-    expandBodyStyle: {
-      fontSize: '12px',
-      fontWeight: 600,
-      lineHeight: 1.5,
-      color: semantic ? 'rgba(255,255,255,0.85)' : 'var(--fg2)',
-      background: semantic ? 'rgba(0,0,0,0.12)' : 'var(--bg-chip)',
-      borderRadius: '12px',
-      padding: '10px 12px',
-    },
-    onPress: () => {},
-  }
-}
-
-// One stacked toast's card. Owns the expand region's height via
-// useAutoHeight (duration/easing mirrored from ExpandableCard's main
-// variant), so mount stays permanent through collapse -- only visibility
-// changes -- per the mounted-through-exit-css-animations lesson.
-function ToastCard({
-  t,
-  isExpanded,
-  onPointerDown,
-  onPointerMove,
-  onPointerUp,
-  onPress,
-  onDismiss,
-}: {
-  t: ToastVm
-  isExpanded: boolean
-  onPointerDown: (e: PointerEvent<HTMLElement>) => void
-  onPointerMove: (e: PointerEvent<HTMLElement>) => void
-  onPointerUp: (e: PointerEvent<HTMLElement>) => void
-  onPress: () => void
-  onDismiss: () => void
-}) {
-  const { ref } = useAutoHeight<HTMLDivElement>({
-    open: isExpanded,
-    duration: EXPAND_DURATION_MS,
-    easing: EXPAND_HEIGHT_EASING,
-  })
-  return (
-    <div
-      style={t.wrapStyle}
-      className="ts-wrap"
-      data-ts-base={String(t.wrapStyle.transform)}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
-      onPointerCancel={onPointerUp}
-      // onPointerDown below calls el.setPointerCapture on this element, which
-      // per spec retargets the resulting synthetic click's dispatch path to
-      // this captured element -- a click listener on any descendant (e.g.
-      // the surfaceStyle div) never receives it. The tap handler has to live
-      // here, on the capturing element itself, for the browser to deliver it.
-      onClick={onPress}
-    >
-      <div className="shell" style={{ padding: '7px', borderRadius: '24px', boxShadow: '0 10px 30px rgba(15,23,42,0.14), 0 2px 8px rgba(15,23,42,0.08)' }}>
-        <div style={t.surfaceStyle}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--gap-icon-text)', padding: '12px 14px' }}>
-            <div style={t.iconBoxStyle}>
-              <span className="material-icons" style={{ fontSize: '18px', display: 'inline-block', transform: ICON_OPTICAL_NUDGE[t.icon] || 'none' }}>{t.icon}</span>
-            </div>
-            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '1px' }}>
-              <span style={t.titleStyle}>{t.title}</span>
-              {t.message ? <span style={t.messageStyle}>{t.message}</span> : null}
-            </div>
-            {t.hasAction ? (
-              <button
-                type="button"
-                className="ts-pill-btn"
-                style={t.actionStyle}
-                onClick={(e: MouseEvent) => {
-                  e.stopPropagation()
-                  t.actionOnAction?.()
-                  onDismiss()
-                }}
-              >
-                <span className="material-icons" style={{ fontSize: '14px' }}>{t.actionIcon}</span>
-                {t.actionLabel}
-              </button>
-            ) : null}
-            <button
-              type="button"
-              className="ts-close-btn"
-              style={t.closeStyle}
-              onClick={(e: MouseEvent) => {
-                e.stopPropagation()
-                onDismiss()
-              }}
-            >
-              <span className="material-icons" style={{ fontSize: '14px' }}>close</span>
-            </button>
-          </div>
-          {t.hasExpand ? (
-            <div className="ts-content" ref={ref}>
-              <div style={t.expandStyle}>
-                <div style={{ padding: '0 14px 12px 14px', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-                  <div style={t.expandBodyStyle}>{t.expandText}</div>
-                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <button
-                      type="button"
-                      className="ts-pill-btn"
-                      style={t.actionStyle}
-                      onClick={(e: MouseEvent) => {
-                        e.stopPropagation()
-                        onDismiss()
-                      }}
-                    >
-                      <span className="material-icons" style={{ fontSize: '14px' }}>close</span>Dismiss
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : null}
-        </div>
-      </div>
-    </div>
-  )
-}
 
 // F13: sprint-planner-core substitution needs the viewport stack to escape a
 // transformed ancestor (fixed-position-portals-under-transformed-ancestors
@@ -482,6 +82,17 @@ function ToastCard({
 // F14: hideCard skips the in-tree demo/trigger card (.ts-root and its
 // contents) entirely, leaving only the portaled viewports + imperative
 // show()/handle API -- default unset reproduces the toast page byte-for-byte.
+
+// Imperative handle exposed by ToastStage so an external host (e.g. the
+// sprint-planner substitution step) can drive toasts without owning the
+// stage's internal show()/state -- the module previously had no cross-host
+// API, only ToastDemo's own button handlers calling its local `show`.
+export interface ToastStageHandle {
+  show: (spec: ToastSpec) => void
+}
+
+export type { ToastSpec }
+
 export const ToastStage = forwardRef<ToastStageHandle, { cfg: VariantCfg; portalTarget?: Element | null; anchorRef?: React.RefObject<HTMLElement | null>; hideCard?: boolean }>(function ToastStage({ cfg, portalTarget, anchorRef, hideCard }, forwardedRef) {
   const [toasts, setToastsState] = useState<ToastItem[]>([])
   // Anchor rect (in viewport coords) of the host card the stack should dock
@@ -518,11 +129,15 @@ export const ToastStage = forwardRef<ToastStageHandle, { cfg: VariantCfg; portal
   // render, so this stays clear of react-hooks/refs without a useEffect.
   const toastsRef = useRef<ToastItem[]>([])
   const setToasts = useCallback((updater: ToastItem[] | ((prev: ToastItem[]) => ToastItem[])) => {
-    setToastsState((prev) => {
-      const next = typeof updater === 'function' ? (updater as (prev: ToastItem[]) => ToastItem[])(prev) : updater
-      toastsRef.current = next
-      return next
-    })
+    // toastsRef always mirrors committed state (it's the only writer of
+    // toastsState), so deriving "next" from the ref instead of a setState
+    // updater keeps setToastsState a plain-value call — no side effect
+    // running inside a state updater function.
+    const next = typeof updater === 'function'
+      ? (updater as (prev: ToastItem[]) => ToastItem[])(toastsRef.current)
+      : updater
+    toastsRef.current = next
+    setToastsState(next)
   }, [])
   // Dismissal-timer pause/resume bookkeeping: startedAt is the wall-clock
   // moment the currently-armed timer began, remainingMs is what's left on it.
@@ -571,7 +186,7 @@ export const ToastStage = forwardRef<ToastStageHandle, { cfg: VariantCfg; portal
         if (next.every((t) => t.phase === 'gone')) next = []
         return next
       })
-    }, 320 * MULT)
+    }, tokenMs('--toast-exit-dur', 120) * MULT)
   }, [setToasts])
 
   // Hover-freeze: pause/resume every live dismissal timer in one corner's
@@ -606,95 +221,11 @@ export const ToastStage = forwardRef<ToastStageHandle, { cfg: VariantCfg; portal
     [startExit],
   )
 
-  // ---- swipe-to-dismiss --------------------------------------------------
-  // Gesture motion is written straight onto the node (no per-frame React
-  // state): the drag tracks the pointer 1:1, can be re-grabbed mid-fling, and
-  // the phase machine is only handed control at commit time. `data-ts-base`
-  // carries the stack transform this drag is offsetting.
-  // `behind` is the deck variant's peek-parallax set: the wraps stacked behind
-  // the dragged one, collected once at pointerdown so the move handler stays a
-  // straight write. Empty for every variant with parallax: 0.
-  const drag = useRef<{ id: string; el: HTMLElement; x0: number; t0: number; dx: number; behind: HTMLElement[] } | null>(null)
-  const lastDx = useRef(0)
-
-  const resetBehind = (behind: HTMLElement[]) => {
-    behind.forEach((b) => {
-      b.style.transition = cfg.wrapTransition
-      b.style.transform = b.dataset.tsBase || ''
-    })
-  }
-
-  const onSwipeStart = (id: string) => (e: PointerEvent<HTMLElement>) => {
-    if (e.pointerType === 'mouse' && e.button !== 0) return
-    // Pointer capture retargets the resulting click's dispatch path to the
-    // captured element, so a click starting on a button descendant (Undo,
-    // close) would never reach the button's own onClick. Leave those to
-    // native click dispatch -- no swipe/capture, no drag tracking.
-    if ((e.target as HTMLElement).closest('button')) return
-    const el = e.currentTarget
-    el.setPointerCapture(e.pointerId)
-    el.style.transition = 'none' // hand the current frame to the finger
-    // Caught mid-fling: kill the pending hand-back before it dismisses a toast
-    // the user just took back, and snap the node under the finger, opaque.
-    if (timers.current['s' + id]) {
-      clearTimeout(timers.current['s' + id])
-      delete timers.current['s' + id]
-      el.style.transform = el.dataset.tsBase || ''
-      el.style.opacity = '1'
-    }
-    const behind = cfg.parallax
-      ? Array.from(el.parentElement?.querySelectorAll<HTMLElement>('.ts-wrap') || []).filter(
-          (b) => b !== el && b.style.visibility !== 'hidden',
-        )
-      : []
-    behind.forEach((b) => {
-      b.style.transition = 'none'
-    })
-    drag.current = { id, el, x0: e.clientX, t0: e.timeStamp, dx: 0, behind }
-    lastDx.current = 0
-  }
-
-  const onSwipeMove = (e: PointerEvent<HTMLElement>) => {
-    const d = drag.current
-    if (!d) return
-    d.dx = e.clientX - d.x0
-    lastDx.current = d.dx
-    d.el.style.transform = `${d.el.dataset.tsBase} translateX(${d.dx}px)`
-    d.el.style.opacity = String(Math.max(1 - Math.abs(d.dx) / 260, 0.15))
-    // Peek-parallax: the deck follows the finger at a fraction, so the stack
-    // reads as one connected object instead of a card sliding off a backdrop.
-    d.behind.forEach((b) => {
-      b.style.transform = `${b.dataset.tsBase} translateX(${d.dx * cfg.parallax}px)`
-    })
-  }
-
-  const onSwipeEnd = (e: PointerEvent<HTMLElement>) => {
-    const d = drag.current
-    if (!d) return
-    drag.current = null
-    if (d.el.hasPointerCapture(e.pointerId)) d.el.releasePointerCapture(e.pointerId)
-    const v = d.dx / Math.max(e.timeStamp - d.t0, 1)
-    resetBehind(d.behind)
-    if (Math.abs(d.dx) > cfg.swipeDistance || Math.abs(v) > cfg.swipeVelocity) {
-      // Velocity handoff: keep flinging along the drag axis, then let the
-      // phase machine run its exit under an already-invisible node.
-      d.el.style.transition = `transform ${ms(cfg.flingMs)} var(--ease-out), opacity ${ms(cfg.fadeMs)} var(--ease-out)`
-      d.el.style.transform = `${d.el.dataset.tsBase} translateX(${Math.sign(d.dx) * 480}px)`
-      d.el.style.opacity = '0'
-      const { id, el } = d
-      timers.current['s' + id] = setTimeout(() => {
-        delete timers.current['s' + id]
-        el.style.transition = cfg.wrapTransition // restore React's exact string
-        startExit(id)
-      }, cfg.fadeMs)
-    } else {
-      // Under threshold: settle back on the same curve the stack uses (in
-      // Snap that curve overshoots the slot positionally, never in scale).
-      d.el.style.transition = cfg.wrapTransition
-      d.el.style.transform = d.el.dataset.tsBase || ''
-      d.el.style.opacity = '1'
-    }
-  }
+  // Swipe-to-dismiss gesture (split into toast-swipe.ts, react-doctor
+  // no-giant-component): the hook still owns its refs and is still called
+  // from here, so behavior/timing is byte-identical to the former inline
+  // block, only the implementation moved to its own module.
+  const { onSwipeStart, onSwipeMove, onSwipeEnd, lastDx } = useToastSwipe(cfg, timers, startExit)
 
   // Corner routing: a notification-type toast always mounts top-right,
   // every other kind mounts bottom-right (per this step's brief -- no
@@ -773,10 +304,9 @@ export const ToastStage = forwardRef<ToastStageHandle, { cfg: VariantCfg; portal
   // stays in the list as a hidden 'gone' placeholder so live toasts never
   // swap nodes mid-transition (see its own comment in startExit above).
   const renderGroup = (pos: Position) =>
-    group(pos).map((t, i) => (
+    group(pos).map((t) => (
       <ToastCard
-        // eslint-disable-next-line react/no-array-index-key
-        key={i}
+        key={t.key}
         t={t}
         isExpanded={!!expanded[t.key]}
         onPointerDown={onSwipeStart(t.key)}
@@ -802,7 +332,8 @@ export const ToastStage = forwardRef<ToastStageHandle, { cfg: VariantCfg; portal
     <>
       {/* ============ Top viewport (notification kind) ============ */}
       <div
-        style={{ position: 'fixed', right: anchoredRight, left: 'auto', top: anchoredTop, bottom: 'auto', height: 0, zIndex: 9999, pointerEvents: 'none' }}
+        className="ts-viewport"
+        style={{ right: anchoredRight, top: anchoredTop, bottom: 'auto' }}
         data-screen-label="Toast viewport top"
         onMouseEnter={() => pauseGroup('top')}
         onMouseLeave={() => resumeGroup('top')}
@@ -812,7 +343,8 @@ export const ToastStage = forwardRef<ToastStageHandle, { cfg: VariantCfg; portal
 
       {/* ============ Bottom viewport (every other kind) ============ */}
       <div
-        style={{ position: 'fixed', right: anchoredRight, left: 'auto', top: anchor ? anchoredTop : 'auto', bottom: anchor ? 'auto' : '24px', height: 0, zIndex: 9999, pointerEvents: 'none' }}
+        className="ts-viewport"
+        style={{ right: anchoredRight, top: anchor ? anchoredTop : 'auto', bottom: anchor ? 'auto' : '24px' }}
         data-screen-label="Toast viewport bottom"
         onMouseEnter={() => pauseGroup('bottom')}
         onMouseLeave={() => resumeGroup('bottom')}
@@ -829,146 +361,11 @@ export const ToastStage = forwardRef<ToastStageHandle, { cfg: VariantCfg; portal
   return (
     <div
       className="ts-root"
-      style={{
-        boxSizing: 'border-box',
-        minHeight: '100vh',
-        padding: '40px 24px',
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        fontFamily: 'var(--font-display)',
-        background: 'var(--bg-app)',
-      }}
       data-screen-label="Toast demo"
     >
 
       {/* ============ Demo / trigger card ============ */}
-      <div
-        className="shell zoom"
-        style={{ animation: 'ts-enter calc(220ms * var(--anim-mult, 1)) var(--ease-out) both', cursor: 'default' }}
-      >
-        <div
-          className="card-inner"
-          style={{
-            width: '460px',
-            maxWidth: 'calc(100vw - 88px)',
-            boxSizing: 'border-box',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 'var(--gap-stack)',
-          }}
-        >
-
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--gap-icon-text)' }}>
-            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '2px' }}>
-              <span
-                className="label"
-                style={{
-                  fontSize: 'var(--type-mini)',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: 'var(--tracking-wider)',
-                  color: 'var(--fg4)',
-                }}
-              >
-                Feedback
-              </span>
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 'var(--gap-icon-text)',
-                  fontSize: 'var(--type-h4)',
-                  fontWeight: 900,
-                  letterSpacing: '-0.015em',
-                  color: 'var(--fg1)',
-                }}
-              >
-                <span className="material-icons" style={{ fontSize: '20px', color: '#10B981' }}>notifications</span>Toasts
-              </span>
-            </div>
-            <span className="badge gci" style={{ fontVariantNumeric: 'tabular-nums' }}>
-              <span className="material-icons" style={{ fontSize: '12px' }}>layers</span>
-              <span>{liveCount}</span>
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-            <span
-              className="label"
-              style={{
-                fontSize: 'var(--type-mini)',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: 'var(--tracking-wider)',
-                color: 'var(--fg4)',
-              }}
-            >
-              Semantic
-            </span>
-            <div style={{ display: 'flex', gap: 'var(--gap-inline)', flexWrap: 'wrap' }}>
-              <button
-                type="button"
-                className="btn-cta"
-                style={{ height: '40px', fontSize: '13px', '--accent': '#10B981', '--ctaglow': 'rgba(16,185,129,0.5)' } as CSSProperties}
-                onClick={() => show({ type: 'success', icon: 'check_circle', title: 'Synced data successfully.' })}
-              >
-                <span className="material-icons" style={{ fontSize: '16px' }}>check_circle</span>Success
-              </button>
-              <button
-                type="button"
-                className="btn-cta"
-                style={{ height: '40px', fontSize: '13px', '--accent': '#EF4444', '--ctaglow': 'rgba(239,68,68,0.5)' } as CSSProperties}
-                onClick={() => show({ type: 'error', icon: 'error', title: 'Failed to load data from server.' })}
-              >
-                <span className="material-icons" style={{ fontSize: '16px' }}>error</span>Error
-              </button>
-              <button
-                type="button"
-                className="btn-cta"
-                style={{ height: '40px', fontSize: '13px', '--accent': '#F59E0B', '--ctaglow': 'rgba(245,158,11,0.5)' } as CSSProperties}
-                onClick={() => show({ type: 'warning', icon: 'warning', title: 'Deprecation alert for your API usage.' })}
-              >
-                <span className="material-icons" style={{ fontSize: '16px' }}>warning</span>Warning
-              </button>
-              <button
-                type="button"
-                className="btn-cta"
-                style={{ height: '40px', fontSize: '13px', '--accent': '#3B82F6', '--ctaglow': 'rgba(59,130,246,0.5)' } as CSSProperties}
-                onClick={() => show({ type: 'info', icon: 'info', title: 'A new version 2.4 is available.' })}
-              >
-                <span className="material-icons" style={{ fontSize: '16px' }}>info</span>Info
-              </button>
-              <button
-                type="button"
-                className="btn-cta"
-                style={{ height: '40px', fontSize: '13px', '--accent': COLORS.notification, '--ctaglow': 'rgba(99,102,241,0.5)' } as CSSProperties}
-                onClick={() => show({ type: 'notification', icon: 'notifications', title: 'New comment on your task.', expandText: 'Priya left a comment: "Can we bump the due date to Friday?"' })}
-              >
-                <span className="material-icons" style={{ fontSize: '16px' }}>notifications</span>Notification
-              </button>
-              <button
-                type="button"
-                className="btn-cta"
-                style={{ height: '40px', fontSize: '13px', '--accent': '#0F172A', '--ctaglow': 'rgba(15,23,42,0.5)' } as CSSProperties}
-                onClick={() => show(withUndo({ type: 'success', icon: 'delete', title: 'Item deleted.' }))}
-              >
-                <span className="material-icons" style={{ fontSize: '16px' }}>undo</span>Undo demo
-              </button>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 'var(--gap-inline)' }}>
-            <button type="button" className="btn-text" onClick={dismissAll}>
-              <span className="material-icons" style={{ fontSize: '18px' }}>clear_all</span>Dismiss all
-            </button>
-          </div>
-
-          <div style={{ display: 'flex' }}>
-            <span className="badge tag"><span className="material-icons">sell</span>toast / stacked</span>
-          </div>
-        </div>
-      </div>
+      <ToastDemoCard liveCount={liveCount} onShow={show} onDismissAll={dismissAll} />
 
       {portalTarget ? createPortal(viewports, portalTarget) : viewports}
     </div>

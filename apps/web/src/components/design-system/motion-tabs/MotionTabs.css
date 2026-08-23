@@ -240,14 +240,18 @@ html.dark .mt-divider {
   pointer-events: auto;
 }
 /* Component-local retune (locked decision, supersedes the earlier "almost
-   immediate" ask): panel switch is ~180ms decelerating, not the global
-   120ms (--duration-fast). Overrides the [data-panel-state] animation
+   immediate" ask): panel switch is --duration-180 decelerating, not the global
+   --duration-fast. Overrides the [data-panel-state] animation
    *duration only* -- keyframes + direction-aware translateX/opacity stay
    the shared global ones from motion-tokens.css. */
 .mt-panel[data-panel-state="entering-right"],
 .mt-panel[data-panel-state="entering-left"],
 .mt-panel[data-panel-state="exiting-left"],
 .mt-panel[data-panel-state="exiting-right"] {
+  /* faster-exits sweep: kept symmetric on purpose (global rule exception) --
+     this is a gesture-driven panel swipe (MotionTabs) that must match the
+     finger/pointer tracking on both the entering and exiting leg, so an
+     asymmetric exit would read as a mistimed drag rather than a snap. */
   animation-duration: calc(var(--duration-180) * var(--anim-mult, 1));
   animation-timing-function: var(--ease-out);
 }
@@ -277,15 +281,15 @@ html.dark .mt-divider {
   background: none;
   border: none;
   text-align: left;
-  transition: background calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease);
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
 /* Flat horizontal divider between rows: full-width, no gap artifacts */
 .mt-row + .mt-row {
   border-top: 1px solid var(--card-border, #D4D4D4);
 }
 html.dark .mt-row + .mt-row { border-top-color: var(--card-border, #232323); }
-.mt-row:hover { background: rgba(17,17,17,0.05); }
-html.dark .mt-row:hover { background: rgba(255,255,255,0.06); }
+.mt-row:hover { background: var(--fp-hover); }
+html.dark .mt-row:hover { background: var(--fp-hover); }
 
 /* ── Row icon badge — matches .ms-icon semantic-pill treatment ─────────── */
 .mt-row-ic {

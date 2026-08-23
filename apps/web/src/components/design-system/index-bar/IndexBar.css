@@ -68,7 +68,7 @@ html.dark .idx-foot-txt { color:#fff; } html.dark .idx-foot-txt b { color:#fff; 
   flex-shrink:0; display:inline-flex; align-items:center; gap:8px; padding:5px 13px 5px 5px;
   border-radius:9999px; background:#FFFFFF; border:none; cursor:pointer; font-family:'Montserrat';
   box-shadow: 0 4px 14px rgba(17,17,17,0.10), inset 0 0 0 1px rgba(17,17,17,0.05), inset 0 1px 0 rgba(255,255,255,0.9);
-  transition: background calc(var(--duration-200) * var(--anim-mult, 1)), box-shadow calc(var(--duration-200) * var(--anim-mult, 1));
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), box-shadow calc(var(--duration-200) * var(--anim-mult, 1));
 }
 html.dark .idx-ai { background:#1C1C1C; box-shadow: 0 4px 14px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.07); }
 html.dark .idx-ai:hover { background:var(--fp-hover); }
@@ -198,7 +198,7 @@ html.dark .idx-tick.on .idx-tick-label { color:inherit; }
 .replay button {
   display:inline-flex; align-items:center; gap:6px; font-family:'Montserrat'; font-size:11px; font-weight:800; letter-spacing:0.02em;
   color:var(--fg3,#6B6B6B); background:var(--card-bg,#FFFFFF); border:1px solid var(--card-border,#ECECEC); padding:6px 12px; border-radius:9999px; cursor:pointer;
-  box-shadow:0 2px 6px rgba(17,17,17,0.07), inset 0 1px 0 rgba(255,255,255,0.9); transition: background calc(var(--duration-150) * var(--anim-mult, 1)), color calc(var(--duration-150) * var(--anim-mult, 1)), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+  box-shadow:0 2px 6px rgba(17,17,17,0.07), inset 0 1px 0 rgba(255,255,255,0.9); transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), color calc(var(--duration-150) * var(--anim-mult, 1)), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 html.dark .replay button { background:#1C1C1C; border-color:rgba(255,255,255,0.1); color:#A1A1A1; }
 .replay button:hover { background:var(--fp-hover); color:var(--fg1,#111111); }

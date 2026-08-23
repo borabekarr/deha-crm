@@ -104,11 +104,7 @@ export function BlurCarousel() {
       const opacity = SIDE_OPACITY + (1 - SIDE_OPACITY) * foc
       const blur = MAX_BLUR * (1 - foc)
 
-      card.style.transform = `scale(${scale.toFixed(4)})`
-      card.style.opacity = opacity.toFixed(4)
-      card.style.setProperty('--foc', foc.toFixed(4))
-      card.style.setProperty('--blur', blur.toFixed(3))
-      card.style.zIndex = String(Math.round(foc * 100))
+      card.style.cssText += `;transform:scale(${scale.toFixed(4)});opacity:${opacity.toFixed(4)};--foc:${foc.toFixed(4)};--blur:${blur.toFixed(3)};z-index:${Math.round(foc * 100)}`
 
       if (raw < nearestDist) {
         nearestDist = raw
@@ -123,12 +119,42 @@ export function BlurCarousel() {
     }
   }, [])
 
+  // Completion signal for scrollToIndex's native scrollTo({behavior:'smooth'}),
+  // which has no fixed duration: `data-scrolling` on the rail flips 'false'
+  // when the browser's own `scrollend` event fires, with a 120ms
+  // scroll-idle debounce as the fallback for engines without scrollend
+  // support (reset on every scroll frame; see the mount effect below).
+  //
+  // Both completion paths race the rAF-throttled `update()` scheduled by the
+  // final 'scroll' event: `update` runs on the next animation frame, while
+  // 'scrollend' (a microtask-adjacent DOM event) and the setTimeout debounce
+  // are macrotask-scheduled — under load either can fire and flip the flag
+  // to 'false' one tick before that last rAF actually runs, so a caller
+  // polling the flag can observe it go false while the card's transform
+  // still reflects the second-to-last frame (a few percent off the true
+  // resting scale, e.g. scale(0.97) instead of scale(1)). Force a
+  // synchronous `update()` right before flipping the flag on both paths so
+  // the transform is guaranteed current at the moment 'false' becomes
+  // observable, regardless of which path won the race.
+  const scrollIdleTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const markScrolling = useCallback(() => {
+    const rail = railRef.current
+    if (!rail) return
+    rail.dataset.scrolling = 'true'
+    if (scrollIdleTimer.current) clearTimeout(scrollIdleTimer.current)
+    scrollIdleTimer.current = setTimeout(() => {
+      update()
+      rail.dataset.scrolling = 'false'
+    }, 120)
+  }, [update])
+
   const onScroll = useCallback(() => {
+    markScrolling()
     if (!ticking.current) {
       ticking.current = true
       requestAnimationFrame(update)
     }
-  }, [update])
+  }, [update, markScrolling])
 
   const scrollToIndex = useCallback((i: number) => {
     const rail = railRef.current
@@ -141,15 +167,23 @@ export function BlurCarousel() {
   // raw's `update(); syncArrows(); requestAnimationFrame(() =>
   // {scrollToIndex(0); requestAnimationFrame(update)})` sequence. ----
   useEffect(() => {
+    const rail = railRef.current
     update()
     const onResize = () => update()
     window.addEventListener('resize', onResize)
+    const onScrollEnd = () => {
+      if (!rail) return
+      update()
+      rail.dataset.scrolling = 'false'
+    }
+    rail?.addEventListener('scrollend', onScrollEnd)
     const raf1 = requestAnimationFrame(() => {
       scrollToIndex(0)
       requestAnimationFrame(update)
     })
     return () => {
       window.removeEventListener('resize', onResize)
+      rail?.removeEventListener('scrollend', onScrollEnd)
       cancelAnimationFrame(raf1)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -200,15 +234,24 @@ export function BlurCarousel() {
   return (
     <>
       <div className="carousel" id="carousel">
-        <div className="rail" id="rail" ref={railRef} onScroll={onScroll}>
+        <div className="rail" id="rail" ref={railRef} onScroll={onScroll} data-scrolling="false">
           {CARDS.map((c, i) => (
             <div
-              key={i}
+              key={c.cat}
               className="card"
               data-index={i}
               ref={(el) => { cardRefs.current[i] = el }}
               style={{ '--grad': c.grad } as CSSProperties}
+              role="button"
+              tabIndex={0}
+              aria-current={i === active}
               onClick={() => scrollToIndex(i)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  scrollToIndex(i)
+                }
+              }}
             >
               <div className="face" />
               <div className="veil" />
@@ -245,6 +288,7 @@ export function BlurCarousel() {
       <div className="below">
         <div className="nav-row">
           <button
+            type="button"
             className={`nav-arrow${active === CARDS.length - 1 ? ' is-cta' : ''}`}
             id="prevBtn"
             aria-label="Previous card"
@@ -257,14 +301,25 @@ export function BlurCarousel() {
           </button>
           <div className="dots" id="dots">
             {CARDS.map((_, i) => (
-              <span
-                key={i}
+              <button
+                key={CARDS[i].title}
+                type="button"
                 className={`dot${i === active ? ' on' : ''}`}
+                style={{ border: 'none', padding: 0, font: 'inherit' }}
+                aria-label={`Go to card ${i + 1}`}
+                aria-current={i === active}
                 onClick={() => scrollToIndex(i)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    scrollToIndex(i)
+                  }
+                }}
               />
             ))}
           </div>
           <button
+            type="button"
             className={`nav-arrow${active < CARDS.length - 1 ? ' is-cta' : ''}`}
             id="nextBtn"
             aria-label="Next card"

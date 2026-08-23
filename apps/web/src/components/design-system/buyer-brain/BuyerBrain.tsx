@@ -35,10 +35,14 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react'
 import { Shimmer } from '../shimmer/Shimmer'
+import { BuyerBrainDetailCard } from './BuyerBrainDetailCard'
+import type { Side } from './buyer-brain-shared'
 
-// Step-7 load diagnosis: the 9 brain pieces are large uncompressed PNGs
-// hosted on i.postimg.cc (third-party, no cache-control/CDN control from
-// this app) and each URL is fetched twice — once for the silhouette backing
+// Step-7 load diagnosis, Step-5 fix (F2): the 9 brain pieces are large
+// uncompressed PNGs, now served from this app's own public/brain-ref/pieces/
+// directory (previously hosted on a third-party image host with no
+// cache-control/CDN control from this app) and each URL is fetched twice —
+// once for the silhouette backing
 // layer (.bbq-piecebg) and once for the visible cutout (.bbq-piece) — with
 // no priority or decoding hints, so the browser treats all 18 requests as
 // equal-priority alongside the rest of the page. Fix applied: fetchPriority
@@ -84,31 +88,18 @@ interface PieceInfo {
    cutout's own alpha centroid (ccx/ccy, native px), native size (nw/nh),
    and native→reference linear scale (s). Pieces assemble into the brain from these alone. */
 const PIECE: Record<string, PieceInfo> = {
-  aspirations: { u: 'https://i.postimg.cc/rsNcMGSG/PNG-image.png', fcx: 236.6, fcy: 184.6, ccx: 158.1, ccy: 212.5, nw: 297, nh: 374, s: 0.6222 },
-  challenges: { u: 'https://i.postimg.cc/ZnxZ4P8t/PNG-image-2.png', fcx: 398.5, fcy: 153.6, ccx: 135.8, ccy: 206.9, nw: 269, nh: 385, s: 0.7477 },
-  values: { u: 'https://i.postimg.cc/j24Kt6zh/PNG-image-3.png', fcx: 563.2, fcy: 182, ccx: 134.3, ccy: 212.1, nw: 291, nh: 374, s: 0.6306 },
-  fears: { u: 'https://i.postimg.cc/prJxRQDG/PNG-image-4.png', fcx: 206.6, fcy: 390.5, ccx: 153.7, ccy: 167, nw: 302, nh: 332, s: 0.6673 },
-  preferences: { u: 'https://i.postimg.cc/3NF7Yjgf/PNG-image-5.png', fcx: 398.5, fcy: 388.5, ccx: 148.7, ccy: 166.6, nw: 297, nh: 333, s: 0.6673 },
-  dislikes: { u: 'https://i.postimg.cc/1XrPs0p2/PNG-image-6.png', fcx: 593, fcy: 390.1, ccx: 144.5, ccy: 167.9, nw: 299, nh: 334, s: 0.6761 },
-  influencers: { u: 'https://i.postimg.cc/BbBs45xr/PNG-image-7.png', fcx: 226.5, fcy: 596.3, ccx: 168.3, ccy: 162.1, nw: 309, nh: 379, s: 0.6464 },
-  keywords: { u: 'https://i.postimg.cc/tJjyKvVS/PNG-image-8.png', fcx: 398.5, fcy: 624.5, ccx: 142.8, ccy: 182.8, nw: 287, nh: 390, s: 0.7086 },
-  purchase_factors: { u: 'https://i.postimg.cc/C5gY3rfr/PNG-image-9.png', fcx: 571.3, fcy: 596.7, ccx: 141.3, ccy: 162.8, nw: 311, nh: 379, s: 0.6511 },
+  aspirations: { u: '/brain-ref/pieces/piece-aspirations.png', fcx: 236.6, fcy: 184.6, ccx: 158.1, ccy: 212.5, nw: 297, nh: 374, s: 0.6222 },
+  challenges: { u: '/brain-ref/pieces/piece-challenges.png', fcx: 398.5, fcy: 153.6, ccx: 135.8, ccy: 206.9, nw: 269, nh: 385, s: 0.7477 },
+  values: { u: '/brain-ref/pieces/piece-values.png', fcx: 563.2, fcy: 182, ccx: 134.3, ccy: 212.1, nw: 291, nh: 374, s: 0.6306 },
+  fears: { u: '/brain-ref/pieces/piece-fears.png', fcx: 206.6, fcy: 390.5, ccx: 153.7, ccy: 167, nw: 302, nh: 332, s: 0.6673 },
+  preferences: { u: '/brain-ref/pieces/piece-preferences.png', fcx: 398.5, fcy: 388.5, ccx: 148.7, ccy: 166.6, nw: 297, nh: 333, s: 0.6673 },
+  dislikes: { u: '/brain-ref/pieces/piece-dislikes.png', fcx: 593, fcy: 390.1, ccx: 144.5, ccy: 167.9, nw: 299, nh: 334, s: 0.6761 },
+  influencers: { u: '/brain-ref/pieces/piece-influencers.png', fcx: 226.5, fcy: 596.3, ccx: 168.3, ccy: 162.1, nw: 309, nh: 379, s: 0.6464 },
+  keywords: { u: '/brain-ref/pieces/piece-keywords.png', fcx: 398.5, fcy: 624.5, ccx: 142.8, ccy: 182.8, nw: 287, nh: 390, s: 0.7086 },
+  purchase_factors: { u: '/brain-ref/pieces/piece-purchase_factors.png', fcx: 571.3, fcy: 596.7, ccx: 141.3, ccy: 162.8, nw: 311, nh: 379, s: 0.6511 },
 }
 
-type Side = 'left' | 'right' | 'top-l' | 'top-r' | 'bottom'
-
-// Detail-card scale-open origin: approximates "grows from the piece that was
-// clicked" by mapping the piece's side within the brain grid to the nearest
-// edge of the card (the card sits to the right of the stage).
-const CARD_ORIGIN: Record<Side, string> = {
-  left: '0% 50%',
-  right: '100% 50%',
-  'top-l': '50% 0%',
-  'top-r': '50% 0%',
-  bottom: '50% 100%',
-}
-
-interface Region {
+export interface Region {
   id: string
   r: number
   c: number
@@ -291,7 +282,7 @@ GEOM.forEach((g, i) => {
 })
 
 // ─── component ─────────────────────────────────────────────────────────────
-type BlurbPhase = 'think' | 'typing' | 'done'
+export type BlurbPhase = 'think' | 'typing' | 'done'
 
 export default function BuyerBrain() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -452,9 +443,11 @@ export default function BuyerBrain() {
                       loading="eager"
                       fetchPriority="high"
                       onLoad={handlePieceLoad}
+                      onError={handlePieceLoad}
                       style={{ ...g.pieceStyle, ['--acc' as string]: g.rg.acc }}
                     />
                     <button
+                      type="button"
                       className="bbq-hit"
                       data-id={g.rg.id}
                       aria-label={g.rg.title}
@@ -502,6 +495,7 @@ export default function BuyerBrain() {
               {allLoaded &&
                 GEOM.map((g) => (
                   <button
+                    type="button"
                     key={g.rg.id}
                     className={
                       'bbq-label' + (g.light ? ' lighttext' : '') + (activeId === g.rg.id ? ' on' : '')
@@ -518,76 +512,20 @@ export default function BuyerBrain() {
                 ))}
             </div>
 
-            <div className="bbq-detail" id="detail">
-              {cardRegion && (
-                <div
-                  className={
-                    'bbq-detail-card' +
-                    (cardLight ? ' lighttext' : '') +
-                    (!selectedId ? ' closing' : '')
-                  }
-                  style={{
-                    ['--acc' as string]: cardRegion.acc,
-                    transformOrigin: CARD_ORIGIN[cardRegion.side],
-                  }}
-                >
-                  <button
-                    className="bbq-back"
-                    aria-label="Back to brain"
-                    onClick={() => {
-                      const id = cardRegion.id
-                      closeDetail()
-                      hitRefs.current[id]?.focus()
-                    }}
-                  >
-                    <span className="material-symbols-outlined">arrow_back</span>
-                  </button>
-                  <div className="bbq-band">
-                    <div className="bbq-band-ic">
-                      <span className="material-symbols-outlined">{cardRegion.icon}</span>
-                    </div>
-                    <div className="bbq-band-tx">
-                      <div className="kicker">AI Profiling</div>
-                      <div className="ttl">{cardRegion.title}</div>
-                    </div>
-                  </div>
-                  <div className="bbq-detail-body">
-                    <div className="bbq-blurb" id="blurb">
-                      {phase === 'think' && (
-                        <span className="bbq-think">
-                          <span />
-                          <span />
-                          <span />
-                        </span>
-                      )}
-                      {phase === 'typing' && (
-                        <>
-                          <span id="bt">{typed}</span>
-                          <span className="bbq-caret" />
-                        </>
-                      )}
-                      {phase === 'done' && cardRegion.blurb}
-                    </div>
-                    <div
-                      className="bbq-chips"
-                      id="chips"
-                      style={{ visibility: phase === 'done' ? 'visible' : 'hidden' }}
-                    >
-                      {phase === 'done' &&
-                        cardRegion.chips.map((c, i) => (
-                          <span
-                            key={c}
-                            className="bbq-chip"
-                            style={{ animationDelay: (rmRef.current ? 0 : i * 45) + 'ms' }}
-                          >
-                            {c}
-                          </span>
-                        ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            <BuyerBrainDetailCard
+              cardRegion={cardRegion}
+              cardLight={cardLight}
+              selectedId={selectedId}
+              phase={phase}
+              typed={typed}
+              reducedMotion={rmRef.current}
+              onBack={() => {
+                if (!cardRegion) return
+                const id = cardRegion.id
+                closeDetail()
+                hitRefs.current[id]?.focus()
+              }}
+            />
           </div>
         </div>
       </div>

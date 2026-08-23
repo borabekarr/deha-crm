@@ -83,6 +83,16 @@ function StepPane({ step }: PaneProps) {
   )
 }
 
+// ── Ripple handlers ──────────────────────────────────────────────────────
+
+function handleNextPointerDown(e: React.PointerEvent<HTMLButtonElement>): void {
+  ripple(e.currentTarget, e.nativeEvent as PointerEvent)
+}
+
+function handleBackPointerDown(e: React.PointerEvent<HTMLButtonElement>): void {
+  ripple(e.currentTarget, e.nativeEvent as PointerEvent)
+}
+
 // ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
@@ -162,16 +172,6 @@ export default function Multisteps() {
 
   function handleBack(): void {
     go(cur - 1)
-  }
-
-  // ── Ripple handlers ────────────────────────────────────────────────────
-
-  function handleNextPointerDown(e: React.PointerEvent<HTMLButtonElement>): void {
-    ripple(e.currentTarget, e.nativeEvent as PointerEvent)
-  }
-
-  function handleBackPointerDown(e: React.PointerEvent<HTMLButtonElement>): void {
-    ripple(e.currentTarget, e.nativeEvent as PointerEvent)
   }
 
   // ── Derived flags ──────────────────────────────────────────────────────

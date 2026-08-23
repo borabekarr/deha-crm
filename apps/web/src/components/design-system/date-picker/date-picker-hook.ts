@@ -6,6 +6,8 @@
  * The returned ref-setter is stable — it wires/unwires on mount/unmount.
  */
 
+import { tokenMs } from '@/lib/token-ms'
+
 // ── Types ────────────────────────────────────────────────────────────────────
 
 interface PickerEl extends HTMLDivElement {
@@ -30,10 +32,12 @@ for (let d = 1; d <= 31; d++) DAY_VALUES.push(d)
 const SCALE_TABLE   = [1,    0.92, 0.85, 0.78, 0.70]
 const OPACITY_TABLE = [1,    0.60, 0.35, 0.15, 0.05]
 
-// Animation duration for panel close timeout (item 4); enter is CSS-driven
-const PANEL_EXIT_MS  = 300
-
 // ── Helpers ──────────────────────────────────────────────────────────────────
+
+// Faster-exits rule: the panel-close timeout reads --dp-exit-dur
+// (DatePicker.css, .dp-outer) at call time via the shared helper, scoped
+// to $panel since the token is local to the picker, not global. See
+// lib/token-ms.ts.
 
 function daysInMonth(month: number, year: number): number {
   return new Date(year, month + 1, 0).getDate()
@@ -215,13 +219,11 @@ export function pickerRef(el: HTMLDivElement | null): void {
       const opacity = OPACITY_TABLE[slot] + (OPACITY_TABLE[nextSlot] - OPACITY_TABLE[slot]) * frac
       const transform = 'scale(' + scale + ')'
 
-      items[i].style.transform = transform
-      items[i].style.opacity   = String(opacity)
+      items[i].style.cssText = `transform:${transform};opacity:${opacity}`
       // Active class is NOT toggled during scroll -- applied only on settle.
 
       if (maskItems && maskItems[i]) {
-        maskItems[i].style.transform = transform
-        maskItems[i].style.opacity   = String(opacity)
+        maskItems[i].style.cssText = `transform:${transform};opacity:${opacity}`
       }
     }
 
@@ -407,7 +409,7 @@ export function pickerRef(el: HTMLDivElement | null): void {
     $panel.style.transform = ''
     $panel.style.opacity = ''
     // After exit transition completes, hide the panel
-    const exitDuration = Math.round(PANEL_EXIT_MS * animMult * 1.1) // slight buffer, scaled by --anim-mult
+    const exitDuration = Math.round(tokenMs('--dp-exit-dur', 180, $panel) * animMult * 1.1) // slight buffer, scaled by --anim-mult
     closingTimer = setTimeout(() => {
       closingTimer = null
       $panel.classList.remove('dp-panel--closing')

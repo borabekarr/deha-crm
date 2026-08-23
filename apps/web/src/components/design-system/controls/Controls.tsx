@@ -1,6 +1,5 @@
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
-import '../../../../design-system/preview/_controls.css'
 import './Controls.css'
 
 import { segRef, cleanupSeg, swRef, cleanupSw, sliderRef, cleanupSlider } from './controls-hook'

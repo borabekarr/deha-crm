@@ -49,38 +49,29 @@ html.dark .lb {
 }
 html.dark .h-title .h-title-icon { color: #FFFFFF; }
 
-/* Segmented control — canonical overshoot pill (mirrors _controls.css + _darkmode.css) */
-.seg {
-  position: relative; display: inline-flex;
-  background: #F5F5F5; border-radius: 9999px; padding: 3px;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
-  font-family: 'Montserrat', sans-serif;
-}
+/* Segmented control — canonical overshoot pill (base now resolves from the
+   runtime canonical styles/seg-controls.css; only this component's own
+   color/sizing/timing overrides remain below, tie-specificity + later
+   source order so the un-redeclared canon properties still apply). */
+.seg { background: #F5F5F5; }
 .seg-pill {
-  position: absolute; top: 3px; bottom: 3px; left: 0; width: 0;
-  background: #111111; border-radius: 9999px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.18); z-index: 0;
-  /* Pill and row content read as one gesture: both resolve --duration-fast
-     (120ms), down from --duration-slower (300ms) which made the pill lag
-     visibly behind the already-120ms row swap. See global [data-panel-state]
-     rule in motion-tokens.css for the row/content side of this pairing. */
+  background: #111111;
+  /* Pill and row content read as one gesture: both resolve --duration-fast,
+     down from --duration-slower (the prior canon default) which
+     made the pill lag visibly behind the already-fast row swap. See global
+     [data-panel-state] rule in motion-tokens.css for the row/content side
+     of this pairing. */
   transition:
     left calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-pill-switch),
     width calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-pill-switch);
 }
 .seg button {
-  position: relative; z-index: 1;
   display: inline-flex; align-items: center; gap: 7px;
-  padding: 4px 12px; border-radius: 9999px;
-  font-size: 11px; font-weight: 800; border: none; background: none;
-  color: #6B6B6B; cursor: pointer; font-family: 'Montserrat', sans-serif;
-  transition:
-    color calc(var(--duration-240) * var(--anim-mult, 1)),
-    transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out);
+  padding: 4px 12px;
+  font-size: 11px;
+  color: #6B6B6B;
 }
 .seg button .material-icons { font-size: 14px; line-height: 1; }
-.seg button.active { color: #FFFFFF; font-weight: 900; }
-.seg button:active { transform: scale(0.93); }
 /* Dark-mode seg styling handled canonically by _darkmode.css (html.dark .seg ...) */
 
 .colhead { display:flex; font-size:10px; font-weight:800; color: #A1A1A1; text-transform: uppercase; letter-spacing: 0.1em; padding: 0 8px; margin-bottom: 6px; }
@@ -96,7 +87,7 @@ html.dark .h-title .h-title-icon { color: #FFFFFF; }
    Exit plays on the .rows container as one block (no stagger, matches the
    global rule directly, no local override needed). Enter plays per-.row via
    the same global rule; only the stagger delay is scoped locally here
-   (~160ms across 4 rows, preserved from the prior hand-rolled version). */
+   (stepped across 4 rows, preserved from the prior hand-rolled version). */
 .row[data-panel-state="entering-right"]:nth-child(1),
 .row[data-panel-state="entering-left"]:nth-child(1)  { animation-delay: calc(0ms   * var(--anim-mult, 1)); /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */ }
 .row[data-panel-state="entering-right"]:nth-child(2),
@@ -158,7 +149,7 @@ html.dark .row:not(.win):hover {
     inset 0 -2px 0 rgba(0,0,0,0.18),
     inset 0 0 0 1px rgba(255,255,255,0.15);
   text-shadow: 0 1px 1px rgba(0,0,0,0.2);
-  transition: background calc(var(--duration-320) * var(--anim-mult, 1));
+  transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .a1 { background:#FACC15; }
 .a2 {

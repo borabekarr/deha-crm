@@ -27,7 +27,7 @@ import './proto/variants.css'
 // (200+180) resolving to the same 380ms.
 // ---------------------------------------------------------------------------
 
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { useCallback, useEffect, useEffectEvent, useRef, useState, type KeyboardEvent } from 'react'
 import { ProtoPicker } from './proto/ProtoPicker'
 
 // ---------- Sample data ----------
@@ -108,28 +108,30 @@ export function MessageDropdown({
   )
   const toggle = () => setOpen(!open)
 
-  // Close on outside click
+  // Close on outside click. setOpen is only used inside the listener, so it's
+  // wrapped in useEffectEvent — the effect then only needs to resubscribe
+  // when `open` itself changes, not whenever setOpen's identity changes.
+  const onOutsideClick = useEffectEvent((e: MouseEvent) => {
+    if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false)
+  })
   useEffect(() => {
     if (!open) return
-    const onDown = (e: MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false)
-    }
-    window.addEventListener('mousedown', onDown)
-    return () => window.removeEventListener('mousedown', onDown)
-  }, [open, setOpen])
+    window.addEventListener('mousedown', onOutsideClick)
+    return () => window.removeEventListener('mousedown', onOutsideClick)
+  }, [open])
 
   // Esc to close
+  const onEscKey = useEffectEvent((e: globalThis.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setOpen(false)
+      triggerRef.current?.focus()
+    }
+  })
   useEffect(() => {
     if (!open) return
-    const onKey = (e: globalThis.KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setOpen(false)
-        triggerRef.current?.focus()
-      }
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open, setOpen])
+    window.addEventListener('keydown', onEscKey)
+    return () => window.removeEventListener('keydown', onEscKey)
+  }, [open])
 
   // Keyboard nav inside the list (when open)
   const onItemKeyDown = (e: KeyboardEvent<HTMLLIElement>, idx: number) => {
@@ -210,9 +212,19 @@ export function MessageDropdown({
         )}
       </button>
 
-      {/* Content layer — crisp, on top of panel-bg */}
-      {/* eslint-disable-next-line jsx-a11y/prefer-tag-over-role -- animated popover (opacity/pointer-events driven by .md-root.open); native <dialog> alters show/hide semantics and would fight the CSS transition, same precedent as FileFolder.tsx/Calendar.tsx */}
-      <div className="md-panel-content" role="dialog" aria-modal="false" aria-label={label} aria-hidden={!open}>
+      {/* Content layer — crisp, on top of panel-bg. Native non-modal <dialog>
+          rendered `open` unconditionally (never toggling the `open`
+          attribute) so the existing opacity/pointer-events CSS transition on
+          .md-root.open .md-panel-content keeps driving show/hide exactly as
+          before; UA default background/border/margin neutralised inline so
+          the transparent text layer still sits cleanly on top of panel-bg. */}
+      <dialog
+        open
+        className="md-panel-content"
+        aria-label={label}
+        aria-hidden={!open}
+        style={{ background: 'none', border: 'none', margin: 0, maxWidth: 'none', maxHeight: 'none', color: 'inherit' }}
+      >
         <div className="md-header">
           <span className="material-symbols-outlined" aria-hidden="true">
             chat_bubble
@@ -265,7 +277,7 @@ export function MessageDropdown({
             <span className="md-btn-label">{viewAllLabel}</span>
           </button>
         </div>
-      </div>
+      </dialog>
     </div>
   )
 }

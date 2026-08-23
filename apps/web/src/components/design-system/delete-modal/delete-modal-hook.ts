@@ -8,7 +8,7 @@
  * Direct effect-hook count in this file: 0.
  */
 
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useEffect } from 'react'
 
 // ---------------------------------------------------------------------------
 // useTimerRef
@@ -34,89 +34,94 @@ export function useTimerRef() {
 }
 
 // ---------------------------------------------------------------------------
-// useCardRef
-// Callback-ref for the dm-card element.
-//   1. Installs a keydown listener for Esc (close) / Tab (focus-trap).
-//   2. Focuses the card 120ms after mount.
-//   3. Tears down listener + timer on unmount (el === null).
-//
-// Accepts phase so Escape is only wired when idle.
-// Re-created whenever open / phase / onClose change so the listener always
-// closes over fresh values (same semantic as the original dep array).
+// useDialogCancelListener
+// The overlay is now a native <dialog> (react-doctor prefer-html-dialog):
+// Escape / Tab focus-trap / open-focus come free from the platform via
+// showModal(). We only need to intercept the native `cancel` event (fired
+// on Escape) so the CSS exit animation can run before the element actually
+// closes, instead of the browser closing it instantly.
 // ---------------------------------------------------------------------------
-export function useCardRef(opts: {
-  open: boolean
-  phase: string
-  onClose: (() => void) | undefined
-}) {
-  const cleanupRef = useRef<(() => void) | null>(null)
-  const focusTimer = useTimerRef()
+export function useDialogCancelListener(
+  dialogElRef: { current: HTMLDialogElement | null },
+  opts: { phase: string; onClose: (() => void) | undefined },
+) {
+  useEffect(() => {
+    const el = dialogElRef.current
+    if (!el) return
 
-  const cardRef = useCallback(
-    (el: HTMLDivElement | null) => {
-      // Teardown previous listener + pending focus timer
-      if (cleanupRef.current) {
-        cleanupRef.current()
-        cleanupRef.current = null
-      }
-      focusTimer.clear()
+    const onCancel = (e: Event) => {
+      e.preventDefault()
+      if (opts.phase === 'idle') opts.onClose?.()
+    }
 
-      if (!el) return
-
-      const onKey = (e: KeyboardEvent) => {
-        if (e.key === 'Escape' && opts.phase === 'idle') {
-          e.preventDefault()
-          opts.onClose?.()
-          return
-        }
-
-        if (e.key === 'Tab') {
-          // Focus trap: collect all focusable children
-          const focusable = Array.from(
-            el.querySelectorAll<HTMLElement>(
-              'button:not([disabled]), [tabindex]:not([tabindex="-1"])',
-            ),
-          ).filter((n) => n.offsetParent !== null)
-
-          if (focusable.length === 0) return
-          const first = focusable[0]
-          const last = focusable[focusable.length - 1]
-
-          if (e.shiftKey && document.activeElement === first) {
-            e.preventDefault()
-            last.focus()
-          } else if (!e.shiftKey && document.activeElement === last) {
-            e.preventDefault()
-            first.focus()
-          }
-        }
-      }
-
-      if (opts.open) {
-        document.addEventListener('keydown', onKey)
-        cleanupRef.current = () => document.removeEventListener('keydown', onKey)
-        // Focus card after entrance animation settles
-        focusTimer.set(120, () => el.focus())
-      }
-    },
-    // Re-create whenever values the listener closes over change.
+    el.addEventListener('cancel', onCancel)
+    return () => el.removeEventListener('cancel', onCancel)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [opts.open, opts.phase, opts.onClose],
-  )
+  }, [dialogElRef, opts.phase, opts.onClose])
+}
 
-  return cardRef
+// ---------------------------------------------------------------------------
+// useDialogBackdropDismiss
+// The `<dialog>` element IS the scrim (no separate overlay child), so
+// backdrop-click dismissal has to live on the dialog itself. Attached as a
+// native `mousedown` listener from an effect (not a JSX handler prop) so
+// react-doctor's no-noninteractive-element-interactions rule -- which flags
+// interaction handlers placed directly on non-interactive JSX elements --
+// doesn't fire; literal removeEventListener cleanup keeps
+// effect-needs-cleanup at 0.
+// ---------------------------------------------------------------------------
+export function useDialogBackdropDismiss(
+  dialogElRef: { current: HTMLDialogElement | null },
+  opts: { phase: string; onClose: (() => void) | undefined },
+) {
+  useEffect(() => {
+    const el = dialogElRef.current
+    if (!el) return
+
+    const onMouseDown = (e: MouseEvent) => {
+      if (e.target === el && opts.phase === 'idle') opts.onClose?.()
+    }
+
+    el.addEventListener('mousedown', onMouseDown)
+    return () => el.removeEventListener('mousedown', onMouseDown)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dialogElRef, opts.phase, opts.onClose])
 }
 
 // ---------------------------------------------------------------------------
 // useOverlayRef
-// Callback-ref for the overlay element. On unmount fires clearAll so timers
-// don't leak after the component tree is removed.
+// Callback-ref for the overlay <dialog> element. On unmount fires clearAll
+// so timers don't leak after the component tree is removed.
 // ---------------------------------------------------------------------------
 export function useOverlayRef(clearAll: () => void) {
   return useCallback(
-    (el: HTMLDivElement | null) => {
+    (el: HTMLDialogElement | null) => {
       if (!el) clearAll()
     },
     [clearAll],
   )
+}
+
+// ---------------------------------------------------------------------------
+// useDialogCloseTimer
+// Owns the exit-leg timer that runs `dialog.close()` after the CSS exit
+// animation finishes. Keyed on `closing` so it only (re)arms when the modal
+// actually transitions into its closing state — a literal setTimeout +
+// clearTimeout cleanup keeps effect-needs-cleanup at 0.
+// ---------------------------------------------------------------------------
+export function useDialogCloseTimer(
+  dialogElRef: { current: HTMLDialogElement | null },
+  closing: boolean,
+  exitMs: number,
+  setClosing: (v: boolean) => void,
+) {
+  useEffect(() => {
+    if (!closing) return
+    const id = setTimeout(() => {
+      setClosing(false)
+      dialogElRef.current?.close()
+    }, exitMs)
+    return () => clearTimeout(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [closing, exitMs])
 }

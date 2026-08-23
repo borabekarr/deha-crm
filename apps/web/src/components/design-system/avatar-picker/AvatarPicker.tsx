@@ -132,6 +132,7 @@ export default function AvatarPicker({ onComplete }: AvatarPickerProps) {
                   data-proximity
                   onClick={() => scrollStrip('left')}
                   aria-label="Scroll left"
+                  tabIndex={-1}
                 >
                   <span className={iconClass('arrow_back_ios')}>arrow_back_ios</span>
                 </button>
@@ -178,6 +179,7 @@ export default function AvatarPicker({ onComplete }: AvatarPickerProps) {
                   data-proximity
                   onClick={() => scrollStrip('right')}
                   aria-label="Scroll right"
+                  tabIndex={-1}
                 >
                   <span className={iconClass('arrow_forward_ios')}>arrow_forward_ios</span>
                 </button>

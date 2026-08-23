@@ -60,7 +60,7 @@
 }
 @media (prefers-reduced-motion: no-preference) {
   .shimmer .wave {
-    animation: shimLR calc(var(--shim-dur, 1500ms) * var(--anim-mult, 1)) var(--ease-linear) infinite;
+    animation: shimLR calc(var(--shim-dur, 1500ms /* motion-sweep: kept, 1500ms, fallback default, used <3x library-wide, >15% off nearest tier */) * var(--anim-mult, 1)) var(--ease-linear) infinite;
   }
   .shimmer[data-dir='rightToLeft'] .wave {
     animation-name: shimRL;
@@ -72,7 +72,7 @@
     animation-name: shimBT;
   }
   .shimmer[data-variant='pulse'] {
-    animation: shimPulse calc(var(--shim-dur, 1500ms) * var(--anim-mult, 1)) var(--ease-in-out) infinite;
+    animation: shimPulse calc(var(--shim-dur, 1500ms /* motion-sweep: kept, 1500ms, fallback default, used <3x library-wide, >15% off nearest tier */) * var(--anim-mult, 1)) var(--ease-in-out) infinite;
   }
 }
 /* vertical sweeps re-orient the gradient */

@@ -26,19 +26,21 @@ const DEHA_PALETTE = ['#10B981', '#3B82F6', '#EAB308', '#F97316', '#8B5CF6', '#E
 function useTween(target: number, dur = 520) {
   const [val, setVal] = useState(target)
   const valRef = useRef(target)
-  valRef.current = val
-  const idRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  useEffect(() => {
+    valRef.current = val
+  }, [val])
   useEffect(() => {
     const from = valRef.current
     const start = Date.now()
-    const tick = () => {
+    // setInterval (not recursive setTimeout) so the tick loop is a single
+    // timer with one owner: the id below both starts and stops it.
+    const id = setInterval(() => {
       const t = Math.min(1, (Date.now() - start) / dur)
       const e = 1 - Math.pow(1 - t, 3) // easeOutCubic
       setVal(from + (target - from) * e)
-      if (t < 1) idRef.current = setTimeout(tick, 16)
-    }
-    idRef.current = setTimeout(tick, 16)
-    return () => clearTimeout(idRef.current)
+      if (t >= 1) clearInterval(id)
+    }, 16)
+    return () => clearInterval(id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [target, dur])
   return val
@@ -78,6 +80,8 @@ const DEFAULT_DATA: PieChartDatum[] = [
   { label: 'Home', value: 1580 },
   { label: 'Other', value: 1050 },
 ]
+
+const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3)
 
 function PieChart({
   data = DEFAULT_DATA,
@@ -131,21 +135,19 @@ function PieChart({
   useEffect(() => {
     const DUR = 900
     const start = Date.now()
-    let id: ReturnType<typeof setTimeout> = 0 as unknown as ReturnType<typeof setTimeout>
-    const tick = () => {
+    // setInterval (not recursive setTimeout) so the tick loop is a single
+    // timer with one owner: the id below both starts and stops it.
+    const id = setInterval(() => {
       const p = Math.min(1, (Date.now() - start) / DUR)
       setMount(p)
-      if (p < 1) id = setTimeout(tick, 16)
-    }
-    id = setTimeout(tick, 16)
-    return () => clearTimeout(id)
+      if (p >= 1) clearInterval(id)
+    }, 16)
+    return () => clearInterval(id)
   }, [arcs.length])
 
   /* center value tween — hooks must run unconditionally, before any guard */
   const centerDatum = hovered != null ? colored[hovered] : null
   const displayValue = useTween(centerDatum ? centerDatum.value : total, 520)
-
-  const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3)
 
   /* per-slice eased reveal (stagger) */
   const sliceProgress = (i: number) => {

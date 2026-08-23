@@ -45,7 +45,7 @@
     linear-gradient(to right,  rgba(255,255,255,0.07) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255,255,255,0.07) 1px, transparent 1px);
   background-size: 14px 14px;
-  transition: background calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out);
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out);
   letter-spacing: -0.01em;
 }
 .wp-btn:hover { background: #1C1C1C; }
@@ -54,7 +54,7 @@
 /* Proximity: append scale/filter channels (existing transition untouched). */
 .wp-btn[data-proximity] {
   transition:
-    background calc(var(--duration-150) * var(--anim-mult, 1)),
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
@@ -101,11 +101,12 @@
   transform-origin: top right;
   animation: wp-popIn calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out) forwards;
 }
-/* Exit is the enter animation played backwards: same keyframe, same duration
-   token, same easing — `reverse` guarantees the exit mirrors the enter exactly
-   rather than drifting via a hand-duplicated keyframe. */
+/* Exit is the enter animation played backwards, same keyframe and easing,
+   but one tier faster than the enter duration on the shared
+   --overlay-morph-exit-dur family alias (faster-exits rule):
+   --duration-slower -> --overlay-morph-exit-dur (--duration-240). */
 .wp-bezel.closing {
-  animation: wp-popIn calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out) reverse forwards;
+  animation: wp-popIn calc(var(--overlay-morph-exit-dur) * var(--anim-mult, 1)) var(--ease-out) reverse forwards;
 }
 
 /* Squircle conversion (Step 7): concentric outer/inner pair, mirrors
@@ -227,7 +228,7 @@ html.dark .wp-popover[data-squircle="on"] {
     linear-gradient(to bottom, rgba(255,255,255,0.07) 1px, transparent 1px);
   background-size: 14px 14px;
   letter-spacing: -0.01em;
-  transition: background calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out);
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out);
 }
 .wp-update-btn:hover { background: #1C1C1C; }
 .wp-update-btn:active { transform: scale(var(--press-control)); }
@@ -236,7 +237,7 @@ html.dark .wp-popover[data-squircle="on"] {
 /* Proximity: append scale/filter channels (existing transition untouched). */
 .wp-update-btn[data-proximity] {
   transition:
-    background calc(var(--duration-150) * var(--anim-mult, 1)),
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
@@ -385,7 +386,7 @@ html.dark .wp-update-btn { background: #F5F5F5; color: #111111; }
 html.dark .wp-update-btn:hover { background: #ECECEC; }
 
 html.dark .wp-edited { border-top-color: #232323; }
-html.dark .wp-edited:hover { background: #242424; }
+html.dark .wp-edited:hover { background: var(--fp-hover); }
 html.dark .wp-edited-left { color: #D4D4D4; }
 html.dark .wp-edited .wp-arrow { color: #4A4A4A; }
 

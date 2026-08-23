@@ -65,7 +65,8 @@ html.dark .mb-shell[data-squircle="on"]::before {
 }
 /* fade the glow in, breathe while lit, then fade out gracefully (keyframes = reliable) */
 .mb.generating::before { animation: mbGlowIn calc(var(--duration-expand) * var(--anim-mult, 1)) var(--ease-fade) both, glowPulse calc(2.5s /* motion-sweep: kept, 2500ms, used <3x library-wide, >15% off nearest tier */ * var(--anim-mult, 1)) var(--ease-in-out) calc(var(--duration-expand) * var(--anim-mult, 1)) infinite; }
-.mb.exiting::before { animation: mbGlowOut calc(var(--duration-560) * var(--anim-mult, 1)) var(--ease-standard) both; }
+/* faster-exits rule: exit was slower than enter (560 vs 460), moved one tier below */
+.mb.exiting::before { animation: mbGlowOut calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-standard) both; }
 @keyframes mbGlowIn  { from { opacity: 0; } to { opacity: 1; } }
 @keyframes mbGlowOut { from { opacity: 1; } to { opacity: 0; } }
 
@@ -102,7 +103,9 @@ html.dark .mb-shell[data-squircle="on"]::before {
 .mb.generating .skel-bar.w2 { animation-delay: calc(var(--duration-140) * var(--anim-mult, 1)), 0s /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */; }
 .mb.generating .skel-bar.w3 { animation-delay: calc(var(--duration-slow) * var(--anim-mult, 1)), 0s /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */; }
 /* ── Morph: EXIT (generating → static) ── */
-.mb.exiting .mb-input { animation: mbInputIn calc(var(--duration-compact) * var(--anim-mult, 1)) var(--ease-out) both; }
+/* faster-exits rule: exit was slower than enter (440 vs 420), moved one tier below */
+.mb.exiting .mb-input { animation: mbInputIn calc(var(--duration-380) * var(--anim-mult, 1)) var(--ease-out) both; }
+/* faster-exits rule: exit already faster than enter (300 vs 460), kept */
 .mb.exiting .skel-bar { animation: mbBarOut calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-fade) both; }
 @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 @keyframes mbInputOut { from { opacity: 1; transform: translateY(0); filter: blur(0); } to { opacity: 0; transform: translateY(-8px) scale(.99); filter: blur(2px); } }
@@ -124,11 +127,11 @@ html.dark .mb-shell[data-squircle="on"]::before {
   font-family: 'Montserrat'; font-size: 13px; font-weight: 700; color: #111111;
   cursor: pointer;
   box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 -1px 0 rgba(17,17,17,0.04);
-  transition: background calc(var(--duration-140) * var(--anim-mult, 1)), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out),
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
-.mb-btn:hover { background: #FAFAFA; }
+.mb-btn:hover { background: var(--fp-hover); }
 .mb-btn:active { transform: scale(var(--press-control)); }
 .mb-btn .material-icons { font-size: 16px; color: #4A4A4A; }
 
@@ -151,7 +154,8 @@ html.dark .mb-shell[data-squircle="on"]::before {
 /* btn exits in .3s; give it full runway before gen-label enters */
 .mb.generating .mb-ai-btn { animation: mbBtnOut calc(var(--duration-slower) * var(--anim-mult, 1)) var(--ease-out) both; pointer-events: none; }
 /* btn re-enters after gen-label fully exits (.24s); add matching delay */
-.mb.exiting .mb-ai-btn { animation: mbBtnIn calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-bounce-glow) calc(var(--duration-slow) * var(--anim-mult, 1)) both; }
+/* faster-exits rule: exit was slower than enter (360 vs 300), moved one tier below */
+.mb.exiting .mb-ai-btn { animation: mbBtnIn calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-bounce-glow) calc(var(--duration-slow) * var(--anim-mult, 1)) both; }
 @keyframes mbBtnOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(.9); } }
 @keyframes mbBtnIn  { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: scale(1); } }
 
@@ -179,6 +183,7 @@ html.dark .mb-shell[data-squircle="on"]::before {
   transition: outline-color calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .mb.done .mb-ai-slot { outline-color: var(--brand-primary-500); animation: mbSlotOutlineIn calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out) both; }
+/* faster-exits rule: exit already faster than enter (280 vs 420), kept */
 .mb.done-out .mb-ai-slot { outline-color: transparent; transition: outline-color calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-fade); }
 @keyframes mbSlotOutlineIn {
   from { outline-color: color-mix(in srgb, var(--brand-primary-500) 0%, transparent); box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand-primary-500) 0%, transparent); }
@@ -196,6 +201,7 @@ html.dark .mb.done .mb-ai-slot { outline-color: var(--brand-primary-400); }
 /* delay gen-label enter until btn exit is nearly complete (.28s ≈ .3s btn exit) */
 .mb.generating .mb-gen-label { animation: mbGenIn calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-bounce-glow) calc(var(--duration-280) * var(--anim-mult, 1)) both; }
 /* gen-label exits first (0s delay); btn re-enters after (.22s delay on mbBtnIn) */
+/* faster-exits rule: exit already faster than enter (220 vs 360), kept */
 .mb.exiting .mb-gen-label { animation: mbGenOut calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-fade) both; }
 @keyframes mbGenIn  { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: scale(1); } }
 @keyframes mbGenOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(.94); } }
@@ -208,17 +214,17 @@ html.dark .mb.done .mb-ai-slot { outline-color: var(--brand-primary-400); }
   background: #111111; color: #fff;
   display: grid; place-items: center; cursor: pointer;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.22);
-  transition: background calc(var(--duration-150) * var(--anim-mult, 1)), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out),
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
-.mb-send:hover { background: #1C1C1C; }
+.mb-send:hover { background: var(--fp-hover); }
 .mb-send:active { transform: scale(var(--press-control)); }
 /* No click animation while the "Extend with AI" button is hidden
    (generating → exiting → done). Restored once Extend returns. */
 .mb.generating .mb-send,
 .mb.exiting .mb-send,
-.mb.done .mb-send { transition: background calc(var(--duration-150) * var(--anim-mult, 1)); }
+.mb.done .mb-send { transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade); }
 .mb.generating .mb-send:active,
 .mb.exiting .mb-send:active,
 .mb.done .mb-send:active { transform: none; }
@@ -234,6 +240,7 @@ html.dark .mb.done .mb-ai-slot { outline-color: var(--brand-primary-400); }
 }
 .mb-done-badge svg { display: block; }
 .mb.done .mb-done-badge { animation: mbDoneIn calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-out) both; }
+/* faster-exits rule: exit already faster than enter (320 vs 420), kept */
 .mb.done-out .mb-done-badge { animation: mbDoneOut calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-standard) both; }
 @keyframes mbDoneIn { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes mbDoneOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-7px); } }
@@ -267,7 +274,7 @@ html.dark .mb[data-squircle="on"]{ box-shadow: none; }
    content:none by default, so no override is needed here. */
 html.dark .mb-input{ color:#F5F5F5; }
 html.dark .mb-btn{ background:#1C1C1C; border-color:#232323; color:#F5F5F5; box-shadow:inset 0 1px 0 rgba(255,255,255,.05); }
-html.dark .mb-btn:hover{ background:#111111; }
+html.dark .mb-btn:hover{ background:var(--fp-hover); }
 html.dark .mb-btn .material-icons{ color:#A1A1A1; }
 html.dark .mb-send{ background:var(--brand-primary-500); }
 html.dark .mb-send:hover{ background:var(--brand-primary-400); }

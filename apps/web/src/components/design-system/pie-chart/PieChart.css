@@ -58,10 +58,10 @@ html.dark .pc-head-icon { color: var(--fg1); }
 .pc-chart svg { display: block; overflow: visible; }
 
 .pc-slice {
-  /* Value-identical tokenization (ds-review-visuals Step 3): 160ms/ease ->
+  /* Value-identical tokenization (ds-review-visuals Step 3): opacity leg ->
      --duration-base/--ease-fade (byte-identical to the bare `ease` keyword,
-     see motion-tokens.css:76), 360ms -> --duration-sweep, 200ms/ease ->
-     --duration-200/--ease-fade. The 360ms transform curve
+     see motion-tokens.css:76), transform leg -> --duration-sweep, filter
+     leg -> --duration-200/--ease-fade. The transform curve
      cubic-bezier(.32,1.18,.42,1) has no byte-identical token in
      motion-tokens.css (locked this step, no minting) so it stays literal;
      only its duration leg tokenizes. */
@@ -114,9 +114,9 @@ html.dark .pc-head-icon { color: var(--fg1); }
   background: var(--bg-chip);
   box-shadow: inset 0 0 0 1px var(--border-hairline);
   /* Value-identical tokenization (ds-review-visuals Step 3, gate-triggered):
-     150ms/ease -> --duration-150/--ease-fade, both byte-identical tokens. */
+     --duration-150/--ease-fade, both byte-identical tokens. */
   transition:
-    background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     box-shadow calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
     opacity calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
     filter calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),

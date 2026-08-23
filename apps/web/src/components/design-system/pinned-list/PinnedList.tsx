@@ -219,7 +219,8 @@ export default function PinnedList({ items: initialItems = DEFAULT_ITEMS }: Pinn
   const [state, setState] = useState<PinnedListState>(() => {
     const items = initialItems.map((it) => ({ ...it }))
     // Build initial pinnedOrder: items that start pinned, in their original order
-    const pinnedOrder = items.filter((it) => it.pinned).map((it) => it.id)
+    const pinnedOrder: string[] = []
+    for (const it of items) if (it.pinned) pinnedOrder.push(it.id)
     return { items, pinnedOrder, justToggled: null, toggleGen: 0 }
   })
 
@@ -287,7 +288,7 @@ export default function PinnedList({ items: initialItems = DEFAULT_ITEMS }: Pinn
 
   // Build sorted pinned array: order by pinnedOrder array
   const itemMap = Object.fromEntries(items.map((it) => [it.id, it]))
-  const pinned = pinnedOrder.map((id) => itemMap[id]).filter(Boolean)
+  const pinned = pinnedOrder.flatMap((id) => (itemMap[id] ? [itemMap[id]] : []))
   // All (unpinned): maintain original relative order
   const all = items.filter((it) => !it.pinned)
 

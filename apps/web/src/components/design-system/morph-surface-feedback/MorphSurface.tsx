@@ -102,6 +102,7 @@ export default function MorphSurface({
         ref={rootRef}
         className={`ms2-surface${open ? ' ms2-open' : ''}`}
         style={surfaceStyle}
+        role="presentation"
         onClick={() => { if (!open) setOpen(true) }}
       >
         {/* morphing brand dot — glides from bar centre up to form top-left */}

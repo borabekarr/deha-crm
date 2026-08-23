@@ -63,6 +63,41 @@ export interface ToggleSpamTarget extends SpamTargetBase {
   settleProperty: string
   /** Longest open/close transition on `settleSelector` (ms) — settle wait. */
   transitionMs: number
+  /**
+   * For targets with no fixed CSS transition duration (e.g. native
+   * scrollTo({behavior:'smooth'})): poll this DOM attribute to the given
+   * value instead of a plain timeout before reading the settle property.
+   * `transitionMs` is still used for the mid-flight-reversal interrupt
+   * timing, just not for the final settle wait.
+   */
+  awaitAttribute?: { selector: string; attribute: string; value: string }
+  /**
+   * Number of times to click the post-spam responsiveness trigger before
+   * asserting it reached the opposite reference (default 1). Most toggle
+   * targets jump straight to the open/closed boundary on a single click, so
+   * one click is sufficient proof of responsiveness. A stepper control
+   * (e.g. blur-carousel's next/prev, which advances one card per click)
+   * needs up to (state count - 1) clicks to guarantee reaching the boundary
+   * reference from wherever the spam sequence left it — the settle read
+   * only distinguishes "at the boundary" from "anywhere else" so a single
+   * step within the "anywhere else" region reads as no change even though
+   * the control genuinely responded and moved.
+   */
+  postSpamSteps?: number
+  /**
+   * Numeric tolerance for comparing `settleProperty` reads (matched against
+   * the first numeric token in the value, e.g. the `0.82` in
+   * `matrix(0.82, 0, 0, 0.82, 0, 0)`), instead of requiring an exact string
+   * match. Needed when the settle value is derived from a native scroll
+   * offset: the offset the browser lands on after `scrollTo({behavior:
+   * "smooth"})` is subject to sub-pixel/device-pixel rounding, so a
+   * genuinely-at-rest read can differ from the reference read by a few
+   * ten-thousandths (0.8204 vs 0.8200) despite both being the same visually
+   * and functionally settled state. Omit (default: exact string match) for
+   * settle properties that are discrete/enumerated rather than derived from
+   * continuous geometry.
+   */
+  settleTolerance?: number
 }
 
 export type SpamTarget = AutoHeightSpamTarget | ToggleSpamTarget
@@ -154,12 +189,6 @@ export const WAIVED: SpamWaiver[] = [
     date: '2026-07-14',
   },
   {
-    slug: 'blur-carousel',
-    reason:
-      'nextBtn/prevBtn drive rail.scrollTo({behavior: "smooth"}) instead of a CSS transition, so there is no fixed transitionMs to settle on: under rapid click-reversal spam the native smooth-scroll animation gets interrupted mid-flight and the rAF listener commits an intermediate transform instead of snapping to the target card (observed: matrix(0.82,0,0,0.82,0) instead of the expected fully-centered matrix(1,0,0,1,0,0) after settle+400ms). See debt/blur-carousel-scroll-interruption.md.',
-    date: '2026-08-08',
-  },
-  {
     slug: 'toast',
     reason:
       "Expandable row is a plain CSS max-height/opacity transition on an inline style object (300ms/240ms, byte-preserved from toast.html's own vm()), and it is not a click-flips-two-states toggle: the trigger pushes a NEW toast each press (up to a live stack), the expandable surface belongs to that toast rather than to a stable page element, and every toast auto-dismisses on its own timer — a rapid-click loop has nothing stable to measure.",
@@ -194,6 +223,12 @@ export const WAIVED: SpamWaiver[] = [
     reason:
       "Attempted real toggle enrollment (kind: 'toggle', trigger '.db', settleProperty 'width') and ran it live: idle and confirming share byte-identical [data-state] CSS (background, box-shadow — DeleteButton.css:114-171), so the pill's measured content width is the ONLY distinguishing property, and it is barely distinguishable by design (idle 'Delete' vs confirming 'Cancel'+digit measured 179px vs 180px, 1px apart) — under the spam loop it settled to 136px, a third value matching neither reference, i.e. no reliable two-state pair for the runner's snap-back assertion.",
     date: '2026-08-09',
+  },
+  {
+    slug: 'animations-registry',
+    reason:
+      "Composite page embedding the same demo exports already individually waived on their own routes for the same properties: animated-list's absolute-slot push feed has no stable settle element, number-flow's shuffle trigger sets Math.random() values with no reference to snap back to, and shimmer auto-cycles via setInterval with no click trigger. prize-sheet's own trigger is enrolled as a toggle target on its own route; embedding it a second time here does not create a new independent settle surface to assert against. Stacking these four in one grid does not produce a page-level two-state pair a click-loop could interrupt.",
+    date: '2026-08-21',
   },
   {
     slug: 'otp-input',
@@ -261,12 +296,13 @@ export const SPAM_TARGETS: SpamTarget[] = [
   },
   {
     // FAB-to-card morph: the box only ever opens on click (raw source guards
-    // with `if (!openDate)`), so closing needs the in-card close button — the
-    // first <button> inside the Date picker screen.
+    // with `if (!openDate)`), so closing needs the in-card close button —
+    // the explicit close button, not the FAB trigger button that now also
+    // renders inside the Date picker screen.
     kind: 'toggle',
     slug: 'picker',
     trigger: '[data-screen-label="Date picker"] > div',
-    closeTrigger: '[data-screen-label="Date picker"] button',
+    closeTrigger: '[data-screen-label="Date picker"] button[aria-label="Close date picker"]',
     settleSelector: '[data-screen-label="Date picker"] > div',
     settleProperty: 'width',
     transitionMs: 520,
@@ -391,6 +427,42 @@ export const SPAM_TARGETS: SpamTarget[] = [
     settleSelector: '.dg-clip',
     settleProperty: 'grid-template-rows',
     transitionMs: 380,
+  },
+  {
+    // nextBtn/prevBtn drive rail.scrollTo({behavior:'smooth'}), which has no
+    // fixed duration — awaitAttribute polls #rail's data-scrolling back to
+    // 'false' (set by scrollend / the 120ms idle debounce) instead of a
+    // timed wait. Settle read is card 0's transform: scale(1) when centered
+    // (prevBtn / closed) vs scale(0.82) one step off-center (nextBtn / open).
+    kind: 'toggle',
+    slug: 'blur-carousel',
+    trigger: '#nextBtn',
+    closeTrigger: '#prevBtn',
+    settleSelector: '.card[data-index="0"]',
+    settleProperty: 'transform',
+    transitionMs: 400,
+    awaitAttribute: { selector: '#rail', attribute: 'data-scrolling', value: 'false' },
+    // 6 cards (indices 0-5): card 0's settle read only distinguishes
+    // "active===0" (scale 1) from "active is any other index" (scale 0.82,
+    // saturated — every off-center index reads identically). The spam loop
+    // can leave `active` anywhere in 1-5, so the post-spam responsiveness
+    // check's single click of prevBtn (which steps back by exactly one
+    // index) is not guaranteed to reach index 0 — up to 5 steps are needed
+    // in the worst case. See debt investigation, 2026-08-23.
+    postSpamSteps: 5,
+    // The scale read is `clamp(cardCenter-distance / step, 0, 1)` fed
+    // through a smoothstep — mathematically exact only when the scroll
+    // offset lands exactly on a card boundary. Chromium's native smooth
+    // scroll settles to a device-pixel-rounded offset that is regularly a
+    // pixel or two short of that exact boundary even once truly at rest,
+    // producing e.g. scale 0.8235 instead of the clamped 0.8200 — observed
+    // up to ~0.007 off in practice. 0.008 comfortably absorbs that rounding
+    // while still failing any genuine mid-transition/partial-settle read,
+    // which differs from either reference by several percent (0.02+), not
+    // thousandths — the actual settle-timing gap that produced those larger
+    // reads is closed at the source in settleWait's value-stability poll,
+    // not by tolerance. See debt investigation, 2026-08-23.
+    settleTolerance: 0.008,
   },
 ]
 

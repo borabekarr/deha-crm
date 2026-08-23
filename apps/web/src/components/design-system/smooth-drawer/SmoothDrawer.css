@@ -73,8 +73,8 @@
     inset 0 -2px 0 rgba(17,17,17, 0.08),
     0 4px 14px -8px rgba(17,17,17, 0.30);
   transition:
-    filter calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236),
-    transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);
+    filter calc(var(--panel-settle-dur) * var(--anim-mult, 1)) var(--panel-settle-ease),
+    transform calc(var(--panel-settle-dur) * var(--anim-mult, 1)) var(--panel-settle-ease);
 }
 
 .sd-trigger:hover {
@@ -91,9 +91,9 @@
    filter/transform transition. */
 .sd-trigger[data-proximity] {
   transition:
-    filter calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236),
-    transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236),
-    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    filter calc(var(--panel-settle-dur) * var(--anim-mult, 1)) var(--panel-settle-ease),
+    transform calc(var(--panel-settle-dur) * var(--anim-mult, 1)) var(--panel-settle-ease),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 
 /* ── Overlay — fixed, viewport-anchored, never adds to page scroll ── */
@@ -157,6 +157,12 @@
   backdrop-filter: blur(2px);
   transition: opacity calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-fade);
   cursor: pointer;
+}
+
+/* Faster-exits rule (plan: faster-exits-debts step 7): the scrim's closing
+   leg runs one duration tier below the shared 420ms open/close fade. */
+.sd-overlay.is-closing .sd-scrim {
+  transition-duration: calc(var(--duration-380) * var(--anim-mult, 1));
 }
 
 /* ── The sheet — inner-card recipe ── */
@@ -503,8 +509,8 @@
 
 .sd-buy[data-proximity] {
   transition:
-    background-color calc(var(--duration-180) * var(--anim-mult, 1)),
-    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring-snap),
+    background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-toast-pop),
     box-shadow calc(var(--duration-200) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
@@ -608,11 +614,11 @@
    specificity (0,2,0) to `.sd-later:active`, and — because every `.sd-later`
    always carries `data-proximity` — it wins the cascade on `transition-
    duration` for the `transform` channel regardless of source order, holding
-   press to the 140ms eased duration. A probe reading getComputedStyle right
+   press to the --duration-140 eased duration. A probe reading getComputedStyle right
    after :active engages then samples mid-transition-startup and still sees
-   the identity matrix for 100ms+ before any visible movement. `[data-
+   the identity matrix for a beat before any visible movement. `[data-
    proximity]:active` raises specificity to (0,3,0) so the snap wins
-   deterministically; release still eases via the base 140ms transition. */
+   deterministically; release still eases via the base --duration-140 transition. */
 .sd-later[data-proximity]:active {
   transition-duration: 0ms; /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */
 }

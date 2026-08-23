@@ -9,7 +9,7 @@
  * Direct effect-hook count in this file: 0.
  */
 
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useEffect } from 'react'
 
 // ---------------------------------------------------------------------------
 // useTimerRef
@@ -55,58 +55,61 @@ export function useCardRef(opts: {
   handleConnect: () => void
   inputRef: React.RefObject<HTMLInputElement | null>
 }) {
-  const cleanupRef = useRef<(() => void) | null>(null)
   const focusTimerRef = useTimerRef()
+  const elRef = useRef<HTMLDivElement | null>(null)
 
-  const cardRef = useCallback(
-    (el: HTMLDivElement | null) => {
-      // Teardown previous listener + timer
-      if (cleanupRef.current) {
-        cleanupRef.current()
-        cleanupRef.current = null
-      }
-      focusTimerRef.clear()
+  // Stable callback ref: only stores the node. The listener/focus wiring
+  // lives in the useEffect below so react-doctor can see the cleanup path;
+  // this keeps the exported shape a plain (el) => void the caller composes
+  // with its other callback refs (squircle, proximity), unchanged.
+  const cardRef = useCallback((el: HTMLDivElement | null) => {
+    elRef.current = el
+  }, [])
 
-      if (!el) return
+  useEffect(() => {
+    const el = elRef.current
+    if (!el) return
 
-      // 1. Keyboard listener (runs whenever open / valid / phase refreshes)
-      const onKey = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
+    // 1. Keyboard listener (runs whenever open / valid / phase refreshes)
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        opts.onClose?.()
+      } else if (e.key === 'Enter' && opts.valid && opts.phase === 'idle') {
+        const active = document.activeElement as HTMLElement | null
+        if (active && active.tagName === 'INPUT' && active !== opts.inputRef.current) return
+        e.preventDefault()
+        opts.handleConnect()
+      } else if (e.key === 'Tab') {
+        const focusable = el.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), input, a[href], [tabindex]:not([tabindex="-1"])',
+        )
+        if (!focusable.length) return
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
+        if (e.shiftKey && document.activeElement === first) {
           e.preventDefault()
-          opts.onClose?.()
-        } else if (e.key === 'Enter' && opts.valid && opts.phase === 'idle') {
-          const active = document.activeElement as HTMLElement | null
-          if (active && active.tagName === 'INPUT' && active !== opts.inputRef.current) return
+          last.focus()
+        } else if (!e.shiftKey && document.activeElement === last) {
           e.preventDefault()
-          opts.handleConnect()
-        } else if (e.key === 'Tab') {
-          const focusable = el.querySelectorAll<HTMLElement>(
-            'button:not([disabled]), input, a[href], [tabindex]:not([tabindex="-1"])',
-          )
-          if (!focusable.length) return
-          const first = focusable[0]
-          const last = focusable[focusable.length - 1]
-          if (e.shiftKey && document.activeElement === first) {
-            e.preventDefault()
-            last.focus()
-          } else if (!e.shiftKey && document.activeElement === last) {
-            e.preventDefault()
-            first.focus()
-          }
+          first.focus()
         }
       }
+    }
 
-      if (opts.open) {
-        document.addEventListener('keydown', onKey)
-        cleanupRef.current = () => document.removeEventListener('keydown', onKey)
-        // 2. Focus the card after entrance animation settles
-        focusTimerRef.set(120, () => el.focus())
-      }
-    },
-    // Re-create whenever the values that the listener closes over change.
+    if (opts.open) {
+      document.addEventListener('keydown', onKey)
+      // 2. Focus the card after entrance animation settles
+      focusTimerRef.set(120, () => el.focus())
+    }
+
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      focusTimerRef.clear()
+    }
+    // Re-run whenever the values the listener closes over change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [opts.open, opts.valid, opts.phase, opts.onClose, opts.handleConnect],
-  )
+  }, [opts.open, opts.valid, opts.phase, opts.onClose, opts.handleConnect])
 
   return cardRef
 }

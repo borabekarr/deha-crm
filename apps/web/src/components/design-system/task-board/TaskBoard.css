@@ -124,8 +124,8 @@ html.dark .tb-outer[data-squircle="on"]::before {
   background-color: var(--tb-card-bg);
   border: 2px solid #C9C9C9;
   box-shadow: none;
-  transition: border-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out-soft),
-              background-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out-soft),
+  transition: border-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out),
+              background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out),
               transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out);
 }
 /* Lift hovered card above siblings so its border is never clipped by the
@@ -133,18 +133,30 @@ html.dark .tb-outer[data-squircle="on"]::before {
 .tb-card:hover {
   z-index: 3;
   border-color: #B0B0B0;
-  background-color: rgba(17,17,17,0.03);
+  background-color: var(--fp-hover);
 }
 html.dark .tb-card { border-color: rgba(255,255,255,0.16); box-shadow: none; }
-html.dark .tb-card:hover { border-color: rgba(255,255,255,0.24); background-color: rgba(255,255,255,0.03); }
+html.dark .tb-card:hover { border-color: rgba(255,255,255,0.24); }
 /* Search/filter highlight always wins over rest + hover border/background
    (declared after :hover, equal specificity -> source order decides) */
 .tb-card.tb-highlight { border: 2px dashed var(--brand-primary-500); background-color: var(--tb-card-hl); }
 .tb-card.dragging { opacity: 0.35; transform: scale(0.97); }
 
+/* Step-4 no-inline-exhaustive-style migration (plan: security-deps-doctor-p2). */
+.tb-column {
+  background: var(--tb-col-bg);
+  border: var(--tb-col-dash);
+  border-radius: 12px;
+  padding: 10px;
+  display: flex; flex-direction: column; gap: 14px;
+  height: 380px;
+  box-sizing: border-box;
+  overflow: hidden;
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), outline-color calc(var(--duration-base) * var(--anim-mult, 1));
+}
 .tb-column.drop-target {
   outline-offset: -1px;
-  transition: background calc(var(--duration-base) * var(--anim-mult, 1)), outline-color calc(var(--duration-base) * var(--anim-mult, 1));
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), outline-color calc(var(--duration-base) * var(--anim-mult, 1));
 }
 .tb-column.drop-target[data-col="todo"]     { background: #FAFAFA !important; outline: 1.5px dashed rgba(100,116,139,0.55); }
 .tb-column.drop-target[data-col="progress"] { background: #FFF7ED !important; outline: 1.5px dashed rgba(249,115,22,0.55); }
@@ -181,12 +193,14 @@ html.dark .tb-card:hover { border-color: rgba(255,255,255,0.24); background-colo
    tall; 20px keeps parity with message-dropdown's own 20px badge. */
 .tb-live-count-badge {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 20px; height: 20px;
-  border-radius: 50%;
+  /* F13: 20px -> 25px, font 11px -> 13px, so the number sits with even
+     breathing room to the round's edges instead of touching it. */
+  width: 25px; height: 25px;
+  border-radius: 9999px;
   background: var(--brand-primary-500);
   color: #fff;
   font-family: 'Montserrat', sans-serif;
-  font-size: 11px; font-weight: 900;
+  font-size: 13px; font-weight: 900;
   line-height: 1;
   letter-spacing: 0;
   text-shadow: 0 1px 1px rgba(0,0,0,0.18);
@@ -301,19 +315,47 @@ html.dark .tb-card:hover { border-color: rgba(255,255,255,0.24); background-colo
   pointer-events: auto;
   transform-origin: 50% 100%;
   will-change: transform, opacity, filter;
+  /* Step-4 no-inline-exhaustive-style migration (plan: security-deps-doctor-p2)
+     -- static half; `background` stays inline (TaskBoard.tsx) because it is
+     cfg.bg, chosen per toast kind (move/error/info) from MOVE_CONFIG. */
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 9px 10px 9px 12px;
+  border-radius: 14px;
+  background-image: linear-gradient(rgba(255,255,255,0.10) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.10) 1px, transparent 1px);
+  background-size: 7px 7px;
+  color: #fff;
+  font-size: 12.5px; font-weight: 700;
+  letter-spacing: -0.005em;
+  box-shadow: 0 8px 24px -6px rgba(17,17,17,0.35), inset 0 1px 0 rgba(255,255,255,0.20);
+  max-width: 360px;
+  white-space: nowrap;
 }
-/* Morph IN: blur + scale-up from a small puff into the final pill */
+.tb-toast-undo {
+  padding: 3px 9px; border-radius: 8px;
+  background: rgba(255,255,255,0.22); border: 1px solid rgba(255,255,255,0.30);
+  color: #fff; font-size: 11.5px; font-weight: 700; cursor: pointer;
+}
+.tb-toast-dismiss {
+  width: 22px; height: 22px; padding: 0; flex-shrink: 0;
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 8px; color: rgba(255,255,255,0.85);
+  cursor: pointer; display: grid; place-items: center;
+}
+/* Morph IN: blur + scale-up from a small puff into the final pill. Shape
+   (scale/blur/translateY distances) is this component's own and unchanged;
+   duration/easing converge on the toast family tokens (motion-tokens.css
+   --toast-dur/--toast-ease, plan: motion-family-rules step 7) instead of the
+   former --duration-320/--ease-bounce-soft (bounce-family, denylisted).
+   Morph OUT is now the same keyframe reversed rather than a duplicate.
+   Morph OUT's duration moved to --toast-exit-dur (faster-exits rule, plan:
+   faster-exits-rule step 6) so the close leg is one tier faster than the
+   open leg; morph IN stays on --toast-dur. */
 @keyframes toastMorphIn {
   0%   { opacity: 0; transform: scale(0.55) translateY(14px); filter: blur(6px); }
   100% { opacity: 1; transform: scale(1)    translateY(0);    filter: blur(0); }
 }
-/* Morph OUT: shrink + blur back down */
-@keyframes toastMorphOut {
-  0%   { opacity: 1; transform: scale(1)    translateY(0);    filter: blur(0); }
-  100% { opacity: 0; transform: scale(0.6)  translateY(10px); filter: blur(5px); }
-}
-.tb-toast-layer .tb-toast.tb-toast-in  { animation: toastMorphIn  calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-bounce-soft) both; }
-.tb-toast-layer .tb-toast.tb-toast-out { animation: toastMorphOut calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-accel) both; }
+.tb-toast-layer .tb-toast.tb-toast-in  { animation: toastMorphIn calc(var(--toast-dur) * var(--anim-mult, 1)) var(--toast-ease) both; }
+.tb-toast-layer .tb-toast.tb-toast-out { animation: toastMorphIn calc(var(--toast-exit-dur) * var(--anim-mult, 1)) var(--toast-ease) both reverse; }
 
 /* ---- Column scrollbar — visible (slim, design-system grey) ---- */
 /* Cards are border-only (no shadow), so the scroll wrapper padding stays
@@ -331,7 +373,7 @@ html.dark .tb-card:hover { border-color: rgba(255,255,255,0.24); background-colo
 .tb-column-scroll::-webkit-scrollbar-thumb {
   background: #D4D4D4;
   border-radius: 3px;
-  transition: background calc(var(--duration-200) * var(--anim-mult, 1));
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .tb-column-scroll::-webkit-scrollbar-thumb:hover { background: #A1A1A1; }
 
@@ -359,8 +401,8 @@ html.dark .tb-card:hover { border-color: rgba(255,255,255,0.24); background-colo
   font-size: 12px; font-weight: 800; font-family: 'Montserrat';
   display: inline-flex; align-items: center; justify-content: center;
   transition:
-    background-color calc(var(--duration-180) * var(--anim-mult, 1)),
-    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring-snap),
+    background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out),
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-toast-pop),
     box-shadow calc(var(--duration-200) * var(--anim-mult, 1));
 }
 .tb-btn-gray { background: #6B6B6B; color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 2px 6px rgba(107,107,107,0.30); }
@@ -394,28 +436,47 @@ html.dark .tb-card:hover { border-color: rgba(255,255,255,0.24); background-colo
 
 /* ---- Week pill row (Change 3) -- mirrors todo-list's .td-daybtn recipe
    (todo-list/TodoList.css), local tb- names. ---- */
-/* Wrapper: prev-arrow, pill strip, next-arrow -- compact centered cluster
-   (F16/F17). Whole group centers as one unit; arrow-to-pill gap (14px) sits
-   at 1.75x the pill-to-pill gap (8px, set on .tb-week below), per Apple
-   grouping-by-proximity spacing. */
+/* Wrapper: left arrow, week 1, separator, week 2, right arrow (Step 5: two
+   weeks, left-aligned rather than the prior single-week centered cluster).
+   Spacing between the arrows/weeks/separator uses --space-4 (16px, ~2x the
+   8px intra-week pill gap on .tb-week below), per the group-with-space
+   ratio in better-layout. The right arrow (.tb-week-nav-end) carries
+   margin-left:auto so it lands flush with the card inner shell's right
+   edge instead of following the same rhythm as the rest of the row --
+   Bora's spec is an asymmetric cluster, not a centered group. Fit check
+   (2026-08-22, at the pills' unchanged 44px size): 26 (left arrow) + 16 +
+   356 (week, 7*44 + 6*8) + 16 + 1 (separator) + 16 + 356 (week) = 787px
+   fixed content, plus the right arrow (26px) absorbed into the row's
+   888px inner width (920px panel - 2*16px padding) via the auto margin --
+   fits with ~75px to spare, no shrink needed. */
 .tb-week-row {
-  display: flex; align-items: center; justify-content: center; gap: 14px;
-  padding: 0 16px; margin: 0 0 23px;
+  display: flex; align-items: center; justify-content: flex-start;
+  padding: 0 16px; margin: 0 0 var(--space-8);
 }
 .tb-week-nav {
   flex: 0 0 auto; width: 26px; height: 26px; border-radius: 9999px; cursor: pointer;
   display: grid; place-items: center;
   border: 1px solid var(--tb-col-border); background: var(--tb-col-bg); color: var(--tb-fg3);
-  transition: background calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade),
+  margin-right: var(--space-4);
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
               border-color calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade),
-              transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-spring-snap);
+              transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-toast-pop);
 }
 .tb-week-nav:hover { background: var(--fp-hover); border-color: var(--tb-fg4); }
 .tb-week-nav:active { transform: scale(0.9); }
+/* Right arrow only: cancels the shared margin-right and pushes flush right. */
+.tb-week-nav-end { margin-right: 0; margin-left: auto; }
+/* Thin vertical divider between the two weeks -- keyed off --border-hairline
+   so it stays visible in both themes (F14). */
+.tb-week-sep {
+  flex: 0 0 auto; width: 1px; height: 26px;
+  background: var(--border-hairline);
+  margin: 0 var(--space-4);
+}
 /* Slimmed (Step 5): tracks are content-sized (44px each) instead of the prior
    equal-1fr stretch across the full 888px row, was ~121.7px/pill before. */
 .tb-week {
-  display: flex; justify-content: center; gap: 8px;
+  display: flex; justify-content: flex-start; gap: 8px;
 }
 .tb-daybtn {
   position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px;
@@ -425,8 +486,8 @@ html.dark .tb-card:hover { border-color: rgba(255,255,255,0.24); background-colo
   background: var(--tb-col-bg);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
   font-family: 'Montserrat';
-  transition: transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-spring-snap),
-              background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
+  transition: transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-toast-pop),
+              background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out),
               border-color calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade),
               box-shadow calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade);
 }
@@ -450,7 +511,7 @@ html.dark .tb-daybtn { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
   padding: 7px 13px; border-radius: 9999px; cursor: pointer; border: 1px solid var(--tb-col-border);
   background: var(--tb-col-bg); color: var(--tb-fg3); font-family: 'Montserrat';
   font-size: 11px; font-weight: 800; letter-spacing: 0.02em; white-space: nowrap;
-  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), border-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-spring-snap);
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out), color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), border-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-toast-pop);
 }
 .tb-filt .fdot { width: 8px; height: 8px; border-radius: 50%; background: var(--fcolor, var(--tb-fg4)); flex: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); }
 .tb-filt:hover { background: var(--fp-hover); color: var(--tb-fg1); }
@@ -483,16 +544,32 @@ html.dark .tb-column-scroll::-webkit-scrollbar-thumb:hover{ background:#4A4A4A; 
   60%  { opacity: 1; transform: scale(1.18); }
   100% { opacity: 1; transform: scale(1); }
 }
-.tb-check-pop { animation: checkPop calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-bounce-soft); }
+/* Overshoot now lives entirely in the keyframe's own 60% scale(1.18) beat;
+   --ease-bounce-soft (bounce-family, denylisted) replaced with the toast
+   family's --toast-ease per the no-bounce rule (plan: motion-family-rules
+   step 7). */
+.tb-check-pop { animation: checkPop calc(var(--toast-dur) * var(--anim-mult, 1)) var(--toast-ease); }
 @keyframes panelIn {
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 /* Scroll-fade morph — transform-only slide */
-.tb-fade { opacity: 1; will-change: transform; }
-.tb-fade-top { animation: tbFadeTopIn calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out); }
-.tb-fade-bot { animation: tbFadeBotIn calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out); }
+.tb-fade {
+  opacity: 1; will-change: transform;
+  /* Step-4 no-inline-exhaustive-style migration (plan: security-deps-doctor-p2). */
+  position: absolute; left: 2px; right: 6px; pointer-events: none; z-index: 2;
+}
+.tb-fade-top {
+  animation: tbFadeTopIn calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out);
+  top: 0; height: 44px;
+  background: linear-gradient(to top, var(--tb-fade1) 0%, var(--tb-fade2) 58%, var(--tb-fade3) 100%);
+}
+.tb-fade-bot {
+  animation: tbFadeBotIn calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out);
+  bottom: 0; height: 52px;
+  background: linear-gradient(to bottom, var(--tb-fade1) 0%, var(--tb-fade2) 60%, var(--tb-fade3) 100%);
+}
 @keyframes tbFadeTopIn { from { transform: translateY(-9px); } to { transform: translateY(0); } }
 @keyframes tbFadeBotIn { from { transform: translateY(9px); } to { transform: translateY(0); } }
 

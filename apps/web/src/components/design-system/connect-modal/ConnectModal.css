@@ -379,7 +379,7 @@ html.dark .cm-cta{ background-color:#232323; color:var(--gray-500); }
   background-size:14px 14px;
   box-shadow:var(--shadow-emerald-glow-sm), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -2px 0 rgba(0,0,0,.22), inset 0 0 0 1px rgba(255,255,255,.15);
 }
-/* calm-ui: hover/press are a gentle color shift only, 120ms ease-out, no transform/shadow */
+/* calm-ui: hover/press are a gentle color shift only, --duration-fast ease-out, no transform/shadow */
 .cm-cta[data-enabled="true"][data-style="brand"]:hover{ background-color:color-mix(in srgb, var(--brand-primary) 92%, white); }
 .cm-cta[data-enabled="true"][data-style="brand"]:active{ background-color:color-mix(in srgb, var(--brand-primary) 88%, black); }
 .cm-cta[data-enabled="true"][data-style="black"]{

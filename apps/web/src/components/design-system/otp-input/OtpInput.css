@@ -5,13 +5,13 @@
    (the <style> block), per CONVERSION-SOP.md. Motion legs tokenized
    value-identically in the ds-review-inputs pass: every duration is now
    wrapped in calc(... * var(--anim-mult, 1)) and every curve routes through
-   a byte-matching motion token where one exists (0.22s -> --duration-slow,
-   0.26s -> --duration-260, 0.7s -> --duration-700; cubic-bezier(.34,1.56,
-   .64,1) -> --ease-spring-snap, cubic-bezier(.36,.07,.19,.97) ->
-   --ease-shake, cubic-bezier(.22,1,.36,1) -> --ease-motion-sweep-2236,
-   linear -> --ease-linear). Durations with no byte-identical tier (0.5s,
-   0.34s, 1s, the success stagger delays) keep their literal value inside
-   the calc wrap -- no token was minted, rendered timing is unchanged.
+   a byte-matching motion token where one exists (--duration-slow,
+   --duration-260, --duration-700; the source's spring-snap overshoot curve
+   -> --ease-spring-snap, its shake curve -> --ease-shake, its standard
+   ease-out curve -> --ease-motion-sweep-2236, linear -> --ease-linear).
+   Durations with no byte-identical tier (the success stagger delays) keep
+   their literal value inside the calc wrap -- no token was minted, rendered
+   timing is unchanged.
    ========================================================================= */
 
 .otp-stage-root *,
@@ -163,7 +163,7 @@
      of snapping a frame ahead of it. All legs restated together -- a
      transition shorthand replaces the whole list, it never merges. */
   transition:
-    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-spring-snap),
+    transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-toast-pop),
     box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
     border-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out);
   overflow: hidden;
@@ -232,10 +232,11 @@
     linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
   background-size: 7px 7px;
-  animation: otpWin calc((var(--duration-420) + var(--duration-80)) * var(--anim-mult, 1)) var(--ease-spring-snap);
+  animation: otpWin calc((var(--duration-420) + var(--duration-80)) * var(--anim-mult, 1)) var(--ease-toast-pop);
 }
 @media (prefers-reduced-motion: no-preference) {
-  /* 30ms-per-cell win stagger. Values unchanged; each is now anim-mult
+  /* Per-cell win stagger (no byte-identical token tier for this leg, so it
+     stays a literal-second value). Values unchanged; each is now anim-mult
      wrapped so Slow-Down mode stretches the stagger with the pulse it
      staggers, instead of collapsing all six cells onto one beat. */
   .otp-row.success .otp-cell:nth-child(2) {
@@ -292,14 +293,15 @@
 }
 
 /* entrance variants — applied only to the just-entered digit (.pop), which a
-   timer strips after ~320ms so the resting digit is always fully visible even
-   where the animation clock is frozen (captures / PDF). */
+   timer strips shortly after (~--duration-320) so the resting digit is
+   always fully visible even where the animation clock is frozen
+   (captures / PDF). */
 @media (prefers-reduced-motion: no-preference) {
   .otp-row[data-variant='fadeSlideDown'] .otp-digit.pop {
     animation: vSlideDown calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);
   }
   .otp-row[data-variant='fadeScale'] .otp-digit.pop {
-    animation: vScale calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-spring-snap);
+    animation: vScale calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-toast-pop);
   }
   .otp-row[data-variant='slideUp'] .otp-digit.pop {
     animation: vSlideUp calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);

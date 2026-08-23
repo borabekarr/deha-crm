@@ -49,7 +49,7 @@
     inset 0 1px 0 rgba(255,255,255,0.7),
     inset 0 -2px 0 rgba(17,17,17,0.14);
   cursor: pointer;
-  transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+  transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
 }
 .btn-inverse:hover {
   box-shadow:
@@ -74,7 +74,7 @@
     inset 0 -2px 0 rgba(17,17,17,0.12);
   backdrop-filter: blur(20px);
   cursor: pointer;
-  transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+  transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .btn-glass:hover {
   background: rgba(255,255,255,0.9);
@@ -109,7 +109,7 @@ html.dark .btn-text:hover { box-shadow: 0 4px 12px -4px rgba(52,211,153,0.45); }
 /* Dark mode — html.dark convention */
 html.dark .btn-label { color: #A1A1A1; }
 html.dark .btn-inverse { background: #1C1C1C; color: var(--brand-primary-400); box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), inset 0 1px 0 rgba(255,255,255,.08), inset 0 -2px 0 rgba(0,0,0,.3); }
-html.dark .btn-inverse:hover { background: #242424; box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), inset 0 1px 0 rgba(255,255,255,.08), inset 0 -2px 0 rgba(0,0,0,.3), 0 6px 18px -4px rgba(0,0,0,0.4); }
+html.dark .btn-inverse:hover { background: var(--fp-hover); box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), inset 0 1px 0 rgba(255,255,255,.08), inset 0 -2px 0 rgba(0,0,0,.3), 0 6px 18px -4px rgba(0,0,0,0.4); }
 html.dark .btn-glass { background: rgba(28,28,28,.7); color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), inset 0 1px 0 rgba(255,255,255,.08), inset 0 -2px 0 rgba(0,0,0,.3); }
 html.dark .btn-glass:hover { background: rgba(39,52,73,.85); box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), inset 0 1px 0 rgba(255,255,255,.08), inset 0 -2px 0 rgba(0,0,0,.3), 0 6px 18px -4px rgba(0,0,0,0.4); }
 html.dark .btn-text { color: var(--brand-primary-400); }
@@ -150,8 +150,8 @@ html.dark .btn-text { color: var(--brand-primary-400); }
   transition-property: width, padding, background-color, transform, box-shadow, scale;
   transition-timing-function: var(--ease-out), var(--ease-out), var(--ease-press-calm), var(--ease-press-calm), var(--ease-out), var(--ease-linear);
   /* Resting / phase-3 duration set: width+padding+background-color all
-     revert together over ~460ms so the return leg reads as one continuous
-     glide instead of the background finishing 100ms early and visually
+     revert together over --duration-expand so the return leg reads as one continuous
+     glide instead of the background finishing --duration-instant early and visually
      decoupling from the still-growing width (the prior snap). */
   transition-duration:
     calc(var(--duration-expand) * var(--anim-mult, 1)),
@@ -231,8 +231,8 @@ html.dark .btn-text { color: var(--brand-primary-400); }
    Split enter/exit timing -- the structural stagger fix: exit is fast and
    undelayed so it visibly clears the stage first; enter (phase-3, done ->
    default) is a slower spring delayed to land exactly as the width finishes
-   extending (delay = duration-expand - duration-slow = 460 - 220 = 240ms),
-   instead of popping in ~120ms before the button is done widening. */
+   extending (delay = --duration-expand - --duration-slow = --duration-240),
+   instead of popping in --duration-fast before the button is done widening. */
 .btn-apply .btn-apply-label {
   display: inline-flex; align-items: center; gap: 7px;
   transition:
@@ -253,7 +253,7 @@ html.dark .btn-text { color: var(--brand-primary-400); }
 
 /* Loading: compress to a narrow pill holding the bar.
    Phase-1 (default -> loading) duration override: width/padding compact
-   over ~440ms. Re-tuned to the calm no-overshoot vocabulary -- the
+   over --duration-compact. Re-tuned to the calm no-overshoot vocabulary -- the
    overshoot bounce here read as a click that was too powerful. */
 .btn-apply.is-loading {
   min-width: unset;
@@ -264,14 +264,14 @@ html.dark .btn-text { color: var(--brand-primary-400); }
     calc(var(--duration-compact) * var(--anim-mult, 1)),
     calc(var(--duration-compact) * var(--anim-mult, 1)),
     calc(var(--duration-sweep) * var(--anim-mult, 1)),
-    calc(240ms * var(--anim-mult, 1)),
-    calc(240ms * var(--anim-mult, 1)),
+    calc(var(--duration-240) * var(--anim-mult, 1)),
+    calc(var(--duration-240) * var(--anim-mult, 1)),
     calc(var(--duration-instant) * var(--anim-mult, 1));
 }
 
 /* Done: compressed pill turns green.
    Phase-2 (loading -> done) duration override: background-color sweeps to
-   green over ~360ms (up from 220ms) so the fill visibly travels instead of
+   green over --duration-sweep (up from --duration-slow) so the fill visibly travels instead of
    snapping; width/padding hold their compact value (no visual change). */
 .btn-apply.is-done {
   min-width: unset;
@@ -283,8 +283,8 @@ html.dark .btn-text { color: var(--brand-primary-400); }
     calc(var(--duration-compact) * var(--anim-mult, 1)),
     calc(var(--duration-compact) * var(--anim-mult, 1)),
     calc(var(--duration-sweep) * var(--anim-mult, 1)),
-    calc(240ms * var(--anim-mult, 1)),
-    calc(240ms * var(--anim-mult, 1)),
+    calc(var(--duration-240) * var(--anim-mult, 1)),
+    calc(var(--duration-240) * var(--anim-mult, 1)),
     calc(var(--duration-instant) * var(--anim-mult, 1));
 }
 
@@ -303,7 +303,7 @@ html.dark .btn-text { color: var(--brand-primary-400); }
     opacity   calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
     transform calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
 }
-/* Enter (phase-1, default -> loading): ~120ms delay so it arrives only
+/* Enter (phase-1, default -> loading): --duration-fast delay so it arrives only
    after the label has visibly cleared -- the stagger fix. */
 .btn-apply.is-loading .btn-apply-spinner {
   opacity: 1;
@@ -343,8 +343,8 @@ html.dark .btn-text { color: var(--brand-primary-400); }
 
 /* ── Check mark (done state) ──
    Split enter/exit -- also part of the stagger fix: enter (phase-2,
-   loading -> done) delays ~120ms behind the spinner's exit and scale-pops
-   in over ~300ms; exit (phase-3, done -> default) is fast and undelayed
+   loading -> done) delays --duration-fast behind the spinner's exit and scale-pops
+   in over --duration-slower; exit (phase-3, done -> default) is fast and undelayed
    so it clears before the label re-enters. */
 .btn-apply-check {
   position: absolute; inset: 0;
@@ -393,20 +393,20 @@ html.dark .btn-apply.is-done .btn-apply-check-ic { color: var(--brand-primary-50
   border: 1.5px solid var(--r-chip-bd, #D4D4D4);
   transition:
     border-color calc(var(--duration-base) * var(--anim-mult, 1)),
-    background-color calc(var(--duration-base) * var(--anim-mult, 1)),
+    background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-press-calm),
     box-shadow calc(var(--duration-base) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .btn-discuss:hover {
-  background: var(--r-btn-hover, rgba(17,17,17,0.06));
+  background: var(--r-btn-hover, var(--hover-standard-bg));
   border-color: var(--r-btn, #6B6B6B);
   box-shadow: 0 6px 18px -4px rgba(100,116,139,0.22);
 }
 .btn-discuss:active { transform: scale(var(--press-control)); }
 html.dark .btn-discuss { color: #F5F5F5; border-color: rgba(255,255,255,0.18); }
-html.dark .btn-discuss:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.35); }
+html.dark .btn-discuss:hover { background: var(--hover-standard-bg); border-color: rgba(255,255,255,0.35); }
 
 /* Standalone .btn-delete fallback for contexts needing a plain delete CTA. */
 .btn-delete {
@@ -420,7 +420,7 @@ html.dark .btn-discuss:hover { background: rgba(255,255,255,0.07); border-color:
     inset 0 1px 0 rgba(255,255,255,0.45),
     inset 0 -2px 0 rgba(0,0,0,0.22);
   transition:
-    background-color calc(var(--duration-slow) * var(--anim-mult, 1)),
+    background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out),
     box-shadow calc(var(--duration-slow) * var(--anim-mult, 1));
 }
@@ -454,11 +454,11 @@ html.dark .btn-delete {
     0 0 10px -3px var(--fbtn, #111111);
   text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   transition:
-    border-color calc(150ms * var(--anim-mult, 1)),
-    color calc(150ms * var(--anim-mult, 1)),
-    background calc(150ms * var(--anim-mult, 1)),
+    border-color calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
+    color calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
-    box-shadow calc(var(--duration-base) * var(--anim-mult, 1)),
+    box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
@@ -510,9 +510,9 @@ html.dark .btn-delete {
     inset 0 -2px 0 rgba(0,0,0,0.22),
     inset 0 0 0 1px rgba(255,255,255,0.14);
   transition:
-    filter calc(200ms * var(--anim-mult, 1)),
+    filter calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-press-calm),
-    box-shadow calc(200ms * var(--anim-mult, 1)),
+    box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
 .btn-cta:hover {
@@ -573,9 +573,9 @@ html.dark .btn-page-root .btn-apply:hover {
 .btn-page-root .btn-yellow[data-proximity],
 .btn-page-root .btn-red[data-proximity] {
   transition:
-    background-color calc(180ms * var(--anim-mult, 1)),
+    background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-press-calm),
-    box-shadow calc(200ms * var(--anim-mult, 1)) var(--ease-press-calm),
+    box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-press-calm),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }

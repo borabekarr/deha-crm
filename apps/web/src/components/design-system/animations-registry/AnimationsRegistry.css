@@ -1,0 +1,93 @@
+/* Animations Registry — card grid, scaled demo stage, guide copy.
+   Namespaced .areg-* per plan constraint; no bare utility-colliding names. */
+
+.areg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  padding: 4px;
+}
+
+.areg-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-radius: var(--radius-lg, 16px);
+  border: 1px solid var(--border, #e5e7eb);
+  background: var(--card, #fff);
+  padding: 14px;
+}
+
+.areg-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.areg-stage {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+  border-radius: var(--radius-md, 10px);
+  background: var(--muted, #f5f5f5);
+}
+
+.areg-stage-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: scale(0.5);
+  transform-origin: top left;
+  width: 200%;
+}
+
+.areg-guide-line {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted-foreground, #6b7280);
+}
+
+.areg-guide-label {
+  font-weight: 600;
+  color: var(--foreground, #111827);
+}
+
+.areg-family-rules {
+  padding: 20px 18px 24px;
+  border-top: 1px solid var(--border, #e5e7eb);
+}
+
+.areg-family-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.areg-family-intro {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted-foreground, #6b7280);
+  margin-bottom: 12px;
+  max-width: 720px;
+}
+
+.areg-family-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.areg-family-table th,
+.areg-family-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 6px 10px 6px 0;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+}
+
+.areg-family-table th {
+  color: var(--muted-foreground, #6b7280);
+  font-weight: 600;
+}
+

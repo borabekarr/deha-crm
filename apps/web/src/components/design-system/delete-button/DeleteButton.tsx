@@ -22,7 +22,7 @@ import './DeleteButton.css'
 // the ProtoPicker demo harness were removed (F24): this is the only variant.
 // ---------------------------------------------------------------------------
 
-import { useState, useEffect, useRef, useLayoutEffect } from 'react'
+import { useState, useEffect, useReducer, useRef, useLayoutEffect } from 'react'
 
 // Global slow-down multiplier (:root[data-anim-slow]). The CSS side wraps every
 // duration in calc(... * var(--anim-mult, 1)); the JS timers below mirror CSS
@@ -127,19 +127,68 @@ function RollNum({ value }: { value: number }) {
 type DbState = 'idle' | 'confirming' | 'done'
 type DbPhase = 'rest' | 'morph' | 'in'
 
+// Explicit state machine: `view` is a field of the machine, only ever set by
+// the reducer itself (from its own `state` field) in response to a dispatched
+// action -- never copied from another state variable inside an effect. Effects
+// only *dispatch*; they never call two setters to keep two values in sync.
+interface DbMachine {
+  state: DbState // logical: idle | confirming | done
+  view: DbState // rendered/styled phase (lags through the morph)
+  phase: DbPhase // rest | morph | in
+  count: number
+}
+
+type DbAction =
+  | { type: 'arm'; seconds: number }
+  | { type: 'cancel' }
+  | { type: 'tick' }
+  | { type: 'expire' }
+  | { type: 'reset' }
+  | { type: 'morph-start' }
+  | { type: 'phase-in' }
+  | { type: 'phase-rest' }
+
+function dbReducer(m: DbMachine, action: DbAction): DbMachine {
+  switch (action.type) {
+    case 'arm':
+      return m.state === 'idle' ? { ...m, state: 'confirming', count: action.seconds } : m
+    case 'cancel':
+      return m.state === 'confirming' ? { ...m, state: 'idle' } : m
+    case 'tick':
+      return { ...m, count: m.count - 1 }
+    case 'expire':
+      return { ...m, state: 'done' }
+    case 'reset':
+      return { ...m, state: 'idle' }
+    // Re-fire guard: a press that lands mid-morph (arm, then cancel before the
+    // content has swapped) leaves `state` equal to what is already rendered.
+    // The morph-driving effect below only dispatches this when state !== view.
+    case 'morph-start':
+      return { ...m, view: m.state, phase: 'morph' }
+    case 'phase-in':
+      return { ...m, phase: 'in' }
+    case 'phase-rest':
+      return { ...m, phase: 'rest' }
+    default:
+      return m
+  }
+}
+
 export interface DeleteButtonProps {
   seconds?: number
   label?: string
 }
 
 export function DeleteButton({ seconds = 5, label = 'Delete' }: DeleteButtonProps) {
-  const [state, setState] = useState<DbState>('idle') // logical: idle | confirming | done
-  const [view, setView] = useState<DbState>('idle') // rendered/styled phase (lags through the morph)
-  const [count, setCount] = useState(seconds)
-  const [phase, setPhase] = useState<DbPhase>('rest') // rest | morph | in
+  const [machine, dispatch] = useReducer(dbReducer, {
+    state: 'idle',
+    view: 'idle',
+    phase: 'rest',
+    count: seconds,
+  })
+  const { state, view, phase, count } = machine
   const innerRef = useRef<HTMLSpanElement>(null)
   const [w, setW] = useState<number | null>(null)
-  const firstRun = useRef(true)
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
   const rafs = useRef<number[]>([])
 
@@ -155,44 +204,46 @@ export function DeleteButton({ seconds = 5, label = 'Delete' }: DeleteButtonProp
     if (innerRef.current) setW(innerRef.current.offsetWidth)
   }, [view, count, label])
 
-  // keep the armed count synced while idle
-  useEffect(() => {
-    if (state === 'idle') setCount(seconds)
-  }, [seconds, state])
+  // Note: count is only ever rendered while state === 'confirming' (see the
+  // `view === 'confirming'` branch below), and onClick already resets it to
+  // `seconds` at the exact moment idle -> confirming fires. A standalone
+  // "keep count synced while idle" effect was therefore write-only: it set
+  // state nothing downstream needed yet, and the width-measure effect below
+  // (deps include `count`) re-ran off that write, chaining an extra redraw
+  // for a value that isn't on screen. Removed rather than resynced.
 
   // tick the countdown
   useEffect(() => {
     if (state !== 'confirming') return
     if (count <= 0) {
-      setState('done')
+      dispatch({ type: 'expire' })
       return
     }
-    const id = setTimeout(() => setCount((c) => c - 1), 1000)
+    const id = setTimeout(() => dispatch({ type: 'tick' }), 1000)
     return () => clearTimeout(id)
   }, [state, count])
 
   // auto-reset after the deletion resolves
   useEffect(() => {
     if (state !== 'done') return
-    const id = setTimeout(() => setState('idle'), 2100)
+    const id = setTimeout(() => dispatch({ type: 'reset' }), 2100)
     return () => clearTimeout(id)
   }, [state])
 
-  // drive the blur-morph transition whenever the logical state changes
+  // Drive the blur-morph transition whenever the logical state changes. This
+  // effect only dispatches actions -- `view` is never set directly here; the
+  // reducer is the single place that copies `state` into `view` (see
+  // 'morph-start' above), so there is no cross-hook state mirroring in an
+  // effect body. On mount state === view already ('idle'), so this settles to
+  // 'rest' as a no-op instead of needing a separate first-run branch.
   useEffect(() => {
-    if (firstRun.current) {
-      firstRun.current = false
-      setView(state)
-      return
-    }
     clearTimers()
-    const to = state
     // Re-fire guard: a press that lands mid-morph (arm, then cancel before the
     // content has swapped) leaves the logical state equal to what is already
     // rendered. Replaying the blur chain there would flash content out and back
     // in for no visible change, so settle instead.
-    if (to === view) {
-      setPhase('rest')
+    if (state === view) {
+      dispatch({ type: 'phase-rest' })
       return
     }
     const m = animMult()
@@ -200,8 +251,7 @@ export function DeleteButton({ seconds = 5, label = 'Delete' }: DeleteButtonProp
     // transition-delay, no held OUT frame): the label changes in the same
     // tick as the width, so the two track together instead of the label
     // lagging behind.
-    setView(to)
-    setPhase('morph')
+    dispatch({ type: 'morph-start' })
     // Two rAFs let the hidden pose commit a frame before we animate out of
     // it -- collapsing to one rAF (or a 0ms timeout) risks the browser
     // coalescing the style write and skipping the transition entirely.
@@ -210,10 +260,10 @@ export function DeleteButton({ seconds = 5, label = 'Delete' }: DeleteButtonProp
         rafs.current.push(
           requestAnimationFrame(() => {
             // 2) IN — new content blurs back into focus
-            setPhase('in')
+            dispatch({ type: 'phase-in' })
             timers.current.push(
               setTimeout(() => {
-                setPhase('rest')
+                dispatch({ type: 'phase-rest' })
               }, PHASE_IN_MS * m),
             )
           }),
@@ -226,10 +276,9 @@ export function DeleteButton({ seconds = 5, label = 'Delete' }: DeleteButtonProp
 
   function onClick() {
     if (state === 'idle') {
-      setCount(seconds)
-      setState('confirming')
+      dispatch({ type: 'arm', seconds })
     } else if (state === 'confirming') {
-      setState('idle')
+      dispatch({ type: 'cancel' })
     }
   }
 
@@ -239,6 +288,7 @@ export function DeleteButton({ seconds = 5, label = 'Delete' }: DeleteButtonProp
   return (
     <>
       <button
+        type="button"
         className="db"
         data-state={view}
         data-phase={phase}

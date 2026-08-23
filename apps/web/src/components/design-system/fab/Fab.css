@@ -85,6 +85,13 @@ html.dark .sc-hero { background: #111111; box-shadow: inset 0 0 0 1px #232323, i
 .sc-it-amt { margin-left: auto; font-size: 14px; font-weight: 800; color: #111111; }
 html.dark .sc-it-amt { color: #D4D4D4; }
 
+/* faster-exits sweep: kept symmetric on purpose (global rule exception) --
+   .fab-screen's open/close is a plain `.open` class toggle over shared CSS
+   transitions (.fab-veil, .fab-plus, .fab-menu-hd, .fab-close, .fab-menu-sep
+   below), not a JS-driven closing phase machine, so the same duration token
+   necessarily governs both directions by CSS mechanics; no exit-only
+   selector exists in this file to move one tier faster without adding a
+   new class. */
 /* ── Blur veil ─────────────────────────────────────────────────── */
 .fab-veil {
   position: absolute; inset: 0; z-index: 5;
@@ -232,7 +239,7 @@ html.dark .fab-screen.open .fab-menu { border: 1px solid var(--card-border); mar
   background: var(--fp-close-bg); border: none; cursor: pointer;
   display: grid; place-items: center; color: var(--fp-close-fg);
   opacity: 0; transform: scale(0.5); pointer-events: none;
-  transition: opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-spring-soft), background calc(var(--duration-150) * var(--anim-mult, 1)), scale calc(var(--duration-instant) * var(--anim-mult, 1)), filter calc(var(--duration-instant) * var(--anim-mult, 1));
+  transition: opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-spring-soft), background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), scale calc(var(--duration-instant) * var(--anim-mult, 1)), filter calc(var(--duration-instant) * var(--anim-mult, 1));
 }
 /* .fab-close:hover brightness rule removed -- proximity engine now supplies hover
    brightness via [data-proximity]'s --prox mapping in hover-tokens.css. */
@@ -258,7 +265,7 @@ html.dark .fab-screen.open .fab-menu { border: 1px solid var(--card-border); mar
   display: flex; align-items: center; gap: 14px;
   padding: 11px 8px; border-radius: 14px; cursor: pointer;
   opacity: 0; transform: translateY(14px);
-  /* FIX 1: background has its own short transition with explicit 0ms delay so
+  /* FIX 1: background has its own short transition with an explicit zero-duration delay so
      hover-background always clears instantly, independent of entrance stagger delays */
   transition:
     opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
@@ -267,7 +274,7 @@ html.dark .fab-screen.open .fab-menu { border: 1px solid var(--card-border); mar
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
-/* FIX 1: hover background — no delay property needed here (baseline is 0ms) */
+/* FIX 1: hover background — no delay property needed here (baseline is zero-duration) */
 .fab-item:hover { background: var(--fp-hover); }
 /* FIX 3: press feedback on menu items, distinct from hover background */
 .fab-item:active { transform: scale(var(--press-control)); }

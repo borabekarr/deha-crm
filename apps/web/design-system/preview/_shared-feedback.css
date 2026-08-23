@@ -23,13 +23,6 @@ html.dark {
   --card-border: #232323;
 }
 
-.grid-texture {
-  background-image:
-    linear-gradient(to right, rgba(255, 255, 255, var(--grid-alpha)) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, var(--grid-alpha)) 1px, transparent 1px);
-  background-size: 7px 7px;
-}
-
 /* --------------------------------------------------------------------------
  * .btn-green -- canonical green pill button
  * Mirrors .pc-apply from _pipeline-card.css (class name swapped).
@@ -245,11 +238,9 @@ html.dark .sem.hot     { background: #2a1506 !important; color: #FDBA74 !importa
 
 /* --------------------------------------------------------------------------
  * Motion vocabulary
+ * --ease-spring / --ease-out now defined once in motion-tokens.css
+ * (loaded earlier via global.css); this file only consumes them.
  * -------------------------------------------------------------------------- */
-:root {
-  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
-  --ease-out: cubic-bezier(.22, 1, .36, 1);
-}
 
 /* Fade + rise — enter/exit pair */
 @keyframes db-enter {

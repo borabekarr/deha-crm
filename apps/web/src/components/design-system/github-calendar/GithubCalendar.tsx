@@ -161,6 +161,9 @@ interface GithubCalendarProps {
   glow?: boolean
 }
 
+const GC_LEVEL_CLASS = ['gc-l0', 'gc-l1', 'gc-l2', 'gc-l3', 'gc-l4'] as const
+const GC_DOW_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
 /* ----------------------------- component ----------------------------- */
 export default function GithubCalendar({
   scheme = 'emerald',
@@ -196,11 +199,11 @@ export default function GithubCalendar({
     })
   }
 
-  const levelClass = ['gc-l0', 'gc-l1', 'gc-l2', 'gc-l3', 'gc-l4'] as const
+  const levelClass = GC_LEVEL_CLASS
   const outerSquircleRef = useSquircle<HTMLDivElement>()
   const cardSquircleRef = useSquircle<HTMLElement>()
 
-  const DOW_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  const DOW_LABELS = GC_DOW_LABELS
 
   return (
     <>

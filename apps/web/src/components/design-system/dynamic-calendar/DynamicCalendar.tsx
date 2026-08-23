@@ -6,19 +6,15 @@ import { useMemo, useRef, useState } from 'react'
 import { iconClass } from '@/lib/iconClass'
 import { useProximityGroup } from '@/lib/hooks/use-proximity-group'
 import { makeDcRefs, type IslandState } from './dynamic-calendar-hook'
+import { DynamicCalendarMonthGrid } from './DynamicCalendarMonthGrid'
+import { DynamicCalendarDaySummary } from './DynamicCalendarDaySummary'
+import { sameDay } from './dynamic-calendar-shared'
 
 // ---------- Calendar helpers ----------
-const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-]
-const DOW_SHORT = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
-const DOW_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-
 const daysInMonth = (y: number, m: number) => new Date(y, m + 1, 0).getDate()
 const mondayIdx = (date: Date) => (date.getDay() + 6) % 7
 
-interface GridCell { d: number; dim: boolean; m: number; y: number }
+export interface GridCell { d: number; dim: boolean; m: number; y: number }
 
 function buildMonthGrid(year: number, month: number): GridCell[] {
   const first = new Date(year, month, 1)
@@ -38,16 +34,6 @@ function buildMonthGrid(year: number, month: number): GridCell[] {
   }
   return cells
 }
-
-const sameDay = (a: Date | null, b: Date | null) =>
-  a != null && b != null &&
-  a.getFullYear() === b.getFullYear() &&
-  a.getMonth() === b.getMonth() &&
-  a.getDate() === b.getDate()
-
-const fmtTime = (d: Date) =>
-  `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
-const fmtRange = (s: Date, e: Date) => `${fmtTime(s)} – ${fmtTime(e)}`
 
 function fmtCountdown(ms: number): string {
   if (ms <= 0) return 'now'
@@ -72,7 +58,7 @@ function fmtDuration(ms: number): string {
 }
 
 // ---------- Types ----------
-interface CalEvent {
+export interface CalEvent {
   id: string; start: Date; end: Date; title: string; kind: 'event' | 'bday'
 }
 
@@ -319,147 +305,31 @@ export default function DynamicCalendar({
             <div className="dc-expanded-grid">
 
               {/* LEFT — today / selected summary + events */}
-              <div className="dc-left">
-                <button
-                  type="button"
-                  className="dc-open-cal-btn"
-                  onClick={(e) => { e.stopPropagation(); onOpenCalendar?.(selected) }}
-                  aria-label={onOpenCalendar ? 'Open Calendar app' : 'Selected date'}
-                >
-                  <div className="dc-today-row">
-                    <span className="dc-today-dow">
-                      {selected.toLocaleDateString('en-US', { weekday: 'short' })}
-                    </span>
-                  </div>
-                  <h2 className="dc-today-num">{selected.getDate()}</h2>
-                </button>
-
-                <div className="dc-event-list-wrap">
-                  <div className="dc-event-list">
-                    {eventsToday.map((ev, i) => (
-                      <div
-                        key={ev.id}
-                        className={`dc-event-row kind-${ev.kind}${
-                          sameDay(ev.start, today) && ev.kind === 'event' && nextEvent && ev.id === nextEvent.id
-                            ? ' is-focus' : ''
-                        }`}
-                        style={{ '--dc-delay': `${120 + i * 70}ms` } as React.CSSProperties}
-                      >
-                        {ev.kind === 'bday' ? (
-                          <span className="dc-glyph">
-                            <span className={`dc-icon ${iconClass('cake')}`}>cake</span>
-                          </span>
-                        ) : (
-                          <span className="dc-dot" />
-                        )}
-                        <div className="dc-event-row-text">
-                          <div className="dc-event-row-title">{ev.title}</div>
-                          {ev.kind === 'event' && (
-                            <div className="dc-event-row-time">{fmtRange(ev.start, ev.end)}</div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                    {eventsToday.length === 0 && (
-                      <div
-                        className="dc-more"
-                        style={{ '--dc-delay': 'var(--duration-fast)' } as React.CSSProperties}
-                      >
-                        Nothing scheduled
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+              <DynamicCalendarDaySummary
+                selected={selected}
+                today={today}
+                nextEvent={nextEvent}
+                eventsToday={eventsToday}
+                onOpenCalendar={onOpenCalendar}
+              />
 
               {/* RIGHT — month grid */}
-              <div className="dc-right">
-                <div className="dc-month-head">
-                  <span className="dc-month-name">
-                    {MONTHS[viewMonth]}
-                    <span className="dc-year">{viewYear}</span>
-                  </span>
-                  <div className="dc-month-nav">
-                    <button
-                      type="button"
-                      className="dc-nav-btn"
-                      onClick={(e) => { e.stopPropagation(); prevMonth() }}
-                      aria-label="Previous month"
-                    >
-                      <span className={`dc-icon ${iconClass('chevron_left')}`}>chevron_left</span>
-                    </button>
-                    <button
-                      type="button"
-                      className="dc-nav-btn"
-                      onClick={(e) => { e.stopPropagation(); nextMonth() }}
-                      aria-label="Next month"
-                    >
-                      <span className={`dc-icon ${iconClass('chevron_right')}`}>chevron_right</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Use a real <table> for the grid so th/td provide the correct semantics
-                    without needing role="columnheader" / role="gridcell" on divs. */}
-                <table
-                  className="dc-grid"
-                  role="grid"
-                  aria-label={`${MONTHS[viewMonth]} ${viewYear}`}
-                  ref={gridProximityRef}
-                >
-                  <thead>
-                    <tr>
-                      {DOW_SHORT.map((d, i) => (
-                        <th key={DOW_LABELS[i]} scope="col" className="dc-dow">{d}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Array.from({ length: Math.ceil(cells.length / 7) }, (_, rowIdx) => (
-                      <tr key={`row-${viewYear}-${viewMonth}-${rowIdx}`}>
-                        {cells.slice(rowIdx * 7, rowIdx * 7 + 7).map((c) => {
-                          const cellDate = new Date(c.y, c.m, c.d)
-                          const isToday = sameDay(cellDate, today)
-                          const isSelected = sameDay(cellDate, selected)
-                          const cellKey = `${c.y}-${c.m}-${c.d}`
-                          const hasEvent = eventDateKeys.has(cellKey)
-                          const idx = rowIdx * 7 + cells.slice(rowIdx * 7, rowIdx * 7 + 7).indexOf(c)
-                          return (
-                            <td key={cellKey} className="dc-cell-td">
-                              <button
-                                type="button"
-                                ref={(el) => { cellRefs.current[idx] = el }}
-                                className={[
-                                  'dc-cell',
-                                  c.dim && 'dim',
-                                  isToday && 'today',
-                                  isSelected && 'selected',
-                                  hasEvent && !isToday && 'has-event',
-                                ].filter(Boolean).join(' ')}
-                                aria-selected={isSelected}
-                                aria-label={cellDate.toDateString()}
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setSelected(cellDate)
-                                  if (c.m !== viewMonth) {
-                                    setViewMonth(c.m)
-                                    setViewYear(c.y)
-                                  }
-                                }}
-                                onKeyDown={(e) => onCellKeyDown(e, idx)}
-                                style={{ '--dc-delay': `${120 + idx * 12}ms` } as React.CSSProperties}
-                                data-proximity
-                              >
-                                {c.d}
-                              </button>
-                            </td>
-                          )
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <DynamicCalendarMonthGrid
+                viewMonth={viewMonth}
+                viewYear={viewYear}
+                cells={cells}
+                today={today}
+                selected={selected}
+                eventDateKeys={eventDateKeys}
+                cellRefs={cellRefs}
+                gridProximityRef={gridProximityRef}
+                onCellKeyDown={onCellKeyDown}
+                setSelected={setSelected}
+                setViewMonth={setViewMonth}
+                setViewYear={setViewYear}
+                prevMonth={prevMonth}
+                nextMonth={nextMonth}
+              />
             </div>
 
             {/* Close button */}

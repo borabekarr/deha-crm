@@ -77,7 +77,7 @@ export interface DisclosureGroupProps {
   children?: ReactNode
 }
 
-function DisclosureGroupBase({ id, defaultOpen = false, duration = 380, easing, children }: DisclosureGroupProps) {
+export function DisclosureGroupBase({ id, defaultOpen = false, duration = 380, easing, children }: DisclosureGroupProps) {
   const autoId = useId()
   const gid = id || autoId
   const ease = easing || 'cubic-bezier(.22,1,.36,1)'
@@ -123,7 +123,7 @@ export interface TriggerProps {
   chevronColor?: string
 }
 
-function Trigger({ icon, title, subtitle, showChevron = true, chevronColor }: TriggerProps) {
+export function Trigger({ icon, title, subtitle, showChevron = true, chevronColor }: TriggerProps) {
   const { open, toggle } = useContext(DisclosureCtx)!
   return (
     <button className="dg-trigger" onClick={toggle} aria-expanded={open} type="button">
@@ -160,7 +160,7 @@ export interface ItemsProps {
   style?: CSSProperties
 }
 
-function Items({ children, maxHeight = 400, scrollable = true, useBlur = false, blurAmount = 8, style }: ItemsProps) {
+export function Items({ children, maxHeight = 400, scrollable = true, useBlur = false, blurAmount = 8, style }: ItemsProps) {
   const { open } = useContext(DisclosureCtx)!
   return (
     // `inert` (not aria-hidden alone): the collapsed panel keeps focusable
@@ -199,7 +199,7 @@ export interface ItemProps {
   style?: CSSProperties
 }
 
-function Item({ icon, children, value, dotColor, onPress, disabled = false, style }: ItemProps) {
+export function Item({ icon, children, value, dotColor, onPress, disabled = false, style }: ItemProps) {
   return (
     <button className="dg-item" type="button" disabled={disabled} style={style} onClick={disabled ? undefined : onPress}>
       {dotColor && <span className="dg-dot" style={{ background: dotColor }} aria-hidden="true" />}
@@ -221,78 +221,77 @@ function Item({ icon, children, value, dotColor, onPress, disabled = false, styl
   )
 }
 
-// attach sub-components (composable namespace API)
-export const DisclosureGroup = Object.assign(DisclosureGroupBase, { Trigger, Items, Item })
-
 // ── default demo shell ──────────────────────────────────────────────────
 // Mirrors the raw source's App()/SettingsPanel() at its canonical TW-default
 // state: accordion: true, blur: true, chevron: true, dark: false. The raw
 // source's tweaks panel is authoring-only tooling (never checked into the
 // repo, see pixel-gate harness) and is not part of the converted component.
 
+// Review fix (ds-review-expandables step 5): the raw source's 600ms demo
+// expansion is well past the craft bar for a UI reveal (and dragged the
+// chevron + hover tint with it). Back to the primitive's own 380ms default,
+// which is the container-expansion budget for a panel this size.
+const SETTINGS_GROUP_PROPS = { duration: 380, easing: 'cubic-bezier(.22,1,.36,1)' }
+
 function SettingsPanel({ accordion, blur, chevron }: { accordion: boolean; blur: boolean; chevron: boolean }) {
-  // Review fix (ds-review-expandables step 5): the raw source's 600ms demo
-  // expansion is well past the craft bar for a UI reveal (and dragged the
-  // chevron + hover tint with it). Back to the primitive's own 380ms default,
-  // which is the container-expansion budget for a panel this size.
-  const groupProps = { duration: 380, easing: 'cubic-bezier(.22,1,.36,1)' }
+  const groupProps = SETTINGS_GROUP_PROPS
   const itemsProps = { useBlur: blur, maxHeight: 230 }
 
   const groups = (
     <>
-      <DisclosureGroup id="account" defaultOpen {...groupProps}>
-        <DisclosureGroup.Trigger icon="account_circle" title="Account" subtitle="Profile, login & security" showChevron={chevron} />
-        <DisclosureGroup.Items {...itemsProps}>
-          <DisclosureGroup.Item icon="badge" value="Dana Holloway" onPress={() => {}}>
+      <DisclosureGroupBase id="account" defaultOpen {...groupProps}>
+        <Trigger icon="account_circle" title="Account" subtitle="Profile, login & security" showChevron={chevron} />
+        <Items {...itemsProps}>
+          <Item icon="badge" value="Dana Holloway" onPress={() => {}}>
             Profile
-          </DisclosureGroup.Item>
-          <DisclosureGroup.Item icon="mail" value="dana@deha.co" onPress={() => {}}>
+          </Item>
+          <Item icon="mail" value="dana@deha.co" onPress={() => {}}>
             Email
-          </DisclosureGroup.Item>
-          <DisclosureGroup.Item icon="lock" value="••••••••" onPress={() => {}}>
+          </Item>
+          <Item icon="lock" value="••••••••" onPress={() => {}}>
             Password
-          </DisclosureGroup.Item>
-          <DisclosureGroup.Item icon="verified_user" value="On" onPress={() => {}}>
+          </Item>
+          <Item icon="verified_user" value="On" onPress={() => {}}>
             Two-factor auth
-          </DisclosureGroup.Item>
-        </DisclosureGroup.Items>
-      </DisclosureGroup>
+          </Item>
+        </Items>
+      </DisclosureGroupBase>
 
-      <DisclosureGroup id="notify" {...groupProps}>
-        <DisclosureGroup.Trigger icon="notifications" title="Notifications" subtitle="3 channels enabled" showChevron={chevron} />
-        <DisclosureGroup.Items {...itemsProps}>
-          <DisclosureGroup.Item icon="smartphone" value="On" onPress={() => {}}>
+      <DisclosureGroupBase id="notify" {...groupProps}>
+        <Trigger icon="notifications" title="Notifications" subtitle="3 channels enabled" showChevron={chevron} />
+        <Items {...itemsProps}>
+          <Item icon="smartphone" value="On" onPress={() => {}}>
             Push
-          </DisclosureGroup.Item>
-          <DisclosureGroup.Item icon="forum" value="Mentions" onPress={() => {}}>
+          </Item>
+          <Item icon="forum" value="Mentions" onPress={() => {}}>
             Email digest
-          </DisclosureGroup.Item>
-          <DisclosureGroup.Item icon="alternate_email" value="All" onPress={() => {}}>
+          </Item>
+          <Item icon="alternate_email" value="All" onPress={() => {}}>
             Mentions
-          </DisclosureGroup.Item>
-          <DisclosureGroup.Item icon="do_not_disturb_on" value="22:00" onPress={() => {}}>
+          </Item>
+          <Item icon="do_not_disturb_on" value="22:00" onPress={() => {}}>
             Quiet hours
-          </DisclosureGroup.Item>
-        </DisclosureGroup.Items>
-      </DisclosureGroup>
+          </Item>
+        </Items>
+      </DisclosureGroupBase>
 
-      <DisclosureGroup id="appearance" {...groupProps}>
-        <DisclosureGroup.Trigger icon="palette" title="Appearance" subtitle="Theme & display" showChevron={chevron} />
-        <DisclosureGroup.Items {...itemsProps}>
-          <DisclosureGroup.Item icon="dark_mode" value="Light" onPress={() => {}}>
+      <DisclosureGroupBase id="appearance" {...groupProps}>
+        <Trigger icon="palette" title="Appearance" subtitle="Theme & display" showChevron={chevron} />
+        <Items {...itemsProps}>
+          <Item icon="dark_mode" value="Light" onPress={() => {}}>
             Theme
-          </DisclosureGroup.Item>
-          <DisclosureGroup.Item icon="format_size" value="Medium" onPress={() => {}}>
+          </Item>
+          <Item icon="format_size" value="Medium" onPress={() => {}}>
             Text size
-          </DisclosureGroup.Item>
-          <DisclosureGroup.Item dotColor="var(--brand-primary)" value="Emerald" onPress={() => {}}>
+          </Item>
+          <Item dotColor="var(--brand-primary)" value="Emerald" onPress={() => {}}>
             Accent color
-          </DisclosureGroup.Item>
-          <DisclosureGroup.Item icon="grid_view" value="Comfortable" disabled>
+          </Item>
+          <Item icon="grid_view" value="Comfortable" disabled>
             Density
-          </DisclosureGroup.Item>
-        </DisclosureGroup.Items>
-      </DisclosureGroup>
+          </Item>
+        </Items>
+      </DisclosureGroupBase>
     </>
   )
 

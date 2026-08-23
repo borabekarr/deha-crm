@@ -73,7 +73,7 @@ export function fmtVal(m: MetricDef, n: number): string {
   return m.fmt === 'pct' ? n.toFixed(1) + '%' : Math.round(n).toLocaleString('en-US')
 }
 
-export function genSeries(n: number, dir: 'up' | 'down'): number[] {
+function genSeries(n: number, dir: 'up' | 'down'): number[] {
   const a: number[] = []
   let v = 50
   const drift = dir === 'up' ? 1.6 : -1.4
@@ -84,7 +84,7 @@ export function genSeries(n: number, dir: 'up' | 'down'): number[] {
   return a
 }
 
-export function buildSparkPath(data: number[], W: number, H: number): string {
+function buildSparkPath(data: number[], W: number, H: number): string {
   const min = Math.min(...data)
   const max = Math.max(...data)
   const rng = (max - min) || 1
@@ -186,7 +186,7 @@ export function playBars(barsEl: HTMLElement, _sweepEl: HTMLElement): void {
 
     // Phase 2: spring this bar back to full height
     setTimeout(() => {
-      bars[i].style.transition = `transform ${springDur}ms var(--ease-spring-snap), opacity ${Math.round(springDur * 0.5)}ms ease-out`
+      bars[i].style.transition = `transform ${springDur}ms var(--ease-toast-pop), opacity ${Math.round(springDur * 0.5)}ms ease-out`
       bars[i].style.transform = 'scaleY(1)'
       bars[i].style.opacity = '1'
     }, startDelay + squashDur)
@@ -197,9 +197,7 @@ export function playBars(barsEl: HTMLElement, _sweepEl: HTMLElement): void {
   const totalDur       = lastBarStart + squashDur + springDur
   setTimeout(() => {
     for (let i = 0; i < bars.length; i++) {
-      bars[i].style.transition = ''
-      bars[i].style.transform = ''
-      bars[i].style.opacity = ''
+      bars[i].style.cssText = ''
     }
   }, totalDur + 60)
 }

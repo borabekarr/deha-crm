@@ -4,6 +4,24 @@ import '../../../../design-system/preview/_darkmode.css'
 import './Buttons.css'
 import { useProximityGroup } from '@/lib/hooks'
 import { btnRootRef, cleanupBtnRoot, runApplyBtn } from './buttons-hook'
+import { BUTTON_VARIANT_CLASS, type ButtonProps } from './variants'
+
+// ---------------------------------------------------------------------------
+// Button — importable specimen shared by consumers (WorkflowAddElements,
+// DeleteModal) and the demo rows below, mirroring the Toast-split pattern.
+// Not exported via `export function`/`export const` (Fast Refresh isolation
+// check); re-exported with a bare `export { Button }` at file end instead.
+// ---------------------------------------------------------------------------
+function Button({ variant, variant2, className, children, ...rest }: ButtonProps) {
+  const cls = [BUTTON_VARIANT_CLASS[variant], variant2 ? BUTTON_VARIANT_CLASS[variant2] : '', className]
+    .filter(Boolean)
+    .join(' ')
+  return (
+    <button type="button" className={cls} data-proximity {...rest}>
+      {children}
+    </button>
+  )
+}
 
 // ---------------------------------------------------------------------------
 // ApplyButton — stateful apply specimen mirroring the pipeline-card pattern.
@@ -59,10 +77,10 @@ export default function Buttons() {
     <div className="btn-page-root card card--flat">
       <span className="btn-label">Buttons</span>
       <div className="btn-row" ref={row1Ref}>
-        <button type="button" className="btn-primary" data-proximity>View Your Leads <span className="material-icons btn-mi">arrow_forward</span></button>
-        <button type="button" className="btn-inverse" data-proximity>View Your Leads <span className="material-icons btn-mi">arrow_forward</span></button>
-        <button type="button" className="btn-glass" data-proximity>Son 30 Gün <span className="material-icons btn-mi">expand_more</span></button>
-        <button type="button" className="btn-text" data-proximity>Tüm Görevleri Gör <span className="material-icons btn-mi">arrow_forward</span></button>
+        <Button variant="primary">View Your Leads <span className="material-icons btn-mi">arrow_forward</span></Button>
+        <Button variant="inverse">View Your Leads <span className="material-icons btn-mi">arrow_forward</span></Button>
+        <Button variant="glass">Son 30 Gün <span className="material-icons btn-mi">expand_more</span></Button>
+        <Button variant="text">Tüm Görevleri Gör <span className="material-icons btn-mi">arrow_forward</span></Button>
       </div>
 
       <span className="btn-label" style={{ marginTop: 20 }}>Apply &amp; Discuss (pipeline-card variants)</span>
@@ -70,72 +88,74 @@ export default function Buttons() {
         {/* Stateful apply button — done → reset */}
         <ApplyButton />
         {/* Ask Jeru — static, inherits rainbow border + softened hover from .btn-apply */}
-        <button type="button" className="btn-green btn-apply" data-proximity>
+        <Button variant="green" variant2="apply">
           <span className="material-symbols-outlined btn-apply-icon">neurology</span>
           Ask Jeru
-        </button>
-        <button type="button" className="btn-discuss" data-proximity>
+        </Button>
+        <Button variant="discuss">
           <span className="material-icons" style={{ fontSize: 16 }}>chat</span>
           Discuss
-        </button>
+        </Button>
       </div>
 
       <span className="btn-label" style={{ marginTop: 20 }}>Colorful pill variants (green / yellow / red)</span>
       <div className="btn-row" ref={row3Ref}>
-        <button type="button" className="btn-green" data-proximity>
+        <Button variant="green">
           <span className="material-icons" style={{ fontSize: 16 }}>check_circle</span>
           Confirm
-        </button>
-        <button type="button" className="btn-yellow" data-proximity>
+        </Button>
+        <Button variant="yellow">
           <span className="material-icons" style={{ fontSize: 16 }}>schedule</span>
           Pending
-        </button>
-        <button type="button" className="btn-red" data-proximity>
+        </Button>
+        <Button variant="red">
           <span className="material-icons" style={{ fontSize: 16 }}>cancel</span>
           Reject
-        </button>
+        </Button>
       </div>
 
       <span className="btn-label" style={{ marginTop: 20 }}>Task footer (--fbtn color token)</span>
       <div className="btn-row" ref={row5Ref}>
-        <button type="button" className="btn-task" data-proximity style={{ '--fbtn': 'var(--brand-primary-500)' } as React.CSSProperties}>
+        <Button variant="task" style={{ '--fbtn': 'var(--brand-primary-500)' } as React.CSSProperties}>
           <span className="material-icons btn-task-icon">task_alt</span>
           Mark Done
-        </button>
-        <button type="button" className="btn-task" data-proximity style={{ '--fbtn': '#3B82F6' } as React.CSSProperties}>
+        </Button>
+        <Button variant="task" style={{ '--fbtn': '#3B82F6' } as React.CSSProperties}>
           <span className="material-icons">edit</span>
           Edit Task
-        </button>
-        <button type="button" className="btn-task" data-proximity style={{ '--fbtn': '#F59E0B' } as React.CSSProperties}>
+        </Button>
+        <Button variant="task" style={{ '--fbtn': '#F59E0B' } as React.CSSProperties}>
           <span className="material-icons">schedule</span>
           Reschedule
-        </button>
+        </Button>
         {/* More → Discuss styling */}
-        <button type="button" className="btn-discuss" data-proximity><span className="material-icons" style={{ fontSize: 16 }}>more_horiz</span>More</button>
+        <Button variant="discuss"><span className="material-icons" style={{ fontSize: 16 }}>more_horiz</span>More</Button>
       </div>
       <span className="btn-label" style={{ marginTop: 20 }}>CTA (optimization report)</span>
       <div className="btn-row" ref={row6Ref}>
-        <button type="button" className="btn-cta" data-proximity style={{ '--accent': 'var(--brand-primary-500)', '--ctaglow': 'var(--brand-glow)' } as React.CSSProperties}>
+        <Button variant="cta" style={{ '--accent': 'var(--brand-primary-500)', '--ctaglow': 'var(--brand-glow)' } as React.CSSProperties}>
           <span className="material-symbols-outlined">insights</span>
           Get Optimization
-        </button>
-        <button type="button" className="btn-cta" data-proximity style={{ '--accent': '#EF4444', '--ctaglow': 'rgba(239,68,68,0.5)' } as React.CSSProperties}>
+        </Button>
+        <Button variant="cta" style={{ '--accent': '#EF4444', '--ctaglow': 'rgba(239,68,68,0.5)' } as React.CSSProperties}>
           <span className="material-symbols-outlined">insights</span>
           Get Optimization
-        </button>
-        <button type="button" className="btn-cta" data-proximity style={{ '--accent': '#F97316', '--ctaglow': 'rgba(249,115,22,0.5)' } as React.CSSProperties}>
+        </Button>
+        <Button variant="cta" style={{ '--accent': '#F97316', '--ctaglow': 'rgba(249,115,22,0.5)' } as React.CSSProperties}>
           <span className="material-symbols-outlined">insights</span>
           Get Optimization
-        </button>
-        <button type="button" className="btn-cta" data-proximity style={{ '--accent': '#3B82F6', '--ctaglow': 'rgba(59,130,246,0.5)' } as React.CSSProperties}>
+        </Button>
+        <Button variant="cta" style={{ '--accent': '#3B82F6', '--ctaglow': 'rgba(59,130,246,0.5)' } as React.CSSProperties}>
           <span className="material-symbols-outlined">insights</span>
           Get Optimization
-        </button>
-        <button type="button" className="btn-cta" data-proximity style={{ '--accent': '#EAB308', '--ctaglow': 'rgba(234,179,8,0.5)' } as React.CSSProperties}>
+        </Button>
+        <Button variant="cta" style={{ '--accent': '#EAB308', '--ctaglow': 'rgba(234,179,8,0.5)' } as React.CSSProperties}>
           <span className="material-symbols-outlined">insights</span>
           Get Optimization
-        </button>
+        </Button>
       </div>
     </div>
   )
 }
+
+export { Button }

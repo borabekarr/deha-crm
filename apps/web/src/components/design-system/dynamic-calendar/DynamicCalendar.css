@@ -55,10 +55,10 @@ html.dark .dc-island {
    Light page = DARK island (default rules apply). Dark page = LIGHT island
    (these html.dark overrides give the white-surface treatment). */
 html.dark .dc-nav-btn { background: rgba(17,17,17,0.05); border-color: rgba(17,17,17,0.06); }
-html.dark .dc-nav-btn:hover { background: rgba(17,17,17,0.10); color: #111111; }
-html.dark .dc-cell:hover { background: rgba(17,17,17,0.06); }
+html.dark .dc-nav-btn:hover { background: var(--fp-hover-on-light); color: #111111; }
+html.dark .dc-cell:hover { background: var(--fp-hover-on-light); }
 html.dark .dc-close { background: rgba(17,17,17,0.05); border-color: rgba(17,17,17,0.06); }
-html.dark .dc-close:hover { background: rgba(17,17,17,0.12); color: #111111; }
+html.dark .dc-close:hover { background: var(--fp-hover-on-light); color: #111111; }
 html.dark .dc-event-list { scrollbar-color: rgba(17,17,17,0.18) transparent; }
 html.dark .dc-event-list::-webkit-scrollbar-thumb { background: rgba(17,17,17,0.16); }
 html.dark .dc-event-list-wrap::after { background: linear-gradient(to bottom, rgba(241,245,249,0) 0%, rgba(241,245,249,0.85) 70%, rgba(241,245,249,1) 100%); }
@@ -212,6 +212,7 @@ html.dark .dc-event-row.is-focus {
   opacity: 0;
   pointer-events: none;
   /* exiting / default: fade out immediately */
+  /* faster-exits rule: exit 200 < enter 220, kept */
   transition:
     opacity calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out),
     transform calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out);
@@ -219,7 +220,7 @@ html.dark .dc-event-row.is-focus {
 .dc-layer.active {
   opacity: 1;
   pointer-events: auto;
-  /* arriving: wait for the previous layer's exit (200ms) to complete */
+  /* arriving: wait for the previous layer's exit (--duration-200) to complete */
   transition:
     opacity calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out) calc(var(--duration-slow) * var(--anim-mult, 1)),
     transform calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-out) calc(var(--duration-slow) * var(--anim-mult, 1));
@@ -461,6 +462,7 @@ html.dark .dc-left {
 .dc-event-row .dc-dot {
   width: 7px; height: 7px;
   border-radius: 50%;
+  /* event dot, not a card surface: intentional solid white marker (faster-exits sweep 2026-08-22) */
   background: #fff;
   box-shadow: 0 0 0 2px rgba(255,255,255,0.30);
   flex-shrink: 0;
@@ -572,7 +574,7 @@ html.dark .dc-left {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background calc(var(--duration-base) * var(--anim-mult, 1)), border-color calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-140) * var(--anim-mult, 1));
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), border-color calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-140) * var(--anim-mult, 1));
 }
 .dc-today-btn:hover { background: color-mix(in srgb, var(--brand-primary-500) 18%, transparent); border-color: var(--brand-glow); }
 .dc-today-btn:active { transform: scale(0.96); }
@@ -589,10 +591,10 @@ html.dark .dc-left {
   color: var(--dc-fg-dim);
   cursor: pointer;
   display: inline-flex; align-items: center; justify-content: center;
-  transition: background calc(var(--duration-base) * var(--anim-mult, 1)), color calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-140) * var(--anim-mult, 1));
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), color calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-140) * var(--anim-mult, 1));
   padding: 0;
 }
-.dc-nav-btn:hover { background: rgba(255,255,255,0.12); color: var(--dc-fg); }
+.dc-nav-btn:hover { background: var(--fp-hover-on-dark); color: var(--dc-fg); }
 .dc-nav-btn:active { transform: scale(var(--press-chip)); }
 .dc-nav-btn .dc-icon {
   font-size: 18px;
@@ -634,17 +636,17 @@ html.dark .dc-left {
   position: relative;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.005em;
-  transition: background calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-dc-spring), color calc(var(--duration-base) * var(--anim-mult, 1)), box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out);
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-dc-spring), color calc(var(--duration-base) * var(--anim-mult, 1)), box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out);
 }
 .dc-cell.dim { color: var(--dc-fg-dimmer); font-weight: 500; }
 /* D5 global rule (2026-08-06): option/list rows hover = color change only. */
-.dc-cell:hover { background: rgba(255,255,255,0.08); }
+.dc-cell:hover { background: var(--fp-hover-on-dark); }
 /* Proximity: own transition (0,1,0) beats hover-tokens.css's [data-proximity]x3
    fallback; scale + filter channels added here so the engine's --prox mapping
    doesn't snap. */
 .dc-cell[data-proximity] {
   transition:
-    background calc(var(--duration-base) * var(--anim-mult, 1)),
+    background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     transform calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-dc-spring),
     color calc(var(--duration-base) * var(--anim-mult, 1)),
     box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out),
@@ -702,9 +704,9 @@ html.dark .dc-left {
   display: inline-flex; align-items: center; justify-content: center;
   padding: 0;
   z-index: 6;
-  transition: background calc(var(--duration-base) * var(--anim-mult, 1)), color calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-140) * var(--anim-mult, 1));
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), color calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-140) * var(--anim-mult, 1));
 }
-.dc-close:hover { background: rgba(255,255,255,0.14); color: #fff; }
+.dc-close:hover { background: var(--fp-hover-on-dark); color: #fff; }
 .dc-close:active { transform: scale(var(--press-chip)); }
 .dc-close .dc-icon {
   font-size: 14px;
@@ -728,7 +730,7 @@ html.dark .dc-left {
   font-size: 12.5px; font-weight: 800;
   letter-spacing: 0.02em;
   cursor: pointer;
-  transition: background calc(var(--duration-base) * var(--anim-mult, 1)), border-color calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-140) * var(--anim-mult, 1));
+  transition: background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), border-color calc(var(--duration-base) * var(--anim-mult, 1)), transform calc(var(--duration-140) * var(--anim-mult, 1));
 }
 .dc-add-task:hover { background: color-mix(in srgb, var(--brand-primary-500) 18%, transparent); border-color: var(--brand-glow); }
 .dc-add-task:active { transform: scale(0.96); }

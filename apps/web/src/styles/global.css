@@ -12,11 +12,19 @@
  * commentary and the migration notes for step-8 (motion-token extraction). */
 @import "./motion-tokens.css";
 
+/* Runtime canonical segmented-control pill base (.seg / .seg-pill) --
+ * consumes --duration-slower/--duration-240/--duration-fast/--ease-out/
+ * --ease-pill-switch, so must load after motion-tokens.css. See
+ * the seg-controls stylesheet below for the token/rule source-of-truth;
+ * the preview _controls stylesheet is no longer imported here. */
+@import "./seg-controls.css";
+
 /* Global proximity-hover contract (--prox mapping to scale/brightness/
  * drop-shadow) -- consumes --duration-instant, so must load after
  * motion-tokens.css and before any component stylesheet. See
  * styles/hover-tokens.css for the token/rule source-of-truth. */
 @import "./hover-tokens.css";
+@import "./spacing-radius-tokens.css";
 
 /* Shared dotted-grid texture recipe (pill's 16px recipe wins over the
  * divergent toast copies). See styles/grid-texture.css for the
@@ -28,7 +36,6 @@
  *   relative to _base.css, so tokens load automatically.
  */
 @import "../../design-system/preview/_base.css";
-@import "../../design-system/preview/_controls.css";
 @import "../../design-system/preview/_darkmode.css";
 @import "../../design-system/preview/_surfaces.css";
 @import "../../design-system/preview/_shared-feedback.css";

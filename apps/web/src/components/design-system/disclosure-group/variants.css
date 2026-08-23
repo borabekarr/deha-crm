@@ -77,7 +77,7 @@
   color: rgba(255, 255, 255, 0.55);
   font: inherit;
   cursor: pointer;
-  /* PICKER.md's `color 150ms ease-out`, value-identical through tokens */
+  /* PICKER.md's color/ease-out leg, value-identical through tokens */
   transition: color calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-out-native);
 }
 
@@ -118,8 +118,9 @@
 
 /* ── Variant: cascade ────────────────────────────────────────────────────
    Axis: expansion choreography. The panel stops arriving as one blurred slab;
-   the clip still opens on grid-rows, but the rows themselves ladder in ~60ms
-   apart (80/140/200ms token delays). Review reward-feel idea (1), built. */
+   the clip still opens on grid-rows, but the rows themselves ladder in on a
+   staggered token-delay cadence (--duration-80/140/200). Review reward-feel
+   idea (1), built. */
 [data-variant='cascade'] .dg-scroll {
   transform: none;
   filter: none;
@@ -130,8 +131,9 @@
   opacity: 0;
   transform: translateY(9px);
   /* full property list re-declared: adding opacity must not drop the step-5
-     background/transform press legs */
-  transition: background calc(var(--duration-150) * var(--anim-mult, 1)) var(--ease-fade),
+     background/transform press legs. background is a hover fill, moved to
+     the standard hover-fade pair per the no-exceptions ruling. */
+  transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
               transform calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236),
               opacity calc(var(--duration-240) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236);
 }
@@ -143,7 +145,7 @@
 [data-variant='cascade'] .dg[data-open='true'] .dg-item:active { transform: scale(.975); }
 [data-variant='cascade'] .dg[data-open='true'] .dg-item:disabled:active { transform: none; }
 @media (prefers-reduced-motion: reduce) {
-  [data-variant='cascade'] .dg-item { transform: none !important; transition-delay: 0ms !important; }
+  [data-variant='cascade'] .dg-item { transform: none !important; transition-delay: 0ms !important; } /* motion-sweep: kept, prefers-reduced-motion !important zero-reset, intentionally literal (house pattern, see frontend-motion-contract.md) */
 }
 
 /* ── Variant: ledger ─────────────────────────────────────────────────────

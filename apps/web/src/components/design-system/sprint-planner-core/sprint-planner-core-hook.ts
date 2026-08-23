@@ -133,35 +133,6 @@ export function cleanupSpcModal(el: HTMLElement | null): void {
 }
 
 // ---------------------------------------------------------------------------
-// Toast auto-dismiss timer — managed outside React via a stable ref object
-// ---------------------------------------------------------------------------
-export interface ToastTimerHandle {
-  /** Schedule auto-dismiss. Clears any prior pending timer. */
-  schedule(closeToast: () => void, ms?: number): void
-  /** Cancel any pending auto-dismiss. */
-  cancel(): void
-}
-
-export function makeToastTimer(): ToastTimerHandle {
-  let timer: ReturnType<typeof setTimeout> | null = null
-  return {
-    schedule(closeToast, ms = 4200) {
-      if (timer !== null) clearTimeout(timer)
-      timer = setTimeout(() => {
-        timer = null
-        closeToast()
-      }, ms)
-    },
-    cancel() {
-      if (timer !== null) {
-        clearTimeout(timer)
-        timer = null
-      }
-    },
-  }
-}
-
-// ---------------------------------------------------------------------------
 // Success-flash timer — clears the successMap after 2200 ms
 // ---------------------------------------------------------------------------
 export interface FlashTimerHandle {
@@ -188,32 +159,6 @@ export function makeFlashTimer(): FlashTimerHandle {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Toast morph-out timer — 240 ms, then unmount
-// ---------------------------------------------------------------------------
-export interface MorphOutTimerHandle {
-  schedule(done: () => void): void
-  cancel(): void
-}
-
-export function makeMorphOutTimer(): MorphOutTimerHandle {
-  let timer: ReturnType<typeof setTimeout> | null = null
-  return {
-    schedule(done) {
-      if (timer !== null) clearTimeout(timer)
-      timer = setTimeout(() => {
-        timer = null
-        done()
-      }, 240)
-    },
-    cancel() {
-      if (timer !== null) {
-        clearTimeout(timer)
-        timer = null
-      }
-    },
-  }
-}
 
 // ---------------------------------------------------------------------------
 // DayCell scroll check — wired on the scroll container element

@@ -17,9 +17,18 @@ import { animate } from 'framer-motion/dom'
  *  "no bounce/elastic easing" rule holds. */
 export const PILL_SPRING = { type: 'spring', stiffness: 520, damping: 38 } as const
 
-/** Mirrors `--ease-slide-bounce` in motion-tokens.css. Kept as a JS constant
- *  because WAAPI/`animate` calls cannot read a CSS custom property directly. */
-export const EASE_SLIDE_BOUNCE = 'cubic-bezier(.34,1.3,.64,1)'
+/** House default spring. Source of truth: deha-design-values.md "Named easing
+ *  tokens (2026-08-19)" `--spring-elegant` (claude-code-system repo, sourced
+ *  from easing.dev). Use when a component needs a spring and no more specific
+ *  token applies; settles in ~580ms. */
+export const SPRING_ELEGANT = { type: 'spring', stiffness: 150, damping: 19, mass: 1.2 } as const
+
+/** Momentum/bounce spring for heavy, momentum-driven moments (flick releases,
+ *  playful overshoot). Source of truth: deha-design-values.md "Named easing
+ *  tokens (2026-08-19)" `--spring-bouyant` (claude-code-system repo, sourced
+ *  from easing.dev). Higher mass makes it read weighty, not snappy; settles
+ *  in ~1150ms, roughly twice as slow as SPRING_ELEGANT. */
+export const SPRING_BOUYANT = { type: 'spring', stiffness: 900, damping: 80, mass: 10 } as const
 
 /** E2 verdict (2026-08-06): mirrors `--ease-spring-open` in motion-tokens.css,
  *  the house open-spring. FinancialHealthCard now uses this for BOTH its
