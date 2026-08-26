@@ -215,6 +215,7 @@ const SLUG_MAX_DIFF_PIXELS: Record<string, number> = {
   'leaderboard': 1000,        // observed 814 (reduced-motion)
   'streak-card': 300,         // observed 2, 193
   'avatar-picker': 200,       // observed 3 (2601 vs 2604 between attempts)
+  'motion-tabs': 100,         // observed 22 on Dependabot #70 CI run 32685660803
 }
 
 // Resolve the screenshot options for one slug: under CI a slug listed in
