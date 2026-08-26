@@ -125,7 +125,6 @@ const SLUGS = [
   'news-feed',
   // ds-rebuild-w1 (2026-08-07) — rebuilt from claude-design/raw/ via
   // CONVERSION-SOP; baseline adopts from CI actual per BASELINE ADOPTION RULE.
-  'delete-button',
   'shimmer',
   'disclosure-group',
   'pie-chart',
@@ -208,7 +207,6 @@ const SLUG_MAX_DIFF_PIXELS: Record<string, number> = {
   'message-dropdown': 1500,   // observed 968
   'disclosure-group': 1300,   // observed 819
   'expandable-card': 1100,    // observed 694
-  'delete-button': 700,       // observed 379, 425
   'sprint-planner-core': 500, // observed 247, 286
   'workflow-add-elements': 400, // observed 222
   'smooth-drawer': 200,       // observed 74

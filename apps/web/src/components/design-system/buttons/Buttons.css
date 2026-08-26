@@ -25,7 +25,7 @@
     linear-gradient(to bottom, rgba(255,255,255,0.07) 1px, transparent 1px);
   background-size: 14px 14px;
   cursor: pointer;
-  transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+  transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), outline-color var(--focus-ring-duration) var(--focus-ring-ease), outline-offset var(--focus-ring-duration) var(--focus-ring-ease);
 }
 /* richgold uses dark on-primary text; the dark text-shadow would muddy it */
 :root[data-primary="richgold"] .btn-primary { text-shadow: none; }
@@ -49,7 +49,7 @@
     inset 0 1px 0 rgba(255,255,255,0.7),
     inset 0 -2px 0 rgba(17,17,17,0.14);
   cursor: pointer;
-  transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
+  transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), outline-color var(--focus-ring-duration) var(--focus-ring-ease), outline-offset var(--focus-ring-duration) var(--focus-ring-ease);
 }
 .btn-inverse:hover {
   box-shadow:
@@ -74,7 +74,7 @@
     inset 0 -2px 0 rgba(17,17,17,0.12);
   backdrop-filter: blur(20px);
   cursor: pointer;
-  transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+  transition: transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out), background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade), scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear), outline-color var(--focus-ring-duration) var(--focus-ring-ease), outline-offset var(--focus-ring-duration) var(--focus-ring-ease);
 }
 .btn-glass:hover {
   background: rgba(255,255,255,0.9);
@@ -98,7 +98,9 @@
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
     box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    outline-color var(--focus-ring-duration) var(--focus-ring-ease),
+    outline-offset var(--focus-ring-duration) var(--focus-ring-ease);
 }
 .btn-text:hover { opacity: 0.8; box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--brand-primary-500) 40%, transparent); }
 .btn-text:active { opacity: 0.55; }
@@ -147,8 +149,15 @@ html.dark .btn-text { color: var(--brand-primary-400); }
      old --ease-spring bounce read as too powerful on click).
      transition-duration is also overridden per state class below.
      Order: width, padding, background-color, transform, box-shadow, scale. */
-  transition-property: width, padding, background-color, transform, box-shadow, scale;
-  transition-timing-function: var(--ease-out), var(--ease-out), var(--ease-press-calm), var(--ease-press-calm), var(--ease-out), var(--ease-linear);
+  /* outline-color/outline-offset appended (7th/8th legs) so the shared
+     focus ring (previously supplied by a separate, fully-replacing
+     :focus-visible rule in _shared-feedback.css) animates on this button
+     too -- this is the winning declaration for .btn-green:focus-visible on
+     /components/buttons, since .btn-apply's own longhand transition
+     outranks .btn-green's shorthand at equal (0,1,0) specificity by load
+     order (Buttons.css loads after _shared-feedback.css). */
+  transition-property: width, padding, background-color, transform, box-shadow, scale, outline-color, outline-offset;
+  transition-timing-function: var(--ease-out), var(--ease-out), var(--ease-press-calm), var(--ease-press-calm), var(--ease-out), var(--ease-linear), var(--focus-ring-ease), var(--focus-ring-ease);
   /* Resting / phase-3 duration set: width+padding+background-color all
      revert together over --duration-expand so the return leg reads as one continuous
      glide instead of the background finishing --duration-instant early and visually
@@ -159,7 +168,9 @@ html.dark .btn-text { color: var(--brand-primary-400); }
     calc(var(--duration-expand) * var(--anim-mult, 1)),
     calc(var(--duration-base) * var(--anim-mult, 1)),
     calc(var(--duration-fast) * var(--anim-mult, 1)),
-    calc(var(--duration-instant) * var(--anim-mult, 1));
+    calc(var(--duration-instant) * var(--anim-mult, 1)),
+    var(--focus-ring-duration),
+    var(--focus-ring-duration);
 }
 
 @keyframes btn-rainbow-scroll {
@@ -549,6 +560,23 @@ html.dark .btn-page-root .btn-green:hover {
   box-shadow: 0 6px 18px -4px rgba(52,211,153,0.45), inset 0 1px 0 rgba(255,255,255,0.22);
 }
 
+/* ── Press companions: hover and press are independent (Bora) — restore the
+   press shrink that the transform:none hover rules above cancel, without
+   touching those rules' own declarations.
+   .btn-green companion excludes .btn-apply: :not(.btn-apply) adds a class to
+   the selector, pushing it to (0,0,5,0), which beats both the light rule at
+   (0,0,3,0) above AND the html.dark rule at (0,0,4,1) — class count (5>4)
+   decides before the element-count tiebreak, so one rule covers both themes.
+   .btn-apply carries the btn-green class too, so it needs its own pair of
+   companions (light + dark) at the card press token, or the excluded green
+   rule above would leave it unpressed in dark, where (0,0,4,1) still beats a
+   plain (0,0,4,0) apply-only companion. */
+.btn-page-root .btn-green:hover:active:not(.btn-apply) { transform: scale(0.96); }
+.btn-page-root .btn-yellow:hover:active { transform: scale(0.96); }
+.btn-page-root .btn-red:hover:active { transform: scale(0.96); }
+.btn-page-root .btn-apply:hover:active { transform: scale(var(--press-card)); }
+html.dark .btn-page-root .btn-apply:hover:active { transform: scale(var(--press-card)); }
+
 /* ── Softened hover for .btn-apply (Apply + Ask Jeru) ──
    Specificity 0,3,0 + later in file — beats .btn-page-root .btn-green:hover above.
    .btn-green is NOT redefined globally; these rules are scoped to .btn-page-root .btn-apply. */
@@ -577,5 +605,7 @@ html.dark .btn-page-root .btn-apply:hover {
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-press-calm),
     box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-press-calm),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    outline-color var(--focus-ring-duration) var(--focus-ring-ease),
+    outline-offset var(--focus-ring-duration) var(--focus-ring-ease);
 }
