@@ -210,6 +210,11 @@ const SLUG_MAX_DIFF_PIXELS: Record<string, number> = {
   'sprint-planner-core': 500, // observed 247, 286
   'workflow-add-elements': 400, // observed 222
   'smooth-drawer': 200,       // observed 74
+  // Added 2026-08-26 from CI run 32953980477 (no source change for the first
+  // two; avatar-picker jitters 3px between CI attempts after baseline adoption).
+  'leaderboard': 1000,        // observed 814 (reduced-motion)
+  'streak-card': 300,         // observed 2, 193
+  'avatar-picker': 200,       // observed 3 (2601 vs 2604 between attempts)
 }
 
 // Resolve the screenshot options for one slug: under CI a slug listed in
