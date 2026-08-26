@@ -101,6 +101,12 @@
 .sd-overlay {
   position: fixed;
   inset: 0;
+  /* <dialog>'s UA stylesheet sets width/height: fit-content, which wins over
+     inset: 0 (shorthand for top/right/bottom/left, not an explicit size) and
+     shrinks the overlay to its content box. Force auto so inset governs the
+     full-viewport size again. */
+  width: auto;
+  height: auto;
   z-index: 30;
   display: flex;
   /* Default alignment for bottom (overridden per side below) */

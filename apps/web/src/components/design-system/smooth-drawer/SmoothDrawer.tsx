@@ -23,9 +23,16 @@
  * CSS state classes .is-open / .is-closing + transform/opacity.
  */
 
-import { useState, useCallback, useRef, useId } from 'react'
+import { useReducer, useCallback, useRef, useId } from 'react'
 import { iconClass } from '../../../lib/iconClass'
-import { useTimerRef, useSheetRef, useHandleRef, type DrawerSide } from './smooth-drawer-hook'
+import {
+  useTimerRef,
+  useSheetRef,
+  useHandleRef,
+  drawerReducer,
+  initialDrawerState,
+  type DrawerSide,
+} from './smooth-drawer-hook'
 import { useSquircle } from '../../../lib/hooks/use-squircle'
 import { useProximityGroup } from '../../../lib/hooks/use-proximity-group'
 import { tokenMs } from '@/lib/token-ms'
@@ -90,15 +97,8 @@ function DrawerInstance({
   // shown: true  = .is-open  (fully revealed)
   // closing: true = .is-closing (exit transition in progress)
   const titleId = `sd-title-${useId()}`
-  const [shown, setShown] = useState(defaultOpen)
-  const [closing, setClosing] = useState(false)
-  const [closeVariant, setCloseVariant] = useState<'--duration-420' | '--duration-expand'>(
-    '--duration-expand',
-  )
-
-  // ---- drag state ----
-  const [drag, setDrag] = useState(0)
-  const [dragging, setDragging] = useState(false)
+  const [state, dispatch] = useReducer(drawerReducer, defaultOpen, initialDrawerState)
+  const { shown, closing, closeVariant, drag, dragging } = state
 
   // ---- timers ----
   const closeTimer = useTimerRef()
@@ -107,30 +107,32 @@ function DrawerInstance({
   // closes run one tier faster) ----
   const closedByDragRef = useRef(false)
 
+  // ---- focus return: closeDrawer moves focus out of the overlay before
+  // aria-hidden flips (avoids Chrome's "aria-hidden retained focus" warning)
+  const triggerRef = useRef<HTMLButtonElement | null>(null)
+
   // ---- open / close helpers ----
   const openDrawer = useCallback(() => {
     closeTimer.clear()
-    setDrag(0)
-    setClosing(false)
-    setCloseVariant('--duration-expand')
     closedByDragRef.current = false
+    dispatch({ type: 'OPEN_START' })
     // Double rAF to let the browser paint before applying .is-open
     requestAnimationFrame(() =>
-      requestAnimationFrame(() => setShown(true)),
+      requestAnimationFrame(() => dispatch({ type: 'OPEN_SHOWN' })),
     )
   }, [closeTimer])
 
   const closeDrawer = useCallback(() => {
-    setDragging(false)
-    setDrag(0)
-    setShown(false)
-    setClosing(true)
     const byDrag = closedByDragRef.current
-    setCloseVariant(byDrag ? '--duration-expand' : '--duration-420')
+    if (document.activeElement instanceof HTMLElement) {
+      const overlay = document.activeElement.closest('.sd-overlay')
+      if (overlay) triggerRef.current?.focus()
+    }
+    dispatch({ type: 'CLOSE', byDrag })
     const ms = byDrag
       ? tokenMs('--duration-expand', 460)
       : tokenMs('--duration-420', 420)
-    closeTimer.set(ms, () => setClosing(false))
+    closeTimer.set(ms, () => dispatch({ type: 'CLOSE_DONE' }))
   }, [closeTimer])
 
   // Drag-dismiss goes through this so closeDrawer knows to keep momentum.
@@ -141,8 +143,8 @@ function DrawerInstance({
 
   // ---- drag callbacks (stable, passed to useHandleRef) ----
   const handleDragChange = useCallback((delta: number, isDragging: boolean) => {
-    setDrag(delta)
-    setDragging(isDragging)
+    dispatch({ type: 'DRAG_MOVE', drag: delta })
+    dispatch({ type: isDragging ? 'DRAG_START' : 'DRAG_END' })
   }, [])
 
   // ---- callback refs ----
@@ -224,7 +226,7 @@ function DrawerInstance({
   return (
     <>
       {/* Trigger button to open / reopen */}
-      <button type="button" className="sd-trigger" onClick={openDrawer} data-proximity>
+      <button type="button" className="sd-trigger" ref={triggerRef} onClick={openDrawer} data-proximity>
         <span className={iconClass('play_arrow')} aria-hidden="true">
           play_arrow
         </span>
