@@ -507,6 +507,13 @@
   transform: translateY(-1px);
 }
 
+/* Press companion at (0,3,0), beating the hover rule above (0,2,0). Compose
+   rather than replace, same shape as DeleteModal.css's .btn-discuss pair:
+   the lift survives the press, appended with the green press shrink. */
+.sd-buy:hover:active {
+  transform: translateY(-1px) scale(0.96);
+}
+
 .sd-buy[data-proximity] {
   transition:
     background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),

@@ -98,6 +98,15 @@
   box-shadow: 0 4px 14px rgba(17, 17, 17, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
+/* Press companion at (0,4,0), beating the hover rule above (0,3,0) on class
+   count. The comment above is about the outward hover zoom clipping against
+   .card-inner's overflow:hidden -- this is the inward press scale only,
+   which shrinks toward the button's own center and cannot spill past the
+   card edge, so no width/overflow change is needed here. */
+.xc-content .btn-green:hover:active {
+  transform: scale(0.96);
+}
+
 .msym {
   font-family: 'Material Symbols Outlined';
   font-weight: normal;

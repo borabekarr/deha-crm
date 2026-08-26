@@ -955,11 +955,18 @@ export default function SprintPlannerCore() {
   const [addDay, setAddDay] = useState(0)
   const [draggingId, setDraggingId] = useState<string | null>(null)
   const panelSquircleRef = useSquircle<HTMLDivElement>()
-  // F13: card-rect anchor the portaled toast stack docks below-right of.
-  const cardAnchorRef = useRef<HTMLDivElement | null>(null)
+  // F12: a 0-size point (.sp-toast-anchor below) docked inside .sp-panel's own
+  // bottom-right corner, NOT the panel itself -- see the toast-layer comment
+  // near the ToastStage render for why.
+  const toastAnchorRef = useRef<HTMLDivElement | null>(null)
+  // F12: page-local cfg override, NOT an edit to the shared toast/variants.ts
+  // (the gallery keeps VARIANTS.main byte-identical). enterY shrunk from the
+  // shared 110px to the exact --space-4 (16px) resting gap above the card's
+  // bottom edge, so the entrance's first frame never renders outside the
+  // card; enterScale kept slightly under 1 so the pop-in motion still reads.
+  const sprintToastCfg = useMemo(() => ({ ...VARIANTS.main, enterY: 16, enterScale: 0.94 }), [])
   const panelRef = useCallback((el: HTMLDivElement | null) => {
     panelSquircleRef(el)
-    cardAnchorRef.current = el
   }, [panelSquircleRef])
   const outerSquircleRef = useSquircle<HTMLDivElement>()
   // item 3: toast stack, driven by the shared toast module (design-system/toast/Toast.tsx)
@@ -1133,16 +1140,21 @@ export default function SprintPlannerCore() {
         />
 
         {/* Toast layer — item 3: shared design-system toast, driven imperatively via
-            showToast/toastStageRef. F13: portaled to document.body, docked below-right
-            of .sp-panel (cardAnchorRef) so it overlays everything instead of being caged
-            under this card's transformed ancestor. */}
+            showToast/toastStageRef. F12: stays portaled to document.body (ToastStage's
+            own hideCard mode) rather than mounted in .sp-panel's own layout, because
+            .sp-panel has `overflow: hidden` and would clip the stack; anchorRef instead
+            points at .sp-toast-anchor, a 0-size point placed just inside .sp-panel's
+            bottom-right corner (see its CSS comment for the offset math), which docks
+            the resting stack flush inside the card with an even --space-4 gap to its
+            right/bottom edges instead of the previous below-right-of-the-card mount. */}
         <ToastStage
           ref={toastStageRef}
-          cfg={VARIANTS.main}
+          cfg={sprintToastCfg}
           portalTarget={typeof document !== 'undefined' ? document.body : null}
-          anchorRef={cardAnchorRef}
+          anchorRef={toastAnchorRef}
           hideCard
         />
+        <div ref={toastAnchorRef} className="sp-toast-anchor" aria-hidden="true" />
       </div>
     </div>
   )

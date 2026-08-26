@@ -192,6 +192,9 @@ export default function AvatarPicker({ onComplete }: AvatarPickerProps) {
             no behavioral changes; committed value drives validation/submit below. */}
         <div className="ap-field">
           <div className="ap-field-top">
+            <span className={iconClass('badge') + ' ap-field-icon'} aria-hidden="true">
+              badge
+            </span>
             <span className="ap-field-label">Username</span>
             <span className={'ap-count' + (nearLimit ? ' ap-count--warn' : '')}>
               {username.length}/20
@@ -201,13 +204,19 @@ export default function AvatarPicker({ onComplete }: AvatarPickerProps) {
           <div className="ap-field-wrap">
             <InlineEdit
               fieldLabel="Username"
-              prefix={false}
+              prefix={true}
               value={username}
               onCommit={(next) => setUsername(next.slice(0, 20))}
             />
             {/* Grey example text — CSS-only visibility via InlineEdit's existing
-                data-editing attribute, no InlineEdit prop changes needed. */}
-            {username === '' && <span className="ap-field-ph" aria-hidden="true">@jeru</span>}
+                data-editing/data-saved attributes (see AvatarPicker.css). The
+                leading "@" now comes from InlineEdit's own bold prefix, so the
+                placeholder text itself no longer repeats it (F17). */}
+            {username === '' && (
+              <span className="ap-field-ph" aria-hidden="true">
+                <span className="ap-field-ph-ghost">@</span>jeru
+              </span>
+            )}
           </div>
 
           {showError && (
@@ -215,9 +224,11 @@ export default function AvatarPicker({ onComplete }: AvatarPickerProps) {
           )}
 
           {/* Apple-conventions redesign: hover darkens the fill within the pill (no
-              lift/scale/translate on the button itself), plus-icon rotates+scales
-              subtly on hover; button-level motion stays on var(--duration-*)/
-              var(--ease-*) tokens (see .ap-submit rules in AvatarPicker.css). */}
+              lift/scale/translate on the button itself); the plus icon stays static
+              on hover (F19) and is rendered on material-symbols-outlined with a
+              raised wght so it reads solid rather than thin; button-level motion
+              stays on var(--duration-*)/var(--ease-*) tokens (see .ap-submit rules
+              in AvatarPicker.css). */}
           <button
             type="button"
             className="btn-green ap-submit"
@@ -225,7 +236,7 @@ export default function AvatarPicker({ onComplete }: AvatarPickerProps) {
             disabled={!isValid}
             onClick={submit}
           >
-            <span className={iconClass('add') + ' ap-submit-icon'} aria-hidden="true">
+            <span className="material-symbols-outlined ap-submit-icon" aria-hidden="true">
               add
             </span>
             Get Started

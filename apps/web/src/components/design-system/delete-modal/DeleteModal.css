@@ -239,6 +239,13 @@ html.dark .dm-card[data-squircle="on"] {
   transform: scale(var(--press-control));
 }
 
+/* html.dark .dm-close:hover is (0,2,1); a plain :active can't outrank it.
+   Carry the html.dark prefix through so this companion lands at (0,3,1)
+   and matches the light :active's replace-with-press behavior. */
+html.dark .dm-close:hover:active {
+  transform: scale(var(--press-control));
+}
+
 .dm-close .material-symbols-outlined,
 .dm-close .material-icons {
   font-size: 17px;
@@ -464,6 +471,17 @@ html.dark .dm-card .dm-btn.btn-discuss:hover {
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
+/* .btn-discuss:active (Buttons.css, 0,2,0) loses to both hover rules above
+   (0,3,0 light / 0,4,1 dark). Compose the lift with the press so both play
+   at once, at matching or higher specificity than each killer. */
+.dm-card .dm-btn.btn-discuss:hover:active {
+  transform: translateY(-1px) scale(var(--press-control));
+}
+
+html.dark .dm-card .dm-btn.btn-discuss:hover:active {
+  transform: translateY(-1px) scale(var(--press-control));
+}
+
 /* ── Confirm button: soft destructive style (light-red fill, red text) ── */
 /* Scoped under .dm-card so preview trigger .btn-delete stays solid red */
 .dm-card .dm-btn.btn-delete {
@@ -528,6 +546,13 @@ html.dark .dm-card .dm-btn.btn-delete:hover {
     0 6px 18px -4px rgba(239, 68, 68, 0.35),
     inset 0 1px 0 rgba(255, 255, 255, 0.7),
     inset 0 -1px 0 rgba(239, 68, 68, 0.12);
+}
+
+/* Light's :active (0,3,0) beats light hover on source order, but the dark
+   hover above is (0,4,1) and outranks it. Carry html.dark through so this
+   companion lands at (0,5,1). */
+html.dark .dm-card .dm-btn.btn-delete:hover:active {
+  transform: scale(var(--press-control));
 }
 
 /* Spinner tinted to red so it's visible on light-red fill */

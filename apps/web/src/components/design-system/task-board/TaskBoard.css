@@ -264,8 +264,7 @@ html.dark .tb-card:hover { border-color: rgba(255,255,255,0.24); }
 }
 
 @keyframes cardDone {
-  0%   { background: var(--tb-wash-done);  border-color: var(--brand-primary-500); box-shadow: inset 0 0 0 0 color-mix(in srgb, var(--brand-primary-500) 0%, transparent),    inset 0 0 0 0 color-mix(in srgb, var(--brand-primary-500) 0%, transparent); }
-  18%  { background: var(--tb-wash-done);  border-color: var(--brand-primary-500); box-shadow: inset 0 0 0 2px var(--brand-glow), inset 0 0 14px 0 color-mix(in srgb, var(--brand-primary-500) 35%, transparent); }
+  0%   { background: var(--tb-wash-done);  border-color: var(--brand-primary-500); box-shadow: inset 0 0 0 2px var(--brand-glow), inset 0 0 14px 0 color-mix(in srgb, var(--brand-primary-500) 35%, transparent); }
   72%  { background: var(--tb-wash-done2); border-color: var(--brand-primary-500); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-primary-500) 25%, transparent), inset 0 0 8px 0 color-mix(in srgb, var(--brand-primary-500) 18%, transparent); }
   100% { background: var(--tb-card-bg);    border-color: var(--tb-card-border); box-shadow: inset 0 0 0 0 transparent, inset 0 0 0 0 transparent; }
 }
@@ -273,8 +272,7 @@ html.dark .tb-card:hover { border-color: rgba(255,255,255,0.24); }
 
 /* → In Progress: hot orange inset wash */
 @keyframes cardProgress {
-  0%   { background: var(--tb-wash-prog);  border-color: #F97316; box-shadow: inset 0 0 0 0 rgba(249,115,22,0),    inset 0 0 0 0 rgba(249,115,22,0); }
-  18%  { background: var(--tb-wash-prog);  border-color: #F97316; box-shadow: inset 0 0 0 2px rgba(249,115,22,0.50), inset 0 0 14px 0 rgba(249,115,22,0.35); }
+  0%   { background: var(--tb-wash-prog);  border-color: #F97316; box-shadow: inset 0 0 0 2px rgba(249,115,22,0.50), inset 0 0 14px 0 rgba(249,115,22,0.35); }
   72%  { background: var(--tb-wash-prog2); border-color: #F97316; box-shadow: inset 0 0 0 1px rgba(249,115,22,0.25), inset 0 0 8px 0 rgba(249,115,22,0.18); }
   100% { background: var(--tb-card-bg);    border-color: var(--tb-card-border); box-shadow: inset 0 0 0 0 transparent, inset 0 0 0 0 transparent; }
 }
@@ -282,8 +280,7 @@ html.dark .tb-card:hover { border-color: rgba(255,255,255,0.24); }
 
 /* → Review: warning yellow inset wash */
 @keyframes cardReview {
-  0%   { background: var(--tb-wash-rev);  border-color: #FBBF24; box-shadow: inset 0 0 0 0 rgba(251,191,36,0),    inset 0 0 0 0 rgba(251,191,36,0); }
-  18%  { background: var(--tb-wash-rev);  border-color: #FBBF24; box-shadow: inset 0 0 0 2px rgba(251,191,36,0.55), inset 0 0 14px 0 rgba(251,191,36,0.40); }
+  0%   { background: var(--tb-wash-rev);  border-color: #FBBF24; box-shadow: inset 0 0 0 2px rgba(251,191,36,0.55), inset 0 0 14px 0 rgba(251,191,36,0.40); }
   72%  { background: var(--tb-wash-rev2); border-color: #FBBF24; box-shadow: inset 0 0 0 1px rgba(251,191,36,0.30), inset 0 0 8px 0 rgba(251,191,36,0.20); }
   100% { background: var(--tb-card-bg);    border-color: var(--tb-card-border); box-shadow: inset 0 0 0 0 transparent, inset 0 0 0 0 transparent; }
 }
@@ -495,7 +492,13 @@ html.dark .tb-daybtn { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
 .tb-daybtn .dow { font-size: 8.5px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tb-fg4); }
 .tb-daybtn .dnum { font-size: 14px; font-weight: 800; color: var(--tb-fg3); font-variant-numeric: tabular-nums; }
 .tb-daybtn:hover { background: var(--fp-hover); border-color: var(--tb-fg4); }
-.tb-daybtn:active { transform: scale(.95); transition: transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out); }
+.tb-daybtn:active {
+  transform: scale(.95);
+  transition: transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out),
+              background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out),
+              border-color calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade),
+              box-shadow calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade);
+}
 .tb-daybtn.active {
   background: #111111; border-color: transparent;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 5px 13px -5px rgba(17,17,17,0.45);

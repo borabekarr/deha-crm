@@ -278,7 +278,9 @@
   cursor: pointer;
   transition:
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
-    box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out);
+    box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
+    outline-color var(--focus-ring-duration) var(--focus-ring-ease),
+    outline-offset var(--focus-ring-duration) var(--focus-ring-ease);
 }
 .btn-inverse:hover {
   transform: translateY(-1px);
@@ -311,7 +313,9 @@
   transition:
     opacity calc(var(--duration-140) * var(--anim-mult, 1)),
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
-    box-shadow calc(var(--duration-base) * var(--anim-mult, 1));
+    box-shadow calc(var(--duration-base) * var(--anim-mult, 1)),
+    outline-color var(--focus-ring-duration) var(--focus-ring-ease),
+    outline-offset var(--focus-ring-duration) var(--focus-ring-ease);
 }
 .btn-text:hover {
   opacity: 0.8;

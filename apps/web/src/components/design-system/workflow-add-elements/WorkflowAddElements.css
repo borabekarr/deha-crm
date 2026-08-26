@@ -281,6 +281,20 @@ html.dark .wae-ae-footer .btn-apply:hover {
    wash it (see Buttons.css's identical .btn-page-root exemption). */
 .wae-ae-footer .btn-apply.btn-apply[data-proximity] { filter: none; }
 
+/* Press companions: hover and press are independent (Bora) -- restore the
+   press shrink the transform:none hover rules above cancel, per the same
+   collision Buttons.css:574-578 already fixed. This button is
+   .btn-green.btn-apply (WorkflowAddElementsPanel.tsx), so a plain green
+   companion at (0,4,0) would outrank .btn-apply's own 0.985 press and force
+   it to 0.96. :not(.btn-apply) pushes the green companion to (0,5,0), which
+   beats both the light rule (0,3,0) and the html.dark rule (0,4,1) on class
+   count, covering both themes in one rule. .btn-apply needs its own light +
+   dark pair at the card press token, since a plain (0,4,0) apply companion
+   still loses to the (0,4,1) dark killer. */
+.wae-ae-footer .btn-green:hover:active:not(.btn-apply) { transform: scale(0.96); }
+.wae-ae-footer .btn-apply:hover:active { transform: scale(var(--press-card)); }
+html.dark .wae-ae-footer .btn-apply:hover:active { transform: scale(var(--press-card)); }
+
 /* Step 4: compact the Add Elements card to search mode by springing the
    footer's max-height to 0 (overall panel height shrinks with it, since
    nothing else has a fixed height). Directional split leans on the CSS

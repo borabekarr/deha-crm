@@ -1036,6 +1036,13 @@ html.dark .pc-apply {
   transform: scale(1.03);
 }
 
+/* Press companion at matching (0,5,0) specificity: this hover's outward
+   zoom (1.03) can't compose with an inward press, so the press replaces
+   transform only, leaving background/box-shadow from the hover in place. */
+.pcx-head.pri-low .pc-apply:hover:active {
+  transform: scale(0.96);
+}
+
 /* #9 — AskBlock "AI insight" label: match .pcx-sec-title header scale */
 .pcx-ask-label {
   font-size: 11.5px;

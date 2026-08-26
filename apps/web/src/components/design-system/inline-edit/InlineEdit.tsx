@@ -87,6 +87,15 @@ export default function InlineEdit({
     // Required-value guard: empty trim falls back to last committed value.
     const next = liveVal.trim() || value
     setDraft(next)
+    // No-change guard: committing without an actual edit should not enter the
+    // saved state (F17). Still tear down editing/listener like a normal commit,
+    // just skip onCommit + the saved flash + its timer.
+    if (next === value) {
+      setEditing(false)
+      setConfirming(false)
+      cleanupOutsideListener(rootElRef.current)
+      return
+    }
     onCommit?.(next)
     setEditing(false)
     setConfirming(false)

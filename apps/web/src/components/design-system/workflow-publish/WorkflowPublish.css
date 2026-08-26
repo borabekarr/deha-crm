@@ -51,7 +51,7 @@
 .wp-btn:hover { background: #1C1C1C; }
 .wp-btn:active { transform: scale(var(--press-control)); }
 
-/* Proximity: append scale/filter channels (existing transition untouched). */
+/* Proximity: full transition union restated (a more specific rule replaces the base list, it does not append to it). */
 .wp-btn[data-proximity] {
   transition:
     background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
@@ -234,7 +234,7 @@ html.dark .wp-popover[data-squircle="on"] {
 .wp-update-btn:active { transform: scale(var(--press-control)); }
 .wp-update-btn .material-icons { font-size: 18px; }
 
-/* Proximity: append scale/filter channels (existing transition untouched). */
+/* Proximity: full transition union restated (a more specific rule replaces the base list, it does not append to it). */
 .wp-update-btn[data-proximity] {
   transition:
     background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
@@ -256,10 +256,11 @@ html.dark .wp-popover[data-squircle="on"] {
 .wp-edited:hover { background: var(--fp-hover); }
 .wp-edited:active { transform: scale(var(--press-control)); }
 
-/* Proximity: append scale/filter channels (existing transition untouched). */
+/* Proximity: full transition union restated (a more specific rule replaces the base list, it does not append to it). */
 .wp-edited[data-proximity] {
   transition:
     background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }
@@ -305,10 +306,11 @@ html.dark .wp-popover[data-squircle="on"] {
 .wp-action:active { transform: scale(var(--press-control)); }
 .wp-action:last-child { margin-bottom: 6px; }
 
-/* Proximity: append scale/filter channels (existing transition untouched). */
+/* Proximity: full transition union restated (a more specific rule replaces the base list, it does not append to it). */
 .wp-action[data-proximity] {
   transition:
     background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-out),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
     filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
 }

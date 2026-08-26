@@ -26,17 +26,10 @@ export const COLORS: Record<string, string> = {
   notification: '#6366F1',
 }
 
-// F12: per-glyph optical-center nudges (transform only, no size change).
-// Each Material Icons glyph carries different visual weight, so the offset
-// is judged per glyph rather than applied uniformly.
-export const ICON_OPTICAL_NUDGE: Record<string, string> = {
-  check_circle: 'translate(0.5px, -0.5px)',
-  error: 'translate(0.5px, -0.5px)',
-  warning: 'translate(0, -0.5px)',
-  info: 'translate(0.5px, 0)',
-  notifications: 'translate(0.5px, -0.5px)',
-  delete: 'translate(0.5px, -0.5px)',
-}
+// F11 (plan: ui-library-debt-p3 step 2): the per-glyph optical-center nudge
+// map that used to live here was removed on purpose. Bora asked for exact
+// geometric centring rather than optical centring, so the glyph box is now
+// centred with no transform offset -- do not reintroduce a nudge map here.
 
 // Expand choreography mirrored byte-for-byte from ExpandableCard.tsx's
 // "main" variant (DURATION_S 0.5 / HEIGHT_EASING var(--ease-spring), the
@@ -191,11 +184,10 @@ export function vm(t: ToastItem, index: number, expanded: boolean, cfg: VariantC
         backgroundColor: color,
         color: '#fff',
         textShadow: '0 1px 2px rgba(0,0,0,0.22)',
-        backgroundImage:
-          'linear-gradient(rgba(255,255,255,0.10) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.10) 1px, transparent 1px)',
-        backgroundSize: '9px 9px',
+        backgroundImage: 'var(--grid-texture-image)',
+        backgroundSize: 'var(--grid-texture-size)',
         boxShadow:
-          'inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -2px 0 rgba(0,0,0,0.22), inset 0 0 0 1px rgba(255,255,255,0.15)',
+          'inset 0 -2px 5px rgba(0,0,0,0.14), inset 0 -1px 0 rgba(255,255,255,0.15)',
       }
     : {
         borderRadius: '17px',

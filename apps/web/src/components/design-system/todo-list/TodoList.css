@@ -99,7 +99,14 @@ html.dark .td-daybtn { border-color: rgba(255,255,255,0.10); background: rgba(17
 .td-daybtn .dnum { font-size: 16px; font-weight: 800; color: var(--fg3); font-variant-numeric: tabular-nums; }
 .td-daybtn:hover { border-color: rgba(17,17,17,0.22); }
 html.dark .td-daybtn:hover { border-color: rgba(255,255,255,0.2); }
-.td-daybtn:active { transform: scale(.95); transition: transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out); }
+.td-daybtn:active {
+  transform: scale(.95);
+  transition: transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out),
+              background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
+              border-color calc(var(--duration-180) * var(--anim-mult, 1)),
+              box-shadow calc(var(--duration-180) * var(--anim-mult, 1)),
+              color calc(var(--duration-180) * var(--anim-mult, 1));
+}
 /* Selected day — BLACK pill in light mode (mirrors .td-filt.on / seg pill) */
 .td-daybtn.active {
   background: #111111;
@@ -283,7 +290,26 @@ html.dark .tao-btn.tao-del      { background: #DC2626; }
 .task.anim { transition: opacity calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-fade), transform calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-todo-fade-exit); }
 .task.dragging { cursor: grabbing; transition: none; box-shadow: 0 18px 34px -14px rgba(17,17,17,0.4), var(--tdo-cardshadow); }
 .task.settling { transition: transform calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-todo-settle); }
-.task-row:not(.is-done) .task:not(.dragging):hover { border-color: var(--tag); box-shadow: 0 0 0 1px var(--tag), var(--tdo-cardshadow); transition: border-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade), box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade); }
+.task-row:not(.is-done) .task:not(.dragging):hover {
+  border-color: var(--tag);
+  box-shadow: 0 0 0 1px var(--tag), var(--tdo-cardshadow);
+  transition: border-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade),
+              box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade),
+              transform calc(var(--duration-320) * var(--anim-mult, 1)) var(--ease-todo-settle);
+}
+/* .task.anim carries its own entrance opacity/transform timing, which the
+   shared hover rule above does not restate (it only knows .settling's
+   transform timing). State-scope a higher-specificity hover rule so a
+   hover during entrance keeps animating opacity and uses the entrance's
+   own transform timing instead of the settle timing. */
+.task-row:not(.is-done) .task.anim:not(.dragging):hover {
+  border-color: var(--tag);
+  box-shadow: 0 0 0 1px var(--tag), var(--tdo-cardshadow);
+  transition: border-color calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade),
+              box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade),
+              opacity calc(var(--duration-sweep) * var(--anim-mult, 1)) var(--ease-fade),
+              transform calc(var(--duration-420) * var(--anim-mult, 1)) var(--ease-todo-fade-exit);
+}
 .task:active { cursor: grabbing; }
 
 /* checkbox */

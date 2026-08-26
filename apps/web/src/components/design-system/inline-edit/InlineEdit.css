@@ -39,12 +39,18 @@
   border-radius: 9999px;
   background: var(--bg-card-solid, #fff);
   background-clip: padding-box;
-  border: 2px solid transparent;
-  box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand-primary-500) 0%, transparent), var(--ie-rest);
+  /* Border ring paints the canonical grey shell surface (var(--shell-bg))
+     rather than relying on the ambient page background to bleed through a
+     transparent border — keeps the shell colour correct regardless of what
+     the field happens to sit on. */
+  border: 2px solid var(--shell-bg);
+  box-shadow: var(--ie-rest);
   transition:
     width        calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-spring),
     border-color calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-out),
-    box-shadow   calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-out);
+    box-shadow   calc(var(--duration-260) * var(--anim-mult, 1)) var(--ease-out),
+    outline-color var(--focus-ring-duration) var(--focus-ring-ease),
+    outline-offset var(--focus-ring-duration) var(--focus-ring-ease);
   cursor: text;
 }
 
@@ -71,9 +77,12 @@ html.dark .ie-field {
 
 .ie-field[data-editing="true"] {
   width: 318px;
+  /* Single ring while editing: the 2px border switches to brand colour.
+     The extra 4px box-shadow glow ring that used to sit outside it has been
+     removed (was a duplicate outer ring — see F16). */
   border-color: var(--brand-primary, var(--brand-primary-500));
-  box-shadow: 0 0 0 4px var(--ie-glow), var(--ie-rest);
-  /* Width springs out with overshoot; border and glow ease in via base transition. */
+  box-shadow: var(--ie-rest);
+  /* Width springs out with overshoot; border eases in via base transition. */
 }
 
 /* saved flash on the field ring */
@@ -82,7 +91,7 @@ html.dark .ie-field {
 }
 
 @keyframes ieSaved {
-  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand-primary-500) 0%, transparent), var(--ie-rest); }
+  0%, 100% { box-shadow: var(--ie-rest); }
   28%      { box-shadow: 0 0 0 6px var(--ie-glow), var(--ie-rest); }
 }
 
@@ -168,7 +177,9 @@ html.dark .ie-input::selection {
     transform        calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     opacity          calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
     scale            calc(var(--duration-140) * var(--anim-mult, 1)),
-    filter           calc(var(--duration-140) * var(--anim-mult, 1));
+    filter           calc(var(--duration-140) * var(--anim-mult, 1)),
+    outline-color    var(--focus-ring-duration) var(--focus-ring-ease),
+    outline-offset   var(--focus-ring-duration) var(--focus-ring-ease);
 }
 
 .ie-act:active { transform: scale(var(--press-chip)); }
@@ -190,8 +201,11 @@ html.dark .ie-input::selection {
     box-shadow       calc(var(--duration-260) * var(--anim-mult, 1)),
     border-color     calc(var(--duration-260) * var(--anim-mult, 1)),
     transform        calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-accel),
+    opacity          calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out),
     scale            calc(var(--duration-140) * var(--anim-mult, 1)),
-    filter           calc(var(--duration-140) * var(--anim-mult, 1));
+    filter           calc(var(--duration-140) * var(--anim-mult, 1)),
+    outline-color    var(--focus-ring-duration) var(--focus-ring-ease),
+    outline-offset   var(--focus-ring-duration) var(--focus-ring-ease);
 }
 
 /* pen state */

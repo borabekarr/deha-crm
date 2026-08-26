@@ -1,6 +1,6 @@
 import type { MouseEvent, PointerEvent } from 'react'
 import { useAutoHeight } from '@/lib/hooks/use-auto-height'
-import { ICON_OPTICAL_NUDGE, EXPAND_DURATION_MS, EXPAND_HEIGHT_EASING, type ToastVm } from './toast-vm'
+import { EXPAND_DURATION_MS, EXPAND_HEIGHT_EASING, type ToastVm } from './toast-vm'
 
 // One stacked toast's card. Owns the expand region's height via
 // useAutoHeight (duration/easing mirrored from ExpandableCard's main
@@ -55,7 +55,12 @@ export function ToastCard({
         <div style={t.surfaceStyle}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--gap-icon-text)', padding: '12px 14px' }}>
             <div style={t.iconBoxStyle}>
-              <span className="material-icons" style={{ fontSize: '18px', display: 'inline-block', transform: ICON_OPTICAL_NUDGE[t.icon] || 'none' }}>{t.icon}</span>
+              {/* F11: geometric centring only -- lineHeight: 1 keeps the
+                  inline-block's box equal to its font-size em-square so
+                  placeItems: center on the parent centres the glyph exactly;
+                  no per-glyph transform nudge (removed on purpose, see
+                  toast-vm.ts). */}
+              <span className="material-icons" style={{ fontSize: '18px', lineHeight: 1, display: 'inline-block' }}>{t.icon}</span>
             </div>
             <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '1px' }}>
               <span style={t.titleStyle}>{t.title}</span>
