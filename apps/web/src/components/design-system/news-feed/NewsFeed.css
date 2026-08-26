@@ -36,6 +36,7 @@
     --nf-grid-line:    rgba(255,255,255,0.06);
 
     --nf-kicker:       #FFFFFF;
+    --nf-sub:          rgba(255,255,255,0.46); /* restored: dropped in the HTML→React port, consumed by .nf-empty */
     --nf-title:        #F4F7F5;
     --nf-title-sh:     0 1px 1px rgba(0,0,0,0.45);
     --nf-date:         rgba(255,255,255,0.52);

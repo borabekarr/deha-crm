@@ -50,7 +50,11 @@ html.dark .metric { border-top-color: rgba(255, 255, 255, 0.06) !important; }
 /* Tactile press: shell takes primary squeeze so bezel + card move as one unit.
    Inner card adds a tiny additional compress; composed total ≈ 0.98 × 0.99 ≈ 0.970,
    matching the old inner-only feel while the grey bezel now moves with it. */
-.shell.zoom:active { transform: scale(0.98); transition: transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out); }
+.shell.zoom:active {
+  transform: scale(0.98);
+  transition: transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out),
+              box-shadow calc(var(--duration-slow) * var(--anim-mult, 1)) var(--ease-out);
+}
 .metric:active { transform: scale(0.99); }
 
 .m-left { display:flex; flex-direction:column; gap: 12px; }

@@ -81,6 +81,7 @@ export default function Pills() {
         {STAT_BADGES.map((spec) => (
           <StatBadge key={spec.label} {...spec} />
         ))}
+        <span className="badge success">Success</span>
       </div>
       <span className="pills-label" style={{ marginTop: 16 }}>Task board column tags</span>
       <div className="pills-row">

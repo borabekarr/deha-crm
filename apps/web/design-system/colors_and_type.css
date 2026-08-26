@@ -108,6 +108,7 @@
   --fg2:                  #232323;  /* strong body — gray-700 */
   --fg3:                  #6B6B6B;  /* secondary  — gray-500 */
   --fg4:                  #A1A1A1;  /* tertiary   — gray-400 */
+  --fg5:                  #C4C4C4;  /* quaternary — gray-300 */
   --fg-inverse:           #FFFFFF;
   --fg-brand:             #10B981;
   --brand-on-primary:     #fff;  /* text color on brand-primary-filled surfaces; themes may remap */
@@ -225,6 +226,7 @@
   --fg2:                  #D4D4D4;
   --fg3:                  #A1A1A1;
   --fg4:                  #6B6B6B;
+  --fg5:                  #525252;
 
   --border-hairline:      #232323;
 }
