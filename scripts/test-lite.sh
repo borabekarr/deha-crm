@@ -6,6 +6,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/../apps/web"
 pnpm typecheck
-if [ $# -ge 1 ]; then
+if [ "${1:-}" = "motion-cascade" ]; then
+  pnpm test:motion-cascade
+elif [ $# -ge 1 ]; then
   npx --no playwright test tests/design-system.spec.ts --project=default --grep "$1"
 fi

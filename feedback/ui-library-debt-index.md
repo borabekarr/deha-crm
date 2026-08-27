@@ -24,17 +24,17 @@ Split into 7 part-plans, each executed as its own separate `/execute` session.
 | F7 | ui-library-debt-p1 | DONE 2026-08-22 |
 | F8 | ui-library-debt-p1 | DONE 2026-08-22 |
 | F9 | ui-library-debt-p1 | DONE 2026-08-22 |
-| F10 | ui-library-debt-p3 | PENDING |
-| F11 | ui-library-debt-p3 | PENDING |
-| F12 | ui-library-debt-p3 | PENDING |
+| F10 | ui-library-debt-p3 | DONE 2026-08-23 |
+| F11 | ui-library-debt-p3 | DONE 2026-08-23 |
+| F12 | ui-library-debt-p3 | DONE 2026-08-23 |
 | F13 | ui-library-debt-p2 | DONE 2026-08-23 |
 | F14 | ui-library-debt-p2 | DONE 2026-08-23 |
 | F15 | ui-library-debt-p2 | DONE 2026-08-23 |
-| F16 | ui-library-debt-p4 | PENDING |
-| F17 | ui-library-debt-p4 | PENDING |
-| F18 | ui-library-debt-p4 | PENDING |
-| F19 | ui-library-debt-p4 | PENDING |
-| F20 | ui-library-debt-p4 | PENDING |
+| F16 | ui-library-debt-p4 | DONE 2026-08-23 |
+| F17 | ui-library-debt-p4 | DONE 2026-08-23 |
+| F18 | ui-library-debt-p4 | DONE 2026-08-23 |
+| F19 | ui-library-debt-p4 | DONE 2026-08-23 |
+| F20 | ui-library-debt-p4 | DONE 2026-08-23 |
 | F21 | ui-library-debt-p5 | PENDING |
 | F22 | ui-library-debt-p5 | PENDING |
 | F23 | ui-library-debt-p5 | PENDING |
@@ -49,6 +49,6 @@ Split into 7 part-plans, each executed as its own separate `/execute` session.
 | F32 | ui-library-debt-p7 | PENDING |
 | F33 | ui-library-debt-p7 | PENDING |
 | F34 | ui-library-debt-p7 | PENDING |
-| F35 | ui-library-debt-p3 | PENDING |
+| F35 | ui-library-debt-p3 | DONE 2026-08-23 |
 | F36 | ui-library-debt-p7 | PENDING |
 | F37 | ui-library-debt-p7 | PENDING |

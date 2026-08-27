@@ -121,7 +121,7 @@
    above (grid-template-rows animates a layout property, not transform/
    opacity), faster-exits rule anchors the close to --accordion-exit-dur. */
 .dg:not([data-open="true"]) .dg-clip {
-  transition: grid-template-rows var(--dg-exit-dur, var(--accordion-exit-dur)) var(--dg-ease, var(--accordion-ease));
+  transition: grid-template-rows var(--accordion-exit-dur) var(--dg-ease, var(--accordion-ease));
 }
 @media (prefers-reduced-motion: reduce) {
   .dg-clip, .dg-chevron, .dg-trigger { transition: none !important; }
@@ -151,9 +151,9 @@
 /* Collapsed (exit) leg -- faster-exits rule anchors the close to
    --accordion-exit-dur; * .7 opacity ratio and easing tokens unchanged. */
 .dg:not([data-open="true"]) .dg-scroll {
-  transition: transform var(--dg-exit-dur, var(--accordion-exit-dur)) var(--dg-ease, var(--accordion-ease)),
-              opacity calc(var(--dg-exit-dur, var(--accordion-exit-dur)) * .7) var(--dg-ease, var(--accordion-ease)),
-              filter var(--dg-exit-dur, var(--accordion-exit-dur)) var(--dg-ease, var(--accordion-ease));
+  transition: transform var(--accordion-exit-dur) var(--dg-ease, var(--accordion-ease)),
+              opacity calc(var(--accordion-exit-dur) * .7) var(--dg-ease, var(--accordion-ease)),
+              filter var(--accordion-exit-dur) var(--dg-ease, var(--accordion-ease));
 }
 [data-theme="dark"] .dg-scroll { border-top-color: #2A3A52; scrollbar-color: var(--slate-700) transparent; }
 .dg-scroll::-webkit-scrollbar { width: 8px; }

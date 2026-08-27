@@ -101,6 +101,12 @@
 .sd-overlay {
   position: fixed;
   inset: 0;
+  /* <dialog>'s UA stylesheet sets width/height: fit-content, which wins over
+     inset: 0 (shorthand for top/right/bottom/left, not an explicit size) and
+     shrinks the overlay to its content box. Force auto so inset governs the
+     full-viewport size again. */
+  width: auto;
+  height: auto;
   z-index: 30;
   display: flex;
   /* Default alignment for bottom (overridden per side below) */
@@ -505,6 +511,13 @@
    scale/filter transition channels scoped to this button only. */
 .sd-buy:hover {
   transform: translateY(-1px);
+}
+
+/* Press companion at (0,3,0), beating the hover rule above (0,2,0). Compose
+   rather than replace, same shape as DeleteModal.css's .btn-discuss pair:
+   the lift survives the press, appended with the green press shrink. */
+.sd-buy:hover:active {
+  transform: translateY(-1px) scale(0.96);
 }
 
 .sd-buy[data-proximity] {

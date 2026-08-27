@@ -5,6 +5,7 @@ import './Buttons.css'
 import { useProximityGroup } from '@/lib/hooks'
 import { btnRootRef, cleanupBtnRoot, runApplyBtn } from './buttons-hook'
 import { BUTTON_VARIANT_CLASS, type ButtonProps } from './variants'
+import DeleteButton from '../delete-button/DeleteButton'
 
 // ---------------------------------------------------------------------------
 // Button — importable specimen shared by consumers (WorkflowAddElements,
@@ -72,6 +73,7 @@ export default function Buttons() {
   const row3Ref = useProximityGroup<HTMLDivElement>()
   const row5Ref = useProximityGroup<HTMLDivElement>()
   const row6Ref = useProximityGroup<HTMLDivElement>()
+  const row7Ref = useProximityGroup<HTMLDivElement>()
 
   return (
     <div className="btn-page-root card card--flat">
@@ -153,6 +155,11 @@ export default function Buttons() {
           <span className="material-symbols-outlined">insights</span>
           Get Optimization
         </Button>
+      </div>
+
+      <span className="btn-label" style={{ marginTop: 20 }}>Delete (countdown-to-confirm)</span>
+      <div className="btn-row" ref={row7Ref}>
+        <DeleteButton />
       </div>
     </div>
   )

@@ -16,6 +16,43 @@ import { useRef, useCallback, useEffect } from 'react'
 
 export type DrawerSide = 'bottom' | 'top' | 'left' | 'right'
 
+// drawerReducer — replaces the five useStates (shown/closing/closeVariant/
+// drag/dragging) that used to live directly in DrawerInstance.
+export type DrawerCloseVariant = '--duration-420' | '--duration-expand'
+
+export interface DrawerState {
+  shown: boolean
+  closing: boolean
+  closeVariant: DrawerCloseVariant
+  drag: number
+  dragging: boolean
+}
+
+export type DrawerAction =
+  | { type: 'OPEN_START' } | { type: 'OPEN_SHOWN' } | { type: 'CLOSE_DONE' }
+  | { type: 'CLOSE'; byDrag: boolean } | { type: 'DRAG_MOVE'; drag: number }
+  | { type: 'DRAG_START' } | { type: 'DRAG_END' }
+
+export function initialDrawerState(defaultOpen: boolean): DrawerState {
+  return { shown: defaultOpen, closing: false, closeVariant: '--duration-expand', drag: 0, dragging: false }
+}
+
+export function drawerReducer(state: DrawerState, action: DrawerAction): DrawerState {
+  switch (action.type) {
+    case 'OPEN_START': return { ...state, drag: 0, closing: false, closeVariant: '--duration-expand' }
+    case 'OPEN_SHOWN': return { ...state, shown: true }
+    case 'CLOSE': return {
+      ...state, shown: false, closing: true, dragging: false, drag: 0,
+      closeVariant: action.byDrag ? '--duration-expand' : '--duration-420',
+    }
+    case 'CLOSE_DONE': return { ...state, closing: false }
+    case 'DRAG_MOVE': return { ...state, drag: action.drag }
+    case 'DRAG_START': return { ...state, dragging: true }
+    case 'DRAG_END': return { ...state, dragging: false }
+    default: return state
+  }
+}
+
 // ---------------------------------------------------------------------------
 // useTimerRef
 // Thin wrapper that stores a setTimeout id in a ref so it can be cancelled

@@ -179,6 +179,12 @@ html.dark .wtc-outer:hover .wtc-card {
   transform: translateY(0);
   pointer-events: auto;
 }
+/* Composed press: .wtc-use is only ever pressable while .wtc-outer is
+   hovered (it's revealed by that hover), so the press must carry the
+   reveal's translateY(0) through rather than replace it. A :not(:active)
+   guard on the rule above was rejected: it would slide the button back
+   down mid-press, which is worse than the missing shrink. */
+.wtc-outer:hover .wtc-use:active { transform: translateY(0) scale(0.96); }
 .wtc-use:hover {
   box-shadow: 0 4px 12px rgba(17,17,17,0.32), inset 0 1px 0 rgba(255,255,255,0.08);
 }

@@ -125,7 +125,6 @@ const SLUGS = [
   'news-feed',
   // ds-rebuild-w1 (2026-08-07) — rebuilt from claude-design/raw/ via
   // CONVERSION-SOP; baseline adopts from CI actual per BASELINE ADOPTION RULE.
-  'delete-button',
   'shimmer',
   'disclosure-group',
   'pie-chart',
@@ -208,10 +207,15 @@ const SLUG_MAX_DIFF_PIXELS: Record<string, number> = {
   'message-dropdown': 1500,   // observed 968
   'disclosure-group': 1300,   // observed 819
   'expandable-card': 1100,    // observed 694
-  'delete-button': 700,       // observed 379, 425
   'sprint-planner-core': 500, // observed 247, 286
   'workflow-add-elements': 400, // observed 222
   'smooth-drawer': 200,       // observed 74
+  // Added 2026-08-26 from CI run 32953980477 (no source change for the first
+  // two; avatar-picker jitters 3px between CI attempts after baseline adoption).
+  'leaderboard': 1000,        // observed 814 (reduced-motion)
+  'streak-card': 300,         // observed 2, 193
+  'avatar-picker': 200,       // observed 3 (2601 vs 2604 between attempts)
+  'motion-tabs': 100,         // observed 22 on Dependabot #70 CI run 32685660803
 }
 
 // Resolve the screenshot options for one slug: under CI a slug listed in

@@ -80,6 +80,11 @@
   gap: 3px;
 }
 
+/* Icon + title are one unit: icon always sits left of the header, title
+   beside it. That unit -- not .ap-h2's own text edge -- is what shares the
+   left edge with .ap-sub, .ap-field-top and .ap-field-wrap below; the
+   title's text is deliberately inset from that edge by the icon's width
+   plus this row's gap. */
 .ap-header-row {
   display: flex;
   flex-direction: row;
@@ -302,7 +307,9 @@
     transform calc(var(--duration-140) * var(--anim-mult, 1)) var(--ease-out),
     box-shadow calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    outline-color var(--focus-ring-duration) var(--focus-ring-ease),
+    outline-offset var(--focus-ring-duration) var(--focus-ring-ease);
   padding: 0;
   flex-shrink: 0;
 }
@@ -359,7 +366,9 @@
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
     box-shadow calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-fade),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+    outline-color var(--focus-ring-duration) var(--focus-ring-ease),
+    outline-offset var(--focus-ring-duration) var(--focus-ring-ease);
 }
 
 /* Scale is driven by the proximity engine via --hover-scale-max
@@ -395,6 +404,12 @@
 }
 
 .ap-thumb--on:hover { transform: none; }
+/* Press companion: hover above (0,2,0) sets transform: none, which beat
+   .ap-thumb:active's scale(var(--press-control)) at the same specificity
+   by source order and killed the press entirely. Re-declare the press at
+   (0,3,0) so it composes on top of the hover instead of losing to it --
+   hover and press stay independent per Bora, playable at the same time. */
+.ap-thumb--on:hover:active { transform: scale(var(--press-control)); }
 
 /* Focus ring, explicit local rule (plan: focus-ring-tokens, step 3). The
    house :where(...):focus-visible rule in _shared-feedback.css is zero-
@@ -421,14 +436,31 @@
   display: flex;
   align-items: baseline;
   justify-content: flex-start;
-  gap: 8px;
+  gap: 0;
+}
+
+/* Identity icon, precedes the label. Opts out of the row's baseline
+   alignment (align-self: center) so it doesn't become the baseline
+   reference for .ap-field-label / .ap-count -- those two still align to
+   each other's text baseline exactly as before. Sized close to the
+   label's own line box per Apple's "match the label, don't dwarf it"
+   convention for a leading field icon. */
+.ap-field-icon {
+  align-self: center;
+  flex-shrink: 0;
+  font-size: 17px;
+  line-height: 1;
+  color: var(--fg3, #6B6B6B);
+  margin-right: 6px;
 }
 
 /* Header text — left-aligned, Montserrat Black, a touch larger than the
-   old .ap-label; "0/20" sits right of it via the row's space-between. */
+   old .ap-label. Explicit line-height gives the icon above a stable
+   target to size against. */
 .ap-field-label {
   font-size: 15px;
   font-weight: 900;
+  line-height: 1.2;
   color: var(--fg2, #232323);
   letter-spacing: -0.01em;
   font-family: var(--font-display);
@@ -450,7 +482,13 @@
 
 .ap-field-ph {
   position: absolute;
-  left: 17px;
+  /* 19px = .ie-field's 2px border + 17px padding-left, its content-box
+     inset. An invisible ghost "@" matching .ie-prefix's font/weight/
+     margin-right is rendered ahead of the text (see .ap-field-ph-ghost
+     below); it reserves exactly the prefix's own measured width so
+     "jeru"'s text origin always lands on .ie-input's, in any font/theme,
+     with no magic number. */
+  left: 19px;
   top: 0;
   height: 46px;
   display: flex;
@@ -466,7 +504,21 @@
     visibility 0s linear 0s;
 }
 
-.ap-field-wrap:has(.ie-field[data-editing="true"]) .ap-field-ph {
+/* Invisible ghost of .ie-prefix ("@ ") -- mirrors its font-size/weight and
+   margin-right exactly so it occupies the identical rendered width, pushing
+   the visible "jeru" text to start where .ie-input's own text starts. */
+.ap-field-ph-ghost {
+  font-size: 13px;
+  font-weight: 800;
+  font-family: var(--font-display);
+  margin-right: 1px;
+  visibility: hidden;
+}
+
+/* Hidden while editing (typing) or while the saved confirmation is showing
+   (F17: the example text must not sit under "Kaydedildi" either). */
+.ap-field-wrap:has(.ie-field[data-editing="true"]) .ap-field-ph,
+.ap-field-wrap:has(.ie-field[data-saved="true"]) .ap-field-ph {
   opacity: 0;
   visibility: hidden;
   transition:
@@ -492,6 +544,10 @@
 }
 
 .ap-count {
+  /* Pushed to the row's far edge instead of sitting 8px off the label --
+     secondary metadata reads as quiet only when it isn't crowding the
+     primary text it's describing. */
+  margin-left: auto;
   font-size: 11.5px;
   font-weight: 600;
   color: var(--fg4, #A1A1A1);
@@ -509,7 +565,10 @@
 .ap-field .ie-field[data-editing="true"] { width: 100%; }
 
 .ap-err {
-  margin: 0 0 0 2px;
+  /* No per-element left offset -- .ap-field is a direct child of .ap-inner
+     with no extra padding, so margin:0 already lands .ap-err on the same
+     left edge as .ap-field-top/.ap-field-wrap (was margin-left: 2px). */
+  margin: 0;
   font-size: 12px;
   font-weight: 600;
   color: var(--sem-danger, #ef4444);
@@ -557,17 +616,20 @@
   filter: brightness(0.88);
   box-shadow: 0 2px 6px rgba(17,17,17,0.28);
 }
+/* Press companion: the hover rule above is (0,3,0) and pins transform to
+   none, which beat .btn-green:active's scale(0.96) at (0,2,0) and killed
+   the press feedback on this button entirely. Re-declare the press at
+   (0,4,0), above the hover rule, so darkening (filter) and the press
+   scale render together instead of the hover replacing the press. */
+.ap-submit:hover:not(:disabled):active { transform: scale(0.96); }
 
+/* F19: static plus glyph — no hover rotate/scale (removed; button-level
+   feedback above is the only hover signal). Rendered on material-symbols-
+   outlined (see AvatarPicker.tsx) with a raised wght axis so it reads solid
+   rather than thin. */
 .ap-submit-icon {
   font-size: 17px;
-  transition:
-    transform calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out),
-    scale calc(var(--duration-200) * var(--anim-mult, 1)) var(--ease-out);
-}
-
-.ap-submit:hover:not(:disabled) .ap-submit-icon {
-  transform: rotate(90deg);
-  scale: 1.12;
+  font-variation-settings: 'wght' 700;
 }
 
 /* Disabled state scoped to ap-submit (btn-green has no disabled style) */

@@ -6,6 +6,12 @@
 // component tree's .css/.tsx motion-token gate never sees them -- the gate is
 // right about component CSS and wrong about this file, and MOTION_GATE=skip is
 // not an option. Deleted wholesale when the prototype surface is removed.
+//
+// 2026-08-24: plan transition-clobber-fix step 7 instructed tokenizing these
+// literals; that instruction was written without knowledge of this comment and
+// was reverted by Bora. A `transform` leg WAS added to .proto-picker-item below
+// (its :active scales, so the press snapped without one) -- that fix stands and
+// is unrelated to the durations. Do not tokenize the durations here.
 export const PICKER_CSS = `
 .proto-picker {
   position: fixed;
@@ -61,7 +67,9 @@ export const PICKER_CSS = `
   color: rgba(255, 255, 255, 0.55);
   font: inherit;
   cursor: pointer;
-  transition: color 150ms ease-out;
+  transition:
+    color 150ms ease-out,
+    transform 150ms ease-out;
 }
 .proto-picker-item:hover { color: rgba(255, 255, 255, 0.85); }
 .proto-picker-item:active { transform: scale(0.97); }

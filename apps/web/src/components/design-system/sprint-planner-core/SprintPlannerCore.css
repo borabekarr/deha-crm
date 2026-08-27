@@ -100,6 +100,23 @@ html.dark .sp-panel[data-squircle="on"] {
   box-shadow: none;
 }
 
+/* F12: 0-size anchor point the portaled toast stack (ToastStage, see
+   SprintPlannerCore.tsx's toast-layer comment) docks against. ToastStage
+   always resolves its resting position as this element's own bottom-right
+   corner offset by a further +24px right / +12px down (its own internal
+   below-right docking math, unchanged) -- so this anchor sits that same
+   +24/+12 outside .sp-panel's actual bottom-right corner to cancel that
+   offset back out, landing the stack flush inside the card with an even
+   --space-4 gap to its right and bottom edges instead of outside it. */
+.sp-toast-anchor {
+  position: absolute;
+  right: calc(var(--space-4) - 24px);
+  bottom: calc(var(--space-4) + 12px);
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
 /* Hide scrollbars where needed */
 .hide-scroll::-webkit-scrollbar { display: none; }
 .hide-scroll { scrollbar-width: none; -ms-overflow-style: none; }
@@ -196,7 +213,10 @@ html.dark .ticket:not(.success-p0):not(.success-p1):not(.success-p2):not(.succes
   background: var(--sp-addhover-bg) !important;
   outline: 2px solid rgba(17,17,17,0.70);
   outline-offset: 0px;
-  transition: outline-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out);
+  transition: outline-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out),
+              background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
+              border-color calc(var(--duration-base) * var(--anim-mult, 1)),
+              box-shadow calc(var(--duration-base) * var(--anim-mult, 1));
 }
 html.dark .day-cell.drop-target {
   outline-color: rgba(255,255,255,0.75);

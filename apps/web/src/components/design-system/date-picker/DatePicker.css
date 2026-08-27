@@ -131,7 +131,9 @@ html.dark .dp-outer[data-squircle="on"] {
     transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
     box-shadow calc(var(--duration-200) * var(--anim-mult, 1)),
     scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    outline-color var(--focus-ring-duration) var(--focus-ring-ease),
+    outline-offset var(--focus-ring-duration) var(--focus-ring-ease);
 }
 
 /* Contain the trigger's hover shadow: locked .btn-green:hover's canon shadow
@@ -144,10 +146,24 @@ html.dark .dp-outer[data-squircle="on"] {
   z-index: 2;
   transform: translateY(-1px);
   box-shadow: 0 2px 6px -3px color-mix(in srgb, var(--brand-primary-500) 40%, transparent), inset 0 1px 0 rgba(255,255,255,0.2);
-  transition: box-shadow var(--duration-fast) var(--ease-out), transform var(--duration-fast) var(--ease-out);
+  transition:
+    box-shadow var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out),
+    background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    outline-color var(--focus-ring-duration) var(--focus-ring-ease),
+    outline-offset var(--focus-ring-duration) var(--focus-ring-ease);
 }
 html.dark #dp-open-btn:hover {
   box-shadow: 0 2px 6px -3px rgba(52,211,153,0.45), inset 0 1px 0 rgba(255,255,255,0.22);
+}
+
+/* Press companion: #dp-open-btn's ID specificity (1,2,0) already beats
+   .btn-green:active (0,2,0), so the shrink never rendered on press. Compose
+   the hover's translateY(-1px) with the press shrink instead of dropping it. */
+#dp-open-btn:hover:active {
+  transform: translateY(-1px) scale(0.96);
 }
 
 /* ── Panel enter/exit ─────────────────────────────────────────────────────── */
@@ -478,15 +494,28 @@ html.dark .dp-wheel-mask-inner .dp-item {
 .dp-confirm.btn-green:hover {
   transform: translateX(-50%);
   background-color: var(--fp-hover);
-  transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
+  transition:
+    background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
+    box-shadow calc(var(--duration-200) * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    outline-color var(--focus-ring-duration) var(--focus-ring-ease),
+    outline-offset var(--focus-ring-duration) var(--focus-ring-ease);
 }
 
 /* Press: small inward scale composed with centering, no overshoot */
 .dp-confirm.btn-green:active {
   transform: translateX(-50%) scale(0.96);
   background-color: color-mix(in srgb, #111111 78%, black);
-  transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
-    transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
+  transition:
+    background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
+    transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
+    box-shadow calc(var(--duration-200) * var(--anim-mult, 1)),
+    scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
+    outline-color var(--focus-ring-duration) var(--focus-ring-ease),
+    outline-offset var(--focus-ring-duration) var(--focus-ring-ease);
 }
 
 /* ── Dark mode overrides (System A: html.dark) ────────────────────────────── */

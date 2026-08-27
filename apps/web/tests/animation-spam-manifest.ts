@@ -219,12 +219,6 @@ export const WAIVED: SpamWaiver[] = [
     date: '2026-08-09',
   },
   {
-    slug: 'delete-button',
-    reason:
-      "Attempted real toggle enrollment (kind: 'toggle', trigger '.db', settleProperty 'width') and ran it live: idle and confirming share byte-identical [data-state] CSS (background, box-shadow — DeleteButton.css:114-171), so the pill's measured content width is the ONLY distinguishing property, and it is barely distinguishable by design (idle 'Delete' vs confirming 'Cancel'+digit measured 179px vs 180px, 1px apart) — under the spam loop it settled to 136px, a third value matching neither reference, i.e. no reliable two-state pair for the runner's snap-back assertion.",
-    date: '2026-08-09',
-  },
-  {
     slug: 'animations-registry',
     reason:
       "Composite page embedding the same demo exports already individually waived on their own routes for the same properties: animated-list's absolute-slot push feed has no stable settle element, number-flow's shuffle trigger sets Math.random() values with no reference to snap back to, and shimmer auto-cycles via setInterval with no click trigger. prize-sheet's own trigger is enrolled as a toggle target on its own route; embedding it a second time here does not create a new independent settle surface to assert against. Stacking these four in one grid does not produce a page-level two-state pair a click-loop could interrupt.",
