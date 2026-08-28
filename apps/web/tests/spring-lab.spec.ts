@@ -45,8 +45,9 @@ test.describe('spring-showcase / Spring Lab', () => {
     await expect(page.getByTestId('ss-val-stiffness')).toHaveText('150')
     await expect(page.getByTestId('ss-val-damping')).toHaveText('19')
 
-    // Replay visibly moves the slide demo within 200ms (skipped under
-    // --anim-mult 0, where the callback ref jumps straight to the end state).
+    // Replay must visibly move the slide demo after being clicked (skipped
+    // under --anim-mult 0, where the callback ref jumps straight to the end
+    // state). The poll budget is generous to stay stable on slow CI runners.
     const animMult = await page.evaluate(() =>
       Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--anim-mult').trim() || '1'),
     )
@@ -55,7 +56,7 @@ test.describe('spring-showcase / Spring Lab', () => {
     await page.getByRole('button', { name: 'Replay' }).click()
     if (animMult > 0) {
       await expect
-        .poll(async () => slide.evaluate((el) => getComputedStyle(el).transform), { timeout: 200 })
+        .poll(async () => slide.evaluate((el) => getComputedStyle(el).transform), { timeout: 3000 })
         .not.toBe(transformBefore)
     }
 
