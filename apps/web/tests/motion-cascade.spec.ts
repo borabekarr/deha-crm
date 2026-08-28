@@ -642,6 +642,34 @@ const DARK_PRESS_SUBJECTS: Array<{ route: string; selector: string }> = [
 // reported to console like any other finding) so the gate itself stays
 // reliable; the underlying flake is application behaviour, not this harness.
 const KNOWN_UNSTABLE_PRESS_ROWS = new Set(['buttons::.db', 'connect-modal::.material-icons'])
+const PRESS_READ_RETRIES = 2
+
+// CI run 33058713844: cards dark `.concentric-demo` read `none` for both
+// hover and hover-active on a loaded runner, even though `Cards.css:53-62`
+// still declares live `:hover`/`:active` scale rules -- a missed read, not a
+// lost effect. Re-read up to `PRESS_READ_RETRIES` times when both forced
+// reads collapse to the unforced rest value.
+async function readPressPair(
+  page: Page,
+  cdp: CDPSession,
+  selector: string,
+): Promise<{ hoverTransform: string | null; hoverActiveTransform: string | null }> {
+  for (let attempt = 0; ; attempt++) {
+    const hoverTransform = await readStateTransitionProperty(page, cdp, selector, 'hover', 'transform')
+    const hoverActiveTransform = await readStateTransitionProperty(page, cdp, selector, 'hover active', 'transform')
+    if (hoverTransform === null || hoverActiveTransform === null || attempt >= PRESS_READ_RETRIES) {
+      return { hoverTransform, hoverActiveTransform }
+    }
+    const restTransform = (await page.evaluate((sel) => {
+      const el = document.querySelector(sel)
+      return el ? getComputedStyle(el).transform : null
+    }, selector)) as string | null
+    if (hoverTransform !== hoverActiveTransform || hoverTransform !== restTransform) {
+      return { hoverTransform, hoverActiveTransform }
+    }
+    await page.waitForTimeout(120)
+  }
+}
 
 test.describe('motion-cascade superset report', () => {
   test('every state is a transition-property superset of rest', async ({ page, context }, testInfo) => {
@@ -797,14 +825,7 @@ test.describe('motion-cascade superset report', () => {
           await commitAvatarPickerUsername(page)
         }
 
-        const hoverTransform = await readStateTransitionProperty(page, cdp, target.selector, 'hover', 'transform')
-        const hoverActiveTransform = await readStateTransitionProperty(
-          page,
-          cdp,
-          target.selector,
-          'hover active',
-          'transform',
-        )
+        const { hoverTransform, hoverActiveTransform } = await readPressPair(page, cdp, target.selector)
         if (hoverTransform === null || hoverActiveTransform === null) continue
         const finding = buildPressDeltaFinding({
           route: routePathForSlug(route),
