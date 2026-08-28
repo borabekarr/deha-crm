@@ -46,15 +46,23 @@ test.describe('spring-showcase / Spring Lab', () => {
     await expect(page.getByTestId('ss-val-damping')).toHaveText('19')
 
     // Replay must visibly move the slide demo after being clicked (skipped
-    // under --anim-mult 0, where the callback ref jumps straight to the end
-    // state). The poll budget is generous to stay stable on slow CI runners.
-    const animMult = await page.evaluate(() =>
-      Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--anim-mult').trim() || '1'),
-    )
+    // when motion is disabled -- either --anim-mult <= 0 or the OS/browser
+    // prefers-reduced-motion media feature, which the `reduced-motion`
+    // Playwright project drives via contextOptions.reducedMotion and which
+    // global.css collapses to near-zero transition durations; the callback
+    // ref jumps straight to the end state in both cases, matching the app's
+    // own motionDisabled() check in spring-showcase-hook.ts / motion-spring.ts).
+    // The poll budget is generous to stay stable on slow CI runners.
+    const motionDisabled = await page.evaluate(() => {
+      const raw = getComputedStyle(document.documentElement).getPropertyValue('--anim-mult').trim()
+      const mult = raw === '' ? 1 : Number.parseFloat(raw)
+      if (Number.isFinite(mult) && mult <= 0) return true
+      return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    })
     const slide = page.locator('.ss-demo-slide')
     const transformBefore = await slide.evaluate((el) => getComputedStyle(el).transform)
     await page.getByRole('button', { name: 'Replay' }).click()
-    if (animMult > 0) {
+    if (!motionDisabled) {
       await expect
         .poll(async () => slide.evaluate((el) => getComputedStyle(el).transform), { timeout: 3000 })
         .not.toBe(transformBefore)
