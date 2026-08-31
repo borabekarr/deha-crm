@@ -750,4 +750,93 @@ D31 · MEDIUM · Idle timeout + hard deadline instead of single total timeout �
 154. Placeholder parsing rule and pane-by-kind (B62); delete tag INSERT components path.
 155. Capacity = max_parallel per lane; delete customer math (B63); brief as brief-lane query (B64).
 
-STATUS: all 10 documents reviewed, 155 actions, ~20 fold into others. AWAITING: the consolidated re-ranked file (reviewer needs a "go" turn to write it). Superseded so far: 21, 30, 89-as-written, A34 (under D29).
+STATUS: all 10 documents reviewed, 155 actions, ~20 fold into others. Superseded so far: 21, 30, 89-as-written, A34 (under D29).
+
+---
+
+# CONSOLIDATED REVIEW (final, 2026-08-31) — supersedes passes 1-10
+
+**BORA'S AMENDMENT TO R13 (binding):** `llm_accounts` and `usage_ledger` are NOT dropped. They stay as backend/distribution structure. `llm_lanes` + `usage_events` are ADDED as the operative runtime model. New context-boundary rule: dormant tables are marked "dormant — backend only, never exposed to LLM-facing prompts, never implemented against by coding agents." Every `drop table usage_ledger; drop table llm_accounts` line in the DDL is amended to a dormant-marking comment; R13-derived doc references (04 §9 config, 08 §B.45) redirect to lanes/usage_events but the tables persist.
+
+## 0. Decisions R1–R20
+- R1 Stateless turns on warm processes: session/new per turn, discarded after; warm children only for process-start cost. Deletes needs_resume, recycle drain, resumeSession, 05's double-injection.
+- R2 response_events append-only table replaces responses.text_partial chunk writes and the thinking_steps table.
+- R3 Executor loop (2s poll, guarded claim) executes approvals; approvals webhook deleted.
+- R4 One trigger: queries insert webhook only; Realtime never a dispatch trigger.
+- R5 No router model. Route = (mode, product scope, channel) + deterministic rules; main turn emits component tags.
+- R6 Summary delta inside the main turn (fenced summary_delta block) replaces separate summarizer call.
+- R7 Statistics in deterministic dispatcher code; LLM writes prose only.
+- R8 needs_decision is an approvals row (action_type='experiment_start'), not a separate button path.
+- R9 Competitor: deterministic rules for price_change/new Tier-1 ad id (instant); one daily batched digest turn for the rest.
+- R10 Text streams live; composing waits for all component jobs; right-pane HTML never partial.
+- R11 Retry ×5 (1/2/4/8/16s) for queries; component jobs max 2 attempts (second trimmed).
+- R12 Deadline sweep is the accepted state-deadline mechanism; the word "reconciler" is retired.
+- R13 llm_lanes + usage_events operative [AMENDED: llm_accounts/usage_ledger KEPT dormant].
+- R14 Handout = reset with continuation row; Clear = reset without seeding; both fold summary into long-term memory.
+- R15 Redis cache rule: static/educational queries only, cosine ≥ 0.95, name/tone wrapper; never anything using memory or data slices, never component/approval outputs.
+- R16 One messages table for Jeru chats and customer threads (chats.kind, direction, delivery state on outbound rows).
+- R17 Layout: products top bar; mode/model chips in message box; Skills/Connectors/Memory in Personalize popover; all-chats left pane only; right pane 4/6 ≥1440, 5/5 1200–1440, drawer <1024.
+- R18 Embeddings local: @xenova/transformers + multilingual-e5-small in dispatcher; pgvector on memory; cosine in-process over Redis cache.
+- R19 Naming: accounts = business, profiles = member; 08 §K wording only.
+- R20 Header on ax-vision §7–§10: pricing, pool sizing, per-customer limits, rotation are historical.
+
+## 1. Strike/rewrite table
+| Doc + section | Strike | Replace with |
+|---|---|---|
+| ax-vision §9 | "account rotation if a window closes" | throttle: llm_lanes.status='throttled', throttled_until; queries wait on not_before |
+| ax-vision §9 | "session… keyed by customer_id" | session key = chat_id |
+| ax-vision §7 | "router model (cheap)" | R5 |
+| 04 §10 rows 1–2, §13 | route/migrate chats to another account | throttle/paused only; manual lane moves |
+| 04 §13 | fixed "Jeru is busy, ~1 min" row | status='backpressure' + queue_position, lane_label |
+| 04 §13 | PROMPT_TIMEOUT_SECONDS: 45 total | idle 90s → session/cancel; deadlines 180/300s |
+| 04 §8 | MCP explicit account_id/chat_id params | per-turn MCP process, JERU_QUERY_ID env |
+| 04 §4a.5, 08 §A.5 | "max 3 attempts… needs_attention" | ×5; terminal failed + UI Retry |
+| 04 §4a.6, 08 §A.6 | "reconciler… processed=false older than 90s" | deadline sweep over status; merging excluded |
+| 04 §5, 02 §7 | text_partial += chunk | response_events inserts |
+| 04 §6 | INSERT components (kind=tag…) | tags travel as events; components = generated HTML only |
+| 04 §7 | xAI cache claims / "materially changed" | delete (moot under R1) |
+| 04 §13 | 30s session/new+close health ping | pipe liveness + heartbeat; probe after 60 min idle |
+| 05 §3 | token_count "add to running total" | set from last turn in+out; estimate adds turn delta only |
+| 05 §8 | grok_session_id | provider_session_id |
+| 08 §H | "intent classification by a small fast model" | R5 |
+| Brief 2 | "canvas can partially render" | strike (R10) |
+| 07 §1 | "all four ad libraries have free public search APIs" | default fetch_method='scrape'; API per-source exception; verify |
+| 06 §h | learnings → memory "scoped by scope" | account/campaign → account_memory.entries (experiments:<ch>/campaign:<ch>); entity facts → memory |
+| 03 §c | retry "re-fires the same job_id" | guarded update, attempt+1, only from failed/timeout |
+| 03 §d | build timeout 20s | 90s deadline, 45s soft |
+| 02 §7/§8 | responses.component_id | dropped; components.response_id only |
+| Brief 1 | all-chats "secondary tab beside the Daily Brief" | left pane only |
+
+## 2. CRITICAL (C1–C20)
+C1 queries state machine (status merging|queued|claimed|running|done|failed|cancelled + not_before, window_closes_at, claimed_at, worker_id, deadline_at, attempt, kind, channel, reply_to_event_id; guarded claim). C2 double dispatch → R4 + claim. C3 MCP write idempotency_key = query_id:tool_call_index unique; audit_log.idempotency_key unique. C4 response_events per R2; client keeps highest-attempt events, merge (attempt,event_id), highest seq wins; reconnect seq > last. C5 event-ID collision → covered by C4. C6 approvals status/execution/expiry/supersede + guarded approve and executor claims; stale high-stakes → failed 'stale' + re-propose. C7 outbound queued→sending→sent|failed|unknown|suppressed; sending claim before HTTP; provider_message_id; unknown never auto-retries. C8 bot/human race: last_direction + ai_paused_until atomically inside sending claim; zero rows → suppressed. C9 chats.lane_id + assign_lane() trigger. C10 strike rotation sentences. C11 idle timeout 90s → session/cancel → retry; hard deadlines 180/300s. C12 token counting set-not-sum. C13 reset transactional (claim → summarizer → one txn; source_session_id idempotency; lazy provider session; runs as queries(kind) under lock+lane). C14 stats deterministic module; metric_kind; LLM prose only. C15 experiment_assignments unique subject key; insert-or-read. C16 hash normalized_payload + 2-fetch debounce. C17 no small-model classifier → R9. C18 embeddings → R18. C19 component worker claim + idempotent splice + guarded done. C20 undo only when audit_log.reversible && reversed_at null; "Send correction" otherwise; reversible_window_minutes.
+
+## 3. HIGH (H1–H28)
+H1 retry holds per-chat lock (31s cap, "queued behind a retry n/5"); throttle = wait (queued + not_before, attempt unchanged); deadline clock only in running. H2 reconnect refetch (responses in composing|backpressure, events seq > last; audit since last_seen, "N new actions" chip). H3 all confirmations are in-turn checkpoint events; reply = queries(kind='confirm_reply', reply_to_event_id); reset decline → reset_declined_at, re-propose +10%; handshake gated (stakes ≥1 / component / ambiguity rule). H4 execution results → messages system_event TaskCard, never responses. H5 mode switch = cancel; mark cancelled before kill. H6 Redis memory_ids_used[] + data_version; invalidate/bypass rules; R15. H7 brief = cron query on brief lane; daily_briefs upsert + query_id; delta strip data-only. H8 component lane purpose='component', max_parallel=2, 90s deadline, fallback keeps Approve. H9 action_types table + seeds + v_trust_ladder thresholds; promotion is a proposal. H10 approvals order stakes desc/created asc; bulk tier 0 only; allowApproveAll default false; outbound preview required and sent verbatim. H11 confidence scale (≥14d+precedent / data-no-precedent / smoke-<7d); schema requireds; inline claim tags. H12 Gen* naming; pane rule header; SCHEMA_BY_TAG generated from Zod; drop ThinkingSteps tag. H13 envelope → R2. H14 evals guard as code (grounding source_query_id; sufficiency ≥14d/≥100 else CUPED-or-fail; integrity overlap/holdout/pre-announced; named codes). H15 drop experiments.status/name/hypothesis; transition_initiative(from[],to); floor AND (loss < ε .005 OR horizon); hourly append snapshots; v_experiment_latest. H16 experiment_pause auto_all 0; resume proposes. H17 relevance formula + thresholds + weekly budgets (instant ≤3, digest ≤5, initiatives ≤8); current focus derived at digest time. H18 ad-library claims corrected; snapshot-on-change; prune 90d; digest writes initiatives(proposed) only; notifications delivery unique(ref_kind,ref_id,channel); drop competitor_alerts. H19 component_templates + data-slot validation; component_versions append-only. H20 inbound dupes unique(channel,external_id) + one transaction. H21 deterministic reply checks everywhere; LLM eval only outbound+brief; 10% sample. H22 RLS two shapes; delete permission-jsonb/approver_pool; MCP ids from JERU_QUERY_ID. H23 hot-path indexes (see DDL). H24 session tier walk-back 1500/N≤20/last pair; truncation order; reset_proposed; window from llm_lanes; pct on done event. H25 Brief 2 canvas error keeps Approve/Skip. H26 CRM core minimal DDL. H27 three adapters; resumeSession deleted. H28 Escape Hatch on component_versions; churn never auto-sends.
+
+## 4. MEDIUM (M1–M20)
+M1 Forget re-scores approvals; Memory tab by tier. M2 skeleton until ready; error replaces skeleton. M3 OAuth 60s timeout; pushback rules; lazy scopes. M4 anomaly severity; banner critical only. M5 skill/version from frontmatter. M6 backpressure per lane > 2×max_parallel. M7 session_memory one row/chat; merge 500/90d; metrics user-stated only. M8 checkpoint visuals; event.source check; srcdoc + meta CSP. M9 component TTL 24h/1h; Redis never HTML. M10 experiment_metrics rollups; contact_id → contacts. M11 holdout surfaces; needs_data rule; rescore cron; finished_at. M12 fetch_method; Playwright browser-only; scan_interval_hours; gzip bytea; compliance branch unbuilt. M13 idle-only probe; max_builds_per_day 40. M14 escalation_policy ⊂ tier-0. M15 handoff N=3 / 2 negatives; fixed merge window; message-boundary splits. M16 sync_version; briefs query_id; heartbeats lane_id. M17 brief restructure; competitor placement. M18 trust ladder view; Measure column → direct metrics. M19 v1 analytics 8 metrics + 3 shortcuts. M20 member_private/export/approval_comments/per-customer limits dormant.
+
+## 5. LOW (L1–L10)
+L1 min-height pinned. L2 mobile pill tabs. L3 Retry + "tried 5 times". L4 drop GIN + dup unique index. L5 ActivityTimeline.kind extended. L6 tokens_in/out + usage_events. L7 Photon unverified. L8 profiles prefs = defaults, user_memory overrides. L9 single-page onboarding optional. L10 Files tab dropped.
+
+## 7. Brief edits (R17)
+Brief 5 top: remove mode/model; Products strip; collapse order search → project selector. Brief 5 left: New chat, Search, Projects, Chats, Scheduled, My Generations, Profile → Personalize popover. Brief 1: mode+model chips in box; M17 restructure; secondary-tab sentence deleted; skeleton rule; undo gating. Brief 2: sizing/snap; partial-render struck; Files tab dropped; canvas error keeps Approve; Gen* + pane header. Brief 4: one actions row component; escalation editor; Memory tab by tier. NEW Brief 6: Chats hub (AI box / customer list / conversation; AI live toggle, 10-min auto-pause, per-chat disable; instruction box; 3 right-pane shortcuts).
+
+## 8. DDL delta — PASS 9 block above stands, with consolidated changes:
+- AMENDED: no drop of usage_ledger/llm_accounts — dormant marking instead; lanes/usage_events added alongside.
+- approvals gains edited_before_approve boolean default false; component_jobs gains worker_id; chats index (lane_id).
+- 06 additive: drop experiments.status/name/hypothesis; metric_kind; early_stop_epsilon .005; experiment_assignments; metrics rollups; results unique(experiment_id,variant_id,computed_at); initiatives.finished_at, origin_suppressed.
+- 07 additive: fetch_method, last_hash, pending_hash, pending_seen_count; scan_interval_hours; competitor_changes.initiative_id; drop competitor_alerts; raw gzip bytea.
+- 05 additive: sessions.status + reset_proposed; reset_declined_at; provider_session_id; drop GIN indexes.
+- escalation_policy(urgency, allowed_actions text[], sla_minutes).
+- realtime + response_events; drop approvals insert trigger.
+
+## 9. Ordered phases
+Phase 0 doc hygiene: §1 strikes; R20 header; 04 §9 config rewrite (lanes:, retry 5 + [1,2,4,8,16], deadline_sweep, usage_events ladder, timeouts idle 90 / ask 180 / build 300, component_lane.max_builds_per_day 40, session.stateless true, per-customer limits deleted); §7 brief edits; Brief 6.
+Phase 1 schema: DDL (amended); seed action_types; RLS two shapes; v_trust_ladder + v_experiment_latest; 05/06/07 additive DDL.
+Phase 2 dispatcher core: C1 claim + R4 trigger; locks; stateless turns + 3 adapters; per-turn MCP + idempotency; retry/throttle/sweep; idle timeout + cancel; response_events writer + tag parsing + pane rule; composing/done + splice + backpressure; executor loop + system_event results + expiry/stale + preview verbatim; outbound machine + bot/human check; component worker claim/lane/template validation/versions; embeddings + pgvector + Redis R15; brief cron + delta strip; reply checks + summary delta + provenance; reset/handout transactional.
+Phase 3 protocol+UI: client merge + reconnect; approvals UI; confidence + claim tags + Gen* + generated SCHEMA_BY_TAG; checkpoints + reply path + Brief 2 error; onboarding + brief restructure + mobile + anomaly severity.
+Phase 4 experiments: stats module; assignments; transition guard; hourly cron + floor; guard-as-code + metric_queries; needs_decision → approvals; learnings → account_memory; rollups/holdout/needs_data/rescore/finished_at.
+Phase 5 competitor: normalizer + debounce; rules + digest; fetch_method/snapshot-on-change/prune/Playwright; formula/budgets/placement/notifications.
+Phase 6 initiatives (WIP 3+1+pricing): preview gate; Escape Hatch on versions; inline confidence; Measure column; escalation + handoff; hub 8 metrics.
+Superseded not carried: action 30 (→R2), 21/A34 (→R1), 89-as-written (→H17), 03 §d 20s, 08 §A.5 max 3, per-customer limits (dormant), thinking_steps, competitor_alerts, chat_messages. [llm_accounts/usage_ledger KEPT dormant per Bora.]
