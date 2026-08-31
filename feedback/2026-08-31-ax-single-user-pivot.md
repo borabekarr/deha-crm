@@ -3,6 +3,27 @@
 Sources: Fable 5 ToS conversation (Q1-Q11) + Grok second-opinion review of AX plan files.
 Targets: plans/ax-vision.md, plans/jeru/01-08.
 
+## Item index (canonical IDs)
+
+- **F1** Remove multi-tenant machinery — DROPPED (stack kept as is)
+- **F2** Single-user framing notes in dispatcher/vision docs (doc-only)
+- **F3** Sticky llm_lanes design, pre-defined account IDs, no rotation
+- **F4** composing + backpressure in responses.status check constraint
+- **F5** Per-chat lock + Redis similarity answer-reuse cache
+- **F6** Retry ×5 exponential backoff, idempotency on queries.id
+- **F7** Checksum reconciler dropped; updated_at + state deadlines (deadline sweep)
+- **F8** Terms-section reframe in 08 §B (merged with F2; single-user notes only)
+- **F9** CRM core companion schema (contacts, companies, deals, activities, campaigns)
+- **F10** sessions + session_memory corrections (rolling summary, reset, handout)
+- **F11** Experiments engine corrections (stats module, assignments, state machine)
+- **F12** RLS helper functions / two policy shapes
+- **F13** Hot-path indexes (incl. approvals index)
+- **F14** responses↔components FK ownership resolution
+- **F15** MCP tools account_id/chat_id validation (JERU_QUERY_ID structural fix)
+- **F16** Opus worker latency UI + HTML reuse (templates/slots, deadlines)
+- **F17** Retry ×5 state reflected in UI, never silent
+- **F18** Consolidated-review additions with no original F mapping (07 competitor edits, R17 brief edits, Brief 6)
+
 ## Interview verdicts (2026-08-31, sealed)
 
 - F1: DROPPED. Keep the stack exactly as designed (multi-tenant tables stay; they sit unused). No schema removals.
@@ -22,6 +43,12 @@ Targets: plans/ax-vision.md, plans/jeru/01-08.
 - Verification: Claude owns it — post-edit contradiction grep (rotation leftovers, closed-decision violations, constraint mismatches) + re-read pass.
 - F9-F16: full evaluation cycle via the evals workflow, confirmed.
 - SEQUENCING: WAIT ENTIRELY. No plan file is written until Bora pastes the "ultimate feedback" review from Claude web (prompt already given). Then one combined /planning pass folds that feedback + these verdicts into the plan files.
+
+## Round 3 additions (post-consolidation, 2026-08-31)
+
+- F17 (from artifact comment): retry ×5 state reflected in UI ("queued behind a retry, attempt n/5"), never silent.
+- F18 (new scope from the consolidated web review): items with no original F mapping — competitor-intel doc edits (normalizer hash/debounce, deterministic rules + daily digest, fetch_method, budgets, formula), brief edits R17, and new Brief 6 (Chats hub). Source: feedback/2026-08-31-web-review-passes.md consolidated §1/§7 + H17/H18 + pass 6.
+- R13 amendment (binding): llm_accounts/usage_ledger KEPT as dormant backend tables; llm_lanes/usage_events added as operative model; context-boundary rule marks dormant tables as never-LLM-facing.
 
 ## Items (original intake)
 
