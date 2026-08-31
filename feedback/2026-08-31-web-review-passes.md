@@ -484,3 +484,270 @@ D26 · MEDIUM · Data-only intraday delta strip — A74. Wins: "continuous" feel
 134. Inline claim tags in text_chunk with confidence + source_query_id (B51).
 135. Onboarding scope order: read scopes after profile, write scopes after first approved action (B53).
 136. WIP cap: 3 build + 1 growth + pricing; start-here = B50, A73, B51 (C1).
+
+---
+
+## PASS 9 — 02-SUPABASE-SCHEMA (02-supabase-schema.md)
+
+Verification pass: ~40 earlier actions land here; missing-column findings collapsed into one DDL delta block.
+
+### A. Water leaks
+A77 · CRITICAL · queries has no state machine (§6: processed boolean, processing_started_at). Claim, throttle-wait, not_before, merge window, retry×5, deadline sweep, cancel all need a status enum + columns that don't exist. With a boolean, "claimed but dispatcher died" / "in merge window" / "waiting on throttled lane" are indistinguishable; the sweep re-runs all three. Fix: DDL block.
+A78 · CRITICAL · responses.text_partial updated per chunk is the crash-mid-write hazard (§7). Read-modify-write per chunk; crash leaves truncated blob without attempt marker. status enum lacks composing/backpressure. Fix: response_events (pass-3 D8); responses keeps status/attempt/final_text. thinking_steps becomes redundant — drop it and its publication.
+A79 · CRITICAL · chats has no lane_id (§4; llm_accounts §20 is the pre-lane model). Fix: llm_lanes + chats.lane_id + assign trigger; RECOMMEND replacing llm_accounts/usage_ledger with usage_events per lane — they are a different runtime model, not dormant tables, and will confuse the agent.
+A80 · HIGH · responses.component_id ↔ components.response_id circular FK — drop responses.component_id; components.response_id only; components = generated-HTML only (pre-built tags travel in events).
+A81 · HIGH · approvals lacks execution state, expiry, supersede; risk_level → stakes derived from action_types (which doesn't exist).
+A82 · HIGH · approvals webhook = double-execute path — replace with executor loop (pass-3 D9); queries insert webhook is the only trigger.
+A83 · HIGH · No contacts table but four accepted designs FK to it — minimal CRM core DDL unblocks.
+A84 · MEDIUM · component_jobs.status 'complete' vs protocol 'ready' — pick ready; add deadline_at, lane_id, template_id.
+A85 · MEDIUM · connectors has no sync_version — Redis cache and approval data_version have nothing to read.
+A86 · MEDIUM · daily_briefs not linked to generating query — add query_id; unique stays (profile_id, brief_date).
+A87 · LOW · responses.token_cost_cents — replace with tokens_in/tokens_out + usage_events.
+A88 · LOW · worker_heartbeats.account_id references llm_accounts — becomes lane_id.
+
+### B. Weak points
+B54 · HIGH · RLS is 100% multi-member logic for one member — keep both helper functions; ship exactly two policy shapes: is_account_member(account_id) select/insert on client-facing tables; no client policy on service-role tables. Delete permission-jsonb policies and approver_pool clause.
+B55 · HIGH · Indexes miss every hot path (sweep, lane queue, event replay, last-direction, executor claim); queries(account_id, processed, created_at) goes.
+B56 · MEDIUM · memory.entity_type 'user' dormant (user facts → user_memory per 05); memory needs source_msg_id, confidence, embedding vector(384).
+B57 · MEDIUM · messages needs hub columns (pass-7 D22) + outbound delivery state on the message row; no separate outbound table.
+B58 · LOW · profiles tone/brevity/channel_defaults = onboarding defaults; user_memory overrides; say so.
+B59 · LOW · skills.account_id null marketplace — dormant, fine.
+
+### C. Grok's ten schema flags — verdicts
+1. Missing CRM core → CORRECT (A83).
+2. Session memory tables → ALREADY COVERED in 05; 02 references them.
+3. Experiments table → ALREADY COVERED in 06 (amended pass-5).
+4. RLS complexity → PARTIAL (B54).
+5. Indexes → CORRECT (B55).
+6. Circular FK → CORRECT (A80).
+7. Composing gap → CORRECT, larger: streaming write model itself (A78).
+8. MCP account_id/chat_id validation → CORRECT, structural fix: ids never come from the model; dispatcher spawns CLI with JERU_QUERY_ID env; tools resolve ids server-side from that queries row; add idempotency_key per pass-2 A11.
+9. Opus worker latency → ALREADY COVERED (pass-2 B9 / pass-3 B16).
+10. HTML reuse → ALREADY COVERED (03 §d + pass-7 A68); schema needs components.cache_key + component_templates.
+
+### D. Better ways
+D27 · HIGH · Drop thinking_steps, usage_ledger, llm_accounts; add response_events, usage_events, llm_lanes.
+D28 · MEDIUM · action_types as a table, not config — dial/stakes/outbound/reversible editable from settings; seed 10 rows.
+
+### DDL delta (verbatim, hand to agent as-is)
+```sql
+-- lanes (replaces llm_accounts; usage_events replaces usage_ledger)
+create table llm_lanes (
+  id uuid primary key default gen_random_uuid(),
+  label text not null unique,
+  provider text not null check (provider in ('anthropic_claude','xai_grok')),
+  config_dir text not null,
+  model_window_tokens integer not null,
+  max_parallel integer not null default 3,
+  status text not null default 'active' check (status in ('active','throttled','paused')),
+  throttled_until timestamptz,
+  purpose text not null default 'chat' check (purpose in ('chat','component','brief'))
+);
+create table usage_events (
+  id bigserial primary key,
+  lane_id uuid not null references llm_lanes(id),
+  query_id uuid, component_job_id uuid,
+  tokens_in integer not null, tokens_out integer not null,
+  model text, reported_pct numeric,
+  created_at timestamptz not null default now()
+);
+drop table usage_ledger; drop table llm_accounts;
+
+create table action_types (
+  type text primary key,
+  stakes_tier smallint not null check (stakes_tier in (0,1,2)),
+  autonomy text not null default 'propose' check (autonomy in ('propose','auto_low','auto_all')),
+  outbound boolean not null default false,
+  reversible_window_minutes integer
+);
+
+-- chats
+alter table chats
+  add column lane_id uuid references llm_lanes(id),
+  add column kind text not null default 'jeru' check (kind in ('jeru','customer','system')),
+  add column channel text, add column external_thread_id text,
+  add column contact_id uuid,
+  add column ai_paused_until timestamptz,
+  add column last_direction text check (last_direction in ('inbound','outbound','internal'));
+create unique index on chats (channel, external_thread_id) where external_thread_id is not null;
+-- assign_lane() trigger from the 08-31 chat, purpose='chat'
+
+-- messages (hub + outbound delivery)
+alter table messages
+  add column direction text not null default 'internal' check (direction in ('inbound','outbound','internal')),
+  add column kind text not null default 'chat' check (kind in ('chat','system_event','handout')),
+  add column channel text, add column external_id text, add column provider_message_id text,
+  add column media_transcript text, add column approval_id uuid references approvals(id),
+  add column delivery_status text check (delivery_status in ('queued','sending','sent','failed','unknown','suppressed')),
+  add column contact_id uuid;
+create unique index on messages (channel, external_id) where external_id is not null;
+create index on messages (chat_id, direction, created_at desc);
+
+-- queries: state machine
+alter table queries
+  drop column processed, drop column processing_started_at,
+  add column status text not null default 'queued' check (status in
+    ('merging','queued','claimed','running','done','failed','cancelled')),
+  add column kind text not null default 'user' check (kind in
+    ('user','cron','reset','handout','rescore','competitor_digest','confirm_reply')),
+  add column channel text not null default 'app',
+  add column window_closes_at timestamptz, add column not_before timestamptz,
+  add column claimed_at timestamptz, add column worker_id text, add column deadline_at timestamptz,
+  add column attempt smallint not null default 0,
+  add column reply_to_event_id text, add column merged_query_ids uuid[];
+drop index if exists queries_account_id_processed_created_at_idx;
+create index on queries (status, not_before) where status in ('queued','merging');
+create index on queries (chat_id, status);
+
+-- responses / events
+alter table responses
+  drop column text_partial, drop column component_id, drop column token_cost_cents,
+  add column attempt smallint not null default 1,
+  add column tokens_in integer, add column tokens_out integer,
+  add column queue_position integer, add column lane_label text,
+  drop constraint responses_status_check,
+  add constraint responses_status_check check (status in
+    ('queued','backpressure','streaming','composing','done','error','cancelled'));
+alter table responses rename column text_final to final_text;
+create table response_events (
+  id bigserial primary key,
+  response_id uuid not null references responses(id) on delete cascade,
+  attempt smallint not null, seq integer not null,
+  event_id text not null, type text not null, payload jsonb not null,
+  created_at timestamptz not null default now(),
+  unique (response_id, attempt, seq)
+);
+drop table thinking_steps;
+
+-- components / jobs / templates / versions
+alter table components
+  drop column tag_type, drop column data, drop column kind,
+  add column cache_key text, add column template_id uuid, add column current_version integer not null default 1;
+create index on components (account_id, cache_key);
+create table component_templates (
+  id uuid primary key default gen_random_uuid(),
+  account_id uuid references accounts(id), kind text not null,
+  html text not null, slots jsonb not null, design_tokens_version text not null,
+  created_at timestamptz not null default now()
+);
+create table component_versions (
+  component_id uuid references components(id) on delete cascade,
+  version integer not null, html text not null, slots_data jsonb,
+  created_by_event_id text, created_at timestamptz not null default now(),
+  primary key (component_id, version)
+);
+alter table component_jobs
+  drop constraint component_jobs_status_check,
+  add constraint component_jobs_status_check check (status in ('queued','running','ready','failed','timed_out')),
+  add column lane_id uuid references llm_lanes(id), add column deadline_at timestamptz,
+  add column template_id uuid references component_templates(id), add column trimmed boolean not null default false;
+
+-- approvals / audit
+alter table approvals
+  drop column risk_level,
+  add column stakes text not null default 'low' check (stakes in ('low','medium','high')),
+  add column execution text check (execution in ('queued','running','done','failed','reversed')),
+  add column executor_id text, add column executed_at timestamptz,
+  add column expires_at timestamptz not null default now() + interval '72 hours',
+  add column superseded_by uuid references approvals(id),
+  add column chat_id uuid references chats(id), add column source_memory_ids uuid[],
+  add column data_version jsonb,
+  drop constraint approvals_status_check,
+  add constraint approvals_status_check check (status in ('pending','approved','rejected','superseded','expired'));
+alter table approvals add constraint approvals_action_type_fk foreign key (action_type) references action_types(type);
+create index on approvals (status, execution) where status='approved';
+create index on approvals (account_id, status, stakes, created_at) where status='pending';
+alter table audit_log
+  add column reversible boolean not null default false,
+  add column reversed_at timestamptz, add column reversed_by_audit_id uuid references audit_log(id),
+  add column idempotency_key text unique;
+
+-- memory / connectors / briefs / notifications
+alter table memory add column source_msg_id uuid references messages(id),
+  add column confidence numeric, add column embedding vector(384);
+alter table connectors add column sync_version integer not null default 0;
+alter table daily_briefs add column query_id uuid references queries(id);
+alter table notifications add column ref_kind text, add column ref_id uuid,
+  add column channel text not null default 'in_app', add column sent_at timestamptz, add column acknowledged_at timestamptz;
+create unique index on notifications (ref_kind, ref_id, channel) where ref_id is not null;
+alter table worker_heartbeats drop column account_id, add column lane_id uuid references llm_lanes(id);
+
+-- CRM core (minimal, unblocks FKs)
+create table contacts (
+  id uuid primary key default gen_random_uuid(),
+  account_id uuid not null references accounts(id) on delete cascade,
+  company_id uuid, full_name text not null, phone text, email text,
+  channel_pref text, tags text[] default '{}', stage text,
+  last_contact_at timestamptz, created_at timestamptz not null default now(), updated_at timestamptz not null default now()
+);
+create table companies (id uuid primary key default gen_random_uuid(), account_id uuid not null references accounts(id), name text not null, domain text, created_at timestamptz not null default now());
+create table deals (id uuid primary key default gen_random_uuid(), account_id uuid not null references accounts(id), contact_id uuid references contacts(id), title text not null, stage text not null, value_cents integer, stage_entered_at timestamptz, created_at timestamptz not null default now(), updated_at timestamptz not null default now());
+create table activities (id uuid primary key default gen_random_uuid(), account_id uuid not null references accounts(id), contact_id uuid references contacts(id), deal_id uuid references deals(id), kind text not null, occurred_at timestamptz not null default now(), payload jsonb, message_id uuid references messages(id));
+create table campaigns (id uuid primary key default gen_random_uuid(), account_id uuid not null references accounts(id), name text not null, channel text not null, status text not null default 'draft', external_id text, budget_cents_per_day integer, created_at timestamptz not null default now());
+create table metric_queries (id uuid primary key default gen_random_uuid(), query_id uuid, sql_or_connector text not null, params jsonb, result_hash text, created_at timestamptz not null default now());
+alter table chats add constraint chats_contact_fk foreign key (contact_id) references contacts(id);
+alter table messages add constraint messages_contact_fk foreign key (contact_id) references contacts(id);
+
+-- realtime: +response_events, -thinking_steps; webhook: queries insert only
+alter publication supabase_realtime add table response_events;
+drop trigger if exists on_approval_insert on approvals;
+```
+
+### Action list (137–142)
+137. Apply the DDL delta above (A77–A88, B55–B57, D27, D28).
+138. Seed action_types: send_message(2,outbound), pause_campaign(0,auto_all), budget_change(2), experiment_start(2), experiment_pause(0,auto_all), crm_write(1), draft_only(0,auto_all), renewal_outreach(2,outbound).
+139. RLS: two policy shapes only; delete permission-jsonb and approver_pool policies (B54).
+140. MCP tools read ids from JERU_QUERY_ID → queries row; ignore model-supplied ids (C8).
+141. 02 references 05 (sessions, user_memory, account_memory) and 06 (initiatives…) instead of restating them.
+142. Update 03's approvals field list (§e) and 04's references to llm_accounts/usage_ledger/thinking_steps.
+
+---
+
+## PASS 10 — 04-DISPATCHER-RUNTIME (04-dispatcher-runtime.md)
+
+Doc predates sticky lanes, retry×5, deadline sweep, response_events, per-chat lock; most damage = sentences contradicting accepted mechanisms, each named for striking.
+
+### A. Water leaks
+A89 · CRITICAL · Three places still reroute chats between accounts (§10 rows 1–2; §13 "Account rotation on window close"). Strike all three. Throttle = llm_lanes.status='throttled', throttled_until; queries wait on not_before. Ban/suspension = lane paused + Telegram alert; chat moves are MANUAL update chats set lane_id=…, never automatic. Kill-switch file maps to paused.
+A90 · CRITICAL · PROMPT_TIMEOUT_SECONDS 45 × retry×5 = 5× load amplifier on slow turns (§13, §4a.5). Tool-heavy 70s Build turn → timeout at 45s → retry while child still running → two turns write approvals for same query. Fix: idle timeout not total — no chunk for 90s → session/cancel → then retry; hard deadline_at = 180s Ask/Analyze, 300s Build; idempotency keys (pass-2 A11) make half-written approvals harmless.
+A91 · CRITICAL · Opus worker has no claim (§6 subscribe/poll). Fix: update component_jobs set status='running', worker_id=$w where id=$1 and status='queued' returning *; exit on zero rows.
+A92 · HIGH · Splice can run twice (§6 Realtime + poll fallback). Fix: idempotent splice (replace placeholder only if present); done guarded where status='composing'.
+A93 · HIGH · §4 warm-session pool inherits every problem D11 removes. RESOLVED NOW: stateless turns, warm processes. Warm children per lane; session/new per turn; discard after. Gone: needs_resume, recycle drain, resume storms, --resume fallback, "materially changed" bookkeeping, A34. Kept: max_parallel per lane, per-chat lock. §14 resumeSession deleted.
+A94 · HIGH · Shared MCP server takes account_id/chat_id as explicit params (§8) — contradicts pass-9 C8. Fix (D30): per-turn stdio MCP process with JERU_QUERY_ID env; tools resolve ids server-side.
+A95 · HIGH · Backpressure row hack (§13 fixed "Jeru is busy ~1 min" text in status='streaming' row) — replaced by backpressure status + queue_position/lane_label; per-lane threshold: queued on lane > 2 × max_parallel.
+A96 · MEDIUM · Health check session/new+close per child every 30s (§13) — drop; stdio pipe liveness + heartbeat suffice; three-strike auto-kill stays on real failures; idle-only probe per pass-7 A67.
+A97 · MEDIUM · Chat lanes Grok-only in doc (§2, §3, §14) — add ClaudeChatAdapter (claude -p --output-format stream-json, CLAUDE_CONFIG_DIR per lane). §14: GrokChatAdapter, ClaudeChatAdapter, ClaudeComponentAdapter.
+A98 · MEDIUM · Merge window can starve a chatty thread (§4a.2) — window opens at first message after in-flight run ends, closes at +5/+60s regardless (non-sliding).
+A99 · LOW · token_cost_cents=null and "prompt caching on xAI's side" claims (§5, §7) — unverified/moot under stateless turns; delete both.
+
+### B. Weak points
+B60 · HIGH · §9 config is the old runtime — accounts: → lanes: (label, provider, config_dir, model_window_tokens, max_parallel, purpose); retry.max_attempts: 5, backoff [1,2,4,8,16]; reconciler: → deadline_sweep {interval_seconds: 30}; usage_ledger: → usage_events per lane with 60/75/90/95/99 ladder; rate_limits.per_customer_* deleted; opus_worker.budget_ceiling_cents_per_customer_month → component_lane.max_builds_per_day: 40; prompt_budget: → "see 05 §9"; session: → {children_per_lane, stateless: true}; timeouts {idle_seconds: 90, deadline_ask: 180, deadline_build: 300}; merge_window unchanged; health.synthetic_probe idle_only_after_minutes: 60.
+B61 · HIGH · Accepted mechanisms have no home — add §4b Query state machine, §4c Locks (global file lock + in-process Map<chat_id, Promise> per-chat lock held across retries), §4d Executor loop (2s poll), §4e Deadline sweep (queued past not_before+60s unclaimed → re-enqueue; claimed/running past deadline_at → attempt++ or fail), §4f Cancel (pass-2 A5).
+B62 · MEDIUM · §6 placeholder format vs 03's events — Grok emits <component id kind="html" intent/> (right pane) or <component kind="tag" tag props/> (center); dispatcher parses both into response_events component events, strips from text_chunk; kind decides pane; no INSERT components (kind=tag) ever.
+B63 · MEDIUM · §12 capacity math is customer-per-account — replace: max_parallel per lane (3) = concurrency truth; children_per_lane (2) + RAM formula bound warm processes only.
+B64 · LOW · Nightly brief (§12) as a query on the brief lane (pass-2 D4); one sentence replaces the stagger paragraph.
+
+### C. Grok — verdicts
+No Grok text for 04. "Opus worker latency" and "composing gap" resolved by pass-2 B9/pass-3 B16 and A65/A78.
+
+### D. Better ways
+D29 · CRITICAL · Stateless turns on warm processes — A93. Deletes ~40% of §4/§10 and A34. Costs: re-sent prompt tokens.
+D30 · HIGH · Per-turn MCP process with env-bound ids — A94.
+D31 · MEDIUM · Idle timeout + hard deadline instead of single total timeout — A90.
+
+### Action list (143–155)
+143. Strike §10 rows 1–2 and §13 account rotation; throttle/paused semantics; manual lane moves (A89).
+144. Timeouts: idle 90s → session/cancel; deadlines 180/300s; retry only after cancel confirmed (A90, D31).
+145. Component worker claim; idempotent splice; guarded done (A91, A92).
+146. Stateless turns: session/new per turn, warm children; delete needs_resume, recycle drain, resumeSession (A93, D29).
+147. Per-turn MCP stdio process with JERU_QUERY_ID; tools ignore model-supplied ids (A94, D30).
+148. Backpressure = status + queue_position, per-lane threshold 2 × max_parallel (A95).
+149. Drop the 30s session/new health ping; idle-only probe (A96).
+150. Add ClaudeChatAdapter; three adapters in §14 (A97).
+151. Merge window: fixed, non-sliding (A98).
+152. Rewrite §9 config per B60.
+153. Add §4b–§4f (state machine, locks, executor loop, deadline sweep, cancel) (B61).
+154. Placeholder parsing rule and pane-by-kind (B62); delete tag INSERT components path.
+155. Capacity = max_parallel per lane; delete customer math (B63); brief as brief-lane query (B64).
+
+STATUS: all 10 documents reviewed, 155 actions, ~20 fold into others. AWAITING: the consolidated re-ranked file (reviewer needs a "go" turn to write it). Superseded so far: 21, 30, 89-as-written, A34 (under D29).
