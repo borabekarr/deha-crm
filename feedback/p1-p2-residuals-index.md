@@ -1,12 +1,12 @@
 # Coverage index: p1-p2-residuals  (16 items)
 | F | Part plan | Status |
 |---|---|---|
-| F1 | ui-residuals-p1 | PENDING |
-| F2 | ui-residuals-p1 | PENDING |
-| F3 | ui-residuals-p1 | PENDING |
-| F4 | ui-residuals-p1 | PENDING |
-| F5 | ui-residuals-p1 | PENDING |
-| F6 | ui-residuals-p1 | PENDING |
+| F1 | ui-residuals-p1 | DONE 2026-08-31 |
+| F2 | ui-residuals-p1 | DONE 2026-08-31 |
+| F3 | ui-residuals-p1 | DONE 2026-08-31 |
+| F4 | ui-residuals-p1 | DONE 2026-08-31 |
+| F5 | ui-residuals-p1 | DONE 2026-08-31 |
+| F6 | ui-residuals-p1 | DONE 2026-08-31 |
 | F7 | ui-residuals-p2 | PENDING |
 | F8 | ui-residuals-p2 | PENDING |
 | F9 | ui-residuals-p2 | PENDING |
