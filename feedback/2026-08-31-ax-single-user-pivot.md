@@ -14,6 +14,15 @@ Targets: plans/ax-vision.md, plans/jeru/01-08.
 - F7: ACCEPTED (skip checksum). updated_at + state deadlines instead.
 - F9-F16 (Grok review): routed through the evals workflow — plan steps declare Evals; items evaluated, not auto-applied.
 
+## Round 2 verdicts (artifact comments + follow-up, 2026-08-31)
+
+- F3 lanes: Option A — separate `llm_lanes` table. `max_parallel: 3` for now; subscription details filled with placeholder "smoke" values; real config deferred to backend build.
+- F5 lock: keep both locks (global process lock + per-chat in-process lock); add one clarifying sentence in 04 about their relationship. No user decision needed.
+- F17 (NEW): retry ×5 state must be reflected in the UI ("trying again, attempt N/5"), not silent.
+- Verification: Claude owns it — post-edit contradiction grep (rotation leftovers, closed-decision violations, constraint mismatches) + re-read pass.
+- F9-F16: full evaluation cycle via the evals workflow, confirmed.
+- SEQUENCING: WAIT ENTIRELY. No plan file is written until Bora pastes the "ultimate feedback" review from Claude web (prompt already given). Then one combined /planning pass folds that feedback + these verdicts into the plan files.
+
 ## Items (original intake)
 
 **F1 — Single-user pivot: remove multi-tenant machinery.** Delete/rewrite `llm_accounts`, `usage_ledger`, per-customer economics ($59 ceiling, capacity:10, max_customers, buy-another-account), account rotation on ban, multi-member chat scopes, per-customer rate limits from the plan docs. Optionally keep a single `usage_events` table for personal window tracking.
