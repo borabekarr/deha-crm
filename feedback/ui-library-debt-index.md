@@ -35,12 +35,12 @@ Split into 7 part-plans, each executed as its own separate `/execute` session.
 | F18 | ui-library-debt-p4 | DONE 2026-08-23 |
 | F19 | ui-library-debt-p4 | DONE 2026-08-23 |
 | F20 | ui-library-debt-p4 | DONE 2026-08-23 |
-| F21 | ui-library-debt-p5 | PENDING |
-| F22 | ui-library-debt-p5 | PENDING |
-| F23 | ui-library-debt-p5 | PENDING |
-| F24 | ui-library-debt-p5 | PENDING |
-| F25 | ui-library-debt-p5 | PENDING |
-| F26 | ui-library-debt-p5 | PENDING |
+| F21 | ui-library-debt-p5 | DONE 2026-08-31 |
+| F22 | ui-library-debt-p5 | DONE 2026-08-31 |
+| F23 | ui-library-debt-p5 | DONE 2026-08-31 |
+| F24 | ui-library-debt-p5 | DONE 2026-08-31 |
+| F25 | ui-library-debt-p5 | DONE 2026-08-31 |
+| F26 | ui-library-debt-p5 | DONE 2026-08-31 |
 | F27 | ui-library-debt-p6 | PENDING |
 | F28 | ui-library-debt-p6 | PENDING |
 | F29 | ui-library-debt-p6 | PENDING |
