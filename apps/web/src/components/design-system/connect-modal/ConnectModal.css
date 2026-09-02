@@ -77,9 +77,10 @@ html.dark .cm-card[data-squircle="on"] {
 }
 
 .cm-close{
-  /* top aligns with cm-badges' top (cm-card's padding-top, 24px); right is
-     the round icons' 10px inset shifted 2px further left per Bora's ask. */
-  position:absolute; top:24px; right:12px;
+  /* top nudged above cm-badges' top (was 24px, matching cm-card's
+     padding-top) per Bora's "up a bit" ask; right is the round icons'
+     10px inset shifted 2px further left per Bora's ask. */
+  position:absolute; top:18px; right:12px;
   width:27px; height:27px; display:grid; place-items:center;
   border:none; border-radius:var(--radius-circle); cursor:pointer;
   background:var(--fp-hover); color:var(--fg2);
@@ -402,8 +403,12 @@ html.dark .cm-cta{ background-color:#232323; color:var(--gray-500); }
 }
 .cm-spinner{ width:15px; height:15px; border-radius:50%; border:2px solid rgba(255,255,255,.35); border-top-color:#fff; animation:cm-spin calc(var(--duration-700) * var(--anim-mult,1)) var(--ease-linear) infinite; }
 @keyframes cm-spin{ to{ transform:rotate(360deg); } }
-.cm-okcheck{ width:17px; height:17px; }
-.cm-okcheck path{ stroke:#fff; stroke-width:2.6; fill:none; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:24; stroke-dashoffset:24; animation:cm-draw calc(var(--duration-sweep) * var(--anim-mult,1)) var(--ease-out) forwards; }
+.cm-okcheck{ width:17px; height:17px; color:inherit; }
+/* stroke:currentColor inherits cm-cta's text colour (matches the "Connected"
+   label) instead of a hard-coded white; the path has no variable weight
+   axis (it's an inline SVG stroke, not an icon-font glyph), so the closest
+   legitimate "bolder" is a heavier stroke-width (2.6 -> 3.4). */
+.cm-okcheck path{ stroke:currentColor; stroke-width:3.4; fill:none; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:24; stroke-dashoffset:24; animation:cm-draw calc(var(--duration-sweep) * var(--anim-mult,1)) var(--ease-out) forwards; }
 
 .cm-note{
   display:flex; align-items:center; justify-content:center; gap:4px;

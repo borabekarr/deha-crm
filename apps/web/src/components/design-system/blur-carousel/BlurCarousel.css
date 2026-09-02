@@ -26,17 +26,17 @@
    full-viewport takeover: a same-sized `position:relative` box nested in the
    app's Sidebar + GalleryLayout header + PreviewFrame chrome got pushed
    right/down and only partially fit the gate viewport, clipping the
-   off-center cards that peek at the carousel's edges. Re-packaged as an
-   embedded library card following the `.fhc-shell` shell/bezel precedent
-   (`shell` global bezel class from `_base.css`, `var(--shell-bg)` ring, plus
-   a component-specific class on the same div): `.bc-shell` is a normal-flow,
-   intrinsically-sized 900x760 box (box-sizing: border-box, matching the raw
-   stage's own footprint) with `position: relative; overflow: hidden` --
-   it owns its own clipping bounds instead of inheriting the page's, so no
-   ambient z-index is needed and the `_darkmode.js` dev toggle is never
-   covered. `.stage` keeps its raw `position: absolute; inset: 0`, which now
-   resolves against `.bc-shell`'s padding box, filling the shell's interior
-   regardless of surrounding app chrome. Pixel gate invocation (step 2,
+   off-center cards that peek at the carousel's edges. Re-packaged as a
+   normal-flow, container-relative box: `.bc-shell` no longer carries the
+   grey `.shell` bezel (background/radius/padding/box-shadow) -- that read
+   as a boxed demo card rather than a native page section (plan:
+   ui-residuals-p1 step 5, F6), so it is now `width: 100%; box-sizing:
+   border-box; position: relative` with no fixed footprint, so it fits
+   whatever CRM page embeds it. `.stage` dropped its raw `position: absolute;
+   inset: 0` for normal flow (`position: static`) with its own padding, so
+   height is intrinsic to content instead of a fixed 760px -- it owns its own
+   clipping bounds instead of inheriting the page's, so no ambient z-index is
+   needed and the `_darkmode.js` dev toggle is never covered. Pixel gate invocation (step 2,
    recaptured): PIXEL_GATE_TARGET="#carousel" PIXEL_GATE_VIEWPORT="900x1000"
    PIXEL_GATE_INTERACTION_SELECTOR="#nextBtn"
    PIXEL_GATE_INTERACTION_WAIT_MS=700 -- NOT `.bc-shell`/`.stage`/`#stage`:
@@ -52,11 +52,13 @@
    the interaction capture; this also resolves the previously-recorded
    900x760-vs-900x1000 viewport drift in favor of 1000. */
 .bc-shell {
-  width: 900px;
-  height: 760px;
+  width: 100%;
   box-sizing: border-box;
   position: relative;
-  overflow: hidden;
+  /* Opt out of the global squircle-fallback border (higher-specificity
+     `:not([data-squircle="on"])` rule) -- .bc-shell is no longer a card
+     surface, it's the embed root, so no boxed-demo frame in light theme. */
+  border: none !important;
   /* Tailwind preflight's inherited line-height:1.5 bleeds into text
      descendants that don't declare their own line-height (.eyebrow, .lede
      h1, .badge, .foot .val, .foot .delta, .caption) -- the raw environment
@@ -68,29 +70,33 @@
 
 /* ---------------- Stage ---------------- */
 .stage {
-  position: absolute;
-  inset: 0;
+  position: static;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 30px;
+  /* library page's own rhythm: PreviewFrame's header uses px-4 md:px-6
+     (16/24px) and its preview area p-4 (16px) -- matched here instead of
+     inventing new spacing, per step 5 (F6). */
+  padding: 32px 16px;
   /* Base value is light: nothing in the component tree ever toggles the
      raw `.light` modifier class, so it was permanently rendering the dark
      literal below regardless of app theme. Per app-dark-mode-html-dark-class
      lesson, the app's real theme switch is `html.dark` on the document
      root, not this component's inert `.light` class -- route through that
      selector instead so #stage actually follows the app theme. */
-  background: radial-gradient(1000px 720px at 50% 22%, #eef2f8 0%, #cdd6e3 72%);
+  /* Bora's verdict (2026-08-31, step 5): the stage must not paint its own
+     background at all -- it inherits whatever page hosts it. Both light and
+     dark previously painted an app gradient / radial gradient here; both
+     removed so the host page's background shows through in either theme. */
+  background: transparent;
   /* raw duration has no exact motion-token tier (nearest existing tiers
      are not byte-identical) -- composed value-identically from
      --duration-slower * 1.5 rather than mint a new token; bare `ease` ->
      --ease-fade (== bare ease per its own definition, established mapping,
      see Dropdown.css). */
   transition: background-color calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade);
-}
-html.dark .stage {
-  background: radial-gradient(1100px 760px at 50% 18%, #0d1526 0%, #020617 72%);
 }
 
 /* heading above the carousel */
@@ -125,36 +131,57 @@ html.dark .lede { color: #fff; }
   width: min(760px, 100%);
 }
 
-/* edge fade so cards melt into the stage at the rim */
-.carousel::before,
-.carousel::after {
-  content: '';
-  position: absolute;
-  top: 0; bottom: 0;
-  width: 70px;
-  z-index: 5;
-  pointer-events: none;
-}
-.carousel::before { left: 0;  background: linear-gradient(to right, rgba(205,214,227,0.85), transparent); }
-.carousel::after  { right: 0; background: linear-gradient(to left,  rgba(205,214,227,0.85), transparent); }
-html.dark .carousel::before { background: linear-gradient(to right, rgba(2,6,23,0.7), transparent); }
-html.dark .carousel::after  { background: linear-gradient(to left,  rgba(2,6,23,0.7), transparent); }
-
+/* edge treatment: opacity fade (plan: ui-residuals-p1 step 4/5) -- locked in
+   as THE edge treatment per Bora's verdict; the prior curtain and blurred
+   prototype variants were deleted. Pure opacity/mask ramp on the rail, no
+   filter at all -- cards simply fade toward the edges. Sampled at 8 stops
+   so intermediate opacity is gradual, no data-attribute needed.
+   Vertical padding raised 30px->56px and a second, vertical mask layer
+   added (composited via `intersect`) because the focused card's
+   drop-shadow (see .card filter below) bleeds well past a 30px pad --
+   the rail's own mask-clip box is a hard edge regardless of overflow, so
+   that bleed was getting guillotined at the box boundary (Bora: "sharp
+   edges on top and bottom"). The taller pad shrinks the shadow's residual
+   opacity at the box edge, and the vertical gradient fades what's left to
+   fully transparent before it reaches that edge, so the boundary now
+   coincides with already-invisible content -- same principle as the
+   horizontal fade, just on the other axis. Left/right ramp is untouched. */
 .rail {
   display: flex;
   gap: 26px;
   --gap: 26px;
   --item-w: 262px;
-  padding: 30px calc(50% - (var(--item-w) / 2));
+  padding: 56px calc(50% - (var(--item-w) / 2));
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+  -webkit-mask-image:
+    linear-gradient(to right,
+      transparent 0%, rgba(0,0,0,0.25) 4%, rgba(0,0,0,0.6) 9%,
+      black 16%, black 84%, rgba(0,0,0,0.6) 91%, rgba(0,0,0,0.25) 96%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
+  -webkit-mask-composite: source-in, source-over;
+  mask-image:
+    linear-gradient(to right,
+      transparent 0%, rgba(0,0,0,0.25) 4%, rgba(0,0,0,0.6) 9%,
+      black 16%, black 84%, rgba(0,0,0,0.6) 91%, rgba(0,0,0,0.25) 96%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
+  mask-composite: intersect;
 }
 .rail::-webkit-scrollbar { width: 0; height: 0; }
 
 .card {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  display: block;
   flex: none;
   width: 262px;
   height: 364px;
@@ -297,13 +324,13 @@ html.dark .card .foot { border-top-color: rgba(255,255,255,0.22); }
   border: none; border-radius: 9999px; cursor: pointer;
   background: #D4DCE8;
   box-shadow: 0 6px 18px -8px rgba(15,23,42,0.30);
-  /* raw transform -> --duration-fast / --ease-motion-sweep-2236 (byte-identical);
-     opacity -> --duration-180 / --ease-fade; background/box-shadow have no exact
-     tier -- composed value-identically from --duration-200 * 2 rather than
-     mint a new token. All four legs wrapped with --anim-mult so reduced motion
-     collapses every leg to 0s. */
+  /* press leg standardized to --ease-standard per Bora 2026-08-31 (library-wide
+     press curve decision); opacity -> --duration-180 / --ease-fade;
+     background/box-shadow have no exact tier -- composed value-identically from
+     --duration-200 * 2 rather than mint a new token. All four legs wrapped with
+     --anim-mult so reduced motion collapses every leg to 0s. */
   transition:
-    transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-motion-sweep-2236),
+    transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-standard),
     opacity calc(var(--duration-180) * var(--anim-mult, 1)) var(--ease-fade),
     background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade),
     box-shadow calc(var(--duration-200) * 2 * var(--anim-mult, 1)) var(--ease-fade);

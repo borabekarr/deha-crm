@@ -170,7 +170,6 @@ export function Items({ children, maxHeight = 400, scrollable = true, useBlur = 
       <div className="dg-items">
         <div
           className="dg-scroll"
-          role="region"
           style={
             {
               maxHeight: scrollable ? maxHeight : 'none',

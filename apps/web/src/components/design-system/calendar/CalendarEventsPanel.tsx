@@ -54,36 +54,32 @@ export function CalendarEventsPanel({
                     <span className="cev-chevron material-icons">chevron_right</span>
                   </button>
                 ))}
-                <div
+                <button
+                  type="button"
                   className="cal-add-row"
                   onClick={openPopover}
                   data-proximity
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPopover() } }}
                 >
                   <div className="cal-add-icon">
                     <span className="material-icons">add</span>
                   </div>
                   <span className="cal-add-text">Add event</span>
-                </div>
+                </button>
               </>
             ) : (
               <>
                 <div className="cal-no-events">No events scheduled.</div>
-                <div
+                <button
+                  type="button"
                   className="cal-add-row"
                   onClick={openPopover}
                   data-proximity
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPopover() } }}
                 >
                   <div className="cal-add-icon">
                     <span className="material-icons">add</span>
                   </div>
                   <span className="cal-add-text">Add event</span>
-                </div>
+                </button>
               </>
             )}
           </div>

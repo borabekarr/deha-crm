@@ -75,6 +75,7 @@ html.dark .brief-stat-n { color: #F8FAFC; }
 /* ── LEFT — priority + impact panel; color set by .pri-* ──────────────────── */
 .pc-left {
   --lp: #94A3B8; --lp-edge: rgba(0,0,0,0.22);
+  appearance: none; border: 0; margin: 0; font: inherit; text-align: inherit;
   position: relative; width: 232px; flex-shrink: 0; box-sizing: border-box;
   padding: 17px 19px; display: flex; flex-direction: column; justify-content: space-between;
   color: #fff; border-radius: 24px 0 0 24px; overflow: hidden;
@@ -559,7 +560,7 @@ html.dark .sec, html.dark .cap { color: #94A3B8; } html.dark .cap b { color: #E2
 .pcx-head-actions .pc-discuss-btn .material-symbols-outlined { color:rgba(255,255,255,0.85); }
 .pcx-head.pri-med .pcx-head-actions .pc-discuss-btn { color:#0F172A; }
 /* impact-score opener: a chevron beside the head-stats "Impact score" label */
-.pcx-hstat.pcx-imp { cursor:pointer; }
+.pcx-hstat.pcx-imp { appearance:none; background:none; border:0; padding:0; margin:0; font:inherit; color:inherit; text-align:inherit; display:flex; flex-direction:column; cursor:pointer; }
 .pcx-hstat.pcx-imp .pcx-hstat-l { display:inline-flex; align-items:center; gap:3px; }
 .pcx-hstat.pcx-imp .pcx-impact-chev { font-size:13px; opacity:0.85; transition:transform calc(var(--duration-240) * var(--anim-mult, 1)); }
 .pcx-hstat.pcx-imp.open .pcx-impact-chev { transform:rotate(180deg); }

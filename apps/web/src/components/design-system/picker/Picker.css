@@ -222,3 +222,27 @@
 .pk-root .pk-glyph-row[data-confirmed="true"] .pk-trigger-badge {
   max-width: 72px; opacity: 1;
 }
+
+/* F3: confirmed-state icon+text read as too small (12px icon / 9px
+   text) -- scaled both up to comfortably fill the pill (pill itself
+   unchanged) and switched the label to Montserrat Black. Appended after
+   the confirmed-state rules above (same selectors, later cascade order)
+   rather than edited in place, per the locked-range rule on this file.
+   Badge color is the fixed neutral --gray-900 (not a theme-flipping
+   --fg* token) because the pill's emerald background never changes with
+   html.dark -- white text here was ~2.5:1 against #10B981, below AA;
+   --gray-900 on that same background measures ~7.4:1 in both themes.
+   Max-widths stay inside .pk-glyph-row's locked 96px overflow-hidden
+   box so the longest label ("22 Aug") doesn't clip. */
+.pk-root .pk-glyph-row[data-confirmed="true"] .pk-trigger-icon {
+  font-size: 18px; margin-right: 5px;
+}
+.pk-root .pk-glyph-row[data-confirmed="true"] .pk-trigger-badge {
+  font-family: 'Montserrat', var(--font-display);
+  font-weight: 900;
+  font-size: 14px;
+  letter-spacing: -0.15px;
+  color: var(--gray-900);
+  text-shadow: none;
+  max-width: 80px;
+}

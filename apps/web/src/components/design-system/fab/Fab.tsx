@@ -85,12 +85,11 @@ export default function Fab() {
               </div>
 
               {/* Blur veil (click to close) — decorative scrim, Escape handles dismissal (fabScreenRef) */}
-              <div className="fab-veil" role="presentation" onClick={() => toggle(false)} />
+              <div className="fab-veil" onClick={() => toggle(false)} />
 
               {/* Morphing FAB */}
               <div
                 className="fab"
-                role="presentation"
                 onClick={onFabClick}
               >
                 <button

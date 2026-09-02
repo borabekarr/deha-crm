@@ -169,17 +169,11 @@ export default function MetricCard() {
 
           {/* New Leads card */}
           <div className="shell zoom" data-proximity>
-            <div
+            <button
+              type="button"
               className="metric"
-              role="button"
-              tabIndex={0}
+              aria-label="New Leads: 142, up 12% vs last month"
               onClick={() => openExpanded('leads')}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  openExpanded('leads')
-                }
-              }}
             >
               <div className="m-left">
                 <div className="m-label">
@@ -207,22 +201,16 @@ export default function MetricCard() {
                   <path d="M0,30 C18,32 30,22 48,18 C66,14 82,8 100,6" fill="none" stroke="var(--brand-primary-500)" strokeWidth="2.2" strokeLinecap="round" />
                 </svg>
               </div>
-            </div>
+            </button>
           </div>
 
           {/* Predicted Value card */}
           <div className="shell zoom" data-proximity>
-            <div
+            <button
+              type="button"
               className="metric"
-              role="button"
-              tabIndex={0}
+              aria-label="Predicted Value: $1.2M, down 8.1%"
               onClick={() => openExpanded('value')}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  openExpanded('value')
-                }
-              }}
             >
               <div className="m-left">
                 <div className="m-label">
@@ -251,7 +239,7 @@ export default function MetricCard() {
                   <path d="M0,8 C18,10 32,16 48,22 C64,26 78,30 100,32" fill="none" stroke="#EF4444" strokeWidth="2.2" strokeLinecap="round" />
                 </svg>
               </div>
-            </div>
+            </button>
           </div>
 
         </div>
@@ -260,7 +248,6 @@ export default function MetricCard() {
       {/* Expanded detail overlay — wired via state + callback ref for Escape */}
       <div
         className={`exp-overlay${open ? ' open' : ''}`}
-        role="presentation"
         onClick={handleOverlayClick}
         onTransitionEnd={(e) => {
           if (!open && e.propertyName === 'opacity') setActiveKey(null)

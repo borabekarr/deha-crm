@@ -5,6 +5,7 @@
 // passed down already-composed as a callback ref.
 import { iconClass } from '../../../lib/iconClass'
 import { DARK_BADGE_IDS, isInkColor, type SearchGroups, type NodeItem } from './workflow-add-elements-shared'
+import '../shimmer/Shimmer.css'
 
 interface WorkflowAddElementsNodesFlyoutProps {
   nodesOuterCallbackRef: (el: HTMLDivElement | null) => void
@@ -74,19 +75,24 @@ export function WorkflowAddElementsNodesFlyout({
           {filter ? 'Search Results' : 'Nodes'}
         </div>
 
-        {/* Fix 5: pending window — blur+dim the stale result set behind a
-            shimmer placeholder instead of snapping the layout on each keystroke. */}
+        {/* Fix 5: pending window — the stale result set is unmounted (not
+            blurred) and a shimmer skeleton stands in for it, so nothing
+            legible from the previous search stays on screen while loading. */}
         {searchPending && (
           <div className="wae-search-shimmer" aria-hidden="true">
             {[0, 1, 2, 3].map((i) => (
-              <span key={i} className="wae-shimmer-row" style={{ animationDelay: `${i * 60}ms` }} />
+              <span key={i} className="shimmer" style={{ animationDelay: `${i * 60}ms` }}>
+                <span className="wave" />
+              </span>
             ))}
           </div>
         )}
 
-        {filter ? (
-          /* Two-column grouped search view */
-          <div className="wae-search-cols">
+        {filter && searchPending ? null : filter ? (
+          /* Two-column grouped search view. sh-reveal (shared shimmer
+             primitive) plays each time this mounts fresh after a pending
+             window, so real results fade/rise in rather than popping. */
+          <div className="wae-search-cols sh-reveal">
             {/* General column */}
             <div className="wae-search-col">
               {searchGroups.general.map(({ cat, nodes }) => (

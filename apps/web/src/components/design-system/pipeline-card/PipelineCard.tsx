@@ -303,19 +303,12 @@ function LeftPanel({ d, priority, whyOpen, onToggleWhy }: LeftPanelProps) {
 
   return (
     <div ref={leftProxRef} style={{ display: 'contents' }}>
-    <div
+    <button
+      type="button"
       className={`pc-left pri-${priority}${d.isError ? ' is-error' : ''}${whyOpen ? ' why-open' : ''}`}
-      role="button"
-      tabIndex={0}
       aria-expanded={whyOpen}
+      aria-label={`${d.title} — toggle why panel`}
       onClick={(e) => { e.stopPropagation(); onToggleWhy() }}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          e.stopPropagation()
-          onToggleWhy()
-        }
-      }}
       data-proximity
     >
       <div className="pc-pri"><span className="pc-pri-dot"></span>{PRI[priority].label}</div>
@@ -353,7 +346,7 @@ function LeftPanel({ d, priority, whyOpen, onToggleWhy }: LeftPanelProps) {
           </div>
         </div>
       </div>
-    </div>
+    </button>
     </div>
   )
 }
@@ -406,7 +399,6 @@ function RightPanel({
   return (
     <div
       className="pc-right"
-      role="presentation"
       onClick={(e) => {
         if ((e.target as Element).closest('button, input, a, .pc-pop, .pc-discuss')) return
         onOpenDetail()
@@ -493,7 +485,6 @@ function RightPanel({
           ></div>
           <div
             className="pc-discuss-input"
-            role="presentation"
             onClick={(e) => {
               // fix #4: clicking anywhere on the pill (outside send btn) focuses input
               e.stopPropagation()
@@ -780,14 +771,12 @@ function DetailOverlay({ d, open, onClose, onClosed, onApply, onToast, onRemoveC
   return (
     <div
       className={`pcx-overlay${open ? ' open' : ''}`}
-      role="presentation"
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
       onTransitionEnd={(e) => { if (!open && e.propertyName === 'opacity') onClosed() }}
     >
       <div className="pcx-outer">
         <div
           className="pcx-card"
-          role="presentation"
           onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
         >
@@ -809,23 +798,15 @@ function DetailOverlay({ d, open, onClose, onClosed, onApply, onToast, onRemoveC
               <div className="pcx-head-desc">{d.desc}</div>
               <div className="pcx-head-statsrow">
                 <div className="pcx-head-stats">
-                  <div
+                  <button
+                    type="button"
                     className={`pcx-hstat pcx-imp${impactOpen ? ' open' : ''}`}
-                    role="button"
-                    tabIndex={0}
                     aria-expanded={impactOpen}
                     onClick={(e) => { e.stopPropagation(); setImpactOpen((v) => !v) }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        setImpactOpen((v) => !v)
-                      }
-                    }}
                   >
                     <div className="pcx-hstat-n">{d.impact}<span className="pcx-hstat-pct">%</span></div>
                     <div className="pcx-hstat-l">Impact score<span className="material-symbols-outlined pcx-impact-chev">expand_more</span></div>
-                  </div>
+                  </button>
                   <div className="pcx-hstat-div"></div>
                   <div className="pcx-hstat">
                     <div className="pcx-hstat-n">{d.potential == null ? '—' : fmt(d.potential)}</div>
@@ -1039,7 +1020,6 @@ function BriefingCard({ d, onOpenDetail, onRemove, onDemote, onToast }: Briefing
       className="shell"
       data-id={d.id}
       ref={shellRef}
-      role="presentation"
       onClick={handleRootClick}
       onKeyDown={handleRootKeyDown}
     >
@@ -1118,7 +1098,7 @@ export default function PipelineCard() {
   }
 
   return (
-    <div className="card" style={{ padding: 0 }} role="presentation" onKeyDown={handleKeyDown} tabIndex={-1}>
+    <div className="card" style={{ padding: 0 }} onKeyDown={handleKeyDown} tabIndex={-1}>
       <div className="frame">
         <div className="stack">
           {cards.length === 0 ? (

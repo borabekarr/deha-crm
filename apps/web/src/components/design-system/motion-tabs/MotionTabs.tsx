@@ -181,7 +181,6 @@ export default function MotionTabs() {
             {/* Overlay: tap outside to close */}
             <div
               className={`mt-overlay${isOpen ? ' open' : ''}`}
-              role="presentation"
               onClick={close}
             />
 

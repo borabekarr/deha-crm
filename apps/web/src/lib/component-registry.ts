@@ -508,16 +508,6 @@ export const registry: RegistryEntry[] = [
     Component: lazyWithRetry(() => import('@/components/design-system/inline-edit/InlineEdit')),
   },
   {
-    slug: 'adjust-timeframe',
-    name: 'Adjust Timeframe',
-    status: 'Proceeding',
-    category: 'Auxiliary Elements',
-    subtitle: 'Draggable timeline range scrubber — emerald accent',
-    viewport: { width: 880, height: 620 },
-    sourceHtml: '/design-system/preview/brand-adjust-timeframe.html',
-    Component: lazyWithRetry(() => import('@/components/design-system/adjust-timeframe/AdjustTimeframe')),
-  },
-  {
     slug: 'date-picker',
     name: 'iOS Date Picker',
     status: 'Proceeding',

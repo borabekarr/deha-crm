@@ -1,4 +1,4 @@
-import type { CSSProperties, KeyboardEvent, RefObject } from 'react'
+import type { CSSProperties, RefObject } from 'react'
 import { cardStyle, chevStyle, innerStyle, stop, type VariantId } from './expandable-card-shared'
 
 // Render-only split of ExpandableCardDemo's Card 2 · Task
@@ -10,7 +10,6 @@ export function TaskCard({
   open,
   variant,
   onToggle,
-  onKeyDown,
   onMouseEnter,
   onMouseLeave,
   contentRef,
@@ -18,7 +17,6 @@ export function TaskCard({
   open: boolean
   variant: VariantId
   onToggle: () => void
-  onKeyDown: (e: KeyboardEvent) => void
   onMouseEnter: () => void
   onMouseLeave: () => void
   contentRef: RefObject<HTMLDivElement | null>
@@ -26,7 +24,6 @@ export function TaskCard({
   return (
     <div
       className="shell zoom"
-      role="presentation"
       onClick={onToggle}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
@@ -34,12 +31,22 @@ export function TaskCard({
       style={cardStyle(open, variant)}
     >
       <div className="card-inner" style={{ overflow: 'hidden', boxSizing: 'border-box' }}>
-        <div
-          role="button"
-          tabIndex={0}
+        <button
+          type="button"
           aria-label="Toggle expand"
           aria-expanded={open}
-          onKeyDown={onKeyDown}
+          style={{
+            appearance: 'none',
+            background: 'none',
+            border: 0,
+            padding: 0,
+            margin: 0,
+            font: 'inherit',
+            color: 'inherit',
+            textAlign: 'inherit',
+            display: 'block',
+            width: '100%',
+          }}
         >
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
             <span className="badge col-tag progress">
@@ -67,7 +74,7 @@ export function TaskCard({
             </span>
             Due Friday · Sprint 12
           </div>
-        </div>
+        </button>
 
         <div className="xc-content" ref={contentRef}>
           <div style={innerStyle(open, variant)}>

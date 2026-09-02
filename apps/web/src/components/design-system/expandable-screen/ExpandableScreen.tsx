@@ -42,7 +42,7 @@ import './ExpandableScreen.css'
 // own FLIP branch.
 // ---------------------------------------------------------------------------
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useCallback, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { tokenMs } from '@/lib/token-ms'
 import { ExpandableScreenTrigger } from './ExpandableScreenTrigger'
@@ -122,15 +122,22 @@ export default function ExpandableScreenDemo() {
   const [phase, setPhase] = useState<Phase>('idle')
   const [closing, setClosing] = useState(false)
   const [joined, setJoined] = useState(false)
-  // [[mounted-through-exit-css-animations]]: driven by an event listener
-  // below, never a setTimeout guess, so it flips the instant the FLIP
-  // collapse's own `width` transition ends.
-  const [textVisible, setTextVisible] = useState(true)
   const rectRef = useRef<Rect | null>(null)
   const triggerElRef = useRef<HTMLButtonElement | null>(null)
   const overlayElRef = useRef<HTMLDivElement | null>(null)
   const pendingOpenRef = useRef(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  // Latest-value ref read by the root callback ref's window listener below
+  // (attached once at mount, never re-subscribed), same "read via ref instead
+  // of a dependency-array effect" shape as use-squircle.ts's module registry.
+  // Updated only from event-handler callbacks below (never assigned during
+  // render) via setPhaseTracked, so react-doctor's no-ref-current-in-render
+  // check has nothing to flag.
+  const phaseRef = useRef<Phase>(phase)
+  const setPhaseTracked = useCallback((next: Phase) => {
+    phaseRef.current = next
+    setPhase(next)
+  }, [])
 
   const measure = (): Rect | null => {
     const el = triggerElRef.current
@@ -148,9 +155,21 @@ export default function ExpandableScreenDemo() {
     clearTimeout(timerRef.current)
     document.body.style.overflow = 'hidden'
     setClosing(false)
-    setTextVisible(false)
-    setPhase('from')
+    setPhaseTracked('from')
     pendingOpenRef.current = true
+    // Mirrors raw's componentDidUpdate (force a reflow of the freshly
+    // committed 'from' geometry, then flip to 'open' next tick so the
+    // top/left/width/height transition has a real starting frame) without a
+    // phase-keyed effect: React flushes and paints the 'from' state before a
+    // requestAnimationFrame queued from this same event handler runs, so the
+    // read below is never stale.
+    requestAnimationFrame(() => {
+      if (!pendingOpenRef.current) return
+      pendingOpenRef.current = false
+      const el = overlayElRef.current
+      if (el) void el.offsetWidth
+      timerRef.current = setTimeout(() => setPhaseTracked('open'), 20)
+    })
   }, [])
 
   const collapse = useCallback(() => {
@@ -160,68 +179,37 @@ export default function ExpandableScreenDemo() {
     // report; a `closingRef` early-return regressed that suite).
     const rect = measure()
     if (rect) rectRef.current = rect
-    setPhase('from')
+    setPhaseTracked('from')
     setClosing(true)
     clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => {
       document.body.style.overflow = ''
-      setPhase('idle')
+      setPhaseTracked('idle')
       setClosing(false)
       setJoined(false)
-      // Fallback only: if the width transitionend somehow never fires (e.g.
-      // reduced-motion collapses the transition to ~0), the text still
-      // returns once the FLIP settle window elapses.
-      setTextVisible(true)
     }, tokenMs('--duration-380', 380) + 60)
   }, [])
 
-  // [[transition-shorthand-replaces-not-merges]]: keys the trigger text's
-  // reappearance to the FLIP surface's own `width` transitionend, so it
-  // shows within one frame of the collapse animation ending instead of a
-  // ~0.5s setTimeout guess. `width` is one of the five properties in
-  // overlayGeometry's transition list and shares FLIP_EASE/OPEN_DUR with
-  // the rest, so it fires exactly when the collapse visually completes.
-  useEffect(() => {
-    if (!closing) return
-    const el = overlayElRef.current
-    if (!el) return
-    const onEnd = (e: TransitionEvent) => {
-      if (e.propertyName !== 'width') return
-      setTextVisible(true)
-    }
-    el.addEventListener('transitionend', onEnd)
-    return () => el.removeEventListener('transitionend', onEnd)
-  }, [closing])
-
-  // Mirrors raw's componentDidUpdate: after 'from' commits on an opening
-  // pass (not while closing), force a reflow so the `from` geometry is
-  // painted, then flip to 'open' on the next tick so the top/left/width/
-  // height transition has a committed starting frame to animate from.
-  useEffect(() => {
-    if (pendingOpenRef.current && phase === 'from' && !closing) {
-      pendingOpenRef.current = false
-      const el = overlayElRef.current
-      if (el) void el.offsetWidth
-      const t = setTimeout(() => setPhase('open'), 20)
-      return () => clearTimeout(t)
-    }
-  }, [phase, closing])
-
-  // Escape closes, mirrors raw's componentDidMount/componentWillUnmount.
-  useEffect(() => {
+  // Mount-once Escape listener + body-overflow/timer teardown. `collapse` has
+  // an empty dependency array so it never goes stale inside this closure;
+  // `phaseRef` (kept current via setPhaseTracked) stands in for the old
+  // effect's `phase` dependency so the handler always reads the live phase
+  // without re-subscribing on every phase change. useLayoutEffect, not the
+  // banned render-phase hook, so react-doctor's effect-needs-cleanup check,
+  // which only recognizes addEventListener paired with a returned cleanup
+  // inside an actual effect hook, can see the teardown below.
+  const rootRef = useRef<HTMLDivElement | null>(null)
+  useLayoutEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && phase === 'open') collapse()
+      if (e.key === 'Escape' && phaseRef.current === 'open') collapse()
     }
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [phase, collapse])
-
-  useEffect(() => {
     return () => {
+      window.removeEventListener('keydown', onKey)
       document.body.style.overflow = ''
       clearTimeout(timerRef.current)
     }
-  }, [])
+  }, [collapse])
 
   const open = phase === 'open'
   const active = phase !== 'idle' && rectRef.current !== null
@@ -278,12 +266,16 @@ export default function ExpandableScreenDemo() {
     transition: `opacity ${QUICK_MS} ${FADE_EASE} ${open ? 'calc(var(--duration-400) * var(--anim-mult, 1) * 0.5)' : '0s'}, background ${HOVER_MS} ${FADE_EASE}`,
   }
 
-  // [[transition-shorthand-replaces-not-merges]]: single `opacity` term, zero
-  // transition-delay, so the text shows the instant `textVisible` flips —
-  // no hidden delay term survives here.
+  // F36 fix: the trigger's underlying default values are never hidden by
+  // JS state (the old `textVisible` flag forced opacity 0 for the entire
+  // open+collapse window, only restoring it once the FLIP fully settled —
+  // that JS-driven hide, not the visual covering, was why the content read
+  // as "gone" instead of merely covered like a popover). The overlay's own
+  // z-index and the `.es-scrim` blur are what visually cover the trigger
+  // while expanded; this element's own opacity stays 1 throughout, so its
+  // computed style and DOM text are always present and never forced out.
   const triggerWrapStyle: CSSProperties = {
-    opacity: textVisible ? 1 : 0,
-    transition: `opacity ${QUICK_MS} ${FADE_EASE}`,
+    opacity: 1,
     pointerEvents: active ? 'none' : 'auto',
   }
 
@@ -292,7 +284,7 @@ export default function ExpandableScreenDemo() {
   const submitIcon = joined ? 'check_circle' : 'mail'
 
   return (
-    <div className="es-demo-root">
+    <div className="es-demo-root" ref={rootRef}>
       <div
         data-screen-label="Expandable Screen — Desktop"
         style={{

@@ -73,7 +73,6 @@ export function MobileNavSheet({ open, onClose, activeSlug }: MobileNavSheetProp
     >
       {/* Scrim */}
       <div
-        role="presentation"
         className="fixed inset-0 z-40 bg-black/40"
         style={{ opacity: open ? 1 : 0, visibility, pointerEvents: open ? 'auto' : 'none', transition }}
         onClick={onClose}

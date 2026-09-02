@@ -2,7 +2,7 @@ import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './ModelSelector.css'
 
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { iconClass } from '../../../lib/iconClass'
 import { useProximityGroup } from '@/lib/hooks'
 import { useSquircle } from '../../../lib/hooks/use-squircle'
@@ -125,23 +125,24 @@ export default function ModelSelector() {
   const selectedIndex = MODELS.findIndex((m) => m.id === selectedId)
   const selected = selectedIndex >= 0 ? MODELS[selectedIndex] : MODELS[0]
 
+  // Listbox opens (mouse or ArrowDown) -> focus follows the selection in,
+  // matching the WAI-ARIA APG listbox pattern. Rows stay mounted-through-
+  // collapse (see header comment) so refs are always attachable, which lets
+  // this run synchronously from the triggering event instead of an effect.
+  function openPanel() {
+    setOpen(true)
+    setFocusedId(selectedId)
+    rowRefs.current[selectedId]?.focus()
+  }
+
   function togglePanel() {
-    setOpen((prev) => !prev)
+    if (open) setOpen(false)
+    else openPanel()
   }
 
   function pick(id: string) {
     setSelectedId(id)
   }
-
-  // Listbox opens (mouse or ArrowDown) -> focus follows the selection in,
-  // matching the WAI-ARIA APG listbox pattern. Rows stay mounted-through-
-  // collapse (see header comment) so refs are always attachable.
-  useEffect(() => {
-    if (!open) return
-    setFocusedId(selectedId)
-    rowRefs.current[selectedId]?.focus()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open])
 
   return (
     <div className="ms-card">
@@ -165,7 +166,7 @@ export default function ModelSelector() {
           onKeyDown={(e) => {
             if (e.key === 'ArrowDown' && !open) {
               e.preventDefault()
-              setOpen(true)
+              openPanel()
             }
           }}
           aria-expanded={open}

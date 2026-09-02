@@ -53,9 +53,14 @@ const TODAY_INDEX = 2 // Wed of week 1 in the reference shot
 const TOAST_ICON: Record<'success' | 'danger' | 'info', string> = { success: 'check_circle', danger: 'delete', info: 'info' }
 const TOAST_TYPE: Record<'success' | 'danger' | 'info', string> = { success: 'success', danger: 'error', info: 'info' }
 
+// F15 wiring: color/bg now route via the --p0-color/--p0-bg/--p1-color/
+// --p1-bg custom properties already defined in SprintPlannerCore.css
+// (previously unused raw-value twins of the literals below) instead of raw
+// hex literals, since these values now also feed the shared toast's accent
+// override (toast-vm.ts requires oklch/CSS var, never raw hex in JSX/CSS).
 const PRIORITY: Record<string, { color: string; bg: string; label: string; rank: number }> = {
-  P0: { color: '#EF4444', bg: '#FEF2F2', label: 'P0', rank: 0 },
-  P1: { color: '#F97316', bg: '#FFF7ED', label: 'P1', rank: 1 },
+  P0: { color: 'var(--p0-color)', bg: 'var(--p0-bg)', label: 'P0', rank: 0 },
+  P1: { color: 'var(--p1-color)', bg: 'var(--p1-bg)', label: 'P1', rank: 1 },
   P2: { color: 'var(--brand-primary-500)', bg: 'var(--brand-primary-50)', label: 'P2', rank: 2 },
 }
 
@@ -619,7 +624,6 @@ function CommandPalette({ open, onClose, onRun, tickets }: {
       ref={(el) => { paletteCallbackRef(el); paletteProxRef(el) }}
       className="palette-backdrop sp-palette-centered"
       data-open={open ? 'true' : 'false'}
-      role="presentation"
       onClick={(e) => {
         const t = e.target as HTMLElement
         if (t.classList.contains('palette-backdrop') || t.classList.contains('sp-palette-centered')) onClose()
@@ -867,7 +871,6 @@ function AddTicketModal({ open, day, onClose, onSubmit }: {
       ref={(el) => { modalCallbackRef(el); modalProxRef(el) }}
       className="sp-modal-backdrop"
       data-open={open ? 'true' : 'false'}
-      role="presentation"
       onClick={(e) => { if ((e.target as HTMLElement).classList.contains('sp-modal-backdrop')) onClose() }}
     >
       {/* item 4: dialog centered on the component via translate(-50%,-50%), inner-card look */}
@@ -955,10 +958,6 @@ export default function SprintPlannerCore() {
   const [addDay, setAddDay] = useState(0)
   const [draggingId, setDraggingId] = useState<string | null>(null)
   const panelSquircleRef = useSquircle<HTMLDivElement>()
-  // F12: a 0-size point (.sp-toast-anchor below) docked inside .sp-panel's own
-  // bottom-right corner, NOT the panel itself -- see the toast-layer comment
-  // near the ToastStage render for why.
-  const toastAnchorRef = useRef<HTMLDivElement | null>(null)
   // F12: page-local cfg override, NOT an edit to the shared toast/variants.ts
   // (the gallery keeps VARIANTS.main byte-identical). enterY shrunk from the
   // shared 110px to the exact --space-4 (16px) resting gap above the card's
@@ -984,9 +983,18 @@ export default function SprintPlannerCore() {
     flashTimerRef.current!.schedule(() => setSuccessMap(new Map()))
   }, [])
 
-  const showToast = useCallback((next: { message: string; kind: 'success' | 'danger' | 'info'; onUndo?: () => void } | null) => {
+  const showToast = useCallback((next: { message: string; kind: 'success' | 'danger' | 'info'; onUndo?: () => void; priority?: string } | null) => {
     if (!next) return
-    const spec = { type: TOAST_TYPE[next.kind], icon: TOAST_ICON[next.kind], title: next.message }
+    // F14/F15 wiring: the triggering card's priority palette, routed through
+    // Step 2's optional ToastSpec.accent (color = surface panel, surface =
+    // icon chip bg) -- absent when no single priority triggered the toast.
+    const p = next.priority ? PRIORITY[next.priority] : undefined
+    const spec = {
+      type: TOAST_TYPE[next.kind],
+      icon: TOAST_ICON[next.kind],
+      title: next.message,
+      ...(p ? { accent: { color: p.color, surface: p.bg } } : {}),
+    }
     toastStageRef.current?.show(next.onUndo ? { ...spec, action: { label: 'Undo', icon: 'undo', onAction: next.onUndo } } : spec)
   }, [])
 
@@ -1034,7 +1042,7 @@ export default function SprintPlannerCore() {
       flashSuccess([[draggingId, (ticket.priority || 'p2').toLowerCase()]])
       const dayName = `${DAYS_FULL[dayIdx % 5]} · Week ${dayIdx < 5 ? 1 : 2}`
       const title = ticket.title.length > 36 ? ticket.title.slice(0, 36) + '…' : ticket.title
-      showToast({ message: `”${title}” → ${dayName}`, kind: 'success', onUndo: runUndo })
+      showToast({ message: `”${title}” → ${dayName}`, kind: 'success', onUndo: runUndo, priority: ticket.priority })
     }
     setDraggingId(null)
   }
@@ -1045,7 +1053,7 @@ export default function SprintPlannerCore() {
     if (removed) {
       undoRef.current = tickets
       const title = removed.title.length > 42 ? removed.title.slice(0, 42) + '…' : removed.title
-      showToast({ message: `Removed “${title}”`, kind: 'danger', onUndo: runUndo })
+      showToast({ message: `Removed “${title}”`, kind: 'danger', onUndo: runUndo, priority: removed.priority })
     }
   }
 
@@ -1057,7 +1065,7 @@ export default function SprintPlannerCore() {
     flashSuccess([[ticket.id, (ticket.priority || 'p2').toLowerCase()]])
     const dayName = `${DAYS_FULL[ticket.day % 5]} · Week ${ticket.day < 5 ? 1 : 2}`
     const title = ticket.title.length > 38 ? ticket.title.slice(0, 38) + '…' : ticket.title
-    showToast({ message: `Added “${title}” to ${dayName}`, kind: 'success', onUndo: runUndo })
+    showToast({ message: `Added “${title}” to ${dayName}`, kind: 'success', onUndo: runUndo, priority: ticket.priority })
   }
 
   const runAI = useCallback((actionId: string): { msg: string } => {
@@ -1140,21 +1148,18 @@ export default function SprintPlannerCore() {
         />
 
         {/* Toast layer — item 3: shared design-system toast, driven imperatively via
-            showToast/toastStageRef. F12: stays portaled to document.body (ToastStage's
-            own hideCard mode) rather than mounted in .sp-panel's own layout, because
-            .sp-panel has `overflow: hidden` and would clip the stack; anchorRef instead
-            points at .sp-toast-anchor, a 0-size point placed just inside .sp-panel's
-            bottom-right corner (see its CSS comment for the offset math), which docks
-            the resting stack flush inside the card with an even --space-4 gap to its
-            right/bottom edges instead of the previous below-right-of-the-card mount. */}
-        <ToastStage
-          ref={toastStageRef}
-          cfg={sprintToastCfg}
-          portalTarget={typeof document !== 'undefined' ? document.body : null}
-          anchorRef={toastAnchorRef}
-          hideCard
-        />
-        <div ref={toastAnchorRef} className="sp-toast-anchor" aria-hidden="true" />
+            showToast/toastStageRef. F15: no longer portaled to document.body -- a body
+            portal put the stack in VIEWPORT coordinate space while .sp-panel scrolls in
+            the page's LOCAL space, which was the scroll-drift bug (Bora: "their place is
+            fixed there, no move based on scrolling"). Rendered as a normal DOM child of
+            .sp-panel instead, wrapped in .sp-toast-local which scopes a position:absolute
+            override for the shared .ts-viewport (see SprintPlannerCore.css) -- .sp-panel
+            is already position:relative, so the stack's containing block becomes the
+            panel itself and it scrolls with the card for free, no shared Toast.tsx/css
+            edit required. */}
+        <div className="sp-toast-local">
+          <ToastStage ref={toastStageRef} cfg={sprintToastCfg} hideCard />
+        </div>
       </div>
     </div>
   )

@@ -1,4 +1,4 @@
-import type { KeyboardEvent, RefObject } from 'react'
+import type { RefObject } from 'react'
 import { CONDITIONS, FORECAST, cardStyle, chevStyle, innerStyle, type VariantId } from './expandable-card-shared'
 
 // Render-only split of ExpandableCardDemo's Card 3 · Weather
@@ -10,7 +10,6 @@ export function WeatherCard({
   open,
   variant,
   onToggle,
-  onKeyDown,
   onMouseEnter,
   onMouseLeave,
   contentRef,
@@ -18,23 +17,28 @@ export function WeatherCard({
   open: boolean
   variant: VariantId
   onToggle: () => void
-  onKeyDown: (e: KeyboardEvent) => void
   onMouseEnter: () => void
   onMouseLeave: () => void
   contentRef: RefObject<HTMLDivElement | null>
 }) {
   return (
-    <div
+    <button
+      type="button"
       className="shell zoom"
-      role="button"
-      tabIndex={0}
       aria-label="Toggle expand"
       onClick={onToggle}
-      onKeyDown={onKeyDown}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       data-open={open}
-      style={cardStyle(open, variant)}
+      style={{
+        ...cardStyle(open, variant),
+        appearance: 'none',
+        border: 0,
+        font: 'inherit',
+        color: 'inherit',
+        textAlign: 'inherit',
+        display: 'block',
+      }}
     >
       <div className="card-inner" style={{ overflow: 'hidden', boxSizing: 'border-box' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
@@ -140,6 +144,6 @@ export function WeatherCard({
           </div>
         </div>
       </div>
-    </div>
+    </button>
   )
 }

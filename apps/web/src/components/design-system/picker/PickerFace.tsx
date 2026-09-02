@@ -64,7 +64,6 @@ export function PickerFace({
         className="pk-box"
         data-open={open ? 'true' : 'false'}
         style={boxStyle(open, !!badgeLabel)}
-        role="presentation"
         onClick={onBoxClick}
       >
         {/* F10: single glyph row, always mounted -- the icon span never
@@ -85,7 +84,7 @@ export function PickerFace({
         </button>
 
         <div style={contentStyle(open)}>
-          <div style={headerRowStyle}>
+          <div style={headerRowStyle(open)}>
             <div style={headerColStyle}>
               <span style={titleStyle}>
                 <span className="material-icons" style={{ fontSize: '20px', color: titleIconColor }}>

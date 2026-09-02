@@ -43,7 +43,12 @@ export const shellStyle = (open: boolean): CSSProperties => ({
 // the same width transition leg the open/close morph already declares
 // below, so the confirm reveal and this widen stay one clock, not two.
 export const boxStyle = (open: boolean, confirmed = false): CSSProperties => {
-  const common = `width ${t(500)} var(--ease-spring-pop), height ${t(500)} var(--ease-spring-pop), border-radius ${t(500)} var(--ease-standard), background-color ${t(300)} var(--ease-fade), border-color ${t(300)} var(--ease-fade), box-shadow ${t(300)} var(--ease-fade), transform ${t(120)} var(--ease-standard)`
+  // F1: border-radius used to ease on `--ease-standard` while width/height
+  // eased on `--ease-spring-pop` -- two curves on the same shape meant the
+  // rounded clip briefly lagged/overshot the box's own edges mid-morph,
+  // reading as a torn/broken inner shell in both directions. Same t(500)
+  // clock, same curve for all three now -- one shape, one animation.
+  const common = `width ${t(500)} var(--ease-spring-pop), height ${t(500)} var(--ease-spring-pop), border-radius ${t(500)} var(--ease-spring-pop), background-color ${t(300)} var(--ease-fade), border-color ${t(300)} var(--ease-fade), box-shadow ${t(300)} var(--ease-fade), transform ${t(120)} var(--ease-standard)`
   return {
     position: 'relative', overflow: 'hidden', boxSizing: 'border-box',
     cursor: open ? 'default' : 'pointer',
@@ -109,7 +114,17 @@ export const closeStyle = (open: boolean): CSSProperties => ({
 
 // Static inline styles lifted verbatim from the raw markup's own
 // `style="..."` attributes.
-export const headerRowStyle: CSSProperties = { display: 'flex', alignItems: 'flex-start', gap: 'var(--gap-icon-text)' }
+// F2: previously static -- the header rode contentStyle()'s box-collapse
+// delay (t(500)) before hiding, so it stayed visible inside the shrinking
+// pill for the whole close animation. Bora's call: header is gone the
+// instant close starts, not timed off the box. Own zero-duration,
+// zero-delay opacity leg, decoupled from contentStyle's delayed hide (which
+// still governs the tray/footer).
+export const headerRowStyle = (open: boolean): CSSProperties => ({
+  display: 'flex', alignItems: 'flex-start', gap: 'var(--gap-icon-text)',
+  opacity: open ? 1 : 0,
+  transition: open ? 'none' : `opacity ${t(0)} var(--ease-standard)`,
+})
 export const headerColStyle: CSSProperties = { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '2px' }
 export const titleStyle: CSSProperties = {
   display: 'inline-flex', alignItems: 'center', gap: 'var(--gap-icon-text)',

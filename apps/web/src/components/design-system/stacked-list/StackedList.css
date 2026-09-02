@@ -266,7 +266,7 @@ html.dark .sl-bar-head {
   border-radius: 0;
   border-bottom-color: var(--card-border, #D4D4D4);
 }
-.sl-bar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.sl-bar-left { appearance: none; background: none; border: 0; padding: 0; margin: 0; font: inherit; color: inherit; text-align: inherit; display: flex; align-items: center; gap: 12px; min-width: 0; }
 .sl-bar-icon {
   flex: none; width: 44px; height: 44px; border-radius: 13px;
   display: grid; place-items: center;

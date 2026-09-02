@@ -516,7 +516,6 @@ function CalEventPopoverCard({
           className="cal-ep-customer"
           ref={orgInnerRef}
           onClick={calAddRipple}
-          role="presentation"
         >
           <span className="cal-ep-cust-av icon-badge" style={{ '--icon-c': orgColor } as React.CSSProperties}>
             <span className="material-icons">{orgInit}</span>

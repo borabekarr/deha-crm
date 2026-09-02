@@ -74,7 +74,7 @@ const MAX_BLUR = 9
 
 export function BlurCarousel() {
   const railRef = useRef<HTMLDivElement | null>(null)
-  const cardRefs = useRef<Array<HTMLDivElement | null>>([])
+  const cardRefs = useRef<Array<HTMLButtonElement | null>>([])
   const ticking = useRef(false)
   const activeRef = useRef(0)
   const [active, setActive] = useState(0)
@@ -236,22 +236,16 @@ export function BlurCarousel() {
       <div className="carousel" id="carousel">
         <div className="rail" id="rail" ref={railRef} onScroll={onScroll} data-scrolling="false">
           {CARDS.map((c, i) => (
-            <div
+            <button
+              type="button"
               key={c.cat}
               className="card"
               data-index={i}
               ref={(el) => { cardRefs.current[i] = el }}
               style={{ '--grad': c.grad } as CSSProperties}
-              role="button"
-              tabIndex={0}
               aria-current={i === active}
+              aria-label={c.title.replace(/\n/g, ' ')}
               onClick={() => scrollToIndex(i)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  scrollToIndex(i)
-                }
-              }}
             >
               <div className="face" />
               <div className="veil" />
@@ -265,7 +259,7 @@ export function BlurCarousel() {
                 </div>
                 <h3>
                   {c.title.split('\n').map((line, li) => (
-                    <span key={li}>
+                    <span key={line || `blank-${li}`}>
                       {li > 0 && <br />}
                       {line}
                     </span>
@@ -280,7 +274,7 @@ export function BlurCarousel() {
                   </span>
                 </div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>
@@ -343,10 +337,16 @@ export function BlurCarousel() {
 // panel and is not wired here) with the default blur/scale/fade tuning
 // (9px / 0.82 / 0.46 — the raw CSS custom-property defaults on `.carousel`,
 // also this component's hardcoded scroll-math constants above).
+//
+// Root chrome (plan: ui-residuals-p1 step 5, F6): the `.shell` grey-bezel
+// class (background/radius/padding/box-shadow, see _base.css) is dropped
+// from the root div — it read as a boxed demo card. `.bc-shell` alone sizes
+// to the parent container (width 100%, intrinsic height) so this reads as a
+// native embedded section wherever a CRM page hosts it.
 
 export default function BlurCarouselDemo() {
   return (
-    <div className="shell bc-shell">
+    <div className="bc-shell">
       <div className="stage" id="stage">
         <div className="lede">
           <div className="eyebrow">Featured</div>

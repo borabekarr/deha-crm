@@ -42,7 +42,6 @@ const WIRED_SLUGS: WiredSlug[] = [
   { slug: 'fab' },
   { slug: 'inline-edit' },
   { slug: 'multisteps' },
-  { slug: 'adjust-timeframe' },
   { slug: 'date-picker' },
   { slug: 'model-selector' },
   { slug: 'currency-converter' },

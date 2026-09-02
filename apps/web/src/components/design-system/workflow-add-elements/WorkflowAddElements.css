@@ -115,7 +115,8 @@
 }
 
 .wae-badge-lg .material-icons {
-  font-size: 14px;
+  /* F29: one step up the type scale from the prior 14px (--type-body). */
+  font-size: var(--type-h5);
 }
 
 .wae-badge-sm {
@@ -227,7 +228,8 @@
 
 .wae-ae-name {
   flex: 1;
-  font-size: 13px;
+  /* F29: one step up the type scale from the prior 13px (--type-body-sm). */
+  font-size: var(--type-body);
   font-weight: 700;
   color: #111111;
   letter-spacing: -0.01em;
@@ -250,6 +252,8 @@
 
 .wae-ae-footer {
   padding: 6px 8px 10px;
+  display: flex;
+  justify-content: center;
 }
 
 /* Item 2 (Step 9): the footer button is the buttons-page Ask Jeru button
@@ -271,6 +275,11 @@ html.dark .wae-ae-footer .btn-green:hover {
   transform: none;
   box-shadow: 0 6px 18px -4px rgba(52,211,153,0.45), inset 0 1px 0 rgba(255,255,255,0.22);
 }
+/* Press companion: the hover rule above pins transform to none, which would
+   otherwise beat .btn-green:active's press scale (same pattern fixed in
+   Buttons.css .btn-page-root .btn-green:hover:active) -- hover and press
+   stay independent per Bora, so re-declare the press at higher specificity. */
+.wae-ae-footer .btn-green:hover:active { transform: scale(0.96); }
 .wae-ae-footer .btn-apply:hover {
   box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--brand-primary-500, #06c081) 25%, transparent);
 }
@@ -329,20 +338,10 @@ html.dark .wae-ae-footer .btn-apply:hover:active { transform: scale(var(--press-
 }
 
 /* Pending window (Fix 5): a query changed while the panel was already open —
-   blur+dim the stale results underneath the shimmer overlay below instead of
-   snapping the (possibly taller/shorter) new layout into place. */
-.wae-nodes-inner[data-pending="true"] .wae-search-cols,
-.wae-nodes-inner[data-pending="true"] .wae-nodes-list {
-  filter: blur(4px);
-  opacity: 0.45;
-}
-.wae-search-cols,
-.wae-nodes-list {
-  transition:
-    filter calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out),
-    opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-out);
-}
-
+   the previous results are unmounted and a shimmer skeleton (shared
+   shimmer/Shimmer.css primitive, not a hand-rolled blur+dim) takes their
+   place, absolutely positioned so the panel doesn't snap size while the new
+   (possibly taller/shorter) results resolve. */
 .wae-search-shimmer {
   position: absolute;
   inset: 40px 12px 12px;
@@ -351,20 +350,14 @@ html.dark .wae-ae-footer .btn-apply:hover:active { transform: scale(var(--press-
   gap: 8px;
   pointer-events: none;
 }
-.wae-shimmer-row {
+.wae-search-shimmer .shimmer {
   height: 34px;
-  border-radius: 9px;
-  background: linear-gradient(90deg, #F0F0F0 25%, #F8F8F8 50%, #F0F0F0 75%);
-  background-size: 200% 100%;
-  animation: wae-shimmer-sweep calc(var(--duration-1100) * var(--anim-mult, 1)) var(--ease-linear) infinite;
+  --sk-base: #F0F0F0;
+  --sk-hi: #F8F8F8;
 }
-@keyframes wae-shimmer-sweep {
-  from { background-position: 200% 0; }
-  to   { background-position: -200% 0; }
-}
-html.dark .wae-shimmer-row {
-  background: linear-gradient(90deg, #1C1C1C 25%, #262626 50%, #1C1C1C 75%);
-  background-size: 200% 100%;
+html.dark .wae-search-shimmer .shimmer {
+  --sk-base: #1C1C1C;
+  --sk-hi: #262626;
 }
 
 /* Two-column grid: 1fr vertical-sep 1fr with equal gutters on both sides. */
@@ -431,6 +424,13 @@ html.dark .wae-shimmer-row {
   background-color: var(--wae-cat-color, #232323);
   background-image: var(--grid-texture-image);
   background-size: var(--grid-texture-size);
+  /* F29: same badge recipe as .wae-badge-icon (lines 94-97) — solid fill +
+     inset top highlight + soft inset shadow — so this colored surface reads
+     as the same class of object as the icon badge tags. */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -2px 0 rgba(17,17,17, 0.18),
+    inset 0 0 0 1px rgba(17,17,17, 0.10);
 }
 
 /* F8: bump the header's icon tile a touch (matches event-badge scale better
@@ -441,7 +441,8 @@ html.dark .wae-shimmer-row {
 }
 
 .wae-search-cat-header .wae-badge-icon .material-icons {
-  font-size: 16px;
+  /* F29: one step up the type scale from the prior 16px (--type-h4). */
+  font-size: var(--type-h3);
 }
 
 /* Header badge: plain glyph (no separate tile fill — the header itself is now
@@ -460,7 +461,8 @@ html.dark .wae-shimmer-row {
 
 /* Item 3b/4: header label — bolder white text with a shadow behind it. */
 .wae-search-cat-name {
-  font-size: 11px;
+  /* F29: one step up the type scale from the prior 11px (--type-micro). */
+  font-size: var(--type-meta);
   font-weight: 800;
   color: #FFFFFF;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
@@ -845,10 +847,10 @@ html.dark .wae-search-cat-header {
 
 /* Exit is the enter animation played backwards: same keyframe, same easing.
    `reverse` guarantees the exit exactly mirrors the enter transform/opacity
-   path; the duration drops one tier from --duration-320 to --duration-280
-   (faster-exits rule). */
+   path; duration is the shared popover-family exit token (faster-exits
+   rule) rather than a locally chosen literal tier. */
 .wae-search-leaving {
-  animation: wae-search-morph-in calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out) reverse both;
+  animation: wae-search-morph-in calc(var(--popover-exit-dur) * var(--anim-mult, 1)) var(--ease-out) reverse both;
   pointer-events: none;
 }
 

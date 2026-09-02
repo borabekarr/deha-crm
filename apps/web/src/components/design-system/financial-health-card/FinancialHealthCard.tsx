@@ -126,7 +126,6 @@ export default function FinancialHealthCard() {
         <div
           ref={cardCallbackRef}
           className={`fhc${isOpen ? ' open' : ''}`}
-          role="presentation"
           onClick={handleCardClick}
         >
 

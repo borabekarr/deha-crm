@@ -57,10 +57,7 @@ export function useFitScale(designWidth?: number): UseFitScaleResult {
 
   useLayoutEffect(() => {
     if (!node) return
-    if (!designWidth) {
-      setScale(1)
-      return
-    }
+    if (!designWidth) return
     const measure = () => {
       const style = window.getComputedStyle(node)
       const paddingX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight)
@@ -71,7 +68,7 @@ export function useFitScale(designWidth?: number): UseFitScaleResult {
     const observer = new ResizeObserver(measure)
     observer.observe(node)
     return () => observer.disconnect()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [node, designWidth, recompute])
 
   const contentRef = useCallback((n: HTMLDivElement | null) => {
@@ -98,8 +95,8 @@ export function useFitScale(designWidth?: number): UseFitScaleResult {
       mutationObserver.disconnect()
       observer.disconnect()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [contentNode, designWidth, recompute])
 
-  return { ref, contentRef, scale, contentWidth }
+  return { ref, contentRef, scale: designWidth ? scale : 1, contentWidth }
 }

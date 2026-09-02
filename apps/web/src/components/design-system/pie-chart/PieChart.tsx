@@ -18,6 +18,7 @@ import './PieChart.css'
 
 import { useState, useRef, useEffect, useMemo, type CSSProperties } from 'react'
 import { pie as d3Pie, arc as d3Arc, type PieArcDatum } from 'd3-shape'
+import { useSquircle } from '../../../lib/hooks/use-squircle'
 
 /* Deha-native slice palette — brand emerald + the semantic accents. */
 const DEHA_PALETTE = ['#10B981', '#3B82F6', '#EAB308', '#F97316', '#8B5CF6', '#EF4444']
@@ -41,7 +42,7 @@ function useTween(target: number, dur = 520) {
       if (t >= 1) clearInterval(id)
     }, 16)
     return () => clearInterval(id)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [target, dur])
   return val
 }
@@ -101,6 +102,11 @@ function PieChart({
 }: PieChartProps) {
   const [hovered, setHovered] = useState<number | null>(null)
   const [mount, setMount] = useState(0) // 0 → 1 global mount progress
+
+  /* squircle corner treatment — same card-primitives canon as Cards.tsx's
+     concentric-demo-outer/inner pair (36 outer / 28 inner). */
+  const outerShellRef = useSquircle<HTMLDivElement>()
+  const wrapRef = useSquircle<HTMLDivElement>()
 
   const colored = useMemo(
     () => data.map((d, i) => ({ ...d, color: d.color || DEHA_PALETTE[i % DEHA_PALETTE.length] })),
@@ -174,8 +180,16 @@ function PieChart({
     // preview route's full container width — same precedent as Shimmer's
     // centering wrapper.
     <div style={{ display: 'grid', placeItems: 'center' }}>
-    <div className="pc-outer-shell">
-    <div className="pc-wrap">
+    <div
+      className="pc-outer-shell"
+      ref={outerShellRef}
+      style={{ '--corner-radius': '36px' } as CSSProperties}
+    >
+    <div
+      className="pc-wrap"
+      ref={wrapRef}
+      style={{ '--corner-radius': '28px' } as CSSProperties}
+    >
       <div className="pc-head">
         <span className="pc-head-icon material-symbols-outlined" aria-hidden="true">pie_chart</span>
         <div className="pc-title">{title}</div>

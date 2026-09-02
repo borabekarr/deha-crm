@@ -30,7 +30,6 @@ export function TodoTaskEditorPopover({
     <>
       <div
         className={'td-scrim' + (popOpen ? ' show' : '')}
-        role="presentation"
         onClick={closePop}
       />
       <dialog
@@ -68,7 +67,6 @@ export function TodoTaskEditorPopover({
           <div
             className="seg fill"
             ref={refs.segRef}
-            role="presentation"
             onClick={onSegClick}
           >
             <span className="seg-pill" ref={refs.segPillRef} />

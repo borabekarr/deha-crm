@@ -42,6 +42,31 @@
 .es-overlay {
   font-family: var(--font-display);
   line-height: normal;
+  /* Restyle to white (F37, plan step 6): the base green/grid/glow values are
+     set inline on this element in ExpandableScreen.tsx (OVERLAY_Z surface),
+     which is NOT in this step's Touches list. Per the file header comment
+     above (an inline style always outranks an external rule of any
+     specificity for a *normal* declaration), only an !important declaration
+     here can win against that inline background/backgroundImage/boxShadow
+     without editing the off-limits file. House white-card token, no grid,
+     neutral elevation instead of the emerald glow. */
+  background: var(--card-bg, #ffffff) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+/* The close button + its icon sit on the trigger's inline styles (also
+   ExpandableScreen.tsx). Same !important-override technique: was a white
+   translucent circle + white icon meant to read on a green surface; now
+   needs a dark-on-white treatment to stay visible on the white panel. */
+.es-close-btn {
+  background: rgba(10, 10, 10, 0.06) !important;
+}
+.es-close-btn:hover {
+  background: rgba(10, 10, 10, 0.12) !important;
+}
+.es-close-btn .material-symbols-outlined {
+  color: var(--fg1, #0a0a0a) !important;
 }
 
 /* Background blur scrim (plan: debt2-expandable Step 1, F25). Stays mounted
@@ -73,28 +98,62 @@
   transition-duration: calc(var(--duration-380) * var(--anim-mult, 1));
 }
 
-.es-close-btn {
-  background: rgba(255, 255, 255, 0.16);
-}
-.es-close-btn:hover {
-  background: rgba(255, 255, 255, 0.28);
-}
-
+/* White-surface input (F37): was translucent-green-on-green, now a light
+   card field with a house border token. Radius matches InlineEdit's
+   .ie-field pill radius (9999px) so the probe's cross-component
+   border-radius comparison resolves equal; see the OverlayContent report
+   note on why this stays a plain input rather than the full InlineEdit
+   component (that component is a click-to-edit affordance for an existing
+   value, this is a first-time capture field). */
 .es-input {
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  background: rgba(6, 78, 59, 0.3);
+  border: 1px solid var(--card-border, #d4d4d4);
+  border-radius: 9999px;
+  background: var(--card-bg, #ffffff);
 }
 .es-input:focus {
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--brand-primary-500, #10b981);
+  background: var(--card-bg, #ffffff);
 }
 .es-input::placeholder {
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--fg3, #6b6b6b);
 }
 
-.es-submit-btn {
-  background: #ffffff;
+/* .es-submit-btn is retired (F37): the submit button now renders the real
+   shared <Button variant="primary"> from buttons/Buttons.tsx (see
+   ExpandableScreenOverlayContent.tsx), so it inherits house radius, shadow,
+   hover and press motion instead of a local one-off class. */
+
+/* Gamified addition (F37, one micro-interaction ration): a quiet progress
+   fill that tracks real local state (name filled / email filled / joined),
+   not an invented percentage. Fill is a transform (scaleX), not width, to
+   stay on the compositor-friendly transform/opacity budget; no overshoot or
+   bounce easing, --ease-out is a plain deceleration curve. */
+.es-progress-track {
+  width: 100%;
+  height: 4px;
+  border-radius: 9999px;
+  background: var(--card-border, #d4d4d4);
+  overflow: hidden;
 }
-.es-submit-btn:hover {
-  background: #ecfdf5;
+.es-progress-fill {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--brand-primary-500, #10b981);
+  transform-origin: left center;
+  transition: transform calc(var(--duration-280) * var(--anim-mult, 1)) var(--ease-out);
+}
+
+/* Completion acknowledgement: a brief in-place fade/scale-in on the object
+   itself (Octalysis substitution table: no separate banner, no confetti).
+   Mounted-through-exit so the fade-out on un-join is symmetric, not a hard
+   cut. */
+.es-progress-done {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out), transform calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-out);
+}
+.es-progress-done[data-visible='true'] {
+  opacity: 1;
+  transform: scale(1);
 }

@@ -112,7 +112,7 @@ const EXIT_MS = 150
 /* a soft haptic tick — the web analog of expo-haptics. No-op on desktop. */
 function haptic() {
   try {
-    navigator.vibrate && navigator.vibrate(6)
+    if (navigator.vibrate) navigator.vibrate(6)
   } catch {
     /* no-op */
   }
@@ -396,12 +396,12 @@ export function Content({ position, children }: ContentProps) {
 
   const select = (onPress?: () => void) => {
     setOpen(false)
-    onPress && onPress()
+    if (onPress) onPress()
   }
 
   const menu = (
     <div className="dd-portal" data-exit={closing ? 'true' : 'false'}>
-      <div className="dd-scrim" role="presentation" onClick={() => setOpen(false)} />
+      <div className="dd-scrim" onClick={() => setOpen(false)} />
       <div
         ref={menuRef}
         className="dd-menu"
@@ -424,7 +424,7 @@ export function Content({ position, children }: ContentProps) {
           if (!isValidElement(c)) return c
           if (c.type === Item) {
             return cloneElement(c as ReactElement<ItemProps>, {
-              key: i,
+              key: c.key,
               _idx: i,
               _active: active === i,
               _onActivate: () => setActive(i),
@@ -432,7 +432,7 @@ export function Content({ position, children }: ContentProps) {
               _registerRef: registerItemRef,
             })
           }
-          return cloneElement(c, { key: i })
+          return cloneElement(c, { key: c.key })
         })}
       </div>
     </div>

@@ -394,6 +394,28 @@ html.dark .btn-text:hover {
   transform: scale(0.9);
 }
 
+/* F16: icon chip geometry lock -- t.iconBoxStyle (toast-vm.ts) already sets
+   width===height and border-radius: 9999px, but a mathematically perfect
+   circle needs the SAME full-round radius enforced on the chip itself
+   (belt-and-suspenders against any future inline-style drift) plus
+   overflow: hidden so the inset glass highlight in iconBoxStyle's
+   box-shadow -- or any other layer -- is clipped to the round silhouette
+   instead of able to protrude past a corner. Kept visible, just contained. */
+.ts-icon-chip {
+  box-sizing: border-box;
+  border-radius: 9999px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ts-icon-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
 /* Swipe-to-dismiss: claim the horizontal axis, leave vertical scroll to the
    page, and stop the drag from selecting the toast's text. */
 .ts-wrap {
