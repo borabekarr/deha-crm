@@ -13,10 +13,10 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "@types/node": "26.2.0",
+    "@types/node": "26.4.1",
     "husky": "^9.1.7",
-    "knip": "^6.32.0",
-    "turbo": "^2.10.11",
+    "knip": "^6.34.0",
+    "turbo": "^2.10.12",
     "typescript": "^5.6.0"
   },
   "pnpm": {
