@@ -6,7 +6,7 @@ export function RootLayout() {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="border-b px-6 py-4">
-        <span className="text-lg font-semibold">Deha Design System — Showcase</span>
+        <span className="text-lg font-semibold">Deha CRM</span>
       </header>
       <main className="flex-1 px-6 py-8">
         <Outlet />

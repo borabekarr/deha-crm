@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Message Dropdown — Deha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../colors_and_type.css">
+<link rel="stylesheet" href="./_message-dropdown.css">
+<link rel="stylesheet" href="../../_shared/_darkmode.css">
+<script src="../../_shared/_darkmode.js"></script>
+<script src="../../_shared/_colormode.js"></script>
+<script src="../../_shared/_slowmo.js"></script>
+<link rel="stylesheet" href="../../_shared/_shared-feedback.css">
+<link rel="stylesheet" href="../../01-foundations/buttons/_buttons.css">
+<link rel="stylesheet" href="../../_shared/_capsule-recut.css">
+</head>
+<body>
+<div id="root" class="stage"></div>
+<button id="themeToggle" aria-label="Toggle dark mode"><span class="material-symbols-outlined">dark_mode</span></button>
+<script>
+  (function(){
+    var KEY = 'deha-theme';
+    var saved = localStorage.getItem(KEY);
+    if (saved === 'dark') document.documentElement.setAttribute('data-theme','dark');
+    var btn = document.getElementById('themeToggle');
+    function apply(dark){
+      var st = document.createElement('style');
+      st.textContent = '*,*::before,*::after{transition:none!important;animation:none!important}';
+      document.head.appendChild(st);
+      if (dark) document.documentElement.setAttribute('data-theme','dark');
+      else document.documentElement.removeAttribute('data-theme');
+      void document.documentElement.offsetWidth;
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ st.remove(); }); });
+    }
+    function sync(){
+      var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+      btn.querySelector('.material-symbols-outlined').textContent = dark ? 'light_mode' : 'dark_mode';
+    }
+    sync();
+    btn.addEventListener('click', function(){
+      var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+      apply(!dark); localStorage.setItem(KEY, dark ? 'light' : 'dark');
+      sync();
+    });
+  })();
+</script>
+
+<!-- Global SVG goo filter — referenced by .md-goo-wrap.gooey -->
+<svg width="0" height="0" style="position:absolute; pointer-events:none;" aria-hidden="true">
+  <defs>
+    <filter id="deha-goo-filter">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="9" result="blur"/>
+      <feColorMatrix in="blur" mode="matrix"
+                     values="1 0 0 0 0
+                             0 1 0 0 0
+                             0 0 1 0 0
+                             0 0 0 20 -9"
+                     result="goo"/>
+      <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+    </filter>
+  </defs>
+</svg>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+<script type="text/babel" src="./_message-dropdown.jsx"></script>
+</body></html>

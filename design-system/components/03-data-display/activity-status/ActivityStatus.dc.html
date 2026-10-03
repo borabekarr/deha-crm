@@ -1,0 +1,60 @@
+<!-- @dsCard group="Data Display" viewport="1200x800" name="Activity Status" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../../../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="../../../colors_and_type.css">
+<link rel="stylesheet" href="../../../styles.css">
+<script src="../../../_ds_bundle.js"></script>
+<style>
+@keyframes as-pulse { 0% { transform: scale(1); opacity: .55 } 100% { transform: scale(1.9); opacity: 0 } }
+@keyframes as-breathe { 0%,100% { transform: scale(1); opacity: .45 } 50% { transform: scale(1.35); opacity: .9 } }
+</style>
+</helmet>
+<div style="display:flex;flex-direction:column;gap:8px;width:100%;max-width:340px;box-sizing:border-box;font-family:var(--font-display)">
+
+  <div style="display:inline-flex;align-self:flex-start;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--border-hairline);border-radius:var(--radius-circle);background:var(--bg-card-solid)">
+    <div style="position:relative;width:8px;height:8px;flex:none">
+      <div style="position:absolute;inset:0;border-radius:var(--radius-circle);background:var(--brand-primary-400);transform-origin:50% 50%;pointer-events:none;animation:as-pulse 1800ms cubic-bezier(.22,1,.36,1) infinite"></div>
+      <div style="position:absolute;inset:0;border-radius:var(--radius-circle);background:var(--brand-primary-400)"></div>
+    </div>
+    <h2 style="margin:0;font-size:var(--type-body-sm);font-weight:var(--weight-bold);letter-spacing:var(--tracking-tight);line-height:var(--leading-none);color:var(--fg1)">Available to work</h2>
+  </div>
+
+  <div style="display:inline-flex;align-self:flex-start;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--border-hairline);border-radius:var(--radius-circle);background:var(--bg-card-solid)">
+    <div style="position:relative;width:8px;height:8px;flex:none">
+      <div style="position:absolute;inset:0;border-radius:var(--radius-circle);background:var(--semantic-warning);filter:blur(3px);transform-origin:50% 50%;pointer-events:none;animation:as-breathe 2200ms ease-in-out infinite"></div>
+      <div style="position:absolute;inset:0;border-radius:var(--radius-circle);background:var(--semantic-warning)"></div>
+    </div>
+    <h2 style="margin:0;font-size:var(--type-body-sm);font-weight:var(--weight-bold);letter-spacing:var(--tracking-tight);line-height:var(--leading-none);color:var(--fg1)">Busy right now</h2>
+  </div>
+
+  <div style="display:inline-flex;align-self:flex-start;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--border-hairline);border-radius:var(--radius-circle);background:var(--bg-card-solid)">
+    <div style="position:relative;width:8px;height:8px;flex:none">
+      <div style="position:absolute;inset:0;border-radius:var(--radius-circle);background:var(--semantic-danger)"></div>
+    </div>
+    <h2 style="margin:0;font-size:var(--type-body-sm);font-weight:var(--weight-bold);letter-spacing:var(--tracking-tight);line-height:var(--leading-none);color:var(--fg1)">Unavailable</h2>
+  </div>
+
+  <div style="display:inline-flex;align-self:flex-start;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--border-hairline);border-radius:var(--radius-circle);background:var(--bg-card-solid)">
+    <div style="position:relative;width:8px;height:8px;flex:none">
+      <div style="position:absolute;inset:0;border-radius:var(--radius-circle);background:var(--sexyblue-2);transform-origin:50% 50%;pointer-events:none;animation:as-pulse 2400ms ease-out infinite"></div>
+      <div style="position:absolute;inset:0;border-radius:var(--radius-circle);background:var(--sexyblue-2);transform-origin:50% 50%;pointer-events:none;animation:as-pulse 2400ms ease-out 800ms infinite"></div>
+      <div style="position:absolute;inset:0;border-radius:var(--radius-circle);background:var(--sexyblue-2);transform-origin:50% 50%;pointer-events:none;animation:as-pulse 2400ms ease-out 1600ms infinite"></div>
+      <div style="position:absolute;inset:0;border-radius:var(--radius-circle);background:var(--sexyblue-2)"></div>
+    </div>
+    <h2 style="margin:0;font-size:var(--type-body-sm);font-weight:var(--weight-bold);letter-spacing:var(--tracking-tight);line-height:var(--leading-none);color:var(--fg1)">Open for collabs</h2>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:400,&quot;height&quot;:300}}"></script>
+</body>
+</html>

@@ -1,0 +1,676 @@
+<!-- @dsCard group="AI Chat" name="PromptBar" subtitle="Composer with @ sources, / commands, model picker, dictation" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../../../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0">
+<link rel="stylesheet" href="../../../colors_and_type.css">
+<link rel="stylesheet" href="../../../styles.css">
+<script src="../../../_ds_bundle.js"></script>
+<style>
+  body { margin: 0; background: #FFFFFF; font-family: 'Montserrat', system-ui, sans-serif; }
+  body, button, input, select, textarea { font-family: 'Montserrat', system-ui, sans-serif; }
+  h1 { font-family: 'Montserrat', system-ui, sans-serif; font-weight: 900; }
+  a { color: #059669; text-decoration: none; }
+  @media (hover: hover) and (pointer: fine) { a:hover { color: #047857; text-decoration: underline; } }
+  .ms { font-family: 'Material Symbols Outlined'; font-weight: normal; line-height: 1; }
+  .pb-btn { position: relative; border: none; background: transparent; padding: 0; margin: 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; color: var(--fg4); transition: background-color 150ms, color 150ms, transform 150ms cubic-bezier(.22,1,.36,1); }
+  .pb-btn::after { content: ""; position: absolute; inset: 50% auto auto 50%; width: 44px; height: 44px; transform: translate(-50%,-50%); }
+  .pb-btn:hover { background: var(--bg-chip); color: var(--fg1); }
+  .pb-btn:active { transform: scale(0.94); }
+  .pb-btn:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 2px; }
+  .pb-row { border: none; background: transparent; padding: 0; margin: 0; cursor: pointer; text-align: left; }
+  .pb-send { cursor: pointer; }
+  .pb-send:disabled { cursor: default; }
+  /* shell → inner nested surfaces, capsule geometry (shell r42 · pad 10 → inner r32) */
+  .pb-shell { box-sizing: border-box; display: flex; background: var(--bg-chip); border: 1px solid var(--border-hairline); box-shadow: 0 4px 8px rgba(15,23,42,0.10); padding: 6px; border-radius: 9999px; }
+  .pb-inner { position: relative; isolation: isolate; flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; gap: 8px; border: 1px solid var(--border-hairline); background: var(--bg-card-solid); box-shadow: 0 10px 28px -8px rgba(15,23,42,0.28), 0 3px 8px -2px rgba(15,23,42,0.12), inset 0 0 0 1px rgba(15,23,42,0.03); padding: 8px; border-radius: 9999px; transition: border-color 150ms; }
+  .pb-input { box-sizing: border-box; min-width: 0; flex: 1 1 auto; order: 1; width: auto; resize: none; border: none; background: transparent; padding: 6px; font-size: var(--type-body-sm); font-weight: var(--weight-medium); line-height: 18px; color: var(--fg1); outline: none; overflow-wrap: anywhere; }
+
+  .pb-controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px; }
+
+  .pb-spacer { flex: 0 1 0; }
+  .pb-expandable { display: inline-flex; }
+  .pb-send { width: 30px; height: 30px; flex-shrink: 0; border-radius: 9999px; background: var(--bg-chip); color: var(--fg4); box-shadow: inset 0 0 0 1px var(--border-hairline); }
+  .pb-send.is-on { background: var(--brand-primary); color: #FFFFFF; box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -2px 0 rgba(0,0,0,0.16), 0 2px 8px -2px rgba(16,185,129,0.6); }
+  .pb-send.is-on:hover { background: var(--brand-primary-600); color: #FFFFFF; }
+  .pb-ctl { width: 30px; height: 30px; flex-shrink: 0; border-radius: 9999px; }
+  .pb-ctl.is-active { background: var(--bg-chip); color: var(--fg1); }
+  .pb-mic.is-active { background: var(--brand-primary-50); color: var(--brand-primary-600); }
+  .pb-model { height: 30px; flex-shrink: 0; align-items: center; gap: 3px; padding: 0 10px; font-size: var(--type-meta); font-weight: var(--weight-semibold); color: var(--fg2); border-radius: 9999px; }
+  .pb-connect { color: var(--brand-primary-600); }
+  .pb-connect:hover { text-decoration: underline; }
+  .pb-connect.is-connected { color: var(--brand-primary); }
+  .pb-chip { display: flex; height: 28px; align-items: center; gap: 8px; background: var(--bg-chip); padding: 4px 4px 4px 10px; font-size: var(--type-meta); font-weight: var(--weight-semibold); color: var(--fg2); box-shadow: inset 0 0 0 1px var(--border-hairline); border-radius: 9999px; animation: pb-pop-in 200ms cubic-bezier(0.23,1,0.32,1) both; }
+  /* rounded variant: same geometry, soft corners instead of capsules */
+  .pb-rounded .pb-shell { border-radius: var(--radius-lg); }
+  .pb-rounded .pb-inner { border-radius: var(--radius-md); }
+
+  .pb-rounded .pb-send, .pb-rounded .pb-ctl, .pb-rounded .pb-model, .pb-rounded .pb-chip, .pb-rounded .pb-chip .pb-btn { border-radius: var(--radius-sm); }
+  @keyframes pb-pop-in { from { opacity: 0; transform: translateY(4px) scale(0.98); } to { opacity: 1; transform: none; } }
+  @keyframes pb-eq { 0%, 100% { height: 35%; } 50% { height: 100%; } }
+  @keyframes pb-sweep { 0% { transform: translateX(-70%); opacity: 0; } 12% { opacity: 1; } 80% { opacity: 1; } 100% { transform: translateX(170%); opacity: 0; } }
+</style>
+</helmet>
+
+<div style="padding: 40px 48px 64px; display: flex; flex-direction: column; gap: 28px; color: #0A0A0A;">
+  <div style="display: flex; flex-direction: column; gap: 10px; max-width: 560px;">
+    <div style="font-size: var(--type-mini); font-weight: var(--weight-bold); letter-spacing: 0.12em; text-transform: uppercase; color: var(--fg4);">Bora · Controls &amp; input</div>
+    <h1 style="margin: 0; font-size: var(--type-h1); font-weight: var(--weight-black); letter-spacing: var(--tracking-tight);">PromptBar</h1>
+    <p style="margin: 0; font-size: var(--type-body); line-height: var(--leading-relaxed); color: var(--fg3); text-wrap: pretty;">A composer with real controls: attach, @ data sources, / commands, a model picker, dictation and send. Type @ or / to open the menus, ↑↓ + Enter to pick.</p>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; font-size: var(--type-micro); font-weight: var(--weight-bold);">
+      <span style="padding: 5px var(--space-3); border-radius: 100px; background: var(--bg-chip); color: var(--fg2);">shell r20 · pad 6 → inner r16</span>
+      <span style="padding: 5px var(--space-3); border-radius: 100px; background: var(--bg-chip); color: var(--fg2);">h30 controls · r pill/8</span>
+    </div>
+  </div>
+
+  <div data-promptbar data-variant="pill" onPointerDownCapture="{{ takeOver }}" onKeyDownCapture="{{ takeOver }}" style="display: flex; min-height: 240px; width: 100%; max-width: 420px; flex-direction: column; justify-content: flex-end; padding-bottom: 8px;">
+    <div ref="{{ anchorRef }}" style="position: relative;">
+
+      <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+        <div onMouseLeave="{{ leaveMenu }}" style="position: absolute; left: 0; right: 0; bottom: 100%; z-index: 10; margin-bottom: 10px; border-radius: var(--radius-lg); border: 1px solid var(--border-hairline); background: var(--bg-card-solid); padding: 6px; box-shadow: 0 10px 28px -8px rgba(15,23,42,0.28), 0 3px 8px -2px rgba(15,23,42,0.12), inset 0 0 0 1px rgba(15,23,42,0.03); animation: pb-pop-in 180ms cubic-bezier(0.23,1,0.32,1) both; transform-origin: bottom center;">
+          <span ref="{{ highlightRef }}" aria-hidden="true" style="position: absolute; left: 6px; right: 6px; border-radius: var(--radius-sm); background: var(--bg-chip); pointer-events: none; opacity: 0; transition: top 220ms cubic-bezier(0.23,1,0.32,1), height 220ms cubic-bezier(0.23,1,0.32,1), opacity 150ms ease;"></span>
+          <sc-for list="{{ rows }}" as="row" hint-placeholder-count="4">
+            <button type="button" class="pb-row" ref="{{ row.ref }}" onMouseDown="{{ row.onMouseDown }}" onMouseEnter="{{ row.onMouseEnter }}" onClick="{{ row.onClick }}" style="position: relative; z-index: 1; display: flex; height: 38px; width: 100%; align-items: center; gap: 12px; border-radius: var(--radius-sm); padding: 0 10px;">
+              <sc-if value="{{ row.hasIcon }}" hint-placeholder-val="{{ true }}">
+                <span style="display: flex; width: 22px; flex-shrink: 0; align-items: center; justify-content: center; color: var(--fg3);">
+                  <sc-if value="{{ row.glyph }}" hint-placeholder-val="{{ true }}">
+                    <span class="ms" style="font-size: 17px;">{{ row.glyph }}</span>
+                  </sc-if>
+                  <sc-if value="{{ row.isFigma }}" hint-placeholder-val="{{ false }}">
+                    <svg width="11" height="16" viewBox="0 0 38 57" aria-hidden="true">
+                      <path d="M9.5 57A9.5 9.5 0 0 0 19 47.5V38H9.5a9.5 9.5 0 0 0 0 19z" fill="#0ACF83"></path>
+                      <path d="M0 28.5A9.5 9.5 0 0 1 9.5 19H19v19H9.5A9.5 9.5 0 0 1 0 28.5z" fill="#A259FF"></path>
+                      <path d="M0 9.5A9.5 9.5 0 0 1 9.5 0H19v19H9.5A9.5 9.5 0 0 1 0 9.5z" fill="#F24E1E"></path>
+                      <path d="M19 0h9.5a9.5 9.5 0 1 1 0 19H19V0z" fill="#FF7262"></path>
+                      <path d="M38 28.5a9.5 9.5 0 1 1-19 0 9.5 9.5 0 0 1 19 0z" fill="#1ABCFE"></path>
+                    </svg>
+                  </sc-if>
+                  <sc-if value="{{ row.isSlack }}" hint-placeholder-val="{{ false }}">
+                    <svg width="15" height="15" viewBox="0 0 127 127" aria-hidden="true">
+                      <path d="M27.2 80c0 7.3-5.9 13.2-13.2 13.2C6.7 93.2.8 87.3.8 80c0-7.3 5.9-13.2 13.2-13.2h13.2V80zm6.6 0c0-7.3 5.9-13.2 13.2-13.2 7.3 0 13.2 5.9 13.2 13.2v33c0 7.3-5.9 13.2-13.2 13.2-7.3 0-13.2-5.9-13.2-13.2V80z" fill="#E01E5A"></path>
+                      <path d="M47 27.2c-7.3 0-13.2-5.9-13.2-13.2C33.8 6.7 39.7.8 47 .8c7.3 0 13.2 5.9 13.2 13.2v13.2H47zm0 6.7c7.3 0 13.2 5.9 13.2 13.2 0 7.3-5.9 13.2-13.2 13.2H13.9C6.6 60.3.7 54.4.7 47.1c0-7.3 5.9-13.2 13.2-13.2H47z" fill="#36C5F0"></path>
+                      <path d="M99.9 47.1c0-7.3 5.9-13.2 13.2-13.2 7.3 0 13.2 5.9 13.2 13.2 0 7.3-5.9 13.2-13.2 13.2H99.9V47.1zm-6.6 0c0 7.3-5.9 13.2-13.2 13.2-7.3 0-13.2-5.9-13.2-13.2V13.9C66.9 6.6 72.8.7 80.1.7c7.3 0 13.2 5.9 13.2 13.2v33.2z" fill="#2EB67D"></path>
+                      <path d="M80.1 99.8c7.3 0 13.2 5.9 13.2 13.2 0 7.3-5.9 13.2-13.2 13.2-7.3 0-13.2-5.9-13.2-13.2V99.8h13.2zm0-6.6c-7.3 0-13.2-5.9-13.2-13.2 0-7.3 5.9-13.2 13.2-13.2h33.1c7.3 0 13.2 5.9 13.2 13.2 0 7.3-5.9 13.2-13.2 13.2H80.1z" fill="#ECB22E"></path>
+                    </svg>
+                  </sc-if>
+                  <sc-if value="{{ row.isGmail }}" hint-placeholder-val="{{ false }}">
+                    <svg width="15" height="12" viewBox="0 0 256 193" aria-hidden="true">
+                      <path d="M58.182 192.05V93.14L27.507 65.077 0 49.504v125.091c0 9.658 7.825 17.455 17.455 17.455h40.727Z" fill="#4285F4"></path>
+                      <path d="M197.818 192.05h40.727c9.659 0 17.455-7.826 17.455-17.455V49.505l-31.156 17.837-27.026 25.798v98.91Z" fill="#34A853"></path>
+                      <path d="m58.182 93.14-4.174-38.647 4.174-36.989L128 69.868l69.818-52.364 4.669 34.992-4.669 40.644L128 145.504 58.182 93.14Z" fill="#EA4335"></path>
+                      <path d="M197.818 17.504V93.14L256 49.504V26.231c0-21.585-24.64-33.89-41.89-20.945l-16.292 12.218Z" fill="#FBBC04"></path>
+                      <path d="m0 49.504 26.759 20.07L58.182 93.14V17.504L41.89 5.286C24.61-7.66 0 4.646 0 26.23v23.273Z" fill="#C5221F"></path>
+                    </svg>
+                  </sc-if>
+                </span>
+              </sc-if>
+              <span style="flex-shrink: 0; font-size: var(--type-body-sm); font-weight: var(--weight-semibold); color: var(--fg1);">{{ row.name }}</span>
+              <span style="min-width: 0; flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: var(--type-meta); font-weight: var(--weight-medium); color: var(--fg4);">{{ row.desc }}</span>
+              <sc-if value="{{ row.showConnect }}" hint-placeholder-val="{{ false }}">
+                <span role="button" tabindex="-1" class="{{ row.connectClass }}" onClick="{{ row.onConnect }}" style="flex-shrink: 0; font-size: var(--type-meta); font-weight: var(--weight-bold);">{{ row.connectLabel }}</span>
+              </sc-if>
+            </button>
+          </sc-for>
+          <sc-if value="{{ noMatches }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; height: 38px; align-items: center; padding: 0 10px; font-size: var(--type-meta); font-weight: var(--weight-medium); color: var(--fg4);">No matches for “{{ query }}”</div>
+          </sc-if>
+          <div style="margin-top: 4px; border-top: 1px solid var(--border-hairline); padding: 8px 10px 4px; font-size: var(--type-micro); font-weight: var(--weight-bold); color: var(--fg4);">{{ menuHint }}</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ modelOpen }}" hint-placeholder-val="{{ false }}">
+        <div ref="{{ modelMenuRef }}" onMouseLeave="{{ leaveModelMenu }}" style="position: absolute; z-index: 10; width: 190px; border-radius: var(--radius-lg); border: 1px solid var(--border-hairline); background: var(--bg-card-solid); padding: 6px; box-shadow: 0 10px 28px -8px rgba(15,23,42,0.28), 0 3px 8px -2px rgba(15,23,42,0.12), inset 0 0 0 1px rgba(15,23,42,0.03); animation: pb-pop-in 180ms cubic-bezier(0.23,1,0.32,1) both; transform-origin: bottom left; left: 0; bottom: 100%;">
+          <span ref="{{ modelHighlightRef }}" aria-hidden="true" style="position: absolute; left: 6px; right: 6px; border-radius: var(--radius-sm); background: var(--bg-chip); pointer-events: none; opacity: 0; transition: top 220ms cubic-bezier(0.23,1,0.32,1), height 220ms cubic-bezier(0.23,1,0.32,1), opacity 150ms ease;"></span>
+          <sc-for list="{{ models }}" as="m" hint-placeholder-count="3">
+            <button type="button" class="pb-row" ref="{{ m.ref }}" onMouseDown="{{ m.onMouseDown }}" onMouseEnter="{{ m.onMouseEnter }}" onClick="{{ m.onClick }}" style="position: relative; z-index: 1; display: flex; height: 32px; width: 100%; align-items: center; gap: 8px; border-radius: var(--radius-sm); padding: 0 10px;">
+              <span style="min-width: 0; flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: var(--type-body-sm); font-weight: var(--weight-semibold); color: var(--fg1);">{{ m.name }}</span>
+              <span style="flex-shrink: 0; font-size: var(--type-micro); font-weight: var(--weight-semibold); color: var(--fg4);">{{ m.tag }}</span>
+              <sc-if value="{{ m.selected }}" hint-placeholder-val="{{ false }}">
+                <span class="ms" style="flex-shrink: 0; font-size: 14px; color: var(--brand-primary);">check</span>
+              </sc-if>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <div class="pb-shell" ref="{{ shellRef }}">
+      <div class="pb-inner">
+        {{ sweep }}
+        <span ref="{{ measureRef }}" aria-hidden="true" style="position: absolute; visibility: hidden; white-space: pre; font-size: 13px; font-weight: 500; line-height: 18px;">{{ draft }}</span>
+
+        <sc-if value="{{ hasAttachments }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; padding: 2px 2px 0;">
+            <sc-for list="{{ attachments }}" as="file" hint-placeholder-count="1">
+              <span class="pb-chip">
+                <span class="ms" style="font-size: 14px; color: var(--fg3);">description</span>
+                <span style="max-width: 140px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">{{ file.name }}</span>
+                <button type="button" class="pb-btn" aria-label="Remove attachment" onClick="{{ file.onRemove }}" style="width: 22px; height: 22px; border-radius: 9999px;">
+                  <span class="ms" style="font-size: 13px;">close</span>
+                </button>
+              </span>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <div class="pb-controls" ref="{{ controlsRef }}">
+          <textarea class="pb-input" ref="{{ inputRef }}" rows="1" aria-label="Prompt" value="{{ draft }}" placeholder="{{ placeholderText }}" onChange="{{ onInputChange }}" onKeyDown="{{ onInputKeyDown }}" onFocus="{{ onInputFocus }}" onBlur="{{ onInputBlur }}"></textarea>
+
+          <button type="button" class="pb-btn pb-ctl pb-expandable pb-plus" ref="{{ plusRef }}" aria-label="Add attachments and sources" onClick="{{ togglePlus }}" style="order: 1;">
+            <span class="ms" style="font-size: 19px;">add</span>
+          </button>
+
+          <button type="button" class="pb-btn pb-model pb-expandable" ref="{{ modelRef }}" aria-label="Choose model" onClick="{{ toggleModel }}" style="order: 2;">
+            {{ modelName }}
+            <span class="ms" style="font-size: 13px; color: var(--fg4);">expand_more</span>
+          </button>
+
+          <span class="pb-spacer" aria-hidden="true" style="order: 3;"></span>
+
+          <button type="button" class="pb-btn pb-ctl pb-mic pb-expandable" ref="{{ micRef }}" aria-label="Toggle dictation" onClick="{{ toggleListening }}" style="order: 4;">
+            {{ micIcon }}
+          </button>
+
+          <button type="button" class="pb-btn pb-send" ref="{{ sendRef }}" aria-label="Send" disabled="{{ sendDisabled }}" onClick="{{ send }}" style="order: 5;">
+            <span class="ms" style="font-size: 17px;">arrow_upward</span>
+          </button>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:560,&quot;height&quot;:700},&quot;variant&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Rounded&quot;,&quot;Pill&quot;],&quot;default&quot;:&quot;Pill&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Appearance&quot;},&quot;demo&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;placeholder&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Write a message…&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Content&quot;}}">
+const SOURCES = [
+  { key: "attach", name: "Add photos & files", desc: "Upload from your computer", glyph: "attach_file", attach: true },
+  { key: "scoop", name: "Scoop Data", desc: "Sales & churn metrics", glyph: "bar_chart" },
+  { key: "flavors", name: "Flavor records", desc: "26 makers, tags, links", glyph: "layers" },
+  { key: "web", name: "Web search", desc: "Real-time news and info", glyph: "language" },
+  { key: "figma", name: "Figma", desc: "Design-to-code workflows", brand: "figma" },
+  { key: "slack", name: "Slack", desc: "Read and manage Slack", brand: "slack" },
+  { key: "gmail", name: "Gmail", desc: "Read and manage Gmail", brand: "gmail", connect: true },
+];
+
+const COMMANDS = [
+  { key: "compare", name: "/compare", desc: "Flavor vs. last summer" },
+  { key: "churn-plan", name: "/churn-plan", desc: "Draft a churn schedule" },
+  { key: "restock", name: "/restock", desc: "Build a reorder list" },
+  { key: "draft-email", name: "/draft-email", desc: "Write a supplier email" },
+  { key: "summarize", name: "/summarize", desc: "Digest the thread so far" },
+];
+
+const MODELS = [
+  { key: "sprinkles-5", name: "Sprinkles 5", tag: "Flagship" },
+  { key: "vanilla-1", name: "Vanilla 1", tag: "Basic" },
+  { key: "freezer-burn", name: "Freezer Burn 0.4", tag: "Stale" },
+];
+
+const FILES = ["flavor-chart.png", "summer-menu.pdf", "pos-export.csv"];
+const DICTATION = "Compare pistachio weekends to last summer";
+
+const AUTO_STEPS = [
+  { draft: "", connect: false, model: "vanilla-1", hold: 1100 },
+  { draft: "@", active: 0, hold: 900 },
+  { draft: "@", active: 1, hold: 620 },
+  { draft: "@", active: 4, hold: 620 },
+  { draft: "@", active: 6, hold: 700 },
+  { draft: "@", active: 6, connect: true, hold: 1000 },
+  { draft: "", hold: 700 },
+  { draft: "/", active: 0, hold: 900 },
+  { draft: "/", active: 1, hold: 620 },
+  { draft: "/", active: 3, hold: 1000 },
+  { draft: "", hold: 800 },
+  { draft: "", modelOpen: true, hold: 1200 },
+  { draft: "", model: "sprinkles-5", hold: 2400 },
+  { draft: "", hold: 900 },
+];
+
+function parseToken(draft) {
+  const match = /(^|\s)([@/])([\w-]*)$/.exec(draft);
+  if (!match) return null;
+  return {
+    kind: match[2] === "@" ? "at" : "slash",
+    query: match[3].toLowerCase(),
+    start: match.index + match[1].length,
+  };
+}
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      draft: "",
+      dismissed: false,
+      plusOpen: false,
+      modelOpen: false,
+      modelKey: MODELS[1].key,
+      attachments: [],
+      connected: false,
+      active: 0,
+      listening: false,
+      auto: props.demo !== false,
+      autoStep: 0,
+      expanded: false,
+      engaged: false,
+      rowBox: null,
+      modelBox: null,
+      modelHovered: null,
+      modelMenuLeft: 0,
+      modelMenuBottom: 0,
+      sweepId: 0,
+      focused: false,
+    };
+    this.anchorRef = React.createRef();
+    this.controlsRef = React.createRef();
+    this.inputRef = React.createRef();
+    this.measureRef = React.createRef();
+    this.modelRef = React.createRef();
+    this.shellRef = React.createRef();
+    this.sendRef = React.createRef();
+    this.plusRef = React.createRef();
+    this.micRef = React.createRef();
+    this.highlightRef = React.createRef();
+    this.modelHighlightRef = React.createRef();
+    this.modelMenuRef = React.createRef();
+    this.rowEls = [];
+    this.modelEls = [];
+    this.timers = [];
+  }
+
+  /* ── derived ───────────────────────────────────────── */
+  get token() {
+    return this.state.dismissed ? null : parseToken(this.state.draft);
+  }
+  get menu() {
+    if (this.state.plusOpen) return "at";
+    const t = this.token;
+    return t ? t.kind : null;
+  }
+  get query() {
+    if (this.state.plusOpen) return "";
+    const t = this.token;
+    return t ? t.query : "";
+  }
+  get rowData() {
+    const menu = this.menu, query = this.query;
+    if (menu === "at") return SOURCES.filter((s) => s.name.toLowerCase().includes(query));
+    if (menu === "slash") return COMMANDS.filter((c) => c.name.slice(1).startsWith(query));
+    return [];
+  }
+
+  /* ── lifecycle ─────────────────────────────────────── */
+  componentDidMount() {
+    this.runAuto();
+    requestAnimationFrame(() => { this.measure(); this.syncVisuals(); });
+    this.applyVariant();
+    if (window.ResizeObserver && this.controlsRef.current) {
+      this.observer = new ResizeObserver(() => this.measure());
+      this.observer.observe(this.controlsRef.current);
+    }
+    this.onDocPointerDown = (event) => {
+      if (!event.target.closest || !event.target.closest("[data-promptbar]")) {
+        this.setState({ modelOpen: false, plusOpen: false });
+      }
+    };
+    document.addEventListener("pointerdown", this.onDocPointerDown);
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    prevProps = prevProps || {};
+    prevState = prevState || {};
+    if (prevProps.variant !== this.props.variant) this.applyVariant();
+    if (prevState.auto !== this.state.auto || prevState.autoStep !== this.state.autoStep) this.runAuto();
+    if (prevState.draft !== this.state.draft || prevState.expanded !== this.state.expanded) this.measure();
+    if (prevState.listening !== this.state.listening) this.runDictation();
+    this.syncVisuals();
+    const signature = this.menu + "|" + this.query;
+    if (this.signature !== undefined && this.signature !== signature) {
+      this.setState({ active: 0, engaged: false });
+    }
+    this.signature = signature;
+  }
+
+  componentWillUnmount() {
+    this.timers.forEach(clearTimeout);
+    if (this.observer) this.observer.disconnect();
+    document.removeEventListener("pointerdown", this.onDocPointerDown);
+  }
+
+  /* renderVals runs on every render; componentDidUpdate is not reliable in
+   * this runtime, so post-render work is scheduled from here. */
+  scheduleSync() {
+    if (this.syncQueued) return;
+    this.syncQueued = true;
+    requestAnimationFrame(() => {
+      this.syncQueued = false;
+      this.applyVariant();
+      this.measure();
+      this.syncVisuals();
+    });
+  }
+
+  applyVariant() {
+    const root = this.shellRef.current && this.shellRef.current.closest("[data-promptbar]");
+    if (root) root.classList.toggle("pb-rounded", (this.props.variant || "Pill") !== "Pill");
+  }
+
+  later(fn, ms) {
+    const t = setTimeout(fn, ms);
+    this.timers.push(t);
+    return t;
+  }
+
+  /* ── autoplay demo ─────────────────────────────────── */
+  runAuto() {
+    clearTimeout(this.autoTimer);
+    if (!this.state.auto) return;
+    const step = AUTO_STEPS[this.state.autoStep % AUTO_STEPS.length];
+    const patch = { draft: step.draft };
+    if (step.active !== undefined) patch.active = step.active;
+    if (step.active !== undefined) patch.engaged = true;
+    if (step.connect !== undefined) patch.connected = step.connect;
+    if (step.modelOpen !== undefined) patch.modelOpen = step.modelOpen;
+    if (step.model) {
+      patch.modelKey = step.model;
+      patch.modelOpen = false;
+      if (step.model === "sprinkles-5") patch.sweepId = this.state.sweepId + 1;
+    }
+    this.setState(patch);
+    this.autoTimer = this.later(() => this.setState((s) => ({ autoStep: s.autoStep + 1 })), step.hold);
+  }
+
+  runDictation() {
+    if (!this.state.listening) return;
+    this.later(() => {
+      if (!this.state.listening) return;
+      this.setState((s) => ({
+        draft: s.draft ? s.draft.replace(/\s+$/, "") + " " + DICTATION : DICTATION,
+        listening: false,
+      }));
+      if (this.inputRef.current) this.inputRef.current.focus();
+    }, 2200);
+  }
+
+  /* ── measurement ───────────────────────────────────── */
+  measure() {
+    const input = this.inputRef.current;
+    const controls = this.controlsRef.current;
+    const span = this.measureRef.current;
+    const modelButton = this.modelRef.current;
+    if (!input || !controls || !span || !modelButton) return;
+    if (!controls.clientWidth) return;
+    const fixed = 30 * 3 + modelButton.offsetWidth + 20;
+    const inline = controls.clientWidth - fixed;
+    const needsFullWidth = this.state.draft.indexOf("\n") >= 0 || span.offsetWidth + 8 > inline;
+    if (needsFullWidth !== this.state.expanded) this.setState({ expanded: needsFullWidth });
+    input.style.height = "0px";
+    const contentHeight = input.scrollHeight;
+    input.style.height = Math.min(Math.max(contentHeight, 30), 100) + "px";
+    input.style.overflowY = contentHeight > 100 ? "auto" : "hidden";
+  }
+
+  /* every state-driven visual is applied imperatively: style-attribute holes
+   * in this runtime resolve once and never update. */
+  syncVisuals() {
+    const s = this.state;
+    const menu = this.menu;
+    const rows = this.rowData;
+    const canSend = s.draft.trim().length > 0 || s.attachments.length > 0;
+
+    if (this.sendRef.current) this.sendRef.current.classList.toggle("is-on", canSend);
+    if (this.plusRef.current) this.plusRef.current.classList.toggle("is-active", s.plusOpen);
+    if (this.micRef.current) this.micRef.current.classList.toggle("is-active", s.listening);
+
+    const bar = this.highlightRef.current;
+    if (bar) {
+      const row = this.rowEls[s.active];
+      if (row) {
+        bar.style.top = row.offsetTop + "px";
+        bar.style.height = row.offsetHeight + "px";
+      }
+      bar.style.opacity = row && s.engaged && rows.length > 0 ? "1" : "0";
+    }
+
+    const modelBar = this.modelHighlightRef.current;
+    if (modelBar) {
+      const index = MODELS.findIndex((m) => m.key === s.modelKey);
+      const el = this.modelEls[s.modelHovered === null ? index : s.modelHovered];
+      if (el) {
+        modelBar.style.top = el.offsetTop + "px";
+        modelBar.style.height = el.offsetHeight + "px";
+      }
+      modelBar.style.opacity = el && s.modelHovered !== null ? "1" : "0";
+    }
+
+    const menuEl = this.modelMenuRef.current;
+    const anchor = this.anchorRef.current;
+    const trigger = this.modelRef.current;
+    if (menuEl && anchor && trigger && trigger.offsetParent) {
+      const a = anchor.getBoundingClientRect(), t = trigger.getBoundingClientRect();
+      menuEl.style.left = Math.max(0, Math.min(t.left - a.left, a.width - 190)) + "px";
+      menuEl.style.bottom = a.bottom - t.top + 8 + "px";
+    }
+  }
+
+  /* ── actions ───────────────────────────────────────── */
+  takeOver = (event) => {
+    if (!this.state.auto) return;
+    const patch = { auto: false };
+    if (event.target === this.inputRef.current) patch.draft = "";
+    this.setState(patch);
+  };
+
+  selectModel = (key) => {
+    const patch = { modelKey: key, modelOpen: false };
+    const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (key === "sprinkles-5" && !reduced) patch.sweepId = this.state.sweepId + 1;
+    this.setState(patch);
+  };
+
+  pick = (row) => {
+    const token = this.token;
+    const draft = this.state.draft;
+    const source = SOURCES.find((s) => s.key === row.key);
+    const patch = { plusOpen: false, dismissed: false };
+    if (source && source.attach) {
+      patch.attachments = this.state.attachments.concat(FILES[this.state.attachments.length % FILES.length]);
+      if (token) patch.draft = draft.slice(0, token.start);
+    } else if (this.menu === "at") {
+      patch.draft = (token ? draft.slice(0, token.start) : draft) + "@" + row.name + " ";
+    } else {
+      patch.draft = (token ? draft.slice(0, token.start) : draft) + row.name + " ";
+    }
+    this.setState(patch);
+    if (this.inputRef.current) this.inputRef.current.focus();
+  };
+
+  send = () => {
+    if (!(this.state.draft.trim().length > 0 || this.state.attachments.length > 0)) return;
+    if (this.props.onSend) this.props.onSend(this.state.draft.trim());
+    this.setState({ draft: "", attachments: [], plusOpen: false, modelOpen: false });
+  };
+
+  onKeyDown = (event) => {
+    const rows = this.rowData;
+    if (this.menu && rows.length > 0) {
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        this.setState((s) => ({
+          engaged: true,
+          active: (s.active + (event.key === "ArrowDown" ? 1 : rows.length - 1)) % rows.length,
+        }));
+        return;
+      }
+      if ((event.key === "Enter" && !event.shiftKey) || event.key === "Tab") {
+        event.preventDefault();
+        this.pick(rows[this.state.active]);
+        return;
+      }
+    }
+    if (event.key === "Escape") {
+      this.setState({ dismissed: true, plusOpen: false, modelOpen: false });
+      return;
+    }
+    if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
+      event.preventDefault();
+      this.send();
+    }
+  };
+
+  /* ── render values ─────────────────────────────────── */
+  renderVals() {
+    this.scheduleSync();
+    const s = this.state;
+    const pill = (this.props.variant || "Rounded") === "Pill";
+    const menu = this.menu;
+    const rows = this.rowData;
+    const canSend = s.draft.trim().length > 0 || s.attachments.length > 0;
+    const model = MODELS.find((m) => m.key === s.modelKey) || MODELS[1];
+
+    return {
+      draft: s.draft,
+      query: this.query,
+      menuOpen: !!menu,
+      menuHint: menu === "at" ? "Type to search sources & files" : "Type to search commands",
+      noMatches: !!menu && rows.length === 0,
+      modelOpen: s.modelOpen,
+      modelName: model.name,
+      placeholderText: s.listening ? "Listening…" : (this.props.placeholder || "Write a message…"),
+
+      anchorRef: this.anchorRef,
+      controlsRef: this.controlsRef,
+      inputRef: this.inputRef,
+      measureRef: this.measureRef,
+      modelRef: this.modelRef,
+      shellRef: this.shellRef,
+      sendRef: this.sendRef,
+      plusRef: this.plusRef,
+      micRef: this.micRef,
+      highlightRef: this.highlightRef,
+      modelHighlightRef: this.modelHighlightRef,
+      modelMenuRef: this.modelMenuRef,
+
+      sendDisabled: !canSend,
+      hasAttachments: s.attachments.length > 0,
+      attachments: s.attachments.map((name, i) => ({
+        name,
+        onRemove: () => this.setState({ attachments: s.attachments.filter((_, j) => j !== i) }),
+      })),
+
+      rows: rows.map((row, i) => {
+        const source = menu === "at" ? SOURCES.find((x) => x.key === row.key) : null;
+        return {
+          name: row.name,
+          desc: row.desc,
+          hasIcon: !!source,
+          glyph: source && !source.brand ? source.glyph : null,
+          isFigma: !!source && source.brand === "figma",
+          isSlack: !!source && source.brand === "slack",
+          isGmail: !!source && source.brand === "gmail",
+          showConnect: !!(source && source.connect),
+          connectLabel: s.connected ? "Connected" : "Connect",
+          connectClass: s.connected ? "pb-connect is-connected" : "pb-connect",
+          onConnect: (event) => {
+            event.stopPropagation();
+            this.setState((prev) => ({ connected: !prev.connected }));
+          },
+          ref: (el) => { this.rowEls[i] = el; },
+          onMouseDown: (event) => event.preventDefault(),
+          onMouseEnter: () => this.setState({ active: i, engaged: true }),
+          onClick: () => this.pick(row),
+        };
+      }),
+
+      models: MODELS.map((m, i) => ({
+        name: m.name,
+        tag: m.tag,
+        selected: m.key === s.modelKey,
+        ref: (el) => { this.modelEls[i] = el; },
+        onMouseDown: (event) => event.preventDefault(),
+        onMouseEnter: () => this.setState({ modelHovered: i }),
+        onClick: () => {
+          this.selectModel(m.key);
+          if (this.inputRef.current) this.inputRef.current.focus();
+        },
+      })),
+
+      micIcon: s.listening
+        ? React.createElement(
+            "span",
+            { style: { display: "flex", height: "13px", alignItems: "center", gap: "2.5px" } },
+            [0, 1, 2].map((i) =>
+              React.createElement("span", {
+                key: i,
+                style: {
+                  width: "2.5px",
+                  borderRadius: "9999px",
+                  background: "currentColor",
+                  height: "100%",
+                  animation: "pb-eq 900ms ease-in-out " + i * 150 + "ms infinite",
+                },
+              })
+            )
+          )
+        : React.createElement("span", { className: "ms", style: { fontSize: "17px" } }, "mic"),
+
+      sweep: s.sweepId
+        ? React.createElement(
+            "span",
+            {
+              key: s.sweepId,
+              "aria-hidden": "true",
+              style: {
+                position: "absolute",
+                inset: "-20% -10%",
+                zIndex: -1,
+                pointerEvents: "none",
+                borderRadius: "inherit",
+                overflow: "hidden",
+              },
+            },
+            React.createElement("span", {
+              style: {
+                position: "absolute",
+                top: 0,
+                bottom: 0,
+                left: 0,
+                width: "55%",
+                filter: "blur(10px)",
+                opacity: 0.85,
+                background:
+                  "linear-gradient(90deg, rgba(239,68,68,0) 0%, #EF4444 12%, #F97316 26%, #EAB308 40%, #10B981 56%, #06B6D4 70%, #6366F1 84%, rgba(168,85,247,0) 100%)",
+                animation: "pb-sweep 650ms cubic-bezier(0.16,1,0.3,1) both",
+              },
+            })
+          )
+        : null,
+
+      takeOver: this.takeOver,
+      leaveMenu: () => this.setState({ engaged: false }),
+      leaveModelMenu: () => this.setState({ modelHovered: null }),
+      togglePlus: () => {
+        this.setState((prev) => ({ plusOpen: !prev.plusOpen, modelOpen: false }));
+        if (this.inputRef.current) this.inputRef.current.focus();
+      },
+      toggleModel: () => this.setState((prev) => ({ modelOpen: !prev.modelOpen, plusOpen: false })),
+      toggleListening: () => this.setState((prev) => ({ listening: !prev.listening })),
+      onInputChange: (event) => this.setState({ draft: event.target.value, dismissed: false, plusOpen: false }),
+      onInputKeyDown: this.onKeyDown,
+      onInputFocus: () => this.setState({ focused: true }),
+      onInputBlur: () => this.setState({ focused: false }),
+      send: this.send,
+    };
+  }
+}
+</script>
+</body>
+</html>

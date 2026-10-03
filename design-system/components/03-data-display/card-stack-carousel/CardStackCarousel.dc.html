@@ -1,0 +1,201 @@
+<!-- @dsCard group="Data Display" viewport="1200x800" name="Card Stack Carousel" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../../../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<link rel="stylesheet" href="../../../colors_and_type.css">
+<link rel="stylesheet" href="../../../styles.css">
+<script src="../../../_ds_bundle.js"></script>
+<style>
+html, body { margin: 0; height: 100%; overflow: hidden; overscroll-behavior: none; font-family: 'Montserrat', system-ui, sans-serif; background: #F8FAFC; }
+a { color: #10B981; text-decoration: none; }
+a:hover { color: #34D399; text-decoration: none; }
+.material-icons { font-family: 'Material Icons'; }
+@media (prefers-reduced-motion: reduce) { [style*="transition:"] { transition-duration: 0.01ms !important; } }
+</style>
+</helmet>
+<div style="width:100%;height:100vh;box-sizing:border-box;overflow:hidden;background:#F8FAFC;background-image:radial-gradient(ellipse at top right, rgba(16,185,129,0.10) 0%, #F8FAFC 55%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:28px 20px 34px;font-family:'Montserrat',system-ui,sans-serif;touch-action:none;user-select:none" onWheel="{{ onWheel }}" onMouseDown="{{ onPointerDown }}" onMouseMove="{{ onPointerMove }}" onMouseUp="{{ onPointerUp }}" onMouseLeave="{{ onPointerUp }}" onTouchStart="{{ onPointerDown }}" onTouchMove="{{ onPointerMove }}" onTouchEnd="{{ onPointerUp }}">
+
+  <div style="width:100%;max-width:392px;flex:0 0 auto;position:relative;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px">
+    <span style="font-size:11px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#94A3B8">Bora · Story stack</span>
+    <span style="display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 12px;border-radius:100px;background:#0F172A;color:#E2E8F0;font-size:11px;font-weight:700;background-image:linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);background-size:7px 7px"><span class="material-icons" style="font-size:14px">swipe_down</span>{{ counter }}</span>
+  </div>
+
+  <div style="width:100%;max-width:392px;flex:1 1 auto;min-height:0;max-height:520px;margin-top:22px;position:relative;perspective:1600px;padding-bottom:6px">
+    <sc-for list="{{ stack }}" as="card" hint-placeholder-count="5">
+      <div style="{{ card.style }}" draggable="false">
+        <div style="position:relative;flex:1 1 40%;min-height:96px;border-radius:32px;overflow:hidden;background:#0B1220;border:1px solid rgba(255,255,255,0.07);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.04), 0 10px 28px -12px rgba(0,0,0,0.8)">
+          <div role="img" aria-label="{{ card.tag }}" style="{{ card.imageStyle }}"></div>
+          <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(11,18,32,0.72), rgba(11,18,32,0) 55%)"></div>
+          <span style="position:absolute;left:12px;top:12px;display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 13px;border-radius:100px;background-color:#10B981;color:#fff;font-size:11.5px;font-weight:800;letter-spacing:-0.01em;text-shadow:0 1px 2px rgba(0,0,0,0.2);box-shadow:inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -2px 0 rgba(15,23,42,0.16), 0 4px 12px -4px rgba(16,185,129,0.7);background-image:linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);background-size:7px 7px"><span class="material-icons" style="font-size:15px">bolt</span>{{ card.tag }}</span>
+        </div>
+        <div style="flex:0 0 auto;min-height:0;display:flex;flex-direction:column;justify-content:space-between;gap:14px;padding:18px 16px 14px">
+          <div style="display:flex;flex-direction:column;gap:8px;min-height:0;flex:0 1 auto;overflow:hidden">
+            <span style="font-size:10.5px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#64748B">{{ card.published }}</span>
+            <h2 style="margin:0;font-size:19px;font-weight:900;letter-spacing:-0.02em;line-height:1.25;color:#F8FAFC;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;max-height:3.75em;flex:0 0 auto;overflow:hidden;text-wrap:pretty">{{ card.heading }}</h2>
+            <p style="margin:0;font-size:13px;font-weight:500;line-height:1.5;color:#94A3B8;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;max-height:4.5em;flex:0 1 auto;min-height:0;overflow:hidden;text-wrap:pretty">{{ card.desc }}</p>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0">
+            <span style="display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 12px;border-radius:100px;background:rgba(255,255,255,0.06);color:#CBD5E1;font-size:11px;font-weight:700;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.08);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><span class="material-icons" style="font-size:14px;opacity:.8">schedule</span>3 min read</span>
+            <a href="{{ card.href }}" target="_blank" rel="noopener noreferrer" style="box-sizing:border-box;height:40px;padding:0 20px;border-radius:100px;background-color:#10B981;color:#fff;display:inline-flex;align-items:center;gap:7px;justify-content:center;font-size:12px;font-weight:800;letter-spacing:-0.01em;text-decoration:none;flex-shrink:0;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,0.18);box-shadow:inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -2px 0 rgba(15,23,42,0.18), 0 8px 20px -8px rgba(16,185,129,0.8);background-image:linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);background-size:7px 7px;transition:transform .18s ease" style-hover="transform:translateY(-2px)" style-active="transform:translateY(0) scale(.97)">Read More<span class="material-icons" style="font-size:15px">arrow_outward</span></a>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="flex:0 0 auto;display:flex;align-items:center;gap:8px">
+    <sc-for list="{{ dots }}" as="dot" hint-placeholder-count="5">
+      <button type="button" style="{{ dot.style }}" aria-label="{{ dot.label }}" onClick="{{ dot.go }}"></button>
+    </sc-for>
+  </div>
+  <span style="flex:0 0 auto;font-size:11px;font-weight:600;color:#94A3B8">Drag or scroll down to advance</span>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:440,&quot;height&quot;:660},&quot;offsetY&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:18,&quot;min&quot;:0,&quot;max&quot;:40,&quot;step&quot;:1,&quot;unit&quot;:&quot;px&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Stack&quot;},&quot;scaleStep&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0.05,&quot;min&quot;:0,&quot;max&quot;:0.12,&quot;step&quot;:0.01,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Stack&quot;},&quot;cards&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;Array&lt;{published:string;title:string;tag:string;image:string;href:string}&gt;&quot;}}">
+const DEFAULT_CARDS = [
+  { published: "Published recently", title: "The Rise of Ambient Computing\n\nTechnology is becoming quieter, smarter, and more seamlessly integrated into everyday environments.", tag: "Future Tech", image: "https://framerusercontent.com/images/M6FkXv8Gv9lc5yj0iaFCJ4gsFQ8.png?width=755&height=500", href: "https://framer.link/SYJK4Bv" },
+  { published: "Published 4 days ago", title: "Designing AI Interfaces That Feel Human\n\nHow modern teams create calmer and more intuitive AI experiences through motion, spacing, and smart interactions.", tag: "AI Experience", image: "https://framerusercontent.com/images/NILoew4DJQpVajxSCWjZkXfCeg.png?width=755&height=500", href: "https://framer.link/SYJK4Bv" },
+  { published: "Published recently", title: "Creative Workflows Powered by AI\n\nHow designers use generative tools for faster exploration, prototyping, and visual experimentation.", tag: "Creative AI", image: "https://framerusercontent.com/images/9CbtAUADvObFPbZwiTUTWb9OkA.png?width=755&height=619", href: "https://framer.link/SYJK4Bv" },
+  { published: "Published recently", title: "Minimal Design Systems for Fast Teams\n\nScalable visual systems that help creative teams move faster while staying consistent and elegant.", tag: "Design Systems", image: "https://framerusercontent.com/images/0oUqSeRT0bQl86uJT4rPYEI.png?width=755&height=619", href: "https://framer.link/SYJK4Bv" },
+  { published: "Published recently", title: "Exploring the intersection of artificial intelligence and creative design systems. How machine learning algorithms are reshaping digital experiences.", tag: "AI & Tech", image: "https://framerusercontent.com/images/ZoucbBgUZnY6n1ofCx926BBGn8.png?width=1083&height=1453", href: "https://framer.link/SYJK4Bv" }
+];
+
+class Component extends DCLogic {
+  state = { index: 0, drag: 0, dragging: false, phase: null, card: null };
+
+  componentWillUnmount() { this.clearTimers(); }
+
+  clearTimers() { (this._timers || []).forEach(clearTimeout); this._timers = []; }
+  later(fn, ms) { (this._timers = this._timers || []).push(setTimeout(fn, ms)); }
+
+  cards() {
+    const c = this.props.cards;
+    return Array.isArray(c) && c.length ? c : DEFAULT_CARDS;
+  }
+
+  clientY(e) { return e.touches && e.touches[0] ? e.touches[0].clientY : e.clientY; }
+
+  next() {
+    const n = this.cards().length;
+    const from = this.state.index;
+    this.clearTimers();
+    this.setState({ index: (from + 1) % n, phase: 'exit', card: from, drag: 0, dragging: false });
+    this.later(() => {
+      this.setState({ phase: 'settle' });
+      this.later(() => this.setState({ phase: null, card: null }), 40);
+    }, 640);
+  }
+
+  prev() {
+    const n = this.cards().length;
+    const to = (this.state.index - 1 + n) % n;
+    this.clearTimers();
+    this.setState({ index: to, phase: 'rise', card: to, drag: 0, dragging: false });
+    this.later(() => this.setState({ phase: null, card: null }), 40);
+  }
+
+  renderVals() {
+    const cards = this.cards();
+    const n = cards.length;
+    const offset = this.props.offsetY ?? 18;
+    const scaleStep = this.props.scaleStep ?? 0.05;
+    const { index, drag, dragging, phase, card } = this.state;
+    const OFFSTAGE = 'translateY(150%) scale(0.9) rotateX(8deg)';
+
+    const shell = "position:absolute;inset:0;box-sizing:border-box;background:#111827;border:1px solid rgba(255,255,255,0.08);border-radius:42px;padding:10px;display:flex;flex-direction:column;gap:0;overflow:hidden;cursor:grab;transform-style:preserve-3d;will-change:transform,opacity;";
+    const ease = "transition:transform .62s cubic-bezier(.32,.72,0,1), opacity .42s cubic-bezier(.32,.72,0,1), box-shadow .62s cubic-bezier(.32,.72,0,1);";
+    const exitEase = "transition:transform .62s cubic-bezier(.32,.72,0,1), opacity .38s cubic-bezier(.4,0,.6,1) .14s;";
+
+    const stack = cards.map((c, i) => {
+      const nl = String(c.title).split(/\n+/);
+      const active = i === card;
+      const isExiting = active && phase === 'exit';
+      const isRising = active && phase === 'rise';
+      const isSettling = active && phase === 'settle';
+      const depth = (i - index + n) % n;
+      const front = depth === 0 && !isExiting;
+      const pull = front && !isRising && drag > 0 ? drag : 0;
+      let transform, opacity, z;
+      if (isExiting || isRising) {
+        transform = OFFSTAGE;
+        opacity = isExiting ? 1 : 0;
+        z = n + 1;
+      } else {
+        transform = `translateY(${-offset * depth + pull}px) scale(${1 - scaleStep * depth})`;
+        opacity = depth >= 5 ? 0 : 1;
+        z = n - depth;
+      }
+      return {
+        key: i,
+        heading: nl[0],
+        desc: nl.length > 1 ? nl.slice(1).join(" ") : "",
+        published: c.published,
+        tag: c.tag,
+        imageStyle: `position:absolute;inset:0;background-image:url("${c.image}");background-size:cover;background-position:center`,
+        href: c.href,
+        style: shell +
+          `box-shadow:${front ? "0 30px 70px -20px rgba(15,23,42,0.55), 0 8px 20px -8px rgba(15,23,42,0.4)" : "0 14px 36px -16px rgba(15,23,42,0.45)"};` +
+          `transform:${transform};opacity:${opacity};z-index:${z};` +
+          `pointer-events:${front ? "auto" : "none"};` +
+          ((isRising || isSettling) ? "" : (dragging && front) ? "" : ease)
+      };
+    });
+
+    if (phase === 'exit' || phase === 'settle') {
+      const src = stack[card];
+      const rear = n - 1;
+      stack.push({
+        ...src,
+        key: 'ghost',
+        style: shell +
+          "box-shadow:0 14px 36px -16px rgba(15,23,42,0.45);" +
+          `transform:translateY(${-offset * rear}px) scale(${1 - scaleStep * rear});opacity:1;z-index:1;pointer-events:none;`
+      });
+    }
+
+    const dots = cards.map((_, i) => ({
+      label: `Go to card ${i + 1}`,
+      go: () => { this.clearTimers(); this.setState({ index: i, phase: null, card: null }); },
+      style: `width:${i === index ? 26 : 8}px;height:8px;padding:0;border-radius:100px;border:none;cursor:pointer;transition:all .3s cubic-bezier(.22,.61,.36,1);background:${i === index ? "#10B981" : "#CBD5E1"};box-shadow:${i === index ? "0 2px 8px -1px rgba(16,185,129,0.7), inset 0 1px 0 rgba(255,255,255,0.4)" : "none"};opacity:${i === index ? 1 : 0.6}`
+    }));
+
+    return {
+      stack, dots,
+      counter: `${index + 1} / ${n}`,
+      onWheel: e => {
+        const now = Date.now();
+        if (Math.abs(e.deltaY) < 8) return;
+        if (this._wheelAt && now - this._wheelAt < 620) return;
+        this._wheelAt = now;
+        if (e.deltaY > 0) this.next(); else this.prev();
+      },
+      onPointerDown: e => { this._start = this.clientY(e); this.setState({ dragging: true, drag: 0 }); },
+      onPointerMove: e => {
+        if (!this.state.dragging) return;
+        const d = this.clientY(e) - this._start;
+        this.setState({ drag: d > 0 ? d : d * 0.2 });
+      },
+      onPointerUp: () => {
+        if (!this.state.dragging) return;
+        const moved = this.state.drag;
+        if (moved > 70) this.next();
+        else this.setState({ dragging: false, drag: 0 });
+      }
+    };
+  }
+}
+
+</script>
+</body>
+</html>

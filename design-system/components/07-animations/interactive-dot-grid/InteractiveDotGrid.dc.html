@@ -1,0 +1,124 @@
+<!-- @dsCard group="Animations" name="Interactive Dot Grid" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../../../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="../../../colors_and_type.css">
+<link rel="stylesheet" href="../../_shared/_motion-tokens.css">
+<link rel="stylesheet" href="../../_shared/_base.css">
+<link rel="stylesheet" href="../../_shared/_darkmode.css">
+<link rel="stylesheet" href="../../../styles.css">
+<style>html,body{height:100%;margin:0;background:var(--bg-app)}x-dc{display:block;height:100%}#dc-root,#dc-root>.sc-host{height:100%}</style>
+</helmet>
+<div ref="{{ containerRef }}" style="position:relative;width:100%;height:100%;min-width:100px;min-height:100px;overflow:hidden;pointer-events:none">{{ layer }}</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":640,"height":400},"gridType":{"editor":"enum","options":["plus-lines","plus","dots-lines","dots","lines"],"default":"plus-lines","tsType":"string"},"showBackground":{"editor":"boolean","default":false,"tsType":"boolean"},"backgroundColor":{"editor":"color","default":"#E8F5A8","options":["#E8F5A8","#0B0B0C","#FFFFFF","#101828"],"tsType":"string"},"dotColor":{"editor":"color","default":"#9CA3AF","options":["#9CA3AF","#111827","#FFFFFF","#E8F5A8"],"tsType":"string"},"dotSize":{"editor":"float","default":4,"min":0.5,"step":0.1,"unit":"px","tsType":"number"},"spacing":{"editor":"int","default":60,"min":30,"max":500,"step":5,"unit":"px","tsType":"number"},"proximityRadius":{"editor":"int","default":150,"min":50,"max":300,"step":10,"unit":"px","tsType":"number"},"maxOpacity":{"editor":"range","default":1,"min":0,"max":1,"step":0.1,"tsType":"number"},"backgroundOpacity":{"editor":"range","default":0.15,"min":0,"max":1,"step":0.05,"tsType":"number"},"fadeDelay":{"editor":"int","default":0,"min":0,"max":2000,"step":100,"unit":"ms","tsType":"number"},"thickness":{"editor":"float","default":1.5,"min":0.1,"step":0.1,"unit":"px","tsType":"number"},"hoverDarken":{"editor":"range","default":0.3,"min":0,"max":1,"step":0.05,"tsType":"number"},"showGrain":{"editor":"boolean","default":true,"tsType":"boolean"},"grainOpacity":{"editor":"range","default":0.4,"min":0,"max":1,"step":0.02,"tsType":"number"},"grainScale":{"editor":"float","default":0.85,"min":0.2,"max":2,"step":0.05,"tsType":"number"}}'>
+class Component extends DCLogic {
+  state = { w: 800, h: 600, mx: -1000, my: -1000 };
+  containerRef = React.createRef();
+  componentDidMount() {
+    const el = this.containerRef.current;
+    if (!el) return;
+    this.ro = new ResizeObserver(es => {
+      const r = es[0] && es[0].contentRect; if (!r) return;
+      if (r.width !== this.state.w || r.height !== this.state.h) this.setState({ w: r.width, h: r.height });
+    });
+    this.ro.observe(el);
+    this.onMove = e => {
+      const c = this.containerRef.current; if (!c) return;
+      const r = c.getBoundingClientRect();
+      const x = e.clientX - r.left, y = e.clientY - r.top;
+      if (this.raf) return;
+      this.raf = requestAnimationFrame(() => { this.raf = null; this.setState({ mx: x, my: y }); });
+    };
+    window.addEventListener('mousemove', this.onMove);
+  }
+  componentWillUnmount() {
+    if (this.ro) this.ro.disconnect();
+    if (this.raf) cancelAnimationFrame(this.raf);
+    window.removeEventListener('mousemove', this.onMove);
+  }
+  cfg() {
+    const p = this.props;
+    return {
+      gridType: p.gridType ?? 'plus-lines',
+      showBackground: p.showBackground ?? false,
+      backgroundColor: p.backgroundColor ?? '#E8F5A8',
+      dotColor: p.dotColor ?? '#9CA3AF',
+      dotSize: p.dotSize ?? 4,
+      spacing: Math.max(8, p.spacing ?? 60),
+      proximityRadius: p.proximityRadius ?? 150,
+      maxOpacity: p.maxOpacity ?? 1,
+      backgroundOpacity: p.backgroundOpacity ?? 0.15,
+      fadeDelay: p.fadeDelay ?? 0,
+      thickness: p.thickness ?? 1.5,
+      hoverDarken: p.hoverDarken ?? 0.3,
+      showGrain: p.showGrain ?? true,
+      grainOpacity: p.grainOpacity ?? 0.4,
+      grainScale: p.grainScale ?? 0.85
+    };
+  }
+  opacityAt(x, y, c) {
+    const d = Math.hypot(this.state.mx - x, this.state.my - y);
+    if (d > c.proximityRadius) return c.backgroundOpacity;
+    return Math.max(c.backgroundOpacity, (1 - d / c.proximityRadius) * c.maxOpacity);
+  }
+  dots(c) {
+    const out = [];
+    const cols = Math.ceil(this.state.w / c.spacing), rows = Math.ceil(this.state.h / c.spacing);
+    for (let r = 0; r < rows; r++) for (let k = 0; k < cols; k++)
+      out.push({ x: k * c.spacing + c.spacing / 2, y: r * c.spacing + c.spacing / 2, key: k + '-' + r });
+    return out;
+  }
+  lines(c, hover) {
+    const cols = Math.ceil(this.state.w / c.spacing), rows = Math.ceil(this.state.h / c.spacing);
+    const trans = { transition: 'opacity ' + (0.2 + c.fadeDelay / 1000) + 's ease-out' };
+    const kids = [];
+    for (let i = 0; i < cols; i++) {
+      const x = i * c.spacing + c.spacing / 2;
+      kids.push(React.createElement('line', { key: 'v' + i, x1: x, y1: 0, x2: x, y2: this.state.h, stroke: c.dotColor, strokeWidth: 1, opacity: hover ? this.opacityAt(x, this.state.my, c) : c.backgroundOpacity, style: trans }));
+    }
+    for (let i = 0; i < rows; i++) {
+      const y = i * c.spacing + c.spacing / 2;
+      kids.push(React.createElement('line', { key: 'h' + i, x1: 0, y1: y, x2: this.state.w, y2: y, stroke: c.dotColor, strokeWidth: 1, opacity: hover ? this.opacityAt(this.state.mx, y, c) : c.backgroundOpacity, style: trans }));
+    }
+    return React.createElement('svg', { key: hover ? 'hoverlines' : 'gridlines', style: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' } }, kids);
+  }
+  plusPath(s, t) {
+    const h = t / 2, m = s / 2;
+    return 'M ' + (m - h) + ' 0 L ' + (m + h) + ' 0 L ' + (m + h) + ' ' + (m - h) + ' L ' + s + ' ' + (m - h) + ' L ' + s + ' ' + (m + h) + ' L ' + (m + h) + ' ' + (m + h) + ' L ' + (m + h) + ' ' + s + ' L ' + (m - h) + ' ' + s + ' L ' + (m - h) + ' ' + (m + h) + ' L 0 ' + (m + h) + ' L 0 ' + (m - h) + ' L ' + (m - h) + ' ' + (m - h) + ' Z';
+  }
+  renderVals() {
+    const c = this.cfg();
+    const trans = 'opacity ' + (0.2 + c.fadeDelay / 1000) + 's ease-out';
+    const children = [React.createElement('div', { key: 'bg', style: { position: 'absolute', inset: 0, backgroundColor: c.showBackground ? c.backgroundColor : 'transparent' } })];
+    if (c.gridType === 'dots-lines' || c.gridType === 'lines' || c.gridType === 'plus-lines') children.push(this.lines(c, false));
+    if (c.gridType === 'dots-lines' || c.gridType === 'dots') {
+      children.push(this.dots(c).map(d => React.createElement('div', { key: d.key, style: { position: 'absolute', left: d.x, top: d.y, width: c.dotSize, height: c.dotSize, borderRadius: '50%', backgroundColor: c.dotColor, opacity: this.opacityAt(d.x, d.y, c), transform: 'translate(-50%,-50%)', transition: trans, pointerEvents: 'none' } })));
+    } else if (c.gridType === 'plus' || c.gridType === 'plus-lines') {
+      const s = c.dotSize * 2;
+      const span = c.maxOpacity - c.backgroundOpacity;
+      children.push(this.dots(c).map(d => {
+        const o = this.opacityAt(d.x, d.y, c);
+        const extra = o > c.backgroundOpacity && span > 0 ? ((o - c.backgroundOpacity) / span) * c.hoverDarken : 0;
+        return React.createElement('svg', { key: d.key, style: { position: 'absolute', left: d.x, top: d.y, width: s, height: s, opacity: Math.min(1, o + extra), transform: 'translate(-50%,-50%)', transition: trans, pointerEvents: 'none' } }, React.createElement('path', { d: this.plusPath(s, c.thickness), fill: c.dotColor }));
+      }));
+    } else {
+      children.push(this.lines(c, true));
+    }
+    if (c.showGrain) {
+      const svg = "<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='" + c.grainScale + "' numOctaves='4' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/><feComponentTransfer><feFuncA type='linear' slope='2.2' intercept='-0.4'/></feComponentTransfer></filter><rect width='180' height='180' filter='url(%23n)'/></svg>";
+      children.push(React.createElement('div', { key: 'grain', style: { position: 'absolute', inset: 0, pointerEvents: 'none', opacity: c.grainOpacity, mixBlendMode: 'multiply', backgroundImage: 'url("data:image/svg+xml;utf8,' + svg.replace(/"/g, "'") + '")', backgroundRepeat: 'repeat', backgroundSize: '180px 180px' } }));
+    }
+    return { containerRef: this.containerRef, layer: children };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 <!-- structure adapted from vercel-design-md; values are Deha's own (truth: colors_and_type.css) -->
-<!-- Value source of truth: apps/web/design-system/colors_and_type.css and design-tokens.json. Do not hand-edit hex values here; regenerate from those files if tokens change. -->
+<!-- Value source of truth: design-system/colors_and_type.css and design-tokens.json. Do not hand-edit hex values here; regenerate from those files if tokens change. -->
 
 # Deha CRM — Design
 
@@ -36,7 +36,7 @@ motion_intent: 2
 
 ## Colors
 
-Every hex below is transcribed verbatim from `apps/web/design-system/colors_and_type.css`. Each
+Every hex below is transcribed verbatim from `design-system/colors_and_type.css`. Each
 step in the scale ENCODES A ROLE — use the role, not the raw hex, in component code.
 
 - `#10B981` (`--brand-primary` / `--fg-brand` / `--bg-accent`) — the only brand color; primary

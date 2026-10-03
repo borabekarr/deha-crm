@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="../../_shared/_base.css">
+  <link rel="stylesheet" href="../../_shared/_shared-feedback.css">
+  <link rel="stylesheet" href="../../_shared/_controls.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+  <link rel="stylesheet" href="./_controls.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../_shared/_darkmode.css">
+  <style>
+    body { background: #F1F5F9; }
+    html.dark body { background: #0B1220; }
+  </style>
+<link rel="stylesheet" href="../../../colors_and_type.css">
+<script src="../../_shared/_colormode.js"></script>
+<script src="../../_shared/_slowmo.js"></script>
+<link rel="stylesheet" href="../../_shared/_capsule-recut.css">
+</head>
+<body>
+  <div id="controls-root"></div>
+  <script src="../../_shared/_darkmode.js"></script>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+  <script type="text/babel" src="./_controls.jsx"></script>
+  <script type="text/babel" data-presets="react">
+    ReactDOM.createRoot(document.getElementById('controls-root')).render(React.createElement(window.Controls));
+  </script>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!-- @dsCard group="Data Display" viewport="1200x800" name="Task Rows" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../../../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="../../../colors_and_type.css">
+  <link rel="stylesheet" href="../../../styles.css">
+  <script src="../../../_ds_bundle.js"></script>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap">
+  <style>
+    body { margin: 0; background: #000; font-family: 'Montserrat', system-ui, sans-serif; }
+    body, button { font-family: 'Montserrat', system-ui, sans-serif; }
+    a { color: #34D399; text-decoration: none; }
+    a:hover { color: #6EE7B7; }
+    @keyframes tr-spin { to { transform: rotate(360deg); } }
+    @keyframes tr-pop-in { 0% { transform: scale(0.4); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    @keyframes tr-fade-in { 0% { opacity: 0; } 100% { opacity: 1; } }
+    @keyframes tr-fade-up { 0% { opacity: 0; transform: translateY(6px); } 100% { opacity: 1; transform: translateY(0); } }
+  </style>
+</helmet>
+
+<div class="dark" style="min-height:100vh;width:100%;display:flex;align-items:center;justify-content:center;background:#000;background-image:linear-gradient(to right, rgba(255,255,255,0.045) 1px, transparent 1px),linear-gradient(to bottom, rgba(255,255,255,0.045) 1px, transparent 1px);background-size:24px 24px;padding:32px 24px;box-sizing:border-box;">
+<div style="width:100%;max-width:492px;display:flex;flex-direction:column;gap:16px;padding:20px;border-radius:24px;background:rgba(28,28,28,0.72);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border:1px solid rgba(255,255,255,0.07);box-shadow:0 24px 60px -24px rgba(0,0,0,0.8);">
+  <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:0 2px;">
+    <span style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;color:#6B6B6B;">Agent run</span>
+    <span style="display:inline-flex;align-items:center;height:26px;padding:0 12px;border-radius:100px;background:rgba(255,255,255,0.06);font-size:11px;font-weight:800;letter-spacing:0.02em;color:#A1A1A1;font-variant-numeric:tabular-nums;">3 tasks</span>
+  </div>
+<div style="{{ containerStyle }}">
+  <sc-for list="{{ rows }}" as="row" hint-placeholder-count="3">
+    <div style="{{ row.wrapperStyle }}">
+      <button type="button" aria-expanded="{{ row.open }}" onClick="{{ row.onToggle }}" style="display:flex;align-items:center;gap:10px;height:48px;width:100%;padding:0 12px;text-align:left;background:transparent;border:none;cursor:pointer;font-family:var(--font-display);">
+        <span style="display:flex;width:24px;height:24px;flex-shrink:0;align-items:center;justify-content:center;">
+          <sc-if value="{{ row.isCheck }}" hint-placeholder-val="{{ false }}">
+            <span style="{{ row.badgePopStyle }}">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+            </span>
+          </sc-if>
+          <sc-if value="{{ row.isX }}" hint-placeholder-val="{{ false }}">
+            <span style="{{ row.badgePopStyleRed }}">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+            </span>
+          </sc-if>
+          <sc-if value="{{ row.isSpin }}" hint-placeholder-val="{{ false }}">
+            <span style="position:relative;display:inline-flex;width:24px;height:24px;align-items:center;justify-content:center;">
+              <svg width="24" height="24" style="{{ row.spinSvgStyle }}">
+                <circle cx="12" cy="12" r="11" fill="none" stroke="var(--border-hairline)" stroke-width="2"></circle>
+                <sc-if value="{{ row.spinActive }}" hint-placeholder-val="{{ false }}">
+                  <circle cx="12" cy="12" r="11" fill="none" stroke="var(--fg3)" stroke-width="2" stroke-linecap="round" stroke-dasharray="19.3 49.8"></circle>
+                </sc-if>
+              </svg>
+              <span style="position:relative;font-size:10.5px;font-weight:600;color:var(--fg1);font-variant-numeric:tabular-nums;">{{ row.step }}</span>
+            </span>
+          </sc-if>
+        </span>
+
+        <span style="min-width:0;flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:700;letter-spacing:-0.01em;color:#EDEDED;">{{ row.label }}</span>
+        <span style="font-size:12px;font-weight:600;color:#A1A1A1;font-variant-numeric:tabular-nums;flex-shrink:0;">{{ row.amount }}</span>
+
+        <sc-if value="{{ row.isPillSuccess }}" hint-placeholder-val="{{ false }}">
+          <span style="{{ row.pillSuccessStyle }}">{{ row.pillLabel }}</span>
+        </sc-if>
+        <sc-if value="{{ row.isPillDanger }}" hint-placeholder-val="{{ false }}">
+          <span style="{{ row.pillDangerStyle }}">
+            {{ row.pillLabel }}
+            <span style="display:inline-flex;animation:tr-spin 1.2s linear infinite;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"></path></svg>
+            </span>
+          </span>
+        </sc-if>
+
+        <span aria-hidden="true" style="display:flex;width:28px;height:28px;flex-shrink:0;margin-left:-8px;align-items:center;justify-content:center;color:var(--fg3);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="{{ row.chevronStyle }}">
+            <path d="M6 9l6 6 6-6"></path>
+          </svg>
+        </span>
+      </button>
+
+      <div style="{{ row.detailWrapStyle }}">
+        <div style="overflow:hidden;">
+          <div style="display:grid;grid-template-columns:24px 1fr;gap:10px;padding:0 12px;margin-bottom:16px;">
+            <span aria-hidden="true" style="margin:0 auto;height:100%;width:1px;background:rgba(255,255,255,0.14);"></span>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <sc-for list="{{ row.details }}" as="d" hint-placeholder-count="2">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <span style="font-size:13px;font-weight:500;color:#A1A1A1;">{{ d.label }}</span>
+                  <span style="font-size:11px;font-weight:800;letter-spacing:0.02em;color:#A1A1A1;font-variant-numeric:tabular-nums;">{{ d.meta }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-for>
+</div>
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:460,&quot;height&quot;:380},&quot;variant&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Capsules&quot;,&quot;options&quot;:[&quot;Capsules&quot;,&quot;List&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;showAmounts&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const TICKS = [600, 900, 2400, 1400, 2400, 600];
+
+const TASK_ROWS = [
+  {
+    key: "verify",
+    label: "Verified vendor records",
+    amount: "12 suppliers",
+    status: "done",
+    step: null,
+    details: [
+      { label: "Matched tax and contact IDs", meta: "12/12" },
+      { label: "Flagged stale records", meta: "0" },
+    ],
+  },
+  {
+    key: "index",
+    label: "Build reorder task list",
+    amount: "7 SKUs",
+    status: "running",
+    step: 2,
+    details: [
+      { label: "Reading POS export", meta: "3 files" },
+      { label: "Scoring stockout risk", meta: "68%" },
+    ],
+  },
+  {
+    key: "draft",
+    label: "Draft supplier emails",
+    amount: "2 messages",
+    status: "sequence",
+    step: 3,
+    details: [
+      { label: "Cone supplier follow-up", meta: "draft" },
+      { label: "Pistachio reorder note", meta: "draft" },
+    ],
+  },
+];
+
+class Component extends DCLogic {
+  state = { tick: 0, manualOpen: {} };
+
+  componentDidMount() {
+    this.scheduleTick();
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this._t);
+  }
+
+  scheduleTick() {
+    if (this.state.tick >= TICKS.length - 1) return;
+    this._t = setTimeout(() => {
+      this.setState((s) => ({ tick: s.tick + 1 }), () => this.scheduleTick());
+    }, TICKS[this.state.tick]);
+  }
+
+  toggleRow(key, open) {
+    this.setState((s) => ({ manualOpen: { ...s.manualOpen, [key]: !open } }));
+    this.props.onToggleRow && this.props.onToggleRow(key, !open);
+  }
+
+  renderVals() {
+    const isList = (this.props.variant ?? "Capsules") === "List";
+    const showAmounts = this.props.showAmounts ?? true;
+    const { tick, manualOpen } = this.state;
+    const row2 = tick < 3 ? "pending" : tick === 3 ? "failed" : "done";
+
+    const containerStyle = isList
+      ? { display: "flex", flexDirection: "column", width: "100%", gap: 0, overflow: "hidden", borderRadius: 18, background: "#1C1C1C", border: "1px solid rgba(255,255,255,0.06)" }
+      : { display: "flex", flexDirection: "column", width: "100%", gap: 8, minHeight: 196 };
+
+    const rows = TASK_ROWS.map((row, i) => {
+      const open = manualOpen[row.key] ?? (row.key === "index" && tick === 2);
+
+      let isCheck = false, isX = false, isSpin = false, spinActive = false, step = row.step ?? "";
+      if (row.status === "done") { isCheck = true; }
+      else if (row.status === "running") { isSpin = true; spinActive = true; }
+      else {
+        if (row2 === "pending") { isSpin = true; spinActive = false; }
+        else if (row2 === "failed") { isX = true; }
+        else { isCheck = true; }
+      }
+
+      let isPillSuccess = false, isPillDanger = false, pillLabel = "";
+      if (row.status === "done") { isPillSuccess = true; pillLabel = "Completed"; }
+      else if (row.status === "running") { /* no pill */ }
+      else {
+        if (row2 === "failed") { isPillDanger = true; pillLabel = "Failed"; }
+        else if (row2 === "done") { isPillSuccess = true; pillLabel = "Completed"; }
+      }
+
+      const wrapperStyle = {
+        alignSelf: "stretch",
+        overflow: "hidden",
+        background: isList ? "transparent" : "#1C1C1C",
+        border: isList ? "none" : "1px solid rgba(255,255,255,0.07)",
+        boxShadow: isList ? "none" : "0 1px 2px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.045)",
+        borderBottom: isList && i < TASK_ROWS.length - 1 ? "1px solid rgba(255,255,255,0.07)" : undefined,
+        borderRadius: isList ? 0 : (open ? 14 : 22),
+        transition: "border-radius 300ms, background-color 300ms",
+        animation: `tr-fade-up 450ms cubic-bezier(0.23,1,0.32,1) ${i * 80}ms both`,
+      };
+
+      return {
+        key: row.key,
+        label: row.label,
+        amount: showAmounts ? row.amount : "",
+        details: row.details,
+        open,
+        step,
+        isCheck, isX, isSpin, spinActive,
+        isPillSuccess, isPillDanger, pillLabel,
+        onToggle: () => this.toggleRow(row.key, open),
+        wrapperStyle,
+        badgePopStyle: { display: "flex", width: 22, height: 22, alignItems: "center", justifyContent: "center", borderRadius: "50%", background: "var(--semantic-success)", color: "#fff", animation: "tr-pop-in 300ms cubic-bezier(0.23,1,0.32,1) both" },
+        badgePopStyleRed: { display: "flex", width: 22, height: 22, alignItems: "center", justifyContent: "center", borderRadius: "50%", background: "var(--semantic-danger)", color: "#fff", animation: "tr-pop-in 300ms cubic-bezier(0.23,1,0.32,1) both" },
+        spinSvgStyle: spinActive ? { position: "absolute", inset: 0, animation: "tr-spin 1.1s linear infinite" } : { position: "absolute", inset: 0 },
+        pillSuccessStyle: { boxSizing: "border-box", display: "inline-flex", height: 26, flex: "0 0 auto", alignItems: "center", gap: 6, borderRadius: 100, padding: "0 12px", fontSize: 11, fontWeight: 800, letterSpacing: "0.02em", background: "rgba(16,185,129,0.16)", border: "1px solid rgba(16,185,129,0.28)", color: "#34D399", animation: "tr-fade-in 200ms ease-out both" },
+        pillDangerStyle: { boxSizing: "border-box", display: "inline-flex", height: 26, flex: "0 0 auto", alignItems: "center", gap: 6, borderRadius: 100, padding: "0 12px", fontSize: 11, fontWeight: 800, letterSpacing: "0.02em", background: "rgba(239,68,68,0.16)", border: "1px solid rgba(239,68,68,0.28)", color: "#F87171", animation: "tr-fade-in 200ms ease-out both" },
+        chevronStyle: { transition: "transform 300ms", transform: open ? "rotate(180deg)" : "rotate(0)" },
+        detailWrapStyle: { display: "grid", gridTemplateRows: open ? "1fr" : "0fr", opacity: open ? 1 : 0, transition: "grid-template-rows 300ms cubic-bezier(0.23,1,0.32,1), opacity 300ms cubic-bezier(0.23,1,0.32,1)" },
+      };
+    });
+
+    return { containerStyle, rows };
+  }
+}
+</script>
+</body>
+</html>

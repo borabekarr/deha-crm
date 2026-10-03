@@ -1,0 +1,110 @@
+<!-- @dsCard group="Marketing & Pricing" viewport="1200x800" name="Logo Strip" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../../../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="../../../colors_and_type.css">
+<link rel="stylesheet" href="../../../styles.css">
+<script src="../../../_ds_bundle.js"></script>
+</helmet>
+<div style="width:100%;max-width:1020px;margin-inline:auto;display:flex;align-items:center;justify-content:space-between;gap:32px;padding:32px;box-sizing:border-box">
+  <sc-for list="{{ slots }}" as="slot" hint-placeholder-count="5">
+    <div style="flex:1;min-width:0;display:flex" onMouseEnter="{{ slot.onEnter }}" onMouseLeave="{{ slot.onLeave }}">
+      <div style="position:relative;flex:1;min-width:0;height:24px;display:flex;align-items:center;justify-content:center;filter:grayscale(100%);opacity:0.6;transition:filter 300ms ease, opacity 300ms ease" style-hover="filter:grayscale(0%);opacity:1">
+        <img src="{{ slot.a }}" alt="" loading="lazy" decoding="async" draggable="false" style="{{ slot.aStyle }}">
+        <sc-if value="{{ slot.hasB }}" hint-placeholder-val="{{ true }}">
+          <img src="{{ slot.b }}" alt="" loading="lazy" decoding="async" draggable="false" style="{{ slot.bStyle }}">
+        </sc-if>
+      </div>
+    </div>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1020,&quot;height&quot;:120},&quot;count&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:5,&quot;min&quot;:1,&quot;max&quot;:5,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Content&quot;},&quot;animate&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motion&quot;},&quot;interval&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:2600,&quot;min&quot;:800,&quot;max&quot;:6000,&quot;step&quot;:100,&quot;unit&quot;:&quot;ms&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Motion&quot;}}">
+const BASE = "https://framerusercontent.com/images/";
+const LOGOS = [
+  "vOhpuZ5cDYj32p4y5t84ufDQ0.png?width=400&height=113",
+  "0Dw81Uh0YXMqTBuXqo8EfK6AX9U.png?width=400&height=62",
+  "9cLsJTufiuGD7xCltPXbqqptck.png?width=400&height=76",
+  "TnIJYQhjl07BIGEEcZm6LDcogY.png?width=400&height=178",
+  "vMgt1ewDe0bqvsa523tBQIAmLz4.png?width=400&height=74",
+  "p7cdlGfgiVApf7oQ5Jsh5ZB7E.png?width=400&height=73",
+  "wxeqVzxLwhZJwk7yxVqvXp7OlpE.png?width=400&height=130"
+];
+const PAIRS = [
+  ["vOhpuZ5cDYj32p4y5t84ufDQ0.png?width=400&height=113", "p7cdlGfgiVApf7oQ5Jsh5ZB7E.png?width=400&height=73"],
+  ["0Dw81Uh0YXMqTBuXqo8EfK6AX9U.png?width=400&height=62", "wxeqVzxLwhZJwk7yxVqvXp7OlpE.png?width=400&height=130"],
+  ["9cLsJTufiuGD7xCltPXbqqptck.png?width=400&height=76", null],
+  ["TnIJYQhjl07BIGEEcZm6LDcogY.png?width=400&height=178", null],
+  ["vMgt1ewDe0bqvsa523tBQIAmLz4.png?width=400&height=74", null]
+];
+
+class Component extends DCLogic {
+  state = { steps: [0, 0, 0, 0, 0], flipped: [false, false, false, false, false] };
+
+  componentDidMount() {
+    if (this.props.animate === false) return;
+    const every = this.props.interval ?? 2600;
+    this.timer = setInterval(() => {
+      this.setState(s => {
+        const flipped = s.flipped.slice();
+        const steps = s.steps.slice();
+        const len = flipped.length;
+        let i = ((this.tick ?? -1) + 1) % len;
+        for (let k = 0; k < len && i === this.hovered; k++) i = (i + 1) % len;
+        this.tick = i;
+        if (i === this.hovered) return null;
+        steps[i] = steps[i] + 1;
+        flipped[i] = !flipped[i];
+        return { flipped, steps };
+      });
+    }, every);
+  }
+
+  componentWillUnmount() { clearInterval(this.timer); }
+
+  slotStyle(visible, dir) {
+    return {
+      position: "absolute",
+      maxWidth: "100%",
+      maxHeight: "100%",
+      objectFit: "contain",
+      display: "block",
+      willChange: "transform",
+      transition: "opacity 600ms ease, filter 600ms ease, transform 600ms ease",
+      opacity: visible ? 1 : 0,
+      filter: visible ? "blur(0px)" : "blur(8px)",
+      transform: visible ? "none" : "translateY(" + dir + "40%)"
+    };
+  }
+
+  renderVals() {
+    const count = Math.max(1, Math.min(PAIRS.length, this.props.count ?? 5));
+    const n = LOGOS.length;
+    const slots = PAIRS.slice(0, count).map((p, i) => {
+      const s = this.state.steps[i];
+      const flipped = s % 2 === 1;
+      const cur = LOGOS[((i + s * 5) % n + n) % n];
+      const prev = LOGOS[((i + (s - 1) * 5) % n + n) % n];
+      return {
+        onEnter: () => { this.hovered = i; },
+        onLeave: () => { if (this.hovered === i) this.hovered = null; },
+        a: BASE + (flipped ? prev : cur),
+        b: BASE + (flipped ? cur : prev),
+        hasB: true,
+        aStyle: this.slotStyle(!flipped, "-"),
+        bStyle: this.slotStyle(flipped, "")
+      };
+    });
+    return { slots };
+  }
+}
+</script>
+</body>
+</html>

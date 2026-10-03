@@ -1,0 +1,244 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Star Rating</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --background: #ffffff;
+  --foreground: oklch(0.145 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --border: oklch(0.922 0 0);
+  --star-rating-yellow: hsl(38 90% 55%);
+  --star-rating-stroke: hsl(223 10% 80%);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --border: oklch(1 0 0 / 10%);
+    --star-rating-stroke: hsl(223 10% 30%);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --border: oklch(1 0 0 / 10%);
+  --star-rating-stroke: hsl(223 10% 30%);
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  background: var(--background); color: var(--foreground);
+  min-height: 100dvh; -webkit-font-smoothing: antialiased;
+  display: grid; place-items: center; padding: 16px;
+}
+button { font: inherit; }
+.demo { display: grid; gap: 40px; justify-items: center; }
+.cell { display: grid; gap: 30px; justify-items: center; }
+.cap { font-size: 12px; color: var(--muted-foreground); letter-spacing: -0.01em; }
+.chip-btn {
+  border: 1px solid var(--border); background: var(--background); color: var(--foreground);
+  border-radius: 999px; padding: 6px 12px; font-size: 13px; cursor: pointer;
+}
+.chip-btn:hover { background: var(--muted); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+/* ---------- star rating (ported from star-rating.tsx) ---------- */
+.star-rating { margin: auto; font-size: 14px; line-height: 1.5; color: var(--foreground); }
+.star-rating__row { position: relative; display: flex; }
+.star-rating__row.with-label { padding-bottom: 6px; }
+.star-rating__input { position: absolute; appearance: none; -webkit-appearance: none; margin: 0; }
+.star-rating__label { cursor: pointer; padding: 2px; }
+.star-rating__input:focus-visible ~ .star-rating__label { outline: none; }
+.star-rating__svg { pointer-events: none; display: block; width: 20px; height: 20px; overflow: visible; }
+.star-rating__display {
+  position: absolute; top: 100%; margin: 0; min-height: 16px; width: 100%;
+  text-align: center; font-size: 12px; line-height: 16px; font-weight: 500; color: var(--muted-foreground);
+}
+.star-rating__star-ring { stroke: var(--star-rating-yellow); }
+.star-rating__star-stroke { stroke: var(--star-rating-stroke); transition: stroke 300ms cubic-bezier(0.4,0,0.2,1); }
+.star-rating__star-fill {
+  fill: var(--star-rating-yellow); stroke: var(--star-rating-yellow);
+  transition: fill 300ms cubic-bezier(0.42,0,0.58,1), transform 300ms cubic-bezier(0.42,0,0.58,1);
+}
+.star-rating__star-line { stroke: var(--star-rating-yellow); stroke-dasharray: 12 13; stroke-dashoffset: -13; }
+
+.star-rating__label.d1 :is(.star-rating__star-ring,.star-rating__star-fill,.star-rating__star-line,.star-rating__star-stroke) { animation-delay: 0.05s; }
+.star-rating__label.d2 :is(.star-rating__star-ring,.star-rating__star-fill,.star-rating__star-line,.star-rating__star-stroke) { animation-delay: 0.1s; }
+.star-rating__label.d3 :is(.star-rating__star-ring,.star-rating__star-fill,.star-rating__star-line,.star-rating__star-stroke) { animation-delay: 0.15s; }
+.star-rating__label.d4 :is(.star-rating__star-ring,.star-rating__star-fill,.star-rating__star-line,.star-rating__star-stroke) { animation-delay: 0.2s; }
+
+/* verbatim interaction styles */
+.star-rating__star-ring,
+.star-rating__star-fill,
+.star-rating__star-line,
+.star-rating__star-stroke {
+  animation-duration: 1s;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: forwards;
+}
+.star-rating__star-fill { transform: scale(0); }
+
+.star-rating__input:hover ~ [data-rating]:not([hidden]) { display: none; }
+.star-rating__input-1:hover ~ [data-rating="1"][hidden],
+.star-rating__input-2:hover ~ [data-rating="2"][hidden],
+.star-rating__input-3:hover ~ [data-rating="3"][hidden],
+.star-rating__input-4:hover ~ [data-rating="4"][hidden],
+.star-rating__input-5:hover ~ [data-rating="5"][hidden],
+.star-rating__input:checked:hover ~ [data-rating]:not([hidden]) { display: block; }
+
+.star-rating__input-1:hover ~ .star-rating__label:first-of-type .star-rating__star-stroke,
+.star-rating__input-2:hover ~ .star-rating__label:nth-of-type(-n + 2) .star-rating__star-stroke,
+.star-rating__input-3:hover ~ .star-rating__label:nth-of-type(-n + 3) .star-rating__star-stroke,
+.star-rating__input-4:hover ~ .star-rating__label:nth-of-type(-n + 4) .star-rating__star-stroke,
+.star-rating__input-5:hover ~ .star-rating__label:nth-of-type(-n + 5) .star-rating__star-stroke {
+  stroke: var(--star-rating-yellow);
+  transform: scale(1);
+}
+.star-rating__input-1:checked ~ .star-rating__label:first-of-type .star-rating__star-ring,
+.star-rating__input-2:checked ~ .star-rating__label:nth-of-type(-n + 2) .star-rating__star-ring,
+.star-rating__input-3:checked ~ .star-rating__label:nth-of-type(-n + 3) .star-rating__star-ring,
+.star-rating__input-4:checked ~ .star-rating__label:nth-of-type(-n + 4) .star-rating__star-ring,
+.star-rating__input-5:checked ~ .star-rating__label:nth-of-type(-n + 5) .star-rating__star-ring { animation-name: star-rating-ring; }
+.star-rating__input-1:checked ~ .star-rating__label:first-of-type .star-rating__star-stroke,
+.star-rating__input-2:checked ~ .star-rating__label:nth-of-type(-n + 2) .star-rating__star-stroke,
+.star-rating__input-3:checked ~ .star-rating__label:nth-of-type(-n + 3) .star-rating__star-stroke,
+.star-rating__input-4:checked ~ .star-rating__label:nth-of-type(-n + 4) .star-rating__star-stroke,
+.star-rating__input-5:checked ~ .star-rating__label:nth-of-type(-n + 5) .star-rating__star-stroke { animation-name: star-rating-stroke; }
+.star-rating__input-1:checked ~ .star-rating__label:first-of-type .star-rating__star-line,
+.star-rating__input-2:checked ~ .star-rating__label:nth-of-type(-n + 2) .star-rating__star-line,
+.star-rating__input-3:checked ~ .star-rating__label:nth-of-type(-n + 3) .star-rating__star-line,
+.star-rating__input-4:checked ~ .star-rating__label:nth-of-type(-n + 4) .star-rating__star-line,
+.star-rating__input-5:checked ~ .star-rating__label:nth-of-type(-n + 5) .star-rating__star-line { animation-name: star-rating-line; }
+.star-rating__input-1:checked ~ .star-rating__label:first-of-type .star-rating__star-fill,
+.star-rating__input-2:checked ~ .star-rating__label:nth-of-type(-n + 2) .star-rating__star-fill,
+.star-rating__input-3:checked ~ .star-rating__label:nth-of-type(-n + 3) .star-rating__star-fill,
+.star-rating__input-4:checked ~ .star-rating__label:nth-of-type(-n + 4) .star-rating__star-fill,
+.star-rating__input-5:checked ~ .star-rating__label:nth-of-type(-n + 5) .star-rating__star-fill { animation-name: star-rating-fill; }
+.star-rating__input-1:not(:checked):hover ~ .star-rating__label:first-of-type .star-rating__star-fill,
+.star-rating__input-2:not(:checked):hover ~ .star-rating__label:nth-of-type(2) .star-rating__star-fill,
+.star-rating__input-3:not(:checked):hover ~ .star-rating__label:nth-of-type(3) .star-rating__star-fill,
+.star-rating__input-4:not(:checked):hover ~ .star-rating__label:nth-of-type(4) .star-rating__star-fill,
+.star-rating__input-5:not(:checked):hover ~ .star-rating__label:nth-of-type(5) .star-rating__star-fill { fill: var(--background); }
+
+/* keyboard focus ring on the star for the focused radio */
+.star-rating__input-1:focus-visible ~ .star-rating__label:nth-of-type(1),
+.star-rating__input-2:focus-visible ~ .star-rating__label:nth-of-type(2),
+.star-rating__input-3:focus-visible ~ .star-rating__label:nth-of-type(3),
+.star-rating__input-4:focus-visible ~ .star-rating__label:nth-of-type(4),
+.star-rating__input-5:focus-visible ~ .star-rating__label:nth-of-type(5) { outline: 2px solid var(--star-rating-yellow); outline-offset: 1px; border-radius: 6px; }
+
+@keyframes star-rating-ring {
+  from, 20% { animation-timing-function: ease-in; opacity: 1; r: 8px; stroke-width: 16px; transform: scale(0); }
+  35% { animation-timing-function: ease-out; opacity: 0.5; r: 8px; stroke-width: 16px; transform: scale(1); }
+  50%, to { opacity: 0; r: 16px; stroke-width: 0; transform: scale(1); }
+}
+@keyframes star-rating-fill {
+  from, 40% { animation-timing-function: ease-out; transform: scale(0); }
+  60% { animation-timing-function: ease-in-out; transform: scale(1.2); }
+  80% { transform: scale(0.9); }
+  to { transform: scale(1); }
+}
+@keyframes star-rating-stroke {
+  from { transform: scale(1); }
+  20%, to { transform: scale(0); }
+}
+@keyframes star-rating-line {
+  from, 40% { animation-timing-function: ease-out; stroke-dasharray: 1 23; stroke-dashoffset: 1; }
+  60%, to { stroke-dasharray: 12 13; stroke-dashoffset: -13; }
+}
+</style>
+</head>
+<body>
+<main class="demo">
+  <div class="cell">
+    <div data-star-rating data-show-label="true"></div>
+    <span class="cap">With label</span>
+  </div>
+  <div class="cell">
+    <div data-star-rating data-show-label="false"></div>
+    <span class="cap">Without label</span>
+  </div>
+  <button type="button" class="chip-btn" id="themeBtn">Toggle theme</button>
+</main>
+
+<script>
+(() => {
+  const RATINGS = [
+    { id: 1, name: "Terrible" }, { id: 2, name: "Bad" }, { id: 3, name: "OK" },
+    { id: 4, name: "Good" }, { id: 5, name: "Excellent" },
+  ];
+  const STAR_POINTS = "0,15 4.41,6.07 14.27,4.64 7.13,-2.32 8.82,-12.14 0,-7.5 -8.82,-12.14 -7.13,-2.32 -14.27,4.64 -4.41,6.07";
+  const starSvg = () => `
+    <svg class="star-rating__svg" width="20" height="20" viewBox="0 0 32 32" aria-hidden="true">
+      <g transform="translate(16,16)"><circle class="star-rating__star-ring" fill="none" stroke-width="16" r="8" transform="scale(0)"/></g>
+      <g stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <g transform="translate(16,16) rotate(180)">
+          <polygon class="star-rating__star-stroke" points="${STAR_POINTS}" fill="none"/>
+          <polygon class="star-rating__star-fill" points="${STAR_POINTS}"/>
+        </g>
+        <g transform="translate(16,16)">
+          ${[0, 72, 144, 216, 288].map(a => `<polyline class="star-rating__star-line" transform="rotate(${a})" points="0 4,0 16"/>`).join("")}
+        </g>
+      </g>
+    </svg>`;
+
+  let seq = 0;
+  document.querySelectorAll("[data-star-rating]").forEach(host => {
+    const showLabel = host.dataset.showLabel !== "false";
+    const name = `star-rating-${++seq}`;
+    let prev = 0;
+    const form = document.createElement("form");
+    form.className = "star-rating";
+    form.addEventListener("submit", e => e.preventDefault());
+    form.innerHTML = `
+      <div class="star-rating__row${showLabel ? " with-label" : ""}" role="radiogroup" aria-label="Rating">
+        ${RATINGS.map(r => `<input id="${name}-${r.id}" class="star-rating__input star-rating__input-${r.id}" type="radio" name="${name}" value="${r.id}">`).join("")}
+        ${RATINGS.map(r => `<label class="star-rating__label" for="${name}-${r.id}">${starSvg()}<span class="sr-only">${r.id === 1 ? `1 star, ${r.name}` : `${r.id} stars, ${r.name}`}</span></label>`).join("")}
+        ${showLabel ? RATINGS.map(r => `<p class="star-rating__display" data-rating="${r.id}" hidden>${r.name}</p>`).join("") : ""}
+      </div>`;
+    host.replaceWith(form);
+
+    const labels = form.querySelectorAll(".star-rating__label");
+    form.querySelectorAll(".star-rating__input").forEach(input => {
+      input.addEventListener("change", () => {
+        const next = +input.value;
+        // stagger delays for stars jumped over (same rule as the React source)
+        let delay = 0;
+        labels.forEach((lab, i) => {
+          lab.classList.remove("d1", "d2", "d3", "d4");
+          const id = i + 1;
+          if (id > prev + 1 && id <= next) { delay += 1; if (delay <= 4) lab.classList.add(`d${delay}`); }
+        });
+        prev = next;
+        form.querySelectorAll("[data-rating]").forEach(p => { p.hidden = +p.dataset.rating !== next; });
+      });
+    });
+  });
+
+  const root = document.documentElement;
+  document.getElementById("themeBtn").addEventListener("click", () => {
+    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+  });
+})();
+</script>
+</body>
+</html>
+
+</body></html>
