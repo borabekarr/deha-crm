@@ -58,11 +58,11 @@ interface ShimmerGroupValue {
 
 const ShimmerCtx = createContext<ShimmerGroupValue | null>(null)
 
-export interface ShimmerGroupProps extends ShimmerGroupValue {
+interface ShimmerGroupProps extends ShimmerGroupValue {
   children?: ReactNode
 }
 
-export function ShimmerGroup({
+function ShimmerGroup({
   isLoading,
   preset,
   duration,

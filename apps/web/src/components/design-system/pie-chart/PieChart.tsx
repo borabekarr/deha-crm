@@ -51,13 +51,13 @@ function formatNumber(n: number) {
   return Math.round(n).toLocaleString('en-US')
 }
 
-export interface PieChartDatum {
+interface PieChartDatum {
   label: string
   value: number
   color?: string
 }
 
-export interface PieChartProps {
+interface PieChartProps {
   data?: PieChartDatum[]
   title?: string
   size?: number

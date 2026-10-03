@@ -43,10 +43,10 @@ function IcoWarn() {
 
 // ── the field ────────────────────────────────────────────────────────────
 
-export type OtpVariant = 'fadeSlideDown' | 'fadeScale' | 'slideUp' | 'flip'
+type OtpVariant = 'fadeSlideDown' | 'fadeScale' | 'slideUp' | 'flip'
 type OtpStatus = 'idle' | 'verifying' | 'error' | 'success'
 
-export interface OtpInputProps {
+interface OtpInputProps {
   count: number
   expected: string
   variant: OtpVariant
@@ -56,7 +56,7 @@ export interface OtpInputProps {
   onFinished?: (value: string) => void
 }
 
-export function OtpInput({ count, expected, variant, mask, autoFocus, onChange, onFinished }: OtpInputProps) {
+function OtpInput({ count, expected, variant, mask, autoFocus, onChange, onFinished }: OtpInputProps) {
   const [value, setValue] = useState('')
   const [status, setStatus] = useState<OtpStatus>('idle') // idle | verifying | error | success
   const [focused, setFocused] = useState(false)

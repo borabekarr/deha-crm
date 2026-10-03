@@ -30,7 +30,7 @@ import { useCallback, useEffect, useEffectEvent, useRef, useState, type Keyboard
 
 // ---------- Sample data ----------
 
-export interface MessageDropdownItem {
+interface MessageDropdownItem {
   id: string
   sender: string
   time: string
@@ -68,7 +68,7 @@ const SAMPLE_MESSAGES: MessageDropdownItem[] = [
 
 // ---------- Component ----------
 
-export interface MessageDropdownProps {
+interface MessageDropdownProps {
   messages?: MessageDropdownItem[]
   gooey?: boolean
   speed?: 'normal' | 'slow'
@@ -79,7 +79,7 @@ export interface MessageDropdownProps {
   viewAllLabel?: string
 }
 
-export function MessageDropdown({
+function MessageDropdown({
   messages = SAMPLE_MESSAGES,
   gooey = true,
   speed = 'normal',

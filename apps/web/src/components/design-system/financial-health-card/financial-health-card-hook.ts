@@ -26,8 +26,6 @@ const ZONE_GLOW = { red:'var(--g-red)', yellow:'var(--g-yellow)', blue:'var(--g-
 const ZONE_HALO = { red:'rgba(239,68,68,0.16)', yellow:'rgba(234,179,8,0.16)', blue:'rgba(59,130,246,0.16)', green:'rgba(16,185,129,0.18)' }
 const ZONE_KEYS = ['red','yellow','blue','green'] as const
 
-export type ZoneKey = typeof ZONE_KEYS[number]
-
 export interface FhcRefs {
   card:   HTMLDivElement | null
   num:    HTMLDivElement | null

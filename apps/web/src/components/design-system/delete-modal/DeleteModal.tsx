@@ -39,7 +39,7 @@ import './DeleteModal.css'
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
-export interface DeleteModalProps {
+interface DeleteModalProps {
   open?: boolean
   onClose?: () => void
   onConfirm?: () => void
@@ -53,7 +53,7 @@ export interface DeleteModalProps {
 // ---------------------------------------------------------------------------
 // Component (named export — for direct controlled usage)
 // ---------------------------------------------------------------------------
-export function DeleteModal({
+function DeleteModal({
   open = false,
   onClose,
   onConfirm,

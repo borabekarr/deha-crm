@@ -104,7 +104,7 @@
   text-align: center;
   color: #0F172A;
   /* raw duration/easing; same substitution as .stage above. */
-  transition: color calc(var(--duration-slower) * 1.5) var(--ease-fade);
+  transition: color calc(var(--duration-slower) * 1.5 * var(--anim-mult, 1)) var(--ease-fade);
 }
 html.dark .lede { color: #fff; }
 .lede .eyebrow {
@@ -376,7 +376,7 @@ html.dark .nav-arrow-inner { background: #1E293B; border-color: #334155; color: 
   background-size: 260% 100%; background-repeat: no-repeat;
   opacity: 0;
   /* raw duration/easing; same composition as above. */
-  transition: opacity calc(var(--duration-200) * 2) var(--ease-fade);
+  transition: opacity calc(var(--duration-200) * 2 * var(--anim-mult, 1)) var(--ease-fade);
   pointer-events: none;
 }
 .nav-arrow.is-cta .nav-arrow-inner::after {
@@ -410,6 +410,6 @@ html.dark .dots .dot { background: rgba(148,163,184,0.5); }
   letter-spacing: 0.04em;
   color: rgba(15,23,42,0.5);
   /* raw duration/easing; same composition as .stage above. */
-  transition: color calc(var(--duration-slower) * 1.5) var(--ease-fade);
+  transition: color calc(var(--duration-slower) * 1.5 * var(--anim-mult, 1)) var(--ease-fade);
 }
 html.dark .caption { color: rgba(255,255,255,0.55); }

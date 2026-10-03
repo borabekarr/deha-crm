@@ -142,7 +142,7 @@ export function closedState(s: MenuState): MenuState {
 // gives the travel direction, mirroring motion-tabs' index-based `dir`.
 export const TAB_ORDER: Tab[] = ['general', 'integrations']
 
-export interface SearchGroup { cat: Category; nodes: NodeItem[] }
+interface SearchGroup { cat: Category; nodes: NodeItem[] }
 export interface SearchGroups { general: SearchGroup[]; integrations: SearchGroup[] }
 
 /** Groups matching nodes by their parent category, split into General vs

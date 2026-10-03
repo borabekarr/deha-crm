@@ -46,7 +46,7 @@ const VARIANTS: Record<string, AnimVariant> = {
   },
 }
 
-export interface AnimatedListProps<T extends { id: string | number }> {
+interface AnimatedListProps<T extends { id: string | number }> {
   /** Items to display; index 0 = newest. Each item must have a unique `id`. */
   items?: T[]
   /** Row renderer — return any React node for a single item. */
@@ -64,7 +64,7 @@ export interface AnimatedListProps<T extends { id: string | number }> {
 }
 
 /* ── Main component ──────────────────────────────────────────────── */
-export function AnimatedList<T extends { id: string | number }>({
+function AnimatedList<T extends { id: string | number }>({
   items = [],
   renderItem,
   maxVisible = 8,

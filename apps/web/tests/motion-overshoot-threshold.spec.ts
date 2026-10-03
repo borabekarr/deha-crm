@@ -63,16 +63,6 @@ async function readTransition(locator: Locator) {
   })
 }
 
-// Reads back a pseudo-element's (::before/::after) resolved transition
-// timing-function/duration -- getComputedStyle's second argument targets the
-// pseudo directly, since Playwright locators can't address ::before/::after.
-async function readPseudoTransition(locator: Locator, pseudo: string) {
-  return locator.evaluate((el, p) => {
-    const style = getComputedStyle(el, p)
-    return { timingFunction: style.transitionTimingFunction, duration: style.transitionDuration }
-  }, pseudo)
-}
-
 test.describe('motion overshoot threshold: control points stay within Apple-standard range', () => {
   test('tb-daybtn hover easing is within threshold', async ({ page }, testInfo) => {
     test.skip(testInfo.project.name === 'reduced-motion', 'reduced motion zeroes durations')

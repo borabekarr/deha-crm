@@ -18,7 +18,7 @@ function transpile(src) {
 const page = (js) => `<!doctype html><html><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script src="vendor/react.js"></script>
-<script src="vendor/react-dom.js"></script>
+<script src="../render-gate/vendor/react-dom.js"></script>
 <script>
 (function(){var n=0,orig=React.createElement;React.createElement=function(){if(++n>20000){throw new Error('render-watchdog: aborted after '+n+' createElement calls');}return orig.apply(React,arguments);};})();
 </script>

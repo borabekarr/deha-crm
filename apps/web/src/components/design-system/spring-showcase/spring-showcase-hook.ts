@@ -22,14 +22,14 @@ export type Preset = 'pill' | 'elegant' | 'bouyant' | 'pop' | 'custom'
 
 export interface LabParams { stiffness: number; damping: number; mass: number }
 
-export interface LabState {
+interface LabState {
   params: LabParams
   preset: Preset
   version: number
   copied: 'js' | 'css' | null
 }
 
-export type LabAction =
+type LabAction =
   | { type: 'preset'; preset: Exclude<Preset, 'custom'> }
   | { type: 'param'; key: 'stiffness' | 'damping' | 'mass'; value: number }
   | { type: 'replay' }

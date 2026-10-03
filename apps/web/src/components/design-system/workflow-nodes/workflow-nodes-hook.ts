@@ -20,7 +20,7 @@
 // ---------------------------------------------------------------------------
 
 /** Coordinates in the canvas coordinate space (relative to canvas top-left). */
-export interface Point {
+interface Point {
   x: number
   y: number
 }

@@ -3,7 +3,6 @@
 import { useCallback, useRef } from 'react';
 import { registerProximityGroup, type ProximityOptions } from './proximity-engine';
 
-export { registerProximityGroup } from './proximity-engine';
 export type { ProximityOptions } from './proximity-engine';
 
 interface ProximityGroupRefState {

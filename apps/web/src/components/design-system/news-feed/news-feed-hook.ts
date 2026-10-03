@@ -10,13 +10,13 @@
 // Data
 // ---------------------------------------------------------------------------
 
-export interface FeedItem {
+interface FeedItem {
   title: string
   sub: string
   date: string
 }
 
-export type Tone = 'bull' | 'bear'
+type Tone = 'bull' | 'bear'
 
 const FEEDS: Record<Tone, FeedItem[]> = {
   bull: [

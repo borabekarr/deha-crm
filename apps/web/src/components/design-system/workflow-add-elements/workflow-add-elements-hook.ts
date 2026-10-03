@@ -41,7 +41,7 @@ export interface MenuPos {
  * Must be called inside a `requestAnimationFrame` so the element already has
  * its layout dimensions (the outer panel must be in the DOM at that point).
  */
-export function clampAEPosition(
+function clampAEPosition(
   x: number,
   y: number,
   outerEl: HTMLElement,

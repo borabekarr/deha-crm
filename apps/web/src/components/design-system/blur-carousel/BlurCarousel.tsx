@@ -72,7 +72,7 @@ const SIDE_SCALE = 0.82
 const SIDE_OPACITY = 0.46
 const MAX_BLUR = 9
 
-export function BlurCarousel() {
+function BlurCarousel() {
   const railRef = useRef<HTMLDivElement | null>(null)
   const cardRefs = useRef<Array<HTMLButtonElement | null>>([])
   const ticking = useRef(false)

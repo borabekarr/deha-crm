@@ -20,13 +20,6 @@ export type DiAccent = 'emerald' | 'blue' | 'violet' | 'amber'
 export type DiShowMode = 'percent' | 'time' | 'off'
 export type DiPillStyle = 'island' | 'glass'
 
-export interface DirState {
-  disp: number
-  mode: DiMode
-  pulseKey: number
-  scale: number
-}
-
 export interface DirSetters {
   setDisp: (v: number) => void
   setMode: (m: DiMode) => void

@@ -1,8 +1,6 @@
 import { Component, Suspense, type ReactNode, type ErrorInfo } from 'react'
 import { lazyWithRetry, type LazyWithRetryComponent } from './lazy-retry-loader'
 
-export type { LazyWithRetryComponent }
-
 interface LazyLoadBoundaryProps {
   componentName: string
   component: LazyWithRetryComponent

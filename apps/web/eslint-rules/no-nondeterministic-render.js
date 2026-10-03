@@ -238,7 +238,6 @@ const rule = {
     docs: {
       description:
         'Disallow non-deterministic calls (Date.now, Math.random, new Date) in the React render path. See lesson react19-hoist-nondeterministic-render.',
-      url: 'https://github.com/deha-crm/.claude/lessons/react19-hoist-nondeterministic-render.md',
     },
     messages: {
       noNondeterministicRender:

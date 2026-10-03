@@ -105,7 +105,7 @@ export function springParams(s: SpringParams): SpringDerived {
 }
 
 /** Displacement 0→1 at time `tSec`, starting at rest with zero velocity. */
-export function springPosition(s: SpringParams, tSec: number): number {
+function springPosition(s: SpringParams, tSec: number): number {
   const { omega0, zeta, isCritical } = springParams(s)
   if (tSec <= 0) return 0
   if (isCritical) {

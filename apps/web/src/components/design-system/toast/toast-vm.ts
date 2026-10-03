@@ -36,10 +36,10 @@ export const COLORS: Record<string, string> = {
 // inner reveal's opacity+translateY legs and delays) so the expandable
 // toast expands and collapses on the identical curve as the expandable
 // card, per this step's brief.
-export const EXPAND_DURATION_S = 0.5
+const EXPAND_DURATION_S = 0.5
 export const EXPAND_DURATION_MS = EXPAND_DURATION_S * 1000
 export const EXPAND_HEIGHT_EASING = 'var(--ease-spring)'
-export function expandInnerStyle(open: boolean): CSSProperties {
+function expandInnerStyle(open: boolean): CSSProperties {
   return {
     opacity: open ? 1 : 0,
     transform: open ? 'translateY(0)' : 'translateY(14px)',

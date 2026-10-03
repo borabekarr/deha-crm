@@ -11,7 +11,7 @@
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-export type StepStatus = 'todo' | 'processing' | 'done'
+type StepStatus = 'todo' | 'processing' | 'done'
 export type StatusMap = Record<string, StepStatus>
 export type SetStatus = React.Dispatch<React.SetStateAction<StatusMap>>
 export type SetFire   = React.Dispatch<React.SetStateAction<boolean>>
