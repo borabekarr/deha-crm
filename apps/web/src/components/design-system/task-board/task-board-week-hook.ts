@@ -12,7 +12,7 @@ export const DOW = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 const TODAY_IDX = (new Date().getDay() + 6) % 7;
 
 // Builds the Mon–Sun span for the week `offset` weeks from the current one.
-export function buildWeekDays(offset: number): Date[] {
+function buildWeekDays(offset: number): Date[] {
   const monday = new Date();
   monday.setDate(monday.getDate() - TODAY_IDX + offset * 7);
   return Array.from({ length: 7 }, (_, i) => {

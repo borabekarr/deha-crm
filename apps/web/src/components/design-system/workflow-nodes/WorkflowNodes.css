@@ -562,7 +562,7 @@ html.dark .wf-outer:not([data-squircle="on"]) {
 html.dark .wf-outer[data-squircle="on"] { background: #0A0A0A; }
 /* Squircle canon: only the outer shell opts back into the 1px --card-border
    ring (dark mode only); .wf-card stays line-less (default recipe). Mirrors
-   .concentric-demo-outer in Cards.css / .tf-shell in AdjustTimeframe.css. */
+   .concentric-demo-outer in Cards.css. */
 html.dark .wf-outer[data-squircle="on"]::before {
   content: '';
   position: absolute;

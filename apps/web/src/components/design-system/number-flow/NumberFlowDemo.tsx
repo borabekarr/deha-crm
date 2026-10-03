@@ -13,7 +13,7 @@ import { useProximityGroup } from '@/lib/hooks'
 // numeral treatment without redefining it per-consumer.
 // ---------------------------------------------------------------------------
 
-export function DsNumberFlow({
+function DsNumberFlow({
   value,
   format,
   prefix,

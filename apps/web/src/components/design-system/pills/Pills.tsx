@@ -21,7 +21,7 @@ import {
 // variants.ts, this module exports only components).
 // ---------------------------------------------------------------------------
 
-export function PriorityPill({ color, label }: PriorityPillSpec) {
+function PriorityPill({ color, label }: PriorityPillSpec) {
   return (
     <span className="pill-priority" data-proximity>
       <span className="dot" style={{ background: color }}></span> {label}
@@ -29,7 +29,7 @@ export function PriorityPill({ color, label }: PriorityPillSpec) {
   )
 }
 
-export function StatBadge({ tone, icon, prefix, label }: StatBadgeSpec) {
+function StatBadge({ tone, icon, prefix, label }: StatBadgeSpec) {
   return (
     <span className={`badge ${tone}`}>
       {prefix ? <span>{prefix}</span> : icon ? <span className="material-icons">{icon}</span> : null}
@@ -39,7 +39,7 @@ export function StatBadge({ tone, icon, prefix, label }: StatBadgeSpec) {
   )
 }
 
-export function ColumnTagBadge({ tone, icon, label, count }: ColumnTagSpec) {
+function ColumnTagBadge({ tone, icon, label, count }: ColumnTagSpec) {
   return (
     <span className={`badge col-tag ${tone}`}>
       <span className="material-icons">{icon}</span> {label} <span className="count">{count}</span>
@@ -47,7 +47,7 @@ export function ColumnTagBadge({ tone, icon, label, count }: ColumnTagSpec) {
   )
 }
 
-export function EventBadge({ color, icon, label, tone }: EventBadgeSpec) {
+function EventBadge({ color, icon, label, tone }: EventBadgeSpec) {
   return (
     <span className="badge-event" data-tone={tone} style={{ backgroundColor: color }}>
       <span className="material-icons">{icon}</span> {label}
@@ -55,7 +55,7 @@ export function EventBadge({ color, icon, label, tone }: EventBadgeSpec) {
   )
 }
 
-export function IconBadge({ color, icon, tone }: IconBadgeSpec) {
+function IconBadge({ color, icon, tone }: IconBadgeSpec) {
   return (
     <div className="icon-badge icon-badge--lg" data-tone={tone} style={{ '--icon-c': color } as React.CSSProperties}>
       <span className="material-icons">{icon}</span>

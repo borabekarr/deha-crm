@@ -9,7 +9,7 @@ Barrel-exported (`import { X } from '@/lib/hooks'`):
 Direct-file import only (not re-exported from the barrel — import from the file directly):
 
 - **useAutoHeight** (`use-auto-height.ts`) — animates height transitions respecting `--anim-mult`; reach for expand/collapse panels.
-- **registerProximityGroup** (`use-proximity-group.ts`) — imperative registration helper alongside `useProximityGroup`; reach for non-hook call sites.
+- **registerProximityGroup** (`proximity-engine.ts`): imperative registration helper; import directly from `proximity-engine.ts` for non-hook call sites.
 - **usePanelDirection** (`use-panel-direction.ts`) — derives panel open/close direction; reach for directional slide/reveal transitions.
 
 `usehooks-ts`'s `useMediaQuery`, `useEventListener`, `useOnClickOutside`, `useDebounceValue`, `useCopyToClipboard`, `useResizeObserver`, `useTimeout`, `useIsMounted` were previously re-exported here unused; import them straight from `usehooks-ts` if a future component needs one.

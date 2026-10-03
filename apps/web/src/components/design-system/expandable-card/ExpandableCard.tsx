@@ -57,7 +57,7 @@ import './ExpandableCard.css'
 // exactly as before — only render-only JSX and pure value logic moved.
 // ---------------------------------------------------------------------------
 
-import { useCallback, useState, type KeyboardEvent } from 'react'
+import { useCallback, useState } from 'react'
 import { useAutoHeight } from '@/lib/hooks/use-auto-height'
 import { VariantPicker } from './VariantPicker'
 import { MeetingCard } from './MeetingCard'
@@ -123,12 +123,6 @@ export default function ExpandableCardDemo() {
     })
   }, [])
 
-  const keyHandler = (i: number) => (e: KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      toggle(i)
-    }
-  }
   const handleEnter = (i: number) => () => {
     if (HOVER_TO_EXPAND) setCardOpen(i, true)
   }
@@ -146,7 +140,6 @@ export default function ExpandableCardDemo() {
         open={open[0]}
         variant={variant}
         onToggle={() => toggle(0)}
-        onKeyDown={keyHandler(0)}
         onMouseEnter={handleEnter(0)}
         onMouseLeave={handleLeave(0)}
         contentRef={autoHeights[0].ref}
@@ -157,7 +150,6 @@ export default function ExpandableCardDemo() {
         open={open[1]}
         variant={variant}
         onToggle={() => toggle(1)}
-        onKeyDown={keyHandler(1)}
         onMouseEnter={handleEnter(1)}
         onMouseLeave={handleLeave(1)}
         contentRef={autoHeights[1].ref}
@@ -168,7 +160,6 @@ export default function ExpandableCardDemo() {
         open={open[2]}
         variant={variant}
         onToggle={() => toggle(2)}
-        onKeyDown={keyHandler(2)}
         onMouseEnter={handleEnter(2)}
         onMouseLeave={handleLeave(2)}
         contentRef={autoHeights[2].ref}

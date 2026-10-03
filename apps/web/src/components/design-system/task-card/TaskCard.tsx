@@ -738,7 +738,7 @@ function TaskDetailsPopover({
               </span>
             </div>
 
-            <div className="tp-cust-shell" role="presentation" onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+            <div className="tp-cust-shell" onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                 // (7) Press ripple — paints the grey frame behind the white customer card
                 const shell = e.currentTarget
                 const r = document.createElement('span')
@@ -749,7 +749,7 @@ function TaskDetailsPopover({
                 shell.appendChild(r)
                 r.addEventListener('animationend', () => r.remove(), { once: true })
               }}>
-              <div className="tp-customer tp-customer-link" role="presentation"
+              <div className="tp-customer tp-customer-link"
                 onClick={openLeadDetails}
               >
                 <button type="button" className="tp-cust-av"
@@ -880,7 +880,6 @@ export default function TaskCard() {
               key={card.title}
               className={`task canon-hover ${card.cls}`}
               style={{ '--tag': card.tag } as React.CSSProperties}
-              role="presentation"
               onClick={() => openTask(buildTask(card))}
             >
               <div className="tag-banner">

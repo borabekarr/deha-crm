@@ -33,7 +33,7 @@ export const shellStyle = (open: boolean): CSSProperties => ({
   padding: open ? '10px' : '0px',
   background: open ? 'var(--shell-bg)' : 'transparent',
   boxShadow: open ? '0 10px 30px rgba(15,23,42,0.12), 0 2px 8px rgba(15,23,42,0.06)' : 'none',
-  transition: `padding ${t(500)} var(--ease-spring-pop), background-color ${t(300)} var(--ease-fade), box-shadow ${t(300)} var(--ease-fade)`,
+  transition: `padding ${t(160)} var(--ease-standard), background-color ${t(300)} var(--ease-fade), box-shadow ${t(300)} var(--ease-fade)`,
 })
 
 // FAB-style morph styles (mirrors _fab.css timings/beziers)
@@ -43,7 +43,18 @@ export const shellStyle = (open: boolean): CSSProperties => ({
 // the same width transition leg the open/close morph already declares
 // below, so the confirm reveal and this widen stay one clock, not two.
 export const boxStyle = (open: boolean, confirmed = false): CSSProperties => {
-  const common = `width ${t(500)} var(--ease-spring-pop), height ${t(500)} var(--ease-spring-pop), border-radius ${t(500)} var(--ease-standard), background-color ${t(300)} var(--ease-fade), border-color ${t(300)} var(--ease-fade), box-shadow ${t(300)} var(--ease-fade), transform ${t(120)} var(--ease-standard)`
+  // F1: border-radius used to ease on `--ease-standard` while width/height
+  // eased on `--ease-spring-pop` -- two curves on the same shape meant the
+  // rounded clip briefly lagged/overshot the box's own edges mid-morph,
+  // reading as a torn/broken inner shell in both directions. Same t(160)
+  // clock, same curve for all three now -- one shape, one animation.
+  // motion-drift-fix (2026-09-02): moved off `--ease-spring-pop`/t(500) onto
+  // `--ease-standard`/t(160) so this leg shares one clock with the confirm
+  // icon/badge legs in Picker.css (font-size/margin/max-width/opacity),
+  // which were already on `--duration-base`/`--ease-standard`; no token
+  // matches the box's old duration, so matching required moving one side,
+  // and the box's old literal has no token equivalent to reuse in Picker.css.
+  const common = `width ${t(160)} var(--ease-standard), height ${t(160)} var(--ease-standard), border-radius ${t(160)} var(--ease-standard), background-color ${t(300)} var(--ease-fade), border-color ${t(300)} var(--ease-fade), box-shadow ${t(300)} var(--ease-fade), transform ${t(120)} var(--ease-standard)`
   return {
     position: 'relative', overflow: 'hidden', boxSizing: 'border-box',
     cursor: open ? 'default' : 'pointer',
@@ -83,7 +94,7 @@ export const glyphStyle = (open: boolean): CSSProperties => ({
 // mirrors that instead of blanking early: the face stays fully opaque for
 // the box's entire collapse and only disappears once the box has actually
 // finished shrinking, via a transition-delay equal to the box's own
-// width/height duration (`t(500)`, the same literal boxStyle() uses) with a
+// width/height duration (`t(160)`, the same literal boxStyle() uses) with a
 // zero-duration opacity leg -- an instant flip timed off the box's clock,
 // not a second independent fade animation. `pointerEvents` still flips
 // immediately since it isn't a visual leg.
@@ -93,7 +104,7 @@ export const contentStyle = (open: boolean): CSSProperties => ({
   padding: 'var(--pad-card)', display: 'flex', flexDirection: 'column',
   opacity: open ? 1 : 0,
   pointerEvents: open ? 'auto' : 'none',
-  transition: open ? 'none' : `opacity ${t(0)} var(--ease-standard) ${t(500)}`,
+  transition: open ? 'none' : `opacity ${t(0)} var(--ease-standard) ${t(160)}`,
 })
 
 export const closeStyle = (open: boolean): CSSProperties => ({
@@ -109,7 +120,17 @@ export const closeStyle = (open: boolean): CSSProperties => ({
 
 // Static inline styles lifted verbatim from the raw markup's own
 // `style="..."` attributes.
-export const headerRowStyle: CSSProperties = { display: 'flex', alignItems: 'flex-start', gap: 'var(--gap-icon-text)' }
+// F2: previously static -- the header rode contentStyle()'s box-collapse
+// delay (t(500)) before hiding, so it stayed visible inside the shrinking
+// pill for the whole close animation. Bora's call: header is gone the
+// instant close starts, not timed off the box. Own zero-duration,
+// zero-delay opacity leg, decoupled from contentStyle's delayed hide (which
+// still governs the tray/footer).
+export const headerRowStyle = (open: boolean): CSSProperties => ({
+  display: 'flex', alignItems: 'flex-start', gap: 'var(--gap-icon-text)',
+  opacity: open ? 1 : 0,
+  transition: open ? 'none' : `opacity ${t(0)} var(--ease-standard)`,
+})
 export const headerColStyle: CSSProperties = { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '2px' }
 export const titleStyle: CSSProperties = {
   display: 'inline-flex', alignItems: 'center', gap: 'var(--gap-icon-text)',

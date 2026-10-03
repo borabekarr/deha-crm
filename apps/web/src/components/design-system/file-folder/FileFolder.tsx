@@ -72,14 +72,11 @@ function FolderIcon({
       ref={folderRef}
       onClick={onClick}
       data-proximity
-      role="presentation"
     >
-      <div
+      <button
+        type="button"
         className="ff-clip"
-        role="button"
-        tabIndex={0}
         aria-label="Open folder"
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } }}
       >
         <div className="ff-grad" />
         <div className="ff-papers">
@@ -95,7 +92,7 @@ function FolderIcon({
         >
           <path d="M0,98 H150 C168,98 172,124 192,124 H268 V268 H0 Z" />
         </svg>
-      </div>
+      </button>
       <div className="ff-text">
         <div className="ff-title">
           <span className="material-symbols-outlined ff-title-ic">folder</span>
@@ -170,20 +167,18 @@ function extColorClass(ext: string): string {
 /* ── File row / grid cell ─────────────────────────────────────────────────── */
 function FileRow({ file, onClick }: { file: (typeof FILES)[number]; onClick: () => void }) {
   return (
-    <div
+    <button
+      type="button"
       className="ff-file"
       onClick={onClick}
       data-proximity
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } }}
     >
       <span className={`ff-file-ic ${extColorClass(file.ext)}`}>{file.ext}</span>
       <span className="ff-file-meta">
         <span className="ff-file-name">{file.name}</span>
         <span className="ff-file-sub">{file.type} · {file.size}</span>
       </span>
-    </div>
+    </button>
   )
 }
 
@@ -265,7 +260,6 @@ export default function FileFolder() {
       {/* Scrim */}
       <div
         className={`ff-scrim${popState.isOpen ? ' show' : ''}`}
-        role="presentation"
         onClick={closePop}
       />
 

@@ -206,7 +206,6 @@ function TemplateCard({
     <div
       className={`wtc-outer${expanded ? ' wtc-expanded' : ''}`}
       onClick={onToggle}
-      role="presentation"
       ref={outerSquircleRef}
     >
       <div className="wtc-card" ref={innerSquircleRef}>
@@ -234,12 +233,11 @@ function TemplateCard({
         </div>
 
         {/* Info section: title row + description */}
-        <div
+        <button
+          type="button"
           className="wtc-info"
-          role="button"
-          tabIndex={0}
           aria-expanded={expanded}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggle() } }}
+          aria-label={`Toggle details: ${card.title}`}
         >
           <div className="wtc-title-row">
             <span className="wtc-title">{card.title}</span>
@@ -252,7 +250,7 @@ function TemplateCard({
             )}
           </div>
           <p className="wtc-desc">{card.description}</p>
-        </div>
+        </button>
 
         {/* Inline expand-down detail panel */}
         <ExpandDetail />

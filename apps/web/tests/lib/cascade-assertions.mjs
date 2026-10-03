@@ -50,9 +50,9 @@ export function isNoneExempt(stateProps) {
  *  "transition everything" writes `transition: all <duration> ...`, which
  *  computes to the identical string, but only a state selector exists then
  *  to retime a *narrower* interaction list -- there is no such state rule in
- *  the two sites this exemption was written for (`AdjustTimeframe.css:310`,
- *  `.tf-strip`/`.tf-sel`; `Calendar.css:113-116`, `.cal-cell`), which declare
- *  `transition` only on their `[data-anim="true"]`/`[data-proximity]`
+ *  the site this exemption was written for (`Calendar.css:113-116`,
+ *  `.cal-cell`), which declares
+ *  `transition` only on its `[data-anim="true"]`/`[data-proximity]`
  *  variants, never at rest. Superset-flagging a spec default has no possible
  *  CSS fix -- there is no base list to restate -- so it would fail forever
  *  rather than catching a real clobber. (plan: transition-clobber-fix, Step 8)

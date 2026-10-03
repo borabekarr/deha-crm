@@ -442,7 +442,6 @@ function CurrencyPicker({
     <div ref={keyRef} style={{ display: 'contents' }}>
       <div
         className="cc-pop-backdrop"
-        role="presentation"
         onClick={(e) => {
           if ((e.target as HTMLElement).classList.contains('cc-pop-backdrop')) onClose()
         }}

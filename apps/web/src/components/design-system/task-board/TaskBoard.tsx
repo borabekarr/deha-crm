@@ -10,6 +10,11 @@ import { makeTaskBoardTimers, type SyncPhase, type TaskBoardTimers } from './tas
 import { reorderTask } from './task-board-reducer';
 import { WeekRow } from './TaskBoardWeekRow';
 import { useWeekRow } from './task-board-week-hook';
+// F13: private inline board Toast replaced with the shared design-system
+// module -- see ../toast/Toast.tsx. No tint/accent passed: board toasts render
+// the shared component's default untinted path, same as the Toast page.
+import { ToastStage, type ToastStageHandle } from '../toast/Toast';
+import { VARIANTS } from '../toast/variants';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -207,57 +212,6 @@ function MoveBadge({ kind }: { kind: string }) {
     >
       <span className={`${iconClass(cfg.icon)} move-badge-icon`}>{cfg.icon}</span>
       {cfg.label}
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Toast
-// ---------------------------------------------------------------------------
-interface ToastData { message: string; kind: string }
-
-function Toast({
-  message,
-  kind,
-  phase,
-  onUndo,
-  onClose,
-}: {
-  message: string;
-  kind: string;
-  phase: string;
-  onUndo: (() => void) | null;
-  onClose: () => void;
-}) {
-  const cfg = MOVE_CONFIG[kind] ?? { bg: '#6B6B6B', icon: 'info', label: '' };
-  const toastRef = useProximityGroup<HTMLDivElement>();
-  return (
-    <div
-      ref={toastRef}
-      className={`tb-toast ${phase === 'out' ? 'tb-toast-out' : 'tb-toast-in'}`}
-      style={{ background: cfg.bg }}
-    >
-      <SymIcon name="check_circle" size={15} />
-      <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{message}</span>
-      {onUndo && (
-        <button
-          type="button"
-          onClick={onUndo}
-          data-proximity
-          className="tb-toast-undo"
-        >
-          Undo
-        </button>
-      )}
-      <button
-        type="button"
-        onClick={onClose}
-        aria-label="Dismiss"
-        data-proximity
-        className="tb-toast-dismiss"
-      >
-        <SymIcon name="close" size={13} />
-      </button>
     </div>
   );
 }
@@ -807,11 +761,7 @@ export default function TaskBoard() {
   const [draggingId, setDraggingId]     = React.useState<string | null>(null);
   const [highlight, setHighlight]       = React.useState(new Set<string>());
   const [recentMoveId, setRecentMoveId] = React.useState<string | null>(null);
-  const [toast, setToast]               = React.useState<ToastData | null>(null);
-  const [toastPhase, setToastPhase]     = React.useState<'in' | 'out'>('in');
   const [syncBtnAnim, setSyncBtnAnim]   = React.useState<string | null>(null);
-  // hasUndo tracks whether undoRef holds a value — avoids reading .current during render
-  const [hasUndo, setHasUndo]           = React.useState(false);
   // Week-day + badge filters (Change 3) — today active by default, both compose (AND).
   // Week-pill state (weekDays/weekDays2/activePillIdx/activeWeekday + arrow
   // handlers) lives in useWeekRow (./task-board-week-hook) — extraction, no
@@ -825,19 +775,16 @@ export default function TaskBoard() {
   const taskHistoryRef     = React.useRef<Record<string, Record<string, number>>>({});
   // Hook timers ref — populated by callback-ref when the host element mounts
   const timersApiRef       = React.useRef<TaskBoardTimers | null>(null);
+  // F13: shared toast module, driven imperatively (see ../toast/Toast.tsx /
+  // SprintPlannerCore.tsx's identical consumer pattern). No accent passed —
+  // board toasts render the shared component's default untinted path.
+  const toastStageRef      = React.useRef<ToastStageHandle>(null);
 
-  // closeToast uses the timers API through the ref so it doesn't go stale
+  // undoRef is cleared once the toast's own dismiss/undo flow has run its
+  // course; the shared ToastStage owns dismiss timing and the Undo button's
+  // own exit, so this component no longer force-closes toasts itself.
   const closeToast = React.useCallback(() => {
-    timersApiRef.current?.cancelToastDismiss();
     undoRef.current = null;
-    setHasUndo(false);
-    setToastPhase('out');
-    const t = setTimeout(() => {
-      setToast(null);
-      setToastPhase('in');
-    }, 240);
-    // Register this cleanup timer too so teardown can clear it
-    timersApiRef.current?.registerSyncTimer(t);
   }, []);
 
   // Manual drop / undo / sync-reset all land here. No FLIP slide: the destination
@@ -889,8 +836,6 @@ export default function TaskBoard() {
       return reorderTask(curr, u.id, u.from, u.fromIdx ?? 0);
     });
     undoRef.current = null;
-    setHasUndo(false);
-    closeToast();
   };
 
   // Flash a card with the success wash for ~2.8s
@@ -912,12 +857,15 @@ export default function TaskBoard() {
     if (!kind) return;
     const colLabel = COLUMNS.find((c) => c.id === toCol)?.label ?? toCol;
     undoRef.current = { id, from: fromCol, fromIdx: oldIdxInFromCol };
-    setHasUndo(true);
-    setToast({ message: `Moved "${taskTitle}" → ${colLabel}`, kind: `success-${kind}` });
-    setToastPhase('in');
-    // Schedule auto-dismiss via the hook API (no direct timing side-effect in component)
-    timersApiRef.current?.scheduleToastDismiss(closeToast);
-  }, [flashRecentMove, closeToast]);
+    // Shared toast: no accent, matches the Toast page's default success card.
+    // Auto-dismiss and undo-click dismissal are owned by ToastStage itself.
+    toastStageRef.current?.show({
+      type: 'success',
+      icon: 'check_circle',
+      title: `Moved "${taskTitle}" → ${colLabel}`,
+      action: { label: 'Undo', icon: 'undo', onAction: undoMove },
+    });
+  }, [flashRecentMove]);
 
   const addHighlight    = (id: string) => setHighlight((s) => { const n = new Set(s); n.add(id);    return n; });
   const clearHighlight  = (id: string) => setHighlight((s) => { const n = new Set(s); n.delete(id); return n; });
@@ -1052,17 +1000,12 @@ export default function TaskBoard() {
             ))}
           </div>
 
-          {/* Toast layer — stays mounted, hidden via CSS visibility */}
-          <div className={`tb-toast-layer ${toast && toastPhase === 'in' ? 'visible' : ''}`}>
-            {toast && (
-              <Toast
-                message={toast.message}
-                kind={toast.kind}
-                phase={toastPhase}
-                onUndo={hasUndo ? undoMove : null}
-                onClose={closeToast}
-              />
-            )}
+          {/* F13: shared toast module — DOM-local (non-portal) like
+              SprintPlannerCore's .sp-toast-local, positioned via the same
+              .tb-stage-local override in TaskBoard.css so it can't drift off
+              this (position: relative) board wrapper. */}
+          <div className="tb-stage-local">
+            <ToastStage ref={toastStageRef} cfg={VARIANTS.main} hideCard />
           </div>
         </div>
 

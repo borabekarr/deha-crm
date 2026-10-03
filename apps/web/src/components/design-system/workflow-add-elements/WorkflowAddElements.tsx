@@ -136,7 +136,7 @@ export default function WorkflowAddElements() {
   // this effect deliberately runs every render too.
   useLayoutEffect(() => {
     closeAllRef.current = closeAll
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   })
 
   /** Item 1+6: clear search input and play reverse morph before unmounting panel. */
@@ -251,7 +251,6 @@ export default function WorkflowAddElements() {
     <div
       ref={(el) => { shellRef.current = el; proximityRef(el) }}
       className="wae-shell"
-      role="presentation"
       onContextMenu={handleContextMenu}
       onMouseDown={handleDocMouseDown}
       onKeyDown={handleKeyDown}

@@ -89,3 +89,6 @@ reports/
 
 # DesignSync staging mirror of the live claude.ai/design project (local-only, never committed)
 apps/web/design-system/claude-design/
+
+# Strix scan output (contains live vulnerability details)
+strix_runs/

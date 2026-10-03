@@ -88,12 +88,12 @@
   transform: translateX(-50%) scale(0.9);
   transform-origin: top center;
   width: 360px; height: 354px;
-  /* Concentric with the pane: the pane is inset 10px on every side and ends
-     the morph at radius 22 (FROZEN), so the shell reads true-concentric at
-     22 + 10 = 32. Canon: token bezel, no inner line in light, elevation via
-     drop-shadow() only (box-shadow removed). Non-animated properties — the
-     transition list below is untouched. */
-  border-radius: 32px;
+  /* Card-primitives canon (concentric-demo-outer, Cards.css): outer shell
+     radius 36px, fill var(--shell-bg), no border of its own in light. The
+     pane inside is no longer required to land at radius-minus-inset —
+     Concentric.md-panel-bg carries its own canon radius (28px) below;
+     non-animated properties here, the transition list is untouched. */
+  border-radius: 36px;
   background: var(--shell-bg);
   filter: drop-shadow(0 16px 34px rgba(17,17,17,0.16)) drop-shadow(0 3px 8px rgba(17,17,17,0.08));
   opacity: 0;
@@ -119,10 +119,12 @@
    enter throughout -- only the delay direction changes. */
 .md-root:not(.open) .md-panel-shell {
   /* faster-exits rule: the closed leg runs one tier faster than the open leg
-     (--popover-exit-dur instead of --duration-200); the transform leg keeps
-     its + --duration-180 composition. */
-  transition-duration: calc(var(--popover-exit-dur) * var(--anim-mult, 1)), calc((var(--popover-exit-dur) + var(--duration-180)) * var(--anim-mult, 1));
-  transition-delay: calc(var(--md-dur) * 0.50), calc(var(--md-dur) * 0.50);
+     (--popover-exit-dur instead of --duration-200). The old --md-dur-based
+     delay held this layer visible well past the panel-bg's collapse,
+     which is what made the close read as slow -- close now fires immediately
+     with the rest of the layer stack. */
+  transition-duration: calc(var(--popover-exit-dur) * var(--anim-mult, 1)), calc(var(--popover-exit-dur) * var(--anim-mult, 1));
+  transition-delay: 0s, 0s;
 }
 
 /* ---- Gooey shape layer ---- */
@@ -182,22 +184,32 @@
   width: 340px;
   height: 334px;
   top: 76px;
-  border-radius: 22px;
-  background-color: #FFFFFF;
-  box-shadow:
-    0 18px 40px -12px rgba(15,23,42,0.22),
-    0 4px 12px -4px rgba(15,23,42,0.10),
-    inset 0 0 0 1px rgba(15,23,42,0.06);
+  /* Card-primitives inner-surface canon (concentric-demo-inner, Cards.css):
+     28px radius, var(--card-bg) fill, no external line in either theme --
+     the inset ring below was the stray "3D-ish" edge Bora flagged; elevation
+     moves to a stacked filter: drop-shadow(...), never box-shadow. */
+  border-radius: 28px;
+  background-color: var(--card-bg);
+  box-shadow: none;
+  filter: drop-shadow(0 10px 24px rgba(15,23,42,0.14)) drop-shadow(0 2px 6px rgba(15,23,42,0.08));
   transition-delay:
     0s, 0s, 0s, 0s,
     calc(var(--md-dur) * 0.50),
     calc(var(--md-dur) * 0.50);
 }
 .md-root:not(.open) .md-panel-bg {
-  transition-delay:
-    calc(var(--md-dur) * 0.55), calc(var(--md-dur) * 0.55),
-    calc(var(--md-dur) * 0.55), calc(var(--md-dur) * 0.55),
-    calc(var(--md-dur) * 0.45), calc(var(--md-dur) * 0.45);
+  /* faster-exits rule: close collapses on the shared --popover-exit-dur
+     tier with no stagger, rather than riding the slow --md-dur open
+     choreography in reverse -- that's what made the close
+     feel sluggish even though the shell already used the exit token. */
+  transition-duration:
+    calc(var(--popover-exit-dur) * var(--anim-mult, 1)),
+    calc(var(--popover-exit-dur) * var(--anim-mult, 1)),
+    calc(var(--popover-exit-dur) * var(--anim-mult, 1)),
+    calc(var(--popover-exit-dur) * var(--anim-mult, 1)),
+    calc(var(--popover-exit-dur) * var(--anim-mult, 1)),
+    calc(var(--popover-exit-dur) * var(--anim-mult, 1));
+  transition-delay: 0s, 0s, 0s, 0s, 0s, 0s;
 }
 
 /* ---- Interactive (real) trigger button — sits ABOVE the goo layer ---- */
@@ -300,7 +312,10 @@
   transition-delay: calc(var(--md-dur) * 0.55);
 }
 .md-root:not(.open) .md-panel-content {
-  transition-delay: calc(var(--md-dur) * 0.38);
+  /* faster-exits rule: no --md-dur-based delay on close -- content fades
+     with the rest of the collapsing layer stack instead of lagging it. */
+  transition-duration: calc(var(--popover-exit-dur) * var(--anim-mult, 1));
+  transition-delay: 0s;
 }
 
 .md-header {
@@ -378,10 +393,16 @@
 .md-root.open .md-item:nth-child(2) { transition-delay: calc(var(--md-dur) * 0.72), calc(var(--md-dur) * 0.72), 0s; }
 .md-root.open .md-item:nth-child(3) { transition-delay: calc(var(--md-dur) * 0.82), calc(var(--md-dur) * 0.82), 0s; }
 .md-root.open .md-item:nth-child(4) { transition-delay: calc(var(--md-dur) * 0.92), calc(var(--md-dur) * 0.92), 0s; }
-.md-root:not(.open) .md-item:nth-child(1) { transition-delay: calc(var(--md-dur) * 0.30), calc(var(--md-dur) * 0.30), 0s; }
-.md-root:not(.open) .md-item:nth-child(2) { transition-delay: calc(var(--md-dur) * 0.20), calc(var(--md-dur) * 0.20), 0s; }
-.md-root:not(.open) .md-item:nth-child(3) { transition-delay: calc(var(--md-dur) * 0.10), calc(var(--md-dur) * 0.10), 0s; }
-.md-root:not(.open) .md-item:nth-child(4) { transition-delay: 0s, 0s, 0s; }
+/* faster-exits rule: items collapse together on --popover-exit-dur instead
+   of riding the --md-dur-based open stagger in reverse, which used to hold
+   pure delay before any exit motion even started. */
+.md-root:not(.open) .md-item {
+  transition-duration:
+    calc(var(--popover-exit-dur) * var(--anim-mult, 1)),
+    calc(var(--popover-exit-dur) * var(--anim-mult, 1)),
+    calc(var(--duration-fast) * var(--anim-mult, 1));
+  transition-delay: 0s, 0s, 0s;
+}
 .md-item:hover {
   background: var(--fp-hover);
 }
@@ -573,12 +594,14 @@ html.dark .md-card {
   background: #111111;
   border-color: #232323;
 }
-/* Canon dark shell: no ring, matching the card-primitives outer shell
-   (concentric-demo-outer in Cards.css carries no border/box-shadow of its
-   own in either theme); elevation stays drop-shadow-only, background comes
-   from --shell-bg. The previous inset ring here was the stray external
-   line Bora flagged -- card primitives never draws one on this layer. */
+/* Canon (corrected, per Cards.css concentric-demo-outer): exactly one
+   external line exists anywhere in this system -- a single 1px
+   --card-border ring on the OUTER shell, dark mode only. The prior version
+   of this rule claimed the outer shell carries no ring at all, which is
+   backwards: that's what left the shell invisible against the dark page
+   background, the complaint Bora raised. Elevation stays drop-shadow-only. */
 html.dark .md-panel-shell {
+  border: 1px solid var(--card-border);
   filter: drop-shadow(0 16px 34px rgba(0,0,0,0.55)) drop-shadow(0 3px 8px rgba(0,0,0,0.32));
 }
 html.dark .md-trigger-bg,
@@ -586,14 +609,12 @@ html.dark .md-panel-bg { background: #FFFFFF; }
 html.dark .md-trigger { color: #0F172A; }
 html.dark .md-trigger .material-symbols-outlined { text-shadow: none; }
 html.dark .md-root.open .md-panel-bg {
-  /* Card-primitives dark surface literal (_shared-feedback.css html.dark
-     --card-bg), used as a literal per this step's guidance since --card-bg
-     is not wired into this component's token chain; the prior #1E293B was
-     a navy/blue value, not the house dark card color. */
-  background-color: #1C1C1C;
-  box-shadow:
-    0 18px 40px -12px rgba(0,0,0,0.55),
-    0 4px 12px -4px rgba(0,0,0,0.35),
-    inset 0 1px 0 rgba(255,255,255,0.06),
-    inset 0 0 0 1px rgba(255,255,255,0.05);
+  /* Inner surface: no external line in either theme (fill contrast alone
+     does the separating), --card-bg for the dark fill, and elevation via
+     stacked filter: drop-shadow(...) -- never box-shadow -- matching the
+     card-primitives inner-surface canon. The previous inset box-shadow
+     rings here were the "3D-ish" edge Bora flagged. */
+  background-color: var(--card-bg);
+  box-shadow: none;
+  filter: drop-shadow(0 10px 24px rgba(0,0,0,0.40)) drop-shadow(0 2px 6px rgba(0,0,0,0.24));
 }

@@ -537,7 +537,7 @@
 
     var ComponentClass;
     try {
-      // eslint-disable-next-line no-new-func
+       
       ComponentClass = new Function('DCLogic', scriptEl.textContent + '\nreturn Component;')(DCLogic);
     } catch (err) {
       console.error('[dc-support-shim] failed to evaluate data-dc-script:', err);

@@ -39,7 +39,6 @@ export function ToastCard({
       style={t.wrapStyle}
       className="ts-wrap"
       data-ts-base={String(t.wrapStyle.transform)}
-      role="presentation"
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
@@ -54,13 +53,15 @@ export function ToastCard({
       <div className="shell" style={{ padding: '7px', borderRadius: '24px', boxShadow: '0 10px 30px rgba(15,23,42,0.14), 0 2px 8px rgba(15,23,42,0.08)' }}>
         <div style={t.surfaceStyle}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--gap-icon-text)', padding: '12px 14px' }}>
-            <div style={t.iconBoxStyle}>
+            <div className="ts-icon-chip" style={t.iconBoxStyle}>
               {/* F11: geometric centring only -- lineHeight: 1 keeps the
                   inline-block's box equal to its font-size em-square so
                   placeItems: center on the parent centres the glyph exactly;
                   no per-glyph transform nudge (removed on purpose, see
-                  toast-vm.ts). */}
-              <span className="material-icons" style={{ fontSize: '18px', lineHeight: 1, display: 'inline-block' }}>{t.icon}</span>
+                  toast-vm.ts). F16: .ts-icon-chip (Toast.css) locks the chip
+                  to a full-round circle and clips any layer that could
+                  otherwise protrude past its silhouette. */}
+              <span className="material-icons ts-icon-glyph" style={{ fontSize: '18px', lineHeight: 1, display: 'inline-block' }}>{t.icon}</span>
             </div>
             <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '1px' }}>
               <span style={t.titleStyle}>{t.title}</span>

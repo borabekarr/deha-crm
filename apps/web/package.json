@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
+    "test": "pnpm typecheck && pnpm test:eslint-rules",
     "test:e2e": "playwright test",
     "test:lite": "bash ../../scripts/test-lite.sh",
     "test:motion-cascade": "playwright test motion-cascade --project=default",

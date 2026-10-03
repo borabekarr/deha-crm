@@ -15,8 +15,8 @@ instrumentation, never from source inspection.
 ## Gate script
 
 `../../.claude/scripts/render-gate-browser.mjs`
-(canonical source mirrored at `.claude-ext/scripts/render-gate-browser.mjs`;
-`.claude/scripts` is a symlink into the shared `claude-code-system` repo.)
+(`.claude/scripts` is a symlink into the shared `claude-code-system` repo;
+no local copy is kept.)
 
 ## What it checks
 

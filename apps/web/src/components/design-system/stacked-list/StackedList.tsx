@@ -134,18 +134,15 @@ export default function StackedList({
       {/* ---------- floating directory dock ---------- */}
       <div
         className={'sl-bar' + (expanded ? ' is-expanded' : '')}
-        role="presentation"
         onClick={() => { if (!expanded) setExpanded(true) }}
       >
         <div className="sl-bar-head">
-          <div
+          <button
+            type="button"
             className="sl-bar-left"
-            role="button"
             tabIndex={expanded ? -1 : 0}
+            aria-disabled={expanded}
             aria-label="Open member directory"
-            onKeyDown={(e) => {
-              if (!expanded && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); setExpanded(true) }
-            }}
           >
             <div className="sl-bar-icon">
               <span className="material-symbols-outlined">groups</span>
@@ -154,7 +151,7 @@ export default function StackedList({
               <h4>Member Directory</h4>
               <p>{MEMBERS.length} Members Registered</p>
             </div>
-          </div>
+          </button>
           <div className="sl-bar-right">
             <div className="sl-stack">
               {stack.map((m) => (

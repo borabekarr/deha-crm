@@ -4,37 +4,19 @@
   "workspaces": {
     "apps/web": {
       "entry": [
-        "src/main.tsx",
-        "src/routes/**/*.tsx",
-        "scripts/check-bundle-budget.mjs",
-        "vite.config.ts",
-        "eslint.config.js",
-        "playwright.config.ts"
+        "src/routes/**/*.tsx"
       ],
       "project": ["src/**/*.{ts,tsx}"],
-      "ignore": [
-        "src/routeTree.gen.ts",
-        "**/design-system-archive/**",
-        "tests/**/*-snapshots/**"
-      ]
-    },
-    "packages/api": {
-      "entry": ["src/index.ts"],
-      "project": ["src/**/*.ts"]
-    },
-    "packages/core": {
-      "entry": ["src/index.ts"],
-      "project": ["src/**/*.ts"]
+      "ignoreDependencies": [
+        "react-scan",
+        "tailwindcss"
+      ],
+      "tailwind": false
     }
   },
   "ignore": [
-    ".claude*/**",
-    "memory/**",
-    "plans/**",
-    "debt/**",
-    "knowledge/**",
     "**/design-system-archive/**",
-    "**/*-snapshots/**",
-    "pilot-sandbox/**"
+    "pilot-sandbox/**",
+    "scripts/motion-probe.mjs"
   ]
 }

@@ -43,10 +43,10 @@ function IcoWarn() {
 
 // ── the field ────────────────────────────────────────────────────────────
 
-export type OtpVariant = 'fadeSlideDown' | 'fadeScale' | 'slideUp' | 'flip'
+type OtpVariant = 'fadeSlideDown' | 'fadeScale' | 'slideUp' | 'flip'
 type OtpStatus = 'idle' | 'verifying' | 'error' | 'success'
 
-export interface OtpInputProps {
+interface OtpInputProps {
   count: number
   expected: string
   variant: OtpVariant
@@ -56,7 +56,7 @@ export interface OtpInputProps {
   onFinished?: (value: string) => void
 }
 
-export function OtpInput({ count, expected, variant, mask, autoFocus, onChange, onFinished }: OtpInputProps) {
+function OtpInput({ count, expected, variant, mask, autoFocus, onChange, onFinished }: OtpInputProps) {
   const [value, setValue] = useState('')
   const [status, setStatus] = useState<OtpStatus>('idle') // idle | verifying | error | success
   const [focused, setFocused] = useState(false)
@@ -67,12 +67,21 @@ export function OtpInput({ count, expected, variant, mask, autoFocus, onChange, 
 
   const target = expected.replace(/\D/g, '').slice(0, count)
 
-  // reset when the shape changes; status flipping away from 'verifying'/
-  // 'error' below cancels the verify/shake/reset timers via their own
-  // cleanups, so this effect only owns the autofocus timer.
-  useEffect(() => {
+  // Reset when the shape changes -- adjusted during render (React's
+  // documented "storing information from previous renders" pattern), not an
+  // effect, so it lands in the same commit instead of a redundant one.
+  // Status flipping away from 'verifying'/'error' below cancels the verify/
+  // shake/reset timers via their own cleanups.
+  const shapeKey = `${count}|${expected}`
+  const [prevShapeKey, setPrevShapeKey] = useState(shapeKey)
+  if (prevShapeKey !== shapeKey) {
+    setPrevShapeKey(shapeKey)
     setValue('')
     setStatus('idle')
+  }
+
+  // Autofocus timer only -- an external-system side effect, kept as an effect.
+  useEffect(() => {
     if (!autoFocus || !inputRef.current) return
     const id = setTimeout(() => inputRef.current?.focus(), 60)
     return () => clearTimeout(id)
@@ -128,12 +137,12 @@ export function OtpInput({ count, expected, variant, mask, autoFocus, onChange, 
       popTimer.current = setTimeout(() => setPop(-1), 320)
     }
     setStatus('idle')
-    onChange && onChange(v)
+    if (onChange) onChange(v)
     if (v.length === count) verify(v)
   }
 
   function verify(v: string) {
-    onFinished && onFinished(v)
+    if (onFinished) onFinished(v)
     setStatus('verifying')
     // decision + shake/reset timing lives in the effects above, gated on
     // `status` and reading `value` (already `v` by the time they run)
@@ -169,7 +178,7 @@ export function OtpInput({ count, expected, variant, mask, autoFocus, onChange, 
 
   return (
     <>
-      <div className={rowClass} data-variant={variant} role="presentation" onClick={focus}>
+      <div className={rowClass} data-variant={variant} onClick={focus}>
         {cells}
         <input
           ref={inputRef}

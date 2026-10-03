@@ -54,37 +54,43 @@ export function WeekRow({
       <button type="button" data-proximity className="tb-week-nav" aria-label="Previous week" onClick={onPrevWeek}>
         <WeekNavIcon name="chevron_left" size={16} />
       </button>
-      <div className="tb-week">
-        {weekDays.map((d, i) => (
-          <button
-            key={`w1-${d.toISOString().slice(0, 10)}`}
-            type="button"
-            className={`tb-daybtn hover-standard${i === activePillIdx ? ' active' : ''}`}
-            onClick={() => onSelect(i)}
-          >
-            <span className="dow">{DOW[i]}</span>
-            <span className="dnum">{d.getDate()}</span>
-          </button>
-        ))}
+      {/* F11: week1/sep/week2 grouped so justify-content:space-between splits
+          the row's remaining width into two equal gaps flanking the
+          separator — mirrors the left arrow's gap to week1 on the right
+          arrow's gap to week2, and centers the separator between them. */}
+      <div className="tb-week-group">
+        <div className="tb-week">
+          {weekDays.map((d, i) => (
+            <button
+              key={`w1-${d.toISOString().slice(0, 10)}`}
+              type="button"
+              className={`tb-daybtn hover-standard${i === activePillIdx ? ' active' : ''}`}
+              onClick={() => onSelect(i)}
+            >
+              <span className="dow">{DOW[i]}</span>
+              <span className="dnum">{d.getDate()}</span>
+            </button>
+          ))}
+        </div>
+        {/* Thin quiet divider between the two visible weeks — keyed off
+            --border-hairline so it stays visible in both themes (F14). */}
+        <span className="tb-week-sep" aria-hidden="true" />
+        <div className="tb-week">
+          {weekDays2.map((d, i) => (
+            <button
+              key={`w2-${d.toISOString().slice(0, 10)}`}
+              type="button"
+              className={`tb-daybtn hover-standard${i + 7 === activePillIdx ? ' active' : ''}`}
+              onClick={() => onSelect(i + 7)}
+            >
+              <span className="dow">{DOW[i]}</span>
+              <span className="dnum">{d.getDate()}</span>
+            </button>
+          ))}
+        </div>
       </div>
-      {/* Thin quiet divider between the two visible weeks — keyed off
-          --border-hairline so it stays visible in both themes (F14). */}
-      <span className="tb-week-sep" aria-hidden="true" />
-      <div className="tb-week">
-        {weekDays2.map((d, i) => (
-          <button
-            key={`w2-${d.toISOString().slice(0, 10)}`}
-            type="button"
-            className={`tb-daybtn hover-standard${i + 7 === activePillIdx ? ' active' : ''}`}
-            onClick={() => onSelect(i + 7)}
-          >
-            <span className="dow">{DOW[i]}</span>
-            <span className="dnum">{d.getDate()}</span>
-          </button>
-        ))}
-      </div>
-      {/* margin-left:auto (tb-week-nav-end) pushes this flush to the card
-          inner shell's right edge — asymmetric by design (F14). */}
+      {/* F11: fixed --space-4 gap to week2's last pill, mirroring the left
+          arrow's gap to week1's first pill (was margin-left:auto/flush-right). */}
       <button type="button" data-proximity className="tb-week-nav tb-week-nav-end" aria-label="Next week" onClick={onNextWeek}>
         <WeekNavIcon name="chevron_right" size={16} />
       </button>

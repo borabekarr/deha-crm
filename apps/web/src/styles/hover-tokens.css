@@ -69,6 +69,21 @@ html.dark {
       );
   }
 
+  /* Freeze-on-press (Bora, 2026-08-31): while pressed, hold the proximity
+   * scale/filter contribution constant instead of letting it keep ramping
+   * under the press. `--prox` keeps updating live via the engine's inline
+   * style underneath; this only overrides the `transition` used to render
+   * `scale`/`filter` (never writes `scale` itself -- the engine still owns
+   * that value, matching apps/web/tests/proximity.spec.ts:167). A huge
+   * step-end duration keeps the rendered value pinned at its press-start
+   * point for the whole press; releasing :active reverts to the fast
+   * transition below, so tracking resumes smoothly with no discontinuity. */
+  [data-proximity][data-proximity][data-proximity]:active {
+    transition:
+      scale calc(var(--duration-560) * 999999) step-end,
+      filter calc(var(--duration-560) * 999999) step-end;
+  }
+
   /* Low specificity on purpose: `transition` shorthands don't merge across
    * rules, so a component's own `transition:` (0,1,0, loaded after this file)
    * must be able to win outright. Components that opt into proximity must
@@ -76,8 +91,8 @@ html.dark {
    * for [data-proximity] elements with no component-level transition. */
   [data-proximity] {
     transition:
-      scale calc(var(--duration-instant) * var(--anim-mult, 1)) linear,
-      filter calc(var(--duration-instant) * var(--anim-mult, 1)) linear;
+      scale calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear),
+      filter calc(var(--duration-instant) * var(--anim-mult, 1)) var(--ease-linear);
   }
 
   [data-proximity]:hover,

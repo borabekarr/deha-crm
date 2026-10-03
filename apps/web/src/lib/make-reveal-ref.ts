@@ -140,23 +140,28 @@ function playReveal(
   const maxDist = Math.max(origin, n - 1 - origin)
   const step = Math.min(opts.each, opts.maxTotal / Math.max(1, maxDist)) * mult
 
-  const aug = container as AugContainer
   const controls = animate(
     items,
     { opacity: [0, 1], y: [opts.y, 0], rotate: [opts.rotate, 0] },
     { duration, ease: ENTRANCE_EASE, delay: stagger(step, { from: opts.from }) },
   )
 
-  const clearInline = () => {
-    items.forEach((item) => {
-      Object.assign(item.style, { opacity: '', transform: '' })
-    })
+  // Clear each item's own inline transform as ITS stagger leg finishes, not
+  // once for the whole container after the slowest sibling -- items revealed
+  // early would otherwise sit press-dead waiting on the last one to settle.
+  const clearItemInline = (item: HTMLElement) => {
+    Object.assign(item.style, { opacity: '', transform: '' })
   }
 
-  controls.then(clearInline)
+  items.forEach((item, i) => {
+    const dist = Math.abs(i - origin)
+    const itemDelayMs = dist * step * 1000
+    setTimeout(() => {
+      if (container.isConnected) clearItemInline(item)
+    }, itemDelayMs + duration * 1000 + 200)
+  })
 
-  aug.__revealTimerId = setTimeout(() => {
-    delete aug.__revealTimerId
-    if (container.isConnected) clearInline()
-  }, duration * 1000 + 200)
+  controls.then(() => {
+    items.forEach(clearItemInline)
+  })
 }

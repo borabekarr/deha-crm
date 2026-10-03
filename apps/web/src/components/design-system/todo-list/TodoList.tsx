@@ -116,7 +116,7 @@ export default function TodoList() {
       el.removeEventListener('keydown', handleKey)
       el.removeEventListener('click', handleClick)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [])
 
   // Popover state

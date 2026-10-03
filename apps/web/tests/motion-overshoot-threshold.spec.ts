@@ -63,47 +63,7 @@ async function readTransition(locator: Locator) {
   })
 }
 
-// Reads back a pseudo-element's (::before/::after) resolved transition
-// timing-function/duration -- getComputedStyle's second argument targets the
-// pseudo directly, since Playwright locators can't address ::before/::after.
-async function readPseudoTransition(locator: Locator, pseudo: string) {
-  return locator.evaluate((el, p) => {
-    const style = getComputedStyle(el, p)
-    return { timingFunction: style.transitionTimingFunction, duration: style.transitionDuration }
-  }, pseudo)
-}
-
 test.describe('motion overshoot threshold: control points stay within Apple-standard range', () => {
-  test('tf-handle hover height easing is within threshold', async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name === 'reduced-motion', 'reduced motion zeroes durations')
-
-    await page.goto('/components/adjust-timeframe')
-    await settle(page)
-
-    const handle = page.locator('.tf-handle.start').first()
-    await handle.waitFor({ state: 'attached' })
-    await handle.hover()
-    await expect
-      .poll(() => handle.evaluate((el) => el.matches(':hover')), { timeout: 3000 })
-      .toBe(true)
-
-    const { timingFunction, duration } = await readPseudoTransition(handle, '::before')
-    assertOvershootWithinThreshold(timingFunction, duration, '.tf-handle::before (hovered) height/width transition')
-  })
-
-  test('tf-range .tf-seg segment transform easing is within threshold', async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name === 'reduced-motion', 'reduced motion zeroes durations')
-
-    await page.goto('/components/adjust-timeframe')
-    await settle(page)
-
-    const seg = page.locator('.tf-range .tf-seg').first()
-    await seg.waitFor({ state: 'attached' })
-
-    const { timingFunction, duration } = await readTransition(seg)
-    assertOvershootWithinThreshold(timingFunction, duration, '.tf-range .tf-seg transform transition')
-  })
-
   test('tb-daybtn hover easing is within threshold', async ({ page }, testInfo) => {
     test.skip(testInfo.project.name === 'reduced-motion', 'reduced motion zeroes durations')
 

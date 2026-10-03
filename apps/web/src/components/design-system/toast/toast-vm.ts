@@ -36,10 +36,10 @@ export const COLORS: Record<string, string> = {
 // inner reveal's opacity+translateY legs and delays) so the expandable
 // toast expands and collapses on the identical curve as the expandable
 // card, per this step's brief.
-export const EXPAND_DURATION_S = 0.5
+const EXPAND_DURATION_S = 0.5
 export const EXPAND_DURATION_MS = EXPAND_DURATION_S * 1000
 export const EXPAND_HEIGHT_EASING = 'var(--ease-spring)'
-export function expandInnerStyle(open: boolean): CSSProperties {
+function expandInnerStyle(open: boolean): CSSProperties {
   return {
     opacity: open ? 1 : 0,
     transform: open ? 'translateY(0)' : 'translateY(14px)',
@@ -69,6 +69,14 @@ export interface ToastSpec {
   duration?: number
   action?: { label: string; icon: string; onAction?: () => void }
   expandText?: string
+  // F14: optional per-instance accent/surface override (e.g. priority-tag
+  // colors from a consumer like the sprint planner). Undefined reproduces
+  // the byte-identical default toast; caller values must be oklch or CSS
+  // custom properties, never raw hex. `color` tints the surface panel
+  // (same layer COLORS[t.type] already drives below), `surface` tints the
+  // icon chip's background layer. This is the only override field — no
+  // variant/flag family.
+  accent?: { color: string; surface: string }
 }
 
 export interface ToastItem extends ToastSpec {
@@ -140,8 +148,11 @@ export function vm(t: ToastItem, index: number, expanded: boolean, cfg: VariantC
     op = fanned || index <= 2 ? 1 : 0
   }
 
-  const semantic = !!COLORS[t.type]
-  const color = COLORS[t.type]
+  // F14: accent override wins only when explicitly passed on this toast's
+  // spec; default path (t.accent undefined) reproduces `semantic`/`color`
+  // exactly as before -- no mutation of COLORS or VARIANTS.
+  const semantic = !!t.accent || !!COLORS[t.type]
+  const color = t.accent?.color ?? COLORS[t.type]
 
   const wrapStyle: CSSProperties = {
     position: 'absolute',
@@ -205,7 +216,7 @@ export function vm(t: ToastItem, index: number, expanded: boolean, cfg: VariantC
     borderRadius: '9999px',
     display: 'grid',
     placeItems: 'center',
-    background: semantic ? 'rgba(255,255,255,0.2)' : '#10B981',
+    background: t.accent?.surface ?? (semantic ? 'rgba(255,255,255,0.2)' : '#10B981'),
     color: '#fff',
     boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -1.5px 0 rgba(0,0,0,0.18)',
   }

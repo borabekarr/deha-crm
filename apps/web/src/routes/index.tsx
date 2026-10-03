@@ -16,7 +16,7 @@ export const Route = createFileRoute('/')({
 
 const grouped = getGroupedByStatus()
 
-function ShowcasePage() {
+export function ShowcasePage() {
   const total = [...grouped.values()].reduce(
     (n, sub) => n + [...sub.values()].reduce((m, entries) => m + entries.length, 0),
     0,

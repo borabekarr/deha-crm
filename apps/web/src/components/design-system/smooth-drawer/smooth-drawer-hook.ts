@@ -18,7 +18,7 @@ export type DrawerSide = 'bottom' | 'top' | 'left' | 'right'
 
 // drawerReducer — replaces the five useStates (shown/closing/closeVariant/
 // drag/dragging) that used to live directly in DrawerInstance.
-export type DrawerCloseVariant = '--duration-420' | '--duration-expand'
+type DrawerCloseVariant = '--duration-420' | '--duration-expand'
 
 export interface DrawerState {
   shown: boolean

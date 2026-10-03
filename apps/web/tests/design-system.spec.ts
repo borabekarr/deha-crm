@@ -71,7 +71,6 @@ const SLUGS = [
   'fab',
   'inline-edit',
   // Data
-  'adjust-timeframe',
   'currency-converter',
   'dynamic-calendar',
   'github-calendar',
@@ -191,11 +190,8 @@ async function waitForStableBox(loc: import('@playwright/test').Locator) {
 // - stacked-list: `.sl-bar` blurred box-shadow band rasterizes
 //   nondeterministically in headless Chromium (~18.7k px, identical DOM/CSS,
 //   animations disabled); no wait fixes it.
-// - adjust-timeframe: 208 px single-run jitter observed on CI 2026-07-15
-//   (passed retry; same-DOM antialiasing drift).
 const SLUG_MAX_DIFF_PIXELS: Record<string, number> = {
   'stacked-list': 25000,
-  'adjust-timeframe': 500,
   // Added 2026-08-23. These eight diverge between a local run and the GitHub
   // Actions runner even with identical DOM/CSS, seeded Math.random and a
   // frozen clock: the seed only replays the same sequence if components

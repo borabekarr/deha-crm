@@ -9,7 +9,7 @@ export const Route = createFileRoute('/components/$slug')({
   component: ComponentPreviewPage,
 })
 
-function ComponentPreviewPage() {
+export function ComponentPreviewPage() {
   const { slug } = Route.useParams()
   const entry = getBySlug(slug)
 

@@ -174,12 +174,12 @@ function dbReducer(m: DbMachine, action: DbAction): DbMachine {
   }
 }
 
-export interface DeleteButtonProps {
+interface DeleteButtonProps {
   seconds?: number
   label?: string
 }
 
-export function DeleteButton({ seconds = 5, label = 'Delete' }: DeleteButtonProps) {
+function DeleteButton({ seconds = 5, label = 'Delete' }: DeleteButtonProps) {
   const [machine, dispatch] = useReducer(dbReducer, {
     state: 'idle',
     view: 'idle',

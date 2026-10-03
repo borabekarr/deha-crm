@@ -1,7 +1,6 @@
 import '../../../../design-system/preview/_base.css'
 import '../../../../design-system/preview/_darkmode.css'
 import './MessageDropdown.css'
-import './proto/variants.css'
 
 // ---------------------------------------------------------------------------
 // MessageDropdown — Deha Design System
@@ -28,11 +27,10 @@ import './proto/variants.css'
 // ---------------------------------------------------------------------------
 
 import { useCallback, useEffect, useEffectEvent, useRef, useState, type KeyboardEvent } from 'react'
-import { ProtoPicker } from './proto/ProtoPicker'
 
 // ---------- Sample data ----------
 
-export interface MessageDropdownItem {
+interface MessageDropdownItem {
   id: string
   sender: string
   time: string
@@ -70,7 +68,7 @@ const SAMPLE_MESSAGES: MessageDropdownItem[] = [
 
 // ---------- Component ----------
 
-export interface MessageDropdownProps {
+interface MessageDropdownProps {
   messages?: MessageDropdownItem[]
   gooey?: boolean
   speed?: 'normal' | 'slow'
@@ -81,7 +79,7 @@ export interface MessageDropdownProps {
   viewAllLabel?: string
 }
 
-export function MessageDropdown({
+function MessageDropdown({
   messages = SAMPLE_MESSAGES,
   gooey = true,
   speed = 'normal',
@@ -348,38 +346,10 @@ function Demo() {
 // byte-preserved .md-* rule set) so the block-level .md-panel doesn't sit
 // flush against the preview route's container edge. Precedent: OtpInputDemo,
 // DropdownDemo.
-// ── prototype surface (ds-review-overlays step 4) ────────────────────────
-// Three pane-card directions behind the prototype skill's picker; "Main" is
-// step 3's shipped result untouched and is the cherry-pick baseline (star).
-// Variant styling lives entirely in proto/variants.css, keyed off a
-// .mdv-<slug> class (distinct from the dropdown run's .ddv-* prefix) mirrored
-// onto <html> as well as the stage root. Delete this block + proto/ to strip.
-const VARIANT_SLUGS = ['main', 'tiles', 'editorial', 'vivid'] as const
-const VARIANT_NAMES = ['Main', 'Tiles', 'Editorial', 'Vivid']
-
 export default function MessageDropdownDemo() {
-  const [variant, setVariant] = useState(0)
-  const [nonce, setNonce] = useState(0) // replay: re-mount so the morph re-runs
-  const slug = VARIANT_SLUGS[variant]
-
-  useEffect(() => {
-    const cls = 'mdv-' + slug
-    document.documentElement.classList.add(cls)
-    return () => document.documentElement.classList.remove(cls)
-  }, [slug])
-
   return (
     <div style={{ display: 'grid', placeItems: 'center' }}>
-      <div className={'md-proto-root mdv-' + slug} data-variant={slug} key={slug + ':' + nonce}>
-        <Demo />
-      </div>
-      <ProtoPicker
-        names={VARIANT_NAMES}
-        index={variant}
-        mainIndex={0}
-        onSelect={setVariant}
-        onReplay={() => setNonce((n) => n + 1)}
-      />
+      <Demo />
     </div>
   )
 }

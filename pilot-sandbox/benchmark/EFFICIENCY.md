@@ -26,7 +26,7 @@ A third party can repeat every column as follows.
 - **Token counts (`subagent_tokens`):** taken from the Claude Code Agent tool usage report emitted per subagent spawn, `subagent_tokens` field. Executors cannot read this value; only the spawning orchestrator sees it. One figure per run, captured at spawn completion.
 - **Wall-clock (`wall_clock_ms`):** the `duration_ms` field of the same Agent tool usage report, per spawn.
 - **Tool uses:** the tool-use count from the same report, per spawn.
-- **Render gate:** `node pilot-sandbox/benchmark/render-gate-browser.mjs <file>`; exit code 0 = PASS. The `createElement` column is the call count that gate reports.
+- **Render gate:** `node .claude/scripts/render-gate-browser.mjs <file>`; exit code 0 = PASS. The `createElement` column is the call count that gate reports.
 - **Structural color discipline** (run from `pilot-sandbox/benchmark/`, per file):
   - color violations: `grep -cE '#[0-9a-fA-F]{3,8}\b|rgb\(|hsl\(' <file>`
   - oklch tokens: `grep -c oklch <file>`

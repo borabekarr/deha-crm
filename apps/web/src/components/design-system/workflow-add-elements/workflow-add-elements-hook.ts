@@ -41,7 +41,7 @@ export interface MenuPos {
  * Must be called inside a `requestAnimationFrame` so the element already has
  * its layout dimensions (the outer panel must be in the DOM at that point).
  */
-export function clampAEPosition(
+function clampAEPosition(
   x: number,
   y: number,
   outerEl: HTMLElement,
@@ -110,6 +110,26 @@ export function clampNodesPositionForRow(
 }
 
 // ---------------------------------------------------------------------------
+// F30: search popover top-lock — module-singleton ResizeObserver
+// ---------------------------------------------------------------------------
+
+const aeTopObservers = new Map<HTMLElement, { nodesEl: HTMLElement; ro: ResizeObserver }>()
+
+/** Keeps `nodesEl`'s `top` pinned to `aeOuter`'s live offsetTop for as long
+ *  as `aeOuter`'s box changes, without a lifecycle effect. Registering again
+ *  for the same `aeOuter` disconnects the previous observer first, so at
+ *  most one observer per AE panel exists at a time. */
+function registerAeTopSync(nodesEl: HTMLDivElement, aeOuter: HTMLDivElement): void {
+  if (typeof ResizeObserver === 'undefined') return
+  aeTopObservers.get(aeOuter)?.ro.disconnect()
+  const ro = new ResizeObserver(() => {
+    nodesEl.style.top = `${aeOuter.offsetTop}px`
+  })
+  ro.observe(aeOuter)
+  aeTopObservers.set(aeOuter, { nodesEl, ro })
+}
+
+// ---------------------------------------------------------------------------
 // Nodes flyout mount/update placement (callback ref body)
 // ---------------------------------------------------------------------------
 
@@ -144,14 +164,34 @@ export function placeNodesFlyout(
     } else {
       ny = aeOuter.offsetTop
     }
-    if (ny + nh > shInner - 10) ny = shInner - nh - 10
-    if (ny < 10) ny = 10
+    // F30: the search results popover's top edge is a HARD LOCK to the AE
+    // panel's top edge, per Bora's invariant, regardless of either panel's
+    // size — this is what previously "flipped" the popover: when the result
+    // set was tall enough that `ny + nh` overflowed the shell, this clamp
+    // shoved `ny` upward to keep it on screen, breaking the shared top line
+    // (that's the "sometimes on top and bottom" Bora reported). The
+    // hover-row nodes flyout is a different, always-short menu that was
+    // never the subject of that complaint, so it keeps the viewport clamp.
+    if (!searchModeRef.current) {
+      if (ny + nh > shInner - 10) ny = shInner - nh - 10
+      if (ny < 10) ny = 10
+    }
     el.style.left = `${nx}px`
     el.style.top = `${ny}px`
   }
 
   // Place the flyout at its final position on this frame (no jump).
   placeRight()
+
+  // F30: register a module-level ResizeObserver so the top-lock holds LIVE
+  // for the life of this mount, not just at this call — if the AE panel's
+  // box ever changes size while the search popover stays mounted, the
+  // search popover's top re-syncs to the AE panel's current offsetTop.
+  // Pattern mirrors use-squircle.ts's module-singleton registry (callback-ref
+  // driven, no useEffect); keyed by aeOuter so a fresh mount for the same AE
+  // panel supersedes (disconnects) any prior observer instead of leaking one
+  // per open/close cycle.
+  if (searchModeRef.current) registerAeTopSync(el, aeOuter)
 
   const aeRect = aeOuter.getBoundingClientRect()
   const shellRect = shell ? shell.getBoundingClientRect() : { left: 0, top: 0 }
@@ -203,11 +243,12 @@ export function closeAllMenus(
   const wasSearching = state.searchPanelMounted && !state.searchPanelLeaving
   if (wasSearching) {
     setState((s) => ({ ...closedState(s), searchPanelMounted: true, searchPanelLeaving: true }))
-    // Unmount after the flyout's reverse-morph exit (--duration-280, live
-    // read via tokenMs) plus a 20ms buffer.
+    // Unmount after the flyout's reverse-morph exit (--popover-exit-dur, F30:
+    // matches the CSS animation's duration source, live read via tokenMs)
+    // plus a 20ms buffer.
     timers.searchLeaveTimer.current = setTimeout(() => {
       setState((s) => ({ ...s, searchPanelMounted: false, searchPanelLeaving: false }))
-    }, tokenMs('--duration-280', 280) + 20)
+    }, tokenMs('--popover-exit-dur', 150) + 20)
   } else {
     // Use closedState (not INITIAL) to preserve aeLeft/aeTop so the fade-out
     // stays in place instead of jumping to the viewport left edge.

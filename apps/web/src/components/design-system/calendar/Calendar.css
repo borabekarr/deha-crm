@@ -208,7 +208,7 @@ html.dark .cal-dot-more { color: #6B6B6B; }
    (fab/Fab.css .fab-item): background var(--fp-hover), --duration-fast
    zero-delay fade, press scale(0.97). The idle 0.7 opacity ghost-affordance is kept
    (pre-existing, not part of the broken-hover report). */
-.cal-add-row { display: flex; align-items: center; gap: 10px; padding: 10px 2px 4px; cursor: pointer; opacity: 0.7; border-radius: 8px; transition: opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade), background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade) 0ms /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */; }
+.cal-add-row { appearance: none; background-color: transparent; border: 0; margin: 0; font: inherit; color: inherit; text-align: inherit; width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 2px 4px; cursor: pointer; opacity: 0.7; border-radius: 8px; transition: opacity calc(var(--duration-base) * var(--anim-mult, 1)) var(--ease-fade), background calc(var(--duration-fast) * var(--anim-mult, 1)) var(--ease-fade) 0ms /* motion-sweep: kept, zero-duration (delay/visibility reset), no token needed */; }
 .cal-add-row:hover { opacity: 1; background: var(--fp-hover); }
 .cal-add-row:active { transform: scale(var(--press-control)); }
 /* Proximity: own `opacity` transition (0,1,0) beats hover-tokens.css's
