@@ -1,81 +1,17 @@
 /* global.css
- * Deha Design System -- global stylesheet entry point.
- * Load order: Tailwind base first, then design-system CSS so tokens/overrides win.
+ * Global stylesheet entry point. Design tokens arrive with the React port
+ * from /design-system/ (the Claude Design system source).
  */
 
 /* Tailwind v4 base */
 @import "tailwindcss";
 
-/* Motion tokens (duration scale + easing set) -- must load before any
- * component stylesheet that consumes the --duration- and --ease- custom
- * properties. See styles/motion-tokens.css for the source-of-truth
- * commentary and the migration notes for step-8 (motion-token extraction). */
-@import "./motion-tokens.css";
-
-/* Runtime canonical segmented-control pill base (.seg / .seg-pill) --
- * consumes --duration-slower/--duration-240/--duration-fast/--ease-out/
- * --ease-pill-switch, so must load after motion-tokens.css. See
- * the seg-controls stylesheet below for the token/rule source-of-truth;
- * the preview _controls stylesheet is no longer imported here. */
-@import "./seg-controls.css";
-
-/* Global proximity-hover contract (--prox mapping to scale/brightness/
- * drop-shadow) -- consumes --duration-instant, so must load after
- * motion-tokens.css and before any component stylesheet. See
- * styles/hover-tokens.css for the token/rule source-of-truth. */
-@import "./hover-tokens.css";
-@import "./spacing-radius-tokens.css";
-
-/* Shared dotted-grid texture recipe (pill's 16px recipe wins over the
- * divergent toast copies). See styles/grid-texture.css for the
- * token/rule source-of-truth. */
-@import "./grid-texture.css";
-
-/* Deha Design System foundation (verbatim, in dependency order):
- *   _base.css itself @imports ../colors_and_type.css -- Vite resolves that
- *   relative to _base.css, so tokens load automatically.
- */
-@import "../../design-system/preview/_base.css";
-@import "../../design-system/preview/_darkmode.css";
-@import "../../design-system/preview/_surfaces.css";
-@import "../../design-system/preview/_shared-feedback.css";
-
-/* Slow-Down multiplier, defined eagerly in the entry stylesheet so every route
- * (including statically-imported components whose chunk did not pick up the
- * deep _base -> colors_and_type :root) inherits it. Mirrors the definition in
- * colors_and_type.css. */
-:root { --anim-mult: 1; }
-:root[data-anim-slow="true"] { --anim-mult: 4; }
-
-/* Repo-wide reduced-motion fallback. Per-component reduced-motion
- * guards remain valid but are now redundant. */
+/* Repo-wide reduced-motion fallback. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: .001ms !important;
     scroll-behavior: auto !important;
-  }
-}
-
-/* Step-6 immediate-fade utility (plan: ds-primer-entrance) -- Primer's
- * "immediate" treatment for standalone typography/iconography that sits
- * OUTSIDE cards (page titles, labels, icon rows). Fades in on mount only:
- * no stagger, no scroll trigger, no slide. Retuned (plan: primer-entrance-fixes)
- * to match the on-visible card reveal exactly: --duration-entrance (600ms)
- * and --ease-brand-entrance, Primer's published curve, for a consistent feel.
- * Do not apply to elements inside a reveal-engine container (see
- * PreviewFrame.tsx / animated-list) -- that would double-animate. */
-@keyframes anim-immediate-fade {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-.anim-immediate {
-  animation: anim-immediate-fade calc(var(--duration-entrance) * var(--anim-mult, 1)) var(--ease-brand-entrance) both;
-}
-@media (prefers-reduced-motion: reduce) {
-  .anim-immediate {
-    animation: none;
-    opacity: 1;
   }
 }

@@ -1,0 +1,551 @@
+<!-- @dsCard group="Animations" viewport="1200x800" name="Liquid Ui" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../../../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap">
+<link rel="stylesheet" href="../../../colors_and_type.css">
+<link rel="stylesheet" href="../../../styles.css">
+<script src="../../../_ds_bundle.js"></script>
+<style>
+  body { margin: 0; background: var(--bg-app); }
+  a { color: var(--fg-brand); text-decoration: none; }
+  a:hover { color: var(--brand-primary-700); }
+  input[type="range"] { -webkit-appearance: none; appearance: none; background: transparent; }
+  input[type="range"]::-webkit-slider-runnable-track { height: 4px; border-radius: 999px; background: var(--gray-200); }
+  input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; margin-top: -6px; border-radius: 999px; background: #fff; border: 1px solid var(--gray-300); box-shadow: 0 1px 3px rgba(0,0,0,.18); cursor: grab; }
+  input[type="range"]::-moz-range-track { height: 4px; border-radius: 999px; background: var(--gray-200); }
+  input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border: 1px solid var(--gray-300); border-radius: 999px; background: #fff; }
+</style>
+</helmet>
+
+<div style="font-family: var(--font-display); color: var(--fg1); padding: 40px 24px 64px; display: flex; flex-direction: column; align-items: center; gap: 28px;">
+
+  <div style="width: 100%; max-width: 720px; display: flex; flex-direction: column; gap: 14px;">
+    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.10em; color: var(--fg4);">SVG · SDF · Morph</div>
+    <h1 style="margin: 0; font-size: 36px; font-weight: 900; letter-spacing: -0.02em; line-height: 1.05;">Liquid UI</h1>
+    <p style="margin: 0; max-width: 60ch; font-size: 15px; font-weight: 500; line-height: 1.6; color: var(--fg3); text-wrap: pretty;">I love UI where two cards fuse and the corner between them bends inward, like they were poured together, so I built a tiny engine that just makes it from code instead of drawing it by hand. Drag the cards below to watch the join re-flow, and turn one knob to go from crisp joints all the way to soft gooey blobs.</p>
+  </div>
+
+  <div style="width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 10px;">
+    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px;">
+      <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.10em; color: var(--fg4);">Button-pill · horizontal</span>
+      <span style="font-size: 11px; font-weight: 600; color: var(--fg5);">hover</span>
+    </div>
+    <div onMouseEnter="{{ pillEnter }}" onMouseLeave="{{ pillLeave }}" style="position: relative; border-radius: 20px; border: 1px solid var(--border-hairline); background: var(--gray-50); background-image: var(--bg-section-grid); background-size: 24px 24px; overflow: hidden; cursor: pointer;">
+      <div style="position: relative; width: 100%; aspect-ratio: 340 / 120;">
+        <div ref="{{ pillRef }}" style="position: absolute; inset: 0;">
+          <div style="position: absolute; left: 0; top: 0; width: 340px; height: 120px; transform-origin: top left; transform: scale({{ pillScale }});">
+            <svg aria-hidden="true" viewBox="{{ pillViewBox }}" style="position: absolute; left: {{ pillX }}px; top: {{ pillY }}px; width: {{ pillW }}px; height: {{ pillH }}px; overflow: visible; pointer-events: none;">
+              <defs>
+                <pattern id="pillGrid" width="14" height="14" patternUnits="userSpaceOnUse">
+                  <path d="M14 0H0V14" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1"></path>
+                </pattern>
+              </defs>
+              <path d="{{ pillPath }}" fill="var(--brand-primary)" style="filter: drop-shadow(0 10px 30px rgba(16,185,129,0.35));"></path>
+              <path d="{{ pillPath }}" fill="url(#pillGrid)"></path>
+            </svg>
+            <div style="position: absolute; left: 24px; top: 34px; width: 176px; height: 52px; display: flex; align-items: center; padding-left: 22px;">
+              <span style="font-size: 14px; font-weight: 800; color: var(--brand-on-primary); text-shadow: 0 1px 2px rgba(0,0,0,0.18);">{{ pillLabel }}</span>
+            </div>
+            <div style="position: absolute; left: {{ pillDotX }}px; top: 36px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: var(--brand-on-primary); opacity: {{ pillIconOpacity }};">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 12h13"></path>
+                <path d="m12 5 7 7-7 7"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="width: 100%; max-width: 720px; border-radius: 24px; border: 1px solid var(--border-hairline); background: var(--gray-50); background-image: var(--bg-section-grid); background-size: 24px 24px; overflow: hidden; touch-action: none;">
+    <div style="position: relative; width: 100%; aspect-ratio: 720 / 380;" onPointerMove="{{ onPointerMove }}" onPointerUp="{{ endDrag }}" onPointerCancel="{{ endDrag }}" onPointerLeave="{{ endDrag }}">
+      <div ref="{{ pgRef }}" style="position: absolute; inset: 0;">
+        <div style="position: absolute; left: 50%; top: 50%; width: 720px; height: 380px; transform: translate(-50%, -50%) scale({{ pgScale }}); transform-origin: center;">
+
+          <svg aria-hidden="true" viewBox="{{ viewBox }}" style="position: absolute; left: {{ skinX }}px; top: {{ skinY }}px; width: {{ skinW }}px; height: {{ skinH }}px; overflow: visible; pointer-events: none; filter: drop-shadow(0 8px 18px rgba(0,0,0,0.10));">
+            <path d="{{ pathD }}" fill="{{ skinFill }}"></path>
+          </svg>
+
+          <sc-for list="{{ cards }}" as="c" hint-placeholder-count="2">
+            <div data-cid="{{ c.id }}" onPointerDown="{{ onPointerDown }}" style="position: absolute; left: {{ c.x }}px; top: {{ c.y }}px; width: {{ c.w }}px; height: {{ c.h }}px; cursor: grab; user-select: none;">
+
+              <sc-if value="{{ c.isGrid }}" hint-placeholder-val="{{ true }}">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; height: 100%; padding: 14px;">
+                  <div style="border-radius: 8px; background: var(--bg-chip);"></div>
+                  <div style="border-radius: 8px; background: var(--bg-chip);"></div>
+                  <div style="border-radius: 8px; background: var(--bg-chip);"></div>
+                  <div style="border-radius: 8px; background: var(--bg-chip);"></div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ c.isBubble }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; align-items: center; gap: 14px; height: 100%; padding: 0 22px;">
+                  <div style="width: 40px; height: 40px; flex: none; border-radius: 999px; background: var(--bg-chip);"></div>
+                  <div style="flex: 1; display: flex; flex-direction: column; gap: 7px; min-width: 0;">
+                    <div style="height: 9px; width: 80%; border-radius: 999px; background: var(--bg-chip);"></div>
+                    <div style="height: 9px; width: 52%; border-radius: 999px; background: var(--bg-chip);"></div>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ c.isShare }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; align-items: center; gap: 14px; height: 100%; padding: 0 20px;">
+                  <div style="display: flex;">
+                    <div style="width: 34px; height: 34px; border-radius: 999px; background: var(--bg-chip); border: 2px solid var(--bg-card-solid);"></div>
+                    <div style="width: 34px; height: 34px; border-radius: 999px; background: var(--bg-chip); border: 2px solid var(--bg-card-solid); margin-left: -10px;"></div>
+                    <div style="width: 34px; height: 34px; border-radius: 999px; background: var(--bg-chip); border: 2px solid var(--bg-card-solid); margin-left: -10px;"></div>
+                  </div>
+                  <div style="flex: 1; display: flex; flex-direction: column; gap: 7px; min-width: 0;">
+                    <div style="height: 9px; width: 70%; border-radius: 999px; background: var(--bg-chip);"></div>
+                    <div style="height: 9px; width: 44%; border-radius: 999px; background: var(--bg-chip);"></div>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ c.isSearch }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; align-items: center; height: 100%; padding: 0 28px;">
+                  <div style="height: 10px; width: 55%; border-radius: 999px; background: var(--bg-chip);"></div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ c.isIcon }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--fg3);">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <path d="m20 20-3.2-3.2"></path>
+                  </svg>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ c.isLabel }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; align-items: center; justify-content: center; height: 100%; padding-bottom: 2px;">
+                  <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.02em; color: var(--fg3);">{{ c.label }}</span>
+                </div>
+              </sc-if>
+
+            </div>
+          </sc-for>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="width: 100%; max-width: 720px; display: flex; flex-direction: column; gap: 16px; padding: 18px; border-radius: 20px; border: 1px solid var(--border-hairline); background: var(--bg-card-solid); box-shadow: var(--shadow-glass-sm);">
+
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+      <div style="display: flex; padding: 3px; gap: 3px; border-radius: 14px; background: var(--gray-100);">
+        <button type="button" data-mode="geometric" onClick="{{ applyMode }}" style="border: none; cursor: pointer; padding: 7px 16px; border-radius: 11px; font-family: inherit; font-size: 12px; font-weight: 700; background: {{ geoBg }}; color: {{ geoFg }}; box-shadow: {{ geoShadow }};">Geometric</button>
+        <button type="button" data-mode="goo" onClick="{{ applyMode }}" style="border: none; cursor: pointer; padding: 7px 16px; border-radius: 11px; font-family: inherit; font-size: 12px; font-weight: 700; background: {{ gooBg }}; color: {{ gooFg }}; box-shadow: {{ gooShadow }};">Goo</button>
+      </div>
+      <button type="button" onClick="{{ remix }}" style="border: 1px solid var(--border-hairline); background: #fff; cursor: pointer; padding: 8px 16px; border-radius: 12px; font-family: inherit; font-size: 12px; font-weight: 700; color: var(--fg2);" style-hover="background: var(--gray-50);">Remix</button>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.10em; color: var(--fg4);">
+          <span>Blend</span><span style="color: var(--fg2); letter-spacing: 0;">{{ k }}</span>
+        </div>
+        <input type="range" min="0" max="90" step="1" value="{{ k }}" onChange="{{ setK }}" onInput="{{ setK }}" style="width: 100%; height: 16px;">
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.10em; color: var(--fg4);">
+          <span>Detail</span><span style="color: var(--fg2); letter-spacing: 0;">{{ cellLabel }}</span>
+        </div>
+        <input type="range" min="3" max="14" step="1" value="{{ cell }}" onChange="{{ setCell }}" onInput="{{ setCell }}" style="width: 100%; height: 16px;">
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;skin&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;surface&quot;,&quot;accent&quot;],&quot;default&quot;:&quot;surface&quot;,&quot;tsType&quot;:&quot;\&quot;surface\&quot; | \&quot;accent\&quot;&quot;,&quot;section&quot;:&quot;Liquid skin&quot;},&quot;smooth&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:2,&quot;min&quot;:0,&quot;max&quot;:4,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Liquid skin&quot;},&quot;blend&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:28,&quot;min&quot;:0,&quot;max&quot;:90,&quot;step&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Liquid skin&quot;}}">
+const PRESETS = [
+  { k: 28, cell: 12, pieces: [
+    { id: "bubble", x: 188, y: 123, w: 300, h: 116, radius: 40, kind: "bubble" },
+    { id: "tail", x: 472, y: 212, w: 52, h: 52, radius: 14, kind: "plain" },
+  ]},
+  { k: 20, cell: 12, pieces: [
+    { id: "tab", x: 178, y: 80, w: 92, h: 46, radius: 18, kind: "label", label: "Grid" },
+    { id: "panel", x: 247, y: 104, w: 300, h: 196, radius: 22, kind: "grid" },
+  ]},
+  { k: 77, cell: 11, pieces: [
+    { id: "card", x: 176, y: 131, w: 288, h: 120, radius: 26, kind: "share" },
+    { id: "btn", x: 483, y: 165, w: 96, h: 52, radius: 18, kind: "label", label: "Share" },
+  ]},
+  { k: 20, cell: 3, pieces: [
+    { id: "input", x: 208, y: 167, w: 300, h: 64, radius: 32, kind: "search" },
+    { id: "go", x: 452, y: 132, w: 56, h: 56, radius: 26, kind: "icon" },
+  ]},
+];
+
+const MODES = { geometric: { k: 22, cell: 5 }, goo: { k: 64, cell: 7 } };
+const VW = 720, VH = 380, REMIX_MS = 620;
+const lerp = (a, b, t) => a + (b - a) * t;
+const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+function sdRoundBox(px, py, cx, cy, hw, hh, r) {
+  const rr = Math.min(r, Math.min(hw, hh));
+  const qx = Math.abs(px - cx) - hw + rr;
+  const qy = Math.abs(py - cy) - hh + rr;
+  const outside = Math.hypot(Math.max(qx, 0), Math.max(qy, 0));
+  const inside = Math.min(Math.max(qx, qy), 0);
+  return outside + inside - rr;
+}
+function smin(a, b, k) {
+  if (k <= 0) return Math.min(a, b);
+  const h = Math.max(0, Math.min(1, 0.5 + (0.5 * (b - a)) / k));
+  return b * (1 - h) + a * h - k * h * (1 - h);
+}
+
+const EDGES = [[], [[3,2]], [[2,1]], [[3,1]], [[0,1]], [[3,2],[0,1]], [[0,2]], [[3,0]],
+  [[3,0]], [[0,2]], [[3,0],[2,1]], [[0,1]], [[3,1]], [[2,1]], [[3,2]], []];
+
+function lerpEdge(x0, y0, v0, x1, y1, v1) {
+  const denom = v0 - v1;
+  const t = Math.abs(denom) < 1e-6 ? 0.5 : v0 / denom;
+  const tc = Math.max(0, Math.min(1, t));
+  return { x: x0 + (x1 - x0) * tc, y: y0 + (y1 - y0) * tc };
+}
+
+function fieldEval(boxes, k, x, y) {
+  if (!boxes.length) return Infinity;
+  let d = sdRoundBox(x, y, boxes[0].cx, boxes[0].cy, boxes[0].hw, boxes[0].hh, boxes[0].r);
+  for (let i = 1; i < boxes.length; i++) {
+    const b = boxes[i];
+    d = smin(d, sdRoundBox(x, y, b.cx, b.cy, b.hw, b.hh, b.r), k);
+  }
+  return d;
+}
+
+function bounds(boxes, k) {
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const b of boxes) {
+    minX = Math.min(minX, b.cx - b.hw - k);
+    minY = Math.min(minY, b.cy - b.hh - k);
+    maxX = Math.max(maxX, b.cx + b.hw + k);
+    maxY = Math.max(maxY, b.cy + b.hh + k);
+  }
+  if (!isFinite(minX)) return { minX: 0, minY: 0, maxX: 0, maxY: 0 };
+  return { minX, minY, maxX, maxY };
+}
+
+function stitch(segs, cell) {
+  const eps = cell * 0.5;
+  const key = (p) => Math.round(p.x / eps) + "," + Math.round(p.y / eps);
+  const map = new Map();
+  segs.forEach((s, idx) => {
+    for (const end of [0, 1]) {
+      const kk = key(s[end]);
+      const arr = map.get(kk);
+      if (arr) arr.push({ seg: idx, end });
+      else map.set(kk, [{ seg: idx, end }]);
+    }
+  });
+  const used = new Array(segs.length).fill(false);
+  const loops = [];
+  for (let start = 0; start < segs.length; start++) {
+    if (used[start]) continue;
+    const loop = [];
+    let cur = start, end = 0, guard = 0;
+    while (!used[cur] && guard++ < segs.length + 2) {
+      used[cur] = true;
+      loop.push(segs[cur][end]);
+      const bPt = segs[cur][end === 0 ? 1 : 0];
+      const cands = map.get(key(bPt)) || [];
+      let next = -1, nextEnd = 0;
+      for (const c of cands) { if (!used[c.seg]) { next = c.seg; nextEnd = c.end; break; } }
+      if (next === -1) break;
+      cur = next; end = nextEnd;
+    }
+    if (loop.length >= 3) loops.push(loop);
+  }
+  return loops;
+}
+
+function chaikin(pts, passes) {
+  let out = pts;
+  for (let p = 0; p < passes; p++) {
+    const next = [];
+    const n = out.length;
+    for (let i = 0; i < n; i++) {
+      const a = out[i], b = out[(i + 1) % n];
+      next.push({ x: a.x * 0.75 + b.x * 0.25, y: a.y * 0.75 + b.y * 0.25 });
+      next.push({ x: a.x * 0.25 + b.x * 0.75, y: a.y * 0.25 + b.y * 0.75 });
+    }
+    out = next;
+  }
+  return out;
+}
+
+function fieldToPath(boxes, k, cell, smooth) {
+  const b = bounds(boxes, k);
+  const w = b.maxX - b.minX, h = b.maxY - b.minY;
+  const empty = { d: "", minX: 0, minY: 0, width: 0, height: 0 };
+  if (w <= 0 || h <= 0) return empty;
+  const step = Math.max(2, cell);
+  const cols = Math.ceil(w / step) + 1;
+  const rows = Math.ceil(h / step) + 1;
+  if (cols * rows > 400000) return empty;
+
+  const val = new Float32Array(cols * rows);
+  for (let j = 0; j < rows; j++) {
+    const y = b.minY + j * step;
+    for (let i = 0; i < cols; i++) val[j * cols + i] = fieldEval(boxes, k, b.minX + i * step, y);
+  }
+  const segs = [];
+  for (let j = 0; j < rows - 1; j++) {
+    for (let i = 0; i < cols - 1; i++) {
+      const x0 = b.minX + i * step, y0 = b.minY + j * step;
+      const x1 = x0 + step, y1 = y0 + step;
+      const vTL = val[j * cols + i], vTR = val[j * cols + i + 1];
+      const vBR = val[(j + 1) * cols + i + 1], vBL = val[(j + 1) * cols + i];
+      let mask = 0;
+      if (vTL < 0) mask |= 8;
+      if (vTR < 0) mask |= 4;
+      if (vBR < 0) mask |= 2;
+      if (vBL < 0) mask |= 1;
+      if (mask === 0 || mask === 15) continue;
+      const edgePt = (edge) => {
+        if (edge === 0) return lerpEdge(x0, y0, vTL, x1, y0, vTR);
+        if (edge === 1) return lerpEdge(x1, y0, vTR, x1, y1, vBR);
+        if (edge === 2) return lerpEdge(x0, y1, vBL, x1, y1, vBR);
+        return lerpEdge(x0, y0, vTL, x0, y1, vBL);
+      };
+      let cases = EDGES[mask];
+      if (mask === 5 || mask === 10) {
+        const center = fieldEval(boxes, k, (x0 + x1) / 2, (y0 + y1) / 2);
+        if (mask === 5) cases = center < 0 ? [[3,0],[2,1]] : [[3,2],[0,1]];
+        else cases = center < 0 ? [[3,2],[0,1]] : [[3,0],[2,1]];
+      }
+      for (const pair of cases) segs.push([edgePt(pair[0]), edgePt(pair[1])]);
+    }
+  }
+  const fmt = (v) => v.toFixed(2);
+  const parts = [];
+  for (const loop of stitch(segs, step)) {
+    const s = smooth > 0 ? chaikin(loop, smooth) : loop;
+    if (s.length < 3) continue;
+    parts.push("M " + fmt(s[0].x) + " " + fmt(s[0].y) + " " +
+      s.slice(1).map((p) => "L " + fmt(p.x) + " " + fmt(p.y)).join(" ") + " Z");
+  }
+  return { d: parts.join(" "), minX: b.minX, minY: b.minY, width: w, height: h };
+}
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const i = 0;
+    this.state = {
+      presetIdx: i,
+      cards: PRESETS[i].pieces.map((c) => ({ ...c })),
+      k: this.props.blend ?? PRESETS[i].k,
+      cell: PRESETS[i].cell,
+      mode: "",
+    };
+    this.drag = null;
+    this.morph = null;
+    this.state.pillT = 0;
+    this.state.cbT = 0;
+    this.tweens = {};
+    this.state.scales = { pg: 1, pill: 1 };
+    this.ros = {};
+    this.makeRef = (key, design) => (el) => {
+      if (!el) return;
+      if (this.ros[key]) this.ros[key].disconnect();
+      const measure = () => {
+        const s = el.clientWidth / design;
+        if (!s) return;
+        if (Math.abs(s - this.state.scales[key]) > 0.001) {
+          this.setState((st) => ({ scales: { ...st.scales, [key]: s } }));
+        }
+      };
+      const ro = new ResizeObserver(measure);
+      ro.observe(el);
+      this.ros[key] = ro;
+      measure();
+    };
+    this.refs_ = {
+      pg: this.makeRef("pg", 720),
+      pill: this.makeRef("pill", 340),
+    };
+  }
+
+  tween(key, to) {
+    const t0 = this.state[key];
+    if (this.tweens[key]) cancelAnimationFrame(this.tweens[key]);
+    const start = performance.now();
+    const dur = 420;
+    const step = (now) => {
+      const p = ease(Math.min(1, (now - start) / dur));
+      this.setState({ [key]: lerp(t0, to, p) });
+      if (p < 1) this.tweens[key] = requestAnimationFrame(step);
+      else this.tweens[key] = 0;
+    };
+    this.tweens[key] = requestAnimationFrame(step);
+  }
+
+  skin(boxes, k) {
+    const p = fieldToPath(boxes, k == null ? 22 : k, 5, 2);
+    return { d: p.d, viewBox: p.minX + " " + p.minY + " " + p.width + " " + p.height,
+      x: p.minX, y: p.minY, w: p.width, h: p.height };
+  }
+
+  componentWillUnmount() {
+    if (this.morph && this.morph.raf) cancelAnimationFrame(this.morph.raf);
+    Object.values(this.ros).forEach((ro) => ro.disconnect());
+    Object.values(this.tweens).forEach((r) => r && cancelAnimationFrame(r));
+  }
+
+  toLocal(clientX, clientY) {
+    const el = this.stageEl;
+    if (!el) return { x: 0, y: 0 };
+    const r = el.getBoundingClientRect();
+    return { x: ((clientX - r.left) / r.width) * VW, y: ((clientY - r.top) / r.height) * VH };
+  }
+
+  renderVals() {
+    const { cards, k, cell, mode } = this.state;
+    const smooth = this.props.smooth ?? 2;
+    const boxes = cards.map((c) => ({
+      cx: c.x + c.w / 2, cy: c.y + c.h / 2, hw: c.w / 2, hh: c.h / 2, radius: c.radius,
+      r: c.radius,
+    }));
+    const path = fieldToPath(boxes, k, cell, smooth);
+
+    const seg = (on) => ({
+      bg: on ? "#fff" : "transparent",
+      fg: on ? "var(--fg1)" : "var(--fg3)",
+      shadow: on ? "0 1px 2px rgba(0,0,0,.10)" : "none",
+    });
+    const g = seg(mode === "geometric");
+    const go = seg(mode === "goo");
+
+    const sc = this.state.scales;
+    const fade = (t) => Math.max(0, Math.min(1, (t - 0.45) / 0.55)).toFixed(3);
+
+    const pt = this.state.pillT;
+    const dotHalf = lerp(3, 24, pt);
+    const dotCx = lerp(176, 236, pt);
+    const pill = this.skin([
+      { cx: 112, cy: 60, hw: 88, hh: 26, r: 26 },
+      { cx: dotCx, cy: 60, hw: dotHalf, hh: dotHalf, r: dotHalf },
+    ], lerp(22, 1.5, pt));
+
+    return {
+      pgRef: this.refs_.pg, pillRef: this.refs_.pill,
+      pgScale: sc.pg, pillScale: sc.pill,
+
+      pillPath: pill.d, pillViewBox: pill.viewBox,
+      pillX: pill.x, pillY: pill.y, pillW: pill.w, pillH: pill.h,
+      pillDotX: dotCx - 24,
+      pillIconOpacity: fade(pt),
+      pillLabel: "Continue",
+      pillEnter: () => this.tween("pillT", 1),
+      pillLeave: () => this.tween("pillT", 0),
+
+      cards: cards.map((c) => ({
+        ...c,
+        isGrid: c.kind === "grid",
+        isBubble: c.kind === "bubble",
+        isShare: c.kind === "share",
+        isSearch: c.kind === "search",
+        isIcon: c.kind === "icon",
+        isLabel: c.kind === "label",
+        label: c.label || "",
+      })),
+      k, cell,
+      cellLabel: cell + "px",
+      pathD: path.d,
+      viewBox: path.minX + " " + path.minY + " " + path.width + " " + path.height,
+      skinX: path.minX, skinY: path.minY, skinW: path.width, skinH: path.height,
+      skinFill: this.props.skin === "accent" ? "var(--brand-primary)" : "var(--bg-card-solid)",
+      geoBg: g.bg, geoFg: g.fg, geoShadow: g.shadow,
+      gooBg: go.bg, gooFg: go.fg, gooShadow: go.shadow,
+
+      setK: (e) => this.setState({ k: Number(e.target.value), mode: "" }),
+      setCell: (e) => this.setState({ cell: Number(e.target.value), mode: "" }),
+      applyMode: (e) => {
+        const id = e.currentTarget.dataset.mode;
+        const m = MODES[id];
+        this.setState({ mode: id, k: m.k, cell: m.cell });
+      },
+      remix: () => this.remix(),
+      onPointerDown: (e) => {
+        if (this.morph && this.morph.raf) { cancelAnimationFrame(this.morph.raf); this.morph = null; }
+        const el = e.currentTarget;
+        this.stageEl = el.parentElement;
+        if (el.setPointerCapture) el.setPointerCapture(e.pointerId);
+        const id = el.dataset.cid;
+        const p = this.toLocal(e.clientX, e.clientY);
+        const card = this.state.cards.find((c) => c.id === id);
+        if (!card) return;
+        this.drag = { id, dx: p.x - card.x, dy: p.y - card.y };
+      },
+      onPointerMove: (e) => {
+        if (!this.drag) return;
+        if (!this.stageEl) this.stageEl = e.currentTarget.querySelector("div > div");
+        const p = this.toLocal(e.clientX, e.clientY);
+        const { id, dx, dy } = this.drag;
+        const slack = VW * 0.055;
+        this.setState((s) => ({
+          cards: s.cards.map((c) => c.id === id ? {
+            ...c,
+            x: Math.max(-slack, Math.min(VW - c.w + slack, p.x - dx)),
+            y: Math.max(-slack, Math.min(VH - c.h + slack, p.y - dy)),
+          } : c),
+        }));
+      },
+      endDrag: () => { this.drag = null; },
+    };
+  }
+
+  remix() {
+    const i = (this.state.presetIdx + 1) % PRESETS.length;
+    const target = PRESETS[i];
+    if (this.morph && this.morph.raf) cancelAnimationFrame(this.morph.raf);
+    const byRole = (arr) => [...arr].sort((a, b) => b.w * b.h - a.w * a.h);
+    const from = byRole(this.state.cards.map((c) => ({ ...c })));
+    const to = byRole(target.pieces.map((c) => ({ ...c })));
+    const fromK = this.state.k;
+    const m = { start: 0, raf: 0 };
+    this.morph = m;
+    this.setState({ presetIdx: i, mode: "", cell: target.cell });
+    const step = (now) => {
+      if (!m.start) m.start = now;
+      const p = ease(Math.min(1, (now - m.start) / REMIX_MS));
+      const cards = from.map((fc, idx) => {
+        const tc = to[idx] || fc;
+        const src = p < 0.5 ? fc : tc;
+        return {
+          id: src.id, kind: src.kind, label: src.label,
+          x: lerp(fc.x, tc.x, p), y: lerp(fc.y, tc.y, p),
+          w: lerp(fc.w, tc.w, p), h: lerp(fc.h, tc.h, p),
+          radius: lerp(fc.radius, tc.radius, p),
+        };
+      });
+      this.setState({ cards, k: Math.round(lerp(fromK, target.k, p)) });
+      if (p < 1) { m.raf = requestAnimationFrame(step); }
+      else {
+        this.setState({ cards: target.pieces.map((c) => ({ ...c })), k: target.k });
+        this.morph = null;
+      }
+    };
+    m.raf = requestAnimationFrame(step);
+  }
+}
+
+</script>
+</body>
+</html>

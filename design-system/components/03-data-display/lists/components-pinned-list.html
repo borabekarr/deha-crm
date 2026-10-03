@@ -1,0 +1,47 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../_shared/_base.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link rel="stylesheet" href="./_pinned-list.css">
+<link rel="stylesheet" href="../../_shared/_darkmode.css">
+<link rel="stylesheet" href="../../../colors_and_type.css">
+<script src="../../_shared/_colormode.js"></script>
+<script src="../../_shared/_slowmo.js"></script>
+<link rel="stylesheet" href="../../_shared/_capsule-recut.css">
+</head><body><div class="card" style="padding:0; background:var(--bg-app);">
+  <div class="frame">
+    <div class="shell zoom" style="border-radius:42px; padding:10px;">
+    <section class="pinlist" data-screen-label="Pinned List" aria-label="Pinned list">
+
+      <div class="pl-top">
+        <span class="pl-top-ic"><span class="material-icons">apps</span></span>
+        <div>
+          <div class="pl-top-tt">Quick Access</div>
+          <div class="pl-top-sb">Pin the workspaces you use most</div>
+        </div>
+      </div>
+
+      <!-- Pinned section -->
+      <div class="pl-sec pinned" id="secPinned">
+        <div class="pl-head"><span class="material-icons">push_pin</span>Pinned<span class="pl-count" id="cntPinned">0</span></div>
+        <div class="pl-items" id="itemsPinned"></div>
+      </div>
+
+      <!-- All section -->
+      <div class="pl-sec all" id="secAll">
+        <div class="pl-head">All items<span class="pl-count" id="cntAll">0</span></div>
+        <div class="pl-items" id="itemsAll"></div>
+        <div class="pl-empty"><span class="material-icons">push_pin</span><span class="t">Everything is pinned</span></div>
+      </div>
+
+    </section>
+    </div>
+  </div>
+</div>
+
+<script src="./_pinned-list.js"></script>
+<script src="../../_shared/_darkmode.js"></script>
+</body></html>

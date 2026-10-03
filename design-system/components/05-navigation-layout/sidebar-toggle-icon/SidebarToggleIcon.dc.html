@@ -1,0 +1,83 @@
+<!-- @dsCard group="Navigation & Layout" viewport="1200x800" name="Sidebar Toggle Icon" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../../../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="../../../colors_and_type.css">
+<link rel="stylesheet" href="../../../styles.css">
+<script src="../../../_ds_bundle.js"></script>
+</helmet>
+<div style="min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:48px;background:var(--background,#fff);color:var(--foreground,#111)">
+  <button type="button" onClick="{{ toggle }}" aria-label="Toggle sidebar" style="display:flex;align-items:center;justify-content:center;width:44px;height:44px;border:none;border-radius:10px;background:transparent;color:var(--foreground,#111);cursor:pointer" style-hover="background:var(--muted,#f1f1f1)">
+    {{ icon }}
+  </button>
+  <div style="font:400 13px/1.4 var(--font-sans,system-ui);letter-spacing:.02em;opacity:.6">{{ label }}</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:320,&quot;height&quot;:240},&quot;strokeWidth&quot;:{&quot;editor&quot;:&quot;float&quot;,&quot;default&quot;:1.5,&quot;tsType&quot;:&quot;number&quot;,&quot;min&quot;:0.5,&quot;max&quot;:3,&quot;step&quot;:0.25}}">
+const OUTER = "M11 3H13C16.7712 3 18.6569 3 19.8284 4.17157C21 5.34315 21 7.22876 21 11V13C21 16.7712 21 18.6569 19.8284 19.8284C18.6569 21 16.7712 21 13 21H11C7.2288 21 5.3431 21 4.1716 19.8284C3 18.6569 3 16.7712 3 13V11C3 7.22876 3 5.34315 4.1716 4.17157C5.3431 3 7.2288 3 11 3Z";
+const PANEL_CLOSED = "M10 5.5 C10 4.793 10 4.439 9.780 4.220 C9.560 4 9.207 4 8.5 4 H8.5 C6.379 4 5.318 4 4.659 4.659 C4 5.318 4 6.379 4 8.5 V15.5 C4 17.621 4 18.682 4.659 19.341 C5.318 20 6.379 20 8.5 20 H8.5 C9.207 20 9.561 20 9.780 19.780 C10 19.561 10 19.207 10 18.5 V5.5 Z";
+const PANEL_OPEN = "M14 6 C14 5.057 14 4.586 13.707 4.293 C13.414 4 12.943 4 12 4 H10 C7.172 4 5.757 4 4.879 4.879 C4 5.757 4 7.172 4 10 V14 C4 16.828 4 18.243 4.879 19.121 C5.757 20 7.172 20 10 20 H12 C12.943 20 13.414 20 13.707 19.707 C14 19.414 14 18.943 14 18 V6 Z";
+
+const nums = s => s.match(/-?\d*\.?\d+/g).map(Number);
+const tmpl = s => s.split(/-?\d*\.?\d+/);
+const A = nums(PANEL_CLOSED), B = nums(PANEL_OPEN), T = tmpl(PANEL_CLOSED);
+const bez = t => { // cubic-bezier(.4,0,.2,1) approximation by Newton on x
+  let u = t;
+  for (let i = 0; i < 6; i++) {
+    const x = 3*(1-u)*(1-u)*u*0.4 + 3*(1-u)*u*u*0.2 + u*u*u;
+    const dx = 3*(1-u)*(1-u)*0.4 + 6*(1-u)*u*(0.2-0.4) + 3*u*u*(1-0.2);
+    if (Math.abs(dx) < 1e-6) break;
+    u -= (x - t)/dx;
+  }
+  return 3*(1-u)*(1-u)*u*0 + 3*(1-u)*u*u*1 + u*u*u;
+};
+const lerpPath = p => T.map((seg, i) => i < A.length ? seg + (A[i] + (B[i]-A[i])*p).toFixed(3) : seg).join("");
+
+class Component extends DCLogic {
+  state = { isOpen: false };
+  constructor(props) { super(props); this.p = 0; this.panelRef = React.createRef(); }
+  componentWillUnmount() { cancelAnimationFrame(this.raf); }
+  animate(to) {
+    cancelAnimationFrame(this.raf);
+    const from = this.p, t0 = performance.now(), dur = 350;
+    const step = now => {
+      const t = Math.min(1, (now - t0) / dur);
+      this.p = from + (to - from) * bez(t);
+      const el = this.panelRef.current;
+      if (el) el.setAttribute("d", lerpPath(this.p));
+      if (t < 1) this.raf = requestAnimationFrame(step);
+    };
+    this.raf = requestAnimationFrame(step);
+    clearTimeout(this.commit);
+    this.commit = setTimeout(() => {
+      if (this.p !== to) {
+        cancelAnimationFrame(this.raf);
+        this.p = to;
+        const el = this.panelRef.current;
+        if (el) el.setAttribute("d", lerpPath(to));
+      }
+    }, dur + 20);
+  }
+  renderVals() {
+    const sw = this.props.strokeWidth ?? 1.5;
+    const icon = React.createElement("svg", { width: 24, height: 24, viewBox: "0 0 24 24", fill: "none" },
+      React.createElement("path", { d: OUTER, fill: "currentColor", stroke: "currentColor", strokeWidth: sw, strokeLinecap: "round", strokeLinejoin: "round" }),
+      React.createElement("path", { ref: this.panelRef, d: lerpPath(this.p), style: { fill: "var(--background, #fff)" } })
+    );
+    return {
+      icon,
+      label: this.state.isOpen ? "open" : "closed",
+      toggle: () => { const next = !this.state.isOpen; this.setState({ isOpen: next }); this.animate(next ? 1 : 0); }
+    };
+  }
+}
+</script>
+</body>
+</html>

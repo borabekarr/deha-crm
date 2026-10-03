@@ -13,10 +13,5 @@
       ],
       "tailwind": false
     }
-  },
-  "ignore": [
-    "**/design-system-archive/**",
-    "pilot-sandbox/**",
-    "scripts/motion-probe.mjs"
-  ]
+  }
 }

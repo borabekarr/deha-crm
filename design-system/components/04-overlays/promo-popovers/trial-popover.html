@@ -1,0 +1,479 @@
+<!-- @dsCard group="Overlays" viewport="800x560" name="Trial Popover" subtitle="Free-trial promo popover" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trial Popover</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --background: #ffffff;
+  --foreground: oklch(0.145 0 0);
+  --card: #ffffff;
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --border: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --trigger-bg: var(--foreground);
+  --inset-hi: rgba(255,255,255,0.7);
+  --inset-btn: rgba(255,255,255,0.8);
+  --body-border: var(--border);
+  --stage: oklch(0.985 0 0);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.205 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --border: oklch(1 0 0 / 10%);
+    --ring: oklch(0.556 0 0);
+    --trigger-bg: var(--muted);
+    --inset-hi: rgba(0,0,0,0.7);
+    --inset-btn: rgba(0,0,0,0.7);
+    --body-border: rgba(255,255,255,0.2);
+    --stage: oklch(0.18 0 0);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --border: oklch(1 0 0 / 10%);
+  --ring: oklch(0.556 0 0);
+  --trigger-bg: var(--muted);
+  --inset-hi: rgba(0,0,0,0.7);
+  --inset-btn: rgba(0,0,0,0.7);
+  --body-border: rgba(255,255,255,0.2);
+  --stage: oklch(0.18 0 0);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  background: var(--background);
+  color: var(--foreground);
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; }
+a { color: inherit; }
+
+/* ---------- demo shell ---------- */
+.shell { max-width: 960px; margin: 0 auto; padding: 24px 16px 64px; }
+.app {
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--stage);
+  min-height: 560px;
+  overflow: hidden;
+}
+.app-header {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--background);
+}
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -0.02em; font-size: 15px; }
+.brand-mark { width: 24px; height: 24px; border-radius: 7px; background: var(--foreground); }
+.app-body { padding: 28px 24px; display: grid; gap: 12px; }
+.skeleton { height: 14px; border-radius: 7px; background: var(--muted); }
+.controls {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 16px;
+  margin-top: 16px; font-size: 13px; color: var(--muted-foreground);
+}
+.controls label { display: inline-flex; align-items: center; gap: 8px; }
+.controls input[type=range] { width: 140px; accent-color: #8880d1; }
+.chip-btn {
+  border: 1px solid var(--border); background: var(--background); color: var(--foreground);
+  border-radius: 999px; padding: 6px 12px; font-size: 13px; cursor: pointer;
+}
+.chip-btn:hover { background: var(--muted); }
+
+/* ---------- trigger ---------- */
+.tp { display: inline-flex; align-items: center; gap: 10px; }
+.tp-trigger {
+  display: inline-flex; align-items: center; gap: 10px;
+  height: 36px; padding: 6px 10px 6px 8px;
+  border: 0; border-radius: 999px; cursor: pointer; user-select: none;
+  background: var(--trigger-bg); color: #fff;
+  font-size: 14px; line-height: 1; font-weight: 500; letter-spacing: -0.025em;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 0 0 1px rgba(255,255,255,0.08);
+  outline: none;
+  transition: filter 200ms;
+}
+.tp-trigger:hover { filter: brightness(1.1); }
+.tp-trigger:focus-visible {
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px color-mix(in oklab, var(--ring) 50%, transparent);
+}
+.tp-ring { flex-shrink: 0; transform: rotate(-90deg); }
+.tp-ring .track { stroke: rgba(255,255,255,0.2); }
+.tp-ring .meter { stroke: #9b93e2; transition: stroke-dashoffset 1.15s cubic-bezier(0.16,1,0.3,1); }
+.tp-days { padding-right: 2px; font-size: 13px; color: #f4f4f5; letter-spacing: -0.025em; }
+.tp-badge {
+  border-radius: 999px; background: #8880d1; padding: 4px 6px;
+  font-size: 12px; line-height: 1; font-weight: 600; letter-spacing: -0.025em;
+  text-transform: uppercase; color: #fff;
+}
+.tp-avatar {
+  width: 36px; height: 36px; border-radius: 999px; overflow: hidden; flex-shrink: 0;
+  background: var(--muted); display: grid; place-items: center;
+  font-size: 12px; color: var(--muted-foreground);
+}
+.tp-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* ---------- popup ---------- */
+.tp-positioner { position: absolute; top: 0; left: 0; z-index: 50; isolation: isolate; }
+.tp-popup {
+  width: min(36rem, calc(100vw - 1.5rem));
+  overflow: hidden;
+  border-radius: 30px;
+  background: var(--muted);
+  padding: 4px;
+  color: var(--foreground);
+  box-shadow:
+    0 28px 70px -28px rgba(0,0,0,0.45),
+    0 8px 24px -16px rgba(0,0,0,0.2),
+    0 0 0 1px color-mix(in oklab, var(--foreground) 10%, transparent);
+  outline: none;
+  will-change: transform, opacity, filter;
+}
+.tp-body {
+  border-radius: 2rem;
+  border: 1px solid var(--body-border);
+  background: var(--background);
+  padding: 24px 16px 16px;
+}
+.tp-header { padding: 4px 6px 4px; }
+.tp-icon {
+  margin-bottom: 16px; display: inline-flex; width: 40px; height: 40px;
+  align-items: center; justify-content: center;
+  border-radius: 12px; background: #8880d1; color: #fff;
+}
+.tp-icon svg { width: 20px; height: 20px; }
+.tp-title { margin: 0; font-size: 16px; line-height: 1.25; font-weight: 600; letter-spacing: -0.025em; }
+.tp-desc { margin: 4px 0 0; font-size: 14px; line-height: 1.375; color: var(--muted-foreground); }
+
+.tp-plans { margin-top: 12px; display: grid; gap: 12px; }
+@media (min-width: 640px) { .tp-plans { grid-template-columns: 1fr 1fr; } }
+
+.tp-card {
+  position: relative; display: flex; flex-direction: column; overflow: hidden;
+  border-radius: 22px; border: 1px solid var(--border); background: var(--muted);
+  padding: 16px; letter-spacing: -0.03em; color: var(--foreground);
+  box-shadow: inset 0 1px 0 var(--inset-hi);
+}
+.tp-card.featured { padding: 14px; }
+.tp-accent {
+  position: absolute; left: 0; right: 0; top: 0; margin: 2px 2px 0; height: 64px;
+  border-radius: 18px 18px 0 0;
+  background: linear-gradient(135deg,#2b9eb3 0%,#55b8c7 38%,#efe0cc 63%,#f0524b 100%);
+}
+.tp-card-head { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.tp-card-name { margin: 0; font-size: 16px; line-height: 1; font-weight: 500; letter-spacing: -0.025em; }
+.tp-card.featured .tp-card-name { color: #fff; }
+.tp-card-badge {
+  border-radius: 999px; background: #fff; padding: 4px 8px;
+  font-size: 12px; line-height: 1; font-weight: 600; letter-spacing: -0.02em; color: #1c1c1c;
+  box-shadow: 0 8px 18px -12px rgba(0,0,0,0.5);
+}
+.tp-price {
+  position: relative; z-index: 1; margin: 12px -12px 0;
+  border-radius: 16px; background: #fff; padding: 14px 16px;
+  box-shadow: 0 24px 32px -26px rgba(0,0,0,0.4);
+}
+:root[data-theme="dark"] .tp-price { background: var(--card); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tp-price { background: var(--card); } }
+.tp-plan-desc { margin: 0; font-size: 13px; line-height: 20px; font-weight: 500; letter-spacing: -0.025em; color: var(--muted-foreground); }
+.tp-amount-row { margin-top: 8px; display: flex; align-items: flex-end; gap: 8px; }
+.tp-amount { font-size: 28px; line-height: 1; font-weight: 500; letter-spacing: -0.05em; }
+.tp-suffix { flex-shrink: 0; padding-bottom: 2px; font-size: 12px; font-weight: 500; letter-spacing: -0.025em; color: var(--muted-foreground); }
+.tp-cta {
+  margin-top: 14px; display: inline-flex; height: 36px; width: 100%;
+  align-items: center; justify-content: center;
+  border-radius: 7px; border: 1px solid var(--border);
+  font-size: 13px; font-weight: 500; letter-spacing: -0.02em; text-decoration: none;
+  background: var(--muted); color: var(--foreground);
+  box-shadow: inset 0 1px 0 var(--inset-btn);
+  transition: all 200ms ease-out;
+}
+.tp-cta:hover { transform: translateY(-2px); background: var(--background); }
+.tp-card.featured .tp-cta {
+  border-color: transparent; background: var(--foreground); color: var(--background);
+  box-shadow: 0 16px 24px -20px rgba(0,0,0,0.8);
+}
+.tp-card.featured .tp-cta:hover { background: color-mix(in oklab, var(--foreground) 90%, transparent); }
+.tp-features {
+  position: relative; z-index: 1; margin: 12px 0 0; padding: 0; list-style: none;
+  display: grid; gap: 6px;
+  font-size: 13px; line-height: 1; font-weight: 500; letter-spacing: -0.025em; color: var(--muted-foreground);
+}
+.tp-features li { display: flex; align-items: center; gap: 8px; }
+.tp-features svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+.tp-footer {
+  display: flex; flex-direction: column; gap: 12px;
+  background: var(--muted); padding: 10px 16px;
+}
+@media (min-width: 640px) { .tp-footer { flex-direction: row; align-items: center; justify-content: space-between; } }
+.tp-footer p { margin: 0; display: flex; min-width: 0; align-items: flex-start; gap: 8px; font-size: 14px; line-height: 1.375; color: var(--muted-foreground); }
+.tp-footer p svg { margin-top: 2px; width: 16px; height: 16px; flex-shrink: 0; }
+.tp-footer p a { color: var(--foreground); text-decoration: underline; text-decoration-color: #c5b8ed; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.tp-sales {
+  display: inline-flex; flex-shrink: 0; align-items: center; gap: 6px; align-self: flex-start;
+  border-radius: 12px; border: 1px solid var(--border); background: transparent;
+  padding: 8px 12px; font-size: 14px; font-weight: 500; letter-spacing: -0.025em;
+  color: var(--foreground); text-decoration: none; transition: background-color 150ms;
+}
+@media (min-width: 640px) { .tp-sales { align-self: auto; } }
+.tp-sales:hover { background: color-mix(in oklab, var(--background) 70%, transparent); }
+.tp-sales svg { width: 16px; height: 16px; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="app">
+    <header class="app-header">
+      <div class="brand"><span class="brand-mark"></span>Acme</div>
+      <div class="tp" id="tp">
+        <button type="button" class="tp-trigger" id="tpTrigger" aria-haspopup="dialog" aria-expanded="false">
+          <svg class="tp-ring" id="tpRing" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+            <circle class="track" cx="10" cy="10" fill="none" stroke-width="2.75"></circle>
+            <circle class="meter" cx="10" cy="10" fill="none" stroke-width="2.75" stroke-linecap="round"></circle>
+          </svg>
+          <span class="tp-days" id="tpDays">4 days left</span>
+          <span class="tp-badge">Trial</span>
+        </button>
+        <span class="tp-avatar"><img alt="Account" src="data:image/jpeg;base64,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"></span>
+      </div>
+    </header>
+    <div class="app-body" aria-hidden="true">
+      <div class="skeleton" style="width:38%"></div>
+      <div class="skeleton" style="width:72%"></div>
+      <div class="skeleton" style="width:64%"></div>
+      <div class="skeleton" style="width:50%"></div>
+    </div>
+  </div>
+  <div class="controls">
+    <label>Days left <input type="range" id="daysInput" min="0" max="14" value="4"> <span id="daysOut">4</span> / 14</label>
+    <button type="button" class="chip-btn" id="themeBtn">Toggle theme</button>
+  </div>
+</div>
+
+<template id="tpPopupTpl">
+  <div class="tp-positioner">
+    <div class="tp-popup" role="dialog" aria-labelledby="tpTitle" aria-describedby="tpDesc" tabindex="-1">
+      <div class="tp-body">
+        <div class="tp-header">
+          <span class="tp-icon"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.15 2.18 4.9 13.72c-.32.45 0 1.08.54 1.08h5.34l-1.18 7.02c-.12.7.78 1.12 1.28.58l8.26-11.54c.32-.45 0-1.08-.54-1.08H13.26l1.17-7.02c.12-.7-.78-1.12-1.28-.58Z"/></svg></span>
+          <h2 class="tp-title" id="tpTitle">Upgrade to access all features</h2>
+          <p class="tp-desc" id="tpDesc">Invite your team to review and collaborate.</p>
+        </div>
+        <div class="tp-plans"></div>
+      </div>
+      <div class="tp-footer">
+        <p>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          <span>Not ready to commit? Explore <a href="#">credit packages</a>.</span>
+        </p>
+        <a class="tp-sales" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+          Chat to sales
+        </a>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+(() => {
+  const PLANS = [
+    { name: "Starter", description: "For individuals just getting started", price: 0,
+      features: ["Up to 3 projects", "1 GB storage", "Basic analytics", "Community support", "Single user"] },
+    { name: "Professional", description: "For freelancers and small teams", price: 19, featured: true, badge: "Most Popular",
+      features: ["Unlimited projects", "50 GB storage", "Advanced analytics", "Priority email support", "Up to 5 team members", "Custom integrations"] },
+  ];
+  const TOTAL_DAYS = 14;
+  const CHECK = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m3.5 8.2 2.65 2.65L12.5 4.5" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const trigger = document.getElementById("tpTrigger");
+  const daysEl = document.getElementById("tpDays");
+
+  /* ---------- ring meter (size 20, stroke 2.75) ---------- */
+  const SIZE = 20, STROKE = 2.75, R = (SIZE - STROKE) / 2, C = 2 * Math.PI * R;
+  const ring = document.getElementById("tpRing");
+  ring.querySelectorAll("circle").forEach(c => c.setAttribute("r", R));
+  const meter = ring.querySelector(".meter");
+  meter.setAttribute("stroke-dasharray", C);
+  meter.style.strokeDashoffset = C;
+  function setDays(d) {
+    const days = Math.max(0, Math.ceil(d));
+    daysEl.textContent = `${days} ${days === 1 ? "day" : "days"} left`;
+    trigger.setAttribute("aria-label", `${daysEl.textContent}. Open plans`);
+    const p = Math.min(1, Math.max(0, days / TOTAL_DAYS));
+    meter.style.strokeDashoffset = C * (1 - p);
+  }
+  if (reduceMotion) meter.style.transition = "none";
+  requestAnimationFrame(() => requestAnimationFrame(() => setDays(4)));
+
+  /* ---------- motion helpers (spring 460/32/0.72, exit 0.22s [0.4,0,1,1]) ---------- */
+  function springCurve(k = 460, c = 32, m = 0.72) {
+    const w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    if (z < 1) {
+      const wd = w0 * Math.sqrt(1 - z * z);
+      return t => 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t));
+    }
+    return t => 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+  }
+  function bezier(x1, y1, x2, y2) {
+    const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx;
+    const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    const sx = t => ((ax * t + bx) * t + cx) * t, sy = t => ((ay * t + by) * t + cy) * t;
+    const dx = t => (3 * ax * t + 2 * bx) * t + cx;
+    return x => { let t = x; for (let i = 0; i < 8; i++) { const e = sx(t) - x; const d = dx(t); if (Math.abs(e) < 1e-6 || !d) break; t -= e / d; } return sy(Math.min(1, Math.max(0, t))); };
+  }
+  const spring = springCurve();
+  const exitEase = bezier(0.4, 0, 1, 1);
+
+  const CLOSED = { o: 0, b: 12, s: 0.72, y: -18, rx: 16 };
+  const OPEN   = { o: 1, b: 0,  s: 1,    y: 0,   rx: 0 };
+  const EXIT   = { o: 0, b: 8,  s: 0.86, y: -12, rx: 10 };
+
+  let positioner = null, popup = null, state = null, raf = 0, isOpen = false;
+
+  function apply(st) {
+    const o = Math.min(1, Math.max(0, st.o));
+    popup.style.opacity = o;
+    if (reduceMotion) return;
+    popup.style.filter = `blur(${Math.max(0, st.b)}px)`;
+    popup.style.transform = `perspective(920px) translateY(${st.y}px) scale(${st.s}) rotateX(${st.rx}deg)`;
+  }
+  function tween(from, to, durMs, ease, done) {
+    cancelAnimationFrame(raf);
+    const t0 = performance.now();
+    const step = now => {
+      const t = now - t0;
+      const finished = durMs ? t >= durMs : (t > 300 && Math.abs(1 - ease(t / 1000)) < 0.0005);
+      const p = finished ? 1 : (durMs ? ease(t / durMs) : ease(t / 1000));
+      state = {};
+      for (const k in to) state[k] = from[k] + (to[k] - from[k]) * p;
+      apply(state);
+      if (finished) { done && done(); return; }
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  }
+
+  /* ---------- positioning: side bottom, align end, sideOffset 12, alignOffset -8 ---------- */
+  function position() {
+    if (!positioner) return;
+    const r = trigger.getBoundingClientRect();
+    const w = popup.offsetWidth;
+    const pad = 12;
+    let left = r.right + 8 - w;
+    left = Math.min(Math.max(left, pad), document.documentElement.clientWidth - w - pad);
+    const top = r.bottom + 12;
+    positioner.style.transform = `translate(${left + scrollX}px, ${top + scrollY}px)`;
+    const ox = r.left + r.width / 2 - left;
+    popup.style.transformOrigin = `${ox}px -12px`;
+  }
+
+  function buildPopup() {
+    const frag = document.getElementById("tpPopupTpl").content.cloneNode(true);
+    positioner = frag.querySelector(".tp-positioner");
+    popup = frag.querySelector(".tp-popup");
+    popup.id = "tpPopup";
+    const plansEl = frag.querySelector(".tp-plans");
+    PLANS.forEach(plan => {
+      const card = document.createElement("article");
+      card.className = "tp-card" + (plan.featured ? " featured" : "");
+      card.innerHTML = `
+        ${plan.featured ? '<div class="tp-accent" aria-hidden="true"></div>' : ""}
+        <div class="tp-card-head">
+          <h3 class="tp-card-name">${plan.name}</h3>
+          ${plan.badge ? `<span class="tp-card-badge">${plan.badge}</span>` : ""}
+        </div>
+        <div class="tp-price">
+          <p class="tp-plan-desc">${plan.description}</p>
+          <div class="tp-amount-row"><span class="tp-amount">$${plan.price}</span><span class="tp-suffix">/month</span></div>
+          <a class="tp-cta" href="#">Select plan</a>
+        </div>
+        <ul class="tp-features">${plan.features.map(f => `<li>${CHECK}<span>${f}</span></li>`).join("")}</ul>`;
+      plansEl.appendChild(card);
+    });
+    positioner.addEventListener("click", e => { if (e.target.closest("a[href='#']")) e.preventDefault(); });
+    document.body.appendChild(frag);
+    trigger.setAttribute("aria-controls", "tpPopup");
+  }
+
+  function openPopover() {
+    if (isOpen) return;
+    isOpen = true;
+    trigger.setAttribute("aria-expanded", "true");
+    if (!positioner) { buildPopup(); state = { ...CLOSED }; }
+    position();
+    const from = reduceMotion ? { ...CLOSED, o: state ? state.o : 0 } : { ...state };
+    if (reduceMotion) tween(from, OPEN, 150, t => t);
+    else tween(from, OPEN, 0, spring);
+
+    // plan cards: stagger 0.08, delay 0.06, 0.5s bloom ease
+    if (!reduceMotion) {
+      popup.querySelectorAll(".tp-card").forEach((card, i) => {
+        card.getAnimations().forEach(a => a.cancel());
+        card.animate(
+          [{ opacity: 0, transform: "translateY(18px)", filter: "blur(8px)" },
+           { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" }],
+          { duration: 500, delay: 60 + i * 80, easing: "cubic-bezier(0.16,1,0.3,1)", fill: "backwards" }
+        );
+      });
+    }
+    popup.focus({ preventScroll: true });
+  }
+
+  function closePopover(returnFocus = true) {
+    if (!isOpen) return;
+    isOpen = false;
+    trigger.setAttribute("aria-expanded", "false");
+    const finish = () => { positioner.remove(); positioner = null; popup = null; state = null; };
+    if (reduceMotion) tween({ ...state }, { ...state, o: 0 }, 120, t => t, finish);
+    else tween({ ...state }, EXIT, 220, exitEase, finish);
+    if (returnFocus) trigger.focus({ preventScroll: true });
+  }
+
+  trigger.addEventListener("click", () => (isOpen ? closePopover() : openPopover()));
+  document.addEventListener("pointerdown", e => {
+    if (!isOpen) return;
+    if (popup.contains(e.target) || trigger.contains(e.target)) return;
+    closePopover(false);
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && isOpen) closePopover(); });
+  addEventListener("resize", position);
+
+  /* ---------- demo controls ---------- */
+  const daysInput = document.getElementById("daysInput");
+  const daysOut = document.getElementById("daysOut");
+  daysInput.addEventListener("input", () => { daysOut.textContent = daysInput.value; setDays(+daysInput.value); });
+
+  const root = document.documentElement;
+  document.getElementById("themeBtn").addEventListener("click", () => {
+    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+  });
+})();
+</script>
+</body>
+</html>
+

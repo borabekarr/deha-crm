@@ -1,0 +1,301 @@
+<!-- @dsCard group="Marketing & Pricing" viewport="1000x760" name="Velora Pricing" subtitle="3-tier cards, spring billing toggle, count-up prices" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Velora Pricing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* The block is a fixed light design (hardcoded colors in the source), so both themes use it. */
+:root {
+  --section-bg: #f6f6f5;
+  --ink: #171717;
+  --heading: #505050;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --section-bg: #f6f6f5; --ink: #171717; --heading: #505050; color-scheme: light; }
+}
+:root[data-theme="dark"] { --section-bg: #f6f6f5; --ink: #171717; --heading: #505050; color-scheme: light; }
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  background: var(--section-bg); color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; }
+
+.velora {
+  position: relative; isolation: isolate; min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: center;
+  width: 100%; overflow: hidden; background: var(--section-bg); color: var(--ink);
+  padding: 48px 0;
+}
+@media (min-width: 768px) { .velora { padding: 56px 0; } }
+.velora-container {
+  margin: 0 auto; display: flex; flex-direction: column; gap: 34px;
+  width: calc(100% - 2.5rem); max-width: 886px;
+}
+@media (min-width: 768px) { .velora-container { width: 86.5vw; } }
+.velora-head { display: flex; flex-direction: column; gap: 32px; }
+@media (min-width: 768px) { .velora-head { flex-direction: row; align-items: flex-end; justify-content: space-between; } }
+.velora-heading {
+  margin: 0; max-width: 440px; white-space: pre-line;
+  font-size: 30px; line-height: 1.2; font-weight: 500; letter-spacing: -0.025em; color: var(--heading);
+}
+@media (min-width: 768px) { .velora-heading { font-size: 48px; line-height: 1; } }
+.velora-toggle-wrap { padding-top: 8px; }
+@media (min-width: 768px) { .velora-toggle-wrap { padding-top: 56px; } }
+
+/* billing toggle */
+.billing {
+  position: relative; display: flex; width: max-content; max-width: 100%;
+  border-radius: 12px; border: 1px solid rgba(0,0,0,0.08);
+  background: rgba(255,255,255,0.88); padding: 6px;
+  box-shadow: 0 20px 34px -18px rgba(0,0,0,0.44), 0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.88);
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+}
+.billing-pill {
+  position: absolute; top: 6px; left: 0; height: calc(100% - 12px);
+  border-radius: 7px; border: 1px solid rgba(0,0,0,0.08); background: #dedede;
+  box-shadow: 0 10px 18px -12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.65);
+  pointer-events: none; transform-origin: 0 50%;
+}
+.billing button {
+  position: relative; z-index: 1; min-width: 116px; cursor: pointer;
+  border: 0; background: transparent; border-radius: 7px;
+  padding: 12px 14px; font-size: 14px; line-height: 1; font-weight: 500; letter-spacing: -0.02em;
+  color: rgba(32,32,32,0.82); transition: color 200ms;
+}
+.billing button:hover, .billing button[aria-selected="true"] { color: #171717; }
+.billing button:focus-visible { outline: 2px solid #171717; outline-offset: 2px; }
+
+/* cards */
+.velora-grid { display: grid; gap: 12px; }
+@media (min-width: 768px) { .velora-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; } }
+.vcard {
+  position: relative; display: flex; min-height: 444px; flex-direction: column; overflow: hidden;
+  border-radius: 32px; border: 1px solid rgba(0,0,0,0.09); padding: 24px; letter-spacing: -0.03em;
+  background: #eeeeed; color: #171717; box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+}
+.vcard.featured { border-color: #d4d9d9; padding: 22px; }
+.vcard.dark { border-color: rgba(255,255,255,0.07); background: #202020; color: #fff; box-shadow: 0 30px 55px -28px rgba(0,0,0,0.82); }
+.vcard-accent {
+  position: absolute; left: 0; right: 0; top: 0; height: 104px; margin: 2px 2px 0;
+  border-radius: 30px 30px 0 0;
+  background: linear-gradient(135deg,#2b9eb3 0%,#55b8c7 38%,#efe0cc 63%,#f0524b 100%);
+}
+.vcard-head { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.vcard-name { margin: 0; font-size: 18px; line-height: 1; font-weight: 500; letter-spacing: -0.025em; color: #171717; }
+.vcard.featured .vcard-name, .vcard.dark .vcard-name { color: #fff; }
+.vcard-badge {
+  border-radius: 999px; background: #fff; padding: 4px 8px;
+  font-size: 12px; line-height: 1; font-weight: 600; letter-spacing: -0.02em; color: #1c1c1c;
+  box-shadow: 0 8px 18px -12px rgba(0,0,0,0.5);
+}
+.vprice {
+  position: relative; z-index: 1; margin: 16px -20px 0; border-radius: 2rem; padding: 20px;
+  background: #fff; box-shadow: 0 24px 32px -26px rgba(0,0,0,0.4);
+}
+.vcard.dark .vprice { background: #373737; box-shadow: none; }
+.vprice-desc { margin: 0; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: -0.025em; color: #656565; }
+.vcard.dark .vprice-desc { color: rgba(255,255,255,0.48); }
+.vprice-row { margin-top: 8px; display: flex; align-items: flex-end; gap: 8px; }
+.vprice-amount { font-size: 42px; line-height: 1; font-weight: 500; letter-spacing: -0.05em; color: #000; }
+.vcard.dark .vprice-amount { color: #fff; }
+.vprice-num { display: inline-block; margin: 0 -4px; padding: 0 4px; white-space: pre; font-variant-numeric: tabular-nums; }
+.vprice-suffix { flex-shrink: 0; padding-bottom: 6px; font-size: 14px; font-weight: 500; letter-spacing: -0.025em; color: #777; }
+.vcard.dark .vprice-suffix { color: rgba(255,255,255,0.38); }
+.vcta {
+  margin-top: 20px; display: inline-flex; height: 40px; width: 100%; align-items: center; justify-content: center;
+  border-radius: 7px; border: 1px solid rgba(0,0,0,0.1); text-decoration: none;
+  font-size: 14px; font-weight: 500; letter-spacing: -0.02em;
+  background: #efefee; color: #232323; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+  transition: all 200ms ease-out;
+}
+.vcta:hover { transform: translateY(-2px); background: #fff; }
+.vcard.featured .vcta { border-color: transparent; background: #1f1f1f; color: #fff; box-shadow: 0 16px 24px -20px rgba(0,0,0,0.8); }
+.vcard.featured .vcta:hover { background: #000; }
+.vcard.dark .vcta { border-color: rgba(255,255,255,0.09); background: rgba(255,255,255,0.07); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); }
+.vcard.dark .vcta:hover { background: rgba(255,255,255,0.11); }
+.vcta:focus-visible { outline: 2px solid #2b9eb3; outline-offset: 2px; }
+.vfeatures {
+  position: relative; z-index: 1; margin: 16px 0 0; padding: 0; list-style: none; display: grid; gap: 8px;
+  font-size: 14px; line-height: 1; font-weight: 500; letter-spacing: -0.025em; color: #555;
+}
+.vcard.dark .vfeatures { color: rgba(255,255,255,0.55); }
+.vfeatures li { display: flex; align-items: center; gap: 8px; }
+.vfeatures svg { width: 18px; height: 18px; flex-shrink: 0; color: #8d8d8d; }
+.vcard.dark .vfeatures svg { color: rgba(255,255,255,0.45); }
+
+/* scroll reveal start state */
+.reveal { opacity: 0; filter: blur(10px); }
+@media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; filter: none; } }
+</style>
+</head>
+<body>
+<section class="velora">
+  <div class="velora-container">
+    <div class="velora-head">
+      <h2 class="velora-heading reveal" data-delay="0" data-y="18">Simple Pricing,
+No Surprises</h2>
+      <div class="velora-toggle-wrap">
+        <div class="billing reveal" data-delay="0.12" data-y="16" role="tablist" aria-label="Billing cycle" id="billing">
+          <span class="billing-pill" id="billingPill" aria-hidden="true"></span>
+          <button type="button" role="tab" aria-selected="true" data-cycle="monthly">Monthly Billing</button>
+          <button type="button" role="tab" aria-selected="false" data-cycle="annual">Annual Billing</button>
+        </div>
+      </div>
+    </div>
+    <div class="velora-grid" id="grid"></div>
+  </div>
+</section>
+
+<script>
+(() => {
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const EASE = "cubic-bezier(0.16,1,0.3,1)";
+
+  const PLANS = [
+    { name: "Starter", description: "For individuals just getting started", monthly: 0, annual: 0,
+      features: ["Up to 3 projects", "1 GB storage", "Basic analytics", "Community support", "Single user"] },
+    { name: "Professional", description: "For freelancers and small teams", monthly: 19, annual: 15, featured: true, badge: "Most Popular",
+      features: ["Unlimited projects", "50 GB storage", "Advanced analytics", "Priority email support", "Up to 5 team members", "Custom integrations"] },
+    { name: "Business", description: "For teams that need more control", monthly: 49, annual: 39, dark: true,
+      features: ["Unlimited projects", "500 GB storage", "Advanced analytics + reporting", "Priority chat and email support", "Up to 25 team members", "Custom integrations", "Role based permissions", "API access"] },
+  ];
+  const CHECK = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m3.5 8.2 2.65 2.65L12.5 4.5" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  /* spring -> CSS linear(), same physics as Motion */
+  function springEasing(k, c, m = 1) {
+    const w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    let x;
+    if (z < 1) { const wd = w0 * Math.sqrt(1 - z * z); x = t => 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+    else { x = t => 1 - Math.exp(-w0 * t) * (1 + w0 * t); }
+    let T = 3;
+    for (let t = 3; t > 0; t -= 1 / 240) { if (Math.abs(1 - x(t)) > 0.001) { T = t + 1 / 240; break; } }
+    const n = 50, pts = [];
+    for (let i = 0; i <= n; i++) pts.push(+x((T * i) / n).toFixed(4));
+    pts[n] = 1;
+    return { easing: `linear(${pts.join(",")})`, duration: Math.round(T * 1000) };
+  }
+  const PILL_SPRING = springEasing(380, 34);
+  // cubic-bezier(0.16,1,0.3,1) as a JS function, for the price count
+  function bezier(x1, y1, x2, y2) {
+    const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx;
+    const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    const sx = t => ((ax * t + bx) * t + cx) * t, sy = t => ((ay * t + by) * t + cy) * t, dx = t => (3 * ax * t + 2 * bx) * t + cx;
+    return x => { let t = x; for (let i = 0; i < 8; i++) { const e = sx(t) - x, d = dx(t); if (Math.abs(e) < 1e-6 || !d) break; t -= e / d; } return sy(Math.min(1, Math.max(0, t))); };
+  }
+  const ease = bezier(0.16, 1, 0.3, 1);
+
+  /* render cards */
+  const grid = document.getElementById("grid");
+  PLANS.forEach((p, i) => {
+    const el = document.createElement("article");
+    el.className = "vcard reveal" + (p.featured ? " featured" : "") + (p.dark ? " dark" : "");
+    el.dataset.delay = String(0.24 + i * 0.08);
+    el.dataset.y = "28";
+    el.innerHTML = `
+      ${p.featured ? '<div class="vcard-accent" aria-hidden="true"></div>' : ""}
+      <div class="vcard-head"><h3 class="vcard-name">${p.name}</h3>${p.badge ? `<span class="vcard-badge">${p.badge}</span>` : ""}</div>
+      <div class="vprice">
+        <p class="vprice-desc">${p.description}</p>
+        <div class="vprice-row">
+          <span class="vprice-amount"><span class="vprice-num" data-plan="${i}">$${p.monthly}</span></span>
+          <span class="vprice-suffix">/month</span>
+        </div>
+        <a class="vcta" href="#">Start Free Trial</a>
+      </div>
+      <ul class="vfeatures">${p.features.map(f => `<li>${CHECK}<span>${f}</span></li>`).join("")}</ul>`;
+    grid.appendChild(el);
+  });
+  grid.addEventListener("click", e => { if (e.target.closest(".vcta")) e.preventDefault(); });
+
+  /* scroll reveal: once, 25% visible, 0.72s */
+  if (!reduceMotion) {
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (!en.isIntersecting) return;
+        const el = en.target;
+        io.unobserve(el);
+        el.animate(
+          [{ opacity: 0, transform: `translateY(${el.dataset.y}px)`, filter: "blur(10px)" },
+           { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" }],
+          { duration: 720, delay: +el.dataset.delay * 1000, easing: EASE, fill: "backwards" }
+        );
+        el.classList.remove("reveal");
+      });
+    }, { threshold: 0.25 });
+    document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+  }
+
+  /* billing toggle: shared-layout pill, spring 380/34 */
+  const billing = document.getElementById("billing");
+  const pill = document.getElementById("billingPill");
+  const tabs = [...billing.querySelectorAll("button")];
+  let cycle = "monthly";
+  const pillBox = btn => ({ x: btn.offsetLeft, w: btn.offsetWidth });
+  function placePill(animate) {
+    const btn = tabs.find(b => b.dataset.cycle === cycle);
+    const { x, w } = pillBox(btn);
+    const from = pill.getBoundingClientRect(), bRect = billing.getBoundingClientRect();
+    const prevX = from.left - bRect.left - billing.clientLeft, prevW = from.width;
+    pill.style.width = `${w}px`;
+    pill.style.transform = `translateX(${x}px)`;
+    if (animate && !reduceMotion && prevW) {
+      pill.animate(
+        [{ transform: `translateX(${prevX}px) scaleX(${prevW / w})` }, { transform: `translateX(${x}px) scaleX(1)` }],
+        PILL_SPRING
+      );
+    }
+  }
+  requestAnimationFrame(() => placePill(false));
+  addEventListener("resize", () => placePill(false));
+  document.fonts && document.fonts.ready.then(() => placePill(false));
+
+  function setCycle(next) {
+    if (next === cycle) return;
+    cycle = next;
+    tabs.forEach(b => b.setAttribute("aria-selected", String(b.dataset.cycle === cycle)));
+    placePill(true);
+    document.querySelectorAll(".vprice-num").forEach(span => {
+      const p = PLANS[+span.dataset.plan];
+      const to = cycle === "monthly" ? p.monthly : p.annual;
+      const fromVal = +span.dataset.val || (cycle === "monthly" ? p.annual : p.monthly);
+      if (reduceMotion || fromVal === to) { span.textContent = `$${to}`; span.dataset.val = to; return; }
+      cancelAnimationFrame(span._raf);
+      const t0 = performance.now();
+      const tick = now => {
+        const k = Math.min(1, (now - t0) / 680);
+        const v = fromVal + (to - fromVal) * ease(k);
+        span.dataset.val = v;
+        span.textContent = `$${Math.round(v)}`;
+        if (k < 1) span._raf = requestAnimationFrame(tick); else { span.textContent = `$${to}`; span.dataset.val = to; }
+      };
+      span._raf = requestAnimationFrame(tick);
+      span.animate(
+        [{ transform: "scale(1)", filter: "drop-shadow(0 0 0 rgba(0,0,0,0))", easing: EASE },
+         { transform: "scale(1.025)", filter: "drop-shadow(0 0 10px rgba(0,0,0,0.18))", easing: EASE },
+         { transform: "scale(1)", filter: "drop-shadow(0 0 0 rgba(0,0,0,0))" }],
+        { duration: 620 }
+      );
+    });
+  }
+  tabs.forEach(b => b.addEventListener("click", () => setCycle(b.dataset.cycle)));
+  billing.addEventListener("keydown", e => {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    const i = tabs.findIndex(b => b.dataset.cycle === cycle);
+    const n = tabs[(i + (e.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length];
+    n.focus(); setCycle(n.dataset.cycle);
+  });
+})();
+</script>
+</body>
+</html>
+

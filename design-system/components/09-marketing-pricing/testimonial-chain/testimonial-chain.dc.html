@@ -1,0 +1,188 @@
+<!-- @dsCard group="Marketing & Pricing" viewport="1200x800" name="Testimonial Chain" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../../../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="../../../colors_and_type.css">
+<link rel="stylesheet" href="../../../styles.css">
+<script src="../../../_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=Inter:wght@400;500&display=swap">
+<style>
+  body { margin: 0; background: #000000; overflow-x: hidden; }
+  a { color: var(--fg-brand); text-decoration: none; }
+  a:hover { color: var(--brand-primary-700); }
+  @keyframes tc-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+</style>
+</helmet>
+<div style="width: 100%; padding: 56px 0; background: #000000; font-family: Inter, sans-serif; display: flex; flex-direction: column; align-items: center;">
+  <div onPointerDown="{{ onDown }}" onPointerMove="{{ onMove }}" onPointerUp="{{ onUp }}" onPointerCancel="{{ onUp }}" style="position: relative; width: 100%; height: 364.175px; flex: 0 0 auto; touch-action: pan-y; user-select: none; cursor: grab;">
+    <sc-for list="{{ cards }}" as="c" hint-placeholder-count="5">
+      <div onClick="{{ c.select }}" style="position: absolute; left: 50%; top: 50%; width: {{ c.w }}; height: {{ c.h }}; opacity: {{ c.op }}; background: rgb(255,255,255); box-sizing: border-box; overflow: hidden; cursor: {{ c.cursor }}; transform: translate3d({{ c.x }}, {{ c.y }}, 0px); border-radius: {{ c.radius }}; padding: {{ c.pad }}; z-index: {{ c.z }}; pointer-events: {{ c.pe }}; box-shadow: {{ c.shadow }}; transition: width 620ms cubic-bezier(.22,1,.36,1), height 620ms cubic-bezier(.22,1,.36,1), transform 620ms cubic-bezier(.22,1,.36,1), opacity 480ms ease, border-radius 620ms ease, padding 620ms ease;">
+        <div style="width: 100%; height: 100%; overflow: hidden; background: {{ c.gradient }}; border-radius: {{ c.innerRadius }};">
+          <div role="img" aria-label="{{ c.name }}" style="width: 100%; height: 100%; background-image: url({{ c.photo }}); background-size: cover; background-position: center;"></div>
+        </div>
+
+        <sc-if value="{{ c.active }}" hint-placeholder-val="{{ true }}">
+          <div style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; background: rgb(255,255,255); overflow: hidden; opacity: 1;">
+            <div style="width: 720px; height: 520px; transform: scale(0.700337); transform-origin: 0px 0px; display: flex; flex-direction: row; padding: 14px; box-sizing: border-box;">
+              <div style="flex: 1 1 0px; min-width: 0px; min-height: 0px; overflow: hidden; display: flex; flex-direction: column; box-sizing: border-box; padding: 44.2px 44.64px;">
+                <div style="font-family: Geist, sans-serif; font-size: 48px; font-weight: 400; letter-spacing: -0.025em; line-height: 1.08em; color: rgb(18,23,42); margin: 0px;">{{ c.headline }}</div>
+                <div style="flex: 1 1 auto; min-height: 16px;"></div>
+                <div style="font-family: Geist, sans-serif; font-size: 32px; font-weight: 400; letter-spacing: -0.01em; line-height: 1.24em; color: rgb(20,30,60); margin: 0px; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden;">{{ c.quote }}</div>
+                <div style="height: 26px;"></div>
+                <div style="display: flex; align-items: stretch; gap: 15px;">
+                  <div style="width: 3px; min-width: 3px; border-radius: 3px; background: rgb(0,0,0);"></div>
+                  <div style="min-width: 0px; display: flex; flex-direction: column; justify-content: center;">
+                    <div style="font-family: Inter, sans-serif; font-size: 16px; font-weight: 400; line-height: 1.3em; color: rgb(27,34,51); margin: 0px;">{{ c.name }}</div>
+                    <div style="font-family: Inter, sans-serif; font-size: 15px; font-weight: 400; line-height: 1.3em; color: rgb(91,98,116); margin: 4px 0px 0px;">{{ c.role }}</div>
+                  </div>
+                </div>
+              </div>
+              <div style="flex: 0 0 40%; min-height: 0px; position: relative; border-radius: 24px; overflow: hidden; background: {{ c.gradient }};">
+                <div role="img" aria-label="{{ c.name }}" style="position: absolute; inset: 0px; width: 100%; height: 100%; background-image: url({{ c.photo }}); background-size: cover; background-position: center;"></div>
+                <div style="position: absolute; inset: 0px; background: linear-gradient(to top, rgba(10,14,26,0.5) 0%, rgba(10,14,26,0.08) 32%, rgba(10,14,26,0) 58%); pointer-events: none;"></div>
+                <div style="position: absolute; left: 28px; right: 28px; bottom: 26px; display: flex; justify-content: center; pointer-events: none;">
+                  <div role="img" aria-label="{{ c.company }}" style="height: 36px; width: 100%; background-image: url({{ c.logo }}); background-size: contain; background-position: center; background-repeat: no-repeat;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 14px; margin-top: 18.2088px; flex: 0 0 auto;">
+    <div style="display: flex; flex-direction: row; align-items: center; gap: 8px;">
+      <sc-for list="{{ dots }}" as="d" hint-placeholder-count="5">
+        <div role="button" tabindex="0" onClick="{{ d.select }}" aria-label="{{ d.label }}" style="width: {{ d.w }}; height: 8px; border-radius: 4px; overflow: hidden; cursor: pointer; background: {{ d.bg }}; transition: width 320ms cubic-bezier(0.22, 0.61, 0.36, 1);">
+          {{ d.fill }}
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1000,&quot;height&quot;:480}}">
+const LOGO_A = 'https://framerusercontent.com/images/q6FDS6StJeaEKsDfn13KreosyXs.png?width=400&height=91';
+const LOGO_B = 'https://framerusercontent.com/images/FFyyyQha1zPXNaYIn4j7j3OSWbA.png?width=400&height=69';
+
+const DATA = [
+  { name: 'Amara Vale', role: 'Head of Client Operations at Northlake Group', company: 'Northlake Group',
+    headline: '62% faster replies',
+    quote: '“Our team stopped chasing calendars and started closing the day on time.”',
+    gradient: 'linear-gradient(145deg, rgb(220, 227, 246) 0%, rgb(183, 195, 230) 100%)',
+    photo: 'https://framerusercontent.com/images/BBVl3oMbbyatgoiMtZi1LSV6Is.jpg?width=736&height=1104',
+    logo: LOGO_A },
+  { name: 'Jonah Reyes', role: 'VP Revenue at Bracket Labs', company: 'Bracket Labs',
+    headline: 'Three times the pipeline',
+    quote: '“Every handoff is documented, so nothing sits in an inbox for a week.”',
+    gradient: 'linear-gradient(145deg, rgb(243, 228, 218) 0%, rgb(222, 195, 180) 100%)',
+    photo: 'https://framerusercontent.com/images/mtvDwboQXRRM8ncBWEWiRcuNn0w.jpg?width=768&height=1152',
+    logo: LOGO_B },
+  { name: 'Priyoz Menon', role: 'Founder at Halcyon Studio', company: 'Halcyon Studio',
+    headline: 'Eleven hours back',
+    quote: '“We replaced four tools with one view of the week and never looked back.”',
+    gradient: 'linear-gradient(145deg, rgb(221, 237, 230) 0%, rgb(179, 207, 198) 100%)',
+    photo: 'https://framerusercontent.com/images/MEJPWMpghAcy5jB8ZwPgurI3cs.png?width=1200&height=1200',
+    logo: LOGO_A },
+  { name: 'Elena Duarte', role: 'Director of Support at Verano', company: 'Verano',
+    headline: '98% satisfaction',
+    quote: '“Customers get answers before they think to follow up.”',
+    gradient: 'linear-gradient(145deg, rgb(230, 221, 243) 0%, rgb(195, 180, 228) 100%)',
+    photo: 'https://framerusercontent.com/images/jO4rmyPI1VoCgQqsCTKsSXjPssM.jpg?width=736&height=736',
+    logo: LOGO_B },
+  { name: 'Tobias Wren', role: 'Studio Director at Studio Cadence', company: 'Studio Cadence',
+    headline: 'Half the admin work',
+    quote: '“We replaced four spreadsheets with one flow the whole studio actually uses.”',
+    gradient: 'linear-gradient(145deg, rgb(241, 230, 201) 0%, rgb(217, 198, 155) 100%)',
+    photo: 'https://framerusercontent.com/images/rp6JdmGOx9edEoZC08GtvHnfpWc.jpg?width=736&height=1318',
+    logo: LOGO_B }
+];
+
+const SLOTS = {
+  '0':  { w: 504.243, h: 364.175, x: -252.121, op: 1, z: 24, radius: 26.6128, inner: 26.6128, pad: 0,
+          shadow: 'rgba(28, 32, 60, 0.16) 0px 26px 70px 0px', pe: 'auto', cursor: 'inherit' },
+  '1':  { w: 91.0438, h: 247.639, x: 261.926,  op: 1, z: 21, radius: 17.5645, inner: 12.6621, pad: 4.90236,
+          shadow: 'none', pe: 'auto', cursor: 'pointer' },
+  '-1': { w: 91.0438, h: 247.639, x: -352.97,  op: 1, z: 21, radius: 17.5645, inner: 12.6621, pad: 4.90236,
+          shadow: 'none', pe: 'auto', cursor: 'pointer' },
+  '2':  { w: 60.0889, h: 163.442, x: 362.775,  op: 0, z: 18, radius: 11.5925, inner: 6.69018, pad: 4.90236,
+          shadow: 'none', pe: 'none', cursor: 'pointer' },
+  '-2': { w: 60.0889, h: 163.442, x: -422.864, op: 0, z: 18, radius: 11.5925, inner: 6.69018, pad: 4.90236,
+          shadow: 'none', pe: 'none', cursor: 'pointer' }
+};
+
+const STORY_MS = 6000;
+
+class Component extends DCLogic {
+  state = { i: 0, progress: 0 };
+
+  componentDidMount() { this.start(); }
+  componentWillUnmount() { clearTimeout(this.timer); }
+
+  start() {
+    clearTimeout(this.timer);
+    this.timer = setTimeout(() => this.go(1), STORY_MS);
+  }
+
+  go(step) {
+    const n = DATA.length;
+    this.setState(s => ({ i: (s.i + step + n) % n }), () => this.start());
+  }
+
+  renderVals() {
+    const i = this.state.i, n = DATA.length;
+    const self = this;
+    return {
+      cards: DATA.map((p, k) => {
+        let d = ((k - i + n) % n);
+        if (d > n / 2) d -= n;
+        const s = SLOTS[String(d)] || SLOTS['2'];
+        return {
+          active: d === 0,
+          name: p.name, role: p.role, company: p.company,
+          headline: p.headline, quote: p.quote,
+          gradient: p.gradient, photo: p.photo, logo: p.logo,
+          w: s.w + 'px', h: s.h + 'px', x: s.x + 'px', y: (-s.h / 2) + 'px',
+          op: s.op, z: s.z, pad: s.pad + 'px', pe: s.pe, cursor: s.cursor,
+          shadow: s.shadow, radius: s.radius + 'px', innerRadius: s.inner + 'px',
+          select: () => { if (d !== 0) self.go(d); }
+        };
+      }),
+      dots: DATA.map((p, k) => ({
+        label: 'Story ' + (k + 1),
+        w: k === i ? '56px' : '8px',
+        bg: k === i ? 'rgba(255, 255, 255, 0.22)' : 'rgba(255, 255, 255, 0.28)',
+        fill: k === i ? React.createElement('div', {
+          key: 'fill-' + i,
+          style: {
+            width: '100%', height: '100%', borderRadius: '4px', background: '#FFFFFF',
+            transformOrigin: 'left center',
+            animation: 'tc-fill ' + STORY_MS + 'ms linear forwards'
+          }
+        }) : null,
+        select: () => { if (k !== i) self.go(k - i); }
+      })),
+      onDown: (e) => { this.drag = { x: e.clientX, done: false }; },
+      onMove: (e) => {
+        if (!this.drag || this.drag.done) return;
+        const dx = e.clientX - this.drag.x;
+        if (Math.abs(dx) > 60) { this.drag.done = true; this.go(dx < 0 ? 1 : -1); }
+      },
+      onUp: () => { this.drag = null; }
+    };
+  }
+}
+
+</script>
+</body>
+</html>

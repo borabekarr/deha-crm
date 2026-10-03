@@ -1,0 +1,74 @@
+<!-- @dsCard group="Navigation & Layout" name="FloatingPillNav" subtitle="-> new: Navigation & layout" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../../../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap">
+<link rel="stylesheet" href="../../../colors_and_type.css">
+<link rel="stylesheet" href="../../../styles.css">
+<script src="../../../_ds_bundle.js"></script>
+<style>
+  html, body { margin: 0; background: #FCFCFC; font-family: 'Montserrat', system-ui, sans-serif; }
+  a { color: #1A1919; text-decoration: none; }
+  a:hover { color: #1A1919; }
+  .lp { transition: background-color 420ms cubic-bezier(.22,1,.36,1), box-shadow 420ms cubic-bezier(.22,1,.36,1), padding 560ms cubic-bezier(.22,1.2,.36,1); }
+  .lp:hover, .lp:focus-visible { background-color: #FFFFFF; box-shadow: rgba(0,0,0,0.19) 0 .48px 1.25px -1.33px, rgba(0,0,0,0.17) 0 2.6px 6.4px -2.67px, rgba(0,0,0,0.06) 0 10px 24px -4px, #FFFFFF 0 0 4px 2px inset; }
+  .lp:focus-visible { outline: 1.5px solid var(--lp-accent); outline-offset: 3px; }
+  .lp-ico { transition: color 240ms ease; color: #1A1919; }
+  .lp:hover .lp-ico, .lp:focus-visible .lp-ico { color: var(--lp-accent); }
+  .lp-slot { display: grid; grid-template-columns: 0fr; transition: grid-template-columns 560ms cubic-bezier(.22,1.2,.36,1); }
+  .lp:hover .lp-slot, .lp:focus-visible .lp-slot { grid-template-columns: 1fr; }
+  .lp-clip { overflow: hidden; min-width: 0; position: relative; display: flex; align-items: center; }
+  .lp-label { transition: color 240ms ease, opacity 300ms ease, transform 560ms cubic-bezier(.22,1.2,.36,1); color: #1A1919; opacity: 0; transform: translateX(-6px); }
+  .lp:hover .lp-label, .lp:focus-visible .lp-label { color: var(--lp-accent); opacity: 1; transform: translateX(0); }
+  .lp-light { transition: transform 900ms cubic-bezier(.22,1,.36,1); }
+  .lp:hover .lp-light, .lp:focus-visible .lp-light { transform: translateX(120px) skewX(-16deg); }
+  @media (prefers-reduced-motion: reduce) { .lp, .lp-ico, .lp-label, .lp-light { transition-duration: 0.01ms !important; } }
+</style>
+</helmet>
+
+<div style="min-height: 100vh; box-sizing: border-box; background: #FCFCFC; display: flex; align-items: center; justify-content: center; padding: 48px 24px; overflow: hidden;">
+  <div style="transform: scale(1.4); transform-origin: 50% 50%;">
+    <div style="display: flex; align-items: center; gap: 7px;">
+      <sc-for list="{{ items }}" as="item" hint-placeholder-count="3">
+        <a class="lp" href="{{ item.href }}" style="--lp-accent: {{ item.accent }}; box-sizing: border-box; display: inline-flex; align-items: center; gap: 0; height: 34px; width: auto; min-width: 34px; justify-content: center; padding: 0 8px; border: 1px solid #FFFFFF; border-radius: 22px; background-color: #F9F9F9; position: relative; overflow: hidden; box-shadow: rgba(0,0,0,0.19) 0 0.48175px 1.25255px -1.33333px, rgba(0,0,0,0.17) 0 1.83083px 4.76015px -2.66667px, rgba(0,0,0,0.05) 0 8px 20.8px -4px, #FFFFFF 0 0 4px 2px inset;">
+          <span class="lp-ico" style="display: flex; align-items: center; justify-content: center; width: 18px; height: 18px; filter: brightness(1.1);">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="{{ item.path2 }}"></path><path d="{{ item.path }}" fill-rule="{{ item.rule }}" clip-rule="evenodd"></path></svg>
+          </span>
+          <span class="lp-slot">
+            <span class="lp-clip">
+              <span class="lp-light" style="position: absolute; top: -10px; bottom: -10px; left: -46px; width: 16px; background: #FFFFFF; filter: blur(2px); opacity: 0.6; transform: skewX(-16deg); pointer-events: none;"></span>
+              <span class="lp-label" style="position: relative; padding-left: 4px; font-size: 10px; font-weight: 900; letter-spacing: -0.005em; white-space: nowrap;">{{ item.label }}</span>
+            </span>
+          </span>
+        </a>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:900,&quot;height&quot;:420},&quot;item1&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Home&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;item2&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Calendar&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;item3&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Contact&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;accent1&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#036AEF&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;accent2&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#D9233F&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;accent3&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0AC423&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const P = {
+      home: "M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Zm.53 1.591 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z",
+      calendar: "M18 2.993a.75.75 0 0 0-1.5 0v1.5h-9V2.994a.75.75 0 1 0-1.5 0v1.497h-.752a3 3 0 0 0-3 3v11.252a3 3 0 0 0 3 3h13.5a3 3 0 0 0 3-3V7.492a3 3 0 0 0-3-3H18V2.993ZM3.748 18.743v-7.5a1.5 1.5 0 0 1 1.5-1.5h13.5a1.5 1.5 0 0 1 1.5 1.5v7.5a1.5 1.5 0 0 1-1.5 1.5h-13.5a1.5 1.5 0 0 1-1.5-1.5Z",
+      contact: "M4.848 2.771A49.144 49.144 0 0 1 12 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 0 1-3.476.383.39.39 0 0 0-.297.17l-2.755 4.133a.75.75 0 0 1-1.248 0l-2.755-4.133a.39.39 0 0 0-.297-.17 48.9 48.9 0 0 1-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97ZM6.75 8.25a.75.75 0 0 1 .75-.75h9a.75.75 0 0 1 0 1.5h-9a.75.75 0 0 1-.75-.75Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H7.5Z"
+    };
+    return [
+      { label: this.props.item1 ?? "Home", path: P.home, rule: "nonzero", accent: this.props.accent1 ?? "#036AEF" },
+      { label: this.props.item2 ?? "Calendar", path: P.calendar, path2: "M12 11.993a.75.75 0 0 0-.75.75v.006c0 .414.336.75.75.75h.006a.75.75 0 0 0 .75-.75v-.006a.75.75 0 0 0-.75-.75H12ZM12 16.494a.75.75 0 0 0-.75.75v.005c0 .414.335.75.75.75h.005a.75.75 0 0 0 .75-.75v-.005a.75.75 0 0 0-.75-.75H12ZM8.999 17.244a.75.75 0 0 1 .75-.75h.006a.75.75 0 0 1 .75.75v.006a.75.75 0 0 1-.75.75h-.006a.75.75 0 0 1-.75-.75v-.006ZM7.499 16.494a.75.75 0 0 0-.75.75v.005c0 .414.336.75.75.75h.005a.75.75 0 0 0 .75-.75v-.005a.75.75 0 0 0-.75-.75H7.5ZM13.499 14.997a.75.75 0 0 1 .75-.75h.006a.75.75 0 0 1 .75.75v.005a.75.75 0 0 1-.75.75h-.006a.75.75 0 0 1-.75-.75v-.005ZM14.25 16.494a.75.75 0 0 0-.75.75v.006c0 .414.335.75.75.75h.005a.75.75 0 0 0 .75-.75v-.006a.75.75 0 0 0-.75-.75h-.005ZM15.75 14.995a.75.75 0 0 1 .75-.75h.005a.75.75 0 0 1 .75.75v.006a.75.75 0 0 1-.75.75H16.5a.75.75 0 0 1-.75-.75v-.006ZM13.498 12.743a.75.75 0 0 1 .75-.75h2.25a.75.75 0 1 1 0 1.5h-2.25a.75.75 0 0 1-.75-.75ZM6.748 14.993a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1-.75-.75Z", rule: "evenodd", accent: this.props.accent2 ?? "#D9233F" },
+      { label: this.props.item3 ?? "Contact", path: P.contact, rule: "evenodd", accent: this.props.accent3 ?? "#0AC423" }
+    ].reduce((acc, d) => (acc.items.push({ ...d, href: "#" }), acc), { items: [] });
+  }
+}
+</script>
+</body>
+</html>

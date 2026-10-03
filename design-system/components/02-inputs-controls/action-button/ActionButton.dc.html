@@ -1,0 +1,98 @@
+<!-- @dsCard group="Inputs & Controls" viewport="1200x800" name="Action Button" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../../../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap">
+<style>
+body { margin: 0; }
+@keyframes om-nudge {
+  0% { transform: rotate(-45deg) scale(1); }
+  10% { transform: rotate(-45deg) scale(1.18); }
+  24% { transform: rotate(-45deg) scale(1); }
+  60% { transform: rotate(-45deg) scale(1); }
+  72% { transform: rotate(-22deg) scale(1.04); }
+  86% { transform: rotate(-58deg) scale(1.02); }
+  100% { transform: rotate(-45deg) scale(1); }
+}
+@keyframes om-shimmer { from { transform: translateX(-120%); } to { transform: translateX(220%); } }
+a { color: rgb(0, 153, 255); text-decoration: underline; }
+a:hover { color: rgb(0, 122, 204); }
+</style>
+</helmet>
+<div style="display:flex; align-items:center; justify-content:center; padding:48px; background:#f5f5f5; min-height:100%; box-sizing:border-box">
+  <a data-framer-name="Variant 1" href="tel:+9193548 90960" target="_blank" rel="noopener" onMouseEnter="{{ onEnter }}" onMouseLeave="{{ onLeave }}" style="{{ rootStyle }}">
+    <div style="{{ textStyle }}">
+      <p dir="auto" style="margin:0; font-family:Montserrat, sans-serif; font-weight:600; font-size:15px; line-height:1.4; color:rgb(0,0,0); white-space:pre">Action Button</p>
+    </div>
+    <div style="{{ circleStyle }}">
+      <sc-if value="{{ hovered }}" hint-placeholder-val="{{ false }}"><div aria-hidden="true" style="{{ shimmerStyle }}"></div></sc-if>
+      <div aria-hidden="true" style="{{ arrowStyle }}"></div>
+    </div>
+  </a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:420,&quot;height&quot;:160}}">
+class Component extends DCLogic {
+  state = { hovered: false };
+  renderVals() {
+    const h = this.state.hovered;
+    const ease = "cubic-bezier(.2,1.2,.3,1)";
+    const shadow = "0px 0.622417503647448px 0.622417503647448px -0.75px rgba(196,196,196,0.22), 0px 1.6950081502422107px 1.6950081502422107px -1.5px rgba(196,196,196,0.21), 0px 3.72162441979599px 3.72162441979599px -2.25px rgba(196,196,196,0.2), 0px 8.2611564706426px 8.2611564706426px -3px rgba(196,196,196,0.17), 0px 21px 21px -3.75px rgba(196,196,196,0.08)";
+    const circleShadow = "0px 0.6624060319518321px 0.3974436191710994px -0.5833333333333333px rgba(0,0,0,0.22), 0px 2.517386633567803px 1.510431980140682px -1.1666666666666665px rgba(0,0,0,0.25), 0px 11px 6.600000000000001px -1.75px rgba(0,0,0,0.39)";
+    const arrow14 = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" overflow="visible"><path d="M 10.653 7.875 L 0 7.875 L 0 6.125 L 10.653 6.125 L 5.753 1.225 L 7 0 L 14 7 L 7 14 L 5.753 12.775 Z" fill="rgb(255, 255, 255)"></path></svg>';
+    return {
+      hovered: h,
+      shimmerStyle: {
+        position: "absolute", top: 0, bottom: 0, left: 0, width: "45%",
+        background: "linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.55) 50%, rgba(255,255,255,0) 100%)",
+        pointerEvents: "none",
+        animation: "om-shimmer .6s cubic-bezier(.4,0,.2,1) 0s 1 both"
+      },
+      onEnter: () => this.setState({ hovered: true }),
+      onLeave: () => this.setState({ hovered: false }),
+      rootStyle: {
+        display: "inline-flex", flexDirection: "row", alignItems: "center",
+        height: "44px", boxSizing: "border-box", overflow: "hidden", position: "relative",
+        textDecoration: "none", backgroundColor: "rgb(255,255,255)", borderRadius: "28px",
+        padding: h ? "5px 47px 5px 5px" : "5px 47px 5px 18px",
+        transition: `box-shadow .45s ${ease}, padding .45s ${ease}`,
+        boxShadow: h ? "none" : shadow
+      },
+      textStyle: {
+        display: "flex", alignItems: "center", height: "auto", width: "auto",
+        position: "relative", zIndex: 1,
+        transform: h ? "translateX(-110%)" : "translateX(0)",
+        opacity: h ? 0 : 1,
+        transition: `transform .45s ${ease}, opacity .28s ease`
+      },
+      circleStyle: {
+        display: "flex", alignItems: "center", justifyContent: "center",
+        height: "34px", overflow: "hidden",
+        position: "absolute", top: "5px", right: "5px",
+        backgroundColor: "rgb(0,0,0)", borderRadius: "137px", boxShadow: circleShadow,
+        transition: `width .45s ${ease}`,
+        width: h ? "calc(100% - 10px)" : "34px"
+      },
+      arrowStyle: {
+        position: "relative",
+        width: h ? "16px" : "13px",
+        height: h ? "16px" : "13px",
+        backgroundSize: "100% 100%",
+        backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(arrow14)}")`,
+        transform: h ? "rotate(-45deg)" : "rotate(0deg)",
+        animation: h ? "om-nudge 2.6s cubic-bezier(.4,0,.2,1) 3s 1 both" : "none",
+        transition: `transform .45s ${ease}, width .45s ${ease}, height .45s ${ease}`
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>
